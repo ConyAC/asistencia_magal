@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans xmlns="http://www.springframework.org/schema/security"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xmlns:beans="http://www.springframework.org/schema/beans"
+             xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-3.2.xsd">
+
+    <!-- Enable the @Secured annotation to secure service layer methods -->
+    <global-method-security secured-annotations="enabled" pre-post-annotations="enabled" authentication-manager-ref="authenticationManager"/> 
+    <http security="none" pattern="/favicon.ico" authentication-manager-ref="authenticationManager"/>
+ 	 <!-- 
+    <http auto-config='true' authentication-manager-ref="authenticationManager">
+       
+        <intercept-url pattern="/login" access="IS_AUTHENTICATED_ANONYMOUSLY"/>
+         
+        <intercept-url pattern="/Vaadin_Project1/**" access="ROLE_USER, ROLE_ADMIN" />  
+        <intercept-url pattern="/Vaadin_Project1/*.*" access="ROLE_USER, ROLE_ADMIN" />
+        <intercept-url pattern="/**" access="ROLE_USER, ROLE_ADMIN" />
+        -->  
+        <!--   <form-login login-page="/login/" authentication-failure-url="/login/?error=true"/>    
+        <form-login login-page="/login" authentication-failure-url="/login?error=true"/> 
+    </http>
+    -->  
+ 
+    <beans:bean id="springSecurityFilterChain" class="org.springframework.security.web.FilterChainProxy">
+        <filter-chain-map path-type="ant">
+            <filter-chain pattern="/**" filters="securityContextPersistenceFilter"/>
+        </filter-chain-map>
+    </beans:bean>
+
+    <beans:bean id="securityContextPersistenceFilter" class="org.springframework.security.web.context.SecurityContextPersistenceFilter"/>
+
+    <authentication-manager id="authenticationManager">
+        <authentication-provider ref="authProvider"></authentication-provider>
+    </authentication-manager>
+    <beans:bean id="authProvider" class="org.springframework.security.authentication.dao.DaoAuthenticationProvider">
+	  <beans:property name="userDetailsService" ref="userService"  />
+	  <beans:property name="passwordEncoder" ref="encoder" />
+	</beans:bean>
+	<!-- For hashing and salting user passwords -->
+    <beans:bean id="encoder" class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder"/>
+    <!--
+    <authentication-manager id="authenticationManager">
+        <authentication-provider>
+            <user-service>
+                <user name="user" password="user" authorities="ROLE_USER" />
+                <user name="admin" password="admin" authorities="ROLE_ADMIN, ROLE_USER" />
+            </user-service>
+        </authentication-provider>
+    </authentication-manager>
+     
+    <bean id="shiroFilter" class="org.apache.shiro.spring.web.ShiroFilterFactoryBean">
+        <property name="securityManager" ref="securityManager"/>
+        <property name="loginUrl" value="/login/"/>
+        <property name="successUrl" value="/"/>
+        <property name="filterChainDefinitions">
+            <value>
+                /login/ = authc
+                /logout/ = logout
+                /** = authc, roles[user]
+            </value>
+        </property>
+    </bean>
+
+    <bean id="securityManager" class="org.apache.shiro.web.mgt.DefaultWebSecurityManager">
+        <property name="realm" ref="myRealm"/>
+    </bean>
+
+    <bean id="myRealm" class="org.apache.shiro.realm.text.TextConfigurationRealm">
+        <property name="userDefinitions">
+            <value>
+                user = user, user
+                admin = admin, user, admin
+            </value>
+        </property>
+    </bean>
+
+    <bean id="lifecycleBeanPostProcessor" class="org.apache.shiro.spring.LifecycleBeanPostProcessor"/>
+	-->	
+    <!-- Enable Shiro Annotations for Spring-configured beans.  Only run after -->
+    <!-- the lifecycleBeanProcessor has run: -->
+    <!--
+    <bean class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator"
+          depends-on="lifecycleBeanPostProcessor"/>
+    <bean class="org.apache.shiro.spring.security.interceptor.AuthorizationAttributeSourceAdvisor">
+        <property name="securityManager" ref="securityManager"/>
+    </bean>
+	-->
+	<beans:bean class="org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler">
+  		<beans:property name="invalidateHttpSession" value="false" />
+	</beans:bean>
+</beans:beans>

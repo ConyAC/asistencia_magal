@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:jpa="http://www.springframework.org/schema/data/jpa"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+       					   http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+						   http://www.springframework.org/schema/context 
+						   http://www.springframework.org/schema/context/spring-context-3.1.xsd
+						   http://www.springframework.org/schema/data/jpa
+    					   http://www.springframework.org/schema/data/jpa/spring-jpa.xsd">
+
+	<context:annotation-config />
+
+
+	<bean id="entityManagerFactory"
+		class="org.springframework.orm.jpa.LocalEntityManagerFactoryBean">
+		<property name="persistenceUnitName" value="persistenceUnit" />
+	</bean>
+
+	<bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
+		<property name="entityManagerFactory" ref="entityManagerFactory" />
+	</bean>
+
+	<context:component-scan base-package="com.adeptagestion.pruebacenizas" />
+	<jpa:repositories base-package="com.adeptagestion.pruebacenizas.model.repository" />
+	<jpa:auditing auditor-aware-ref="auditorAwareBean" />
+	<bean id="auditorAwareBean" class="org.mockito.Mockito" factory-method="mock">
+	    <constructor-arg value="com.adeptagestion.pruebacenizas.auth.CenizasAuditorAware" />
+	</bean>
+	
+	
+	<bean id="messageSource"
+		class="org.springframework.context.support.ResourceBundleMessageSource">
+		<property name="basenames">
+			<list>
+				<value>MensajesLogin</value>
+			</list>
+		</property>
+	</bean>
+	
+	<bean id="autowireHelper" class="com.adeptagestion.pruebacenizas.util.AutowireHelper" />
+
+	<import resource="security.xml" />
+
+	<bean id="validator" class="org.springframework.validation.beanvalidation.LocalValidatorFactoryBean" />
+</beans>
