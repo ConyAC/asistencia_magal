@@ -11,7 +11,11 @@ import org.springframework.context.annotation.Scope;
 
 import ru.xpoft.vaadin.DiscoveryNavigator;
 import ru.xpoft.vaadin.SpringVaadinServlet;
+import cl.magal.asistencia.entities.Obra;
+import cl.magal.asistencia.services.FichaService;
+import cl.magal.asistencia.ui.fichaobra.FichaObra;
 
+import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.Title;
 import com.vaadin.annotations.VaadinServletConfiguration;
 import com.vaadin.server.ErrorHandler;
@@ -27,9 +31,10 @@ import com.vaadin.ui.VerticalLayout;
 @Scope("prototype")
 @SuppressWarnings("serial")
 @Title("Asistencia Magal")
+@Theme("valo")
 public class MagalUI extends UI implements ErrorHandler {
 	
-	Logger logger = LoggerFactory.getLogger(MagalUI.class);
+	private transient Logger logger = LoggerFactory.getLogger(MagalUI.class);
 
 	@WebServlet(value = "/*", asyncSupported = true, 
 			initParams = { 
@@ -37,6 +42,9 @@ public class MagalUI extends UI implements ErrorHandler {
 	@VaadinServletConfiguration(productionMode = false, ui = MagalUI.class, widgetset = "cl.magal.asistencia.ui.AppWidgetSet")
 	public static class Servlet extends SpringVaadinServlet {
 	}
+	
+	@Autowired
+	private transient FichaService service;
 
 	@Autowired
     private transient ApplicationContext applicationContext;
@@ -55,6 +63,12 @@ public class MagalUI extends UI implements ErrorHandler {
 		
 		VaadinSession.getCurrent().setErrorHandler(this);
 		
+		Obra obra = new Obra();
+		obra.setNombre("Obra1");
+		obra.setDireccion("Dire");
+		
+		service.saveObra(obra);
+		
 		root = new CssLayout();
 		setContent(root);
         root.addStyleName("root");
@@ -67,10 +81,14 @@ public class MagalUI extends UI implements ErrorHandler {
 		content.setSizeFull();
 		content.addStyleName("view-content");
 		
-//		navigator = new DiscoveryNavigator(UI.getCurrent(), content);
+		navigator = new DiscoveryNavigator(UI.getCurrent(), content);
 		
-		content.addComponent(new Label("Hola"));
+		Obra dbobra = service.findObra(obra.getId());
+		
+		content.addComponent(new Label(dbobra.getId()+" --------- "+dbobra.getNombre()));
 		root.addComponent(content);
+		
+		navigator.navigateTo(FichaObra.NAME);
 	}
 
 	public void error(com.vaadin.server.ErrorEvent event) {

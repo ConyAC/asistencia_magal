@@ -30,7 +30,7 @@
 	</bean>
 	
 	<!-- JPA Repositories -->
-	<jpa:repositories base-package="cl.magal.asistencia"></jpa:repositories>
+	<jpa:repositories base-package="cl.magal.asistencia.repositories"></jpa:repositories>
 
 	<bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource">
 		<property name="basenames">

@@ -1,46 +1,42 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:jpa="http://www.springframework.org/schema/data/jpa"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+	xmlns:jpa="http://www.springframework.org/schema/data/jpa"
 	xmlns:context="http://www.springframework.org/schema/context"
-	xsi:schemaLocation="http://www.springframework.org/schema/beans 
-       					   http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+	xsi:schemaLocation="http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc-4.0.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/data/jpa http://www.springframework.org/schema/data/jpa/spring-jpa-1.3.xsd
 						   http://www.springframework.org/schema/context 
-						   http://www.springframework.org/schema/context/spring-context-3.1.xsd
-						   http://www.springframework.org/schema/data/jpa
-    					   http://www.springframework.org/schema/data/jpa/spring-jpa.xsd">
+						   http://www.springframework.org/schema/context/spring-context-3.1.xsd">
 
 	<context:annotation-config />
+	<!-- escanea las clases del package services buscando componentes -->
+	<context:component-scan base-package="cl.magal.asistencia.services" />
+	<context:component-scan base-package="cl.magal.asistencia.ui" />
 
-
-	<bean id="entityManagerFactory"
-		class="org.springframework.orm.jpa.LocalEntityManagerFactoryBean">
-		<property name="persistenceUnitName" value="persistenceUnit" />
+	<!--  Data Base -->
+	<jdbc:embedded-database id="datasource" type="H2"></jdbc:embedded-database>
+	
+	<!--  Entity Manager Factory -->
+	<bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean" >
+		<property name="dataSource" ref="datasource"></property>
+		<property name="persistenceUnitName" value="persistenceUnit"></property>
 	</bean>
-
+	
+	<!--  Transacción manager -->
 	<bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
-		<property name="entityManagerFactory" ref="entityManagerFactory" />
+		<property name="entityManagerFactory" ref="entityManagerFactory"></property>
 	</bean>
+	
+	<!-- JPA Repositories -->
+	<jpa:repositories base-package="cl.magal.asistencia.repositories"></jpa:repositories>
 
-	<context:component-scan base-package="com.adeptagestion.pruebacenizas" />
-	<jpa:repositories base-package="com.adeptagestion.pruebacenizas.model.repository" />
-	<jpa:auditing auditor-aware-ref="auditorAwareBean" />
-	<bean id="auditorAwareBean" class="org.mockito.Mockito" factory-method="mock">
-	    <constructor-arg value="com.adeptagestion.pruebacenizas.auth.CenizasAuditorAware" />
-	</bean>
-	
-	
-	<bean id="messageSource"
-		class="org.springframework.context.support.ResourceBundleMessageSource">
+	<bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource">
 		<property name="basenames">
 			<list>
 				<value>MensajesLogin</value>
 			</list>
 		</property>
 	</bean>
-	
-	<bean id="autowireHelper" class="com.adeptagestion.pruebacenizas.util.AutowireHelper" />
-
-	<import resource="security.xml" />
-
-	<bean id="validator" class="org.springframework.validation.beanvalidation.LocalValidatorFactoryBean" />
 </beans>
