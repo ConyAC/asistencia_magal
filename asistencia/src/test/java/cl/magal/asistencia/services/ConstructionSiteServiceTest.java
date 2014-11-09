@@ -26,12 +26,11 @@ public class ConstructionSiteServiceTest {
 	public void testSaveConstructionSite() {
 		
 		ConstructionSite cs = new ConstructionSite();
-		cs.setName("Obra1");
 		cs.setAddress("Dire");
 		
 		service.saveConstructionSite(cs);
 		
-		assertTrue("El id de cs no puede ser nulo.",cs.getId() != null );
+		assertTrue("El id de cs no puede ser nulo.",cs.getConstructionsiteId() != null );
 		
 	}
 	
