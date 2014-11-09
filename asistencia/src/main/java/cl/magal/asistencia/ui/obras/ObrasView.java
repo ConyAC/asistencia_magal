@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 import org.tepi.filtertable.FilterTable;
 
 import ru.xpoft.vaadin.VaadinView;
-import cl.magal.asistencia.entities.Obra;
+import cl.magal.asistencia.entities.ConstructionSite;
 import cl.magal.asistencia.services.ObrasService;
 import cl.magal.asistencia.util.Utils;
 
@@ -43,7 +43,7 @@ public class ObrasView extends HorizontalLayout implements View {
 	
 	public static final String NAME = "obras";
 	
-	BeanItemContainer<Obra> container = new BeanItemContainer<Obra>(Obra.class);
+	BeanItemContainer<ConstructionSite> container = new BeanItemContainer<ConstructionSite>(ConstructionSite.class);
 	
 	@Autowired
 	private transient ObrasService service;
@@ -95,11 +95,11 @@ public class ObrasView extends HorizontalLayout implements View {
 
 			@Override
 			public void buttonClick(ClickEvent event) {
-				Obra obra = new Obra();
-				obra.setNombre("Obra"+Utils.random());
+				ConstructionSite obra = new ConstructionSite();
+				obra.setName("Obra"+Utils.random());
 				
-				obra.setDireccion("Dire");
-				service.saveObra(obra);
+				obra.setAddress("Dire");
+				service.save(obra);
 				recargarDatos();
 			}
 		});
@@ -115,7 +115,7 @@ public class ObrasView extends HorizontalLayout implements View {
 		table.setContainerDataSource(container);
 		table.setSizeFull();
 		table.setFilterBarVisible(true);
-		table.setVisibleColumns("id","nombre");
+		table.setVisibleColumns("constructionsiteId","name");
 		table.setSelectable(true);
 		return table;
 	}
@@ -152,7 +152,7 @@ public class ObrasView extends HorizontalLayout implements View {
 		table.setContainerDataSource(container);
 		table.setSizeFull();
 		table.setFilterBarVisible(true);
-		table.setVisibleColumns("id","nombre");
+		table.setVisibleColumns("constructionsiteId","name");
 		table.setSelectable(true);
 		
 		vl.addComponent(table);
@@ -169,7 +169,7 @@ public class ObrasView extends HorizontalLayout implements View {
 		table.setContainerDataSource(container);
 		table.setSizeFull();
 		table.setFilterBarVisible(true);
-		table.setVisibleColumns("id","nombre");
+		table.setVisibleColumns("constructionsiteId","name");
 		table.setSelectable(true);
 		
 		vl.addComponent(table);
@@ -216,7 +216,7 @@ public class ObrasView extends HorizontalLayout implements View {
 	}
 	
 	private void recargarDatos(){
-		Page<Obra> page = service.findAllObra(new PageRequest(0, 20));
+		Page<ConstructionSite> page = service.findAllConstructionSite(new PageRequest(0, 20));
 		container.removeAllItems();
 		container.addAll(page.getContent());
 	}
