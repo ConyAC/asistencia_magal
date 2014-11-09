@@ -51,7 +51,7 @@ public class ConstructionSite {
 	@Override
 	public String toString() {
 		return "ConstructionSite [id=" + id + ", address=" + address
-				+ ", deleted=" + deleted + ", status=" + status + ", name="
+				+ ", deleted=" + deleted + ",status=" + status + ", name="
 				+ name + "]";
 	}
 

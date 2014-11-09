@@ -6,6 +6,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToOne;
 
 @Entity
 public class Laborer {
@@ -19,7 +20,10 @@ public class Laborer {
 	String lastname;
 	String secondlastname;
 	String rut;
+	
+	@OneToOne(mappedBy = "roleId")
 	Role rol;
+	
 	Date dateBirth;
 	String address;
 	String mobileNumber;
