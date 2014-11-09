@@ -2,7 +2,6 @@ package cl.magal.asistencia.services;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -10,7 +9,7 @@ import cl.magal.asistencia.entities.Obra;
 import cl.magal.asistencia.repositories.ObraRepository;
 
 @Service
-public class FichaService {
+public class ObrasService {
 
 	@Autowired
 	ObraRepository repo;

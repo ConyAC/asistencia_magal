@@ -20,7 +20,7 @@ import cl.magal.asistencia.entities.Obra;
 public class ObraServiceTest {
 
 	@Autowired
-	FichaService service;
+	private transient ObrasService service;
 	
 	@Test
 	public void testSaveObra() {

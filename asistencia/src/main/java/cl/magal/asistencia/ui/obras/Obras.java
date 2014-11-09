@@ -1,7 +1,9 @@
-package cl.magal.asistencia.ui.fichaobra;
+package cl.magal.asistencia.ui.obras;
 
 import javax.annotation.PostConstruct;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.data.domain.Page;
@@ -10,7 +12,7 @@ import org.springframework.stereotype.Component;
 
 import ru.xpoft.vaadin.VaadinView;
 import cl.magal.asistencia.entities.Obra;
-import cl.magal.asistencia.services.FichaService;
+import cl.magal.asistencia.services.ObrasService;
 
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.navigator.View;
@@ -18,21 +20,27 @@ import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.VerticalLayout;
 
-@VaadinView(value=FichaObra.NAME)
+@VaadinView(value=Obras.NAME)
 @Scope("prototype")
 @Component
-public class FichaObra extends VerticalLayout implements View {
+public class Obras extends VerticalLayout implements View {
 	
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 8616320162970295709L;
 	
-	public static final String NAME = "ficha_obra";
+	private transient Logger logger = LoggerFactory.getLogger(Obras.class);
+	
+	public static final String NAME = "obras";
 	
 	BeanItemContainer<Obra> container = new BeanItemContainer<Obra>(Obra.class);
 	
-	public FichaObra(){
+	public Obras(){
+		
+		logger.debug("obras");
+		
+		setSizeFull();
 		
 		Table table = new Table();
 		table.setContainerDataSource(container);
@@ -42,7 +50,7 @@ public class FichaObra extends VerticalLayout implements View {
 	}
 	
 	@Autowired
-	FichaService service;
+	private transient ObrasService service;
 	
 	@PostConstruct
 	private void init(){
@@ -53,7 +61,7 @@ public class FichaObra extends VerticalLayout implements View {
 
 	@Override
 	public void enter(ViewChangeEvent event) {
-		
+		logger.debug("enter");
 		
 
 	}

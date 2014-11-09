@@ -15,7 +15,7 @@
   <logger name='cl.magal.asistencia.service'>
     <level value='DEBUG' />
   </logger>
-  <logger name='cl.magal.asistencia'>
+  <logger name='cl.magal.asistencia.ui'>
     <level value='DEBUG' />
   </logger>
 
