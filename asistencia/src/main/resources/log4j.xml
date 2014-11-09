@@ -17,6 +17,7 @@
   </logger>
   <logger name='cl.magal.asistencia.ui'>
     <level value='DEBUG' />
+    <appender-ref ref='CONSOLE' />
   </logger>
 
   <root>

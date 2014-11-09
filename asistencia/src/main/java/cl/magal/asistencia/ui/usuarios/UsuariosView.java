@@ -7,11 +7,11 @@ import org.springframework.stereotype.Component;
 import org.tepi.filtertable.FilterTable;
 
 import ru.xpoft.vaadin.VaadinView;
+import cl.magal.asistencia.entities.Role;
+import cl.magal.asistencia.entities.User;
 import cl.magal.asistencia.util.Utils;
 
-import com.vaadin.data.Container;
-import com.vaadin.data.Item;
-import com.vaadin.data.util.IndexedContainer;
+import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.FontAwesome;
@@ -34,13 +34,12 @@ public class UsuariosView extends HorizontalLayout implements View {
 	
 	public static final String NAME = "usuarios";
 	
-	Container container = new IndexedContainer();
+	BeanItemContainer<User> container = new BeanItemContainer<User>(User.class);
 	
 	public UsuariosView(){
-		//solo para test
-		container.addContainerProperty("rol", String.class, null);
-		container.addContainerProperty("nombre", String.class, null);
 		
+		container.addNestedContainerProperty("role.name");
+
 		setSizeFull();
 		
 		//dibula la sección de las obras
@@ -69,7 +68,7 @@ public class UsuariosView extends HorizontalLayout implements View {
 		table.setContainerDataSource(container);
 		table.setSizeFull();
 		table.setFilterBarVisible(true);
-		table.setVisibleColumns("rol","nombre");
+		table.setVisibleColumns("role.name","firstname");
 		table.setSelectable(true);
 		return table;
 	}
@@ -98,10 +97,10 @@ public class UsuariosView extends HorizontalLayout implements View {
 			@Override
 			public void buttonClick(ClickEvent event) {
 				
-				Object itemId = container.addItem();
-				Item item = container.getItem(itemId);
-				item.getItemProperty("rol").setValue("Adm. Central");
-				item.getItemProperty("nombre").setValue("Usuario "+Utils.random());
+				User user = new User();
+				user.setRole(new Role(1));
+				user.setFirstname("Usuario "+Utils.random());
+				container.addBean(user);
 				
 			}
 		});

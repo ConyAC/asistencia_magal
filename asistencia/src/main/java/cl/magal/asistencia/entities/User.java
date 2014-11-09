@@ -6,12 +6,14 @@
 package cl.magal.asistencia.entities;
 
 import java.io.Serializable;
+
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
@@ -31,7 +33,7 @@ import javax.persistence.Table;
     @NamedQuery(name = "User.findByEmail", query = "SELECT u FROM User u WHERE u.email = :email"),
     @NamedQuery(name = "User.findByPassword", query = "SELECT u FROM User u WHERE u.password = :password"),
     @NamedQuery(name = "User.findBySalt", query = "SELECT u FROM User u WHERE u.salt = :salt"),
-    @NamedQuery(name = "User.findByRoleId", query = "SELECT u FROM User u WHERE u.roleId = :roleId")})
+    @NamedQuery(name = "User.findByRoleId", query = "SELECT u FROM User u WHERE u.role = :roleId")})
 public class User implements Serializable {
     private static final long serialVersionUID = 1L;
     @Id
@@ -56,8 +58,8 @@ public class User implements Serializable {
     @Column(name = "salt")
     private String salt;
     @Basic(optional = false)
-    @Column(name = "roleId")
-    private int roleId;
+    @JoinColumn(name = "roleId")
+    private Role role;
 
     public User() {
     }
@@ -66,13 +68,13 @@ public class User implements Serializable {
         this.userId = userId;
     }
 
-    public User(Integer userId, String firstname, String lastname, String rut, String email, int roleId) {
+    public User(Integer userId, String firstname, String lastname, String rut, String email, Role role) {
         this.userId = userId;
         this.firstname = firstname;
         this.lastname = lastname;
         this.rut = rut;
         this.email = email;
-        this.roleId = roleId;
+        this.role = role;
     }
 
     public Integer getUserId() {
@@ -131,12 +133,12 @@ public class User implements Serializable {
         this.salt = salt;
     }
 
-    public int getRoleId() {
-        return roleId;
+    public Role getRole() {
+        return role;
     }
 
-    public void setRoleId(int roleId) {
-        this.roleId = roleId;
+    public void setRole(Role role) {
+        this.role = role;
     }
 
     @Override

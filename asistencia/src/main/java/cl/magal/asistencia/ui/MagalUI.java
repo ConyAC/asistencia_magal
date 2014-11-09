@@ -21,6 +21,7 @@ import cl.magal.asistencia.util.Constantes;
 import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.Title;
 import com.vaadin.annotations.VaadinServletConfiguration;
+import com.vaadin.server.DefaultErrorHandler;
 import com.vaadin.server.ErrorHandler;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.VaadinRequest;
@@ -85,7 +86,7 @@ public class MagalUI extends UI implements ErrorHandler {
 	}
 
 	public void error(com.vaadin.server.ErrorEvent event) {
-		
+		DefaultErrorHandler.doDefault(event);
 	}
 	
 	private MenuBar drawMenu() {
