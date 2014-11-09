@@ -12,10 +12,10 @@ import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.ui.VerticalLayout;
 
-@VaadinView(value=Fichas.NAME)
+@VaadinView(value=FichasView.NAME)
 @Scope("prototype")
 @Component
-public class Fichas extends VerticalLayout implements View {
+public class FichasView extends VerticalLayout implements View {
 
 	
 	/**

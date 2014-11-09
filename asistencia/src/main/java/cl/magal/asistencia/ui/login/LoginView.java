@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 
 import ru.xpoft.vaadin.VaadinView;
 import cl.magal.asistencia.ui.MagalUI;
-import cl.magal.asistencia.ui.obras.Obras;
+import cl.magal.asistencia.ui.obras.ObrasView;
 
 import com.vaadin.event.ShortcutAction.KeyCode;
 import com.vaadin.event.ShortcutListener;
@@ -29,15 +29,15 @@ import com.vaadin.ui.VerticalLayout;
 
 @Component
 @Scope("prototype")
-@VaadinView(value = Login.NAME, cached = true)
-public class Login extends VerticalLayout implements View {
+@VaadinView(value = LoginView.NAME, cached = true)
+public class LoginView extends VerticalLayout implements View {
 	
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 5518732114208565830L;
 
-	Logger logger = LoggerFactory.getLogger(Login.class);
+	Logger logger = LoggerFactory.getLogger(LoginView.class);
 
 	public static final String NAME = "";
 
@@ -52,7 +52,7 @@ public class Login extends VerticalLayout implements View {
 
 	};
 	
-public Login() {
+public LoginView() {
     	
     	setSizeFull();
     	addStyleName("login-layout");
@@ -111,7 +111,7 @@ public Login() {
 					 try {
 		                   
 						 ((MagalUI)UI.getCurrent()).getMenuLayout().setVisible(true);
-		                    UI.getCurrent().getNavigator().navigateTo(Obras.NAME);
+		                    UI.getCurrent().getNavigator().navigateTo(ObrasView.NAME);
 
 					} catch (Exception e) {
 						logger.debug("Mal login ", e );
