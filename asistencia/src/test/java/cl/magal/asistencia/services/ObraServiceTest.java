@@ -35,7 +35,7 @@ public class ObraServiceTest {
 		
 	}
 	
-	@Test
+	/*@Test
 	public void testFindObra() {
 		
 		Obra obra = new Obra();
@@ -142,6 +142,6 @@ public class ObraServiceTest {
 		assertTrue("Me debe pasar solo 1 elemento",dbobras.getContent().size() == 1 );
 		assertEquals("Me debe entregar el primer elemento",obra2.getId() ,dbobras.getContent().get(0).getId() );
 		
-	}
+	}*/
 
 }
