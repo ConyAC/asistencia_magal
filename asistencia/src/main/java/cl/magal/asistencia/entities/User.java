@@ -12,6 +12,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
@@ -55,9 +56,11 @@ public class User implements Serializable {
     private String password;
     @Column(name = "salt")
     private String salt;
+   
     @Basic(optional = false)
-    @Column(name = "roleId")
-    private int roleId;
+    @JoinColumn(name = "roleId")
+    private Role role;
+
 
     public User() {
     }
@@ -66,13 +69,13 @@ public class User implements Serializable {
         this.userId = userId;
     }
 
-    public User(Integer userId, String firstname, String lastname, String rut, String email, int roleId) {
+    public User(Integer userId, String firstname, String lastname, String rut, String email, Role role) {
         this.userId = userId;
         this.firstname = firstname;
         this.lastname = lastname;
         this.rut = rut;
         this.email = email;
-        this.roleId = roleId;
+        this.role = role;
     }
 
     public Integer getUserId() {
@@ -131,15 +134,15 @@ public class User implements Serializable {
         this.salt = salt;
     }
 
-    public int getRoleId() {
-        return roleId;
-    }
+    public Role getRole() {
+		return role;
+	}
 
-    public void setRoleId(int roleId) {
-        this.roleId = roleId;
-    }
+	public void setRole(Role role) {
+		this.role = role;
+	}
 
-    @Override
+	@Override
     public int hashCode() {
         int hash = 0;
         hash += (userId != null ? userId.hashCode() : 0);

@@ -35,21 +35,19 @@ public class ConstructionSiteServiceTest {
 	}
 	
 	/*@Test
-	public void testFindObra() {
+	public void testFindConstructionSite() {
 		
-		Obra obra = new Obra();
-		obra.setNombre("Obra1");
-		obra.setDireccion("Dire");
-		service.saveObra(obra);
+		ConstructionSite cs = new ConstructionSite();
+		cs.setAddress("Dire");
+		service.saveConstructionSite(cs);
 		
-		assertTrue("El id no puede ser nulo.",obra.getId() != null );
+		assertTrue("El id no puede ser nulo.",cs.getConstructionsiteId() != null );
 		
-		Obra dbobra = service.findObra(obra.getId());
+		ConstructionSite dbcs = service.findConstructionSite(cs.getConstructionsiteId());
 		
-		assertNotNull("La obra no puede ser nula",dbobra);
+		assertNotNull("La obra no puede ser nula", dbcs);
 		
-		assertEquals("nombre debe ser igual", "Obra1",dbobra.getNombre());
-		assertEquals("direccion debe ser igual", "Dire",dbobra.getDireccion());
+		assertEquals("direccion debe ser igual", "Dire", dbcs.getAddress());
 		
 	}
 	

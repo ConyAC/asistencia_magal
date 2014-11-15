@@ -14,7 +14,7 @@ public interface ConstructionSiteRepository extends PagingAndSortingRepository<C
 
 	Page<ConstructionSite> findAll(Pageable page);
 	
-	ConstructionSite findByNombre(String nombre);
+	//ConstructionSite findByNombre(String nombre);
 	
 	@Query(value="SELECT cs FROM ConstructionSite cs WHERE cs.address = :address " )
 	List<ConstructionSite> findByComplicada(@Param("address") String address);

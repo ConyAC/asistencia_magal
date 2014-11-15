@@ -23,6 +23,10 @@ public class FichaService {
 		rep.save(cs);
 	}
 	
+	public ConstructionSite findConstructionSite(Long id){
+		return rep.findOne(id);
+	}
+	
 	public void saveObra(Obra obra) {
 		repo.save(obra);
 	}
