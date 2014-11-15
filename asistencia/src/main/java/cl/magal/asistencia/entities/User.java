@@ -32,7 +32,7 @@ import javax.persistence.Table;
     @NamedQuery(name = "User.findByEmail", query = "SELECT u FROM User u WHERE u.email = :email"),
     @NamedQuery(name = "User.findByPassword", query = "SELECT u FROM User u WHERE u.password = :password"),
     @NamedQuery(name = "User.findBySalt", query = "SELECT u FROM User u WHERE u.salt = :salt"),
-    @NamedQuery(name = "User.findByRoleId", query = "SELECT u FROM User u WHERE u.roleId = :roleId")})
+    @NamedQuery(name = "User.findByRoleId", query = "SELECT u FROM User u WHERE u.role = :role")})
 public class User implements Serializable {
     private static final long serialVersionUID = 1L;
     @Id

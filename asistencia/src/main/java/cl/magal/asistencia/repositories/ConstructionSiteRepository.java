@@ -19,7 +19,7 @@ public interface ConstructionSiteRepository extends PagingAndSortingRepository<C
 	@Query(value="SELECT cs FROM ConstructionSite cs WHERE cs.address = :address " )
 	List<ConstructionSite> findByComplicada(@Param("address") String address);
 	
-	@Query(value="SELECT cs.status FROM ConstructionSite cs WHERE cs.id = :id " ,nativeQuery=true)
+	@Query(value="SELECT cs.status FROM construction_site cs WHERE cs.construction_siteId = :id " ,nativeQuery=true)
 	Integer findRawStatusCS(@Param("id") Long id);
 
 }
