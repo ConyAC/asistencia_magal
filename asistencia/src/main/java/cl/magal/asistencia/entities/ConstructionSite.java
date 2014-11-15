@@ -10,6 +10,7 @@ import java.util.Currency;
 
 import javax.persistence.Basic;
 import javax.persistence.Column;
+import javax.persistence.Converter;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -42,11 +43,11 @@ public class ConstructionSite implements Serializable {
     @Basic(optional = false)
     @Column(name = "address")
     private String address;
-    Status
-
     @Column(name = "deleted")
     private Boolean deleted;
-
+   // @Converter(converter = StatusConverter.class)
+    
+    
     public ConstructionSite() {
     }
 
@@ -76,13 +77,7 @@ public class ConstructionSite implements Serializable {
         this.address = address;
     }
 
-    public Status getStatus() {
-		return status;
-	}
-
-	public void setStatus(Status status) {
-		this.status = status;
-	}
+   
 
 	public Boolean getDeleted() {
         return deleted;
