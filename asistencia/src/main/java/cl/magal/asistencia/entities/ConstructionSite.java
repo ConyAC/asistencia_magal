@@ -6,19 +6,20 @@
 package cl.magal.asistencia.entities;
 
 import java.io.Serializable;
-import java.util.Currency;
 
 import javax.persistence.Basic;
 import javax.persistence.Column;
-import javax.persistence.Converter;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
+
+import cl.magal.asistencia.entities.converter.StatusConverter;
+import cl.magal.asistencia.entities.enums.Status;
 
 /**
  *
@@ -45,8 +46,8 @@ public class ConstructionSite implements Serializable {
     private String address;
     @Column(name = "deleted")
     private Boolean deleted;
-   // @Converter(converter = StatusConverter.class)
-    
+   @Convert(converter = StatusConverter.class)
+    private Status status;
     
     public ConstructionSite() {
     }
@@ -58,7 +59,7 @@ public class ConstructionSite implements Serializable {
     public ConstructionSite(Long constructionsiteId, String address, Status status) {
         this.constructionsiteId = constructionsiteId;
         this.address = address;
-       // this.status = status;
+        this.status = status;
     }
 
     public Long getConstructionsiteId() {
@@ -77,7 +78,13 @@ public class ConstructionSite implements Serializable {
         this.address = address;
     }
 
-   
+	public Status getStatus() {
+		return status;
+	}
+
+	public void setStatus(Status status) {
+		this.status = status;
+	}
 
 	public Boolean getDeleted() {
         return deleted;

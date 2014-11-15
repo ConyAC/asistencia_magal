@@ -38,6 +38,11 @@ public class FichaService {
 	public Page<Obra> findAllObra(Pageable page) {
 		return repo.findAll(page);
 	}
+	
+	public Integer findRawStatusCS(Long id) {
+		return (Integer) rep.findRawStatusCS(id);
+	}
+	
 /*
 	public Obra findObraByNombre(String nombre) {
 		return repo.findByNombre(nombre);
