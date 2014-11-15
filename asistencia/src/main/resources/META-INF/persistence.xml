@@ -18,17 +18,11 @@
 	    <class>cl.magal.asistencia.entities.TeamConstructionsite</class>
 	    <class>cl.magal.asistencia.entities.Tool</class>
 	    <class>cl.magal.asistencia.entities.User</class>
+	    <class>cl.magal.asistencia.entities.converter.StatusConverter</class>
 	    <properties>
 	        <property name="hibernate.dialect" value="org.hibernate.dialect.H2Dialect"/>
 	        <property name="hibernate.hbm2ddl.auto" value="create-drop"/>
-	        <property name="hibernate.show_sql" value="true"/>
-	        
-	        <property name="javax.persistence.jdbc.url" value="jdbc:mysql://localhost:3306/magal"/>
-			<property name="javax.persistence.jdbc.user" value="root"/>
-			<property name="javax.persistence.jdbc.password" value=""/>
-			<property name="javax.persistence.jdbc.driver" value="com.mysql.jdbc.Driver"/>
-			<property name="eclipselink.logging.level" value="FINE"/>
-			
+	        <property name="hibernate.show_sql" value="true"/>			
 	    </properties>
 	</persistence-unit>
 </persistence>
