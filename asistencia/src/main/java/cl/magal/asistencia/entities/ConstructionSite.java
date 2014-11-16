@@ -31,7 +31,7 @@ import cl.magal.asistencia.entities.enums.Status;
     @NamedQuery(name = "ConstructionSite.findAll", query = "SELECT c FROM ConstructionSite c"),
     @NamedQuery(name = "ConstructionSite.findByConstructionsiteId", query = "SELECT c FROM ConstructionSite c WHERE c.constructionsiteId = :constructionsiteId"),
     @NamedQuery(name = "ConstructionSite.findByAddress", query = "SELECT c FROM ConstructionSite c WHERE c.address = :address"),
-    @NamedQuery(name = "ConstructionSite.findByStatus", query = "SELECT c FROM ConstructionSite c JOIN c.status s WHERE s.statusId = :statusId"),    
+    @NamedQuery(name = "ConstructionSite.findByStatus", query = "SELECT c FROM ConstructionSite c WHERE c.status = :status"),    
     @NamedQuery(name = "ConstructionSite.findByDeleted", query = "SELECT c FROM ConstructionSite c WHERE c.deleted = :deleted")})
 	
 public class ConstructionSite implements Serializable {
@@ -46,7 +46,7 @@ public class ConstructionSite implements Serializable {
     private String address;
     @Column(name = "deleted")
     private Boolean deleted;
-   @Convert(converter = StatusConverter.class)
+    @Convert(converter = StatusConverter.class)
     private Status status;
     
     public ConstructionSite() {
