@@ -42,7 +42,7 @@ public class User implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
     @Column(name = "userId")
-    private Integer userId;
+    private Long userId;
     @Basic(optional = false)
     @Column(name = "firstname")
     private String firstname;
@@ -67,11 +67,11 @@ public class User implements Serializable {
     public User() {
     }
 
-    public User(Integer userId) {
+    public User(Long userId) {
         this.userId = userId;
     }
 
-    public User(Integer userId, String firstname, String lastname, String rut, String email, Role role) {
+    public User(Long userId, String firstname, String lastname, String rut, String email, Role role) {
         this.userId = userId;
         this.firstname = firstname;
         this.lastname = lastname;
@@ -79,16 +79,16 @@ public class User implements Serializable {
         this.email = email;
         this.role = role;
     }
+    
+    public Long getUserId() {
+		return userId;
+	}
 
-    public Integer getUserId() {
-        return userId;
-    }
+	public void setUserId(Long userId) {
+		this.userId = userId;
+	}
 
-    public void setUserId(Integer userId) {
-        this.userId = userId;
-    }
-
-    public String getFirstname() {
+	public String getFirstname() {
         return firstname;
     }
 

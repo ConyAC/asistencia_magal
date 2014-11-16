@@ -2,6 +2,7 @@ package cl.magal.asistencia.services;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
@@ -14,6 +15,8 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import cl.magal.asistencia.entities.ConstructionSite;
+import cl.magal.asistencia.entities.User;
+import cl.magal.asistencia.entities.enums.Role;
 import cl.magal.asistencia.entities.enums.Status;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -23,6 +26,9 @@ public class ConstructionSiteServiceTest {
 	@Autowired
 	FichaService service;
 	
+	/**
+	 * Almacenar
+	 */
 	@Test
 	public void testSaveConstructionSite() {
 		
@@ -49,6 +55,9 @@ public class ConstructionSiteServiceTest {
 		
 	}
 	
+	/**
+	 * Encontrar
+	 */
 	@Test
 	public void testFindConstructionSite() {
 		
@@ -68,25 +77,9 @@ public class ConstructionSiteServiceTest {
 		
 	}
 	
-	@Test
-	public void testFindByAddress() {
-		
-		ConstructionSite cs = new ConstructionSite();
-		cs.setAddress("Dire");
-		cs.setStatus(Status.ACTIVE);
-		
-		service.saveConstructionSite(cs);
-		
-		assertTrue("El id no puede ser nulo.", cs.getConstructionsiteId() != null );
-		
-		ConstructionSite dbcs = service.findByAddress(cs.getAddress());
-		
-		assertNotNull("La obra no puede ser nula", dbcs);
-		
-		assertEquals("La dirección debe ser igual", "Dire", dbcs.getAddress());
-		
-	}
-	
+	/**
+	 * Listar no eliminados (campo deleted)
+	 */
 	@Test
 	public void testFindByNoDeleted(){
 		
@@ -105,4 +98,51 @@ public class ConstructionSiteServiceTest {
 		
 		assertTrue("La obra no debe estar eliminada", dbcs.getDeleted() != true);
 	}
+	
+	/**
+	 * Actualizar
+	 */
+	@Test
+	public void testUpdate() {
+		
+		ConstructionSite cs = new ConstructionSite();
+		cs.setAddress("Dire");
+		cs.setStatus(Status.ACTIVE);
+		cs.setDeleted(false);
+		
+		service.saveConstructionSite(cs);		
+		assertTrue("El id no puede ser nulo.", cs.getConstructionsiteId() != null );
+		
+		ConstructionSite dbcs = service.findConstructionSite(cs.getConstructionsiteId());
+		assertNotNull("La obra no puede ser nula", dbcs);
+		
+		cs.setAddress("cambio");	
+		service.saveConstructionSite(cs);
+		
+		dbcs = service.findConstructionSite(cs.getConstructionsiteId());		
+		assertEquals("Email debe ser igual", cs.getAddress(), dbcs.getAddress());		
+				
+	}
+	
+	/**
+	 * Eliminar
+	 */
+	@Test
+	public void testDelete(){
+		
+		ConstructionSite cs = new ConstructionSite();
+		cs.setAddress("Dire");
+		cs.setStatus(Status.ACTIVE);
+		
+		service.saveConstructionSite(cs);
+		
+		assertTrue("El id no puede ser nulo.", cs.getConstructionsiteId() != null );
+		
+		service.deleteCS(cs.getConstructionsiteId());
+		
+		ConstructionSite dbcs = service.findConstructionSite(cs.getConstructionsiteId());
+		
+		assertNull("La obra debe ser nula", dbcs);
+		
+	}	
 }

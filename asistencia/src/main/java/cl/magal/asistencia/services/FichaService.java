@@ -52,6 +52,10 @@ public class FichaService {
 		return repo.findAll(page);
 	}
 	
+	public void deleteCS(Long id){
+		rep.delete(id);
+	}
+	
 /*
 	public Obra findObraByNombre(String nombre) {
 		return repo.findByNombre(nombre);
