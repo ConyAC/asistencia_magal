@@ -1,4 +1,4 @@
-package cl.magal.asistencia.ui.usuarios;
+package cl.magal.asistencia.ui.users;
 
 import javax.annotation.PostConstruct;
 
@@ -22,10 +22,10 @@ import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.VerticalLayout;
 
-@VaadinView(value=UsuariosView.NAME)
+@VaadinView(value=UsersView.NAME)
 @Scope("prototype")
 @Component
-public class UsuariosView extends HorizontalLayout implements View {
+public class UsersView extends HorizontalLayout implements View {
 
 	/**
 	 * 
@@ -36,7 +36,7 @@ public class UsuariosView extends HorizontalLayout implements View {
 	
 	BeanItemContainer<User> container = new BeanItemContainer<User>(User.class);
 	
-	public UsuariosView(){
+	public UsersView(){
 		
 		container.addNestedContainerProperty("role.name");
 

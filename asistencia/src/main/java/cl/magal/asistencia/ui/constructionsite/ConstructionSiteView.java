@@ -1,4 +1,4 @@
-package cl.magal.asistencia.ui.obras;
+package cl.magal.asistencia.ui.constructionsite;
 
 import javax.annotation.PostConstruct;
 
@@ -13,6 +13,9 @@ import org.tepi.filtertable.FilterTable;
 
 import ru.xpoft.vaadin.VaadinView;
 import cl.magal.asistencia.entities.ConstructionSite;
+import cl.magal.asistencia.entities.Laborer;
+import cl.magal.asistencia.services.ConstructionSiteHelper;
+import cl.magal.asistencia.services.LaborerHelper;
 import cl.magal.asistencia.services.ObrasService;
 import cl.magal.asistencia.util.Utils;
 
@@ -26,30 +29,32 @@ import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Image;
 import com.vaadin.ui.Label;
+import com.vaadin.ui.Notification;
 import com.vaadin.ui.TabSheet;
 import com.vaadin.ui.VerticalLayout;
 
-@VaadinView(value=ObrasView.NAME,cached=false)
+@VaadinView(value=ConstructionSiteView.NAME,cached=false)
 @Scope("prototype")
 @Component
-public class ObrasView extends HorizontalLayout implements View {
+public class ConstructionSiteView extends HorizontalLayout implements View {
 	
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 8616320162970295709L;
 	
-	private transient Logger logger = LoggerFactory.getLogger(ObrasView.class);
+	private transient Logger logger = LoggerFactory.getLogger(ConstructionSiteView.class);
 	
 	public static final String NAME = "obras";
 	
-	BeanItemContainer<ConstructionSite> container = new BeanItemContainer<ConstructionSite>(ConstructionSite.class);
+	BeanItemContainer<ConstructionSite> constructionContainer = new BeanItemContainer<ConstructionSite>(ConstructionSite.class);
+	BeanItemContainer<Laborer> laborerContainer = new BeanItemContainer<Laborer>(Laborer.class);
 	
 	@Autowired
 	private transient ObrasService service;
 	
 	
-	public ObrasView(){
+	public ConstructionSiteView(){
 		
 		logger.debug("obras");
 		
@@ -62,7 +67,7 @@ public class ObrasView extends HorizontalLayout implements View {
 		setExpandRatio(obras, 0.2F);
 		
 		//dibuja la sección de detalles
-		VerticalLayout detalleObra = drawDetalleObra();
+		VerticalLayout detalleObra = drawContructionDetail();
 		
 		addComponent(detalleObra);
 		setExpandRatio(detalleObra, 0.8F);
@@ -78,7 +83,7 @@ public class ObrasView extends HorizontalLayout implements View {
 		vl.setMargin(true);
 		
 		//la tabla con su buscador buscador
-		vl.addComponent(drawTablaObras());
+		vl.addComponent(drawConstructionTable());
 		//botones agrega y eliminar
 		HorizontalLayout hl = new HorizontalLayout();
 		hl.setSpacing(true);
@@ -95,12 +100,10 @@ public class ObrasView extends HorizontalLayout implements View {
 
 			@Override
 			public void buttonClick(ClickEvent event) {
-				ConstructionSite obra = new ConstructionSite();
-				obra.setName("Obra"+Utils.random());
-				
-				obra.setAddress("Dire");
+				//FIXME SOLO PARA TEST
+				ConstructionSite obra = ConstructionSiteHelper.newConstrutionSite();
 				service.save(obra);
-				recargarDatos();
+				constructionContainer.addBean(obra);
 			}
 		});
 		hl.addComponent(agregaObra);
@@ -110,9 +113,9 @@ public class ObrasView extends HorizontalLayout implements View {
 		return vl;
 	}
 	
-	private FilterTable drawTablaObras() {
+	private FilterTable drawConstructionTable() {
 		FilterTable table =  new FilterTable();
-		table.setContainerDataSource(container);
+		table.setContainerDataSource(constructionContainer);
 		table.setSizeFull();
 		table.setFilterBarVisible(true);
 		table.setVisibleColumns("constructionsiteId","name");
@@ -120,13 +123,13 @@ public class ObrasView extends HorizontalLayout implements View {
 		return table;
 	}
 
-	private VerticalLayout drawDetalleObra() {
+	private VerticalLayout drawContructionDetail() {
 		VerticalLayout vl = new VerticalLayout(); 
 		vl.setSizeFull();
 		vl.setMargin(true);
 		
 		//creando la parte de arriba
-		HorizontalLayout hl = drawTopDetalles();
+		HorizontalLayout hl = drawTopDetails();
 		vl.addComponent(hl);
 		vl.setExpandRatio(hl, 0.2F);
 		
@@ -136,7 +139,7 @@ public class ObrasView extends HorizontalLayout implements View {
 		vl.addComponent(tab);
 		vl.setExpandRatio(tab, 0.8F);
 		//tab de trabajadores
-		tab.addTab(drawTrabajadores(),"Trabajadores");
+		tab.addTab(drawLaborer(),"Trabajadores");
 		
 		//tab de cuadrillas
 		tab.addTab(drawCuadrillas(),"Cuadrillas");
@@ -149,7 +152,7 @@ public class ObrasView extends HorizontalLayout implements View {
 		vl.setSizeFull();
 		
 		FilterTable table =  new FilterTable();
-		table.setContainerDataSource(container);
+		table.setContainerDataSource(constructionContainer);
 		table.setSizeFull();
 		table.setFilterBarVisible(true);
 		table.setVisibleColumns("constructionsiteId","name");
@@ -160,24 +163,72 @@ public class ObrasView extends HorizontalLayout implements View {
 		return vl;
 	}
 
-	private VerticalLayout drawTrabajadores() {
+	private VerticalLayout drawLaborer() {
+		
 		VerticalLayout vl = new VerticalLayout();
 		
 		vl.setSizeFull();
+		vl.setMargin(true);
+		
+		//boton para agregar trabajadores e imprimir
+		HorizontalLayout hl = new HorizontalLayout();
+		hl.setMargin(true);
+		hl.setSpacing(true);
+		vl.addComponent(hl);
+		vl.setComponentAlignment(hl, Alignment.TOP_RIGHT);
+		
+		Button btnPrint = new Button(null,FontAwesome.PRINT);
+		hl.addComponent(btnPrint);
+		
+		btnPrint.addClickListener(new Button.ClickListener() {
+			
+			@Override
+			public void buttonClick(ClickEvent event) {
+				Notification.show("Imprimiendo");
+				
+			}
+		});
+		
+		Button btnAdd = new Button(null,FontAwesome.PLUS);
+		hl.addComponent(btnAdd);
+		
+		btnAdd.addClickListener(new Button.ClickListener() {
+			
+			@Override
+			public void buttonClick(ClickEvent event) {
+				//FIXME solo para test
+				Laborer laborer = LaborerHelper.newLaborer();
+				//FIXME asociar obra seleccionada
+				if(constructionContainer.size() != 0){
+					ConstructionSite cs = constructionContainer.firstItemId();
+					//TODO asociar trabajador con obra
+				}else{
+					throw new RuntimeException("Es necesario seleccionar una obra");
+				}
+				
+				service.save(laborer);
+				laborerContainer.addBean(laborer);
+				
+			}
+		});
 		
 		FilterTable table =  new FilterTable();
-		table.setContainerDataSource(container);
+		table.setContainerDataSource(laborerContainer);
 		table.setSizeFull();
 		table.setFilterBarVisible(true);
-		table.setVisibleColumns("constructionsiteId","name");
+		//TODO estado
+		table.setVisibleColumns("jobId","firstname","laborerId"); //FIXME laborerId
+		table.setColumnHeaders("Cod","Nombre","Estado");
 		table.setSelectable(true);
 		
 		vl.addComponent(table);
+		vl.setExpandRatio(table,1.0F);
 		
 		return vl;
 	}
 
-	private HorizontalLayout drawTopDetalles() {
+	private HorizontalLayout drawTopDetails() {
+		
 		HorizontalLayout hl = new HorizontalLayout();
 		hl.setSizeFull();
 		hl.setSpacing(true);
@@ -203,7 +254,7 @@ public class ObrasView extends HorizontalLayout implements View {
 		vacaciones.setSizeFull();
 		vlIBotones.addComponent(vacaciones);
 		
-		Button configuraciones = new Button("Configuraciones",FontAwesome.GEARS);
+		Button configuraciones = new Button("Configuraciones Obra",FontAwesome.GEARS);
 		configuraciones.setSizeFull();
 		vlIBotones.addComponent(configuraciones);
 		
@@ -212,13 +263,20 @@ public class ObrasView extends HorizontalLayout implements View {
 
 	@Override
 	public void enter(ViewChangeEvent event) {
-		recargarDatos();
+		reloadData();
 	}
 	
-	private void recargarDatos(){
+	private void reloadData(){
+		//agrega las obras TODO segun perfil TODO usar paginación
 		Page<ConstructionSite> page = service.findAllConstructionSite(new PageRequest(0, 20));
-		container.removeAllItems();
-		container.addAll(page.getContent());
+		constructionContainer.removeAllItems();
+		constructionContainer.addAll(page.getContent());
+		//agrea los trabajadores asociados a la obra TODO segun la obra seleccionada
+		//si no es vacia
+		if(!page.getContent().isEmpty()){
+			ConstructionSite fisrt = page.getContent().get(0);
+			Page<Laborer> laborerPage = service.findLaborerByConstruction(fisrt);
+		}
 	}
 
 }

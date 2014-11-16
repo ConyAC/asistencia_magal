@@ -1,4 +1,4 @@
-package cl.magal.asistencia.ui.configuraciones;
+package cl.magal.asistencia.ui.config;
 
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -9,10 +9,10 @@ import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.ui.VerticalLayout;
 
-@VaadinView(value=ConfiguracionesView.NAME)
+@VaadinView(value=ConfigView.NAME)
 @Scope("prototype")
 @Component
-public class ConfiguracionesView extends VerticalLayout implements View {
+public class ConfigView extends VerticalLayout implements View {
 
 	/**
 	 * 

@@ -11,12 +11,12 @@ import org.springframework.context.annotation.Scope;
 
 import ru.xpoft.vaadin.DiscoveryNavigator;
 import ru.xpoft.vaadin.SpringVaadinServlet;
-import cl.magal.asistencia.ui.configuraciones.ConfiguracionesView;
-import cl.magal.asistencia.ui.fichas.FichasView;
+import cl.magal.asistencia.ui.config.ConfigView;
+import cl.magal.asistencia.ui.constructionsite.ConstructionSiteView;
 import cl.magal.asistencia.ui.login.LoginView;
-import cl.magal.asistencia.ui.obras.ObrasView;
-import cl.magal.asistencia.ui.usuarios.UsuariosView;
-import cl.magal.asistencia.util.Constantes;
+import cl.magal.asistencia.ui.users.UsersView;
+import cl.magal.asistencia.ui.workerfile.WorkerFileView;
+import cl.magal.asistencia.util.Constants;
 
 import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.Title;
@@ -97,7 +97,7 @@ public class MagalUI extends UI implements ErrorHandler {
 			
 			@Override
 			public void menuSelected(MenuItem selectedItem) {
-				navigator.navigateTo(ObrasView.NAME);
+				navigator.navigateTo(ConstructionSiteView.NAME);
 				
 			}
 		});
@@ -108,7 +108,7 @@ public class MagalUI extends UI implements ErrorHandler {
 			
 			@Override
 			public void menuSelected(MenuItem selectedItem) {
-				navigator.navigateTo(FichasView.NAME);
+				navigator.navigateTo(WorkerFileView.NAME);
 				
 			}
 		});
@@ -119,7 +119,7 @@ public class MagalUI extends UI implements ErrorHandler {
 			
 			@Override
 			public void menuSelected(MenuItem selectedItem) {
-				navigator.navigateTo(UsuariosView.NAME);
+				navigator.navigateTo(UsersView.NAME);
 				
 			}
 		});
@@ -130,7 +130,7 @@ public class MagalUI extends UI implements ErrorHandler {
 			
 			@Override
 			public void menuSelected(MenuItem selectedItem) {
-				navigator.navigateTo(ConfiguracionesView.NAME);
+				navigator.navigateTo(ConfigView.NAME);
 				
 			}
 		});
@@ -164,7 +164,7 @@ public class MagalUI extends UI implements ErrorHandler {
 //    	//deslogea
 //    	VaadinSession.getCurrent().
 //    	setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY,SecurityContextHolder.createEmptyContext());
-    	VaadinSession.getCurrent().setAttribute(Constantes.SESSION_USUARIO, null);
+    	VaadinSession.getCurrent().setAttribute(Constants.SESSION_USUARIO, null);
     	navigator.navigateTo(LoginView.NAME);
 	}
 		

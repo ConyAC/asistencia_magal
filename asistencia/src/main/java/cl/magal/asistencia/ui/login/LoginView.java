@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 
 import ru.xpoft.vaadin.VaadinView;
 import cl.magal.asistencia.ui.MagalUI;
-import cl.magal.asistencia.ui.obras.ObrasView;
+import cl.magal.asistencia.ui.constructionsite.ConstructionSiteView;
 
 import com.vaadin.event.ShortcutAction.KeyCode;
 import com.vaadin.event.ShortcutListener;
@@ -111,7 +111,7 @@ public LoginView() {
 					 try {
 		                   
 						 ((MagalUI)UI.getCurrent()).getMenuLayout().setVisible(true);
-		                    UI.getCurrent().getNavigator().navigateTo(ObrasView.NAME);
+		                    UI.getCurrent().getNavigator().navigateTo(ConstructionSiteView.NAME);
 
 					} catch (Exception e) {
 						logger.debug("Mal login ", e );

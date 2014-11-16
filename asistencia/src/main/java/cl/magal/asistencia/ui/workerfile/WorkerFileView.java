@@ -1,4 +1,4 @@
-package cl.magal.asistencia.ui.fichas;
+package cl.magal.asistencia.ui.workerfile;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -12,10 +12,10 @@ import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.ui.VerticalLayout;
 
-@VaadinView(value=FichasView.NAME)
+@VaadinView(value=WorkerFileView.NAME)
 @Scope("prototype")
 @Component
-public class FichasView extends VerticalLayout implements View {
+public class WorkerFileView extends VerticalLayout implements View {
 
 	
 	/**

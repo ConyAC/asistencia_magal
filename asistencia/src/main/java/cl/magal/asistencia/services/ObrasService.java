@@ -1,13 +1,18 @@
 package cl.magal.asistencia.services;
 
+import java.util.Arrays;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import cl.magal.asistencia.entities.ConstructionSite;
+import cl.magal.asistencia.entities.Laborer;
 import cl.magal.asistencia.entities.Obra;
 import cl.magal.asistencia.repositories.ConstructionSiteRepository;
+import cl.magal.asistencia.repositories.LaborerRepository;
 import cl.magal.asistencia.repositories.ObraRepository;
 
 @Service
@@ -16,9 +21,15 @@ public class ObrasService {
 	
 	@Autowired
 	ConstructionSiteRepository repo2;
+	@Autowired
+	LaborerRepository labRepo;
 	
 	public void save(ConstructionSite obra) {
 		repo2.save(obra);
+	}
+	
+	public void save(Laborer laborer) {
+		labRepo.save(laborer);
 	}
 
 	public ConstructionSite findConstructionSite(Long id) {
@@ -59,6 +70,13 @@ public class ObrasService {
 
 	public Obra findObraByDireccion(String direccion) {
 		return repo.findByComplicada(direccion).get(0);
+	}
+
+	public Page<Laborer> findLaborerByConstruction(ConstructionSite fisrt) {
+		Page<Laborer> page = new PageImpl<Laborer>(
+				Arrays.asList(LaborerHelper.newLaborer(),LaborerHelper.newLaborer(),LaborerHelper.newLaborer())
+				);
+		return page;
 	}
 
 }
