@@ -6,8 +6,10 @@
 package cl.magal.asistencia.entities;
 
 import java.io.Serializable;
+
 import javax.persistence.Basic;
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -15,6 +17,9 @@ import javax.persistence.Id;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
+
+import cl.magal.asistencia.entities.converter.StatusConverter;
+import cl.magal.asistencia.entities.enums.Status;
 
 /**
  *
@@ -26,44 +31,44 @@ import javax.persistence.Table;
     @NamedQuery(name = "ConstructionSite.findAll", query = "SELECT c FROM ConstructionSite c"),
     @NamedQuery(name = "ConstructionSite.findByConstructionsiteId", query = "SELECT c FROM ConstructionSite c WHERE c.constructionsiteId = :constructionsiteId"),
     @NamedQuery(name = "ConstructionSite.findByAddress", query = "SELECT c FROM ConstructionSite c WHERE c.address = :address"),
-    @NamedQuery(name = "ConstructionSite.findByStatusId", query = "SELECT c FROM ConstructionSite c WHERE c.statusId = :statusId"),
+    @NamedQuery(name = "ConstructionSite.findByStatus", query = "SELECT c FROM ConstructionSite c WHERE c.status = :status"),    
     @NamedQuery(name = "ConstructionSite.findByDeleted", query = "SELECT c FROM ConstructionSite c WHERE c.deleted = :deleted")})
+	
 public class ConstructionSite implements Serializable {
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
     @Column(name = "construction_siteId")
-    private Integer constructionsiteId;
+    private Long constructionsiteId;
     @Basic(optional = false)
     @Column(name = "address")
     private String address;
-    @Basic(optional = false)
-    @Column(name = "statusId")
-    private int statusId;
     @Column(name = "deleted")
     private Boolean deleted;
     @Column(name = "name")
     String name;
-
+   @Convert(converter = StatusConverter.class)
+    private Status status;
+    
     public ConstructionSite() {
     }
 
-    public ConstructionSite(Integer constructionsiteId) {
+    public ConstructionSite(Long constructionsiteId) {
         this.constructionsiteId = constructionsiteId;
     }
 
-    public ConstructionSite(Integer constructionsiteId, String address, int statusId) {
+    public ConstructionSite(Long constructionsiteId, String address, Status status) {
         this.constructionsiteId = constructionsiteId;
         this.address = address;
-        this.statusId = statusId;
+        this.status = status;
     }
 
-    public Integer getConstructionsiteId() {
+    public Long getConstructionsiteId() {
         return constructionsiteId;
     }
 
-    public void setConstructionsiteId(Integer constructionsiteId) {
+    public void setConstructionsiteId(Long constructionsiteId) {
         this.constructionsiteId = constructionsiteId;
     }
 
@@ -75,15 +80,15 @@ public class ConstructionSite implements Serializable {
         this.address = address;
     }
 
-    public int getStatusId() {
-        return statusId;
-    }
+	public Status getStatus() {
+		return status;
+	}
 
-    public void setStatusId(int statusId) {
-        this.statusId = statusId;
-    }
+	public void setStatus(Status status) {
+		this.status = status;
+	}
 
-    public Boolean getDeleted() {
+	public Boolean getDeleted() {
         return deleted;
     }
 

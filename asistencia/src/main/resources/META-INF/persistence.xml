@@ -2,6 +2,7 @@
 <persistence version="2.1" xmlns="http://xmlns.jcp.org/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence http://xmlns.jcp.org/xml/ns/persistence/persistence_2_1.xsd">
 	<persistence-unit name="persistenceUnit" transaction-type="RESOURCE_LOCAL">
 	    <provider>org.hibernate.ejb.HibernatePersistence</provider>
+	     <class>cl.magal.asistencia.entities.Obra</class>
 	    <class>cl.magal.asistencia.entities.Afp</class>
 	    <class>cl.magal.asistencia.entities.Attachment</class>
 	    <class>cl.magal.asistencia.entities.ConstructionSite</class>
@@ -11,18 +12,17 @@
 	    <class>cl.magal.asistencia.entities.LaborerConstructionsite</class>
 	    <class>cl.magal.asistencia.entities.LaborerHistoricTeam</class>
 	    <class>cl.magal.asistencia.entities.LaborerTool</class>
-	    <class>cl.magal.asistencia.entities.Obra</class>
 	    <class>cl.magal.asistencia.entities.Permission</class>
 	    <class>cl.magal.asistencia.entities.Role</class>
-	    <class>cl.magal.asistencia.entities.Status</class>
 	    <class>cl.magal.asistencia.entities.Team</class>
 	    <class>cl.magal.asistencia.entities.TeamConstructionsite</class>
 	    <class>cl.magal.asistencia.entities.Tool</class>
 	    <class>cl.magal.asistencia.entities.User</class>
+	    <class>cl.magal.asistencia.entities.converter.StatusConverter</class>
 	    <properties>
 	        <property name="hibernate.dialect" value="org.hibernate.dialect.H2Dialect"/>
 	        <property name="hibernate.hbm2ddl.auto" value="create-drop"/>
-	        <property name="hibernate.show_sql" value="false"/>
+	        <property name="hibernate.show_sql" value="true"/>
 	    </properties>
 	</persistence-unit>
 </persistence>

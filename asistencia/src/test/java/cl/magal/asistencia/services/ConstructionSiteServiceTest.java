@@ -1,19 +1,15 @@
 package cl.magal.asistencia.services;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import cl.magal.asistencia.entities.ConstructionSite;
+import cl.magal.asistencia.entities.enums.Status;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = { "/META-INF/spring/testApplicationContext.xml" })
@@ -27,29 +23,41 @@ public class ConstructionSiteServiceTest {
 		
 		ConstructionSite cs = new ConstructionSite();
 		cs.setAddress("Dire");
+		cs.setStatus(Status.ACTIVE);
 		
+		//guardamos el elemento.
 		service.saveConstructionSite(cs);
+		
+		//recuperamos el elemento de la base
+		ConstructionSite bdcs = service.findConstructionSite(cs.getConstructionsiteId());
+		
+		//verificar que el tipo del estado sea del tipo enum Status
+		assertTrue("El tipo de estado debe ser enum", bdcs.getStatus().getClass() == Status.class);
+		assertTrue("El enum debe ser igual al guardado", bdcs.getStatus() == Status.ACTIVE);
+		
+		//recuperar el elemento directamente de la base (solo para test)
+		Integer rawCSStatus = service.findRawStatusCS(cs.getConstructionsiteId());
+		assertTrue("El tipo de estado debe ser enum", rawCSStatus.getClass() == Integer.class);
+		assertTrue("El enum debe ser igual al guardado", rawCSStatus == Status.ACTIVE.getCorrelative());
 		
 		assertTrue("El id de cs no puede ser nulo.",cs.getConstructionsiteId() != null );
 		
 	}
 	
 	/*@Test
-	public void testFindObra() {
+	public void testFindConstructionSite() {
 		
-		Obra obra = new Obra();
-		obra.setNombre("Obra1");
-		obra.setDireccion("Dire");
-		service.saveObra(obra);
+		ConstructionSite cs = new ConstructionSite();
+		cs.setAddress("Dire");
+		service.saveConstructionSite(cs);
 		
-		assertTrue("El id no puede ser nulo.",obra.getId() != null );
+		assertTrue("El id no puede ser nulo.",cs.getConstructionsiteId() != null );
 		
-		Obra dbobra = service.findObra(obra.getId());
+		ConstructionSite dbcs = service.findConstructionSite(cs.getConstructionsiteId());
 		
-		assertNotNull("La obra no puede ser nula",dbobra);
+		assertNotNull("La obra no puede ser nula", dbcs);
 		
-		assertEquals("nombre debe ser igual", "Obra1",dbobra.getNombre());
-		assertEquals("direccion debe ser igual", "Dire",dbobra.getDireccion());
+		assertEquals("direccion debe ser igual", "Dire", dbcs.getAddress());
 		
 	}
 	
