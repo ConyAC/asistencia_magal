@@ -17,7 +17,6 @@ import cl.magal.asistencia.entities.Laborer;
 import cl.magal.asistencia.services.ConstructionSiteHelper;
 import cl.magal.asistencia.services.LaborerHelper;
 import cl.magal.asistencia.services.ObrasService;
-import cl.magal.asistencia.util.Utils;
 
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.navigator.View;
