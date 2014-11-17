@@ -11,7 +11,6 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import cl.magal.asistencia.entities.User;
-import cl.magal.asistencia.entities.enums.Role;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = { "/META-INF/spring/testApplicationContext.xml" })
@@ -31,24 +30,13 @@ public class UserServiceTest {
 		u.setLastname("Emerson");
 		u.setEmail("a@a.cl");
 		u.setRut("123-9");
-		u.setRole(Role.ADM_CENTRAL);
 
 		service.saveUser(u);
 		assertTrue("El id no puede ser nulo.", u.getUserId() != null );
 		
 		User dbu = service.findUser(u.getUserId());
-		
-		//verificar tipo enum 
-		assertTrue("El tipo de rol debe ser enum", dbu.getRole().getClass() == Role.class);
-		assertTrue("El enum debe ser igual al guardado", dbu.getRole() == Role.ADM_CENTRAL);
-		
-		//recuperar el elemento directamente de la base
-		Integer rawUserRole = service.findRawRoleUser(u.getUserId());		
-		assertTrue("El tipo de rol debe ser enum", rawUserRole.getClass() == Integer.class);
-		assertTrue("El enum debe ser igual al guardado", rawUserRole == Role.ADM_CENTRAL.getCorrelative());
-				
-		assertTrue("El id de u no puede ser nulo.", u.getUserId() != null );
-		
+		assertNotNull("El ususario no puede ser nulo", dbu);
+		assertTrue("El id de u no puede ser nulo.", u.getUserId() != null );		
 	}
 	
 	/**
@@ -62,7 +50,6 @@ public class UserServiceTest {
 		u.setLastname("Emerson");
 		u.setEmail("a@a.cl");
 		u.setRut("123-9");
-		u.setRole(Role.ADM_CENTRAL);
 		
 		service.saveUser(u);		
 		assertTrue("El id no puede ser nulo.", u.getUserId() != null );
@@ -85,7 +72,6 @@ public class UserServiceTest {
 		u.setLastname("Emerson");
 		u.setEmail("a@a.cl");
 		u.setRut("123-9");
-		u.setRole(Role.ADM_CENTRAL);
 		
 		service.saveUser(u);		
 		assertTrue("El id no puede ser nulo.", u.getUserId() != null );	
@@ -112,7 +98,6 @@ public class UserServiceTest {
 		u.setLastname("Emerson");
 		u.setEmail("a@a.cl");
 		u.setRut("123-9");
-		u.setRole(Role.ADM_CENTRAL);
 		
 		service.saveUser(u);		
 		assertTrue("El id no puede ser nulo.", u.getUserId() != null );	

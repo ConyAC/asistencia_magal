@@ -8,7 +8,6 @@ package cl.magal.asistencia.entities;
 import java.io.Serializable;
 import javax.persistence.Basic;
 import javax.persistence.Column;
-import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -16,9 +15,6 @@ import javax.persistence.Id;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
-
-import cl.magal.asistencia.entities.converter.RoleConverter;
-import cl.magal.asistencia.entities.enums.Role;
 
 /**
  *
@@ -35,7 +31,7 @@ import cl.magal.asistencia.entities.enums.Role;
     @NamedQuery(name = "User.findByEmail", query = "SELECT u FROM User u WHERE u.email = :email"),
     @NamedQuery(name = "User.findByPassword", query = "SELECT u FROM User u WHERE u.password = :password"),
     @NamedQuery(name = "User.findBySalt", query = "SELECT u FROM User u WHERE u.salt = :salt"),
-    @NamedQuery(name = "User.findByRoleId", query = "SELECT u FROM User u WHERE u.role = :role")})
+    @NamedQuery(name = "User.findByRoleId", query = "SELECT u FROM User u WHERE u.roleId = :roleId")})
 public class User implements Serializable {
     private static final long serialVersionUID = 1L;
     @Id
@@ -59,11 +55,9 @@ public class User implements Serializable {
     private String password;
     @Column(name = "salt")
     private String salt;
+    @Column(name = "roleId")
+    private Long roleId;
     
-    @Convert(converter = RoleConverter.class)
-    private Role role;
-
-
     public User() {
     }
 
@@ -71,13 +65,13 @@ public class User implements Serializable {
         this.userId = userId;
     }
 
-    public User(Long userId, String firstname, String lastname, String rut, String email, Role role) {
+    public User(Long userId, String firstname, String lastname, String rut, String email, Long roleId) {
         this.userId = userId;
         this.firstname = firstname;
         this.lastname = lastname;
         this.rut = rut;
         this.email = email;
-        this.role = role;
+        this.roleId = roleId;
     }
     
     public Long getUserId() {
@@ -136,12 +130,12 @@ public class User implements Serializable {
         this.salt = salt;
     }
 
-    public Role getRole() {
-		return role;
+	public Long getRoleId() {
+		return roleId;
 	}
 
-	public void setRole(Role role) {
-		this.role = role;
+	public void setRoleId(Long roleId) {
+		this.roleId = roleId;
 	}
 
 	@Override

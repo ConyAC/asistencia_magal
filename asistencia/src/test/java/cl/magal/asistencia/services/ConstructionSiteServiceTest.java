@@ -15,8 +15,6 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import cl.magal.asistencia.entities.ConstructionSite;
-import cl.magal.asistencia.entities.User;
-import cl.magal.asistencia.entities.enums.Role;
 import cl.magal.asistencia.entities.enums.Status;
 
 @RunWith(SpringJUnit4ClassRunner.class)
