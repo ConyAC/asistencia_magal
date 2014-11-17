@@ -33,7 +33,7 @@ public class Role implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
     @Column(name = "roleId")
-    private Integer roleId;
+    private Long roleId;
     @Basic(optional = false)
     @Column(name = "name")
     private String name;
@@ -43,20 +43,20 @@ public class Role implements Serializable {
     public Role() {
     }
 
-    public Role(Integer roleId) {
+    public Role(Long roleId) {
         this.roleId = roleId;
     }
 
-    public Role(Integer roleId, String name) {
+    public Role(Long roleId, String name) {
         this.roleId = roleId;
         this.name = name;
     }
 
-    public Integer getRoleId() {
+    public Long getRoleId() {
         return roleId;
     }
 
-    public void setRoleId(Integer roleId) {
+    public void setRoleId(Long roleId) {
         this.roleId = roleId;
     }
 

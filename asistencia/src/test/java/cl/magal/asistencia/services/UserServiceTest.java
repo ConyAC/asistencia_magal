@@ -122,4 +122,28 @@ public class UserServiceTest {
        
     }   
 
+    /**
+     * Asignar rol
+     */
+    @Test
+    public void testUserRole() {
+    	
+    	User u = new User();
+    	u.setFirstname("Gabriel");
+		u.setLastname("Emerson");
+		u.setEmail("a@a.cl");
+		u.setRut("123-9");
+		u.setRoleId(1L);
+
+		service.saveUser(u);
+		assertTrue("El id no puede ser nulo.", u.getUserId() != null );
+		
+		User dbu = service.findUser(u.getUserId());
+		assertNotNull("El ususario no puede ser nulo", dbu);
+		assertTrue("El id de u no puede ser nulo.", u.getUserId() != null );		
+		assertEquals("Id de Rol", u.getRoleId(), dbu.getRoleId());
+       
+    }   
+
+    
 }
