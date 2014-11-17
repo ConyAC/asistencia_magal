@@ -216,7 +216,7 @@ public class ConstructionSiteView extends HorizontalLayout implements View {
 		table.setSizeFull();
 		table.setFilterBarVisible(true);
 		//TODO estado
-		table.setVisibleColumns("jobId","firstname","laborerId"); //FIXME laborerId
+		table.setVisibleColumns("job","firstname","laborerId"); //FIXME laborerId
 		table.setColumnHeaders("Cod","Nombre","Estado");
 		table.setSelectable(true);
 		
