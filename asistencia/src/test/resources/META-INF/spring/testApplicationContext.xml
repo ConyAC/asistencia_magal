@@ -29,6 +29,8 @@
 		<property name="entityManagerFactory" ref="entityManagerFactory"></property>
 	</bean>
 	
+	
+	
 	<!-- JPA Repositories -->
 	<jpa:repositories base-package="cl.magal.asistencia.repositories"></jpa:repositories>
 

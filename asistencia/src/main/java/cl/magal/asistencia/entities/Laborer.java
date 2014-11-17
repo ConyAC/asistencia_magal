@@ -9,6 +9,7 @@ import java.io.Serializable;
 import java.util.Date;
 import javax.persistence.Basic;
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -18,6 +19,13 @@ import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+
+import cl.magal.asistencia.entities.converter.AfpConverter;
+import cl.magal.asistencia.entities.converter.JobConverter;
+import cl.magal.asistencia.entities.converter.MaritalStatusConverter;
+import cl.magal.asistencia.entities.enums.Afp;
+import cl.magal.asistencia.entities.enums.Job;
+import cl.magal.asistencia.entities.enums.MaritalStatus;
 
 /**
  *
@@ -33,16 +41,15 @@ import javax.persistence.TemporalType;
     @NamedQuery(name = "Laborer.findByLastname", query = "SELECT l FROM Laborer l WHERE l.lastname = :lastname"),
     @NamedQuery(name = "Laborer.findBySecondlastname", query = "SELECT l FROM Laborer l WHERE l.secondlastname = :secondlastname"),
     @NamedQuery(name = "Laborer.findByRut", query = "SELECT l FROM Laborer l WHERE l.rut = :rut"),
-    @NamedQuery(name = "Laborer.findByRol", query = "SELECT l FROM Laborer l WHERE l.rol = :rol"),
     @NamedQuery(name = "Laborer.findByDateBirth", query = "SELECT l FROM Laborer l WHERE l.dateBirth = :dateBirth"),
-    @NamedQuery(name = "Laborer.findByMaritalStatusId", query = "SELECT l FROM Laborer l WHERE l.maritalStatusId = :maritalStatusId"),
+    @NamedQuery(name = "Laborer.findByMaritalStatusId", query = "SELECT l FROM Laborer l WHERE l.maritalStatus = :maritalStatus"),
     @NamedQuery(name = "Laborer.findByAddress", query = "SELECT l FROM Laborer l WHERE l.address = :address"),
     @NamedQuery(name = "Laborer.findByMobileNumber", query = "SELECT l FROM Laborer l WHERE l.mobileNumber = :mobileNumber"),
     @NamedQuery(name = "Laborer.findByPhone", query = "SELECT l FROM Laborer l WHERE l.phone = :phone"),
     @NamedQuery(name = "Laborer.findByDateAdmission", query = "SELECT l FROM Laborer l WHERE l.dateAdmission = :dateAdmission"),
     @NamedQuery(name = "Laborer.findByContractId", query = "SELECT l FROM Laborer l WHERE l.contractId = :contractId"),
-    @NamedQuery(name = "Laborer.findByJobId", query = "SELECT l FROM Laborer l WHERE l.jobId = :jobId"),
-    @NamedQuery(name = "Laborer.findByAfpId", query = "SELECT l FROM Laborer l WHERE l.afpId = :afpId"),
+    @NamedQuery(name = "Laborer.findByJobId", query = "SELECT l FROM Laborer l WHERE l.job = :job"),
+    @NamedQuery(name = "Laborer.findByAfpId", query = "SELECT l FROM Laborer l WHERE l.afp = :afp"),
     @NamedQuery(name = "Laborer.findByTeamId", query = "SELECT l FROM Laborer l WHERE l.teamId = :teamId")})
 public class Laborer implements Serializable {
     private static final long serialVersionUID = 1L;
@@ -50,7 +57,7 @@ public class Laborer implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
     @Column(name = "laborerId")
-    private Integer laborerId;
+    private Long laborerId;
     @Basic(optional = false)
     @Column(name = "firstname")
     private String firstname;
@@ -62,13 +69,9 @@ public class Laborer implements Serializable {
     private String secondlastname;
     @Column(name = "rut")
     private String rut;
-    @Column(name = "rol")
-    private String rol;
     @Column(name = "dateBirth")
     @Temporal(TemporalType.TIMESTAMP)
     private Date dateBirth;
-    @Column(name = "maritalStatusId")
-    private Integer maritalStatusId;
     @Column(name = "address")
     private String address;
     @Column(name = "mobileNumber")
@@ -80,30 +83,35 @@ public class Laborer implements Serializable {
     private Date dateAdmission;
     @Column(name = "contractId")
     private Integer contractId;
-    @Column(name = "jobId")
-    private Integer jobId;
-    @Column(name = "afpId")
-    private Integer afpId;
     @Column(name = "teamId")
     private Integer teamId;
 
+    @Convert(converter = JobConverter.class)
+    private Job job;
+    
+    @Convert(converter = AfpConverter.class)
+    private Afp afp;
+    
+    @Convert(converter = MaritalStatusConverter.class)
+    private MaritalStatus maritalStatus;
+    
     public Laborer() {
     }
 
-    public Laborer(Integer laborerId) {
+    public Laborer(Long laborerId) {
         this.laborerId = laborerId;
     }
 
-    public Laborer(Integer laborerId, String firstname) {
+    public Laborer(Long laborerId, String firstname) {
         this.laborerId = laborerId;
         this.firstname = firstname;
     }
 
-    public Integer getLaborerId() {
+    public Long getLaborerId() {
         return laborerId;
     }
 
-    public void setLaborerId(Integer laborerId) {
+    public void setLaborerId(Long laborerId) {
         this.laborerId = laborerId;
     }
 
@@ -147,14 +155,6 @@ public class Laborer implements Serializable {
         this.rut = rut;
     }
 
-    public String getRol() {
-        return rol;
-    }
-
-    public void setRol(String rol) {
-        this.rol = rol;
-    }
-
     public Date getDateBirth() {
         return dateBirth;
     }
@@ -163,15 +163,15 @@ public class Laborer implements Serializable {
         this.dateBirth = dateBirth;
     }
 
-    public Integer getMaritalStatusId() {
-        return maritalStatusId;
-    }
+	public MaritalStatus getMaritalStatus() {
+		return maritalStatus;
+	}
 
-    public void setMaritalStatusId(Integer maritalStatusId) {
-        this.maritalStatusId = maritalStatusId;
-    }
+	public void setMaritalStatus(MaritalStatus maritalStatus) {
+		this.maritalStatus = maritalStatus;
+	}
 
-    public String getAddress() {
+	public String getAddress() {
         return address;
     }
 
@@ -211,23 +211,23 @@ public class Laborer implements Serializable {
         this.contractId = contractId;
     }
 
-    public Integer getJobId() {
-        return jobId;
-    }
+    public Job getJob() {
+		return job;
+	}
 
-    public void setJobId(Integer jobId) {
-        this.jobId = jobId;
-    }
+	public void setJob(Job job) {
+		this.job = job;
+	}
 
-    public Integer getAfpId() {
-        return afpId;
-    }
+    public Afp getAfp() {
+		return afp;
+	}
 
-    public void setAfpId(Integer afpId) {
-        this.afpId = afpId;
-    }
+	public void setAfp(Afp afp) {
+		this.afp = afp;
+	}
 
-    public Integer getTeamId() {
+	public Integer getTeamId() {
         return teamId;
     }
 

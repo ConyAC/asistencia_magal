@@ -1,17 +1,34 @@
 package cl.magal.asistencia.ui.users;
 
-import javax.annotation.PostConstruct;
+import java.util.List;
 
+import javax.annotation.PostConstruct;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.tepi.filtertable.FilterTable;
 
 import ru.xpoft.vaadin.VaadinView;
-import cl.magal.asistencia.entities.Role;
 import cl.magal.asistencia.entities.User;
-import cl.magal.asistencia.util.Utils;
+import cl.magal.asistencia.services.UserHelper;
+import cl.magal.asistencia.services.UserService;
+import cl.magal.asistencia.util.Constants;
 
+import com.vaadin.addon.jpacontainer.EntityItem;
+import com.vaadin.addon.jpacontainer.JPAContainer;
+import com.vaadin.addon.jpacontainer.JPAContainerFactory;
+import com.vaadin.data.fieldgroup.BeanFieldGroup;
+import com.vaadin.data.fieldgroup.FieldGroup;
+import com.vaadin.data.fieldgroup.FieldGroup.CommitException;
+import com.vaadin.data.util.BeanItem;
 import com.vaadin.data.util.BeanItemContainer;
+import com.vaadin.event.ItemClickEvent;
+import com.vaadin.event.ItemClickEvent.ItemClickListener;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.FontAwesome;
@@ -20,6 +37,9 @@ import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
+import com.vaadin.ui.Notification;
+import com.vaadin.ui.Notification.Type;
+import com.vaadin.ui.PasswordField;
 import com.vaadin.ui.VerticalLayout;
 
 @VaadinView(value=UsersView.NAME)
@@ -32,13 +52,20 @@ public class UsersView extends HorizontalLayout implements View {
 	 */
 	private static final long serialVersionUID = 8538300514577423280L;
 	
+	private transient Logger logger = LoggerFactory.getLogger(UsersView.class);
+	
 	public static final String NAME = "usuarios";
 	
 	BeanItemContainer<User> container = new BeanItemContainer<User>(User.class);
 	
+	@Autowired
+	UserService service;
+	
+	VerticalLayout detalleUsuario;
+	
 	public UsersView(){
 		
-		container.addNestedContainerProperty("role.name");
+//		container.addNestedContainerProperty("role");
 
 		setSizeFull();
 		
@@ -49,7 +76,7 @@ public class UsersView extends HorizontalLayout implements View {
 		setExpandRatio(usuarios, 0.2F);
 		
 		//dibuja la sección de detalles
-		VerticalLayout detalleUsuario = drawDetalleUsuario();
+		detalleUsuario = drawDetalleUsuario();
 		
 		addComponent(detalleUsuario);
 		setExpandRatio(detalleUsuario, 0.8F);
@@ -62,14 +89,67 @@ public class UsersView extends HorizontalLayout implements View {
 		
 		return vl;
 	}
+	
+	private void setUser(BeanItem<User> userItem){
+		//obtiene el vertical Layout
+		detalleUsuario.removeAllComponents();
+		final BeanFieldGroup<User> fieldGroup = new BeanFieldGroup<User>(User.class);
+		// We need an item data source before we create the fields to be able to
+        // find the properties, otherwise we have to specify them by hand
+        fieldGroup.setItemDataSource(userItem);
+
+        //agrega un boton que hace el commit
+        Button add = new Button(null,new Button.ClickListener() {
+
+        	@Override
+        	public void buttonClick(ClickEvent event) {
+        		try {
+        			fieldGroup.commit();
+        			service.saveUser(fieldGroup.getItemDataSource().getBean());
+        		} catch (CommitException e) {
+        			logger.error("Error al guardar la información del usuario");
+        			Notification.show("Error al guardar la información del usuario", Type.ERROR_MESSAGE);
+        		}
+
+        	}
+        }){{
+        	setIcon(FontAwesome.SAVE);
+        }};
+        detalleUsuario.addComponent(add);
+        detalleUsuario.setComponentAlignment(add, Alignment.TOP_RIGHT);
+        
+        // Loop through the properties, build fields for them and add the fields
+        // to this UI
+        for (Object propertyId : fieldGroup.getUnboundPropertyIds()) {
+        	if(propertyId.equals("role")||propertyId.equals("salt")||propertyId.equals("userId"))
+        		;
+        	else if(propertyId.equals("password")){
+        		PasswordField pf = new PasswordField("Password");
+        		pf.setNullRepresentation("");
+        		detalleUsuario.addComponent(pf);
+        		fieldGroup.bind(pf, propertyId);
+        	}else
+        		detalleUsuario.addComponent(fieldGroup.buildAndBind(propertyId));
+        	
+        }
+	}
 
 	private FilterTable drawTablaUsuarios() {
 		FilterTable table =  new FilterTable();
 		table.setContainerDataSource(container);
 		table.setSizeFull();
 		table.setFilterBarVisible(true);
-		table.setVisibleColumns("role.name","firstname");
+		table.setVisibleColumns("role","firstname");
 		table.setSelectable(true);
+		
+		table.addItemClickListener(new ItemClickListener() {
+			
+			@Override
+			public void itemClick(ItemClickEvent event) {
+				setUser((BeanItem<User>)event.getItem());
+			}
+		});
+		
 		return table;
 	}
 
@@ -97,9 +177,8 @@ public class UsersView extends HorizontalLayout implements View {
 			@Override
 			public void buttonClick(ClickEvent event) {
 				
-				User user = new User();
-				user.setRole(new Role(1));
-				user.setFirstname("Usuario "+Utils.random());
+				User user = UserHelper.newUser();
+				service.saveUser(user);
 				container.addBean(user);
 				
 			}
@@ -117,6 +196,9 @@ public class UsersView extends HorizontalLayout implements View {
 
 	@Override
 	public void enter(ViewChangeEvent event) {
+		List<User> users = service.findAllUser();
+		container.removeAllItems();
+		container.addAll(users);
 		
 	}
 

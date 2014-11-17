@@ -1,6 +1,6 @@
 package cl.magal.asistencia.services;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -9,6 +9,8 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import cl.magal.asistencia.entities.ConstructionSite;
+import cl.magal.asistencia.entities.User;
+import cl.magal.asistencia.entities.enums.Role;
 import cl.magal.asistencia.entities.enums.Status;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -18,6 +20,9 @@ public class ConstructionSiteServiceTest {
 	@Autowired
 	FichaService service;
 	
+	/**
+	 * Almacenar
+	 */
 	@Test
 	public void testSaveConstructionSite() {
 		
@@ -44,11 +49,16 @@ public class ConstructionSiteServiceTest {
 		
 	}
 	
-	/*@Test
+	/**
+	 * Encontrar
+	 */
+	@Test
 	public void testFindConstructionSite() {
 		
 		ConstructionSite cs = new ConstructionSite();
 		cs.setAddress("Dire");
+		cs.setStatus(Status.ACTIVE);
+		
 		service.saveConstructionSite(cs);
 		
 		assertTrue("El id no puede ser nulo.",cs.getConstructionsiteId() != null );
@@ -61,94 +71,72 @@ public class ConstructionSiteServiceTest {
 		
 	}
 	
+	/**
+	 * Listar no eliminados (campo deleted)
+	 */
 	@Test
-	public void testFindObraByNombre() {
+	public void testFindByNoDeleted(){
 		
-		Obra obra = new Obra();
-		obra.setNombre("Obra1");
-		obra.setDireccion("Dire");
-		service.saveObra(obra);
+		ConstructionSite cs = new ConstructionSite();
+		cs.setAddress("Dire");
+		cs.setStatus(Status.ACTIVE);
+		cs.setDeleted(false);
 		
-		assertTrue("El id no puede ser nulo.",obra.getId() != null );
+		service.saveConstructionSite(cs);
 		
-		Obra dbobra = service.findObraByNombre(obra.getNombre());
+		assertTrue("El id no puede ser nulo.", cs.getConstructionsiteId() != null );
 		
-		assertNotNull("La obra no puede ser nula",dbobra);
+		ConstructionSite dbcs = service.findByNoDeleted(cs.getDeleted());
 		
-		assertEquals("nombre debe ser igual", "Obra1",dbobra.getNombre());
-		assertEquals("direccion debe ser igual", "Dire",dbobra.getDireccion());
+		assertNotNull("La obra no puede ser nula", dbcs);
 		
+		assertTrue("La obra no debe estar eliminada", dbcs.getDeleted() != true);
 	}
 	
+	/**
+	 * Actualizar
+	 */
 	@Test
-	public void testFindObraByDireccion() {
+	public void testUpdate() {
 		
-		Obra obra = new Obra();
-		obra.setNombre("Obra1");
-		obra.setDireccion("Dire");
-		service.saveObra(obra);
+		ConstructionSite cs = new ConstructionSite();
+		cs.setAddress("Dire");
+		cs.setStatus(Status.ACTIVE);
+		cs.setDeleted(false);
 		
-		assertTrue("El id no puede ser nulo.",obra.getId() != null );
+		service.saveConstructionSite(cs);		
+		assertTrue("El id no puede ser nulo.", cs.getConstructionsiteId() != null );
 		
-		Obra dbobra = service.findObraByDireccion(obra.getDireccion());
+		ConstructionSite dbcs = service.findConstructionSite(cs.getConstructionsiteId());
+		assertNotNull("La obra no puede ser nula", dbcs);
 		
-		assertNotNull("La obra no puede ser nula",dbobra);
+		cs.setAddress("cambio");	
+		service.saveConstructionSite(cs);
 		
-		assertEquals("nombre debe ser igual", "Obra1",dbobra.getNombre());
-		assertEquals("direccion debe ser igual", "Dire",dbobra.getDireccion());
-		
+		dbcs = service.findConstructionSite(cs.getConstructionsiteId());		
+		assertEquals("Email debe ser igual", cs.getAddress(), dbcs.getAddress());	 	
+				
 	}
 	
+	/**
+	 * Eliminar
+	 */
 	@Test
-	public void testFindAll() {
+	public void testDelete(){
 		
-		Obra obra1 = new Obra();
-		obra1.setNombre("Obra1");
-		obra1.setDireccion("Dire");
-		service.saveObra(obra1);
+		ConstructionSite cs = new ConstructionSite();
+		cs.setAddress("Dire");
+		cs.setStatus(Status.ACTIVE);
 		
-		assertTrue("El id no puede ser nulo.",obra1.getId() != null );
+		service.saveConstructionSite(cs);
 		
-		Obra obra2 = new Obra();
-		obra2.setNombre("Obra2");
-		obra2.setDireccion("Dire2");
-		service.saveObra(obra2);
+		assertTrue("El id no puede ser nulo.", cs.getConstructionsiteId() != null );
 		
-		assertTrue("El id no puede ser nulo.",obra2.getId() != null );
+		service.deleteCS(cs.getConstructionsiteId());
 		
-		Page<Obra> dbobras = service.findAllObra(new PageRequest(0, 1));
+		ConstructionSite dbcs = service.findConstructionSite(cs.getConstructionsiteId());
 		
-		assertNotNull("La pagina no puede ser nula",dbobras);
+		assertNull("La obra debe ser nula", dbcs);
 		
-		assertTrue("Me debe pasar solo 1 elemento",dbobras.getContent().size() == 1 );
-		assertEquals("Me debe entregar el primer elemento",obra1.getId() ,dbobras.getContent().get(0).getId() );
-		
-	}
-	
-	@Test
-	public void testFindAllOrderInveso() {
-		
-		Obra obra1 = new Obra();
-		obra1.setNombre("Obra1");
-		obra1.setDireccion("Dire");
-		service.saveObra(obra1);
-		
-		assertTrue("El id no puede ser nulo.",obra1.getId() != null );
-		
-		Obra obra2 = new Obra();
-		obra2.setNombre("Obra2");
-		obra2.setDireccion("Dire2");
-		service.saveObra(obra2);
-		
-		assertTrue("El id no puede ser nulo.",obra2.getId() != null );
-		
-		Page<Obra> dbobras = service.findAllObra(new PageRequest(0, 1,new Sort(Sort.Direction.DESC, "id")) );
-		
-		assertNotNull("La pagina no puede ser nula",dbobras);
-		
-		assertTrue("Me debe pasar solo 1 elemento",dbobras.getContent().size() == 1 );
-		assertEquals("Me debe entregar el primer elemento",obra2.getId() ,dbobras.getContent().get(0).getId() );
-		
-	}*/
-
+	}	
 }
