@@ -1,5 +1,6 @@
 package cl.magal.asistencia.ui.users;
 
+import java.util.Arrays;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
@@ -35,6 +36,7 @@ import com.vaadin.server.FontAwesome;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
+import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
@@ -62,6 +64,7 @@ public class UsersView extends HorizontalLayout implements View {
 	UserService service;
 	
 	VerticalLayout detalleUsuario;
+	FilterTable usersTable;
 	
 	public UsersView(){
 		
@@ -91,8 +94,15 @@ public class UsersView extends HorizontalLayout implements View {
 	}
 	
 	private void setUser(BeanItem<User> userItem){
+		
 		//obtiene el vertical Layout
 		detalleUsuario.removeAllComponents();
+		if(userItem == null){
+			detalleUsuario.addComponent(new Label("Seleccione un usuario para ver su información"));
+			return;
+		}
+		
+		
 		final BeanFieldGroup<User> fieldGroup = new BeanFieldGroup<User>(User.class);
 		// We need an item data source before we create the fields to be able to
         // find the properties, otherwise we have to specify them by hand
@@ -123,11 +133,20 @@ public class UsersView extends HorizontalLayout implements View {
         for (Object propertyId : fieldGroup.getUnboundPropertyIds()) {
         	if(propertyId.equals("role")||propertyId.equals("salt")||propertyId.equals("userId"))
         		;
-        	else if(propertyId.equals("password")){
+        	else if(propertyId.equals("role.name")){
+        		ComboBox cb = new ComboBox("Rol",Arrays.asList("ADM","SADM"));
+        		detalleUsuario.addComponent(cb);
+        		fieldGroup.bind(cb, propertyId);
+        	}else if(propertyId.equals("password")){
         		PasswordField pf = new PasswordField("Password");
         		pf.setNullRepresentation("");
         		detalleUsuario.addComponent(pf);
         		fieldGroup.bind(pf, propertyId);
+        	}else if(propertyId.equals("password2")){
+        		PasswordField pf2 = new PasswordField("Confirmar Password");
+        		pf2.setNullRepresentation("");
+        		detalleUsuario.addComponent(pf2);
+        		fieldGroup.bind(pf2, propertyId);
         	}else
         		detalleUsuario.addComponent(fieldGroup.buildAndBind(propertyId));
         	
@@ -135,14 +154,15 @@ public class UsersView extends HorizontalLayout implements View {
 	}
 
 	private FilterTable drawTablaUsuarios() {
-		FilterTable table =  new FilterTable();
-		table.setContainerDataSource(container);
-		table.setSizeFull();
-		table.setFilterBarVisible(true);
-		table.setVisibleColumns("role","firstname");
-		table.setSelectable(true);
+		usersTable =  new FilterTable();
+		container.addNestedContainerProperty("role.name");
+		usersTable.setContainerDataSource(container);
+		usersTable.setSizeFull();
+		usersTable.setFilterBarVisible(true);
+		usersTable.setVisibleColumns("role.name","firstname");
+		usersTable.setSelectable(true);
 		
-		table.addItemClickListener(new ItemClickListener() {
+		usersTable.addItemClickListener(new ItemClickListener() {
 			
 			@Override
 			public void itemClick(ItemClickEvent event) {
@@ -150,7 +170,7 @@ public class UsersView extends HorizontalLayout implements View {
 			}
 		});
 		
-		return table;
+		return usersTable;
 	}
 
 	private VerticalLayout drawUsuarios() {
@@ -185,6 +205,23 @@ public class UsersView extends HorizontalLayout implements View {
 		});
 		hl.addComponent(agregaObra);
 		Button borrarObra = new Button(null,FontAwesome.TRASH_O);
+		borrarObra.addClickListener(new Button.ClickListener() {
+			
+			@Override
+			public void buttonClick(ClickEvent event) {
+				//recupera el elemento seleccionado
+				User user = (User) usersTable.getValue();
+				if(user == null){
+					Notification.show("Debe seleccionar un usuario para eliminarlo");
+					return;
+				}
+				//TODO dialogo de confirmación
+				service.deleteUser(user.getUserId());
+				container.removeItem(user);
+				
+				setUser(null);
+			}
+		});
 		hl.addComponent(borrarObra);
 		
 		return vl;

@@ -9,17 +9,14 @@ import java.io.Serializable;
 
 import javax.persistence.Basic;
 import javax.persistence.Column;
-import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
-
-import cl.magal.asistencia.entities.converter.RoleConverter;
-import cl.magal.asistencia.entities.enums.Role;
 
 /**
  *
@@ -36,7 +33,7 @@ import cl.magal.asistencia.entities.enums.Role;
     @NamedQuery(name = "User.findByEmail", query = "SELECT u FROM User u WHERE u.email = :email"),
     @NamedQuery(name = "User.findByPassword", query = "SELECT u FROM User u WHERE u.password = :password"),
     @NamedQuery(name = "User.findBySalt", query = "SELECT u FROM User u WHERE u.salt = :salt"),
-    @NamedQuery(name = "User.findByRoleId", query = "SELECT u FROM User u WHERE u.role = :role")})
+    @NamedQuery(name = "User.findByRole", query = "SELECT u FROM User u WHERE u.role = :role")})
 public class User implements Serializable {
     private static final long serialVersionUID = 1L;
     @Id
@@ -61,7 +58,7 @@ public class User implements Serializable {
     @Column(name = "salt")
     private String salt;
     
-    @Convert(converter = RoleConverter.class)
+    @JoinColumn(name="roleId")
     private Role role;
 
     public User() {
@@ -71,13 +68,12 @@ public class User implements Serializable {
         this.userId = userId;
     }
 
-    public User(Long userId, String firstname, String lastname, String rut, String email, Role role) {
+    public User(Long userId, String firstname, String lastname, String rut, String email) {
         this.userId = userId;
         this.firstname = firstname;
         this.lastname = lastname;
         this.rut = rut;
         this.email = email;
-        this.role = role;
     }
     
     public Long getUserId() {
@@ -143,6 +139,17 @@ public class User implements Serializable {
     public void setRole(Role role) {
         this.role = role;
     }
+    
+    //atributo para crear el registro
+    transient String password2;
+    
+	public String getPassword2() {
+		return password2;
+	}
+
+	public void setPassword2(String password2) {
+		this.password2 = password2;
+	}
 
 	@Override
     public int hashCode() {

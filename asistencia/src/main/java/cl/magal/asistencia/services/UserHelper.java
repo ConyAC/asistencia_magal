@@ -1,5 +1,6 @@
 package cl.magal.asistencia.services;
 
+import cl.magal.asistencia.entities.Role;
 import cl.magal.asistencia.entities.User;
 import cl.magal.asistencia.util.Utils;
 
@@ -12,7 +13,10 @@ public final class UserHelper {
 	
 	public static User newUser(){
 		User user = new User();
-		user.setRole(cl.magal.asistencia.entities.enums.Role.ADM_CENTRAL);
+		Role role = new Role();
+		role.setRoleId(1L);
+		role.setName("ADM");
+		user.setRole(role);
 		user.setRut(RUT);
 		user.setFirstname(NOMBRE+Utils.random());
 		user.setLastname(APELLIDO+Utils.random());

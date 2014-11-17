@@ -11,6 +11,7 @@
 	    <class>cl.magal.asistencia.entities.LaborerTool</class>
 	    <class>cl.magal.asistencia.entities.Obra</class>
 	    <class>cl.magal.asistencia.entities.Permission</class>
+	    <class>cl.magal.asistencia.entities.Role</class>
 	    <class>cl.magal.asistencia.entities.Team</class>
 	    <class>cl.magal.asistencia.entities.TeamConstructionsite</class>
 	    <class>cl.magal.asistencia.entities.Tool</class>
@@ -18,7 +19,6 @@
 	    <class>cl.magal.asistencia.entities.converter.AfpConverter</class>
 	    <class>cl.magal.asistencia.entities.converter.JobConverter</class>
 	    <class>cl.magal.asistencia.entities.converter.MaritalStatusConverter</class>
-	    <class>cl.magal.asistencia.entities.converter.RoleConverter</class>
 	    <class>cl.magal.asistencia.entities.converter.StatusConverter</class>
 	    <properties>
 	        <property name="hibernate.dialect" value="org.hibernate.dialect.H2Dialect"/>
