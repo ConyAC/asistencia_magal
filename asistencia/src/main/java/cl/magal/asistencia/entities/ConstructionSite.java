@@ -46,7 +46,7 @@ public class ConstructionSite implements Serializable {
     private String address;
     @Column(name = "deleted")
     private Boolean deleted;
-   @Convert(converter = StatusConverter.class)
+    @Convert(converter = StatusConverter.class)
     private Status status;
     
     public ConstructionSite() {

@@ -8,14 +8,17 @@ package cl.magal.asistencia.entities;
 import java.io.Serializable;
 import javax.persistence.Basic;
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
+
+import cl.magal.asistencia.entities.converter.RoleConverter;
+import cl.magal.asistencia.entities.enums.Role;
 
 /**
  *
@@ -39,7 +42,7 @@ public class User implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
     @Column(name = "userId")
-    private Integer userId;
+    private Long userId;
     @Basic(optional = false)
     @Column(name = "firstname")
     private String firstname;
@@ -56,20 +59,19 @@ public class User implements Serializable {
     private String password;
     @Column(name = "salt")
     private String salt;
-   
-    @Basic(optional = false)
-    @JoinColumn(name = "roleId")
+    
+    @Convert(converter = RoleConverter.class)
     private Role role;
 
 
     public User() {
     }
 
-    public User(Integer userId) {
+    public User(Long userId) {
         this.userId = userId;
     }
 
-    public User(Integer userId, String firstname, String lastname, String rut, String email, Role role) {
+    public User(Long userId, String firstname, String lastname, String rut, String email, Role role) {
         this.userId = userId;
         this.firstname = firstname;
         this.lastname = lastname;
@@ -77,16 +79,16 @@ public class User implements Serializable {
         this.email = email;
         this.role = role;
     }
+    
+    public Long getUserId() {
+		return userId;
+	}
 
-    public Integer getUserId() {
-        return userId;
-    }
+	public void setUserId(Long userId) {
+		this.userId = userId;
+	}
 
-    public void setUserId(Integer userId) {
-        this.userId = userId;
-    }
-
-    public String getFirstname() {
+	public String getFirstname() {
         return firstname;
     }
 

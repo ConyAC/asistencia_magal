@@ -7,18 +7,18 @@
 	    <class>cl.magal.asistencia.entities.Attachment</class>
 	    <class>cl.magal.asistencia.entities.ConstructionSite</class>
 	    <class>cl.magal.asistencia.entities.Contract</class>
-	    <class>cl.magal.asistencia.entities.Job</class>
 	    <class>cl.magal.asistencia.entities.Laborer</class>
 	    <class>cl.magal.asistencia.entities.LaborerConstructionsite</class>
 	    <class>cl.magal.asistencia.entities.LaborerHistoricTeam</class>
 	    <class>cl.magal.asistencia.entities.LaborerTool</class>
 	    <class>cl.magal.asistencia.entities.Permission</class>
-	    <class>cl.magal.asistencia.entities.Role</class>
 	    <class>cl.magal.asistencia.entities.Team</class>
 	    <class>cl.magal.asistencia.entities.TeamConstructionsite</class>
 	    <class>cl.magal.asistencia.entities.Tool</class>
 	    <class>cl.magal.asistencia.entities.User</class>
 	    <class>cl.magal.asistencia.entities.converter.StatusConverter</class>
+	    <class>cl.magal.asistencia.entities.converter.RoleConverter</class>
+	    <class>cl.magal.asistencia.entities.converter.JobConverter</class>
 	    <properties>
 	        <property name="hibernate.dialect" value="org.hibernate.dialect.H2Dialect"/>
 	        <property name="hibernate.hbm2ddl.auto" value="create-drop"/>

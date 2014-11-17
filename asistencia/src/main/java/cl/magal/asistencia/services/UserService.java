@@ -6,6 +6,7 @@ import javax.annotation.PostConstruct;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -14,20 +15,17 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import cl.magal.asistencia.repositories.UserRepository;
+
 @Service
 @Transactional(readOnly = true)
 public class UserService implements UserDetailsService {
 	static Logger logger = LoggerFactory.getLogger(UserService.class);
 	
-	
-	
 	@PostConstruct
 	public void init(){
 		
 	}
-	
-	
-
 
 	@Override
 	  public UserDetails loadUserByUsername(String userName) throws UsernameNotFoundException {
@@ -38,8 +36,8 @@ public class UserService implements UserDetailsService {
         boolean credentialsNonExpired = true;
         boolean accountNonLocked = true;
 
-        return new User("",
-                "", 
+        return new User("administrator",
+                "admin", 
                 enabled, 
                 accountNonExpired,
                 credentialsNonExpired, 
@@ -47,6 +45,22 @@ public class UserService implements UserDetailsService {
                 new LinkedList<GrantedAuthority>());
 	}
 	
-   
+	@Autowired
+	UserRepository rep;
+	
+	public void saveUser(cl.magal.asistencia.entities.User u) {
+		rep.save(u);
+	}
+	
+	public cl.magal.asistencia.entities.User findUser(Long id){
+		return rep.findOne(id);
+	}
 
+	public Integer findRawRoleUser(Long id) {
+		return (Integer) rep.findRawRoleUser(id);
+	}
+	
+	public void deleteUser(Long id){
+		rep.delete(id);
+	}
 }
