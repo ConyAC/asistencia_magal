@@ -29,13 +29,14 @@ import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Image;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
+import com.vaadin.ui.Panel;
 import com.vaadin.ui.TabSheet;
 import com.vaadin.ui.VerticalLayout;
 
 @VaadinView(value=ConstructionSiteView.NAME,cached=false)
 @Scope("prototype")
 @Component
-public class ConstructionSiteView extends HorizontalLayout implements View {
+public class ConstructionSiteView extends Panel  implements View {
 	
 	/**
 	 * 
@@ -59,17 +60,21 @@ public class ConstructionSiteView extends HorizontalLayout implements View {
 		
 		setSizeFull();
 		
+		HorizontalLayout root = new HorizontalLayout();
+		root.setSizeFull();
+		setContent(root);
+		
 		//dibula la sección de las obras
 		VerticalLayout obras = drawObras();
 		
-		addComponent(obras);
-		setExpandRatio(obras, 0.2F);
+		root.addComponent(obras);
+		root.setExpandRatio(obras, 0.2F);
 		
 		//dibuja la sección de detalles
 		VerticalLayout detalleObra = drawContructionDetail();
 		
-		addComponent(detalleObra);
-		setExpandRatio(detalleObra, 0.8F);
+		root.addComponent(detalleObra);
+		root.setExpandRatio(detalleObra, 0.8F);
 		
 	}
 
@@ -81,8 +86,6 @@ public class ConstructionSiteView extends HorizontalLayout implements View {
 		VerticalLayout vl = new VerticalLayout();
 		vl.setMargin(true);
 		
-		//la tabla con su buscador buscador
-		vl.addComponent(drawConstructionTable());
 		//botones agrega y eliminar
 		HorizontalLayout hl = new HorizontalLayout();
 		hl.setSpacing(true);
@@ -108,6 +111,9 @@ public class ConstructionSiteView extends HorizontalLayout implements View {
 		hl.addComponent(agregaObra);
 		Button borrarObra = new Button(null,FontAwesome.TRASH_O);
 		hl.addComponent(borrarObra);
+
+		//la tabla con su buscador buscador
+		vl.addComponent(drawConstructionTable());
 		
 		return vl;
 	}
