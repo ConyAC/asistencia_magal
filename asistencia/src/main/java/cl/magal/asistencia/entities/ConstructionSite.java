@@ -6,6 +6,8 @@
 package cl.magal.asistencia.entities;
 
 import java.io.Serializable;
+import java.util.LinkedList;
+import java.util.List;
 
 import javax.persistence.Basic;
 import javax.persistence.Column;
@@ -14,6 +16,9 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
@@ -50,6 +55,17 @@ public class ConstructionSite implements Serializable {
     String name;
     @Convert(converter = StatusConverter.class)
     private Status status;
+    
+    @JoinTable(name="laborer_constructionsite",
+    joinColumns = { 
+    		@JoinColumn(name = "construction_siteId", referencedColumnName = "construction_siteId")
+     }, 
+     inverseJoinColumns = { 
+            @JoinColumn(name = "laborerId", referencedColumnName = "laborerId")
+     }
+	)
+    @ManyToMany(targetEntity=Laborer.class)
+    List<Laborer> laborers = new LinkedList<Laborer>();
     
     public ConstructionSite() {
     }
@@ -102,6 +118,14 @@ public class ConstructionSite implements Serializable {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+	
+	public List<Laborer> getLaborers() {
+		return laborers;
+	}
+
+	public void setLaborers(List<Laborer> laborers) {
+		this.laborers = laborers;
 	}
 
 	@Override

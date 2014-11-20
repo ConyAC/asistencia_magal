@@ -1,6 +1,7 @@
 package cl.magal.asistencia.services;
 
 import java.util.Arrays;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -77,6 +78,18 @@ public class ObrasService {
 				Arrays.asList(LaborerHelper.newLaborer(),LaborerHelper.newLaborer(),LaborerHelper.newLaborer())
 				);
 		return page;
+	}
+
+	public List<Laborer> getLaborerByConstruction(ConstructionSite cs) {
+		List<Laborer> laborers = labRepo.findByConstructionSite(cs.getConstructionsiteId());
+		return laborers;
+	}
+
+	public void addLaborer(Laborer laborer, ConstructionSite cs) {
+		labRepo.save(laborer);
+		cs.getLaborers().add(laborer);
+		repo2.save(cs);
+		
 	}
 
 }

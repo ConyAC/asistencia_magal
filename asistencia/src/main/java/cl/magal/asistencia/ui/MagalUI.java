@@ -28,10 +28,10 @@ import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinSession;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Component;
-import com.vaadin.ui.CssLayout;
 import com.vaadin.ui.MenuBar;
 import com.vaadin.ui.MenuBar.Command;
 import com.vaadin.ui.MenuBar.MenuItem;
+import com.vaadin.ui.Panel;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 
@@ -65,16 +65,15 @@ public class MagalUI extends UI implements ErrorHandler {
 		
 		VaadinSession.getCurrent().setErrorHandler(this);
 		//raiz
-//		root = new CssLayout();
 		root = new VerticalLayout();
 		setContent(root);
-		root.setMargin(true);
+		root.setSpacing(true);
         root.addStyleName("root");
         root.setSizeFull();
         //menu
         drawMenu();
 		
-		CssLayout content = new CssLayout();
+        Panel content = new Panel();
 		content.setSizeFull();
 		content.addStyleName("view-content");
 		

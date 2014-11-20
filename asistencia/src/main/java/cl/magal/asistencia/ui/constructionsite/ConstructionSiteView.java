@@ -1,5 +1,7 @@
 package cl.magal.asistencia.ui.constructionsite;
 
+import java.util.List;
+
 import javax.annotation.PostConstruct;
 
 import org.slf4j.Logger;
@@ -14,23 +16,31 @@ import org.tepi.filtertable.FilterTable;
 import ru.xpoft.vaadin.VaadinView;
 import cl.magal.asistencia.entities.ConstructionSite;
 import cl.magal.asistencia.entities.Laborer;
+import cl.magal.asistencia.entities.enums.Status;
 import cl.magal.asistencia.services.ConstructionSiteHelper;
 import cl.magal.asistencia.services.LaborerHelper;
 import cl.magal.asistencia.services.ObrasService;
 
+import com.vaadin.data.fieldgroup.BeanFieldGroup;
+import com.vaadin.data.fieldgroup.FieldGroup.CommitException;
+import com.vaadin.data.util.BeanItem;
 import com.vaadin.data.util.BeanItemContainer;
+import com.vaadin.event.ItemClickEvent;
+import com.vaadin.event.ItemClickEvent.ItemClickListener;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
+import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Image;
-import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
+import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.TabSheet;
+import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
 
 @VaadinView(value=ConstructionSiteView.NAME,cached=false)
@@ -47,8 +57,11 @@ public class ConstructionSiteView extends Panel  implements View {
 	
 	public static final String NAME = "obras";
 	
+	BeanFieldGroup<ConstructionSite> bfg = new BeanFieldGroup<ConstructionSite>(ConstructionSite.class);
 	BeanItemContainer<ConstructionSite> constructionContainer = new BeanItemContainer<ConstructionSite>(ConstructionSite.class);
 	BeanItemContainer<Laborer> laborerContainer = new BeanItemContainer<Laborer>(Laborer.class);
+	
+	FilterTable table;
 	
 	@Autowired
 	private transient ObrasService service;
@@ -62,6 +75,9 @@ public class ConstructionSiteView extends Panel  implements View {
 		
 		HorizontalLayout root = new HorizontalLayout();
 		root.setSizeFull();
+		root.setSpacing(true);
+		root.setMargin(true);
+		
 		setContent(root);
 		
 		//dibula la sección de las obras
@@ -84,11 +100,12 @@ public class ConstructionSiteView extends Panel  implements View {
 	
 	private VerticalLayout drawObras() {
 		VerticalLayout vl = new VerticalLayout();
-		vl.setMargin(true);
+		vl.setSpacing(true);
 		
 		//botones agrega y eliminar
 		HorizontalLayout hl = new HorizontalLayout();
 		hl.setSpacing(true);
+		
 		vl.addComponent(hl);
 		vl.setComponentAlignment(hl, Alignment.BOTTOM_CENTER );
 		Button agregaObra = new Button(null,FontAwesome.PLUS);
@@ -119,19 +136,28 @@ public class ConstructionSiteView extends Panel  implements View {
 	}
 	
 	private FilterTable drawConstructionTable() {
-		FilterTable table =  new FilterTable();
+	    table =  new FilterTable();
 		table.setContainerDataSource(constructionContainer);
 		table.setSizeFull();
 		table.setFilterBarVisible(true);
-		table.setVisibleColumns("constructionsiteId","name");
+		table.setVisibleColumns("name");
+		table.setColumnHeaders("Nombre");
 		table.setSelectable(true);
+		
+		table.addItemClickListener(new ItemClickListener() {
+			
+			@Override
+			public void itemClick(ItemClickEvent event) {
+				setConstruction((BeanItem<ConstructionSite>)event.getItem());
+			}
+		});
 		return table;
 	}
 
 	private VerticalLayout drawContructionDetail() {
 		VerticalLayout vl = new VerticalLayout(); 
 		vl.setSizeFull();
-		vl.setMargin(true);
+		vl.setSpacing(true);
 		
 		//creando la parte de arriba
 		HorizontalLayout hl = drawTopDetails();
@@ -141,6 +167,7 @@ public class ConstructionSiteView extends Panel  implements View {
 		//crea el tab con trabajadores y cuadrillas
 		TabSheet tab = new TabSheet();
 		tab.setSizeFull();
+		
 		vl.addComponent(tab);
 		vl.setExpandRatio(tab, 0.8F);
 		//tab de trabajadores
@@ -155,6 +182,8 @@ public class ConstructionSiteView extends Panel  implements View {
 	private VerticalLayout drawCuadrillas() {
 		VerticalLayout vl = new VerticalLayout();
 		vl.setSizeFull();
+		vl.setSpacing(true);
+		vl.setMargin(true);
 		
 		FilterTable table =  new FilterTable();
 		table.setContainerDataSource(constructionContainer);
@@ -171,14 +200,14 @@ public class ConstructionSiteView extends Panel  implements View {
 	private VerticalLayout drawLaborer() {
 		
 		VerticalLayout vl = new VerticalLayout();
-		
-		vl.setSizeFull();
+		vl.setSpacing(true);
 		vl.setMargin(true);
+		vl.setSizeFull();
 		
 		//boton para agregar trabajadores e imprimir
 		HorizontalLayout hl = new HorizontalLayout();
-		hl.setMargin(true);
 		hl.setSpacing(true);
+		
 		vl.addComponent(hl);
 		vl.setComponentAlignment(hl, Alignment.TOP_RIGHT);
 		
@@ -201,17 +230,15 @@ public class ConstructionSiteView extends Panel  implements View {
 			
 			@Override
 			public void buttonClick(ClickEvent event) {
-				//FIXME solo para test
-				Laborer laborer = LaborerHelper.newLaborer();
-				//FIXME asociar obra seleccionada
-				if(constructionContainer.size() != 0){
-					ConstructionSite cs = constructionContainer.firstItemId();
-					//TODO asociar trabajador con obra
-				}else{
-					throw new RuntimeException("Es necesario seleccionar una obra");
+				ConstructionSite cs = (ConstructionSite) table.getValue();
+				if(cs == null){
+					Notification.show("Debe seleccionar una obra",Type.ERROR_MESSAGE);
+					return;
 				}
 				
-				service.save(laborer);
+				Laborer laborer = LaborerHelper.newLaborer();
+				service.addLaborer(laborer,cs);
+				
 				laborerContainer.addBean(laborer);
 				
 			}
@@ -231,6 +258,16 @@ public class ConstructionSiteView extends Panel  implements View {
 		
 		return vl;
 	}
+	
+	private void setConstruction(BeanItem<ConstructionSite> item){
+		if(item == null )
+			return;
+		
+		bfg.setItemDataSource(item);
+		List<Laborer> laborers = service.getLaborerByConstruction(item.getBean());
+		laborerContainer.removeAllItems();
+		laborerContainer.addAll(laborers);
+	}
 
 	private HorizontalLayout drawTopDetails() {
 		
@@ -241,9 +278,43 @@ public class ConstructionSiteView extends Panel  implements View {
 		vlInfo.setSpacing(true);
 		hl.addComponent(vlInfo);
 		
-		vlInfo.addComponent(new Label("Obra1"));
-		vlInfo.addComponent(new Label("Dirección de la Obra"));
-		vlInfo.addComponent(new Label("Estado Obra"));
+		final TextField nameField = new TextField();
+		bfg.bind(nameField, "name");
+		vlInfo.addComponent(new HorizontalLayout(){{
+			addComponent(nameField);
+			 //agrega un boton que hace el commit
+	        Button add = new Button(null,new Button.ClickListener() {
+
+	        	@Override
+	        	public void buttonClick(ClickEvent event) {
+	        		try {
+	        			bfg.commit();
+	        			service.save(bfg.getItemDataSource().getBean());
+	        		} catch (CommitException e) {
+	        			logger.error("Error al guardar la información la obra",e);
+	        			Notification.show("Error al guardar la información del usuario", Type.ERROR_MESSAGE);
+	        		}
+
+	        	}
+	        }){{
+	        	setIcon(FontAwesome.SAVE);
+	        }};
+	        addComponent(add);
+	        setComponentAlignment(add, Alignment.TOP_RIGHT);
+		}});
+		
+		TextField addressField = new TextField();
+		bfg.bind(addressField, "address");
+		vlInfo.addComponent(addressField);
+		
+		ComboBox statusField = new ComboBox();
+		for(Status s : Status.values()){
+			statusField.addItem(s);
+		}
+		
+		bfg.bind(statusField, "status");
+		
+		vlInfo.addComponent(statusField);
 		
 		hl.addComponent(new Image());
 		
