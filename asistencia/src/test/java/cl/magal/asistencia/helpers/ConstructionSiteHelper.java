@@ -3,6 +3,7 @@ package cl.magal.asistencia.helpers;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertEquals;
 import cl.magal.asistencia.entities.ConstructionSite;
 import cl.magal.asistencia.entities.enums.Status;
 import cl.magal.asistencia.util.Utils;
@@ -39,7 +40,7 @@ public final class ConstructionSiteHelper {
 		assertNotNull("El bdcs no puede ser nulo.",bdcs);
 		
 		assertSame("El id deben ser el mismo.",cs.getConstructionsiteId(),bdcs.getConstructionsiteId());
-		assertSame("El nombre debe ser el mismo.",cs.getName(),bdcs.getName());
+		assertEquals("El nombre debe ser el mismo.",cs.getName(),bdcs.getName());
 		//verificar que el tipo del estado sea del tipo enum Status
 		assertSame("El tipo de estado debe ser el mismo", cs.getStatus().getClass() , bdcs.getStatus().getClass());
 		assertSame("El enum debe ser el mismo", cs.getStatus() ,bdcs.getStatus() );

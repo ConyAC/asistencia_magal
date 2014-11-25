@@ -190,6 +190,11 @@ public class UsersView extends HorizontalLayout implements View {
 			public void buttonClick(ClickEvent event) {
 				
 				User user = new User();
+				user.setFirstname("Nuevo Usuario");
+				user.setLastname("Nuevo Usuario");
+				user.setRut("1111111-1");
+				user.setEmail("a@magal.cl");
+				
 				service.saveUser(user);
 				container.addBean(user);
 				
