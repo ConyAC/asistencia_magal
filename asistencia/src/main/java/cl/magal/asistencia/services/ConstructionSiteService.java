@@ -34,12 +34,11 @@ public class ConstructionSiteService {
 	}
 
 	public ConstructionSite findConstructionSite(Long id) {
-		return repo2.findOne(id);
+		return repo2.findOneNotDeleted(id);
 	}
 
 	public Page<ConstructionSite> findAllConstructionSite(Pageable page) {
 		return repo2.findAllNotDeteled(page);
-//		return repo2.findAll(page);
 	}
 
 	public ConstructionSite findConstructionSiteByNombre(String nombre) {

@@ -34,6 +34,6 @@ public interface ConstructionSiteRepository extends PagingAndSortingRepository<C
 	ConstructionSite findByName(String nombre);
 
 	@Query(value="SELECT cs FROM ConstructionSite cs WHERE cs.constructionsiteId = ?1 and cs.deleted = false ")
-	ConstructionSite findNotDeteled(Long id);
+	ConstructionSite findOneNotDeleted(Long id);
 
 }
