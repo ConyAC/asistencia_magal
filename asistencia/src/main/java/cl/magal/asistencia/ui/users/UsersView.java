@@ -128,7 +128,7 @@ public class UsersView extends HorizontalLayout implements View {
         	else if(propertyId.equals("role.name")){
         		ComboBox cb = new ComboBox("Rol",Arrays.asList("ADM","SADM"));
         		detalleUsuario.addComponent(cb);
-        		fieldGroup.bind(cb, propertyId);
+//        		fieldGroup.bind(cb, propertyId);
         	}else if(propertyId.equals("password")){
         		PasswordField pf = new PasswordField("Password");
         		pf.setNullRepresentation("");
