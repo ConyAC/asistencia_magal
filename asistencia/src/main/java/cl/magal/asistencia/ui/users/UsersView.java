@@ -16,8 +16,8 @@ import org.tepi.filtertable.FilterTable;
 
 import ru.xpoft.vaadin.VaadinView;
 import cl.magal.asistencia.entities.User;
-import cl.magal.asistencia.services.UserHelper;
 import cl.magal.asistencia.services.UserService;
+import cl.magal.asistencia.services.helpers.UserHelper;
 import cl.magal.asistencia.util.Constants;
 
 import com.vaadin.addon.jpacontainer.EntityItem;

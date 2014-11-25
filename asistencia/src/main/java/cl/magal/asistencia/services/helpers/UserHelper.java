@@ -1,4 +1,4 @@
-package cl.magal.asistencia.services;
+package cl.magal.asistencia.services.helpers;
 
 import cl.magal.asistencia.entities.Role;
 import cl.magal.asistencia.entities.User;

@@ -12,7 +12,7 @@
   <logger name='org.springframework'>
     <level value='ERROR' />
   </logger>
-  <logger name='cl.magal.asistencia.service'>
+  <logger name='cl.magal.asistencia.services'>
     <level value='DEBUG' />
   </logger>
   <logger name='cl.magal.asistencia.ui'>

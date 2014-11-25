@@ -21,7 +21,9 @@ import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.PrePersist;
 import javax.persistence.Table;
+import javax.validation.constraints.NotNull;
 
 import cl.magal.asistencia.entities.converter.StatusConverter;
 import cl.magal.asistencia.entities.enums.Status;
@@ -40,21 +42,26 @@ import cl.magal.asistencia.entities.enums.Status;
     @NamedQuery(name = "ConstructionSite.findByDeleted", query = "SELECT c FROM ConstructionSite c WHERE c.deleted = :deleted")})
 	
 public class ConstructionSite implements Serializable {
+	
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
     @Column(name = "construction_siteId")
     private Long constructionsiteId;
-    @Basic(optional = false)
-    @Column(name = "address")
+    @Column(name = "address",nullable=true)
     private String address;
     @Column(name = "deleted")
     private Boolean deleted;
-    @Column(name = "name")
+    
+    @Column(name = "name",nullable=false)
+    @NotNull
     String name;
+    
     @Convert(converter = StatusConverter.class)
-    private Status status;
+    @Column(name = "status",nullable=false)
+    @NotNull
+    private Status status = Status.ACTIVE;
     
     @JoinTable(name="laborer_constructionsite",
     joinColumns = { 
@@ -66,6 +73,15 @@ public class ConstructionSite implements Serializable {
 	)
     @ManyToMany(targetEntity=Laborer.class)
     List<Laborer> laborers = new LinkedList<Laborer>();
+    
+    /**
+     * Obliga a que status sea activo, si no viene uno seteado
+     */
+    @PrePersist
+    void preInsert() {
+       if(status == null)
+    	   status = Status.ACTIVE;
+    }
     
     public ConstructionSite() {
     }

@@ -17,9 +17,9 @@ import ru.xpoft.vaadin.VaadinView;
 import cl.magal.asistencia.entities.ConstructionSite;
 import cl.magal.asistencia.entities.Laborer;
 import cl.magal.asistencia.entities.enums.Status;
-import cl.magal.asistencia.services.ConstructionSiteHelper;
-import cl.magal.asistencia.services.LaborerHelper;
 import cl.magal.asistencia.services.ObrasService;
+import cl.magal.asistencia.services.helpers.ConstructionSiteHelper;
+import cl.magal.asistencia.services.helpers.LaborerHelper;
 
 import com.vaadin.data.fieldgroup.BeanFieldGroup;
 import com.vaadin.data.fieldgroup.FieldGroup.CommitException;
@@ -34,8 +34,10 @@ import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.ComboBox;
+import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Image;
+import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.Panel;
@@ -105,7 +107,7 @@ public class ConstructionSiteView extends Panel  implements View {
 		//botones agrega y eliminar
 		HorizontalLayout hl = new HorizontalLayout();
 		hl.setSpacing(true);
-		
+
 		vl.addComponent(hl);
 		vl.setComponentAlignment(hl, Alignment.BOTTOM_CENTER );
 		Button agregaObra = new Button(null,FontAwesome.PLUS);
@@ -119,10 +121,11 @@ public class ConstructionSiteView extends Panel  implements View {
 
 			@Override
 			public void buttonClick(ClickEvent event) {
-				//FIXME SOLO PARA TEST
-				ConstructionSite obra = ConstructionSiteHelper.newConstrutionSite();
+				ConstructionSite obra = new ConstructionSite();
+				obra.setName("Nueva Obra");
 				service.save(obra);
 				constructionContainer.addBean(obra);
+				setConstruction(new BeanItem<ConstructionSite>(obra));
 			}
 		});
 		hl.addComponent(agregaObra);
@@ -274,13 +277,18 @@ public class ConstructionSiteView extends Panel  implements View {
 		HorizontalLayout hl = new HorizontalLayout();
 		hl.setSizeFull();
 		hl.setSpacing(true);
-		VerticalLayout vlInfo =new VerticalLayout();
+		FormLayout vlInfo =new FormLayout();
+		vlInfo.setWidth("100%");
 		vlInfo.setSpacing(true);
 		hl.addComponent(vlInfo);
 		
 		final TextField nameField = new TextField();
 		bfg.bind(nameField, "name");
 		vlInfo.addComponent(new HorizontalLayout(){{
+			
+			setSizeFull();
+			setSpacing(true);
+			addComponent(new Label("Nombre "));
 			addComponent(nameField);
 			 //agrega un boton que hace el commit
 	        Button add = new Button(null,new Button.ClickListener() {
@@ -303,11 +311,14 @@ public class ConstructionSiteView extends Panel  implements View {
 	        setComponentAlignment(add, Alignment.TOP_RIGHT);
 		}});
 		
-		TextField addressField = new TextField();
+		TextField addressField = new TextField("Dirección");
+		addressField.setNullRepresentation("");
 		bfg.bind(addressField, "address");
 		vlInfo.addComponent(addressField);
 		
-		ComboBox statusField = new ComboBox();
+		ComboBox statusField = new ComboBox("Estado");
+		//no permite nulos
+		statusField.setNullSelectionAllowed(false);
 		for(Status s : Status.values()){
 			statusField.addItem(s);
 		}

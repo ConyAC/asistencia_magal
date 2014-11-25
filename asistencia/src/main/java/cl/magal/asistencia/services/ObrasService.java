@@ -15,6 +15,7 @@ import cl.magal.asistencia.entities.Obra;
 import cl.magal.asistencia.repositories.ConstructionSiteRepository;
 import cl.magal.asistencia.repositories.LaborerRepository;
 import cl.magal.asistencia.repositories.ObraRepository;
+import cl.magal.asistencia.services.helpers.LaborerHelper;
 
 @Service
 public class ObrasService {

@@ -1,12 +1,14 @@
 package cl.magal.asistencia.entities.enums;
 
 public enum Status {
-	ACTIVE(1),
-	FINALIZED(2);
+	ACTIVE(1,"Activa"),
+	FINALIZED(2,"Finalizada");
 	
 	int i;
-	private Status(int i) {
+	String description;
+	private Status(int i,String description) {
 		this.i = i;
+		this.description = description;
 	}
 	
 	public int getCorrelative(){
@@ -17,6 +19,12 @@ public enum Status {
 		for(Status e : Status.values())
 			if(e.getCorrelative() == i )
 				return e;
-		throw new RuntimeException("Status invalid");
+		throw new RuntimeException("invalid Status");
 	}
+	
+	@Override
+	public String toString(){
+		return description;
+	}
+	
 }

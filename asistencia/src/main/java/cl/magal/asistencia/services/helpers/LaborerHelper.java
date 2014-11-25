@@ -1,4 +1,4 @@
-package cl.magal.asistencia.services;
+package cl.magal.asistencia.services.helpers;
 
 import cl.magal.asistencia.entities.Laborer;
 import cl.magal.asistencia.entities.enums.Job;
