@@ -11,6 +11,8 @@ import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
@@ -25,7 +27,7 @@ public class ConstructionSiteServiceTest {
 	Logger logger = LoggerFactory.getLogger(ConstructionSiteServiceTest.class);
 	
 	@Autowired
-	FichaService service;
+	ConstructionSiteService service;
 	
 	/**
 	 * Debe fallar si la obra no tiene nombre
@@ -35,7 +37,7 @@ public class ConstructionSiteServiceTest {
 		ConstructionSite cs = ConstructionSiteHelper.newConstrutionSite();
 		cs.setName(null);
 		//guardamos el elemento.
-		service.saveConstructionSite(cs);
+		service.save(cs);
 		fail("no debe llegar aquí");
 	}
 	
@@ -47,7 +49,7 @@ public class ConstructionSiteServiceTest {
 		ConstructionSite cs = ConstructionSiteHelper.newConstrutionSite();
 		cs.setStatus(null);
 		//guardamos el elemento.
-		service.saveConstructionSite(cs);
+		service.save(cs);
 		
 		assertNotNull("El status no puede ser nulo",cs.getStatus());
 		assertEquals("El status por defecto debe ser activo",cs.getStatus(),Status.ACTIVE);
@@ -61,7 +63,7 @@ public class ConstructionSiteServiceTest {
 		ConstructionSite cs = ConstructionSiteHelper.newConstrutionSite();
 		cs.setAddress(null);
 		//guardamos el elemento.
-		service.saveConstructionSite(cs);
+		service.save(cs);
 
 	}
 
@@ -75,7 +77,7 @@ public class ConstructionSiteServiceTest {
 		ConstructionSite cs = ConstructionSiteHelper.newConstrutionSite();
 		
 		//guardamos el elemento.
-		service.saveConstructionSite(cs);
+		service.save(cs);
 		
 		ConstructionSiteHelper.verify(cs);
 		
@@ -97,7 +99,7 @@ public class ConstructionSiteServiceTest {
 		ConstructionSite cs = ConstructionSiteHelper.newConstrutionSite();
 		
 		//guardamos el elemento.
-		service.saveConstructionSite(cs);
+		service.save(cs);
 		
 		//recuperar el elemento directamente de la base (solo para test)
 		Integer rawCSStatus = service.findRawStatusCS(cs.getConstructionsiteId());
@@ -114,7 +116,7 @@ public class ConstructionSiteServiceTest {
 		
 		ConstructionSite cs = ConstructionSiteHelper.newConstrutionSite();
 		
-		service.saveConstructionSite(cs);
+		service.save(cs);
 		
 		assertTrue("El id no puede ser nulo.",cs.getConstructionsiteId() != null );
 		
@@ -130,22 +132,19 @@ public class ConstructionSiteServiceTest {
 	 * Listar no eliminados (campo deleted)
 	 */
 	@Test
-	public void testFindByNoDeleted(){
+	public void testSaveNotDeletedByDefault(){
 		
-		ConstructionSite cs = new ConstructionSite();
-		cs.setAddress("Dire");
-		cs.setStatus(Status.ACTIVE);
-		cs.setDeleted(false);
-		
-		service.saveConstructionSite(cs);
+		ConstructionSite cs = ConstructionSiteHelper.newConstrutionSite();
+		cs.setDeleted(null);
+		service.save(cs);
 		
 		assertTrue("El id no puede ser nulo.", cs.getConstructionsiteId() != null );
 		
-		ConstructionSite dbcs = service.findByNoDeleted(cs.getDeleted());
+		ConstructionSite dbcs = service.findConstructionSite(cs.getConstructionsiteId());
 		
 		assertNotNull("La obra no puede ser nula", dbcs);
-		
-		assertTrue("La obra no debe estar eliminada", dbcs.getDeleted() != true);
+		assertNotNull("La obra no debe estar eliminada", dbcs.getDeleted());
+		assertTrue("La obra no debe estar eliminada", !dbcs.getDeleted());
 	}
 	
 	/**
@@ -154,22 +153,22 @@ public class ConstructionSiteServiceTest {
 	@Test
 	public void testUpdate() {
 		
-		ConstructionSite cs = new ConstructionSite();
-		cs.setAddress("Dire");
-		cs.setStatus(Status.ACTIVE);
-		cs.setDeleted(false);
+		ConstructionSite cs = ConstructionSiteHelper.newConstrutionSite();
 		
-		service.saveConstructionSite(cs);		
-		assertTrue("El id no puede ser nulo.", cs.getConstructionsiteId() != null );
+		service.save(cs);		
+		
+		ConstructionSiteHelper.verify(cs);
 		
 		ConstructionSite dbcs = service.findConstructionSite(cs.getConstructionsiteId());
-		assertNotNull("La obra no puede ser nula", dbcs);
+		
+		ConstructionSiteHelper.verify(dbcs);
+		ConstructionSiteHelper.verify(cs,dbcs);
 		
 		cs.setAddress("cambio");	
-		service.saveConstructionSite(cs);
+		service.save(cs);
 		
 		dbcs = service.findConstructionSite(cs.getConstructionsiteId());		
-		assertEquals("Email debe ser igual", cs.getAddress(), dbcs.getAddress());	 	
+		ConstructionSiteHelper.verify(cs,dbcs); 	
 				
 	}
 	
@@ -179,19 +178,52 @@ public class ConstructionSiteServiceTest {
 	@Test
 	public void testDelete(){
 		
-		ConstructionSite cs = new ConstructionSite();
-		cs.setAddress("Dire");
-		cs.setStatus(Status.ACTIVE);
+		ConstructionSite cs = ConstructionSiteHelper.newConstrutionSite();
+		// lo guarda
+		service.save(cs);
 		
-		service.saveConstructionSite(cs);
+		ConstructionSiteHelper.verify(cs);
+		//intenta encontrarlo
+		ConstructionSite dbcs = service.findConstructionSite(cs.getConstructionsiteId());
 		
-		assertTrue("El id no puede ser nulo.", cs.getConstructionsiteId() != null );
+		ConstructionSiteHelper.verify(dbcs);
+		ConstructionSiteHelper.verify(cs,dbcs);
 		
 		service.deleteCS(cs.getConstructionsiteId());
 		
-		ConstructionSite dbcs = service.findConstructionSite(cs.getConstructionsiteId());
+		dbcs = service.findConstructionSite(cs.getConstructionsiteId());
 		
 		assertNull("La obra debe ser nula", dbcs);
 		
 	}	
+	
+	@Test
+	public void testFindAllJustNotDeleted(){
+		//crea 3 obras
+		ConstructionSite primera = ConstructionSiteHelper.newConstrutionSite();
+		// lo guarda
+		service.save(primera);
+		ConstructionSiteHelper.verify(primera);
+		
+		ConstructionSite segunda = ConstructionSiteHelper.newConstrutionSite();
+		// lo guarda
+		service.save(segunda);
+		ConstructionSiteHelper.verify(segunda);
+		
+		ConstructionSite cs = ConstructionSiteHelper.newConstrutionSite();
+		// lo guarda
+		service.save(cs);
+		ConstructionSiteHelper.verify(cs);
+		
+		//elimina la 3°
+		service.deleteCS(cs.getConstructionsiteId());
+		
+		//si se buscan todas, debe retornar solo las dos primeras
+		Page<ConstructionSite> page = service.findAllConstructionSite(new PageRequest(0, 10));
+		
+		assertNotNull("La pagina no puede ser nula",page);
+		assertTrue("La pagina no puede tener más de dos elementos",page.getContent().size() == 2);
+		assertTrue("La pagina debe contener el primer elemento",page.getContent().contains(primera));
+		assertTrue("La pagina debe contener el segundo elemento",page.getContent().contains(segunda));
+	}
 }

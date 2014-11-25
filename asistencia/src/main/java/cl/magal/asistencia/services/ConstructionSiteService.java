@@ -18,7 +18,7 @@ import cl.magal.asistencia.repositories.ObraRepository;
 import cl.magal.asistencia.services.helpers.LaborerHelper;
 
 @Service
-public class ObrasService {
+public class ConstructionSiteService {
 
 	
 	@Autowired
@@ -39,7 +39,8 @@ public class ObrasService {
 	}
 
 	public Page<ConstructionSite> findAllConstructionSite(Pageable page) {
-		return repo2.findAll(page);
+		return repo2.findAllNotDeteled(page);
+//		return repo2.findAll(page);
 	}
 
 	public ConstructionSite findConstructionSiteByNombre(String nombre) {
@@ -48,6 +49,18 @@ public class ObrasService {
 
 	public ConstructionSite findConstructionSiteByDireccion(String direccion) {
 		return repo2.findByComplicada(direccion).get(0);
+	}
+	
+	public void deleteCS(Long id){
+		ConstructionSite cs = repo2.findOne(id);
+		if(cs == null )
+			throw new RuntimeException("El elemento que se trata de eliminar no existe");
+		cs.setDeleted(true);
+		repo2.save(cs);
+	}
+	
+	public Integer findRawStatusCS(Long id) {
+		return (Integer) repo2.findRawStatusCS(id);
 	}
 	
 	@Autowired

@@ -14,6 +14,9 @@ public interface ConstructionSiteRepository extends PagingAndSortingRepository<C
 
 	Page<ConstructionSite> findAll(Pageable page);
 	
+	@Query(value="SELECT cs FROM ConstructionSite cs WHERE cs.deleted = false ")
+	Page<ConstructionSite> findAllNotDeteled(Pageable page);
+	
 	//ConstructionSite findByName(String nombre);
 	
 	@Query(value="SELECT cs FROM ConstructionSite cs WHERE cs.address = :address " )
@@ -29,5 +32,8 @@ public interface ConstructionSiteRepository extends PagingAndSortingRepository<C
 	List<ConstructionSite> findByNoDeleted(@Param("deleted") boolean deleted);
 
 	ConstructionSite findByName(String nombre);
+
+	@Query(value="SELECT cs FROM ConstructionSite cs WHERE cs.constructionsiteId = ?1 and cs.deleted = false ")
+	ConstructionSite findNotDeteled(Long id);
 
 }

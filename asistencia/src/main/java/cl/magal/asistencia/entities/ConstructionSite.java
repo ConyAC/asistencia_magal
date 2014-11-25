@@ -52,7 +52,7 @@ public class ConstructionSite implements Serializable {
     @Column(name = "address",nullable=true)
     private String address;
     @Column(name = "deleted")
-    private Boolean deleted;
+    private Boolean deleted = Boolean.FALSE;
     
     @Column(name = "name",nullable=false)
     @NotNull
@@ -81,6 +81,8 @@ public class ConstructionSite implements Serializable {
     void preInsert() {
        if(status == null)
     	   status = Status.ACTIVE;
+       if(deleted == null)
+    	   deleted = Boolean.FALSE;
     }
     
     public ConstructionSite() {

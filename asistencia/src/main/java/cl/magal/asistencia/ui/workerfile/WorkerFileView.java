@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 
 import ru.xpoft.vaadin.VaadinView;
 import cl.magal.asistencia.entities.Obra;
-import cl.magal.asistencia.services.ObrasService;
+import cl.magal.asistencia.services.ConstructionSiteService;
 
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
@@ -25,7 +25,7 @@ public class WorkerFileView extends VerticalLayout implements View {
 	public static final String NAME = "fichas";
 	
 	@Autowired
-	private transient ObrasService service;
+	private transient ConstructionSiteService service;
 
 	
 	@Override

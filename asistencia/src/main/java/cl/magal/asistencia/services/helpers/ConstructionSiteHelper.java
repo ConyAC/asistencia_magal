@@ -19,6 +19,7 @@ public final class ConstructionSiteHelper {
 		obra.setName(NAME+Utils.random());
 		obra.setStatus(Status.ACTIVE);
 		obra.setAddress(ADDRESS+Utils.random());
+		obra.setDeleted(false);
 		return obra;
 	}
 

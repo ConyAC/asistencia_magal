@@ -15,7 +15,7 @@ import cl.magal.asistencia.entities.Obra;
 public class ObraServiceTest {
 
 	@Autowired
-	private transient ObrasService service;
+	private transient ConstructionSiteService service;
 	
 	@Test
 	public void testSaveObra() {

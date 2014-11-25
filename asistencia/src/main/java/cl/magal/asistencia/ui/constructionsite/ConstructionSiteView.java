@@ -17,7 +17,7 @@ import ru.xpoft.vaadin.VaadinView;
 import cl.magal.asistencia.entities.ConstructionSite;
 import cl.magal.asistencia.entities.Laborer;
 import cl.magal.asistencia.entities.enums.Status;
-import cl.magal.asistencia.services.ObrasService;
+import cl.magal.asistencia.services.ConstructionSiteService;
 import cl.magal.asistencia.services.helpers.ConstructionSiteHelper;
 import cl.magal.asistencia.services.helpers.LaborerHelper;
 
@@ -64,9 +64,10 @@ public class ConstructionSiteView extends Panel  implements View {
 	BeanItemContainer<Laborer> laborerContainer = new BeanItemContainer<Laborer>(Laborer.class);
 	
 	FilterTable table;
+	VerticalLayout detalleLayout;
 	
 	@Autowired
-	private transient ObrasService service;
+	private transient ConstructionSiteService service;
 	
 	
 	public ConstructionSiteView(){
@@ -124,12 +125,27 @@ public class ConstructionSiteView extends Panel  implements View {
 				ConstructionSite obra = new ConstructionSite();
 				obra.setName("Nueva Obra");
 				service.save(obra);
-				constructionContainer.addBean(obra);
-				setConstruction(new BeanItem<ConstructionSite>(obra));
+				BeanItem<ConstructionSite> item = constructionContainer.addBean(obra);
+				setConstruction(item);
 			}
 		});
 		hl.addComponent(agregaObra);
 		Button borrarObra = new Button(null,FontAwesome.TRASH_O);
+		borrarObra.addClickListener(new Button.ClickListener() {
+			
+			@Override
+			public void buttonClick(ClickEvent event) {
+				ConstructionSite cs = (ConstructionSite) table.getValue();
+				if(cs == null){
+					Notification.show("Debe seleccionar una obra para eliminar");
+					return;
+				}
+				service.deleteCS(cs.getConstructionsiteId());
+				constructionContainer.removeItem(cs);
+				setConstruction(null);
+				
+			}
+		});
 		hl.addComponent(borrarObra);
 
 		//la tabla con su buscador buscador
@@ -158,28 +174,28 @@ public class ConstructionSiteView extends Panel  implements View {
 	}
 
 	private VerticalLayout drawContructionDetail() {
-		VerticalLayout vl = new VerticalLayout(); 
-		vl.setSizeFull();
-		vl.setSpacing(true);
+		detalleLayout = new VerticalLayout(); 
+		detalleLayout.setSizeFull();
+		detalleLayout.setSpacing(true);
 		
 		//creando la parte de arriba
 		HorizontalLayout hl = drawTopDetails();
-		vl.addComponent(hl);
-		vl.setExpandRatio(hl, 0.2F);
+		detalleLayout.addComponent(hl);
+		detalleLayout.setExpandRatio(hl, 0.2F);
 		
 		//crea el tab con trabajadores y cuadrillas
 		TabSheet tab = new TabSheet();
 		tab.setSizeFull();
 		
-		vl.addComponent(tab);
-		vl.setExpandRatio(tab, 0.8F);
+		detalleLayout.addComponent(tab);
+		detalleLayout.setExpandRatio(tab, 0.8F);
 		//tab de trabajadores
 		tab.addTab(drawLaborer(),"Trabajadores");
 		
 		//tab de cuadrillas
 		tab.addTab(drawCuadrillas(),"Cuadrillas");
 		
-		return vl;
+		return detalleLayout;
 	}
 
 	private VerticalLayout drawCuadrillas() {
@@ -263,9 +279,12 @@ public class ConstructionSiteView extends Panel  implements View {
 	}
 	
 	private void setConstruction(BeanItem<ConstructionSite> item){
-		if(item == null )
+		if(item == null ){
+			bfg.setEnabled(false);
+			bfg.setItemDataSource(new BeanItem<ConstructionSite>(new ConstructionSite()));
 			return;
-		
+		}
+		bfg.setEnabled(true);
 		bfg.setItemDataSource(item);
 		List<Laborer> laborers = service.getLaborerByConstruction(item.getBean());
 		laborerContainer.removeAllItems();
@@ -277,19 +296,23 @@ public class ConstructionSiteView extends Panel  implements View {
 		HorizontalLayout hl = new HorizontalLayout();
 		hl.setSizeFull();
 		hl.setSpacing(true);
-		FormLayout vlInfo =new FormLayout();
-		vlInfo.setWidth("100%");
-		vlInfo.setSpacing(true);
-		hl.addComponent(vlInfo);
 		
-		final TextField nameField = new TextField();
-		bfg.bind(nameField, "name");
-		vlInfo.addComponent(new HorizontalLayout(){{
+		hl.addComponent(new HorizontalLayout(){{
 			
-			setSizeFull();
 			setSpacing(true);
-			addComponent(new Label("Nombre "));
-			addComponent(nameField);
+			setSizeFull();
+			
+			FormLayout vlInfo =new FormLayout();
+			vlInfo.setSizeFull();
+			vlInfo.setSpacing(true);
+		
+			final TextField nameField = new TextField("Nombre");
+			nameField.setNullRepresentation("");
+			nameField.setRequired(true);
+			nameField.setWidth("100%");
+			bfg.bind(nameField, "name");
+		
+			vlInfo.addComponent(nameField);
 			 //agrega un boton que hace el commit
 	        Button add = new Button(null,new Button.ClickListener() {
 
@@ -309,30 +332,35 @@ public class ConstructionSiteView extends Panel  implements View {
 	        }};
 	        addComponent(add);
 	        setComponentAlignment(add, Alignment.TOP_RIGHT);
+	        
+	        TextField addressField = new TextField("Dirección");
+	        addressField.setWidth("100%");
+			addressField.setNullRepresentation("");
+			bfg.bind(addressField, "address");
+			vlInfo.addComponent(addressField);
+			
+			ComboBox statusField = new ComboBox("Estado");
+			statusField.setWidth("100%");
+			//no permite nulos
+			statusField.setNullSelectionAllowed(false);
+			for(Status s : Status.values()){
+				statusField.addItem(s);
+			}
+			
+			bfg.bind(statusField, "status");
+			
+			vlInfo.addComponent(statusField);
+			
+			addComponent(vlInfo);
+			setExpandRatio(vlInfo, 1.0F);
 		}});
 		
-		TextField addressField = new TextField("Dirección");
-		addressField.setNullRepresentation("");
-		bfg.bind(addressField, "address");
-		vlInfo.addComponent(addressField);
-		
-		ComboBox statusField = new ComboBox("Estado");
-		//no permite nulos
-		statusField.setNullSelectionAllowed(false);
-		for(Status s : Status.values()){
-			statusField.addItem(s);
-		}
-		
-		bfg.bind(statusField, "status");
-		
-		vlInfo.addComponent(statusField);
-		
-		hl.addComponent(new Image());
+//		hl.addComponent(new Image());
 		
 		VerticalLayout vlIBotones =new VerticalLayout();
 		vlIBotones.setSpacing(true);
 		hl.addComponent(vlIBotones);
-		hl.setComponentAlignment(vlIBotones, Alignment.TOP_RIGHT );
+		hl.setComponentAlignment(vlIBotones, Alignment.MIDDLE_RIGHT );
 		
 		Button asistencia = new Button("Asistencia",FontAwesome.CHECK);
 		asistencia.setSizeFull();
@@ -344,6 +372,7 @@ public class ConstructionSiteView extends Panel  implements View {
 		Button configuraciones = new Button("Configuraciones Obra",FontAwesome.GEARS);
 		configuraciones.setSizeFull();
 		vlIBotones.addComponent(configuraciones);
+		vlIBotones.setWidth("300px");
 		
 		return hl;
 	}
@@ -358,6 +387,11 @@ public class ConstructionSiteView extends Panel  implements View {
 		Page<ConstructionSite> page = service.findAllConstructionSite(new PageRequest(0, 20));
 		constructionContainer.removeAllItems();
 		constructionContainer.addAll(page.getContent());
+		
+		//si tiene al menos un elemento selecciona el primero
+		setConstruction( constructionContainer.getItem( constructionContainer.firstItemId() ));
+		table.select(constructionContainer.firstItemId());
+		
 		//agrea los trabajadores asociados a la obra TODO segun la obra seleccionada
 		//si no es vacia
 		if(!page.getContent().isEmpty()){

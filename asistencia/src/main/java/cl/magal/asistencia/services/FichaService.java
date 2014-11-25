@@ -24,19 +24,11 @@ public class FichaService {
 	}
 	
 	public ConstructionSite findConstructionSite(Long id){
-		return rep.findOne(id);
+		return rep.findNotDeteled(id);
 	}
 	
 	public ConstructionSite findByAddress(String address){
 		return rep.findByAddress(address).get(0);
-	}
-	
-	public ConstructionSite findByNoDeleted(boolean deleted){
-		return rep.findByNoDeleted(deleted).get(0);
-	}
-	
-	public Integer findRawStatusCS(Long id) {
-		return (Integer) rep.findRawStatusCS(id);
 	}
 	
 	public void saveObra(Obra obra) {
@@ -51,9 +43,6 @@ public class FichaService {
 		return repo.findAll(page);
 	}
 	
-	public void deleteCS(Long id){
-		rep.delete(id);
-	}
 	
 /*
 	public Obra findObraByNombre(String nombre) {
