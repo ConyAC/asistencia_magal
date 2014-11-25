@@ -18,7 +18,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import cl.magal.asistencia.entities.ConstructionSite;
 import cl.magal.asistencia.entities.enums.Status;
-import cl.magal.asistencia.services.helpers.ConstructionSiteHelper;
+import cl.magal.asistencia.helpers.ConstructionSiteHelper;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = { "/META-INF/spring/testApplicationContext.xml" })
@@ -124,7 +124,7 @@ public class ConstructionSiteServiceTest {
 		
 		assertNotNull("La obra no puede ser nula", dbcs);
 		
-		assertEquals("direccion debe ser igual", "Dire", dbcs.getAddress());
+		assertEquals("direccion debe ser igual", cs.getAddress(), dbcs.getAddress());
 		
 	}
 	

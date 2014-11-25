@@ -1,4 +1,4 @@
-package cl.magal.asistencia.services.helpers;
+package cl.magal.asistencia.helpers;
 
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertNotNull;
