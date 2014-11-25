@@ -15,7 +15,6 @@ import cl.magal.asistencia.entities.Obra;
 import cl.magal.asistencia.repositories.ConstructionSiteRepository;
 import cl.magal.asistencia.repositories.LaborerRepository;
 import cl.magal.asistencia.repositories.ObraRepository;
-import cl.magal.asistencia.services.helpers.LaborerHelper;
 
 @Service
 public class ConstructionSiteService {
@@ -89,7 +88,7 @@ public class ConstructionSiteService {
 
 	public Page<Laborer> findLaborerByConstruction(ConstructionSite fisrt) {
 		Page<Laborer> page = new PageImpl<Laborer>(
-				Arrays.asList(LaborerHelper.newLaborer(),LaborerHelper.newLaborer(),LaborerHelper.newLaborer())
+				Arrays.asList(new Laborer(),new Laborer(),new Laborer())
 				);
 		return page;
 	}

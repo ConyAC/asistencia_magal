@@ -18,8 +18,6 @@ import cl.magal.asistencia.entities.ConstructionSite;
 import cl.magal.asistencia.entities.Laborer;
 import cl.magal.asistencia.entities.enums.Status;
 import cl.magal.asistencia.services.ConstructionSiteService;
-import cl.magal.asistencia.services.helpers.ConstructionSiteHelper;
-import cl.magal.asistencia.services.helpers.LaborerHelper;
 
 import com.vaadin.data.fieldgroup.BeanFieldGroup;
 import com.vaadin.data.fieldgroup.FieldGroup.CommitException;
@@ -36,8 +34,6 @@ import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Image;
-import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.Panel;
@@ -255,7 +251,7 @@ public class ConstructionSiteView extends Panel  implements View {
 					return;
 				}
 				
-				Laborer laborer = LaborerHelper.newLaborer();
+				Laborer laborer = new Laborer();
 				service.addLaborer(laborer,cs);
 				
 				laborerContainer.addBean(laborer);
