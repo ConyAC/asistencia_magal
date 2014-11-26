@@ -13,6 +13,7 @@ import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -71,7 +72,7 @@ public class ConstructionSite implements Serializable {
             @JoinColumn(name = "laborerId", referencedColumnName = "laborerId")
      }
 	)
-    @ManyToMany(targetEntity=Laborer.class)
+    @ManyToMany(targetEntity=Laborer.class,fetch=FetchType.EAGER)
     List<Laborer> laborers = new LinkedList<Laborer>();
     
     /**
@@ -139,6 +140,8 @@ public class ConstructionSite implements Serializable {
 	}
 	
 	public List<Laborer> getLaborers() {
+		if(laborers == null )
+			laborers = new LinkedList<Laborer>();
 		return laborers;
 	}
 
@@ -169,6 +172,15 @@ public class ConstructionSite implements Serializable {
     @Override
     public String toString() {
         return "jpa.magal.entities.ConstructionSite[ constructionsiteId=" + constructionsiteId + " ]";
+    }
+
+    public void addLaborer(Laborer laborer) {
+        if (!getLaborers().contains(laborer)) {
+        	getLaborers().add(laborer);
+        }
+        if (!laborer.getConstructionSites().contains(this)) {
+            laborer.getConstructionSites().add(this);
+        }
     }
     
 }

@@ -3,6 +3,10 @@ package cl.magal.asistencia.services;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.transaction.Transactional;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -19,6 +23,7 @@ import cl.magal.asistencia.repositories.ObraRepository;
 @Service
 public class ConstructionSiteService {
 
+	Logger logger = LoggerFactory.getLogger(ConstructionSiteService.class);
 	
 	@Autowired
 	ConstructionSiteRepository repo2;
@@ -33,8 +38,13 @@ public class ConstructionSiteService {
 		labRepo.save(laborer);
 	}
 
+	@Transactional
 	public ConstructionSite findConstructionSite(Long id) {
-		return repo2.findOneNotDeleted(id);
+		ConstructionSite cs =repo2.findOneNotDeleted(id);
+		//recupera la lista de trabajadores
+		List<Laborer> lbs = labRepo.findByConstructionSite(id);
+		cs.setLaborers(lbs);
+		return cs;
 	}
 
 	public Page<ConstructionSite> findAllConstructionSite(Pageable page) {
@@ -97,11 +107,13 @@ public class ConstructionSiteService {
 		return laborers;
 	}
 
-	public void addLaborer(Laborer laborer, ConstructionSite cs) {
-		labRepo.save(laborer);
-		cs.getLaborers().add(laborer);
-		repo2.save(cs);
+	@Transactional
+	public void addLaborerToConstructionSite(Laborer laborer, ConstructionSite cs) {
 		
+		ConstructionSite dbcs = repo2.findOne(cs.getConstructionsiteId());
+		labRepo.save(laborer);
+		dbcs.addLaborer(laborer);
+		repo2.save(dbcs);
 	}
 
 }

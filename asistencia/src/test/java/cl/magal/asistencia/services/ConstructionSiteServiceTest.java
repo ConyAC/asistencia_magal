@@ -1,6 +1,7 @@
 package cl.magal.asistencia.services;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -17,8 +18,10 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import cl.magal.asistencia.entities.ConstructionSite;
+import cl.magal.asistencia.entities.Laborer;
 import cl.magal.asistencia.entities.enums.Status;
 import cl.magal.asistencia.helpers.ConstructionSiteHelper;
+import cl.magal.asistencia.helpers.LaborerHelper;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = { "/META-INF/spring/testApplicationContext.xml" })
@@ -225,5 +228,47 @@ public class ConstructionSiteServiceTest {
 		assertTrue("La pagina no puede tener más de dos elementos",page.getContent().size() == 2);
 		assertTrue("La pagina debe contener el primer elemento",page.getContent().contains(primera));
 		assertTrue("La pagina debe contener el segundo elemento",page.getContent().contains(segunda));
+	}
+	
+	@Test
+	public void testAddLaborer(){
+		//crea una obra
+		ConstructionSite cs = ConstructionSiteHelper.newConstrutionSite();
+		// lo guarda
+		service.save(cs);		
+		//verifica
+		
+		//agrega un trabajador a la obra
+		Laborer laborer1 = LaborerHelper.newLaborer();
+		service.addLaborerToConstructionSite(laborer1,cs);
+		
+		//verifica que el trabajador tiene un id válido
+		LaborerHelper.verify(laborer1);
+		
+		ConstructionSite dbcs = service.findConstructionSite(cs.getConstructionsiteId());
+		
+		//verifica que al recuperar la obra, se obtenga el trabajador guardado
+		assertNotNull("El objeto guardado no puede ser nulo",dbcs);
+		assertTrue("El objeto guardado debe contener trabajadores",!dbcs.getLaborers().isEmpty());
+		assertEquals("El objeto guardado debe contener el trabajador agregado",dbcs.getLaborers().get(0),laborer1 );
+		
+		//agrega otro mas
+		//agrega un trabajador a la obra
+		Laborer laborer2 = LaborerHelper.newLaborer();
+		service.addLaborerToConstructionSite(laborer2,cs);
+		
+		//verifica que el trabajador tiene un id válido
+		LaborerHelper.verify(laborer2);
+		
+		dbcs = service.findConstructionSite(cs.getConstructionsiteId());
+		
+		//los ids de los laborer no pueden ser iguales
+		assertNotEquals("los ids de los laborer no pueden ser iguales",laborer2.getLaborerId(),laborer1.getLaborerId());
+		
+		//verifica que al recuperar la obra, se obtenga el trabajador guardado
+		assertNotNull("El objeto guardado no puede ser nulo",dbcs);
+		assertTrue("El objeto guardado debe contener trabajadores",!dbcs.getLaborers().isEmpty());
+		assertEquals("El objeto guardado debe contener el trabajador agregado",dbcs.getLaborers().get(1),laborer2 );
+		
 	}
 }
