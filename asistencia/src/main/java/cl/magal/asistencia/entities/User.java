@@ -9,6 +9,7 @@ import java.io.Serializable;
 
 import javax.persistence.Basic;
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -16,7 +17,14 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.PrePersist;
 import javax.persistence.Table;
+import javax.validation.constraints.NotNull;
+
+import cl.magal.asistencia.entities.converter.StatusConverter;
+import cl.magal.asistencia.entities.converter.UserStatusConverter;
+import cl.magal.asistencia.entities.enums.Status;
+import cl.magal.asistencia.entities.enums.UserStatus;
 
 /**
  *
@@ -42,13 +50,13 @@ public class User implements Serializable {
     @Column(name = "userId")
     private Long userId;
     @Basic(optional = false)
-    @Column(name = "firstname")
+    @Column(name = "firstname",nullable=true)
     private String firstname;
     @Basic(optional = false)
-    @Column(name = "lastname")
+    @Column(name = "lastname", nullable=true)
     private String lastname;
     @Basic(optional = false)
-    @Column(name = "rut")
+    @Column(name = "rut", nullable=true)
     private String rut;
     @Basic(optional = false)
     @Column(name = "email")
@@ -57,9 +65,27 @@ public class User implements Serializable {
     private String password;
     @Column(name = "salt")
     private String salt;
+    @Column(name = "deleted")
+    private Boolean deleted = Boolean.FALSE;
+   
+    @Convert(converter = UserStatusConverter.class)
+    @Column(name = "status", nullable=false)
+    @NotNull
+    private UserStatus status = UserStatus.ACTIVE;
     
     @JoinColumn(name="roleId")
     private Role role;
+    
+    /**
+     * Obliga a que status sea activo, si no viene uno seteado
+     */
+    @PrePersist
+    void preInsert() {
+       if(status == null)
+    	   status = UserStatus.ACTIVE;
+       if(deleted == null)
+    	   deleted = Boolean.FALSE;
+    }
 
     public User() {
     }
@@ -68,12 +94,13 @@ public class User implements Serializable {
         this.userId = userId;
     }
 
-    public User(Long userId, String firstname, String lastname, String rut, String email) {
+    public User(Long userId, String firstname, String lastname, String rut, String email, UserStatus status) {
         this.userId = userId;
         this.firstname = firstname;
         this.lastname = lastname;
         this.rut = rut;
         this.email = email;
+        this.status = status;
     }
     
     public Long getUserId() {
@@ -149,6 +176,22 @@ public class User implements Serializable {
 
 	public void setPassword2(String password2) {
 		this.password2 = password2;
+	}
+
+	public Boolean getDeleted() {
+		return deleted;
+	}
+
+	public void setDeleted(Boolean deleted) {
+		this.deleted = deleted;
+	}
+
+	public UserStatus getStatus() {
+		return status;
+	}
+
+	public void setStatus(UserStatus status) {
+		this.status = status;
 	}
 
 	@Override

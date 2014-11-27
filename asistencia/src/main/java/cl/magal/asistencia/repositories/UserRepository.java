@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 
+import cl.magal.asistencia.entities.ConstructionSite;
 import cl.magal.asistencia.entities.User;
 
 public interface UserRepository extends PagingAndSortingRepository<User, Long> {
@@ -15,4 +16,7 @@ public interface UserRepository extends PagingAndSortingRepository<User, Long> {
 
 	@Query(value="SELECT u.role FROM user u WHERE u.userId = :id " , nativeQuery=true)
 	Integer findRawRoleUser(@Param("id") Long id);	
+	
+	@Query(value="SELECT u FROM User u WHERE u.deleted = false ")
+	Page<User> findAllNotDeteled(Pageable page);
 }

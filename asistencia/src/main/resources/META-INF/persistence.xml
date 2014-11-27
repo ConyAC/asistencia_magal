@@ -20,6 +20,7 @@
 	    <class>cl.magal.asistencia.entities.converter.JobConverter</class>
 	    <class>cl.magal.asistencia.entities.converter.MaritalStatusConverter</class>
 	    <class>cl.magal.asistencia.entities.converter.StatusConverter</class>
+	    <class>cl.magal.asistencia.entities.converter.UserStatusConverter</class>
 	    <properties>
 	        <property name="hibernate.dialect" value="org.hibernate.dialect.H2Dialect"/>
 	        <property name="hibernate.hbm2ddl.auto" value="create-drop"/>

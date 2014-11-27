@@ -1,7 +1,6 @@
 package cl.magal.asistencia.ui.users;
 
 import java.util.Arrays;
-import java.util.List;
 
 import javax.annotation.PostConstruct;
 
@@ -9,11 +8,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
 import org.tepi.filtertable.FilterTable;
 
 import ru.xpoft.vaadin.VaadinView;
 import cl.magal.asistencia.entities.User;
+import cl.magal.asistencia.entities.enums.Status;
+import cl.magal.asistencia.entities.enums.UserStatus;
 import cl.magal.asistencia.services.UserService;
 
 import com.vaadin.data.fieldgroup.BeanFieldGroup;
@@ -33,6 +36,7 @@ import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Notification.Type;
+import com.vaadin.ui.OptionGroup;
 import com.vaadin.ui.PasswordField;
 import com.vaadin.ui.VerticalLayout;
 
@@ -90,10 +94,11 @@ public class UsersView extends HorizontalLayout implements View {
 		//obtiene el vertical Layout
 		detalleUsuario.removeAllComponents();
 		if(userItem == null){
+			detalleUsuario.setEnabled(false);
 			detalleUsuario.addComponent(new Label("Seleccione un usuario para ver su información"));
 			return;
 		}
-		
+		detalleUsuario.setEnabled(true);
 		
 		final BeanFieldGroup<User> fieldGroup = new BeanFieldGroup<User>(User.class);
 		// We need an item data source before we create the fields to be able to
@@ -123,7 +128,7 @@ public class UsersView extends HorizontalLayout implements View {
         // Loop through the properties, build fields for them and add the fields
         // to this UI
         for (Object propertyId : fieldGroup.getUnboundPropertyIds()) {
-        	if(propertyId.equals("role")||propertyId.equals("salt")||propertyId.equals("userId"))
+        	if(propertyId.equals("role")||propertyId.equals("salt")||propertyId.equals("userId")||propertyId.equals("deleted"))
         		;
         	else if(propertyId.equals("role.name")){
         		ComboBox cb = new ComboBox("Rol",Arrays.asList("ADM","SADM"));
@@ -139,9 +144,11 @@ public class UsersView extends HorizontalLayout implements View {
         		pf2.setNullRepresentation("");
         		detalleUsuario.addComponent(pf2);
         		fieldGroup.bind(pf2, propertyId);
+        	}else if(propertyId.equals("status")){
+        		detalleUsuario.addComponent(
+        		fieldGroup.buildAndBind("Estado",propertyId,OptionGroup.class));
         	}else
-        		detalleUsuario.addComponent(fieldGroup.buildAndBind(propertyId));
-        	
+        		detalleUsuario.addComponent(fieldGroup.buildAndBind(propertyId)); 			
         }
 	}
 
@@ -152,6 +159,7 @@ public class UsersView extends HorizontalLayout implements View {
 		usersTable.setSizeFull();
 		usersTable.setFilterBarVisible(true);
 		usersTable.setVisibleColumns("role.name","firstname");
+		usersTable.setColumnHeaders("Perfil", "Nombre");
 		usersTable.setSelectable(true);
 		
 		usersTable.addItemClickListener(new ItemClickListener() {
@@ -177,9 +185,9 @@ public class UsersView extends HorizontalLayout implements View {
 		hl.setSpacing(true);
 		vl.addComponent(hl);
 		vl.setComponentAlignment(hl, Alignment.BOTTOM_CENTER );
-		Button agregaObra = new Button(null,FontAwesome.PLUS);
+		Button agregaUsuario = new Button(null,FontAwesome.PLUS);
 		//agregando obras dummy
-		agregaObra.addClickListener(new Button.ClickListener() {
+		agregaUsuario.addClickListener(new Button.ClickListener() {
 			
 			/**
 			 * 
@@ -190,19 +198,20 @@ public class UsersView extends HorizontalLayout implements View {
 			public void buttonClick(ClickEvent event) {
 				
 				User user = new User();
-				user.setFirstname("Nuevo Usuario");
-				user.setLastname("Nuevo Usuario");
-				user.setRut("1111111-1");
-				user.setEmail("a@magal.cl");
-				
+				user.setFirstname("Nombre");
+				user.setLastname("Apellido");
+				user.setEmail("Email");
+				user.setStatus(UserStatus.ACTIVE);
+				user.setRut("12345678-9");
 				service.saveUser(user);
-				container.addBean(user);
+				BeanItem<User> item = container.addBean(user);
+				setUser(item);
 				
 			}
 		});
-		hl.addComponent(agregaObra);
-		Button borrarObra = new Button(null,FontAwesome.TRASH_O);
-		borrarObra.addClickListener(new Button.ClickListener() {
+		hl.addComponent(agregaUsuario);
+		Button borrarUsuario = new Button(null,FontAwesome.TRASH_O);
+		borrarUsuario.addClickListener(new Button.ClickListener() {
 			
 			@Override
 			public void buttonClick(ClickEvent event) {
@@ -214,12 +223,11 @@ public class UsersView extends HorizontalLayout implements View {
 				}
 				//TODO dialogo de confirmación
 				service.deleteUser(user.getUserId());
-				container.removeItem(user);
-				
+				container.removeItem(user);				
 				setUser(null);
 			}
 		});
-		hl.addComponent(borrarObra);
+		hl.addComponent(borrarUsuario);
 		
 		return vl;
 	}
@@ -230,10 +238,17 @@ public class UsersView extends HorizontalLayout implements View {
 
 	@Override
 	public void enter(ViewChangeEvent event) {
-		List<User> users = service.findAllUser();
+		reloaData();		
+	}
+	
+	public void reloaData(){
+		Page<User> page = service.findAllUser(new PageRequest(0, 20));
+		//List<User> users = service.findAllUser();
 		container.removeAllItems();
-		container.addAll(users);
+		container.addAll(page.getContent());
 		
+		setUser( container.getItem( container.firstItemId() ));
+		usersTable.select(container.firstItemId());
 	}
 
 }
