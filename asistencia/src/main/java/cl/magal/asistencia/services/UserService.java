@@ -1,5 +1,6 @@
 package cl.magal.asistencia.services;
 
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -11,13 +12,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import cl.magal.asistencia.entities.Permission;
 import cl.magal.asistencia.repositories.UserRepository;
 
 @Service
@@ -25,8 +30,29 @@ import cl.magal.asistencia.repositories.UserRepository;
 public class UserService implements UserDetailsService {
 	static Logger logger = LoggerFactory.getLogger(UserService.class);
 	
+	@Autowired
+	UserRepository rep;
+	
 	@PostConstruct
 	public void init(){
+		//si no existe un usuario admin, lo crea
+		String userName = "admin@admin.com";
+		
+		cl.magal.asistencia.entities.User usuario = rep.findByEmail(userName);
+		if( usuario == null ){
+			String password = "123456";
+			
+			usuario = new cl.magal.asistencia.entities.User();
+			usuario.setFirstname("jose");
+			usuario.setRut("123-4");
+			usuario.setLastname("soto");
+			usuario.setEmail(userName);
+			PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+			String hashedPassword = passwordEncoder.encode(password);
+			usuario.setPassword(hashedPassword);
+//			rep.save
+			rep.save(usuario);
+		}
 		
 	}
 
@@ -36,23 +62,31 @@ public class UserService implements UserDetailsService {
 	@Override
 	  public UserDetails loadUserByUsername(String userName) throws UsernameNotFoundException {
 		//recupera el usuario desde base de datos
+		cl.magal.asistencia.entities.User entityUser = rep.findByEmail(userName);
+		if( entityUser == null )
+			throw new UsernameNotFoundException("Usuario o password incorrectas");		
+		if(entityUser.getRole() != null){
+			List<Permission> perm = entityUser.getRole().getPermission();
 		
+		//Collections.sort(perm);
+	    for(Permission p : perm){
+	       	logger.debug("permisos del role id {}", p.getPermissionId());
+	    }
+		}
+		//logger.info("El usuario {} ingresÃ³ el {}",userName,Utils.date2String(new Date()));
         boolean enabled = true;
         boolean accountNonExpired = true;
         boolean credentialsNonExpired = true;
         boolean accountNonLocked = true;
 
-        return new User("administrator",
-                "admin", 
+        return new User(entityUser.getEmail(),
+        		entityUser.getPassword(), 
                 enabled, 
                 accountNonExpired,
                 credentialsNonExpired, 
                 accountNonLocked,
                 new LinkedList<GrantedAuthority>());
 	}
-	
-	@Autowired
-	UserRepository rep;
 	
 	public void saveUser(cl.magal.asistencia.entities.User u) {
 		rep.save(u);
@@ -72,5 +106,82 @@ public class UserService implements UserDetailsService {
 
 	public Page<cl.magal.asistencia.entities.User> findAllUser(Pageable page) {
 		return rep.findAllNotDeteled(page);
+	}
+	
+	/**
+	 * 
+	 * @param permissions
+	 * @return
+	 */
+	public Collection<? extends GrantedAuthority> getAuthorities(List<Permission> permissions) {
+        List<GrantedAuthority> authList = getGrantedAuthorities(getPermission(permissions));
+        return authList;
+    }
+   
+	/**
+	 * 
+	 * @param permissions
+	 * @return
+	 */
+	public List<String> getPermission(List<Permission> permissions) {
+
+       List<String> result = new LinkedList<String>();
+       for(Permission permission : permissions )
+    	   result.add(permission.getName());
+       return result;
+	}
+   
+	/**
+	 * 
+	 * @param roles
+	 * @return
+	 */
+	public static List<GrantedAuthority> getGrantedAuthorities(
+            List<String> permissions) {
+        List<GrantedAuthority> authorities = new LinkedList<GrantedAuthority>();
+
+        for (String permission : permissions) {
+        	logger.debug("permission id {}",permission);
+            authorities.add(new SimpleGrantedAuthority(permission));
+        }
+        return authorities;
+    }
+	
+	/**
+	 * Obtiene un usuario por su nombre de usuario
+	 * @param username
+	 * @return
+	 */
+	public cl.magal.asistencia.entities.User findUsuarioByUsername(String username) {
+		return rep.findByEmail(username);
+	}
+	
+	/**
+	 * 
+	 * @param usuario
+	 */
+	private void savePassword(cl.magal.asistencia.entities.User usuario) {
+		if(usuario == null) {
+			throw new RuntimeException("Usuario no debe ser nulo");
+		}
+		PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+		String hashedPassword = passwordEncoder.encode(usuario.getPassword());
+		usuario.setPassword(hashedPassword);
+	}
+	
+	
+	/**
+	 * Permite modificar el password a un usuario ya creado
+	 * @param id
+	 * @param password
+	 */
+	public void savePassword(Long id, String password) {
+		cl.magal.asistencia.entities.User usuario = rep.findOne(id);
+		if(usuario == null) {
+			throw new RuntimeException("El usuario no existe");
+		}
+		usuario.setPassword(password);
+		savePassword(usuario);
+		rep.save(usuario);
 	}
 }

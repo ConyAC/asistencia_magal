@@ -7,7 +7,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 
-import cl.magal.asistencia.entities.ConstructionSite;
 import cl.magal.asistencia.entities.User;
 
 public interface UserRepository extends PagingAndSortingRepository<User, Long> {
@@ -19,4 +18,6 @@ public interface UserRepository extends PagingAndSortingRepository<User, Long> {
 	
 	@Query(value="SELECT u FROM User u WHERE u.deleted = false ")
 	Page<User> findAllNotDeteled(Pageable page);
+	@Query(value="SELECT u FROM User u WHERE u.email = ?1 and u.deleted = false ")
+	User findByEmail(String email); 
 }

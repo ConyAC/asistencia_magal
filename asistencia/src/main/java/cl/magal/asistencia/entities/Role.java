@@ -6,14 +6,19 @@
 package cl.magal.asistencia.entities;
 
 import java.io.Serializable;
+import java.util.LinkedList;
+import java.util.List;
+
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.ManyToMany;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 /**
@@ -40,6 +45,9 @@ public class Role implements Serializable {
     @Column(name = "description")
     private String description;
 
+    @OneToMany(targetEntity=Permission.class)
+    List<Permission> permission = new LinkedList<Permission>();
+    
     public Role() {
     }
 
@@ -75,8 +83,16 @@ public class Role implements Serializable {
     public void setDescription(String description) {
         this.description = description;
     }
+    
+    public List<Permission> getPermission() {
+		return permission;
+	}
 
-    @Override
+	public void setPermission(List<Permission> permission) {
+		this.permission = permission;
+	}
+
+	@Override
     public int hashCode() {
         int hash = 0;
         hash += (roleId != null ? roleId.hashCode() : 0);
