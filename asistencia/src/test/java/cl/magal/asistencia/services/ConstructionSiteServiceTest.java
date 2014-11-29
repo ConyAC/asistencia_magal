@@ -7,6 +7,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
@@ -19,9 +20,11 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import cl.magal.asistencia.entities.ConstructionSite;
 import cl.magal.asistencia.entities.Laborer;
+import cl.magal.asistencia.entities.User;
 import cl.magal.asistencia.entities.enums.Status;
 import cl.magal.asistencia.helpers.ConstructionSiteHelper;
 import cl.magal.asistencia.helpers.LaborerHelper;
+import cl.magal.asistencia.helpers.UserHelper;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = { "/META-INF/spring/testApplicationContext.xml" })
@@ -31,6 +34,16 @@ public class ConstructionSiteServiceTest {
 	
 	@Autowired
 	ConstructionSiteService service;
+	@Autowired
+	UserService userService;
+	
+	User user;
+	
+	@Before
+	public void before(){
+		user = UserHelper.newUser();
+		userService.saveUser(user);
+	}
 	
 	/**
 	 * Debe fallar si la obra no tiene nombre
@@ -90,6 +103,32 @@ public class ConstructionSiteServiceTest {
 		ConstructionSiteHelper.verify(bdcs);
 		
 		ConstructionSiteHelper.verify(cs,bdcs);
+		
+	}
+	
+	/**
+	 * Test que permite verificar que la obra se almacena correctamente y luego es posible recuperarla
+	 */
+	@Test
+	public void testSaveConstructionSiteWithPersonInCharge() {
+		
+		ConstructionSite cs = ConstructionSiteHelper.newConstrutionSite();
+		cs.setPersonInCharge(user);
+		//guardamos el elemento.
+		service.save(cs);
+		
+		ConstructionSiteHelper.verify(cs);
+		
+		assertNotNull("La persona a cargo no puede ser nula, si ésta fue seteada",cs.getPersonInCharge());
+		
+		//recuperamos el elemento de la base
+		ConstructionSite bdcs = service.findConstructionSite(cs.getConstructionsiteId());
+		
+		ConstructionSiteHelper.verify(bdcs);
+		
+		ConstructionSiteHelper.verify(cs,bdcs);
+		
+		assertNotNull("La persona a cargo no puede ser nula, si ésta fue guardada",bdcs.getPersonInCharge());
 		
 	}
 	

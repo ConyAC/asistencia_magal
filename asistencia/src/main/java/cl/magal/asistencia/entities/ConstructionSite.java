@@ -20,6 +20,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
+import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.PrePersist;
@@ -58,6 +59,10 @@ public class ConstructionSite implements Serializable {
     @Column(name = "name",nullable=false)
     @NotNull
     String name;
+    
+    @JoinColumn(name="personInChargeId")
+    @ManyToOne
+    User personInCharge;
     
     @Convert(converter = StatusConverter.class)
     @Column(name = "status",nullable=false)
@@ -149,6 +154,14 @@ public class ConstructionSite implements Serializable {
 		this.laborers = laborers;
 	}
 
+	public User getPersonInCharge() {
+		return personInCharge;
+	}
+
+	public void setPersonInCharge(User personInCharge) {
+		this.personInCharge = personInCharge;
+	}
+
 	@Override
     public int hashCode() {
         int hash = 0;
@@ -168,6 +181,8 @@ public class ConstructionSite implements Serializable {
         }
         return true;
     }
+    
+    
 
     @Override
     public String toString() {

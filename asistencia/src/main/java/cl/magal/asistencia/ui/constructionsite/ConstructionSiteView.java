@@ -16,9 +16,12 @@ import org.tepi.filtertable.FilterTable;
 import ru.xpoft.vaadin.VaadinView;
 import cl.magal.asistencia.entities.ConstructionSite;
 import cl.magal.asistencia.entities.Laborer;
+import cl.magal.asistencia.entities.User;
 import cl.magal.asistencia.entities.enums.Status;
 import cl.magal.asistencia.services.ConstructionSiteService;
+import cl.magal.asistencia.services.UserService;
 
+import com.vaadin.data.Container;
 import com.vaadin.data.fieldgroup.BeanFieldGroup;
 import com.vaadin.data.fieldgroup.FieldGroup.CommitException;
 import com.vaadin.data.util.BeanItem;
@@ -28,16 +31,23 @@ import com.vaadin.event.ItemClickEvent.ItemClickListener;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.FontAwesome;
+import com.vaadin.shared.ui.label.ContentMode;
+import com.vaadin.ui.AbstractSelect.ItemCaptionMode;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.ComboBox;
+import com.vaadin.ui.DateField;
+import com.vaadin.ui.DefaultFieldFactory;
+import com.vaadin.ui.Field;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.TabSheet;
+import com.vaadin.ui.Table;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
 
@@ -58,12 +68,18 @@ public class ConstructionSiteView extends Panel  implements View {
 	BeanFieldGroup<ConstructionSite> bfg = new BeanFieldGroup<ConstructionSite>(ConstructionSite.class);
 	BeanItemContainer<ConstructionSite> constructionContainer = new BeanItemContainer<ConstructionSite>(ConstructionSite.class);
 	BeanItemContainer<Laborer> laborerContainer = new BeanItemContainer<Laborer>(Laborer.class);
+	BeanItemContainer<User> userContainer = new BeanItemContainer<User>(User.class);
 	
 	FilterTable table;
 	VerticalLayout detalleLayout;
 	
 	@Autowired
 	private transient ConstructionSiteService service;
+	@Autowired
+	private transient UserService userService;
+	
+	HorizontalLayout root;
+	Panel panelConstruction,panelAttendance;
 	
 	
 	public ConstructionSiteView(){
@@ -72,25 +88,234 @@ public class ConstructionSiteView extends Panel  implements View {
 		
 		setSizeFull();
 		
-		HorizontalLayout root = new HorizontalLayout();
+		root = new HorizontalLayout();
 		root.setSizeFull();
-		root.setSpacing(true);
-		root.setMargin(true);
-		
 		setContent(root);
 		
-		//dibula la sección de las obras
-		VerticalLayout obras = drawObras();
+		//crea el panel de la información de obra
+		panelConstruction = new Panel();
+		panelConstruction.setSizeFull();
 		
-		root.addComponent(obras);
-		root.setExpandRatio(obras, 0.2F);
+		//dibula la sección de las obras
+		final VerticalLayout obras = drawObras();
 		
 		//dibuja la sección de detalles
-		VerticalLayout detalleObra = drawContructionDetail();
+		final VerticalLayout detalleObra = drawContructionDetail();
+		//rellena el panel de la información de obra
+		panelConstruction.setContent(new HorizontalLayout(){
+			{
+				setSizeFull();
+				setSpacing(true);
+				setMargin(true);
+				
+				addComponent(obras);
+				setExpandRatio(obras, 0.2F);
+				addComponent(detalleObra);
+				setExpandRatio(detalleObra, 0.8F);
+			}
+		});
 		
-		root.addComponent(detalleObra);
-		root.setExpandRatio(detalleObra, 0.8F);
+		root.addComponent(panelConstruction);
 		
+		//crea el panel de asistencia para intercambiarlo
+		panelAttendance = new Panel();
+		panelAttendance.setSizeFull();
+		
+		//crea la parte superior de la interfaz de asistencia
+		final HorizontalLayout topAsistencia = drawTopAttendance();
+		//crea las tabs que contienen la información de asistencia
+		final TabSheet detalleAsistencia = drawAttendanceDetail();
+		
+		panelAttendance.setContent(new VerticalLayout(){
+			{
+				setSizeFull();
+				setSpacing(true);
+				setMargin(true);
+				
+				addComponent(topAsistencia);
+				setExpandRatio(topAsistencia, 0.1F);
+				addComponent(detalleAsistencia);
+				setExpandRatio(detalleAsistencia, 0.9F);
+			}
+		});
+		
+		
+	}
+
+	private TabSheet drawAttendanceDetail() {
+		TabSheet tab = new TabSheet();
+		
+		final Object[][] dummies = new Object[28][26];
+		int j = 0;
+		for(Object[] array  : dummies){
+			for (int i = 0; i < array.length; i++) {
+				if(i == 0)
+					array[0] = j + 1;
+				else if( i == 1)
+					array[1] = "Trabajador "+(j + 1);
+				else
+					array[i] = randomAttendance();
+			}
+			j++;
+		}
+		
+		
+		Table table1 = new Table(){
+			{
+				setSizeFull();
+				setEditable(true);
+				addContainerProperty("number", Integer.class, 0);
+				setColumnHeader("number", "#");
+				setColumnWidth("number", 30);
+				addGeneratedColumn("number", new ColumnGenerator() {
+					
+					@Override
+					public Object generateCell(Table source, Object itemId, Object columnId) {
+						return source.getItem(itemId).getItemProperty(columnId).getValue();
+					}
+				});
+				
+				addContainerProperty("firstname", String.class, "");
+				setColumnHeader("firstname", "Nombre");
+				setColumnWidth("firstname", 100);
+				addGeneratedColumn("firstname", new ColumnGenerator() {
+					
+					@Override
+					public Object generateCell(Table source, Object itemId, Object columnId) {
+						return source.getItem(itemId).getItemProperty(columnId).getValue();
+					}
+				});
+
+				for(int i = 25; i < 49 ; i++){ 
+					addContainerProperty("day"+i, String.class, "");
+					setColumnHeader("day"+i, ((i%31)+1)+"");
+					setColumnWidth("day"+i, 50);
+				}
+				
+				for(Object[] array  : dummies){
+					addItem(new Object[]{0,"e3da","ddasda"});
+				}
+				
+			}
+		};
+		
+		table1.setTableFieldFactory(new ImmediateFieldFactory());
+		
+		
+		
+		tab.addTab(table1,"Asistencia");
+		
+		
+		tab.addTab(new Table(){
+			{
+				setSizeFull();
+				setEditable(true);
+				addContainerProperty("number", Integer.class, 0);
+				setColumnHeader("number", "#");
+				setColumnWidth("number", 30);
+				addGeneratedColumn("number", new ColumnGenerator() {
+					
+					@Override
+					public Object generateCell(Table source, Object itemId, Object columnId) {
+						return source.getItem(itemId).getItemProperty(columnId).getValue();
+					}
+				});
+				
+				addContainerProperty("firstname", String.class, "");
+				setColumnHeader("firstname", "Nombre");
+				setColumnWidth("firstname", 100);
+				addGeneratedColumn("firstname", new ColumnGenerator() {
+					
+					@Override
+					public Object generateCell(Table source, Object itemId, Object columnId) {
+						return source.getItem(itemId).getItemProperty(columnId).getValue();
+					}
+				});
+
+				for(int i = 25; i < 49 ; i++){ 
+					addContainerProperty("day"+i, String.class, "");
+					setColumnHeader("day"+i, ((i%31)+1)+"");
+					setColumnWidth("day"+i, 50);
+				}
+				
+				for(Object[] array  : dummies){
+					addItem(new Object[]{0,"e3da","ddasda"});
+				}
+			}
+		},"Horas Extras");
+		
+		tab.addTab(new Table(){
+			{
+				setSizeFull();
+				setEditable(true);
+			}
+		},"Cálculos");
+		
+		return tab;
+	}
+	
+	public class ImmediateFieldFactory extends DefaultFieldFactory {
+	    public Field createField(Container container,
+	                             Object itemId,
+	                             Object propertyId,
+	                             com.vaadin.ui.Component uiContext) {
+	    	 Field field = null;
+	    	if(propertyId.equals("number") || propertyId.equals("firstname") )
+	    		field = super.createField(container, itemId,
+	                                        propertyId, uiContext);
+	    	else {
+	    		field = new ComboBox(null);
+	    		for(String s : new String[]{"X","LL","P","E","S","D"}){
+	    			((ComboBox)field).addItem(s);
+	    		}
+	    	}
+	        
+	        return field;
+	    }
+	}
+
+	private Object randomAttendance() {
+		return "X";
+	}
+
+	private HorizontalLayout drawTopAttendance() {
+		return new HorizontalLayout(){
+			{
+				setWidth("100%");
+
+				addComponent(new Label("<h1>Asistencia Obra XXXX</h1>",ContentMode.HTML));
+
+				addComponent(new VerticalLayout(){
+					{
+						setSizeFull();
+						addComponent(new HorizontalLayout(){
+							{
+								setSizeFull();
+								setSpacing(true);
+								addComponent(new FormLayout(){
+									{
+										addComponent(new DateField("Fecha"));
+									}
+								});
+								addComponent(new Button("Configuraciones",FontAwesome.GEARS));
+
+							}
+						});
+						addComponent(new HorizontalLayout(){
+							{
+								setSpacing(true);
+								addComponent(new Label("Última Carga Información Reloj: 11/01/2014"));
+								addComponent(new Button("Cargar",FontAwesome.UPLOAD));
+							}
+						});
+					}
+				});
+				Button btn = new Button("Exportar",FontAwesome.FILE_EXCEL_O);
+				addComponent(btn);
+				setComponentAlignment(btn, Alignment.TOP_RIGHT);
+
+			}
+		};
 	}
 
 	@PostConstruct
@@ -177,14 +402,14 @@ public class ConstructionSiteView extends Panel  implements View {
 		//creando la parte de arriba
 		HorizontalLayout hl = drawTopDetails();
 		detalleLayout.addComponent(hl);
-		detalleLayout.setExpandRatio(hl, 0.2F);
+		detalleLayout.setExpandRatio(hl, 0.3F);
 		
 		//crea el tab con trabajadores y cuadrillas
 		TabSheet tab = new TabSheet();
 		tab.setSizeFull();
 		
 		detalleLayout.addComponent(tab);
-		detalleLayout.setExpandRatio(tab, 0.8F);
+		detalleLayout.setExpandRatio(tab, 0.7F);
 		//tab de trabajadores
 		tab.addTab(drawLaborer(),"Trabajadores");
 		
@@ -344,8 +569,15 @@ public class ConstructionSiteView extends Panel  implements View {
 			}
 			
 			bfg.bind(statusField, "status");
-			
 			vlInfo.addComponent(statusField);
+			
+			ComboBox personInChargeField = new ComboBox("Responsable",userContainer);
+			personInChargeField.setItemCaptionMode(ItemCaptionMode.PROPERTY);
+			personInChargeField.setItemCaptionPropertyId("fullname");
+			personInChargeField.setWidth("100%");			
+			bfg.bind(personInChargeField, "personInCharge");
+			
+			vlInfo.addComponent(personInChargeField);
 			
 			addComponent(vlInfo);
 			setExpandRatio(vlInfo, 1.0F);
@@ -359,6 +591,18 @@ public class ConstructionSiteView extends Panel  implements View {
 		hl.setComponentAlignment(vlIBotones, Alignment.MIDDLE_RIGHT );
 		
 		Button asistencia = new Button("Asistencia",FontAwesome.CHECK);
+		asistencia.addClickListener(new Button.ClickListener() {
+			
+			@Override
+			public void buttonClick(ClickEvent event) {
+				if(root.getComponentIndex(panelConstruction) >= 0){
+					root.removeComponent(panelConstruction);
+					root.addComponent(panelAttendance);
+				}
+			}
+		});
+		asistencia.setDisableOnClick(true);
+		
 		asistencia.setSizeFull();
 		vlIBotones.addComponent(asistencia);
 		Button vacaciones = new Button("Carga Masiva Vacaciones",FontAwesome.UPLOAD);
@@ -387,6 +631,11 @@ public class ConstructionSiteView extends Panel  implements View {
 		//si tiene al menos un elemento selecciona el primero
 		setConstruction( constructionContainer.getItem( constructionContainer.firstItemId() ));
 		table.select(constructionContainer.firstItemId());
+		
+		//llena la lista de usuarios disponibles
+		Page<User> users = userService.findAllActiveUser(new PageRequest(0, 20));
+		userContainer.removeAllItems();
+		userContainer.addAll(users.getContent());
 		
 		//agrea los trabajadores asociados a la obra TODO segun la obra seleccionada
 		//si no es vacia
