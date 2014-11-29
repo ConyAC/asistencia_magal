@@ -24,7 +24,7 @@ public class FichaService {
 	}
 	
 	public ConstructionSite findConstructionSite(Long id){
-		return rep.findNotDeteled(id);
+		return rep.findOneNotDeleted(id);
 	}
 	
 	public ConstructionSite findByAddress(String address){

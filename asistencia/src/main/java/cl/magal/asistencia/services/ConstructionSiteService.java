@@ -15,7 +15,6 @@ import cl.magal.asistencia.entities.Obra;
 import cl.magal.asistencia.repositories.ConstructionSiteRepository;
 import cl.magal.asistencia.repositories.LaborerRepository;
 import cl.magal.asistencia.repositories.ObraRepository;
-import cl.magal.asistencia.services.helpers.LaborerHelper;
 
 @Service
 public class ConstructionSiteService {
@@ -35,12 +34,11 @@ public class ConstructionSiteService {
 	}
 
 	public ConstructionSite findConstructionSite(Long id) {
-		return repo2.findOne(id);
+		return repo2.findOneNotDeleted(id);
 	}
 
 	public Page<ConstructionSite> findAllConstructionSite(Pageable page) {
 		return repo2.findAllNotDeteled(page);
-//		return repo2.findAll(page);
 	}
 
 	public ConstructionSite findConstructionSiteByNombre(String nombre) {
@@ -89,7 +87,7 @@ public class ConstructionSiteService {
 
 	public Page<Laborer> findLaborerByConstruction(ConstructionSite fisrt) {
 		Page<Laborer> page = new PageImpl<Laborer>(
-				Arrays.asList(LaborerHelper.newLaborer(),LaborerHelper.newLaborer(),LaborerHelper.newLaborer())
+				Arrays.asList(new Laborer(),new Laborer(),new Laborer())
 				);
 		return page;
 	}

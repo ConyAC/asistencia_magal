@@ -4,8 +4,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,14 +15,8 @@ import org.tepi.filtertable.FilterTable;
 import ru.xpoft.vaadin.VaadinView;
 import cl.magal.asistencia.entities.User;
 import cl.magal.asistencia.services.UserService;
-import cl.magal.asistencia.services.helpers.UserHelper;
-import cl.magal.asistencia.util.Constants;
 
-import com.vaadin.addon.jpacontainer.EntityItem;
-import com.vaadin.addon.jpacontainer.JPAContainer;
-import com.vaadin.addon.jpacontainer.JPAContainerFactory;
 import com.vaadin.data.fieldgroup.BeanFieldGroup;
-import com.vaadin.data.fieldgroup.FieldGroup;
 import com.vaadin.data.fieldgroup.FieldGroup.CommitException;
 import com.vaadin.data.util.BeanItem;
 import com.vaadin.data.util.BeanItemContainer;
@@ -136,7 +128,7 @@ public class UsersView extends HorizontalLayout implements View {
         	else if(propertyId.equals("role.name")){
         		ComboBox cb = new ComboBox("Rol",Arrays.asList("ADM","SADM"));
         		detalleUsuario.addComponent(cb);
-        		fieldGroup.bind(cb, propertyId);
+//        		fieldGroup.bind(cb, propertyId);
         	}else if(propertyId.equals("password")){
         		PasswordField pf = new PasswordField("Password");
         		pf.setNullRepresentation("");
@@ -197,7 +189,12 @@ public class UsersView extends HorizontalLayout implements View {
 			@Override
 			public void buttonClick(ClickEvent event) {
 				
-				User user = UserHelper.newUser();
+				User user = new User();
+				user.setFirstname("Nuevo Usuario");
+				user.setLastname("Nuevo Usuario");
+				user.setRut("1111111-1");
+				user.setEmail("a@magal.cl");
+				
 				service.saveUser(user);
 				container.addBean(user);
 				
