@@ -23,7 +23,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import cl.magal.asistencia.entities.Role;
 import cl.magal.asistencia.entities.enums.Permission;
+import cl.magal.asistencia.repositories.RoleRepository;
 import cl.magal.asistencia.repositories.UserRepository;
 
 @Service
@@ -33,6 +35,8 @@ public class UserService implements UserDetailsService {
 	
 	@Autowired
 	UserRepository rep;
+	@Autowired
+	RoleRepository repRole;
 	
 	@PostConstruct
 	public void init(){
@@ -181,5 +185,9 @@ public class UserService implements UserDetailsService {
 		usuario.setPassword(password);
 		savePassword(usuario);
 		rep.save(usuario);
+	}
+
+	public void saveRole(Role role) {
+		repRole.save(role);
 	}
 }
