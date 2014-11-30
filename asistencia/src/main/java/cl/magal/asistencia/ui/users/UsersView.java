@@ -150,10 +150,15 @@ public class UsersView extends HorizontalLayout implements View {
         		detalleUsuario.addComponent(pf2);
         		fieldGroup.bind(pf2, propertyId);
         	}else if(propertyId.equals("status")){
-        		detalleUsuario.addComponent(
-        		fieldGroup.buildAndBind("Estado",propertyId,OptionGroup.class));
+        		ComboBox statusField = new ComboBox("Estado");
+        		statusField.setNullSelectionAllowed(false);
+        		for(UserStatus us : UserStatus.values()){
+        			statusField.addItem(us);
+        		}
+        		detalleUsuario.addComponent(statusField);
+        		fieldGroup.bind(statusField, "status");
         	}else if(propertyId.equals("")){
-        		tcsObras = new TwinColSelect("Asignar Obras");
+        		tcsObras = new TwinColSelect("Asignar Obra");
                 // Set the column captions (optional)
                 tcsObras.setLeftColumnCaption("Obras");
                 tcsObras.setRightColumnCaption("Obras Seleccionadas");
@@ -166,7 +171,7 @@ public class UsersView extends HorizontalLayout implements View {
         		tcsObras.setRows(2);
         		
         		detalleUsuario.addComponent(tcsObras);
-        		detalleUsuario.setComponentAlignment(tcsObras, Alignment.TOP_RIGHT);
+        		detalleUsuario.setComponentAlignment(tcsObras, Alignment.MIDDLE_RIGHT);
         	}else
         		detalleUsuario.addComponent(fieldGroup.buildAndBind(propertyId)); 			
         }
