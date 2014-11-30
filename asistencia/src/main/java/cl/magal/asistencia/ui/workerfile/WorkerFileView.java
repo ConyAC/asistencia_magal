@@ -36,7 +36,7 @@ import com.vaadin.ui.Notification.Type;
 @VaadinView(value=WorkerFileView.NAME)
 @Scope("prototype")
 @Component
-public class WorkerFileView extends VerticalLayout implements View {
+public class WorkerFileView extends HorizontalLayout implements View {
 	
 	/**
 	 * 
