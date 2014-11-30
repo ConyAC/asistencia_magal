@@ -35,7 +35,6 @@ import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Panel;
-import com.vaadin.ui.TabSheet;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Notification.Type;
@@ -67,11 +66,8 @@ public class WorkerFileView extends HorizontalLayout implements View {
 		addComponent(obreros);
 		setExpandRatio(obreros, 0.2F);
 		
-		TabSheet tab = new TabSheet();
-		tab.setSizeFull();
-		
 		Panel panel = new Panel("Ficha Trabajador");
-		detalleObrero = drawDetalleObrero();		
+		detalleObrero = drawDetalleObrero();	
 		panel.setContent(detalleObrero);
 		panel.setWidth("1200px");
 		panel.setHeight("620px");
@@ -89,6 +85,7 @@ public class WorkerFileView extends HorizontalLayout implements View {
 		return vl;
 	}
 	
+	
 	private void setLaborer(BeanItem<Laborer> laborerItem){
 		
 		//obtiene el vertical Layout
@@ -97,6 +94,11 @@ public class WorkerFileView extends HorizontalLayout implements View {
 			detalleObrero.addComponent(new Label("Seleccione un obrero para ver su información"));
 			return;
 		}
+		
+		HorizontalLayout hl = new HorizontalLayout();
+		hl.setSpacing(true);
+		detalleObrero.addComponent(hl);
+		detalleObrero.setComponentAlignment(hl, Alignment.TOP_RIGHT);
 		
 		final BeanFieldGroup<Laborer> fieldGroup = new BeanFieldGroup<Laborer>(Laborer.class);
         fieldGroup.setItemDataSource(laborerItem);
@@ -118,8 +120,9 @@ public class WorkerFileView extends HorizontalLayout implements View {
         }){{
         	setIcon(FontAwesome.SAVE);
         }};
-        detalleObrero.addComponent(add);
-        detalleObrero.setComponentAlignment(add, Alignment.TOP_RIGHT);
+        hl.addComponent(add);
+        //detalleObrero.addComponent(add);
+        //detalleObrero.setComponentAlignment(add, Alignment.TOP_RIGHT);
         
 		//boton para imprimir
 		Button btnPrint = new Button(null,new Button.ClickListener() {
@@ -132,8 +135,9 @@ public class WorkerFileView extends HorizontalLayout implements View {
 		}){{
 			setIcon(FontAwesome.PRINT);
 		}};
-		detalleObrero.addComponent(btnPrint);
-		detalleObrero.setComponentAlignment(btnPrint, Alignment.TOP_LEFT);
+		 hl.addComponent(btnPrint);
+		//detalleObrero.addComponent(btnPrint);
+		//detalleObrero.setComponentAlignment(btnPrint, Alignment.TOP_LEFT);
         
         // Loop through the properties, build fields for them and add the fields
         // to this UI
@@ -167,6 +171,8 @@ public class WorkerFileView extends HorizontalLayout implements View {
         	}else
         		detalleObrero.addComponent(fieldGroup.buildAndBind(propertyId));        	
         }
+        
+        detalleObrero.setWidth("100%");
 	}
 	
 	private FilterTable drawTablaObreros() {
