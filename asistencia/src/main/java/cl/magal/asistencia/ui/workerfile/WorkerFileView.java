@@ -127,6 +127,20 @@ public class WorkerFileView extends HorizontalLayout implements View {
         detalleObrero.addComponent(add);
         detalleObrero.setComponentAlignment(add, Alignment.TOP_RIGHT);
         
+		//boton para imprimir
+		Button btnPrint = new Button(null,new Button.ClickListener() {
+			
+			@Override
+			public void buttonClick(ClickEvent event) {
+				Notification.show("Imprimiendo");
+				
+			}
+		}){{
+			setIcon(FontAwesome.PRINT);
+		}};
+		detalleObrero.addComponent(btnPrint);
+		detalleObrero.setComponentAlignment(btnPrint, Alignment.TOP_LEFT);
+        
         // Loop through the properties, build fields for them and add the fields
         // to this UI
         for (Object propertyId : fieldGroup.getUnboundPropertyIds()) {
