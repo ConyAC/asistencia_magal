@@ -38,6 +38,8 @@ import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.OptionGroup;
+import com.vaadin.ui.Panel;
+import com.vaadin.ui.TabSheet;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Notification.Type;
@@ -63,7 +65,7 @@ public class WorkerFileView extends HorizontalLayout implements View {
 
 	VerticalLayout detalleObrero;
 	FilterTable tableObrero;
-	
+
 	public WorkerFileView(){
 		
 		setSizeFull();
@@ -71,9 +73,18 @@ public class WorkerFileView extends HorizontalLayout implements View {
 		addComponent(obreros);
 		setExpandRatio(obreros, 0.2F);
 		
+		TabSheet tab = new TabSheet();
+		tab.setSizeFull();
+		
+		Panel panel = new Panel("Ficha Trabajador");
 		detalleObrero = drawDetalleObrero();		
-		addComponent(detalleObrero);
-		setExpandRatio(detalleObrero, 0.8F);
+		panel.setContent(detalleObrero);
+		panel.setWidth("1200px");
+		panel.setHeight("620px");
+		panel.getContent().setSizeUndefined();
+		addComponent(panel);
+		setComponentAlignment(panel, Alignment.MIDDLE_LEFT);
+		setExpandRatio(panel, 0.8F);		
 	}
 	
 	private VerticalLayout drawDetalleObrero() {
@@ -119,7 +130,7 @@ public class WorkerFileView extends HorizontalLayout implements View {
         // Loop through the properties, build fields for them and add the fields
         // to this UI
         for (Object propertyId : fieldGroup.getUnboundPropertyIds()) {
-        	if(propertyId.equals("laborerId"))
+        	if(propertyId.equals("laborerId") || propertyId.equals("constructionSites") || propertyId.equals("contractId") || propertyId.equals("teamId"))
         		;
         	else if(propertyId.equals("afp")){
         		ComboBox afpField = new ComboBox("AFP");
