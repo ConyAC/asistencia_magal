@@ -1,7 +1,5 @@
 package cl.magal.asistencia.ui.workerfile;
 
-import java.util.Arrays;
-import java.util.List;
 
 import javax.annotation.PostConstruct;
 
@@ -19,7 +17,6 @@ import cl.magal.asistencia.entities.Laborer;
 import cl.magal.asistencia.entities.enums.Afp;
 import cl.magal.asistencia.entities.enums.Job;
 import cl.magal.asistencia.entities.enums.MaritalStatus;
-import cl.magal.asistencia.entities.enums.Status;
 import cl.magal.asistencia.services.LaborerService;
 
 import com.vaadin.data.fieldgroup.BeanFieldGroup;
@@ -37,7 +34,6 @@ import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
-import com.vaadin.ui.OptionGroup;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.TabSheet;
 import com.vaadin.ui.VerticalLayout;
@@ -54,10 +50,8 @@ public class WorkerFileView extends HorizontalLayout implements View {
 	 */
 	private static final long serialVersionUID = 7438608047589376668L;
 	
-	private transient Logger logger = LoggerFactory.getLogger(WorkerFileView.class);
-	
-	public static final String NAME = "fichas";
-	
+	private transient Logger logger = LoggerFactory.getLogger(WorkerFileView.class);	
+	public static final String NAME = "fichas";	
 	BeanItemContainer<Laborer> laborerContainer = new BeanItemContainer<Laborer>(Laborer.class);
 	
 	@Autowired
@@ -83,7 +77,7 @@ public class WorkerFileView extends HorizontalLayout implements View {
 		panel.setHeight("620px");
 		panel.getContent().setSizeUndefined();
 		addComponent(panel);
-		setComponentAlignment(panel, Alignment.MIDDLE_LEFT);
+		setComponentAlignment(panel, Alignment.TOP_CENTER);
 		setExpandRatio(panel, 0.8F);		
 	}
 	
@@ -221,14 +215,17 @@ public class WorkerFileView extends HorizontalLayout implements View {
 			public void buttonClick(ClickEvent event) {
 				
 				Laborer l = new Laborer();
-				l.setFirstname("Jesse");
-				l.setLastname("Ward");
-				l.setRut("1111111-1");
-				l.setAfp(Afp.CAPITAL);
-				l.setAddress("Av. Algo");
-				l.setJob(Job.ALBAÑIL);
-				l.setMaritalStatus(MaritalStatus.CASADO);
-				l.setPhone("23322");
+				l.setFirstname("Nuevo Trabajador");
+				l.setLastname("");
+				l.setRut("");
+				//l.setAfp(Afp.CAPITAL);
+				l.setAddress("");
+				//l.setJob(Job.ALBAÑIL);
+				//l.setMaritalStatus(MaritalStatus.CASADO);
+				l.setPhone("");
+				l.setMobileNumber("");
+				l.setSecondlastname("");
+				l.setSecondname("");
 				
 				service.saveLaborer(l);
 				//laborerContainer.addBean(l);
@@ -272,7 +269,6 @@ public class WorkerFileView extends HorizontalLayout implements View {
 	
 	public void reloaData(){
 		Page<Laborer> page = service.findAllLaborer(new PageRequest(0, 20));
-		//List<User> users = service.findAllUser();
 		laborerContainer.removeAllItems();
 		laborerContainer.addAll(page.getContent());
 		
