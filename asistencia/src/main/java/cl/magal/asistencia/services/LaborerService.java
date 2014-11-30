@@ -1,5 +1,7 @@
 package cl.magal.asistencia.services;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -26,6 +28,10 @@ public class LaborerService {
 	
 	public void deleteLaborer(Long id){
 		rep.delete(id);
+	}
+	
+	public List<Laborer> findAllLaborer() {
+		return (List<Laborer>) rep.findAll();
 	}
 
 }
