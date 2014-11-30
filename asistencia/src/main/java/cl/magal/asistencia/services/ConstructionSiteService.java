@@ -45,9 +45,11 @@ public class ConstructionSiteService {
 	@Transactional
 	public ConstructionSite findConstructionSite(Long id) {
 		ConstructionSite cs =repo2.findOneNotDeleted(id);
-		//recupera la lista de trabajadores
-		List<Laborer> lbs = labRepo.findByConstructionSite(id);
-		cs.setLaborers(lbs);
+		if(cs != null){
+			//recupera la lista de trabajadores
+			List<Laborer> lbs = labRepo.findByConstructionSite(id);
+			cs.setLaborers(lbs);
+		}
 		return cs;
 	}
 
