@@ -1,11 +1,18 @@
 package cl.magal.asistencia.helpers;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
+
+import java.util.Set;
+
 import cl.magal.asistencia.entities.Role;
 import cl.magal.asistencia.entities.User;
+import cl.magal.asistencia.entities.enums.Permission;
 import cl.magal.asistencia.entities.enums.UserStatus;
 import cl.magal.asistencia.util.Utils;
 
@@ -20,7 +27,12 @@ public final class UserHelper {
 		User user = new User();
 		Role role = new Role();
 		role.setRoleId(1L);
+		
+		Set<Permission> perm = role.getPermission();		
+		perm.add(Permission.CREAR_OBRA);	
+		role.setPermission(perm);		
 		role.setName("ADM");
+		
 		user.setRole(role);
 		user.setRut(RUT);
 		user.setFirstname(NOMBRE+Utils.random());
@@ -28,6 +40,7 @@ public final class UserHelper {
 		user.setEmail(EMAIL);
 		user.setDeleted(false);
 		user.setStatus(UserStatus.ACTIVE);
+		user.setPassword("123456");
 		//TODO estado
 		return user;
 	}

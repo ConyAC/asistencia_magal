@@ -28,6 +28,7 @@ import com.vaadin.event.ItemClickEvent.ItemClickListener;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.FontAwesome;
+import com.vaadin.ui.AbstractSelect.ItemCaptionMode;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
@@ -38,6 +39,7 @@ import com.vaadin.ui.Notification;
 import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.OptionGroup;
 import com.vaadin.ui.PasswordField;
+import com.vaadin.ui.TwinColSelect;
 import com.vaadin.ui.VerticalLayout;
 
 @VaadinView(value=UsersView.NAME)
@@ -55,6 +57,8 @@ public class UsersView extends HorizontalLayout implements View {
 	public static final String NAME = "usuarios";
 	
 	BeanItemContainer<User> container = new BeanItemContainer<User>(User.class);
+	
+	private TwinColSelect tcsObras;
 	
 	@Autowired
 	UserService service;
@@ -98,7 +102,7 @@ public class UsersView extends HorizontalLayout implements View {
 			detalleUsuario.addComponent(new Label("Seleccione un usuario para ver su información"));
 			return;
 		}
-		detalleUsuario.setEnabled(true);
+		detalleUsuario.setEnabled(true); //VER
 		
 		final BeanFieldGroup<User> fieldGroup = new BeanFieldGroup<User>(User.class);
 		// We need an item data source before we create the fields to be able to
@@ -122,6 +126,7 @@ public class UsersView extends HorizontalLayout implements View {
         }){{
         	setIcon(FontAwesome.SAVE);
         }};
+        
         detalleUsuario.addComponent(add);
         detalleUsuario.setComponentAlignment(add, Alignment.TOP_RIGHT);
         
@@ -147,9 +152,39 @@ public class UsersView extends HorizontalLayout implements View {
         	}else if(propertyId.equals("status")){
         		detalleUsuario.addComponent(
         		fieldGroup.buildAndBind("Estado",propertyId,OptionGroup.class));
+        	}else if(propertyId.equals("")){
+        		tcsObras = new TwinColSelect("Asignar Obras");
+                // Set the column captions (optional)
+                tcsObras.setLeftColumnCaption("Obras");
+                tcsObras.setRightColumnCaption("Obras Seleccionadas");
+                
+        		tcsObras.setWidth("70%");
+        		tcsObras.setNullSelectionAllowed(true);
+        		tcsObras.setItemCaptionPropertyId("nombre");
+        		tcsObras.setItemCaptionMode(ItemCaptionMode.PROPERTY);
+        		tcsObras.setImmediate(true);
+        		tcsObras.setRows(2);
+        		
+        		detalleUsuario.addComponent(tcsObras);
+        		detalleUsuario.setComponentAlignment(tcsObras, Alignment.TOP_RIGHT);
         	}else
         		detalleUsuario.addComponent(fieldGroup.buildAndBind(propertyId)); 			
         }
+        
+		tcsObras = new TwinColSelect("Asignar Obras");
+        // Set the column captions (optional)
+        tcsObras.setLeftColumnCaption("Obras");
+        tcsObras.setRightColumnCaption("Obras Seleccionadas");
+        
+		tcsObras.setWidth("70%");
+		tcsObras.setNullSelectionAllowed(true);
+		tcsObras.setItemCaptionPropertyId("nombre");
+		tcsObras.setItemCaptionMode(ItemCaptionMode.PROPERTY);
+		tcsObras.setImmediate(true);
+		tcsObras.setRows(2);
+		
+		detalleUsuario.addComponent(tcsObras);
+		detalleUsuario.setComponentAlignment(tcsObras, Alignment.TOP_RIGHT);
 	}
 
 	private FilterTable drawTablaUsuarios() {
@@ -198,11 +233,11 @@ public class UsersView extends HorizontalLayout implements View {
 			public void buttonClick(ClickEvent event) {
 				
 				User user = new User();
-				user.setFirstname("Nombre");
-				user.setLastname("Apellido");
-				user.setEmail("Email");
+				user.setFirstname("Nuevo Usuario");
+				user.setLastname("");
+				user.setEmail("");
 				user.setStatus(UserStatus.ACTIVE);
-				user.setRut("12345678-9");
+				user.setRut("");
 				service.saveUser(user);
 				BeanItem<User> item = container.addBean(user);
 				setUser(item);

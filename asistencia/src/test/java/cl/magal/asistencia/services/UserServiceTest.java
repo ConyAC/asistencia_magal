@@ -9,6 +9,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
@@ -126,9 +128,18 @@ public class UserServiceTest {
     @Test
     public void testValidateUser() {
     	
-    	UserDetails userDetails = service.loadUserByUsername("administrator");	
-    	assertEquals("Usuario incorrecto", "administrator", userDetails.getUsername());
-    	assertEquals("Contraseña incorrecta", "admin", userDetails.getPassword());
+    	User u = UserHelper.newUser();	    	
+    	service.saveUser(u);	
+    	
+		UserHelper.verify(u);
+		User dbu = service.findUser(u.getUserId());
+		
+		UserHelper.verify(dbu);
+		UserHelper.verify(u, dbu);
+		
+    	UserDetails userDetails = service.loadUserByUsername(u.getEmail());	
+    	assertEquals("Usuario incorrecto", "a@b.com", userDetails.getUsername());
+    	assertEquals("Contraseña incorrecta", "123456", u.getPassword());
        
     }   
 

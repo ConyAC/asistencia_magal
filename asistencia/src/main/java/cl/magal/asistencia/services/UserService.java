@@ -3,6 +3,7 @@ package cl.magal.asistencia.services;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
@@ -22,7 +23,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import cl.magal.asistencia.entities.Permission;
+import cl.magal.asistencia.entities.enums.Permission;
 import cl.magal.asistencia.repositories.UserRepository;
 
 @Service
@@ -40,17 +41,16 @@ public class UserService implements UserDetailsService {
 		
 		cl.magal.asistencia.entities.User usuario = rep.findByEmail(userName);
 		if( usuario == null ){
-			String password = "123456";
-			
+			String password = "123456";			
 			usuario = new cl.magal.asistencia.entities.User();
-			usuario.setFirstname("jose");
-			usuario.setRut("123-4");
-			usuario.setLastname("soto");
+			usuario.setFirstname("Joseph");
+			usuario.setRut("12345678-9");
+			usuario.setLastname("O'Shea");
 			usuario.setEmail(userName);
 			PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 			String hashedPassword = passwordEncoder.encode(password);
 			usuario.setPassword(hashedPassword);
-//			rep.save
+			usuario.setPassword2(hashedPassword);
 			rep.save(usuario);
 		}
 		
@@ -66,15 +66,13 @@ public class UserService implements UserDetailsService {
 		if( entityUser == null )
 			throw new UsernameNotFoundException("Usuario o password incorrectas");		
 		if(entityUser.getRole() != null){
-			List<Permission> perm = entityUser.getRole().getPermission();
-		
-		//Collections.sort(perm);
-	    for(Permission p : perm){
-	       	logger.debug("permisos del role id {}", p.getPermissionId());
-	    }
+			Set<Permission> perm = entityUser.getRole().getPermission();		
+		    for(Permission p : perm){
+		    	logger.debug("permisos del role id {}", p.name());
+			}
 		}
-		//logger.info("El usuario {} ingresÃ³ el {}",userName,Utils.date2String(new Date()));
-        boolean enabled = true;
+
+		boolean enabled = true;
         boolean accountNonExpired = true;
         boolean credentialsNonExpired = true;
         boolean accountNonLocked = true;
@@ -127,7 +125,7 @@ public class UserService implements UserDetailsService {
 
        List<String> result = new LinkedList<String>();
        for(Permission permission : permissions )
-    	   result.add(permission.getName());
+    	   result.add(permission.name());
        return result;
 	}
    

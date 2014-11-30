@@ -21,9 +21,7 @@ import javax.persistence.PrePersist;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 
-import cl.magal.asistencia.entities.converter.StatusConverter;
 import cl.magal.asistencia.entities.converter.UserStatusConverter;
-import cl.magal.asistencia.entities.enums.Status;
 import cl.magal.asistencia.entities.enums.UserStatus;
 
 /**
