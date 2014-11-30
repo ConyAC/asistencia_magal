@@ -131,7 +131,7 @@ public class UserService implements UserDetailsService {
    
 	/**
 	 * 
-	 * @param roles
+	 * @param permissions
 	 * @return
 	 */
 	public static List<GrantedAuthority> getGrantedAuthorities(

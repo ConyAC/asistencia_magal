@@ -8,6 +8,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import cl.magal.asistencia.entities.Role;
@@ -28,7 +29,7 @@ public final class UserHelper {
 		Role role = new Role();
 		role.setRoleId(1L);
 		
-		Set<Permission> perm = role.getPermission();		
+		Set<Permission> perm = new HashSet<Permission>();	
 		perm.add(Permission.CREAR_OBRA);	
 		role.setPermission(perm);		
 		role.setName("ADM");

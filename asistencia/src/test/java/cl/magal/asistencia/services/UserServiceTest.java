@@ -9,13 +9,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import cl.magal.asistencia.entities.Role;
 import cl.magal.asistencia.entities.User;
+import cl.magal.asistencia.entities.enums.UserStatus;
 import cl.magal.asistencia.helpers.UserHelper;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -149,13 +147,7 @@ public class UserServiceTest {
     @Test
     public void testUserRole() {
     	
-    	User u = new User();
-    	u.setFirstname("Gabriel");
-		u.setLastname("Emerson");
-		u.setEmail("a@a.cl");
-		u.setRut("123-9");
-		u.setRole(new Role());
-
+    	User u = UserHelper.newUser();
 		service.saveUser(u);
 		assertTrue("El id no puede ser nulo.", u.getUserId() != null );
 		
@@ -165,6 +157,42 @@ public class UserServiceTest {
 		assertEquals("Id de Rol", u.getRole(), dbu.getRole());
        
     }   
+    
+    /**
+	 * Encontrar por username
+	 */
+	@Test
+	public void testFindUserByUserName() {
+		
+		User u = UserHelper.newUser();
+		
+		service.saveUser(u);		
+		UserHelper.verify(u);
+		
+		User dbu = service.findUsuarioByUsername(u.getEmail());		
+		assertNotNull("El ususario no puede ser nulo", dbu);
+		
+		assertEquals("El email del usuario debe ser igual a ", "a@b.com", dbu.getEmail());
+		
+	}	
+	
+	/**
+	 * Listar activos
+	 */
+	@Test
+	public void testListActive(){
+		
+		User u = UserHelper.newUser();
+		u.setStatus(UserStatus.DESACTIVADO);
+		service.saveUser(u);
+		
+		UserHelper.verify(u);
+		
+		User dbu = service.findUser(u.getUserId());
+		
+		UserHelper.verify(dbu);
+		assertNotNull("El usuario no debe estar desactivado", dbu.getStatus());
+	}
 
     
 }

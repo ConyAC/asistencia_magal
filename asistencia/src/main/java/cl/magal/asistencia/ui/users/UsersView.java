@@ -136,7 +136,7 @@ public class UsersView extends HorizontalLayout implements View {
         	if(propertyId.equals("role")||propertyId.equals("salt")||propertyId.equals("userId")||propertyId.equals("deleted"))
         		;
         	else if(propertyId.equals("role.name")){
-        		ComboBox cb = new ComboBox("Rol",Arrays.asList("ADM","SADM"));
+        		ComboBox cb = new ComboBox("Rol",Arrays.asList("AADMO","ADMC","ADMO","SADM"));
         		detalleUsuario.addComponent(cb);
 //        		fieldGroup.bind(cb, propertyId);
         	}else if(propertyId.equals("password")){
@@ -171,16 +171,16 @@ public class UsersView extends HorizontalLayout implements View {
         		tcsObras.setRows(2);
         		
         		detalleUsuario.addComponent(tcsObras);
-        		detalleUsuario.setComponentAlignment(tcsObras, Alignment.MIDDLE_RIGHT);
+        		//detalleUsuario.setComponentAlignment(tcsObras, Alignment.MIDDLE_RIGHT);
         	}else
         		detalleUsuario.addComponent(fieldGroup.buildAndBind(propertyId)); 			
         }
         
+        //prueba
 		tcsObras = new TwinColSelect("Asignar Obras");
         // Set the column captions (optional)
-        tcsObras.setLeftColumnCaption("Obras");
-        tcsObras.setRightColumnCaption("Obras Seleccionadas");
-        
+       // tcsObras.setLeftColumnCaption("Obras");
+       // tcsObras.setRightColumnCaption("Obras Seleccionadas");        
 		tcsObras.setWidth("70%");
 		tcsObras.setNullSelectionAllowed(true);
 		tcsObras.setItemCaptionPropertyId("nombre");
@@ -189,7 +189,7 @@ public class UsersView extends HorizontalLayout implements View {
 		tcsObras.setRows(2);
 		
 		detalleUsuario.addComponent(tcsObras);
-		detalleUsuario.setComponentAlignment(tcsObras, Alignment.TOP_RIGHT);
+		//detalleUsuario.setComponentAlignment(tcsObras, Alignment.TOP_RIGHT);
 	}
 
 	private FilterTable drawTablaUsuarios() {

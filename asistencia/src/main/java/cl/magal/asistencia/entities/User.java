@@ -15,13 +15,17 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.ManyToMany;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.PrePersist;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 
 import cl.magal.asistencia.entities.converter.UserStatusConverter;
+import cl.magal.asistencia.entities.enums.Permission;
 import cl.magal.asistencia.entities.enums.UserStatus;
 
 /**
@@ -71,6 +75,7 @@ public class User implements Serializable {
     @NotNull
     private UserStatus status = UserStatus.ACTIVE;
     
+    @OneToOne
     @JoinColumn(name="roleId")
     private Role role;
     
