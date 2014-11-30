@@ -23,6 +23,7 @@ import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.OneToMany;
 import javax.persistence.PrePersist;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
@@ -73,12 +74,15 @@ public class ConstructionSite implements Serializable {
     joinColumns = { 
     		@JoinColumn(name = "construction_siteId", referencedColumnName = "construction_siteId")
      }, 
-     inverseJoinColumns = { 
+     inverseJoinColumns = { 	
             @JoinColumn(name = "laborerId", referencedColumnName = "laborerId")
      }
 	)
     @ManyToMany(targetEntity=Laborer.class,fetch=FetchType.EAGER)
     List<Laborer> laborers = new LinkedList<Laborer>();
+    
+    @OneToMany(targetEntity=Team.class,fetch=FetchType.EAGER)
+    List<Team> teams = new LinkedList<Team>();
     
     /**
      * Obliga a que status sea activo, si no viene uno seteado
@@ -161,6 +165,14 @@ public class ConstructionSite implements Serializable {
 	public void setPersonInCharge(User personInCharge) {
 		this.personInCharge = personInCharge;
 	}
+	
+	public List<Team> getTeams() {
+		return teams;
+	}
+
+	public void setTeams(List<Team> teams) {
+		this.teams = teams;
+	}
 
 	@Override
     public int hashCode() {
@@ -196,6 +208,15 @@ public class ConstructionSite implements Serializable {
         if (!laborer.getConstructionSites().contains(this)) {
             laborer.getConstructionSites().add(this);
         }
+    }
+    
+    public void addTeam(Team team) {
+        if (!getTeams().contains(team)) {
+        	getTeams().add(team);
+            team.setConstructionsite(this) ;
+        }
+
+        
     }
     
 }
