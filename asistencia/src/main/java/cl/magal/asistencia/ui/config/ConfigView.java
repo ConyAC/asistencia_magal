@@ -17,7 +17,6 @@ import com.vaadin.ui.Calendar;
 import com.vaadin.ui.DateField;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.Label;
-import com.vaadin.ui.Slider;
 import com.vaadin.ui.TabSheet;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.TextField;
@@ -53,8 +52,38 @@ public class ConfigView extends VerticalLayout implements View {
 		
 		ts.addTab(drawAFP(),"Afps y Seguros",FontAwesome.MONEY);
 		
+		ts.addTab(drawAnticipos(),"Anticipos",FontAwesome.MONEY);
+		
 	}
 	
+	private com.vaadin.ui.Component drawAnticipos() {
+		return new VerticalLayout(){
+			{
+				setMargin(true);
+				setSpacing(true);
+				
+				addComponent(new FormLayout(){
+					{
+						addComponent(new TextField("Descuento por Permiso","15000"));
+						addComponent(new TextField("Descto Adicional por Falla ","5000"));
+					}
+				});
+				
+				addComponent(new Table("Tabla Anticipo"){
+					{
+						addContainerProperty("suple_cod", String.class, "");
+						addContainerProperty("suple_monto", String.class, "");
+						addContainerProperty("suple_monto_normal", TextField.class, new TextField());
+						addContainerProperty("suple_monto_aumento", TextField.class, new TextField());
+						setVisibleColumns("suple_cod","suple_monto","suple_monto_normal","suple_monto_aumento");
+						setColumnHeaders("Código Suple","Monto Suple","Normal","Aumento Anticipo");
+					}
+					
+				});
+			}
+		};
+	}
+
 	private com.vaadin.ui.Component drawAFP() {
 		return new VerticalLayout(){
 			{

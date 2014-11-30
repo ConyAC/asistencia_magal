@@ -108,14 +108,16 @@ public class MagalUI extends UI implements ErrorHandler {
 			throw new RuntimeException("Nombre de menu si clase conocida.");
 	}
 	
+	
+	MenuItem previous = null;
+	
 	private MenuBar drawMenu() {
 		
 		menuLayout = new MenuBar();
 		menuLayout.addStyleName("mybarmenu");
 		
 		MenuBar.Command mycommand = new MenuBar.Command() {
-			MenuItem previous = null;
-
+			
 		    public void menuSelected(MenuItem selectedItem) {
 		       
 		    	navigator.navigateTo(getUrl(selectedItem.getText()));
@@ -127,6 +129,8 @@ public class MagalUI extends UI implements ErrorHandler {
 		};
 		
 		MenuItem item = menuLayout.addItem("Obras",mycommand);
+		item.setStyleName("highlight");
+		previous=item; 
 		
 		item.setIcon(FontAwesome.BUILDING);
 		
