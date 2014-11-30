@@ -1,8 +1,8 @@
 package cl.magal.asistencia.services;
 
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import cl.magal.asistencia.entities.Laborer;
@@ -30,8 +30,7 @@ public class LaborerService {
 		rep.delete(id);
 	}
 	
-	public List<Laborer> findAllLaborer() {
-		return (List<Laborer>) rep.findAll();
+	public Page<Laborer> findAllLaborer(Pageable page) {
+		return rep.findAll(page);
 	}
-
 }

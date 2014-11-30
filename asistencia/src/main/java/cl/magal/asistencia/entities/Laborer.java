@@ -93,12 +93,15 @@ public class Laborer implements Serializable {
     private Integer teamId;
 
     @Convert(converter = JobConverter.class)
+    @Column(name = "job")
     private Job job;
     
     @Convert(converter = AfpConverter.class)
+    @Column(name = "afp")
     private Afp afp;
     
     @Convert(converter = MaritalStatusConverter.class)
+    @Column(name = "maritalStatus")
     private MaritalStatus maritalStatus;
     
     @ManyToMany(mappedBy="laborers",cascade = { CascadeType.PERSIST, CascadeType.MERGE })

@@ -1,5 +1,6 @@
 package cl.magal.asistencia.ui.workerfile;
 
+import java.util.Arrays;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
@@ -8,11 +9,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
 import org.tepi.filtertable.FilterTable;
 
 import ru.xpoft.vaadin.VaadinView;
 import cl.magal.asistencia.entities.Laborer;
+import cl.magal.asistencia.entities.enums.Afp;
+import cl.magal.asistencia.entities.enums.Job;
+import cl.magal.asistencia.entities.enums.MaritalStatus;
+import cl.magal.asistencia.entities.enums.Status;
 import cl.magal.asistencia.services.LaborerService;
 
 import com.vaadin.data.fieldgroup.BeanFieldGroup;
@@ -26,9 +33,11 @@ import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
+import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
+import com.vaadin.ui.OptionGroup;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Notification.Type;
@@ -112,18 +121,43 @@ public class WorkerFileView extends HorizontalLayout implements View {
         for (Object propertyId : fieldGroup.getUnboundPropertyIds()) {
         	if(propertyId.equals("laborerId"))
         		;
-        	else
+        	else if(propertyId.equals("afp")){
+        		ComboBox afpField = new ComboBox("AFP");
+        		afpField.setNullSelectionAllowed(false);
+    			for(Afp a : Afp.values()){
+    				afpField.addItem(a);
+    			}
+    			detalleObrero.addComponent(afpField);
+    			fieldGroup.bind(afpField, "afp");    			
+        	}else if(propertyId.equals("job")){
+        		ComboBox jobField = new ComboBox("Oficio");
+        		jobField.setNullSelectionAllowed(false);
+    			for(Job j : Job.values()){
+    				jobField.addItem(j);
+    			}
+    			detalleObrero.addComponent(jobField);
+    			fieldGroup.bind(jobField, "job");    
+        	}else if(propertyId.equals("maritalStatus")){
+        		ComboBox msField = new ComboBox("Estado Civil");
+        		msField.setNullSelectionAllowed(false);
+    			for(MaritalStatus ms : MaritalStatus.values()){
+    				msField.addItem(ms);
+    			}
+    			detalleObrero.addComponent(msField);
+    			fieldGroup.bind(msField, "maritalStatus");    
+        	}else
         		detalleObrero.addComponent(fieldGroup.buildAndBind(propertyId));        	
         }
 	}
 	
 	private FilterTable drawTablaObreros() {
 		tableObrero =  new FilterTable();
-		laborerContainer.addNestedContainerProperty("rut");
+		//laborerContainer.addNestedContainerProperty("rut");
 		tableObrero.setContainerDataSource(laborerContainer);
 		tableObrero.setSizeFull();
 		tableObrero.setFilterBarVisible(true);
 		tableObrero.setVisibleColumns("rut","firstname");
+		tableObrero.setColumnHeaders("RUT", "Nombre");
 		tableObrero.setSelectable(true);
 		
 		tableObrero.addItemClickListener(new ItemClickListener() {
@@ -165,9 +199,16 @@ public class WorkerFileView extends HorizontalLayout implements View {
 				l.setFirstname("Jesse");
 				l.setLastname("Ward");
 				l.setRut("1111111-1");
+				l.setAfp(Afp.CAPITAL);
+				l.setAddress("Av. Algo");
+				l.setJob(Job.ALBAÑIL);
+				l.setMaritalStatus(MaritalStatus.CASADO);
+				l.setPhone("23322");
 				
 				service.saveLaborer(l);
-				laborerContainer.addBean(l);				
+				//laborerContainer.addBean(l);
+				BeanItem<Laborer> item = laborerContainer.addBean(l);
+				setLaborer(item);
 			}
 		});
 		
@@ -201,10 +242,16 @@ public class WorkerFileView extends HorizontalLayout implements View {
 	
 	@Override
 	public void enter(ViewChangeEvent event) {
-		List<Laborer> l = service.findAllLaborer();
+		reloaData();		
+	}
+	
+	public void reloaData(){
+		Page<Laborer> page = service.findAllLaborer(new PageRequest(0, 20));
+		//List<User> users = service.findAllUser();
 		laborerContainer.removeAllItems();
-		laborerContainer.addAll(l);
+		laborerContainer.addAll(page.getContent());
 		
-
+		setLaborer( laborerContainer.getItem( laborerContainer.firstItemId() ));
+		tableObrero.select(laborerContainer.firstItemId());
 	}
 }

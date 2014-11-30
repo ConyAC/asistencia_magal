@@ -2,14 +2,17 @@ package cl.magal.asistencia.entities.enums;
 
 public enum Afp {
 
-	MODELO(1),
-	HABITAT(2),
-	CUPRUM(3),
-	CAPITAL(4);
+	MODELO(1, "Modelo"),
+	HABITAT(2, "Habitat"),
+	CUPRUM(3, "Cuprum"),
+	CAPITAL(4, "Capital");
 	
 	int i;
-	private Afp(int i) {
+	String description;
+	
+	private Afp(int i, String description) {
 		this.i = i;
+		this.description = description;
 	}
 	
 	public int getCorrelative(){
@@ -22,5 +25,8 @@ public enum Afp {
 				return e;
 		throw new RuntimeException("Afp invalid");
 	}
-
+	@Override
+	public String toString(){
+		return description;
+	}
 }
