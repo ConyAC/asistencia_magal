@@ -252,7 +252,7 @@ public class ConstructionSiteView extends Panel  implements View {
 				}
 				
 				Laborer laborer = new Laborer();
-				service.addLaborer(laborer,cs);
+				service.addLaborerToConstructionSite(laborer,cs);
 				
 				laborerContainer.addBean(laborer);
 				

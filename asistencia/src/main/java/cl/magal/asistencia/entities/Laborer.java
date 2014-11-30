@@ -6,16 +6,22 @@
 package cl.magal.asistencia.entities;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+
 import javax.persistence.Basic;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.ManyToMany;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.PrePersist;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -95,7 +101,24 @@ public class Laborer implements Serializable {
     @Convert(converter = MaritalStatusConverter.class)
     private MaritalStatus maritalStatus;
     
+    @ManyToMany(mappedBy="laborers",cascade = { CascadeType.PERSIST, CascadeType.MERGE })
+    List<ConstructionSite> constructionSites;
+    
+    @PrePersist
+    public void prePersist(){
+    	if(firstname == null)
+    		firstname = "Nuevo trabajador";
+    	if(afp == null)
+    		afp = Afp.MODELO;
+    	if(maritalStatus == null )
+    		maritalStatus = MaritalStatus.SOLTERO;
+    	if(job == null)
+    		job = Job.JORNAL;
+		
+    }
+    
     public Laborer() {
+    	constructionSites = new ArrayList<ConstructionSite>();
     }
 
     public Laborer(Long laborerId) {
@@ -233,6 +256,23 @@ public class Laborer implements Serializable {
 
     public void setTeamId(Integer teamId) {
         this.teamId = teamId;
+    }
+    
+    public List<ConstructionSite> getConstructionSites() {
+		return constructionSites;
+	}
+
+	public void setConstructionSites(List<ConstructionSite> constructionSites) {
+		this.constructionSites = constructionSites;
+	}
+
+	public void addConstructionSite(ConstructionSite constructionSite) {
+        if (!getConstructionSites().contains(constructionSite)) {
+        	getConstructionSites().add(constructionSite);
+        }
+        if (!constructionSite.getLaborers().contains(this)) {
+        	constructionSite.getLaborers().add(this);
+        }
     }
 
     @Override
