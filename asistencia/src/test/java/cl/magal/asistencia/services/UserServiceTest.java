@@ -1,7 +1,11 @@
 package cl.magal.asistencia.services;
 
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -12,8 +16,10 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import cl.magal.asistencia.entities.Role;
 import cl.magal.asistencia.entities.User;
 import cl.magal.asistencia.entities.enums.UserStatus;
+import cl.magal.asistencia.helpers.RoleHelper;
 import cl.magal.asistencia.helpers.UserHelper;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -24,12 +30,22 @@ public class UserServiceTest {
 	
 	@Autowired
 	UserService service;
+	
+	@Test
+	public void saveRole(){
+		Role role = RoleHelper.newRole();
+		service.saveRole(role);
+	}
+	
 	  
 	/**
 	 * Almacenar y encontrar usuario
 	 */
 	@Test
 	public void testSaveUser() {
+		
+		Role role = RoleHelper.newRole();
+		service.saveRole(role);
 		
 		User u = UserHelper.newUser();
 		

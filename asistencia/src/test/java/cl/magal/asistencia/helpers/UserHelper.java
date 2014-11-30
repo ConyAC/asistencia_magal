@@ -26,13 +26,11 @@ public final class UserHelper {
 	
 	public static User newUser(){
 		User user = new User();
-		Role role = new Role();
-		role.setRoleId(1L);
+		Role role = RoleHelper.newRole();
 		
 		Set<Permission> perm = new HashSet<Permission>();	
 		perm.add(Permission.CREAR_OBRA);	
 		role.setPermission(perm);		
-		role.setName("ADM");
 		
 		user.setRole(role);
 		user.setRut(RUT);
