@@ -2,7 +2,9 @@ package cl.magal.asistencia.ui.users;
 
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
@@ -19,6 +21,7 @@ import ru.xpoft.vaadin.VaadinView;
 import cl.magal.asistencia.entities.ConstructionSite;
 import cl.magal.asistencia.entities.Laborer;
 import cl.magal.asistencia.entities.User;
+import cl.magal.asistencia.entities.enums.Permission;
 import cl.magal.asistencia.entities.enums.Status;
 import cl.magal.asistencia.entities.enums.UserStatus;
 import cl.magal.asistencia.services.UserService;
@@ -32,6 +35,7 @@ import com.vaadin.event.ItemClickEvent.ItemClickListener;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.FontAwesome;
+import com.vaadin.server.VaadinSession;
 import com.vaadin.ui.AbstractSelect.ItemCaptionMode;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
@@ -73,6 +77,10 @@ public class UsersView extends HorizontalLayout implements View {
 	FilterTable usersTable;
 	
 	public UsersView(){
+	}
+	
+	@PostConstruct
+	private void init(){
 		
 //		container.addNestedContainerProperty("role");
 
@@ -132,8 +140,14 @@ public class UsersView extends HorizontalLayout implements View {
         	public void buttonClick(ClickEvent event) {
         		try {
         			fieldGroup.commit();
+        			User user = fieldGroup.getItemDataSource().getBean();
+        			
+        			if(tcsObras != null){
+        				user.setCs(new LinkedList<ConstructionSite>((Set)tcsObras.getValue()));;
+        				
+        			}
         			//service.addConstructionSiteToUser(cs, u);
-        			service.saveUser(fieldGroup.getItemDataSource().getBean());
+        			service.saveUser(user);
         		} catch (CommitException e) {
         			logger.error("Error al guardar la información del usuario");
         			Notification.show("Error al guardar la información del usuario", Type.ERROR_MESSAGE);
@@ -182,26 +196,30 @@ public class UsersView extends HorizontalLayout implements View {
 		//detalleUsuario.removeAllItems();
 		//detalleUsuario.addAll(cs);
         
-        //prueba
-		tcsObras = new TwinColSelect("Asignar Obras",constructionContainer);      
-		tcsObras.setWidth("70%");
-		tcsObras.setHeight("70%");
-		tcsObras.setNullSelectionAllowed(true);
-		tcsObras.setItemCaptionPropertyId("name");
-		tcsObras.setItemCaptionMode(ItemCaptionMode.PROPERTY);
-		tcsObras.setImmediate(true);
-		tcsObras.setRows(cs.size());
-		
-		logger.debug("obras " + cs);
-		if (cs != null) {
-			HashSet<Long> preselected = new HashSet<Long>();
-			for (ConstructionSite obra : cs) {
-				preselected.add(obra.getConstructionsiteId());
+        if(hastPermission(Permission.ASIGNAR_OBRA)){
+	        //prueba
+			tcsObras = new TwinColSelect("Asignar Obras",constructionContainer);      
+			tcsObras.setWidth("70%");
+			tcsObras.setHeight("70%");
+			tcsObras.setNullSelectionAllowed(true);
+			tcsObras.setItemCaptionPropertyId("name");
+			tcsObras.setItemCaptionMode(ItemCaptionMode.PROPERTY);
+			tcsObras.setImmediate(true);
+			tcsObras.setRows(cs.size());
+			
+			logger.debug("obras " + cs);
+			if (cs != null) {
+				HashSet<Long> preselected = new HashSet<Long>();
+				for (ConstructionSite obra : cs) {
+					preselected.add(obra.getConstructionsiteId());
+				}
+				tcsObras.setValue(preselected);
 			}
-			tcsObras.setValue(preselected);
-		}
+			
+			detalleUsuario.addComponent(tcsObras);
+        }
 		
-		detalleUsuario.addComponent(tcsObras);
+		
 		detalleUsuario.setWidth("100%");
 		//detalleUsuario.setComponentAlignment(tcsObras, Alignment.TOP_RIGHT);
 	}
@@ -285,9 +303,22 @@ public class UsersView extends HorizontalLayout implements View {
 		
 		return vl;
 	}
-
-	@PostConstruct
-	private void init(){
+	
+	private boolean hastPermission(Permission... permissions) {
+		if(permissions == null)	
+			return true;
+		
+		User usuario = (User) VaadinSession.getCurrent().getAttribute(
+				"usuario");
+		if(usuario.getRole() == null || usuario.getRole().getPermission() == null ){
+			return false;
+		}
+		for(Permission p : permissions){
+			if(!usuario.getRole().getPermission().contains(p))
+				return false;
+		}
+		
+		return true;
 	}
 
 	@Override

@@ -17,6 +17,7 @@ import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -55,7 +56,7 @@ public class Role implements Serializable {
     private String description;
 
     //tabla intermedia entre role y sus permisos    
-    @ElementCollection(targetClass=Permission.class)
+    @ElementCollection(targetClass=Permission.class,fetch=FetchType.EAGER)
     @CollectionTable(name="permission", joinColumns = @JoinColumn(name = "roleId"))
     @Column(name="role_permission")
     @Enumerated(EnumType.STRING) 

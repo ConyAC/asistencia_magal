@@ -16,6 +16,8 @@ import ru.xpoft.vaadin.VaadinView;
 import cl.magal.asistencia.entities.Configurations;
 import cl.magal.asistencia.entities.ConstructionSite;
 import cl.magal.asistencia.entities.DateConfigurations;
+import cl.magal.asistencia.entities.User;
+import cl.magal.asistencia.entities.enums.Permission;
 import cl.magal.asistencia.services.ConfigurationService;
 import cl.magal.asistencia.services.ConstructionSiteService;
 
@@ -27,6 +29,7 @@ import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.FontAwesome;
+import com.vaadin.server.VaadinSession;
 import com.vaadin.shared.ui.datefield.Resolution;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.AbstractSelect.ItemCaptionMode;
@@ -124,6 +127,12 @@ public class ConfigView extends VerticalLayout implements View {
 
 					}
 				});
+
+				if(!hastPermission(Permission.DEFINIR_VARIABLE_GLOBAL)){
+					setEnabled(false);
+				}else{
+					setEnabled(true);
+				}
 			}
 		};
 	}
@@ -159,6 +168,12 @@ public class ConfigView extends VerticalLayout implements View {
 
 					}
 				});
+
+				if(!hastPermission(Permission.DEFINIR_VARIABLE_GLOBAL)){
+					setEnabled(false);
+				}else{
+					setEnabled(true);
+				}
 			}
 		};
 	}
@@ -196,6 +211,12 @@ public class ConfigView extends VerticalLayout implements View {
 					}
 
 				});
+
+				if(!hastPermission(Permission.DEFINIR_VARIABLE_GLOBAL)){
+					setEnabled(false);
+				}else{
+					setEnabled(true);
+				}
 			}
 		};
 	}
@@ -225,7 +246,11 @@ public class ConfigView extends VerticalLayout implements View {
 						setPageLength(6);
 					}
 				});
-				
+				if(!hastPermission(Permission.DEFINIR_VARIABLE_GLOBAL)){
+					setEnabled(false);
+				}else{
+					setEnabled(true);
+				}
 				
 			}
 		};
@@ -356,6 +381,11 @@ public class ConfigView extends VerticalLayout implements View {
 				};
 				addComponent(form);
 				setComponentAlignment(form, Alignment.MIDDLE_CENTER);
+				if(!hastPermission(Permission.DEFINIR_VARIABLE_GLOBAL)){
+					setEnabled(false);
+				}else{
+					setEnabled(true);
+				}
 			}
 		};
 	}
@@ -425,9 +455,32 @@ public class ConfigView extends VerticalLayout implements View {
 				};
 				addComponent(form);
 				setComponentAlignment(form, Alignment.MIDDLE_CENTER);
+				
+				if(!hastPermission(Permission.DEFINIR_VARIABLE_GLOBAL)){
+					setEnabled(false);
+				}else{
+					setEnabled(true);
+				}
 			}
 		};
 
+	}
+	
+		private boolean hastPermission(Permission... permissions) {
+		if(permissions == null)
+			return true;
+		
+		User usuario = (User) VaadinSession.getCurrent().getAttribute(
+				"usuario");
+		if(usuario.getRole() == null || usuario.getRole().getPermission() == null ){
+			return false;
+		}
+		for(Permission p : permissions){
+			if(!usuario.getRole().getPermission().contains(p))
+				return false;
+		}
+		
+		return true;
 	}
 
 
@@ -521,6 +574,12 @@ public class ConfigView extends VerticalLayout implements View {
 		vl.addComponent(hl);
 		
 		vl.addComponent(table);
+		
+		if(!hastPermission(Permission.DEFINIR_VARIABLE_GLOBAL)){
+			vl.setEnabled(false);
+		}else{
+			vl.setEnabled(true);
+		}
 
 		
 		return vl;

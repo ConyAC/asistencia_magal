@@ -11,6 +11,8 @@ import org.springframework.context.annotation.Scope;
 
 import ru.xpoft.vaadin.DiscoveryNavigator;
 import ru.xpoft.vaadin.SpringVaadinServlet;
+import cl.magal.asistencia.entities.User;
+import cl.magal.asistencia.entities.enums.Permission;
 import cl.magal.asistencia.ui.config.ConfigView;
 import cl.magal.asistencia.ui.constructionsite.ConstructionSiteView;
 import cl.magal.asistencia.ui.login.LoginView;
@@ -138,9 +140,11 @@ public class MagalUI extends UI implements ErrorHandler {
 		
 		item.setIcon(FontAwesome.BOOK);
 		
-		item = menuLayout.addItem("Usuarios", mycommand);
-		
-		item.setIcon(FontAwesome.USERS);
+		if(hastPermission(Permission.CREAR_USUARIO)){
+			item = menuLayout.addItem("Usuarios", mycommand);
+			
+			item.setIcon(FontAwesome.USERS);
+		}
 		
 		item = menuLayout.addItem("Configuraciones",mycommand);
 		
@@ -178,5 +182,27 @@ public class MagalUI extends UI implements ErrorHandler {
 		
 	public Component getMenuLayout() {
 		return menuLayout;
+	}
+	
+	private boolean hastPermission(Permission... permissions) {
+		if(permissions == null)
+			return true;
+		
+		User usuario = (User) VaadinSession.getCurrent().getAttribute(
+				"usuario");
+		if(usuario == null ){
+			logger.debug("usuario nulo");
+			return true;
+		}
+		
+		if(usuario.getRole() == null || usuario.getRole().getPermission() == null ){
+			return false;
+		}
+		for(Permission p : permissions){
+			if(!usuario.getRole().getPermission().contains(p))
+				return false;
+		}
+		
+		return true;
 	}
 }

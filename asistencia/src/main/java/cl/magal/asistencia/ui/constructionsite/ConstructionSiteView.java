@@ -24,6 +24,7 @@ import cl.magal.asistencia.entities.User;
 import cl.magal.asistencia.entities.enums.Afp;
 import cl.magal.asistencia.entities.enums.Job;
 import cl.magal.asistencia.entities.enums.MaritalStatus;
+import cl.magal.asistencia.entities.enums.Permission;
 import cl.magal.asistencia.entities.enums.Status;
 import cl.magal.asistencia.services.ConstructionSiteService;
 import cl.magal.asistencia.services.UserService;
@@ -39,6 +40,7 @@ import com.vaadin.event.ItemClickEvent.ItemClickListener;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.FontAwesome;
+import com.vaadin.server.VaadinSession;
 import com.vaadin.shared.ui.datefield.Resolution;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.AbstractSelect.ItemCaptionMode;
@@ -46,7 +48,6 @@ import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.DateField;
 import com.vaadin.ui.DefaultFieldFactory;
 import com.vaadin.ui.Field;
 import com.vaadin.ui.FormLayout;
@@ -455,53 +456,86 @@ public class ConstructionSiteView extends Panel  implements View {
 		VerticalLayout vl = new VerticalLayout();
 		vl.setSpacing(true);
 
-		//botones agrega y eliminar
-		HorizontalLayout hl = new HorizontalLayout();
-		hl.setSpacing(true);
-
-		vl.addComponent(hl);
-		vl.setComponentAlignment(hl, Alignment.BOTTOM_CENTER );
-		Button agregaObra = new Button(null,FontAwesome.PLUS);
-		//agregando obras dummy
-		agregaObra.addClickListener(new Button.ClickListener() {
-
-			/**
-			 * 
-			 */
-			private static final long serialVersionUID = 3844920778615955739L;
-
-			@Override
-			public void buttonClick(ClickEvent event) {
-				ConstructionSite obra = new ConstructionSite();
-				obra.setName("Nueva Obra");
-				service.save(obra);
-				BeanItem<ConstructionSite> item = constructionContainer.addBean(obra);
-				setConstruction(item);
-			}
-		});
-		hl.addComponent(agregaObra);
-		Button borrarObra = new Button(null,FontAwesome.TRASH_O);
-		borrarObra.addClickListener(new Button.ClickListener() {
-
-			@Override
-			public void buttonClick(ClickEvent event) {
-				ConstructionSite cs = (ConstructionSite) table.getValue();
-				if(cs == null){
-					Notification.show("Debe seleccionar una obra para eliminar");
-					return;
+		//agrega solo si tiene los permisos
+		
+		if(hastPermission(Permission.CREAR_OBRA,Permission.ELIMINAR_OBRA)){
+		
+			//botones agrega y eliminar
+			HorizontalLayout hl = new HorizontalLayout();
+			hl.setSpacing(true);
+	
+			vl.addComponent(hl);
+			vl.setComponentAlignment(hl, Alignment.BOTTOM_CENTER );
+			Button agregaObra = new Button(null,FontAwesome.PLUS);
+			//agregando obras dummy
+			agregaObra.addClickListener(new Button.ClickListener() {
+	
+				/**
+				 * 
+				 */
+				private static final long serialVersionUID = 3844920778615955739L;
+	
+				@Override
+				public void buttonClick(ClickEvent event) {
+					ConstructionSite obra = new ConstructionSite();
+					obra.setName("Nueva Obra");
+					service.save(obra);
+					BeanItem<ConstructionSite> item = constructionContainer.addBean(obra);
+					setConstruction(item);
 				}
-				service.deleteCS(cs.getConstructionsiteId());
-				constructionContainer.removeItem(cs);
-				setConstruction(null);
-
-			}
-		});
-		hl.addComponent(borrarObra);
+			});
+			hl.addComponent(agregaObra);
+			Button borrarObra = new Button(null,FontAwesome.TRASH_O);
+			borrarObra.addClickListener(new Button.ClickListener() {
+	
+				@Override
+				public void buttonClick(ClickEvent event) {
+					ConstructionSite cs = (ConstructionSite) table.getValue();
+					if(cs == null){
+						Notification.show("Debe seleccionar una obra para eliminar");
+						return;
+					}
+					service.deleteCS(cs.getConstructionsiteId());
+					constructionContainer.removeItem(cs);
+					setConstruction(null);
+	
+				}
+			});
+			hl.addComponent(borrarObra);
+		}
 
 		//la tabla con su buscador buscador
 		vl.addComponent(drawConstructionTable());
 
 		return vl;
+	}
+	
+	private boolean hasConstructionSite(ConstructionSite cs){
+		
+		User usuario = (User) VaadinSession.getCurrent().getAttribute(
+				"usuario");
+		if(usuario.getCs()!= null && usuario.getCs().contains(cs) ){
+			return true;
+		}
+		
+		return false;
+	}
+
+	private boolean hastPermission(Permission... permissions) {
+		if(permissions == null)
+			return true;
+		
+		User usuario = (User) VaadinSession.getCurrent().getAttribute(
+				"usuario");
+		if(usuario.getRole() == null || usuario.getRole().getPermission() == null ){
+			return false;
+		}
+		for(Permission p : permissions){
+			if(!usuario.getRole().getPermission().contains(p))
+				return false;
+		}
+		
+		return true;
 	}
 
 	private FilterTable drawConstructionTable() {
@@ -608,7 +642,7 @@ public class ConstructionSiteView extends Panel  implements View {
 
 		return vl;
 	}
-
+	
 	private VerticalLayout drawLaborer() {
 
 		VerticalLayout vl = new VerticalLayout();
@@ -623,7 +657,7 @@ public class ConstructionSiteView extends Panel  implements View {
 		vl.addComponent(hl);
 		vl.setComponentAlignment(hl, Alignment.TOP_RIGHT);
 
-		Button btnPrint = new Button(null,FontAwesome.PRINT);
+		btnPrint = new Button(null,FontAwesome.PRINT);
 		hl.addComponent(btnPrint);
 
 		btnPrint.addClickListener(new Button.ClickListener() {
@@ -635,7 +669,7 @@ public class ConstructionSiteView extends Panel  implements View {
 			}
 		});
 
-		Button btnAdd = new Button(null,FontAwesome.PLUS);
+		btnAdd = new Button(null,FontAwesome.PLUS);
 		hl.addComponent(btnAdd);
 
 		btnAdd.addClickListener(new Button.ClickListener() {
@@ -802,6 +836,19 @@ public class ConstructionSiteView extends Panel  implements View {
 			setEnabledDetail(false,new BeanItem<ConstructionSite>(new ConstructionSite()));
 			return;
 		}
+		
+		if(hasConstructionSite(item.getBean())){
+			if( editConstructionSite != null )
+				editConstructionSite.setEnabled(true);
+			btnPrint.setEnabled(true);
+			btnAdd.setEnabled(true);;
+		}else{
+			if( editConstructionSite != null )
+				editConstructionSite.setEnabled(false);
+			btnPrint.setEnabled(false);
+			btnAdd.setEnabled(false);
+		}
+		
 		setEnabledDetail(true,item);
 		List<Laborer> laborers = service.getLaborerByConstruction(item.getBean());
 		laborerContainer.removeAllItems();
@@ -818,6 +865,8 @@ public class ConstructionSiteView extends Panel  implements View {
 		detailLayout.setEnabled(enable);
 		
 	}
+	
+	Button editConstructionSite,btnPrint,btnAdd;
 
 	private HorizontalLayout drawTopDetails() {
 
@@ -841,25 +890,28 @@ public class ConstructionSiteView extends Panel  implements View {
 			bfg.bind(nameField, "name");
 
 			vlInfo.addComponent(nameField);
-			//agrega un boton que hace el commit
-			Button add = new Button(null,new Button.ClickListener() {
-
-				@Override
-				public void buttonClick(ClickEvent event) {
-					try {
-						bfg.commit();
-						service.save(bfg.getItemDataSource().getBean());
-					} catch (CommitException e) {
-						logger.error("Error al guardar la información la obra",e);
-						Notification.show("Error al guardar la información del usuario", Type.ERROR_MESSAGE);
+			
+			if(hastPermission(Permission.EDITAR_OBRA) ){
+				//agrega un boton que hace el commit
+				editConstructionSite = new Button(null,new Button.ClickListener() {
+	
+					@Override
+					public void buttonClick(ClickEvent event) {
+						try {
+							bfg.commit();
+							service.save(bfg.getItemDataSource().getBean());
+						} catch (CommitException e) {
+							logger.error("Error al guardar la información la obra",e);
+							Notification.show("Error al guardar la información del usuario", Type.ERROR_MESSAGE);
+						}
+	
 					}
-
-				}
-			}){{
-				setIcon(FontAwesome.SAVE);
-			}};
-			addComponent(add);
-			setComponentAlignment(add, Alignment.TOP_RIGHT);
+				}){{
+					setIcon(FontAwesome.SAVE);
+				}};
+				addComponent(editConstructionSite);
+				setComponentAlignment(editConstructionSite, Alignment.TOP_RIGHT);
+			}
 
 			TextField addressField = new TextField("Dirección");
 			addressField.setWidth("100%");

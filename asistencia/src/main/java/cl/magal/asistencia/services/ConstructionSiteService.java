@@ -3,6 +3,7 @@ package cl.magal.asistencia.services;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.annotation.PostConstruct;
 import javax.transaction.Transactional;
 
 import org.slf4j.Logger;
@@ -17,6 +18,7 @@ import cl.magal.asistencia.entities.ConstructionSite;
 import cl.magal.asistencia.entities.Laborer;
 import cl.magal.asistencia.entities.Obra;
 import cl.magal.asistencia.entities.Team;
+import cl.magal.asistencia.entities.enums.Status;
 import cl.magal.asistencia.repositories.ConstructionSiteRepository;
 import cl.magal.asistencia.repositories.LaborerRepository;
 import cl.magal.asistencia.repositories.ObraRepository;
@@ -33,6 +35,32 @@ public class ConstructionSiteService {
 	LaborerRepository labRepo;
 	@Autowired
 	TeamRepository teamRepo;
+	
+	@PostConstruct
+	public void init(){
+		//si no existe obras crea 2 de muestra
+		
+		List<ConstructionSite> obras = repo2.findAllNotDeteled();
+		if( obras.isEmpty() ){
+
+			ConstructionSite obra = new ConstructionSite();
+			obra.setName("Edificio Jardines de Olivares");
+			obra.setStatus(Status.ACTIVE);
+			obra.setAddress("");
+			obra.setDeleted(false);
+			
+			repo2.save(obra);
+			
+			obra = new ConstructionSite();
+			obra.setName("Edificio Parque Sebastián Elcano");
+			obra.setStatus(Status.ACTIVE);
+			obra.setAddress("");
+			obra.setDeleted(false);
+			
+			repo2.save(obra);
+		}
+		
+	}
 	
 	public void save(ConstructionSite obra) {
 		repo2.save(obra);
