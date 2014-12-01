@@ -1,6 +1,8 @@
 package cl.magal.asistencia.ui.users;
 
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
 
 import javax.annotation.PostConstruct;
 
@@ -14,6 +16,8 @@ import org.springframework.stereotype.Component;
 import org.tepi.filtertable.FilterTable;
 
 import ru.xpoft.vaadin.VaadinView;
+import cl.magal.asistencia.entities.ConstructionSite;
+import cl.magal.asistencia.entities.Laborer;
 import cl.magal.asistencia.entities.User;
 import cl.magal.asistencia.entities.enums.Status;
 import cl.magal.asistencia.entities.enums.UserStatus;
@@ -138,7 +142,6 @@ public class UsersView extends HorizontalLayout implements View {
         	else if(propertyId.equals("role.name")){
         		ComboBox cb = new ComboBox("Rol",Arrays.asList("AADMO","ADMC","ADMO","SADM"));
         		detalleUsuario.addComponent(cb);
-//        		fieldGroup.bind(cb, propertyId);
         	}else if(propertyId.equals("password")){
         		PasswordField pf = new PasswordField("Password");
         		pf.setNullRepresentation("");
@@ -157,36 +160,31 @@ public class UsersView extends HorizontalLayout implements View {
         		}
         		detalleUsuario.addComponent(statusField);
         		fieldGroup.bind(statusField, "status");
-        	}else if(propertyId.equals("")){
-        		tcsObras = new TwinColSelect("Asignar Obra");
-                // Set the column captions (optional)
-                tcsObras.setLeftColumnCaption("Obras");
-                tcsObras.setRightColumnCaption("Obras Seleccionadas");
-                
-        		tcsObras.setWidth("70%");
-        		tcsObras.setNullSelectionAllowed(true);
-        		tcsObras.setItemCaptionPropertyId("nombre");
-        		tcsObras.setItemCaptionMode(ItemCaptionMode.PROPERTY);
-        		tcsObras.setImmediate(true);
-        		tcsObras.setRows(2);
-        		
-        		detalleUsuario.addComponent(tcsObras);
-        		//detalleUsuario.setComponentAlignment(tcsObras, Alignment.MIDDLE_RIGHT);
         	}else
         		detalleUsuario.addComponent(fieldGroup.buildAndBind(propertyId)); 			
         }
         
+        List<ConstructionSite> cs = service.getObraByUser(userItem.getBean());
+		//detalleUsuario.removeAllItems();
+		//detalleUsuario.addAll(cs);
+        
         //prueba
-		tcsObras = new TwinColSelect("Asignar Obras");
-        // Set the column captions (optional)
-       // tcsObras.setLeftColumnCaption("Obras");
-       // tcsObras.setRightColumnCaption("Obras Seleccionadas");        
+		tcsObras = new TwinColSelect("Asignar Obras");      
 		tcsObras.setWidth("70%");
 		tcsObras.setNullSelectionAllowed(true);
 		tcsObras.setItemCaptionPropertyId("nombre");
 		tcsObras.setItemCaptionMode(ItemCaptionMode.PROPERTY);
 		tcsObras.setImmediate(true);
-		tcsObras.setRows(2);
+		tcsObras.setRows(cs.size());
+		
+		logger.debug("obras " + cs);
+		if (cs != null) {
+			HashSet<Long> preselected = new HashSet<Long>();
+			for (ConstructionSite obra : cs) {
+				preselected.add(obra.getConstructionsiteId());
+			}
+			tcsObras.setValue(preselected);
+		}
 		
 		detalleUsuario.addComponent(tcsObras);
 		//detalleUsuario.setComponentAlignment(tcsObras, Alignment.TOP_RIGHT);

@@ -91,7 +91,7 @@ public class User implements Serializable {
     	            @JoinColumn(name = "construction_siteId", referencedColumnName = "construction_siteId")
     	     }
     		)
-     @ManyToMany(targetEntity=Laborer.class,fetch=FetchType.EAGER)
+     @OneToMany(targetEntity=ConstructionSite.class,fetch=FetchType.EAGER)
      List<ConstructionSite> cs = new LinkedList<ConstructionSite>();
     
     /**

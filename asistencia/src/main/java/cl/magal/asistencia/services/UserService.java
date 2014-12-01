@@ -23,8 +23,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import cl.magal.asistencia.entities.ConstructionSite;
+import cl.magal.asistencia.entities.Laborer;
 import cl.magal.asistencia.entities.Role;
 import cl.magal.asistencia.entities.enums.Permission;
+import cl.magal.asistencia.repositories.ConstructionSiteRepository;
 import cl.magal.asistencia.repositories.RoleRepository;
 import cl.magal.asistencia.repositories.UserRepository;
 
@@ -38,6 +41,9 @@ public class UserService implements UserDetailsService {
 	
 	@Autowired
 	RoleRepository repRole;
+	
+	@Autowired
+	ConstructionSiteRepository repoCS;
 	
 	@PostConstruct
 	public void init(){
@@ -200,4 +206,10 @@ public class UserService implements UserDetailsService {
 	public Page<cl.magal.asistencia.entities.User> findAllActiveUser(Pageable page) {
 		return rep.findAll(page);
 	}
+	
+	public List<ConstructionSite> getObraByUser( cl.magal.asistencia.entities.User u) {
+		List<ConstructionSite> cs = repoCS.findByUser(u.getUserId());
+		return cs;
+	}
+
 }
