@@ -13,7 +13,6 @@
 	    <class>cl.magal.asistencia.entities.Permission</class>
 	    <class>cl.magal.asistencia.entities.Role</class>
 	    <class>cl.magal.asistencia.entities.Team</class>
-	    <class>cl.magal.asistencia.entities.TeamConstructionsite</class>
 	    <class>cl.magal.asistencia.entities.Tool</class>
 	    <class>cl.magal.asistencia.entities.User</class>
 	    <class>cl.magal.asistencia.entities.converter.AfpConverter</class>
