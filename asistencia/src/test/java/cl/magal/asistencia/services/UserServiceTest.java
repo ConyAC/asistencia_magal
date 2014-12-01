@@ -1,10 +1,16 @@
 package cl.magal.asistencia.services;
 
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.test.context.ContextConfiguration;
@@ -12,54 +18,57 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import cl.magal.asistencia.entities.Role;
 import cl.magal.asistencia.entities.User;
+import cl.magal.asistencia.entities.enums.UserStatus;
+import cl.magal.asistencia.helpers.RoleHelper;
+import cl.magal.asistencia.helpers.UserHelper;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = { "/META-INF/spring/testApplicationContext.xml" })
 public class UserServiceTest {
 	
+	Logger logger = LoggerFactory.getLogger(ConstructionSiteServiceTest.class);
+	
 	@Autowired
 	UserService service;
+	
+	@Test
+	public void saveRole(){
+		Role role = RoleHelper.newRole();
+		service.saveRole(role);
+	}
+	
 	  
 	/**
-	 * Almacenar
+	 * Almacenar y encontrar usuario
 	 */
 	@Test
 	public void testSaveUser() {
 		
-		User u = new User();
-		u.setFirstname("Gabriel");
-		u.setLastname("Emerson");
-		u.setEmail("a@a.cl");
-		u.setRut("123-9");
-
-		service.saveUser(u);
-		assertTrue("El id no puede ser nulo.", u.getUserId() != null );
+		Role role = RoleHelper.newRole();
+		service.saveRole(role);
 		
+		User u = UserHelper.newUser();
+		
+		service.saveUser(u);
+		UserHelper.verify(u);				
 		User dbu = service.findUser(u.getUserId());
-		assertNotNull("El ususario no puede ser nulo", dbu);
-		assertTrue("El id de u no puede ser nulo.", u.getUserId() != null );		
+		UserHelper.verify(dbu);		
+		UserHelper.verify(u, dbu);				
 	}
 	
 	/**
-	 * Encontrar
+	 * Falla si los principales datos estàn nulos
 	 */
-	@Test
-	public void testFindUser() {
+	@Test(expected=Exception.class)
+	public void testFailSaveNull() {
 		
-		User u = new User();
-		u.setFirstname("Gabriel");
-		u.setLastname("Emerson");
-		u.setEmail("a@a.cl");
-		u.setRut("123-9");
+		User u = UserHelper.newUser();	
+		u.setFirstname(null);
+		u.setLastname(null);
+		u.setRut(null);
 		
-		service.saveUser(u);		
-		assertTrue("El id no puede ser nulo.", u.getUserId() != null );
-		
-		User dbu = service.findUser(u.getUserId());		
-		assertNotNull("El ususario no puede ser nulo", dbu);
-		
-		assertEquals("El rut del usuario debe ser igual a ", "123-9", dbu.getRut());
-		
+		service.saveUser(u);
+		fail("No debe llegar aquì");		
 	}
 	
 	/**
@@ -68,25 +77,41 @@ public class UserServiceTest {
 	@Test
 	public void testUpdate() {
 		
-		User u = new User();
-		u.setFirstname("Gabriel");
-		u.setLastname("Emerson");
-		u.setEmail("a@a.cl");
-		u.setRut("123-9");
+		User u = UserHelper.newUser();
+				
+		service.saveUser(u);		
+
+		UserHelper.verify(u);
+		
+		User dbu = service.findUser(u.getUserId());		
+		
+		UserHelper.verify(dbu);
+		UserHelper.verify(u, dbu);
+		
+		u.setFirstname("Jesse");
+		service.saveUser(u);			
+		
+		dbu = service.findUser(u.getUserId());
+		UserHelper.verify(u, dbu);				
+	}
+	
+	/**
+	 * Encontrar
+	 */
+	@Test
+	public void testFindUser() {
+		
+		User u = UserHelper.newUser();
 		
 		service.saveUser(u);		
-		assertTrue("El id no puede ser nulo.", u.getUserId() != null );	
+		assertTrue("El id no puede ser nulo.", u.getUserId() != null );
 		
 		User dbu = service.findUser(u.getUserId());		
 		assertNotNull("El ususario no puede ser nulo", dbu);
 		
-		u.setEmail("b@b.com");		
-		service.saveUser(u);
+		assertEquals("El rut del usuario debe ser igual a ", "16127401-1", dbu.getRut());
 		
-		dbu = service.findUser(u.getUserId());			
-		assertEquals("Email debe ser igual", u.getEmail(), dbu.getEmail());		
-				
-	}
+	}	
 	
 	/**
 	 * Eliminar
@@ -94,32 +119,41 @@ public class UserServiceTest {
 	@Test
 	public void testDelete() {
 		
-		User u = new User();
-		u.setFirstname("Gabriel");
-		u.setLastname("Emerson");
-		u.setEmail("a@a.cl");
-		u.setRut("123-9");
-		
+		User u = UserHelper.newUser();
 		service.saveUser(u);		
-		assertTrue("El id no puede ser nulo.", u.getUserId() != null );	
-				
+
+		UserHelper.verify(u);
+		User dbu = service.findUser(u.getUserId());
+		
+		UserHelper.verify(dbu);
+		UserHelper.verify(u, dbu);
+		
 		service.deleteUser(u.getUserId());		
 		
-		User dbu = service.findUser(u.getUserId());
+		dbu = service.findUser(u.getUserId());
 				
 		assertNull("El usuario debe ser nulo luego de la eliminacion", dbu );
 		
 	}
-	
+		
 	/**
 	 * Validar usuario
 	 */
     @Test
     public void testValidateUser() {
     	
-    	UserDetails userDetails = service.loadUserByUsername("administrator");	
-    	assertEquals("Usuario incorrecto", "administrator", userDetails.getUsername());
-    	assertEquals("Contraseña incorrecta", "admin", userDetails.getPassword());
+    	User u = UserHelper.newUser();	    	
+    	service.saveUser(u);	
+    	
+		UserHelper.verify(u);
+		User dbu = service.findUser(u.getUserId());
+		
+		UserHelper.verify(dbu);
+		UserHelper.verify(u, dbu);
+		
+    	UserDetails userDetails = service.loadUserByUsername(u.getEmail());	
+    	assertEquals("Usuario incorrecto", "a@b.com", userDetails.getUsername());
+    	assertEquals("Contraseña incorrecta", "123456", u.getPassword());
        
     }   
 
@@ -129,22 +163,58 @@ public class UserServiceTest {
     @Test
     public void testUserRole() {
     	
-    	User u = new User();
-    	u.setFirstname("Gabriel");
-		u.setLastname("Emerson");
-		u.setEmail("a@a.cl");
-		u.setRut("123-9");
-		u.setRole(new Role());
-
+    	Role role = RoleHelper.newRole();
+		service.saveRole(role);
+    	
+    	User u = UserHelper.newUser();
+    	u.setRole(role);
+    	
 		service.saveUser(u);
-		assertTrue("El id no puede ser nulo.", u.getUserId() != null );
+		UserHelper.verify(u);
 		
 		User dbu = service.findUser(u.getUserId());
-		assertNotNull("El ususario no puede ser nulo", dbu);
-		assertTrue("El id de u no puede ser nulo.", u.getUserId() != null );		
+		UserHelper.verify(dbu);
+		
+		assertTrue("El id del role no puede ser nulo.", u.getRole().getRoleId() != null );		
 		assertEquals("Id de Rol", u.getRole(), dbu.getRole());
        
     }   
+    
+    /**
+	 * Encontrar por username
+	 */
+	@Test
+	public void testFindUserByUserName() {
+		
+		User u = UserHelper.newUser();
+		
+		service.saveUser(u);		
+		UserHelper.verify(u);
+		
+		User dbu = service.findUsuarioByUsername(u.getEmail());		
+		assertNotNull("El ususario no puede ser nulo", dbu);
+		
+		assertEquals("El email del usuario debe ser igual a ", "a@b.com", dbu.getEmail());
+		
+	}	
+	
+	/**
+	 * Listar activos
+	 */
+	@Test
+	public void testListActive(){
+		
+		User u = UserHelper.newUser();
+		u.setStatus(UserStatus.DESACTIVADO);
+		service.saveUser(u);
+		
+		UserHelper.verify(u);
+		
+		User dbu = service.findUser(u.getUserId());
+		
+		UserHelper.verify(dbu);
+		assertNotNull("El usuario no debe estar desactivado", dbu.getStatus());
+	}
 
     
 }

@@ -13,6 +13,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import cl.magal.asistencia.entities.Role;
+import cl.magal.asistencia.helpers.RoleHelper;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = { "/META-INF/spring/testApplicationContext.xml" })
@@ -22,18 +23,15 @@ public class RoleServiceTest {
 	RoleService service;
 
 	/**
-	 * 
+	 * Guardar Role
 	 */
 	@Test
 	public void testSaveRole() {	
 		
-		Role r = new Role();
-		r.setName("Adm_Central");
-		r.setDescription("Administra los usuarios del sistema...");
-		
+		Role r = RoleHelper.newRole();
 		service.saveRole(r);
-		assertTrue("El id no puede ser nulo.", r.getRoleId() != null );
 		
+		RoleHelper.verify(r);		
 	}	
 	
 	/**
@@ -42,35 +40,30 @@ public class RoleServiceTest {
 	@Test
 	public void testFindRole() {	
 		
-		Role r = new Role();
-		r.setName("Adm_Central");
-		r.setDescription("Administra los usuarios del sistema...");
+		Role r = RoleHelper.newRole();
 		
 		service.saveRole(r);
-		assertTrue("El id no puede ser nulo.", r.getRoleId() != null );
+		RoleHelper.verify(r);
 		
 		Role dbr = service.findRole(r.getRoleId());
 		
 		assertNotNull("El rol no puede ser nulo", dbr);		
-		assertEquals("El nombre del rol debe ser igual a ", "Adm_Central", dbr.getName());
+		assertEquals("El nombre del rol debe ser igual a ", "ADM", dbr.getName());
 		
 	}	
 	
 	/**
-	 * 
+	 * Actualizar
 	 */
 	@Test
 	public void testUpdateRole() {	
 		
-		Role r = new Role();
-		r.setName("Adm_Central");
-		r.setDescription("Administra los usuarios del sistema...");
-		
+		Role r = RoleHelper.newRole();
 		service.saveRole(r);
-		assertTrue("El id no puede ser nulo.", r.getRoleId() != null );
+		RoleHelper.verify(r);
 		
 		Role dbr = service.findRole(r.getRoleId());		
-		assertNotNull("El rol no puede ser nulo", dbr);	
+		RoleHelper.verify(r);
 		
 		r.setName("Adm_Central_1");
 		service.saveRole(r);
@@ -81,14 +74,12 @@ public class RoleServiceTest {
 	}	
 	
 	/**
-	 * 
+	 * Eliminar
 	 */
 	@Test
 	public void testDeleteRole() {	
 		
-		Role r = new Role();
-		r.setName("Adm_Central");
-		r.setDescription("Administra los usuarios del sistema...");
+		Role r = RoleHelper.newRole();
 		
 		service.saveRole(r);
 		assertTrue("El id no puede ser nulo.", r.getRoleId() != null );

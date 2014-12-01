@@ -6,15 +6,29 @@
 package cl.magal.asistencia.entities;
 
 import java.io.Serializable;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
+
 import javax.persistence.Basic;
+import javax.persistence.CollectionTable;
 import javax.persistence.Column;
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
+
+import cl.magal.asistencia.entities.enums.Permission;
 
 /**
  *
@@ -40,6 +54,13 @@ public class Role implements Serializable {
     @Column(name = "description")
     private String description;
 
+    //tabla intermedia entre role y sus permisos    
+    @ElementCollection(targetClass=Permission.class)
+    @CollectionTable(name="permission", joinColumns = @JoinColumn(name = "roleId"))
+    @Column(name="role_permission")
+    @Enumerated(EnumType.STRING) 
+    Set<Permission> permission; 
+    
     public Role() {
     }
 
@@ -76,7 +97,15 @@ public class Role implements Serializable {
         this.description = description;
     }
 
-    @Override
+	public Set<Permission> getPermission() {
+		return permission;
+	}
+
+	public void setPermission(Set<Permission> permission) {
+		this.permission = permission;
+	}
+
+	@Override
     public int hashCode() {
         int hash = 0;
         hash += (roleId != null ? roleId.hashCode() : 0);

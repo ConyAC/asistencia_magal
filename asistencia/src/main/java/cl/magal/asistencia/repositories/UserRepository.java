@@ -15,4 +15,9 @@ public interface UserRepository extends PagingAndSortingRepository<User, Long> {
 
 	@Query(value="SELECT u.role FROM user u WHERE u.userId = :id " , nativeQuery=true)
 	Integer findRawRoleUser(@Param("id") Long id);	
+	
+	@Query(value="SELECT u FROM User u WHERE u.deleted = false ")
+	Page<User> findAllNotDeteled(Pageable page);
+	@Query(value="SELECT u FROM User u WHERE u.email = ?1 and u.deleted = false ")
+	User findByEmail(String email); 
 }

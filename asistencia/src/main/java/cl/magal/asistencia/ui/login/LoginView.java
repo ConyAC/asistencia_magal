@@ -2,10 +2,18 @@ package cl.magal.asistencia.ui.login;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.stereotype.Component;
 
 import ru.xpoft.vaadin.VaadinView;
+import cl.magal.asistencia.services.UserService;
 import cl.magal.asistencia.ui.MagalUI;
 import cl.magal.asistencia.ui.constructionsite.ConstructionSiteView;
 
@@ -13,6 +21,7 @@ import com.vaadin.event.ShortcutAction.KeyCode;
 import com.vaadin.event.ShortcutListener;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
+import com.vaadin.server.VaadinSession;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
@@ -42,6 +51,12 @@ public class LoginView extends VerticalLayout implements View {
 	public static final String NAME = "";
 
 	final Button signin;
+	
+	@Autowired
+	private transient AuthenticationManager authenticationManager;
+	@Autowired
+	private transient UserService userService;
+	
 
 	ShortcutListener enter = new ShortcutListener("Entrar",
 			KeyCode.ENTER, null) {
@@ -52,7 +67,7 @@ public class LoginView extends VerticalLayout implements View {
 
 	};
 	
-public LoginView() {
+	public LoginView() {
     	
     	setSizeFull();
     	addStyleName("login-layout");
@@ -109,13 +124,30 @@ public LoginView() {
 		            } 
 				 else {
 					 try {
+						 logger.debug("Holi ", username +" "+ password );
+						 	UsernamePasswordAuthenticationToken token = 
+		                            new UsernamePasswordAuthenticationToken(u, p);
+		                    
+		                    Authentication authentication = authenticationManager.authenticate(token);
+
+		                    // Set the authentication info to context 
+		                    SecurityContext securityContext = SecurityContextHolder.getContext();
+		                    securityContext.setAuthentication(authentication);
+		                    VaadinSession.getCurrent().setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY, SecurityContextHolder.getContext());
+		                    //busca el usuario en base de datos para guardarlo en la session
+		                    cl.magal.asistencia.entities.User user = userService.findUsuarioByUsername(u);
+		                    VaadinSession.getCurrent().setAttribute("usuario", user);
+		                    logger.debug("Login authentication "+authentication);
+		                    signin.removeShortcutListener(enter);
+		                    //quita cualquier mensaje de error que quedara
+		                    if (loginPanel.getComponentCount() > 2) {
+		                        // Remove the previous error message
+		                        loginPanel.removeComponent(loginPanel.getComponent(2));
+		                    }
 		                   
 						 ((MagalUI)UI.getCurrent()).getMenuLayout().setVisible(true);
 		                    UI.getCurrent().getNavigator().navigateTo(ConstructionSiteView.NAME);
-		                    Label error = new Label(
-		                            "2233",
-		                            ContentMode.HTML);
-		                    loginPanel.addComponent(error);
+		                    
 					} catch (Exception e) {
 						logger.debug("Mal login ", e );
 						if (loginPanel.getComponentCount() > 2) {

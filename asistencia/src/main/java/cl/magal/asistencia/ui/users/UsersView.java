@@ -1,6 +1,7 @@
 package cl.magal.asistencia.ui.users;
 
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
@@ -9,11 +10,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
 import org.tepi.filtertable.FilterTable;
 
 import ru.xpoft.vaadin.VaadinView;
+import cl.magal.asistencia.entities.ConstructionSite;
+import cl.magal.asistencia.entities.Laborer;
 import cl.magal.asistencia.entities.User;
+import cl.magal.asistencia.entities.enums.Status;
+import cl.magal.asistencia.entities.enums.UserStatus;
 import cl.magal.asistencia.services.UserService;
 
 import com.vaadin.data.fieldgroup.BeanFieldGroup;
@@ -25,6 +32,7 @@ import com.vaadin.event.ItemClickEvent.ItemClickListener;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.FontAwesome;
+import com.vaadin.ui.AbstractSelect.ItemCaptionMode;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
@@ -32,8 +40,11 @@ import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
+import com.vaadin.ui.Panel;
 import com.vaadin.ui.Notification.Type;
+import com.vaadin.ui.OptionGroup;
 import com.vaadin.ui.PasswordField;
+import com.vaadin.ui.TwinColSelect;
 import com.vaadin.ui.VerticalLayout;
 
 @VaadinView(value=UsersView.NAME)
@@ -51,6 +62,9 @@ public class UsersView extends HorizontalLayout implements View {
 	public static final String NAME = "usuarios";
 	
 	BeanItemContainer<User> container = new BeanItemContainer<User>(User.class);
+	BeanItemContainer<ConstructionSite> constructionContainer = new BeanItemContainer<ConstructionSite>(ConstructionSite.class);
+	
+	private TwinColSelect tcsObras;
 	
 	@Autowired
 	UserService service;
@@ -70,11 +84,21 @@ public class UsersView extends HorizontalLayout implements View {
 		addComponent(usuarios);
 		setExpandRatio(usuarios, 0.2F);
 		
-		//dibuja la sección de detalles
-		detalleUsuario = drawDetalleUsuario();
+		Panel panel = new Panel("");
+		detalleUsuario = drawDetalleUsuario();	
+		panel.setContent(detalleUsuario);
+		panel.setWidth("1200px");
+		panel.setHeight("620px");
+		panel.getContent().setSizeUndefined();
+		addComponent(panel);
+		setComponentAlignment(panel, Alignment.TOP_CENTER);
+		setExpandRatio(panel, 0.8F);		
 		
-		addComponent(detalleUsuario);
-		setExpandRatio(detalleUsuario, 0.8F);
+		//dibuja la sección de detalles
+		//detalleUsuario = drawDetalleUsuario();
+		
+		//addComponent(detalleUsuario);
+		//setExpandRatio(detalleUsuario, 0.8F);
 	}
 	
 	private VerticalLayout drawDetalleUsuario() {
@@ -90,10 +114,11 @@ public class UsersView extends HorizontalLayout implements View {
 		//obtiene el vertical Layout
 		detalleUsuario.removeAllComponents();
 		if(userItem == null){
+			detalleUsuario.setEnabled(false);
 			detalleUsuario.addComponent(new Label("Seleccione un usuario para ver su información"));
 			return;
 		}
-		
+		detalleUsuario.setEnabled(true); //VER
 		
 		final BeanFieldGroup<User> fieldGroup = new BeanFieldGroup<User>(User.class);
 		// We need an item data source before we create the fields to be able to
@@ -107,6 +132,7 @@ public class UsersView extends HorizontalLayout implements View {
         	public void buttonClick(ClickEvent event) {
         		try {
         			fieldGroup.commit();
+        			//service.addConstructionSiteToUser(cs, u);
         			service.saveUser(fieldGroup.getItemDataSource().getBean());
         		} catch (CommitException e) {
         			logger.error("Error al guardar la información del usuario");
@@ -117,18 +143,18 @@ public class UsersView extends HorizontalLayout implements View {
         }){{
         	setIcon(FontAwesome.SAVE);
         }};
+        
         detalleUsuario.addComponent(add);
         detalleUsuario.setComponentAlignment(add, Alignment.TOP_RIGHT);
         
         // Loop through the properties, build fields for them and add the fields
         // to this UI
         for (Object propertyId : fieldGroup.getUnboundPropertyIds()) {
-        	if(propertyId.equals("role")||propertyId.equals("salt")||propertyId.equals("userId"))
+        	if(propertyId.equals("role")||propertyId.equals("salt")||propertyId.equals("userId")||propertyId.equals("deleted")||propertyId.equals("cs"))
         		;
         	else if(propertyId.equals("role.name")){
-        		ComboBox cb = new ComboBox("Rol",Arrays.asList("ADM","SADM"));
+        		ComboBox cb = new ComboBox("Rol",Arrays.asList("AADMO","ADMC","ADMO","SADM"));
         		detalleUsuario.addComponent(cb);
-//        		fieldGroup.bind(cb, propertyId);
         	}else if(propertyId.equals("password")){
         		PasswordField pf = new PasswordField("Password");
         		pf.setNullRepresentation("");
@@ -139,10 +165,45 @@ public class UsersView extends HorizontalLayout implements View {
         		pf2.setNullRepresentation("");
         		detalleUsuario.addComponent(pf2);
         		fieldGroup.bind(pf2, propertyId);
-        	}else
+        	}else if(propertyId.equals("status")){
+        		ComboBox statusField = new ComboBox("Estado");
+        		statusField.setNullSelectionAllowed(false);
+        		for(UserStatus us : UserStatus.values()){
+        			statusField.addItem(us);
+        		}
+        		detalleUsuario.addComponent(statusField);
+        		fieldGroup.bind(statusField, "status");
+        	}else{
         		detalleUsuario.addComponent(fieldGroup.buildAndBind(propertyId));
-        	
+        	}
         }
+        
+        List<ConstructionSite> cs = service.getObraByUser(userItem.getBean());
+		//detalleUsuario.removeAllItems();
+		//detalleUsuario.addAll(cs);
+        
+        //prueba
+		tcsObras = new TwinColSelect("Asignar Obras",constructionContainer);      
+		tcsObras.setWidth("70%");
+		tcsObras.setHeight("70%");
+		tcsObras.setNullSelectionAllowed(true);
+		tcsObras.setItemCaptionPropertyId("name");
+		tcsObras.setItemCaptionMode(ItemCaptionMode.PROPERTY);
+		tcsObras.setImmediate(true);
+		tcsObras.setRows(cs.size());
+		
+		logger.debug("obras " + cs);
+		if (cs != null) {
+			HashSet<Long> preselected = new HashSet<Long>();
+			for (ConstructionSite obra : cs) {
+				preselected.add(obra.getConstructionsiteId());
+			}
+			tcsObras.setValue(preselected);
+		}
+		
+		detalleUsuario.addComponent(tcsObras);
+		detalleUsuario.setWidth("100%");
+		//detalleUsuario.setComponentAlignment(tcsObras, Alignment.TOP_RIGHT);
 	}
 
 	private FilterTable drawTablaUsuarios() {
@@ -152,6 +213,7 @@ public class UsersView extends HorizontalLayout implements View {
 		usersTable.setSizeFull();
 		usersTable.setFilterBarVisible(true);
 		usersTable.setVisibleColumns("role.name","firstname");
+		usersTable.setColumnHeaders("Perfil", "Nombre");
 		usersTable.setSelectable(true);
 		
 		usersTable.addItemClickListener(new ItemClickListener() {
@@ -177,9 +239,9 @@ public class UsersView extends HorizontalLayout implements View {
 		hl.setSpacing(true);
 		vl.addComponent(hl);
 		vl.setComponentAlignment(hl, Alignment.BOTTOM_CENTER );
-		Button agregaObra = new Button(null,FontAwesome.PLUS);
+		Button agregaUsuario = new Button(null,FontAwesome.PLUS);
 		//agregando obras dummy
-		agregaObra.addClickListener(new Button.ClickListener() {
+		agregaUsuario.addClickListener(new Button.ClickListener() {
 			
 			/**
 			 * 
@@ -191,18 +253,19 @@ public class UsersView extends HorizontalLayout implements View {
 				
 				User user = new User();
 				user.setFirstname("Nuevo Usuario");
-				user.setLastname("Nuevo Usuario");
-				user.setRut("1111111-1");
-				user.setEmail("a@magal.cl");
-				
+				user.setLastname("");
+				user.setEmail("");
+				user.setStatus(UserStatus.ACTIVE);
+				user.setRut("");
 				service.saveUser(user);
-				container.addBean(user);
+				BeanItem<User> item = container.addBean(user);
+				setUser(item);
 				
 			}
 		});
-		hl.addComponent(agregaObra);
-		Button borrarObra = new Button(null,FontAwesome.TRASH_O);
-		borrarObra.addClickListener(new Button.ClickListener() {
+		hl.addComponent(agregaUsuario);
+		Button borrarUsuario = new Button(null,FontAwesome.TRASH_O);
+		borrarUsuario.addClickListener(new Button.ClickListener() {
 			
 			@Override
 			public void buttonClick(ClickEvent event) {
@@ -214,12 +277,11 @@ public class UsersView extends HorizontalLayout implements View {
 				}
 				//TODO dialogo de confirmación
 				service.deleteUser(user.getUserId());
-				container.removeItem(user);
-				
+				container.removeItem(user);				
 				setUser(null);
 			}
 		});
-		hl.addComponent(borrarObra);
+		hl.addComponent(borrarUsuario);
 		
 		return vl;
 	}
@@ -230,10 +292,21 @@ public class UsersView extends HorizontalLayout implements View {
 
 	@Override
 	public void enter(ViewChangeEvent event) {
-		List<User> users = service.findAllUser();
+		reloaData();		
+	}
+	
+	public void reloaData(){
+		Page<User> page = service.findAllUser(new PageRequest(0, 20));
+		//List<User> users = service.findAllUser();
 		container.removeAllItems();
-		container.addAll(users);
+		container.addAll(page.getContent());
 		
+		List<ConstructionSite> css = service.getAllObra();
+        constructionContainer.removeAllItems();
+        constructionContainer.addAll(css);
+		
+		setUser( container.getItem( container.firstItemId() ));
+		usersTable.select(container.firstItemId());
 	}
 
 }
