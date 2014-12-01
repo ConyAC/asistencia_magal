@@ -191,4 +191,13 @@ public class UserService implements UserDetailsService {
 	public void saveRole(Role role) {
 		repRole.save(role);
 	}
+	
+	/**
+	 * TODO filtrar por usuarios activos solamente
+	 * @param page
+	 * @return
+	 */
+	public Page<cl.magal.asistencia.entities.User> findAllActiveUser(Pageable page) {
+		return rep.findAll(page);
+	}
 }

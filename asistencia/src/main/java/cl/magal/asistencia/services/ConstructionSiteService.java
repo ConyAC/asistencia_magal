@@ -16,9 +16,11 @@ import org.springframework.stereotype.Service;
 import cl.magal.asistencia.entities.ConstructionSite;
 import cl.magal.asistencia.entities.Laborer;
 import cl.magal.asistencia.entities.Obra;
+import cl.magal.asistencia.entities.Team;
 import cl.magal.asistencia.repositories.ConstructionSiteRepository;
 import cl.magal.asistencia.repositories.LaborerRepository;
 import cl.magal.asistencia.repositories.ObraRepository;
+import cl.magal.asistencia.repositories.TeamRepository;
 
 @Service
 public class ConstructionSiteService {
@@ -29,6 +31,8 @@ public class ConstructionSiteService {
 	ConstructionSiteRepository repo2;
 	@Autowired
 	LaborerRepository labRepo;
+	@Autowired
+	TeamRepository teamRepo;
 	
 	public void save(ConstructionSite obra) {
 		repo2.save(obra);
@@ -41,9 +45,11 @@ public class ConstructionSiteService {
 	@Transactional
 	public ConstructionSite findConstructionSite(Long id) {
 		ConstructionSite cs =repo2.findOneNotDeleted(id);
-		//recupera la lista de trabajadores
-		List<Laborer> lbs = labRepo.findByConstructionSite(id);
-		cs.setLaborers(lbs);
+		if(cs != null){
+			//recupera la lista de trabajadores
+			List<Laborer> lbs = labRepo.findByConstructionSite(id);
+			cs.setLaborers(lbs);
+		}
 		return cs;
 	}
 
@@ -114,6 +120,33 @@ public class ConstructionSiteService {
 		labRepo.save(laborer);
 		dbcs.addLaborer(laborer);
 		repo2.save(dbcs);
+	}
+
+	/**
+	 * TODO
+	 * @param team
+	 * @param cs
+	 */
+	public void addTeamToConstructionSite(Team team, ConstructionSite cs) {
+		
+		ConstructionSite dbcs = repo2.findOne(cs.getConstructionsiteId());
+		
+		logger.debug("dbcs "+dbcs);
+		dbcs.addTeam(team);	
+		teamRepo.save(team);
+		logger.debug("dbcs team "+dbcs.getTeams());
+	}
+
+	public List<Team> getTeamsByConstruction(ConstructionSite cs) {
+		logger.debug("cs "+cs);
+		List<Team> teamAlls = (List<Team>) teamRepo.findAll();
+		for(Team t : teamAlls){
+			logger.debug("t "+t);
+			logger.debug("t.getConstructionsite "+t.getConstructionsite());
+		}
+		List<Team> teams = teamRepo.findByConstructionsite(cs);
+		logger.debug("teams "+teams);
+		return teams;
 	}
 
 }

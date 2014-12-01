@@ -2,17 +2,20 @@ package cl.magal.asistencia.entities.enums;
 
 public enum Job {
 
-	JORNAL(1),
-	CARPINTERO(2),
-	ENFIERRADOR(3),
-	GASFITER(4),
-	ALBAÑIL(5),
-	ESTUCADOR(6),
-	JEFE_OBRA(7);
+	JORNAL(1, "Jornal"),
+	CARPINTERO(2, "Carpintero"),
+	ENFIERRADOR(3, "Enfierrador"),
+	GASFITER(4, "Gasfiter"),
+	ALBAÑIL(5, "Albañil"),
+	ESTUCADOR(6, "Estucador"),
+	JEFE_OBRA(7, "Jefe Obra");
 	
 	int i;
-	private Job(int i) {
+	String description;
+	
+	private Job(int i, String description) {
 		this.i = i;
+		this.description = description;
 	}
 	
 	public int getCorrelative(){
@@ -26,4 +29,8 @@ public enum Job {
 		throw new RuntimeException("Job invalid");
 	}
 
+	@Override
+	public String toString(){
+		return description;
+	}	
 }

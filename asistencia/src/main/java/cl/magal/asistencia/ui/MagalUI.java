@@ -39,7 +39,7 @@ import com.vaadin.ui.VerticalLayout;
 @Scope("prototype")
 @SuppressWarnings("serial")
 @Title("Asistencia Magal")
-@Theme("valo")
+@Theme("magaltheme")
 public class MagalUI extends UI implements ErrorHandler {
 	
 	private transient Logger logger = LoggerFactory.getLogger(MagalUI.class);
@@ -88,51 +88,61 @@ public class MagalUI extends UI implements ErrorHandler {
 		DefaultErrorHandler.doDefault(event);
 	}
 	
+	public String getUrl(String menuName){
+		if(menuName == null )
+			throw new RuntimeException("Nombre de menu si clase conocida.");
+		
+		if(menuName.equals("Obras"))
+			return ConstructionSiteView.NAME;
+		else if(menuName.equals("Fichas"))
+			return WorkerFileView.NAME;
+		else if(menuName.equals("Usuarios"))
+			return UsersView.NAME;
+		else if(menuName.equals("Usuarios"))
+			return UsersView.NAME;
+		else if(menuName.equals("Configuraciones"))
+			return ConfigView.NAME;
+		else if(menuName.equals("Salir"))
+			return null;
+		else
+			throw new RuntimeException("Nombre de menu si clase conocida.");
+	}
+	
+	
+	MenuItem previous = null;
+	
 	private MenuBar drawMenu() {
 		
 		menuLayout = new MenuBar();
+		menuLayout.addStyleName("mybarmenu");
 		
-		MenuItem item = menuLayout.addItem("Obras", new Command() {
+		MenuBar.Command mycommand = new MenuBar.Command() {
 			
-			@Override
-			public void menuSelected(MenuItem selectedItem) {
-				navigator.navigateTo(ConstructionSiteView.NAME);
-				
-			}
-		});
+		    public void menuSelected(MenuItem selectedItem) {
+		       
+		    	navigator.navigateTo(getUrl(selectedItem.getText()));
+		        if (previous != null)
+		            previous.setStyleName(null);
+		        selectedItem.setStyleName("highlight");
+		        previous = selectedItem;
+		    } 
+		};
+		
+		MenuItem item = menuLayout.addItem("Obras",mycommand);
+		item.setStyleName("highlight");
+		previous=item; 
 		
 		item.setIcon(FontAwesome.BUILDING);
 		
-		item = menuLayout.addItem("Fichas", new Command() {
-			
-			@Override
-			public void menuSelected(MenuItem selectedItem) {
-				navigator.navigateTo(WorkerFileView.NAME);
-				
-			}
-		});
+		item = menuLayout.addItem("Fichas",mycommand);
 		
 		item.setIcon(FontAwesome.BOOK);
 		
-		item = menuLayout.addItem("Usuarios", new Command() {
-			
-			@Override
-			public void menuSelected(MenuItem selectedItem) {
-				navigator.navigateTo(UsersView.NAME);
-				
-			}
-		});
+		item = menuLayout.addItem("Usuarios", mycommand);
 		
 		item.setIcon(FontAwesome.USERS);
 		
-		item = menuLayout.addItem("Configuraciones", new Command() {
-			
-			@Override
-			public void menuSelected(MenuItem selectedItem) {
-				navigator.navigateTo(ConfigView.NAME);
-				
-			}
-		});
+		item = menuLayout.addItem("Configuraciones",mycommand);
 		
 		item.setIcon(FontAwesome.GEAR);
 		
@@ -141,7 +151,7 @@ public class MagalUI extends UI implements ErrorHandler {
 			@Override
 			public void menuSelected(MenuItem selectedItem) {
 				logOut();
-				
+				selectedItem.setVisible(false);
 			}
 		});
 		

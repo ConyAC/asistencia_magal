@@ -7,17 +7,26 @@ package cl.magal.asistencia.entities;
 
 import java.io.Serializable;
 import java.util.Date;
+
 import javax.persistence.Basic;
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.PrePersist;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.validation.constraints.NotNull;
+
+import cl.magal.asistencia.entities.converter.StatusConverter;
+import cl.magal.asistencia.entities.enums.Status;
 
 /**
  *
@@ -30,9 +39,9 @@ import javax.persistence.TemporalType;
     @NamedQuery(name = "Team.findByTeamId", query = "SELECT t FROM Team t WHERE t.teamId = :teamId"),
     @NamedQuery(name = "Team.findByName", query = "SELECT t FROM Team t WHERE t.name = :name"),
     @NamedQuery(name = "Team.findByDate", query = "SELECT t FROM Team t WHERE t.date = :date"),
-    @NamedQuery(name = "Team.findByConstructionsiteId", query = "SELECT t FROM Team t WHERE t.constructionsiteId = :constructionsiteId"),
-    @NamedQuery(name = "Team.findByUserId", query = "SELECT t FROM Team t WHERE t.userId = :userId"),
-    @NamedQuery(name = "Team.findByStatusId", query = "SELECT t FROM Team t WHERE t.statusId = :statusId"),
+    @NamedQuery(name = "Team.findByConstructionsite", query = "SELECT t FROM Team t WHERE t.constructionsite = :constructionsite"),
+    @NamedQuery(name = "Team.findByUser", query = "SELECT t FROM Team t WHERE t.leader = :leader"),
+    @NamedQuery(name = "Team.findByStatusId", query = "SELECT t FROM Team t WHERE t.status = :status"),
     @NamedQuery(name = "Team.findByDeleted", query = "SELECT t FROM Team t WHERE t.deleted = :deleted")})
 public class Team implements Serializable {
     private static final long serialVersionUID = 1L;
@@ -48,28 +57,31 @@ public class Team implements Serializable {
     @Temporal(TemporalType.TIMESTAMP)
     private Date date;
     @Basic(optional = false)
-    @Column(name = "construction_siteId")
-    private int constructionsiteId;
+    @JoinColumn(name = "construction_siteId")
+    @ManyToOne
+    private ConstructionSite constructionsite;
     @Basic(optional = false)
-    @Column(name = "userId")
-    private int userId;
-    @Column(name = "statusId")
-    private Integer statusId;
+    @JoinColumn(name = "leaderId")
+    @ManyToOne
+    private Laborer leader;
+    @Convert(converter = StatusConverter.class)
+    @Column(name = "status",nullable=false)
+    @NotNull
+    private Status status;//FIXME ocuparemos el mismo o otro enum para el estado de las cuadrillas?
     @Column(name = "deleted")
     private Boolean deleted;
 
+    @PrePersist
+    public void prePersist(){
+    	if(deleted == null )
+    		deleted = Boolean.FALSE;
+    }
+    
     public Team() {
     }
 
     public Team(Integer teamId) {
         this.teamId = teamId;
-    }
-
-    public Team(Integer teamId, String name, int constructionsiteId, int userId) {
-        this.teamId = teamId;
-        this.name = name;
-        this.constructionsiteId = constructionsiteId;
-        this.userId = userId;
     }
 
     public Integer getTeamId() {
@@ -96,31 +108,31 @@ public class Team implements Serializable {
         this.date = date;
     }
 
-    public int getConstructionsiteId() {
-        return constructionsiteId;
+    public ConstructionSite getConstructionsite() {
+        return constructionsite;
     }
 
-    public void setConstructionsiteId(int constructionsiteId) {
-        this.constructionsiteId = constructionsiteId;
-    }
+    public Laborer getLeader() {
+		return leader;
+	}
 
-    public int getUserId() {
-        return userId;
-    }
+	public void setLeader(Laborer leader) {
+		this.leader = leader;
+	}
 
-    public void setUserId(int userId) {
-        this.userId = userId;
-    }
+	public void setConstructionsite(ConstructionSite constructionsite) {
+		this.constructionsite = constructionsite;
+	}
 
-    public Integer getStatusId() {
-        return statusId;
-    }
+    public Status getStatus() {
+		return status;
+	}
 
-    public void setStatusId(Integer statusId) {
-        this.statusId = statusId;
-    }
+	public void setStatus(Status status) {
+		this.status = status;
+	}
 
-    public Boolean getDeleted() {
+	public Boolean getDeleted() {
         return deleted;
     }
 

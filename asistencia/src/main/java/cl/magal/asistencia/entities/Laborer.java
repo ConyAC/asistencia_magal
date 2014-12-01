@@ -65,15 +65,15 @@ public class Laborer implements Serializable {
     @Column(name = "laborerId")
     private Long laborerId;
     @Basic(optional = false)
-    @Column(name = "firstname")
+    @Column(name = "firstname", nullable=false)
     private String firstname;
     @Column(name = "secondname")
     private String secondname;
-    @Column(name = "lastname")
+    @Column(name = "lastname", nullable=false)
     private String lastname;
     @Column(name = "secondlastname")
     private String secondlastname;
-    @Column(name = "rut")
+    @Column(name = "rut", nullable=false)
     private String rut;
     @Column(name = "dateBirth")
     @Temporal(TemporalType.TIMESTAMP)
@@ -93,12 +93,15 @@ public class Laborer implements Serializable {
     private Integer teamId;
 
     @Convert(converter = JobConverter.class)
+    @Column(name = "job")
     private Job job;
     
     @Convert(converter = AfpConverter.class)
+    @Column(name = "afp")
     private Afp afp;
     
     @Convert(converter = MaritalStatusConverter.class)
+    @Column(name = "maritalStatus")
     private MaritalStatus maritalStatus;
     
     @ManyToMany(mappedBy="laborers",cascade = { CascadeType.PERSIST, CascadeType.MERGE })
