@@ -25,6 +25,7 @@ import javax.persistence.PrePersist;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.validation.constraints.NotNull;
 
 import cl.magal.asistencia.entities.converter.AfpConverter;
 import cl.magal.asistencia.entities.converter.JobConverter;
@@ -65,14 +66,17 @@ public class Laborer implements Serializable {
     @Column(name = "laborerId")
     private Long laborerId;
     @Basic(optional = false)
+    @NotNull(message="El nombre es necesario")
     @Column(name = "firstname", nullable=false)
     private String firstname;
     @Column(name = "secondname")
     private String secondname;
+    @NotNull(message="El apellido es necesario")
     @Column(name = "lastname", nullable=false)
     private String lastname;
     @Column(name = "secondlastname")
     private String secondlastname;
+    @NotNull(message="El rut es necesario")
     @Column(name = "rut", nullable=false)
     private String rut;
     @Column(name = "dateBirth")
