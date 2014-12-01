@@ -73,9 +73,9 @@ public class WorkerFileView extends HorizontalLayout implements View {
 		Panel panel = new Panel("Ficha Trabajador");
 		detalleObrero = drawDetalleObrero();	
 		panel.setContent(detalleObrero);
-		panel.setWidth("1200px");
-		panel.setHeight("620px");
-		panel.getContent().setSizeUndefined();
+//		panel.setWidth("1200px");
+//		panel.setHeight("620px");
+//		panel.getContent().setSizeUndefined();
 		addComponent(panel);
 		setComponentAlignment(panel, Alignment.TOP_CENTER);
 		setExpandRatio(panel, 0.8F);		
