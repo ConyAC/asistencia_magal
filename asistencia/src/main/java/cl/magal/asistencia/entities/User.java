@@ -6,15 +6,19 @@
 package cl.magal.asistencia.entities;
 
 import java.io.Serializable;
+import java.util.LinkedList;
+import java.util.List;
 
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
@@ -78,6 +82,17 @@ public class User implements Serializable {
     @OneToOne
     @JoinColumn(name="roleId")
     private Role role;
+    
+    @JoinTable(name="user_constructionsite",
+    	    joinColumns = { 
+    	    		@JoinColumn(name = "userId", referencedColumnName = "userId")
+    	     }, 
+    	     inverseJoinColumns = { 
+    	            @JoinColumn(name = "construction_siteId", referencedColumnName = "construction_siteId")
+    	     }
+    		)
+     @ManyToMany(targetEntity=Laborer.class,fetch=FetchType.EAGER)
+     List<ConstructionSite> cs = new LinkedList<ConstructionSite>();
     
     /**
      * Obliga a que status sea activo, si no viene uno seteado
@@ -195,6 +210,16 @@ public class User implements Serializable {
 
 	public void setStatus(UserStatus status) {
 		this.status = status;
+	}	
+	
+	public List<ConstructionSite> getCs() {
+		if(cs == null )
+			cs = new LinkedList<ConstructionSite>();
+		return cs;
+	}
+
+	public void setCs(List<ConstructionSite> cs) {
+		this.cs = cs;
 	}
 
 	@Override

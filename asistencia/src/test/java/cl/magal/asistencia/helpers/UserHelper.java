@@ -27,11 +27,6 @@ public final class UserHelper {
 	public static User newUser(){
 		User user = new User();
 		Role role = RoleHelper.newRole();
-		
-		Set<Permission> perm = new HashSet<Permission>();	
-		perm.add(Permission.CREAR_OBRA);	
-		role.setPermission(perm);		
-		
 		user.setRole(role);
 		user.setRut(RUT);
 		user.setFirstname(NOMBRE+Utils.random());

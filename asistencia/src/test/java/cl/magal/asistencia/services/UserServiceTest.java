@@ -163,13 +163,19 @@ public class UserServiceTest {
     @Test
     public void testUserRole() {
     	
+    	Role role = RoleHelper.newRole();
+		service.saveRole(role);
+    	
     	User u = UserHelper.newUser();
+    	u.setRole(role);
+    	
 		service.saveUser(u);
-		assertTrue("El id no puede ser nulo.", u.getUserId() != null );
+		UserHelper.verify(u);
 		
 		User dbu = service.findUser(u.getUserId());
-		assertNotNull("El ususario no puede ser nulo", dbu);
-		assertTrue("El id de u no puede ser nulo.", u.getUserId() != null );		
+		UserHelper.verify(dbu);
+		
+		assertTrue("El id del role no puede ser nulo.", u.getRole().getRoleId() != null );		
 		assertEquals("Id de Rol", u.getRole(), dbu.getRole());
        
     }   

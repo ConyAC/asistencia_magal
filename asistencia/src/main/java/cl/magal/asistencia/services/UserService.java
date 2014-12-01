@@ -35,6 +35,7 @@ public class UserService implements UserDetailsService {
 	
 	@Autowired
 	UserRepository rep;
+	
 	@Autowired
 	RoleRepository repRole;
 	

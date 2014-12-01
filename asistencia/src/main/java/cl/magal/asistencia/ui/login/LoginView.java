@@ -124,6 +124,7 @@ public class LoginView extends VerticalLayout implements View {
 		            } 
 				 else {
 					 try {
+						 logger.debug("Holi ", username +" "+ password );
 						 	UsernamePasswordAuthenticationToken token = 
 		                            new UsernamePasswordAuthenticationToken(u, p);
 		                    
@@ -146,10 +147,7 @@ public class LoginView extends VerticalLayout implements View {
 		                   
 						 ((MagalUI)UI.getCurrent()).getMenuLayout().setVisible(true);
 		                    UI.getCurrent().getNavigator().navigateTo(ConstructionSiteView.NAME);
-		                    Label error = new Label(
-		                            "2233",
-		                            ContentMode.HTML);
-		                    loginPanel.addComponent(error);
+		                    
 					} catch (Exception e) {
 						logger.debug("Mal login ", e );
 						if (loginPanel.getComponentCount() > 2) {
