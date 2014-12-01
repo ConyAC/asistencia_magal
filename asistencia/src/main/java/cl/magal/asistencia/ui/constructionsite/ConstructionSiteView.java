@@ -639,6 +639,9 @@ public class ConstructionSiteView extends Panel  implements View {
 				}
 
 				Laborer laborer = new Laborer();
+				laborer.setFirstname("Nuevo Trabajador");
+				laborer.setLastname("Nuevo");
+				laborer.setRut("111111-1");
 				service.addLaborerToConstructionSite(laborer,cs);
 
 				laborerContainer.addBean(laborer);
