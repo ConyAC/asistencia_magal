@@ -10,6 +10,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import javax.persistence.Basic;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
@@ -83,6 +84,9 @@ public class ConstructionSite implements Serializable {
     
     @OneToMany(targetEntity=Team.class,fetch=FetchType.EAGER)
     List<Team> teams = new LinkedList<Team>();
+    
+    @OneToMany(mappedBy="constructionsites",cascade = { CascadeType.PERSIST, CascadeType.MERGE })
+    List<User> users;
     
     /**
      * Obliga a que status sea activo, si no viene uno seteado
@@ -172,6 +176,14 @@ public class ConstructionSite implements Serializable {
 
 	public void setTeams(List<Team> teams) {
 		this.teams = teams;
+	}
+	
+	public List<User> getUsers() {
+		return users;
+	}
+
+	public void setUsers(List<User> users) {
+		this.users = users;
 	}
 
 	@Override

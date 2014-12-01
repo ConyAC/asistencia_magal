@@ -251,4 +251,12 @@ public class User implements Serializable {
         return "jpa.magal.entities.User[ userId=" + userId + " ]";
     }
     
+    public void addCS(ConstructionSite cs) {
+        if (!getCs().contains(cs)) {
+        	getCs().add(cs);
+        }
+        if (!cs.getUsers().contains(this)) {
+        	cs.getUsers().add(this);
+        }
+    }
 }

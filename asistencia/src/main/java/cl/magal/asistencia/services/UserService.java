@@ -24,6 +24,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import cl.magal.asistencia.entities.ConstructionSite;
+import cl.magal.asistencia.entities.Laborer;
 import cl.magal.asistencia.entities.Role;
 import cl.magal.asistencia.entities.enums.Permission;
 import cl.magal.asistencia.repositories.ConstructionSiteRepository;
@@ -215,4 +216,12 @@ public class UserService implements UserDetailsService {
 		return (List<ConstructionSite>) repoCS.findAllNotDeteled();
 	}
 
+	@Transactional
+	public void addConstructionSiteToUser(ConstructionSite cs, cl.magal.asistencia.entities.User u) {
+		
+		cl.magal.asistencia.entities.User dbu = rep.findOne(u.getUserId());
+		repoCS.save(cs);
+		dbu.addCS(cs);
+		rep.save(dbu);
+	}
 }

@@ -40,6 +40,7 @@ import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
+import com.vaadin.ui.Panel;
 import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.OptionGroup;
 import com.vaadin.ui.PasswordField;
@@ -83,11 +84,21 @@ public class UsersView extends HorizontalLayout implements View {
 		addComponent(usuarios);
 		setExpandRatio(usuarios, 0.2F);
 		
-		//dibuja la sección de detalles
-		detalleUsuario = drawDetalleUsuario();
+		Panel panel = new Panel("");
+		detalleUsuario = drawDetalleUsuario();	
+		panel.setContent(detalleUsuario);
+		panel.setWidth("1200px");
+		panel.setHeight("620px");
+		panel.getContent().setSizeUndefined();
+		addComponent(panel);
+		setComponentAlignment(panel, Alignment.TOP_CENTER);
+		setExpandRatio(panel, 0.8F);		
 		
-		addComponent(detalleUsuario);
-		setExpandRatio(detalleUsuario, 0.8F);
+		//dibuja la sección de detalles
+		//detalleUsuario = drawDetalleUsuario();
+		
+		//addComponent(detalleUsuario);
+		//setExpandRatio(detalleUsuario, 0.8F);
 	}
 	
 	private VerticalLayout drawDetalleUsuario() {
@@ -121,6 +132,7 @@ public class UsersView extends HorizontalLayout implements View {
         	public void buttonClick(ClickEvent event) {
         		try {
         			fieldGroup.commit();
+        			//service.addConstructionSiteToUser(cs, u);
         			service.saveUser(fieldGroup.getItemDataSource().getBean());
         		} catch (CommitException e) {
         			logger.error("Error al guardar la información del usuario");
@@ -162,7 +174,6 @@ public class UsersView extends HorizontalLayout implements View {
         		detalleUsuario.addComponent(statusField);
         		fieldGroup.bind(statusField, "status");
         	}else{
-        		logger.debug("propertyId "+propertyId);
         		detalleUsuario.addComponent(fieldGroup.buildAndBind(propertyId));
         	}
         }
@@ -174,6 +185,7 @@ public class UsersView extends HorizontalLayout implements View {
         //prueba
 		tcsObras = new TwinColSelect("Asignar Obras",constructionContainer);      
 		tcsObras.setWidth("70%");
+		tcsObras.setHeight("70%");
 		tcsObras.setNullSelectionAllowed(true);
 		tcsObras.setItemCaptionPropertyId("name");
 		tcsObras.setItemCaptionMode(ItemCaptionMode.PROPERTY);
@@ -190,6 +202,7 @@ public class UsersView extends HorizontalLayout implements View {
 		}
 		
 		detalleUsuario.addComponent(tcsObras);
+		detalleUsuario.setWidth("100%");
 		//detalleUsuario.setComponentAlignment(tcsObras, Alignment.TOP_RIGHT);
 	}
 
