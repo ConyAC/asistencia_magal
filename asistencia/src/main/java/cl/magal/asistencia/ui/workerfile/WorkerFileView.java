@@ -30,15 +30,17 @@ import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
+import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.ComboBox;
+import com.vaadin.ui.Field;
+import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
+import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.Notification.Type;
 
 @VaadinView(value=WorkerFileView.NAME)
 @Scope("prototype")
@@ -57,7 +59,8 @@ public class WorkerFileView extends HorizontalLayout implements View {
 	@Autowired
 	private transient LaborerService service;
 
-	VerticalLayout detalleObrero;
+//	VerticalLayout detalleObrero;
+	GridLayout detalleObrero;
 	FilterTable tableObrero;
 
 	public WorkerFileView(){
@@ -78,8 +81,9 @@ public class WorkerFileView extends HorizontalLayout implements View {
 		setExpandRatio(panel, 0.8F);		
 	}
 	
-	private VerticalLayout drawDetalleObrero() {
-		VerticalLayout vl = new VerticalLayout();
+	private GridLayout drawDetalleObrero() {
+//		VerticalLayout vl = new VerticalLayout();
+		GridLayout vl = new GridLayout(2,5);
 		vl.setMargin(true);
 		vl.addComponent(new Label("Seleccione un obrero para ver su información"));
 		
@@ -98,7 +102,8 @@ public class WorkerFileView extends HorizontalLayout implements View {
 		
 		HorizontalLayout hl = new HorizontalLayout();
 		hl.setSpacing(true);
-		detalleObrero.addComponent(hl);
+//		detalleObrero.addComponent(hl);
+		detalleObrero.addComponent(hl,0,0,1,0);
 		detalleObrero.setComponentAlignment(hl, Alignment.TOP_RIGHT);
 		
 		final BeanFieldGroup<Laborer> fieldGroup = new BeanFieldGroup<Laborer>(Laborer.class);
@@ -170,7 +175,12 @@ public class WorkerFileView extends HorizontalLayout implements View {
     			fieldGroup.bind(msField, "maritalStatus");    
         	}else{        		
         		String t = tradProperty(propertyId);
-        		detalleObrero.addComponent(fieldGroup.buildAndBind(t, propertyId));
+        		Field field = fieldGroup.buildAndBind(t, propertyId);
+        		if(field instanceof TextField){
+        			((TextField)field).setNullRepresentation("");
+        		}
+        		detalleObrero.addComponent(field);
+        		detalleObrero.setComponentAlignment(field, Alignment.MIDDLE_CENTER);
         	}
         }
         

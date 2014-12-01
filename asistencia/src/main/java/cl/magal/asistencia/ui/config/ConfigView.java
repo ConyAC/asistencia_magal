@@ -283,7 +283,7 @@ public class ConfigView extends VerticalLayout implements View {
 									@Override
 									public void buttonClick(ClickEvent event) {
 										
-										table.addItem(new Object[]{nombre.getValue(),fecha, new Button(null,new Button.ClickListener() {
+										table.addItem(new Object[]{nombre.getValue(),new TextField(null,fecha.getValue()), new Button(null,new Button.ClickListener() {
 											
 											@Override
 											public void buttonClick(ClickEvent event) {
