@@ -9,7 +9,6 @@ import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 
 import cl.magal.asistencia.entities.ConstructionSite;
-import cl.magal.asistencia.entities.Laborer;
 
 public interface ConstructionSiteRepository extends PagingAndSortingRepository<ConstructionSite, Long> {
 
@@ -17,6 +16,8 @@ public interface ConstructionSiteRepository extends PagingAndSortingRepository<C
 	
 	@Query(value="SELECT cs FROM ConstructionSite cs WHERE cs.deleted = false ")
 	Page<ConstructionSite> findAllNotDeteled(Pageable page);
+	@Query(value="SELECT cs FROM ConstructionSite cs WHERE cs.deleted = false ")
+	List<ConstructionSite> findAllNotDeteled();
 	
 	//ConstructionSite findByName(String nombre);
 	
@@ -37,7 +38,7 @@ public interface ConstructionSiteRepository extends PagingAndSortingRepository<C
 	@Query(value="SELECT cs FROM ConstructionSite cs WHERE cs.constructionsiteId = ?1 and cs.deleted = false ")
 	ConstructionSite findOneNotDeleted(Long id);
 	
-	@Query(value="SELECT cs.* FROM ConstructionSite cs left join user_constructionsite uc on uc.constructionsiteId = cs.constructionsiteId WHERE uc.userId = :id " , nativeQuery=true)
+	@Query(value="SELECT cs.* FROM construction_site cs left join user_constructionsite uc on uc.construction_siteId = cs.construction_siteId WHERE uc.userId = :id " , nativeQuery=true)
 	List<ConstructionSite> findByUser(@Param("id")Long userId);
 
 }

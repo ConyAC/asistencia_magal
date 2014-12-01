@@ -61,6 +61,7 @@ public class UsersView extends HorizontalLayout implements View {
 	public static final String NAME = "usuarios";
 	
 	BeanItemContainer<User> container = new BeanItemContainer<User>(User.class);
+	BeanItemContainer<ConstructionSite> constructionContainer = new BeanItemContainer<ConstructionSite>(ConstructionSite.class);
 	
 	private TwinColSelect tcsObras;
 	
@@ -137,7 +138,7 @@ public class UsersView extends HorizontalLayout implements View {
         // Loop through the properties, build fields for them and add the fields
         // to this UI
         for (Object propertyId : fieldGroup.getUnboundPropertyIds()) {
-        	if(propertyId.equals("role")||propertyId.equals("salt")||propertyId.equals("userId")||propertyId.equals("deleted"))
+        	if(propertyId.equals("role")||propertyId.equals("salt")||propertyId.equals("userId")||propertyId.equals("deleted")||propertyId.equals("cs"))
         		;
         	else if(propertyId.equals("role.name")){
         		ComboBox cb = new ComboBox("Rol",Arrays.asList("AADMO","ADMC","ADMO","SADM"));
@@ -160,8 +161,10 @@ public class UsersView extends HorizontalLayout implements View {
         		}
         		detalleUsuario.addComponent(statusField);
         		fieldGroup.bind(statusField, "status");
-        	}else
-        		detalleUsuario.addComponent(fieldGroup.buildAndBind(propertyId)); 			
+        	}else{
+        		logger.debug("propertyId "+propertyId);
+        		detalleUsuario.addComponent(fieldGroup.buildAndBind(propertyId));
+        	}
         }
         
         List<ConstructionSite> cs = service.getObraByUser(userItem.getBean());
@@ -169,10 +172,10 @@ public class UsersView extends HorizontalLayout implements View {
 		//detalleUsuario.addAll(cs);
         
         //prueba
-		tcsObras = new TwinColSelect("Asignar Obras");      
+		tcsObras = new TwinColSelect("Asignar Obras",constructionContainer);      
 		tcsObras.setWidth("70%");
 		tcsObras.setNullSelectionAllowed(true);
-		tcsObras.setItemCaptionPropertyId("nombre");
+		tcsObras.setItemCaptionPropertyId("name");
 		tcsObras.setItemCaptionMode(ItemCaptionMode.PROPERTY);
 		tcsObras.setImmediate(true);
 		tcsObras.setRows(cs.size());
@@ -284,6 +287,10 @@ public class UsersView extends HorizontalLayout implements View {
 		//List<User> users = service.findAllUser();
 		container.removeAllItems();
 		container.addAll(page.getContent());
+		
+		List<ConstructionSite> css = service.getAllObra();
+        constructionContainer.removeAllItems();
+        constructionContainer.addAll(css);
 		
 		setUser( container.getItem( container.firstItemId() ));
 		usersTable.select(container.firstItemId());
