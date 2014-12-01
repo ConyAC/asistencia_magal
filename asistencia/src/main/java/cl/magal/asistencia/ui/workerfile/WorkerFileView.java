@@ -35,6 +35,7 @@ import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Panel;
+import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Notification.Type;
@@ -137,11 +138,10 @@ public class WorkerFileView extends HorizontalLayout implements View {
 		}};
 		 hl.addComponent(btnPrint);
 		//detalleObrero.addComponent(btnPrint);
-		//detalleObrero.setComponentAlignment(btnPrint, Alignment.TOP_LEFT);
-        
+		//detalleObrero.setComponentAlignment(btnPrint, Alignment.TOP_LEFT);        
         // Loop through the properties, build fields for them and add the fields
         // to this UI
-        for (Object propertyId : fieldGroup.getUnboundPropertyIds()) {
+		 for (Object propertyId : new String[]{"rut","firstname","secondname","lastname", "secondlastname", "dateBirth", "address", "mobileNumber", "phone", "dateAdmission"}) {
         	if(propertyId.equals("laborerId") || propertyId.equals("constructionSites") || propertyId.equals("contractId") || propertyId.equals("teamId"))
         		;
         	else if(propertyId.equals("afp")){
@@ -168,13 +168,40 @@ public class WorkerFileView extends HorizontalLayout implements View {
     			}
     			detalleObrero.addComponent(msField);
     			fieldGroup.bind(msField, "maritalStatus");    
-        	}else
-        		detalleObrero.addComponent(fieldGroup.buildAndBind(propertyId));        	
+        	}else{        		
+        		String t = tradProperty(propertyId);
+        		detalleObrero.addComponent(fieldGroup.buildAndBind(t, propertyId));
+        	}
         }
         
         detalleObrero.setWidth("100%");
 	}
 	
+	private String tradProperty(Object propertyId) {
+		if(propertyId.equals("rut"))
+			return "RUT";
+		else if(propertyId.equals("firstname"))
+			return "Primer Nombre";
+		else if(propertyId.equals("secondname"))
+			return "Segundo Nombre";
+		else if(propertyId.equals("lastname"))
+			return "Primer Apellido";
+		else if(propertyId.equals("secondlastname"))
+			return "Segundo Apellido";
+		else if(propertyId.equals("dateBirth"))
+			return "Fecha de Nacimiento";
+		else if(propertyId.equals("address"))
+			return "Direcciòn";
+		else if(propertyId.equals("mobileNumber"))
+			return "Teléfono móvil";
+		else if(propertyId.equals("phone"))
+			return "Teléfono fijo";
+		else if(propertyId.equals("dateAdmission"))
+			return "Fecha de Admisión";
+		else
+			return propertyId.toString();
+	}
+
 	private FilterTable drawTablaObreros() {
 		tableObrero =  new FilterTable();
 		//laborerContainer.addNestedContainerProperty("rut");
