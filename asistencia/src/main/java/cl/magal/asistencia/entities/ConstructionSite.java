@@ -85,7 +85,7 @@ public class ConstructionSite implements Serializable {
     @OneToMany(targetEntity=Team.class,fetch=FetchType.EAGER)
     List<Team> teams = new LinkedList<Team>();
     
-    @OneToMany(mappedBy="constructionsites",cascade = { CascadeType.PERSIST, CascadeType.MERGE })
+    @ManyToMany(mappedBy="cs",cascade = { CascadeType.PERSIST, CascadeType.MERGE })
     List<User> users;
     
     /**

@@ -29,7 +29,6 @@ import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 
 import cl.magal.asistencia.entities.converter.UserStatusConverter;
-import cl.magal.asistencia.entities.enums.Permission;
 import cl.magal.asistencia.entities.enums.UserStatus;
 
 /**
@@ -91,7 +90,7 @@ public class User implements Serializable {
     	            @JoinColumn(name = "construction_siteId", referencedColumnName = "construction_siteId")
     	     }
     		)
-     @OneToMany(targetEntity=ConstructionSite.class,fetch=FetchType.EAGER)
+     @ManyToMany(targetEntity=ConstructionSite.class,fetch=FetchType.EAGER)
      List<ConstructionSite> cs = new LinkedList<ConstructionSite>();
     
     /**

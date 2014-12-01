@@ -39,6 +39,7 @@ import com.vaadin.event.ItemClickEvent.ItemClickListener;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.FontAwesome;
+import com.vaadin.shared.ui.datefield.Resolution;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.AbstractSelect.ItemCaptionMode;
 import com.vaadin.ui.Alignment;
@@ -51,6 +52,7 @@ import com.vaadin.ui.Field;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.InlineDateField;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Notification.Type;
@@ -325,7 +327,11 @@ public class ConstructionSiteView extends Panel  implements View {
 								setSpacing(true);
 								addComponent(new FormLayout(){
 									{
-										addComponent(new DateField("Fecha"));
+										addComponent(new InlineDateField("Mes"){
+											{
+												setResolution(Resolution.MONTH);
+											}
+										});
 									}
 								});
 //								addComponent(new Button("Configuraciones",FontAwesome.GEARS));
@@ -904,9 +910,9 @@ public class ConstructionSiteView extends Panel  implements View {
 
 		asistencia.setSizeFull();
 		vlIBotones.addComponent(asistencia);
-		Button vacaciones = new Button("Carga Masiva Vacaciones",FontAwesome.UPLOAD);
-		vacaciones.setSizeFull();
-		vlIBotones.addComponent(vacaciones);
+//		Button vacaciones = new Button("Carga Masiva Vacaciones",FontAwesome.UPLOAD);
+//		vacaciones.setSizeFull();
+//		vlIBotones.addComponent(vacaciones);
 
 		Button configuraciones = new Button("Configuraciones Obra",FontAwesome.GEARS);
 		configuraciones.setSizeFull();

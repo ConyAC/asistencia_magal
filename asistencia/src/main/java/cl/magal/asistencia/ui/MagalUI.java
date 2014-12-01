@@ -151,7 +151,6 @@ public class MagalUI extends UI implements ErrorHandler {
 			@Override
 			public void menuSelected(MenuItem selectedItem) {
 				logOut();
-				selectedItem.setVisible(false);
 			}
 		});
 		
