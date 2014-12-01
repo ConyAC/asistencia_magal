@@ -3,8 +3,10 @@
 	<persistence-unit name="persistenceUnit" transaction-type="RESOURCE_LOCAL">
 	    <provider>org.hibernate.ejb.HibernatePersistence</provider>
 	    <class>cl.magal.asistencia.entities.Attachment</class>
+	    <class>cl.magal.asistencia.entities.Configurations</class>
 	    <class>cl.magal.asistencia.entities.ConstructionSite</class>
 	    <class>cl.magal.asistencia.entities.Contract</class>
+	    <class>cl.magal.asistencia.entities.DateConfigurations</class>
 	    <class>cl.magal.asistencia.entities.Laborer</class>
 	    <class>cl.magal.asistencia.entities.LaborerConstructionsite</class>
 	    <class>cl.magal.asistencia.entities.LaborerHistoricTeam</class>

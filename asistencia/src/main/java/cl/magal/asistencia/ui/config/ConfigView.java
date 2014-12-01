@@ -2,6 +2,10 @@ package cl.magal.asistencia.ui.config;
 
 import java.util.Date;
 
+import javax.annotation.PostConstruct;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.data.domain.Page;
@@ -9,24 +13,29 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
 
 import ru.xpoft.vaadin.VaadinView;
+import cl.magal.asistencia.entities.Configurations;
 import cl.magal.asistencia.entities.ConstructionSite;
+import cl.magal.asistencia.entities.DateConfigurations;
 import cl.magal.asistencia.services.ConfigurationService;
 import cl.magal.asistencia.services.ConstructionSiteService;
 
 import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeEvent;
+import com.vaadin.data.fieldgroup.FieldGroup;
+import com.vaadin.data.util.BeanItem;
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.shared.ui.datefield.Resolution;
 import com.vaadin.shared.ui.label.ContentMode;
+import com.vaadin.ui.AbstractSelect.ItemCaptionMode;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
-import com.vaadin.ui.AbstractSelect.ItemCaptionMode;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.DateField;
+import com.vaadin.ui.Field;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.InlineDateField;
@@ -46,6 +55,8 @@ public class ConfigView extends VerticalLayout implements View {
 	 * 
 	 */
 	private static final long serialVersionUID = 8538300514577423280L;
+	
+	Logger logger = LoggerFactory.getLogger(ConfigView.class);
 
 	public static final String NAME = "configuraciones";
 	BeanItemContainer<ConstructionSite> constructionContainer = new BeanItemContainer<ConstructionSite>(ConstructionSite.class);
@@ -55,7 +66,11 @@ public class ConfigView extends VerticalLayout implements View {
 	@Autowired
 	private transient ConfigurationService confService;
 	
-	public ConfigView(){
+	
+	public ConfigView(){}
+	
+	@PostConstruct
+	public void init(){
 
 
 		//define tab para poner cada tipo de configuración
@@ -223,18 +238,41 @@ public class ConfigView extends VerticalLayout implements View {
 				setSpacing(true);
 				setMargin(true);
 				
+				final FieldGroup fg = new FieldGroup();
+				Configurations configuration = confService.findConfigurations();
+				if( configuration  == null )
+					configuration  = new Configurations();
+				fg.setItemDataSource(new BeanItem<Configurations>(configuration));
+				
 				FormLayout form = new FormLayout(){
 					{
 						setSizeUndefined();
 						
-
 						addComponent(new Label("<hr />",ContentMode.HTML){
 							{
 								setWidth("100%");
 							}
 						});
 						
-						addComponent(new TextField("Sueldo Mínimo"));
+						Property.ValueChangeListener listener = new Property.ValueChangeListener() {
+							
+							@Override
+							public void valueChange(ValueChangeEvent event) {
+								try {
+									fg.commit();
+									Configurations bean = ((BeanItem<Configurations>)fg.getItemDataSource()).getBean();
+									confService.save(bean);
+								} catch (Exception e) {
+									Notification.show("Error al guardar");
+								}
+							}
+						};
+						
+						Field advance = fg.buildAndBind("Sueldo Mínimo", "minWage");
+						((TextField)advance).setNullRepresentation("");
+						advance.addValueChangeListener(listener);
+						
+						addComponent(advance);
 						addComponent(new Label("Jornal base : #"));
 						addComponent(new Label("Gratificación : #"));
 						
@@ -244,8 +282,14 @@ public class ConfigView extends VerticalLayout implements View {
 							}
 						});
 						
-						addComponent(new TextField("Colación"));
-						addComponent(new TextField("Movilización 1"));
+						Field collation = fg.buildAndBind("Colación", "collation");
+						((TextField)collation).setNullRepresentation("");
+						collation.addValueChangeListener(listener);
+						addComponent(collation);
+						Field mobilization = fg.buildAndBind("Movilización 1", "mobilization");
+						((TextField)mobilization).setNullRepresentation("");
+						mobilization.addValueChangeListener(listener);
+						addComponent(mobilization);
 						
 						addComponent(new Label("<hr />",ContentMode.HTML){
 							{
@@ -324,6 +368,8 @@ public class ConfigView extends VerticalLayout implements View {
 				setSpacing(true);
 				setMargin(true);
 				
+				final FieldGroup fg = new FieldGroup();
+				fg.setItemDataSource(new BeanItem<DateConfigurations>(new DateConfigurations()));
 //				setComponentAlignment(mes, Alignment.MIDDLE_CENTER);
 				FormLayout form = new FormLayout(){
 					{
@@ -335,14 +381,46 @@ public class ConfigView extends VerticalLayout implements View {
 							@Override
 							public void valueChange(ValueChangeEvent event) {
 								
-								Notification.show("event "+event.getProperty().getValue());
+								//busca la configuración del mes
+								Date date = (Date)event.getProperty().getValue();
+								DateConfigurations config = confService.findDateConfigurationsByDate(date);
+								
+								if(config == null ){
+									config = new DateConfigurations();
+									config.setDate(date);
+								}
+								
+								fg.setItemDataSource(new BeanItem<DateConfigurations>(config));
 							}
 						});
+						
+						Property.ValueChangeListener listener = new Property.ValueChangeListener() {
+							
+							@Override
+							public void valueChange(ValueChangeEvent event) {
+								try {
+									fg.commit();
+									DateConfigurations bean = ((BeanItem<DateConfigurations>)fg.getItemDataSource()).getBean();
+									confService.save(bean);
+								} catch (Exception e) {
+									Notification.show("Error al guardar");
+								}
+							}
+						};
 						addComponent(mes);
-						addComponent(new DateField("Fecha Cierre Anticipo"));
-						addComponent(new DateField("Fecha Cierre Asistencia"));
-						addComponent(new DateField("Fecha Inicio Trato"));
-						addComponent(new DateField("Fecha Fin Trato"));
+//						fg.bind(mes, "date");
+						Field advance = fg.buildAndBind("Fecha Cierre Anticipo", "advance");
+						advance.addValueChangeListener(listener);
+						addComponent(advance);
+						Field assistance = fg.buildAndBind("Fecha Cierre Asistencia", "assistance");
+						assistance.addValueChangeListener(listener);
+						addComponent(assistance);
+						Field beginDeal = fg.buildAndBind("Fecha Inicio Trato", "beginDeal");
+						beginDeal.addValueChangeListener(listener);
+						addComponent(beginDeal);
+						Field finishDeal = fg.buildAndBind("Fecha Fin Trato", "finishDeal");
+						finishDeal.addValueChangeListener(listener);
+						addComponent(finishDeal);
 					}
 				};
 				addComponent(form);
