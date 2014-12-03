@@ -458,7 +458,7 @@ public class ConstructionSiteView extends Panel  implements View {
 
 		//agrega solo si tiene los permisos
 		
-		if(hastPermission(Permission.CREAR_OBRA,Permission.ELIMINAR_OBRA)){
+		if( hastPermission(Permission.CREAR_OBRA,Permission.ELIMINAR_OBRA)){
 		
 			//botones agrega y eliminar
 			HorizontalLayout hl = new HorizontalLayout();
@@ -837,7 +837,7 @@ public class ConstructionSiteView extends Panel  implements View {
 			return;
 		}
 		
-		if(hasConstructionSite(item.getBean())){
+		if( hastPermission(Permission.CREAR_OBRA) || hasConstructionSite(item.getBean())){
 			if( editConstructionSite != null )
 				editConstructionSite.setEnabled(true);
 			btnPrint.setEnabled(true);

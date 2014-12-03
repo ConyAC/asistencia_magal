@@ -207,8 +207,17 @@ public class UserService implements UserDetailsService {
                 ll);
 	}
 	
-	public void saveUser(cl.magal.asistencia.entities.User u) {
-		rep.save(u);
+	public void saveUser(cl.magal.asistencia.entities.User usuario) {
+		if(usuario == null) {
+			throw new RuntimeException("Usuario no debe ser nulo");
+		}
+		PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+		String password = usuario.getPassword();
+		if(password == null )
+			password = "123456";
+		String hashedPassword = passwordEncoder.encode(password);
+		usuario.setPassword(hashedPassword);
+		rep.save(usuario);
 	}
 	
 	public cl.magal.asistencia.entities.User findUser(Long id){
