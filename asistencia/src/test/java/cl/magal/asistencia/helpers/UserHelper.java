@@ -1,19 +1,11 @@
 package cl.magal.asistencia.helpers;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
-
-import java.util.HashSet;
-import java.util.Set;
-
 import cl.magal.asistencia.entities.Role;
 import cl.magal.asistencia.entities.User;
-import cl.magal.asistencia.entities.enums.Permission;
 import cl.magal.asistencia.entities.enums.UserStatus;
 import cl.magal.asistencia.util.Utils;
 
@@ -39,7 +31,11 @@ public final class UserHelper {
 		return user;
 	}
 	
-	public static void verify(User u) {
+	public static void verify(User u){
+		verify(u,false); 
+	}
+	
+	public static void verify(User u,boolean ignoreStatus) {
 		
 		assertNotNull("El usuario no puede ser nulo.", u);
 		assertNotNull("El id de usuario no puede ser nulo.", u.getUserId());
@@ -48,12 +44,13 @@ public final class UserHelper {
 		assertNotNull("El rut no puede ser nulo.", u.getRut());
 		//verificar que el tipo del estado sea del tipo enum Status
 		assertTrue("El tipo de estado debe ser enum", u.getStatus().getClass() == UserStatus.class);
-		assertTrue("El enum debe ser igual al guardado", u.getStatus() == UserStatus.ACTIVE);	
+		if(!ignoreStatus)
+			assertTrue("El enum debe ser igual al guardado", u.getStatus() == UserStatus.ACTIVE);	
 	}
 	
 	public static void verify(User u, User bdu) {
-		assertNotNull("El usuario no puede ser nulo.",u);
-		assertNotNull("El bdu no puede ser nulo.", bdu);
+		verify(u);
+		verify(bdu);
 		
 		assertSame("Los ids deben ser iguales.", u.getUserId(), bdu.getUserId());
 		assertEquals("El rut debe ser el mismo.", u.getRut(), bdu.getRut());

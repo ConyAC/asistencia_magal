@@ -55,16 +55,16 @@ public class User implements Serializable {
     @Column(name = "userId")
     private Long userId;
     @Basic(optional = false)
-    @Column(name = "firstname",nullable=true)
+    @Column(name = "firstname",nullable=false)
     private String firstname;
     @Basic(optional = false)
-    @Column(name = "lastname", nullable=true)
+    @Column(name = "lastname", nullable=false)
     private String lastname;
     @Basic(optional = false)
-    @Column(name = "rut", nullable=true)
+    @Column(name = "rut", nullable=false)
     private String rut;
     @Basic(optional = false)
-    @Column(name = "email")
+    @Column(name = "email",nullable = false,unique = true)
     private String email;
     @Column(name = "password")
     private String password;

@@ -80,7 +80,7 @@ public class RoleServiceTest {
 	public void testDeleteRole() {	
 		
 		Role r = RoleHelper.newRole();
-		
+		r.setRoleId(null);//se setea explicitamente null para que sea uno nuevo
 		service.saveRole(r);
 		assertTrue("El id no puede ser nulo.", r.getRoleId() != null );
 		

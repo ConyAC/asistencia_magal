@@ -2,17 +2,21 @@ package cl.magal.asistencia.services;
 
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
@@ -31,6 +35,11 @@ public class UserServiceTest {
 	@Autowired
 	UserService service;
 	
+	@Before
+	public void before(){
+		service.clear();
+	}
+	
 	@Test
 	public void saveRole(){
 		Role role = RoleHelper.newRole();
@@ -48,7 +57,6 @@ public class UserServiceTest {
 		service.saveRole(role);
 		
 		User u = UserHelper.newUser();
-		
 		service.saveUser(u);
 		UserHelper.verify(u);				
 		User dbu = service.findUser(u.getUserId());
@@ -142,6 +150,9 @@ public class UserServiceTest {
     @Test
     public void testValidateUser() {
     	
+    	String pasword = "123456";
+    	String email = "a@b.com";
+    	
     	User u = UserHelper.newUser();	    	
     	service.saveUser(u);	
     	
@@ -152,8 +163,11 @@ public class UserServiceTest {
 		UserHelper.verify(u, dbu);
 		
     	UserDetails userDetails = service.loadUserByUsername(u.getEmail());	
-    	assertEquals("Usuario incorrecto", "a@b.com", userDetails.getUsername());
-    	assertEquals("Contraseña incorrecta", "123456", u.getPassword());
+    	assertEquals("Usuario incorrecto", email, userDetails.getUsername());
+    	
+    	PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+    	String hashedPassword = passwordEncoder.encode(pasword);
+    	assertNotEquals("El hash del password no puede ser el mismo!",hashedPassword, u.getPassword());
        
     }   
 
@@ -186,15 +200,17 @@ public class UserServiceTest {
 	@Test
 	public void testFindUserByUserName() {
 		
+		String email =  "c@b.com"; //usa un email en particular para no chocar con los otros test
 		User u = UserHelper.newUser();
+		u.setEmail(email);
 		
 		service.saveUser(u);		
 		UserHelper.verify(u);
 		
-		User dbu = service.findUsuarioByUsername(u.getEmail());		
+		User dbu = service.findUsuarioByUsername(email);		
 		assertNotNull("El ususario no puede ser nulo", dbu);
 		
-		assertEquals("El email del usuario debe ser igual a ", "a@b.com", dbu.getEmail());
+		assertEquals("El email del usuario debe ser igual a ",email, dbu.getEmail());
 		
 	}	
 	
@@ -207,12 +223,11 @@ public class UserServiceTest {
 		User u = UserHelper.newUser();
 		u.setStatus(UserStatus.DESACTIVADO);
 		service.saveUser(u);
-		
-		UserHelper.verify(u);
+		UserHelper.verify(u,true);
 		
 		User dbu = service.findUser(u.getUserId());
 		
-		UserHelper.verify(dbu);
+		UserHelper.verify(dbu,true);
 		assertNotNull("El usuario no debe estar desactivado", dbu.getStatus());
 	}
 

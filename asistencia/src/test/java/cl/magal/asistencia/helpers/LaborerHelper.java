@@ -1,9 +1,8 @@
 package cl.magal.asistencia.helpers;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertSame;
 import cl.magal.asistencia.entities.Laborer;
 import cl.magal.asistencia.entities.enums.Afp;
 import cl.magal.asistencia.entities.enums.Job;
@@ -13,10 +12,12 @@ import cl.magal.asistencia.util.Utils;
 public final class LaborerHelper {
 	
 	final static private String NOMBRE = "Trabajador";
+	final static private String APELLIDO = "Soto";
 	
 	public static Laborer newLaborer(){
 		Laborer laborer = new Laborer();
 		laborer.setFirstname(NOMBRE+Utils.random());
+		laborer.setLastname(APELLIDO+Utils.random());
 		laborer.setJob(Job.ALBAÑIL);
 		laborer.setAfp(Afp.MODELO);
 		laborer.setMaritalStatus(MaritalStatus.CASADO);

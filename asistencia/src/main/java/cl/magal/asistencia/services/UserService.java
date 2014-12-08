@@ -343,4 +343,12 @@ public class UserService implements UserDetailsService {
 		dbu.addCS(cs);
 		rep.save(dbu);
 	}
+
+	/**
+	 * Elimina todos los datos de la tabla USADO PRINCIPALMENTE POR LOS TEST 
+	 */
+	public void clear() {
+		rep.deleteAll();
+		
+	}
 }

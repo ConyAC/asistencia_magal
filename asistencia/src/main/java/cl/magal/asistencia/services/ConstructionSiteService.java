@@ -177,4 +177,11 @@ public class ConstructionSiteService {
 		return teams;
 	}
 
+	/**
+	 * permite borrar toda la tabla
+	 */
+	public void clear() {
+		repo2.deleteAll();
+	}
+
 }

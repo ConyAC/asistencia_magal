@@ -14,7 +14,7 @@ import ru.xpoft.vaadin.SpringVaadinServlet;
 import cl.magal.asistencia.entities.User;
 import cl.magal.asistencia.entities.enums.Permission;
 import cl.magal.asistencia.ui.config.ConfigView;
-import cl.magal.asistencia.ui.constructionsite.ConstructionSiteView;
+import cl.magal.asistencia.ui.constructionsite.ConstructionSitesView;
 import cl.magal.asistencia.ui.login.LoginView;
 import cl.magal.asistencia.ui.users.UsersView;
 import cl.magal.asistencia.ui.workerfile.WorkerFileView;
@@ -28,8 +28,13 @@ import com.vaadin.server.ErrorHandler;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinSession;
+import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Alignment;
+import com.vaadin.ui.Button;
+import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.Component;
+import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.Label;
 import com.vaadin.ui.MenuBar;
 import com.vaadin.ui.MenuBar.Command;
 import com.vaadin.ui.MenuBar.MenuItem;
@@ -59,8 +64,10 @@ public class MagalUI extends UI implements ErrorHandler {
 	public static final String PERSISTENCE_UNIT = "persistenceUnit";
 	
 	VerticalLayout root;
-	MenuBar menuLayout;
+	HorizontalLayout top;	MenuBar menuLayout;
 	DiscoveryNavigator navigator = null ;
+	Button backBtn; 
+	Label title;
 
 	@Override
 	protected void init(final VaadinRequest request) {
@@ -72,8 +79,33 @@ public class MagalUI extends UI implements ErrorHandler {
 		root.setSpacing(true);
         root.addStyleName("root");
         root.setSizeFull();
+        
+        top = new HorizontalLayout();
+        top.setMargin(true);
+//        top.setSpacing(true);
+        top.setWidth("100%");
+        top.setHeight("75px");
+        root.addComponent(top);
+        
+        backBtn = new Button(null,FontAwesome.ANGLE_DOUBLE_LEFT);
+        top.addComponent(backBtn);
+        top.setExpandRatio(backBtn, 0.05F);
+        top.setComponentAlignment(backBtn,Alignment.TOP_LEFT);
+        
+        title = new Label("<h1>Título</h1>",ContentMode.HTML);
+        title.setHeight("50px");
+        title.setStyleName("no-margin");
+        
+        top.addComponent(title);
+        top.setComponentAlignment(title,Alignment.TOP_LEFT);
+        top.setExpandRatio(title, 1F);
+        
         //menu
-        drawMenu();
+        menuLayout = drawMenu();
+        
+        top.addComponent(menuLayout);
+        top.setComponentAlignment(menuLayout,Alignment.TOP_RIGHT);
+//        top.setExpandRatio(menuLayout, 1.0F);
 		
         Panel content = new Panel();
 		content.setSizeFull();
@@ -95,11 +127,9 @@ public class MagalUI extends UI implements ErrorHandler {
 			throw new RuntimeException("Nombre de menu si clase conocida.");
 		
 		if(menuName.equals("Obras"))
-			return ConstructionSiteView.NAME;
-		else if(menuName.equals("Fichas"))
+			return ConstructionSitesView.NAME;
+		else if(menuName.equals("Histórico"))
 			return WorkerFileView.NAME;
-		else if(menuName.equals("Usuarios"))
-			return UsersView.NAME;
 		else if(menuName.equals("Usuarios"))
 			return UsersView.NAME;
 		else if(menuName.equals("Configuraciones"))
@@ -115,7 +145,7 @@ public class MagalUI extends UI implements ErrorHandler {
 	
 	private MenuBar drawMenu() {
 		
-		menuLayout = new MenuBar();
+		MenuBar menuLayout = new MenuBar();
 		menuLayout.addStyleName("mybarmenu");
 		
 		MenuBar.Command mycommand = new MenuBar.Command() {
@@ -136,7 +166,7 @@ public class MagalUI extends UI implements ErrorHandler {
 		
 		item.setIcon(FontAwesome.BUILDING);
 		
-		item = menuLayout.addItem("Fichas",mycommand);
+		item = menuLayout.addItem("Histórico",mycommand);
 		
 		item.setIcon(FontAwesome.BOOK);
 		
@@ -160,9 +190,6 @@ public class MagalUI extends UI implements ErrorHandler {
 		
 		item.setIcon(FontAwesome.POWER_OFF);
 		
-		root.addComponent(menuLayout);
-		root.setComponentAlignment(menuLayout,Alignment.TOP_RIGHT);
-		
 		return menuLayout;
 	}
 	
@@ -177,11 +204,39 @@ public class MagalUI extends UI implements ErrorHandler {
 //    	VaadinSession.getCurrent().
 //    	setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY,SecurityContextHolder.createEmptyContext());
     	VaadinSession.getCurrent().setAttribute(Constants.SESSION_USUARIO, null);
+    	VaadinSession.getCurrent().close();
     	navigator.navigateTo(LoginView.NAME);
 	}
+	
+	/** GETTERS DE COMPONENTES DE LA PAGINA **/
 		
 	public Component getMenuLayout() {
 		return menuLayout;
+	}
+	
+	public HorizontalLayout getTop(){
+		return top;
+	}
+	
+	public Button getBackButton(){
+		//quita todos los listeners antes de entregarlo
+		for( Object listener : backBtn.getListeners(Button.ClickEvent.class))
+			backBtn.removeClickListener((ClickListener) listener);
+		return backBtn;
+	}
+	
+	public Label getTitle(){
+		return title;
+	}
+	
+	/** UTILITARIOS PARA MOSTRAR O OCULTAR PARTES DE LA PAGINA **/
+	public void setTopVisible(boolean visible){
+		top.setVisible(visible);
+	}
+	
+	public void setBackVisible(boolean visible){
+		backBtn.setVisible(visible);
+		title.setVisible(visible);
 	}
 	
 	private boolean hastPermission(Permission... permissions) {

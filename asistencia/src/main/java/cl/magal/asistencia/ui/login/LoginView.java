@@ -16,6 +16,7 @@ import ru.xpoft.vaadin.VaadinView;
 import cl.magal.asistencia.services.UserService;
 import cl.magal.asistencia.ui.MagalUI;
 import cl.magal.asistencia.ui.constructionsite.ConstructionSiteView;
+import cl.magal.asistencia.ui.constructionsite.ConstructionSitesView;
 
 import com.vaadin.event.ShortcutAction.KeyCode;
 import com.vaadin.event.ShortcutListener;
@@ -145,8 +146,8 @@ public class LoginView extends VerticalLayout implements View {
 		                        loginPanel.removeComponent(loginPanel.getComponent(2));
 		                    }
 		                   
-						 ((MagalUI)UI.getCurrent()).getMenuLayout().setVisible(true);
-		                    UI.getCurrent().getNavigator().navigateTo(ConstructionSiteView.NAME);
+						 ((MagalUI)UI.getCurrent()).setTopVisible(true);
+		                    UI.getCurrent().getNavigator().navigateTo(ConstructionSitesView.NAME);
 		                    
 					} catch (Exception e) {
 						logger.debug("Mal login ", e );
@@ -183,7 +184,7 @@ public class LoginView extends VerticalLayout implements View {
 	@Override
 	public void enter(ViewChangeEvent event) {
 		
-		((MagalUI)UI.getCurrent()).getMenuLayout().setVisible(false);
+		((MagalUI)UI.getCurrent()).setTopVisible(false);
 		//re asigna el enter
 		signin.addShortcutListener(enter);
 		

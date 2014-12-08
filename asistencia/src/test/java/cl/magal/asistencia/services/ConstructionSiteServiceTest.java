@@ -41,6 +41,7 @@ public class ConstructionSiteServiceTest {
 	
 	@Before
 	public void before(){
+		service.clear();userService.clear();
 		user = UserHelper.newUser();
 		userService.saveUser(user);
 	}
@@ -241,6 +242,9 @@ public class ConstructionSiteServiceTest {
 	
 	@Test
 	public void testFindAllJustNotDeleted(){
+		
+		service.clear();
+		
 		//crea 3 obras
 		ConstructionSite primera = ConstructionSiteHelper.newConstrutionSite();
 		// lo guarda

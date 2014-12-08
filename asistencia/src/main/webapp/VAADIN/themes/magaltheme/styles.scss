@@ -6,4 +6,9 @@
 .magaltheme {
   @include addons;
   @include magaltheme;
+  
+  //permite quitarle el margen a un componente h1
+  .no-margin h1{
+  	margin : 0 !important;
+  }
 }
