@@ -72,7 +72,7 @@ public class UserService implements UserDetailsService {
 			String password = "123456";			
 			usuario = new cl.magal.asistencia.entities.User();
 			usuario.setFirstname("Joseph");
-			usuario.setRut("12345678-9");
+			usuario.setRut("16127401-1");
 			usuario.setLastname("O'Shea");
 			usuario.setRole(role);
 			usuario.setEmail(userName);
@@ -129,7 +129,7 @@ public class UserService implements UserDetailsService {
 			cl.magal.asistencia.entities.User user2 = new cl.magal.asistencia.entities.User();
 			user2.setUserId(null);
 			user2.setRole(role);
-			user2.setRut("11111112-1");
+			user2.setRut("20400474-9");
 			user2.setFirstname("ADMIN");
 			user2.setLastname("OBRA");
 			user2.setEmail("obra@magal.cl");
@@ -152,7 +152,7 @@ public class UserService implements UserDetailsService {
 			
 			user = new cl.magal.asistencia.entities.User();
 			user.setRole(role);
-			user.setRut("11111113-1");
+			user.setRut("24540517-0");
 			user.setFirstname("AYUDANTE");
 			user.setLastname("OBRA");
 			user.setEmail("ayudante@magal.cl");

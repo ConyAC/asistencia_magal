@@ -27,9 +27,13 @@ import javax.persistence.OneToOne;
 import javax.persistence.PrePersist;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
+
+import org.hibernate.validator.constraints.Email;
 
 import cl.magal.asistencia.entities.converter.UserStatusConverter;
 import cl.magal.asistencia.entities.enums.UserStatus;
+import cl.magal.asistencia.entities.validator.RutDigit;
 
 /**
  *
@@ -62,9 +66,14 @@ public class User implements Serializable {
     private String lastname;
     @Basic(optional = false)
     @Column(name = "rut", nullable=false)
+    @Pattern(regexp="^([0-9])+\\-([kK0-9])+$",message="El rut no es válido.")
+    @RutDigit(message="El rut no es válido.")
+    @NotNull(message="El rut es obligatorio.")
     private String rut;
     @Basic(optional = false)
     @Column(name = "email",nullable = false,unique = true)
+    @NotNull(message="El rut es obligatorio.")
+    @Email(message="El email es inválido.")
     private String email;
     @Column(name = "password")
     private String password;

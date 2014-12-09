@@ -14,14 +14,13 @@ import org.tepi.filtertable.FilterTable;
 import ru.xpoft.vaadin.VaadinView;
 import cl.magal.asistencia.entities.ConstructionSite;
 import cl.magal.asistencia.entities.enums.Permission;
-import cl.magal.asistencia.entities.enums.Status;
 import cl.magal.asistencia.services.ConstructionSiteService;
 import cl.magal.asistencia.services.UserService;
 import cl.magal.asistencia.ui.BaseView;
 import cl.magal.asistencia.ui.MagalUI;
+import cl.magal.asistencia.util.SecurityHelper;
 
 import com.vaadin.data.fieldgroup.BeanFieldGroup;
-import com.vaadin.data.fieldgroup.FieldGroup.CommitException;
 import com.vaadin.data.util.BeanItem;
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.event.ItemClickEvent;
@@ -31,17 +30,11 @@ import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
-import com.vaadin.ui.AbstractSelect.ItemCaptionMode;
 import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.Notification.Type;
-import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.CustomTable;
-import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Panel;
-import com.vaadin.ui.TabSheet;
-import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 
@@ -119,7 +112,7 @@ public class ConstructionSitesView extends BaseView implements View {
 		vl.setSpacing(true);
 
 		//agrega solo si tiene los permisos
-		if( hastPermission(Permission.CREAR_OBRA,Permission.ELIMINAR_OBRA)){
+		if( SecurityHelper.hastPermission(Permission.CREAR_OBRA,Permission.ELIMINAR_OBRA)){
 		
 			//botones agrega y eliminar
 			HorizontalLayout hl = new HorizontalLayout();

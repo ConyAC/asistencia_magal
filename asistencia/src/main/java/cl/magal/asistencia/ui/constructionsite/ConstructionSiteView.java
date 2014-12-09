@@ -1,7 +1,6 @@
 package cl.magal.asistencia.ui.constructionsite;
 
 import java.io.OutputStream;
-import java.util.List;
 
 import javax.annotation.PostConstruct;
 
@@ -9,14 +8,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
-import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 
 import ru.xpoft.vaadin.VaadinView;
 import cl.magal.asistencia.entities.ConstructionSite;
-import cl.magal.asistencia.entities.Laborer;
-import cl.magal.asistencia.entities.Team;
-import cl.magal.asistencia.entities.enums.Permission;
 import cl.magal.asistencia.services.ConstructionSiteService;
 import cl.magal.asistencia.services.UserService;
 import cl.magal.asistencia.ui.BaseView;
@@ -24,8 +19,6 @@ import cl.magal.asistencia.ui.MagalUI;
 
 import com.vaadin.data.Container;
 import com.vaadin.data.util.BeanItem;
-import com.vaadin.data.util.BeanItemContainer;
-import com.vaadin.event.EventRouter;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.FontAwesome;
@@ -34,7 +27,6 @@ import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.DefaultFieldFactory;
 import com.vaadin.ui.Field;
@@ -66,8 +58,8 @@ public class ConstructionSiteView extends BaseView  implements View {
 
 	public static final String NAME = "obra";
 
-	BeanItemContainer<Laborer> laborerContainer = new BeanItemContainer<Laborer>(Laborer.class);
-	BeanItemContainer<Team> teamContainer = new BeanItemContainer<Team>(Team.class);
+	@Autowired
+	LaborerAndTeamPanel laborerAndTeamPanel;
 
 	@Autowired
 	private transient ConstructionSiteService service;
@@ -75,37 +67,34 @@ public class ConstructionSiteView extends BaseView  implements View {
 	private transient UserService userService;
 
 	HorizontalLayout root;
-	Panel panelConstruction,panelAttendance;
+//	Panel panelConstruction,
+	Panel panelAttendance;
 
 	public ConstructionSiteView(){
 
 		logger.debug("obras");
 
 		setSizeFull();
-		
-		teamContainer.addNestedContainerProperty("leader.firstname");
 
 		root = new HorizontalLayout();
 		root.setSizeFull();
 		setContent(root);
 
 		//crea el panel de la información de obra
-		panelConstruction = new Panel();
-		panelConstruction.setSizeFull();
-
-		//crea el tab con trabajadores y cuadrillas
-		TabSheet tab = new TabSheet();
-		tab.setSizeFull();
+//		panelConstruction = new Panel();
+//		panelConstruction.setSizeFull();
 		
-		//tab de trabajadores
-		tab.addTab(drawLaborer(),"Trabajadores");
-
-		//tab de cuadrillas
-		tab.addTab(drawCuadrillas(),"Cuadrillas");
-		//rellena el panel de la información de obra
-		panelConstruction.setContent(tab);
-
-		root.addComponent(panelConstruction);
+//		//crea el tab con trabajadores y cuadrillas
+//		TabSheet tab = new TabSheet();
+//		tab.setSizeFull();
+//		
+//		//tab de trabajadores
+//		tab.addTab(drawLaborer(),"Trabajadores");
+//
+//		//tab de cuadrillas
+//		tab.addTab(drawCuadrillas(),"Cuadrillas");
+//		//rellena el panel de la información de obra
+//		panelConstruction.setContent(tab);
 
 		//crea el panel de asistencia para intercambiarlo
 		panelAttendance = new Panel();
@@ -433,47 +422,21 @@ public class ConstructionSiteView extends BaseView  implements View {
 	@PostConstruct
 	private void init(){
 		
+		laborerAndTeamPanel.setHasAttendanceButton(true);
+		laborerAndTeamPanel.setHasConstructionDetails(false);
+		root.addComponent(laborerAndTeamPanel);
 		((MagalUI)UI.getCurrent()).getBackButton().addClickListener(backListener);
-	}
-	
-	private void setConstruction(BeanItem<ConstructionSite> item){
-		if(item == null ){
-			
-			setEnabledDetail(false,new BeanItem<ConstructionSite>(new ConstructionSite()));
-			return;
-		}
-		
-		if( hastPermission(Permission.CREAR_OBRA) || hasConstructionSite(item.getBean())){
-			if( editConstructionSite != null )
-				editConstructionSite.setEnabled(true);
-			btnPrint.setEnabled(true);
-			btnAdd.setEnabled(true);;
-		}else{
-			if( editConstructionSite != null )
-				editConstructionSite.setEnabled(false);
-			btnPrint.setEnabled(false);
-			btnAdd.setEnabled(false);
-		}
-		
-		setEnabledDetail(true,item);
-		List<Laborer> laborers = service.getLaborerByConstruction(item.getBean());
-		laborerContainer.removeAllItems();
-		laborerContainer.addAll(laborers);
-		
-		List<Team> teams = service.getTeamsByConstruction(item.getBean());
-		teamContainer.removeAllItems();
-		teamContainer.addAll(teams);
 	}
 	
 	private void switchPanels() {
 		
-		if(root.getComponentIndex(panelConstruction) >= 0){
-			root.removeComponent(panelConstruction);
-			root.addComponent(panelAttendance);
-		}else{
-			root.removeComponent(panelAttendance);
-			root.addComponent(panelConstruction);
-		}
+//		if(root.getComponentIndex(panelConstruction) >= 0){
+//			root.removeComponent(panelConstruction);
+//			root.addComponent(panelAttendance);
+//		}else{
+//			root.removeComponent(panelAttendance);
+//			root.addComponent(panelConstruction);
+//		}
 	}
 
 	@Override
@@ -519,12 +482,7 @@ public class ConstructionSiteView extends BaseView  implements View {
 		((MagalUI)UI.getCurrent()).getTitle().setValue("<h1>"+cs.getName()+"</h1>");
 		
 		//si tiene al menos un elemento selecciona el primero
-		setConstruction( new BeanItem<ConstructionSite>(cs) );
-
-		//agrea los trabajadores asociados a la obra TODO segun la obra seleccionada
-		//si no es vacia
-		Page<Laborer> laborerPage = service.findLaborerByConstruction(cs);
-		laborerContainer.addAll(laborerPage.getContent());
+		laborerAndTeamPanel.setConstruction( new BeanItem<ConstructionSite>(cs) );
 		
 	}
 	

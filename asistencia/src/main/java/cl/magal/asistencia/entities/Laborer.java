@@ -26,6 +26,7 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
 
 import cl.magal.asistencia.entities.converter.AfpConverter;
 import cl.magal.asistencia.entities.converter.JobConverter;
@@ -33,6 +34,7 @@ import cl.magal.asistencia.entities.converter.MaritalStatusConverter;
 import cl.magal.asistencia.entities.enums.Afp;
 import cl.magal.asistencia.entities.enums.Job;
 import cl.magal.asistencia.entities.enums.MaritalStatus;
+import cl.magal.asistencia.entities.validator.RutDigit;
 
 /**
  *
@@ -78,6 +80,8 @@ public class Laborer implements Serializable {
     private String secondlastname;
     @NotNull(message="El rut es necesario")
     @Column(name = "rut", nullable=false)
+    @Pattern(regexp="^([0-9])+\\-([kK0-9])+$",message="El rut no es válido.")
+    @RutDigit(message="El rut no es válido.")
     private String rut;
     @Column(name = "dateBirth")
     @Temporal(TemporalType.TIMESTAMP)

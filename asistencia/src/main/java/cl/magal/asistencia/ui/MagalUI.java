@@ -11,7 +11,6 @@ import org.springframework.context.annotation.Scope;
 
 import ru.xpoft.vaadin.DiscoveryNavigator;
 import ru.xpoft.vaadin.SpringVaadinServlet;
-import cl.magal.asistencia.entities.User;
 import cl.magal.asistencia.entities.enums.Permission;
 import cl.magal.asistencia.ui.config.ConfigView;
 import cl.magal.asistencia.ui.constructionsite.ConstructionSitesView;
@@ -19,6 +18,7 @@ import cl.magal.asistencia.ui.login.LoginView;
 import cl.magal.asistencia.ui.users.UsersView;
 import cl.magal.asistencia.ui.workerfile.WorkerFileView;
 import cl.magal.asistencia.util.Constants;
+import cl.magal.asistencia.util.SecurityHelper;
 
 import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.Title;
@@ -73,6 +73,7 @@ public class MagalUI extends UI implements ErrorHandler {
 	protected void init(final VaadinRequest request) {
 		
 		VaadinSession.getCurrent().setErrorHandler(this);
+		
 		//raiz
 		root = new VerticalLayout();
 		setContent(root);
@@ -100,6 +101,15 @@ public class MagalUI extends UI implements ErrorHandler {
         top.setComponentAlignment(title,Alignment.TOP_LEFT);
         top.setExpandRatio(title, 1F);
         
+		
+        Panel content = new Panel();
+		content.setSizeFull();
+		content.addStyleName("view-content");
+
+		navigator = new DiscoveryNavigator(UI.getCurrent(), content);
+
+		root.addComponent(content);
+		root.setExpandRatio(content, 1.0F);
         //menu
         menuLayout = drawMenu();
         
@@ -107,14 +117,6 @@ public class MagalUI extends UI implements ErrorHandler {
         top.setComponentAlignment(menuLayout,Alignment.TOP_RIGHT);
 //        top.setExpandRatio(menuLayout, 1.0F);
 		
-        Panel content = new Panel();
-		content.setSizeFull();
-		content.addStyleName("view-content");
-		
-		navigator = new DiscoveryNavigator(UI.getCurrent(), content);
-		
-		root.addComponent(content);
-		root.setExpandRatio(content, 1.0F);
 		
 	}
 
@@ -170,7 +172,7 @@ public class MagalUI extends UI implements ErrorHandler {
 		
 		item.setIcon(FontAwesome.BOOK);
 		
-		if(hastPermission(Permission.CREAR_USUARIO)){
+		if(SecurityHelper.hastPermission(Permission.CREAR_USUARIO)){
 			item = menuLayout.addItem("Usuarios", mycommand);
 			
 			item.setIcon(FontAwesome.USERS);
@@ -239,25 +241,4 @@ public class MagalUI extends UI implements ErrorHandler {
 		title.setVisible(visible);
 	}
 	
-	private boolean hastPermission(Permission... permissions) {
-		if(permissions == null)
-			return true;
-		
-		User usuario = (User) VaadinSession.getCurrent().getAttribute(
-				"usuario");
-		if(usuario == null ){
-			logger.debug("usuario nulo");
-			return true;
-		}
-		
-		if(usuario.getRole() == null || usuario.getRole().getPermission() == null ){
-			return false;
-		}
-		for(Permission p : permissions){
-			if(!usuario.getRole().getPermission().contains(p))
-				return false;
-		}
-		
-		return true;
-	}
 }
