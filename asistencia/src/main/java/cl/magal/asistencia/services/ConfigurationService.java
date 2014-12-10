@@ -6,9 +6,9 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import cl.magal.asistencia.entities.Configurations;
 import cl.magal.asistencia.entities.DateConfigurations;
-import cl.magal.asistencia.repositories.ConfigurationsRepository;
+import cl.magal.asistencia.entities.WageConfigurations;
+import cl.magal.asistencia.repositories.WageConfigurationsRepository;
 import cl.magal.asistencia.repositories.DateConfigurationsRepository;
 
 @Service
@@ -17,7 +17,7 @@ public class ConfigurationService {
 	@Autowired
 	DateConfigurationsRepository repo;
 	@Autowired
-	ConfigurationsRepository configRepo;
+	WageConfigurationsRepository configRepo;
 	
 	public DateConfigurations findDateConfigurationsByDate(Date value) {
 		return repo.findByDate(value);
@@ -27,15 +27,15 @@ public class ConfigurationService {
 		repo.save(bean);
 	}
 
-	public void save(Configurations bean) {
-		configRepo.save(bean);
-	}
-
-	public Configurations findConfigurations() {
-		List<Configurations> configurations = (List<Configurations>)configRepo.findAll();
+	public WageConfigurations findConfigurations() {
+		List<WageConfigurations> configurations = (List<WageConfigurations>)configRepo.findAll();
 		if(configurations.isEmpty())
 			return null;
 		return configurations.get(0);
+	}
+
+	public void save(WageConfigurations configurationDate) {
+		configRepo.save(configurationDate);
 	}
 
 }

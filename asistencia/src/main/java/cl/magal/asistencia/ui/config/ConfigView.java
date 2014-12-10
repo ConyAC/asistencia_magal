@@ -13,10 +13,11 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
 
 import ru.xpoft.vaadin.VaadinView;
-import cl.magal.asistencia.entities.Configurations;
 import cl.magal.asistencia.entities.ConstructionSite;
 import cl.magal.asistencia.entities.DateConfigurations;
+import cl.magal.asistencia.entities.Mobilization2;
 import cl.magal.asistencia.entities.User;
+import cl.magal.asistencia.entities.WageConfigurations;
 import cl.magal.asistencia.entities.enums.Permission;
 import cl.magal.asistencia.services.ConfigurationService;
 import cl.magal.asistencia.services.ConstructionSiteService;
@@ -255,6 +256,8 @@ public class ConfigView extends VerticalLayout implements View {
 			}
 		};
 	}
+	
+	WageConfigurations configuration;
 
 	private com.vaadin.ui.Component drawGlobales() {
 		return new VerticalLayout(){
@@ -264,10 +267,10 @@ public class ConfigView extends VerticalLayout implements View {
 				setMargin(true);
 				
 				final FieldGroup fg = new FieldGroup();
-				Configurations configuration = confService.findConfigurations();
+				configuration = confService.findConfigurations();
 				if( configuration  == null )
-					configuration  = new Configurations();
-				fg.setItemDataSource(new BeanItem<Configurations>(configuration));
+					configuration  = new WageConfigurations();
+				fg.setItemDataSource(new BeanItem<WageConfigurations>(configuration));
 				
 				FormLayout form = new FormLayout(){
 					{
@@ -285,7 +288,7 @@ public class ConfigView extends VerticalLayout implements View {
 							public void valueChange(ValueChangeEvent event) {
 								try {
 									fg.commit();
-									Configurations bean = ((BeanItem<Configurations>)fg.getItemDataSource()).getBean();
+									WageConfigurations bean = ((BeanItem<WageConfigurations>)fg.getItemDataSource()).getBean();
 									confService.save(bean);
 								} catch (Exception e) {
 									Notification.show("Error al guardar");
@@ -293,7 +296,7 @@ public class ConfigView extends VerticalLayout implements View {
 							}
 						};
 						
-						Field advance = fg.buildAndBind("Sueldo Mínimo", "minWage");
+						Field advance = fg.buildAndBind("Sueldo Mínimo", "minimumWage");
 						((TextField)advance).setNullRepresentation("");
 						advance.addValueChangeListener(listener);
 						
@@ -326,17 +329,29 @@ public class ConfigView extends VerticalLayout implements View {
 							{
 								int i = 1;
 								setWidth("100%");
-								
-								addContainerProperty("obra.name", ConstructionSite.class, "");
-								addContainerProperty("monto", TextField.class, new TextField());
-								addContainerProperty("eliminar", Button.class, new Button(null,FontAwesome.TRASH_O));
-								setVisibleColumns("obra.name","monto","eliminar");
-								setColumnHeaders("Obra","Monto","Eliminar");
-
-								
 								setPageLength(3);
 							}
 						};
+						
+						final BeanItemContainer<Mobilization2> container = new BeanItemContainer<Mobilization2>(Mobilization2.class);
+						container.addNestedContainerProperty("constructionSite.name");
+						table.setContainerDataSource(container);
+						container.addAll(configuration.getMobilizations2());
+						
+						table.addGeneratedColumn("eliminar", new Table.ColumnGenerator() {
+							
+							@Override
+							public Object generateCell(Table source, Object itemId, Object columnId) {
+								return new Button(null,FontAwesome.TRASH_O);
+							}
+						});
+						
+						table.setVisibleColumns("constructionSite.name","amount","eliminar");
+						table.setColumnHeaders("Obra","Monto","Eliminar");
+						
+//						addContainerProperty("monto", TextField.class, new TextField());
+//						addContainerProperty("eliminar", Button.class, new Button(null,FontAwesome.TRASH_O));
+						
 						
 						HorizontalLayout hl = new HorizontalLayout(){
 							{
@@ -351,25 +366,12 @@ public class ConfigView extends VerticalLayout implements View {
 									
 									@Override
 									public void buttonClick(ClickEvent event) {
-										
-										table.addItem(new Object[]{nombre.getValue(),new TextField(null,fecha.getValue()), new Button(null,new Button.ClickListener() {
-											
-											@Override
-											public void buttonClick(ClickEvent event) {
-												table.removeItem(fecha.getValue());
-											}
-										}){
-											{
-												setIcon(FontAwesome.TRASH_O);
-											}
-										}}, fecha.getValue());
-										}
+										Mobilization2 mob = new Mobilization2();
+										mob.setAmount(Double.valueOf(fecha.getValue()));
+										mob.setConstructionSite((ConstructionSite) nombre.getValue());
+										container.addBean(mob);
 									}
-								 ){
-									{
-										setIcon(FontAwesome.PLUS);
-									}
-								});
+							}));
 							}
 						};
 						hl.setWidth("100%");
