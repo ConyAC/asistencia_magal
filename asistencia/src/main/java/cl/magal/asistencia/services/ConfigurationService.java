@@ -8,8 +8,8 @@ import org.springframework.stereotype.Service;
 
 import cl.magal.asistencia.entities.DateConfigurations;
 import cl.magal.asistencia.entities.WageConfigurations;
-import cl.magal.asistencia.repositories.WageConfigurationsRepository;
 import cl.magal.asistencia.repositories.DateConfigurationsRepository;
+import cl.magal.asistencia.repositories.WageConfigurationsRepository;
 
 @Service
 public class ConfigurationService {

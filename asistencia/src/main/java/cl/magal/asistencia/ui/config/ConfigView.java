@@ -37,6 +37,7 @@ import com.vaadin.ui.AbstractSelect.ItemCaptionMode;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
+import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.DateField;
 import com.vaadin.ui.Field;
@@ -333,10 +334,9 @@ public class ConfigView extends VerticalLayout implements View {
 							}
 						};
 						
-						final BeanItemContainer<Mobilization2> container = new BeanItemContainer<Mobilization2>(Mobilization2.class);
+						final BeanItemContainer<Mobilization2> container = new BeanItemContainer<Mobilization2>(Mobilization2.class,configuration.getMobilizations2());
 						container.addNestedContainerProperty("constructionSite.name");
 						table.setContainerDataSource(container);
-						container.addAll(configuration.getMobilizations2());
 						
 						table.addGeneratedColumn("eliminar", new Table.ColumnGenerator() {
 							
@@ -360,16 +360,28 @@ public class ConfigView extends VerticalLayout implements View {
 								nombre.setItemCaptionMode(ItemCaptionMode.PROPERTY);
 								nombre.setItemCaptionPropertyId("name");
 								addComponent(nombre);
-								final TextField fecha = new TextField("Monto");
-								addComponent(fecha);
+								final TextField monto = new TextField("Monto");
+								addComponent(monto);
 								addComponent(new Button(null,new Button.ClickListener() {
 									
 									@Override
 									public void buttonClick(ClickEvent event) {
-										Mobilization2 mob = new Mobilization2();
-										mob.setAmount(Double.valueOf(fecha.getValue()));
-										mob.setConstructionSite((ConstructionSite) nombre.getValue());
-										container.addBean(mob);
+										try{
+											
+											ConstructionSite cs = (ConstructionSite) nombre.getValue();
+											logger.debug("cs {}",cs);
+											Mobilization2 mob = new Mobilization2();
+											mob.setAmount(Double.valueOf(monto.getValue()));
+											mob.setConstructionSite(cs);
+											logger.debug("configuration {}",configuration);
+											configuration.addMobilizations2(mob);
+											confService.save(configuration);
+											
+											container.addBean(mob);
+										}catch(Exception e){
+											Notification.show("Error al agregar la mobilización 2",Type.ERROR_MESSAGE);
+											logger.error("Error al agregar la mobilización 2",e);
+										}
 									}
 							}));
 							}
