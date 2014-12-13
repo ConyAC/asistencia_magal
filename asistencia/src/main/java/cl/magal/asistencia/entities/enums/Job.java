@@ -3,12 +3,23 @@ package cl.magal.asistencia.entities.enums;
 public enum Job {
 
 	JORNAL(1, "Jornal"),
-	CARPINTERO(2, "Carpintero"),
-	ENFIERRADOR(3, "Enfierrador"),
-	GASFITER(4, "Gasfiter"),
-	ALBAÑIL(5, "Albañil"),
-	ESTUCADOR(6, "Estucador"),
-	JEFE_OBRA(7, "Jefe Obra");
+	EXCAVADOR(2, "Excavador"),
+	AYUDANTE_ENFIERRADOR(3,"Ayudante Enfierrador"),
+	CARPINTERO(4, "Carpintero"),
+	ENFIERRADOR(5, "Enfierrador"),
+	GASFITER(6, "Gasfiter"),
+	ALBAÑIL(7, "Albañil"),
+	YESERO(8, "Yesero"),
+	TRAZADOR(9, "Trazador"),
+	CAPATAZ(10, "Capataz"),
+	MANTENEDOR_BODEGA_CENTRAL(11,"Mant. B. Central"),
+	CERRAJERO(12,"Cerrajero"),
+	C_6(13,"C.6"),
+	ESTUCADOR(14, "Estucador"),
+	JEFE_OBRA(15, "Jefe Obra"),
+	PREVENCIONISTA_RIESGOS(16,"Prev. Riesgos"),
+	VARIOS(17,"Varios"),
+	BODEGUERO(18,"Bodeguero");
 	
 	int i;
 	String description;

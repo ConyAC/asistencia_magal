@@ -29,11 +29,15 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 
 import cl.magal.asistencia.entities.converter.AfpConverter;
+import cl.magal.asistencia.entities.converter.IsapreConverter;
 import cl.magal.asistencia.entities.converter.JobConverter;
 import cl.magal.asistencia.entities.converter.MaritalStatusConverter;
+import cl.magal.asistencia.entities.converter.NationalityConverter;
 import cl.magal.asistencia.entities.enums.Afp;
+import cl.magal.asistencia.entities.enums.Isapre;
 import cl.magal.asistencia.entities.enums.Job;
 import cl.magal.asistencia.entities.enums.MaritalStatus;
+import cl.magal.asistencia.entities.enums.Nationality;
 import cl.magal.asistencia.entities.validator.RutDigit;
 
 /**
@@ -99,18 +103,40 @@ public class Laborer implements Serializable {
     private Integer contractId;
     @Column(name = "teamId")
     private Integer teamId;
+    @Column(name="dependents")
+    private Integer dependents;
+    @Column(name="town")
+    private String town;
+    @Column(name="commune")
+    private String commune;
+    @Column(name="wedge")
+    private Integer wedge;
 
     @Convert(converter = JobConverter.class)
     @Column(name = "job")
     private Job job;
     
+    @Column(name="jobCode")
+    private Integer jobCode;
+    
     @Convert(converter = AfpConverter.class)
     @Column(name = "afp")
     private Afp afp;
     
+    @Convert(converter = IsapreConverter.class)
+    @Column(name="isapre")
+    private Isapre isapre;
+    
     @Convert(converter = MaritalStatusConverter.class)
     @Column(name = "maritalStatus")
     private MaritalStatus maritalStatus;
+    
+    @Convert(converter = NationalityConverter.class)
+    @Column(name="nationality")
+    private Nationality nationality;
+    
+    @Column(name="photo")
+    private String photo;
     
     @ManyToMany(mappedBy="laborers",cascade = { CascadeType.PERSIST, CascadeType.MERGE })
     List<ConstructionSite> constructionSites;
@@ -140,8 +166,64 @@ public class Laborer implements Serializable {
         this.laborerId = laborerId;
         this.firstname = firstname;
     }
+    
+    public String getPhoto() {
+		return photo;
+	}
 
-    public Long getLaborerId() {
+	public void setPhoto(String photo) {
+		this.photo = photo;
+	}
+
+	public Isapre getIsapre() {
+		return isapre;
+	}
+
+	public void setIsapre(Isapre isapre) {
+		this.isapre = isapre;
+	}
+
+	public Integer getWedge() {
+		return wedge;
+	}
+
+	public void setWedge(Integer wedge) {
+		this.wedge = wedge;
+	}
+
+	public String getTown() {
+		return town;
+	}
+
+	public void setTown(String town) {
+		this.town = town;
+	}
+
+	public String getCommune() {
+		return commune;
+	}
+
+	public void setCommune(String commune) {
+		this.commune = commune;
+	}
+
+	public Nationality getNationality() {
+		return nationality;
+	}
+
+	public void setNationality(Nationality nationality) {
+		this.nationality = nationality;
+	}
+
+	public Integer getDependents() {
+		return dependents;
+	}
+
+	public void setDependents(Integer dependents) {
+		this.dependents = dependents;
+	}
+
+	public Long getLaborerId() {
         return laborerId;
     }
 
@@ -275,6 +357,14 @@ public class Laborer implements Serializable {
 
 	public void setConstructionSites(List<ConstructionSite> constructionSites) {
 		this.constructionSites = constructionSites;
+	}
+	
+	public Integer getJobCode() {
+		return jobCode;
+	}
+
+	public void setJobCode(Integer jobCode) {
+		this.jobCode = jobCode;
 	}
 
 	public void addConstructionSite(ConstructionSite constructionSite) {

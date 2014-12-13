@@ -15,8 +15,21 @@
 	<context:component-scan base-package="cl.magal.asistencia.services" />
 	<context:component-scan base-package="cl.magal.asistencia.ui" />
 
-	<!--  Data Base -->
+	<!--  Data Base 
 	<jdbc:embedded-database id="datasource" type="H2"></jdbc:embedded-database>
+	-->
+	<bean id="datasource"
+		class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+ 
+		<property name="driverClassName" value="org.h2.Driver" />
+		<property name="url" value="jdbc:h2:~/magal.mem" />
+		<property name="username" value="sa" />
+		<property name="password" value="" />
+	</bean>
+	
+	<jdbc:initialize-database data-source="datasource">
+	    <jdbc:script location="classpath:/META-INF/sql/data.sql"/>
+	</jdbc:initialize-database>
 	
 	<!--  Entity Manager Factory -->
 	<bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean" >

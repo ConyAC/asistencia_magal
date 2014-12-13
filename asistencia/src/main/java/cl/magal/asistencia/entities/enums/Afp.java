@@ -5,7 +5,9 @@ public enum Afp {
 	MODELO(1, "Modelo"),
 	HABITAT(2, "Habitat"),
 	CUPRUM(3, "Cuprum"),
-	CAPITAL(4, "Capital");
+	CAPITAL(4, "Capital"),
+	PROVIDA(5,"Provida"),
+	PLANVITAL(6,"Plan Vital");
 	
 	int i;
 	String description;

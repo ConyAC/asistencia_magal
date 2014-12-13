@@ -18,8 +18,10 @@
 	    <class>cl.magal.asistencia.entities.User</class>
 	    <class>cl.magal.asistencia.entities.WageConfigurations</class>
 	    <class>cl.magal.asistencia.entities.converter.AfpConverter</class>
+	    <class>cl.magal.asistencia.entities.converter.IsapreConverter</class>
 	    <class>cl.magal.asistencia.entities.converter.JobConverter</class>
 	    <class>cl.magal.asistencia.entities.converter.MaritalStatusConverter</class>
+	    <class>cl.magal.asistencia.entities.converter.NationalityConverter</class>
 	    <class>cl.magal.asistencia.entities.converter.PermissionConverter</class>
 	    <class>cl.magal.asistencia.entities.converter.StatusConverter</class>
 	    <class>cl.magal.asistencia.entities.converter.UserStatusConverter</class>
