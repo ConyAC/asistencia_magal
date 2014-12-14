@@ -378,6 +378,10 @@ public class Laborer implements Serializable {
 	public void setJobCode(Integer jobCode) {
 		this.jobCode = jobCode;
 	}
+	
+	public String getFullname(){
+    	return firstname + " " +lastname;
+    }
 
 	public void addConstructionSite(ConstructionSite constructionSite) {
         if (!getConstructionSites().contains(constructionSite)) {

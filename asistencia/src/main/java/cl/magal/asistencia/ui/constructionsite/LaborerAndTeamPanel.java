@@ -1,8 +1,8 @@
 package cl.magal.asistencia.ui.constructionsite;
 
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
@@ -18,7 +18,6 @@ import org.tepi.filtertable.FilterTable;
 
 import cl.magal.asistencia.entities.ConstructionSite;
 import cl.magal.asistencia.entities.Laborer;
-import cl.magal.asistencia.entities.Mobilization2;
 import cl.magal.asistencia.entities.Team;
 import cl.magal.asistencia.entities.User;
 import cl.magal.asistencia.entities.enums.Afp;
@@ -27,6 +26,7 @@ import cl.magal.asistencia.entities.enums.MaritalStatus;
 import cl.magal.asistencia.entities.enums.Permission;
 import cl.magal.asistencia.entities.enums.Status;
 import cl.magal.asistencia.services.ConstructionSiteService;
+import cl.magal.asistencia.services.LaborerService;
 import cl.magal.asistencia.services.TeamService;
 import cl.magal.asistencia.services.UserService;
 import cl.magal.asistencia.util.SecurityHelper;
@@ -45,7 +45,6 @@ import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.CustomTable.Align;
 import com.vaadin.ui.Field;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.GridLayout;
@@ -54,7 +53,6 @@ import com.vaadin.ui.Notification;
 import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.CustomTable;
 import com.vaadin.ui.Panel;
-import com.vaadin.ui.PasswordField;
 import com.vaadin.ui.TabSheet;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.TwinColSelect;
@@ -96,6 +94,8 @@ public class LaborerAndTeamPanel extends Panel implements View {
 	transient ConstructionSiteService constructionSiteService;
 	@Autowired
 	transient TeamService teamService;
+	@Autowired
+	transient LaborerService laborerService;
 	
 	
 	Button asistenciaBtn;
@@ -583,14 +583,12 @@ public class LaborerAndTeamPanel extends Panel implements View {
 				 for (Object propertyId : new String[]{"name"}) { //fieldGroup.getUnboundPropertyIds()
 		        	if(propertyId.equals("teamId") || propertyId.equals("constructionsite")|| propertyId.equals("status") || propertyId.equals("deleted") || propertyId.equals("date"))
 		        		;
-		        	else if(propertyId.equals("leader")){
+		        	else if(propertyId.equals("leader.fullname")){
 		        		logger.debug("INGRESO!!! :");
-		        		ComboBox labName = new ComboBox("Laborer", laborerContainer);		        		
-		        		labName.setItemCaptionMode(ItemCaptionMode.PROPERTY);
-		        		labName.setItemCaptionPropertyId("firstname");
-		        		logger.debug("INGRESO!!! :"+labName);
+		        		ComboBox labName = new ComboBox("Responsable", laborerContainer);		        		
+		        		//labName.setItemCaptionMode(ItemCaptionMode.PROPERTY);
+		        		//labName.setItemCaptionPropertyId("fullname");
 		    			detalleCuadrilla.addComponent(labName);
-		    			fieldGroup.bind(labName, "leader");   
 		        	}else if(propertyId.equals("laborers")){
 		        		ComboBox jobField = new ComboBox("Oficio");
 		        		jobField.setNullSelectionAllowed(false);
@@ -614,7 +612,10 @@ public class LaborerAndTeamPanel extends Panel implements View {
 				
 				//Seleccionar Obreros
 				FilterTable select_lab =  new FilterTable();
+				Page<Laborer> page = laborerService.findAllLaborer(new PageRequest(0, 20));
 				select_lab.setContainerDataSource(laborerContainer);
+				laborerContainer.addAll(page.getContent());
+				
 				select_lab.setSizeFull();
 				select_lab.setFilterBarVisible(true);
 				select_lab.addGeneratedColumn("my_select", new CustomTable.ColumnGenerator() {
@@ -622,8 +623,8 @@ public class LaborerAndTeamPanel extends Panel implements View {
 					@Override
 					public Object generateCell(CustomTable source, Object itemId,
 							Object columnId) {
-						CheckBox checkbox = new CheckBox();
-                        return checkbox ;
+						CheckBox select_check = new CheckBox();
+                        return select_check ;
 					}
 				});
     			
@@ -635,7 +636,8 @@ public class LaborerAndTeamPanel extends Panel implements View {
 				
 				//Obreros Seleccionados
 				FilterTable selected_lab =  new FilterTable();
-				selected_lab.setContainerDataSource(teamContainer);
+				selected_lab.setContainerDataSource(laborerContainer);
+				
 				selected_lab.setSizeFull();
 				//selected_lab.setFilterBarVisible(true);
 				selected_lab.addGeneratedColumn("my_remove", new CustomTable.ColumnGenerator() {
@@ -643,11 +645,12 @@ public class LaborerAndTeamPanel extends Panel implements View {
 					@Override
 					public Object generateCell(CustomTable source, Object itemId,
 							Object columnId) {
-						CheckBox checkbox = new CheckBox();
-						return checkbox;
+						CheckBox remove_check = new CheckBox();
+						return remove_check;
 					}
 				});
-				selected_lab.setVisibleColumns("name","laborers", "my_remove");
+				
+				selected_lab.setVisibleColumns("firstname","job", "my_remove");
 				selected_lab.setColumnHeaders("Nombre","Oficio", "Quitar");
 				selected_lab.setSelectable(true);
 				selected_lab.setWidth("600px");
@@ -746,5 +749,4 @@ public class LaborerAndTeamPanel extends Panel implements View {
 			detailLayout.setEnabled(enable);
 		
 	}
-
 }

@@ -57,7 +57,8 @@ public class Team implements Serializable {
     @Column(name = "teamId")
     private Long teamId;
     @Basic(optional = false)
-    @Column(name = "name")
+    @NotNull(message="El nombre es necesario")
+    @Column(name = "name", nullable=false)
     private String name;
     @Column(name = "date")
     @Temporal(TemporalType.TIMESTAMP)
@@ -67,7 +68,7 @@ public class Team implements Serializable {
     @ManyToOne
     private ConstructionSite constructionsite;
     @Basic(optional = false)
-    @JoinColumn(name = "leaderId")
+    @JoinColumn(name = "laborerId")
     @ManyToOne(cascade = CascadeType.ALL)
     private Laborer leader;
     @Convert(converter = StatusConverter.class)
