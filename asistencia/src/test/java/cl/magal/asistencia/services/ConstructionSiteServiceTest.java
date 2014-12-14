@@ -20,10 +20,12 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import cl.magal.asistencia.entities.ConstructionSite;
 import cl.magal.asistencia.entities.Laborer;
+import cl.magal.asistencia.entities.Team;
 import cl.magal.asistencia.entities.User;
 import cl.magal.asistencia.entities.enums.Status;
 import cl.magal.asistencia.helpers.ConstructionSiteHelper;
 import cl.magal.asistencia.helpers.LaborerHelper;
+import cl.magal.asistencia.helpers.TeamHelper;
 import cl.magal.asistencia.helpers.UserHelper;
 
 @RunWith(SpringJUnit4ClassRunner.class)

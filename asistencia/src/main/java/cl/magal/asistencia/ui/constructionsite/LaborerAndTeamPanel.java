@@ -2,6 +2,7 @@ package cl.magal.asistencia.ui.constructionsite;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
@@ -17,6 +18,7 @@ import org.tepi.filtertable.FilterTable;
 
 import cl.magal.asistencia.entities.ConstructionSite;
 import cl.magal.asistencia.entities.Laborer;
+import cl.magal.asistencia.entities.Mobilization2;
 import cl.magal.asistencia.entities.Team;
 import cl.magal.asistencia.entities.User;
 import cl.magal.asistencia.entities.enums.Afp;
@@ -25,6 +27,7 @@ import cl.magal.asistencia.entities.enums.MaritalStatus;
 import cl.magal.asistencia.entities.enums.Permission;
 import cl.magal.asistencia.entities.enums.Status;
 import cl.magal.asistencia.services.ConstructionSiteService;
+import cl.magal.asistencia.services.TeamService;
 import cl.magal.asistencia.services.UserService;
 import cl.magal.asistencia.util.SecurityHelper;
 
@@ -40,16 +43,21 @@ import com.vaadin.ui.AbstractSelect.ItemCaptionMode;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
+import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.ComboBox;
+import com.vaadin.ui.CustomTable.Align;
 import com.vaadin.ui.Field;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Notification.Type;
+import com.vaadin.ui.CustomTable;
 import com.vaadin.ui.Panel;
+import com.vaadin.ui.PasswordField;
 import com.vaadin.ui.TabSheet;
 import com.vaadin.ui.TextField;
+import com.vaadin.ui.TwinColSelect;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
@@ -79,12 +87,15 @@ public class LaborerAndTeamPanel extends Panel implements View {
 	/** LAYOUTS **/
 	VerticalLayout detalleLayout;
 	HorizontalLayout detailLayout;
+	private TwinColSelect tcsLaborer;
 	
 	/** SERVICES **/
 	@Autowired
 	transient UserService userService;
 	@Autowired
 	transient ConstructionSiteService constructionSiteService;
+	@Autowired
+	transient TeamService teamService;
 	
 	
 	Button asistenciaBtn;
@@ -116,7 +127,7 @@ public class LaborerAndTeamPanel extends Panel implements View {
 		tab.addTab(drawLaborer(),"Trabajadores");
 
 		//tab de cuadrillas
-		tab.addTab(drawCuadrillas(),"Cuadrillas");
+		tab.addTab(drawTeam(),"Cuadrillas");
 		//rellena el panel de la información de obra
 		setContent(tab);
 	}
@@ -505,6 +516,169 @@ public class LaborerAndTeamPanel extends Panel implements View {
 		return vl;
 	}
 	
+	protected VerticalLayout drawTeam() {
+		VerticalLayout vl = new VerticalLayout();
+		vl.setSpacing(true);
+		vl.setMargin(true);
+		vl.setSizeFull();
+
+		Button btnAdd = new Button(null,FontAwesome.PLUS);
+		vl.addComponent(btnAdd);
+		vl.setComponentAlignment(btnAdd, Alignment.TOP_RIGHT);
+		btnAdd.addClickListener(new Button.ClickListener() {
+
+			@Override
+			public void buttonClick(ClickEvent event) {
+				final ConstructionSite cs = item.getBean();
+				if(cs == null){
+					Notification.show("Debe seleccionar una obra",Type.ERROR_MESSAGE);
+					return;
+				}
+				
+				final Window window = new Window();
+				window.setWidth("80%");
+				
+				window.setModal(true);
+				window.center();
+				
+				VerticalLayout detalleCuadrilla = new VerticalLayout();
+				detalleCuadrilla.setMargin(true);
+				detalleCuadrilla.setSpacing(true);
+				
+				Panel panel = new Panel("Crear Cuadrilla");
+				panel.setContent(detalleCuadrilla);
+				window.setContent(panel);
+				
+				HorizontalLayout hl = new HorizontalLayout();
+				hl.setSpacing(true);
+				detalleCuadrilla.addComponent(hl);
+				detalleCuadrilla.setComponentAlignment(hl, Alignment.TOP_RIGHT);
+								
+				final BeanFieldGroup<Team> fieldGroup = new BeanFieldGroup<Team>(Team.class);
+		        fieldGroup.setItemDataSource(new BeanItem<Team>(new Team()));
+
+		        //agrega un boton que hace el commit
+		        Button add = new Button(null,new Button.ClickListener() {
+
+		        	@Override
+		        	public void buttonClick(ClickEvent event) {
+		        		try {
+		        			fieldGroup.commit();
+		        			Team team = fieldGroup.getItemDataSource().getBean();
+		        			constructionSiteService.addTeamToConstructionSite(team, cs);		
+		        			teamContainer.addBean(team);
+		        			window.close();
+		        		} catch (Exception e) {
+		        			logger.error("Error al guardar la información de la cuadrilla");
+		        			Notification.show("Es necesario agregar todos los campos obligatorios", Type.ERROR_MESSAGE);
+		        		}
+		        	}
+		        }){{
+		        	setIcon(FontAwesome.SAVE);
+		        }};
+		        hl.addComponent(add);
+		            
+		        // Loop through the properties, build fields for them and add the fields
+		        // to this UI				
+				 for (Object propertyId : new String[]{"name"}) { //fieldGroup.getUnboundPropertyIds()
+		        	if(propertyId.equals("teamId") || propertyId.equals("constructionsite")|| propertyId.equals("status") || propertyId.equals("deleted") || propertyId.equals("date"))
+		        		;
+		        	else if(propertyId.equals("leader")){
+		        		logger.debug("INGRESO!!! :");
+		        		ComboBox labName = new ComboBox("Laborer", laborerContainer);		        		
+		        		labName.setItemCaptionMode(ItemCaptionMode.PROPERTY);
+		        		labName.setItemCaptionPropertyId("firstname");
+		        		logger.debug("INGRESO!!! :"+labName);
+		    			detalleCuadrilla.addComponent(labName);
+		    			fieldGroup.bind(labName, "leader");   
+		        	}else if(propertyId.equals("laborers")){
+		        		ComboBox jobField = new ComboBox("Oficio");
+		        		jobField.setNullSelectionAllowed(false);
+		    			for(Job j : Job.values()){
+		    				jobField.addItem(j);
+		    			}
+		    			detalleCuadrilla.addComponent(jobField);
+		    			fieldGroup.bind(jobField, "laborers");    
+		        	}else{        		
+		        		String t = tradProperty(propertyId);
+		        		Field field = fieldGroup.buildAndBind(t, propertyId);
+		        		if(field instanceof TextField){
+		        			((TextField)field).setNullRepresentation("");
+		        		}
+		        		detalleCuadrilla.addComponent(field);
+		        		detalleCuadrilla.setComponentAlignment(field, Alignment.MIDDLE_LEFT);
+		        	}
+		        }
+		        
+				 HorizontalLayout test = new HorizontalLayout();
+				
+				//Seleccionar Obreros
+				FilterTable select_lab =  new FilterTable();
+				select_lab.setContainerDataSource(laborerContainer);
+				select_lab.setSizeFull();
+				select_lab.setFilterBarVisible(true);
+				select_lab.addGeneratedColumn("my_select", new CustomTable.ColumnGenerator() {
+					
+					@Override
+					public Object generateCell(CustomTable source, Object itemId,
+							Object columnId) {
+						CheckBox checkbox = new CheckBox();
+                        return checkbox ;
+					}
+				});
+    			
+				select_lab.setVisibleColumns("firstname","job", "my_select");
+				select_lab.setColumnHeaders("Nombre","Oficio", "Seleccionar");
+				select_lab.setSelectable(true);
+				select_lab.setWidth("600px");
+				select_lab.setHeight("400px");
+				
+				//Obreros Seleccionados
+				FilterTable selected_lab =  new FilterTable();
+				selected_lab.setContainerDataSource(teamContainer);
+				selected_lab.setSizeFull();
+				//selected_lab.setFilterBarVisible(true);
+				selected_lab.addGeneratedColumn("my_remove", new CustomTable.ColumnGenerator() {
+					
+					@Override
+					public Object generateCell(CustomTable source, Object itemId,
+							Object columnId) {
+						CheckBox checkbox = new CheckBox();
+						return checkbox;
+					}
+				});
+				selected_lab.setVisibleColumns("name","laborers", "my_remove");
+				selected_lab.setColumnHeaders("Nombre","Oficio", "Quitar");
+				selected_lab.setSelectable(true);
+				selected_lab.setWidth("600px");
+				selected_lab.setHeight("400px");
+				
+				test.setSpacing(true);
+				test.addComponent(select_lab);
+				test.addComponent(selected_lab);
+				 
+				detalleCuadrilla.addComponent(test);				
+				detalleCuadrilla.setWidth("100%");
+		        
+		        UI.getCurrent().addWindow(window);
+
+			}
+		});		
+		
+		FilterTable table =  new FilterTable();
+		table.setContainerDataSource(teamContainer);
+		table.setSizeFull();
+		table.setFilterBarVisible(true);
+		table.setVisibleColumns("name","leader.firstname","date","status");
+		table.setColumnHeaders("Nombre","Responsable","Fecha","Estado");
+		table.setSelectable(true);
+
+		vl.addComponent(table);
+		vl.setExpandRatio(table,1.0F);
+
+		return vl;
+	}
+	
 	private String tradProperty(Object propertyId) {
 		if(propertyId.equals("rut"))
 			return "RUT";
@@ -526,6 +700,10 @@ public class LaborerAndTeamPanel extends Panel implements View {
 			return "Teléfono fijo";
 		else if(propertyId.equals("dateAdmission"))
 			return "Fecha de Admisión";
+		else if(propertyId.equals("name"))
+			return "Nombre Cuadrilla";
+		else if(propertyId.equals("leader"))
+			return "Responsable de Cuadrilla";
 		else
 			return propertyId.toString();
 	}
