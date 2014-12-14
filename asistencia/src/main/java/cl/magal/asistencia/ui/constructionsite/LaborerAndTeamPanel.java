@@ -326,6 +326,14 @@ public class LaborerAndTeamPanel extends Panel implements View {
 		return vl;
 	}
 	
+	protected VerticalLayout test1() {
+		return null;
+	}
+	
+	protected VerticalLayout test2() {
+		return null;
+	}
+	
 	protected VerticalLayout drawLaborer() {
 
 		VerticalLayout vl = new VerticalLayout();
@@ -393,13 +401,24 @@ public class LaborerAndTeamPanel extends Panel implements View {
 				detalleObrero.setMargin(true);
 				detalleObrero.setSpacing(true);
 				
-				
-				window.setContent(new Panel(detalleObrero));
+				Panel panel = new Panel("Ficha Trabajador");
+				panel.setContent(detalleObrero);
+				window.setContent(panel);				
 				
 				HorizontalLayout hl = new HorizontalLayout();
+				TabSheet tab = new TabSheet();
+				tab.setSizeFull();
+
+				hl.addComponent(tab);
+				
+				//tab de trabajadores
+				tab.addTab(drawCuadrillas(),"fgfgf");
+				//tab de cuadrillas
+				tab.addTab(drawCuadrillas(),"sdsdsx");
+				
 				hl.setSpacing(true);
 				detalleObrero.addComponent(hl,0,0,1,0);
-				detalleObrero.setComponentAlignment(hl, Alignment.TOP_RIGHT);
+				detalleObrero.setComponentAlignment(hl, Alignment.TOP_LEFT);
 				
 				
 				final BeanFieldGroup<Laborer> fieldGroup = new BeanFieldGroup<Laborer>(Laborer.class);
