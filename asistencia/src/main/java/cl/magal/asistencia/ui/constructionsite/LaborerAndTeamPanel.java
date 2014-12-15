@@ -41,12 +41,14 @@ import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.ComboBox;
+import com.vaadin.ui.DateField;
 import com.vaadin.ui.Field;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
+import com.vaadin.ui.Table;
 import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.TabSheet;
@@ -66,7 +68,7 @@ public class LaborerAndTeamPanel extends Panel implements View {
 
 	Logger logger = LoggerFactory.getLogger(LaborerAndTeamPanel.class);
 	
-	protected Button editConstructionSite,btnPrint,btnAdd;
+	protected Button editConstructionSite,btnPrint,btnAdd,btnAddH, btnAddP;
 	
 	/** CONTAINERS **/
 	BeanItemContainer<User> userContainer = new BeanItemContainer<User>(User.class);
@@ -413,13 +415,13 @@ public class LaborerAndTeamPanel extends Panel implements View {
 				hl.addComponent(tab);
 				
 				//tab de Resumen
-				tab.addTab(drawInfo(),"Resumen");
+				//tab.addTab(drawInfo(),"Resumen"); -> no cuando se está creando.
 				//tab de Información
 				tab.addTab(drawInfo(),"Información");
 				//tab de vacaciones
 				tab.addTab(drawVac(),"Vacaciones");
 				//tab de perstamos y herramientas
-				tab.addTab(drawPyH(),"Prestamos/Herramientas");
+				tab.addTab(drawPyH(),"Préstamos/Herramientas");
 				//tab de accidentes y licencias
 				tab.addTab(drawAyL(),"Accidentes/Licencias");
 				//tab de contratos y finiquitos
@@ -457,7 +459,7 @@ public class LaborerAndTeamPanel extends Panel implements View {
 		vl.setMargin(true);
 		vl.setSizeFull();
 				
-		GridLayout detalleObrero = new GridLayout(2,5);
+		GridLayout detalleObrero = new GridLayout(3,5);
 		detalleObrero.setMargin(true);
 		detalleObrero.setSpacing(true);
 		vl.addComponent(detalleObrero);
@@ -467,7 +469,7 @@ public class LaborerAndTeamPanel extends Panel implements View {
 
         // Loop through the properties, build fields for them and add the fields
         // to this UI
-		 for (Object propertyId : new String[]{"rut","firstname","secondname","lastname", "secondlastname", "dateBirth", "address", "mobileNumber", "phone", "dateAdmission"}) {
+		 for (Object propertyId : new String[]{"rut","firstname","secondname","lastname", "secondlastname", "dateBirth", "address", "mobileNumber", "phone", "dateAdmission", "job", "afp", "maritalStatus"}) {
         	if(propertyId.equals("laborerId") || propertyId.equals("constructionSites") || propertyId.equals("contractId") || propertyId.equals("teamId"))
         		;
         	else if(propertyId.equals("afp")){
@@ -516,7 +518,7 @@ public class LaborerAndTeamPanel extends Panel implements View {
 		vl.setMargin(true);
 		vl.setSizeFull();
 		
-		Label l = new Label("En construcción =P");
+		Label l = new Label("En construcción...");
 		vl.addComponent(l);
 		return vl;
 	}
@@ -527,8 +529,95 @@ public class LaborerAndTeamPanel extends Panel implements View {
 		vl.setMargin(true);
 		vl.setSizeFull();
 		
-		Label l = new Label("En construcción =P");
-		vl.addComponent(l);
+		/*1*/
+		VerticalLayout vh = new VerticalLayout();
+		vh.setSizeFull();
+		
+		HorizontalLayout hl = new HorizontalLayout();
+		hl.setWidth("100%");
+		hl.setSpacing(true);		
+		vh.addComponent(hl);
+
+		btnAddH = new Button(null,FontAwesome.PLUS);
+		hl.addComponent(btnAddH);
+		btnAddH.addClickListener(new Button.ClickListener() {
+
+			@Override
+			public void buttonClick(ClickEvent event) {
+				final ConstructionSite cs = item.getBean();
+				if(cs == null){
+					Notification.show("Debe seleccionar una obra",Type.ERROR_MESSAGE);
+					return;
+				}
+			}
+		});		
+		final Table table_h = new Table("Herramientas"){
+			{
+				setWidth("100%");				
+				addContainerProperty("herramienta", String.class, "");
+				addContainerProperty("monto", String.class, "");
+				addContainerProperty("fecha",String.class, "");
+				addContainerProperty("cuota", String.class, "");
+				addContainerProperty("estado", String.class, "");
+				setVisibleColumns("herramienta","monto","fecha", "cuota", "estado");
+				setColumnHeaders("Herramienta","Monto","Fecha", "Cuota", "Estado");
+
+				setPageLength(4);
+			}
+		};	
+		vh.addComponent(table_h);
+		vh.setComponentAlignment(hl, Alignment.TOP_RIGHT);
+		
+		/*2*/
+		VerticalLayout vp = new VerticalLayout();
+		vp.setSizeFull();
+		
+		HorizontalLayout hl2 = new HorizontalLayout();
+		hl2.setWidth("100%");
+		hl2.setSpacing(true);		
+		vp.addComponent(hl2);
+		
+		TextField monto = new TextField("Monto");
+		hl2.addComponent(monto);
+		DateField fecha = new DateField("Fecha");
+		hl2.addComponent(fecha);
+		TextField cuota = new TextField("Cuota");
+		hl2.addComponent(cuota);
+		TextField estado = new TextField("Estado");
+		hl2.addComponent(estado);
+		
+		btnAddP = new Button(null,FontAwesome.PLUS);
+		hl2.addComponent(btnAddP);
+		btnAddP.addClickListener(new Button.ClickListener() {
+
+			@Override
+			public void buttonClick(ClickEvent event) {
+				final ConstructionSite cs = item.getBean();
+				if(cs == null){
+					Notification.show("Debe seleccionar una obra",Type.ERROR_MESSAGE);
+					return;
+				}
+			}
+		});
+		final Table table_p = new Table("Préstamos"){
+			{
+				setWidth("100%");				
+				addContainerProperty("monto", String.class, "");
+				addContainerProperty("fecha", String.class, "");
+				addContainerProperty("cuota", String.class, "");
+				addContainerProperty("estado", String.class, "");
+				setVisibleColumns("monto","fecha", "cuota", "estado");
+				setColumnHeaders("Monto","Fecha", "Cuota", "Estado");
+				
+				setPageLength(4);
+			}
+		};
+		vp.addComponent(table_p);
+		vp.setComponentAlignment(hl2, Alignment.TOP_RIGHT);
+		
+		vl.addComponent(vh);
+		vl.addComponent(vp);
+		
 		return vl;
 	}
 	
@@ -538,7 +627,7 @@ public class LaborerAndTeamPanel extends Panel implements View {
 		vl.setMargin(true);
 		vl.setSizeFull();
 		
-		Label l = new Label("En construcción =P");
+		Label l = new Label("En construcción...");
 		vl.addComponent(l);
 		return vl;
 	}
@@ -549,7 +638,7 @@ public class LaborerAndTeamPanel extends Panel implements View {
 		vl.setMargin(true);
 		vl.setSizeFull();
 		
-		Label l = new Label("En construcción =P");
+		Label l = new Label("En construcción...");
 		vl.addComponent(l);
 		return vl;
 	}
@@ -560,7 +649,7 @@ public class LaborerAndTeamPanel extends Panel implements View {
 		vl.setMargin(true);
 		vl.setSizeFull();
 		
-		Label l = new Label("En construcción =P");
+		Label l = new Label("En construcción...");
 		vl.addComponent(l);
 		return vl;
 	}
