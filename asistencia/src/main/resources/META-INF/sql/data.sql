@@ -211,3 +211,28 @@ INSERT INTO LABORER (LABORERID,ADDRESS,AFP,COMMUNE,CONTRACTID,DATEADMISSION,DATE
 
 MERGE INTO CONSTRUCTION_SITE (CONSTRUCTION_SITEID,ADDRESS,DELETED,NAME,STATUS,PERSONINCHARGEID) VALUES (1,'',0,'Carolina Rabat 4 Etapa B',1,null);
 MERGE INTO CONSTRUCTION_SITE (CONSTRUCTION_SITEID,ADDRESS,DELETED,NAME,STATUS,PERSONINCHARGEID) VALUES (2,'',0,'Edificio Jardines de Olivares',1,null);
+
+
+-- configuraciones
+-- sueldo
+INSERT INTO wage_configurations values (1,200000,50000,30000);
+
+-- anticipos
+INSERT INTO advance_payment_configurations values (1,15000,10000);
+INSERT INTO advance_payment_item values (1,1,0,105000,105000);
+INSERT INTO advance_payment_item values (1,2,0,140000,140000);
+INSERT INTO advance_payment_item values (1,3,0,130000,130000);
+INSERT INTO advance_payment_item values (1,4,0,250000,250000);
+INSERT INTO advance_payment_item values (1,5,0,115000,115000);
+
+-- afp y seguro
+
+insert into afp_and_insurance values(1,1.26);
+
+insert into adf_item values(1,1,11.44);
+insert into adf_item values(1,2,11.47);
+insert into adf_item values(1,3,11.27);
+insert into adf_item values(1,4,10.77);
+insert into adf_item values(1,5,12.36);
+insert into adf_item values(1,6,11.54);
+

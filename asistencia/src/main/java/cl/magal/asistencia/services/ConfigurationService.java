@@ -6,8 +6,12 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import cl.magal.asistencia.entities.AdvancePaymentConfigurations;
+import cl.magal.asistencia.entities.AfpAndInsuranceConfigurations;
 import cl.magal.asistencia.entities.DateConfigurations;
 import cl.magal.asistencia.entities.WageConfigurations;
+import cl.magal.asistencia.repositories.AdvancePaymentRepository;
+import cl.magal.asistencia.repositories.AfpAndInsuranceRepository;
 import cl.magal.asistencia.repositories.DateConfigurationsRepository;
 import cl.magal.asistencia.repositories.WageConfigurationsRepository;
 
@@ -17,7 +21,11 @@ public class ConfigurationService {
 	@Autowired
 	DateConfigurationsRepository repo;
 	@Autowired
-	WageConfigurationsRepository configRepo;
+	WageConfigurationsRepository wageconfigRepo;
+	@Autowired
+	AdvancePaymentRepository advancePaymentRepo;
+	@Autowired
+	AfpAndInsuranceRepository afpInsuranceRepo;
 	
 	public DateConfigurations findDateConfigurationsByDate(Date value) {
 		return repo.findByDate(value);
@@ -27,15 +35,37 @@ public class ConfigurationService {
 		repo.save(bean);
 	}
 
-	public WageConfigurations findConfigurations() {
-		List<WageConfigurations> configurations = (List<WageConfigurations>)configRepo.findAll();
+	public WageConfigurations findWageConfigurations() {
+		List<WageConfigurations> configurations = (List<WageConfigurations>)wageconfigRepo.findAll();
 		if(configurations.isEmpty())
 			return null;
 		return configurations.get(0);
 	}
 
 	public void save(WageConfigurations configurationDate) {
-		configRepo.save(configurationDate);
+		wageconfigRepo.save(configurationDate);
+	}
+	
+	public AdvancePaymentConfigurations findAdvancePaymentConfigurations() {
+		List<AdvancePaymentConfigurations> configurations = (List<AdvancePaymentConfigurations>)advancePaymentRepo.findAll();
+		if(configurations.isEmpty())
+			return null;
+		return configurations.get(0);
+	}
+
+	public void save(AdvancePaymentConfigurations bean) {
+		advancePaymentRepo.save(bean);
+	}
+
+	public void save(AfpAndInsuranceConfigurations afpAndInsuranceConfiguration) {
+		afpInsuranceRepo.save(afpAndInsuranceConfiguration);
+	}
+
+	public AfpAndInsuranceConfigurations findAfpAndInsuranceConfiguration() {
+		List<AfpAndInsuranceConfigurations> configurations = (List<AfpAndInsuranceConfigurations>)afpInsuranceRepo.findAll();
+		if(configurations.isEmpty())
+			return null;
+		return configurations.get(0);
 	}
 
 }

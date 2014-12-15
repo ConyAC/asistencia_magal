@@ -5,7 +5,7 @@ import javax.persistence.Converter;
 
 import cl.magal.asistencia.entities.enums.Isapre;
 
-@Converter
+@Converter(autoApply=true)
 public class IsapreConverter implements AttributeConverter<Isapre, Integer>{
 
 	@Override

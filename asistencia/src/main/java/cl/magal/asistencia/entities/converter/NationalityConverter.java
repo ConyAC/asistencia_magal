@@ -5,7 +5,7 @@ import javax.persistence.Converter;
 
 import cl.magal.asistencia.entities.enums.Nationality;
 
-@Converter
+@Converter(autoApply=true)
 public class NationalityConverter implements AttributeConverter<Nationality, Integer>{
 
 	@Override

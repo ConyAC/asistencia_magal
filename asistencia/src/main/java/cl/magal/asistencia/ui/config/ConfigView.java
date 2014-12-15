@@ -13,15 +13,20 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
 
 import ru.xpoft.vaadin.VaadinView;
+import cl.magal.asistencia.entities.AdvancePaymentConfigurations;
+import cl.magal.asistencia.entities.AdvancePaymentItem;
+import cl.magal.asistencia.entities.AfpAndInsuranceConfigurations;
+import cl.magal.asistencia.entities.AfpItem;
 import cl.magal.asistencia.entities.ConstructionSite;
 import cl.magal.asistencia.entities.DateConfigurations;
 import cl.magal.asistencia.entities.Mobilization2;
-import cl.magal.asistencia.entities.User;
 import cl.magal.asistencia.entities.WageConfigurations;
 import cl.magal.asistencia.entities.enums.Permission;
 import cl.magal.asistencia.services.ConfigurationService;
 import cl.magal.asistencia.services.ConstructionSiteService;
+import cl.magal.asistencia.util.SecurityHelper;
 
+import com.vaadin.data.Container;
 import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.fieldgroup.FieldGroup;
@@ -30,22 +35,22 @@ import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.FontAwesome;
-import com.vaadin.server.VaadinSession;
 import com.vaadin.shared.ui.datefield.Resolution;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.AbstractSelect.ItemCaptionMode;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.DateField;
+import com.vaadin.ui.DefaultFieldFactory;
 import com.vaadin.ui.Field;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.InlineDateField;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
+import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.TabSheet;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.TextField;
@@ -70,7 +75,10 @@ public class ConfigView extends VerticalLayout implements View {
 	private transient ConstructionSiteService service;
 	@Autowired
 	private transient ConfigurationService confService;
-	
+	//atributos globales
+	WageConfigurations wageconfiguration;
+	AdvancePaymentConfigurations advancepayment;
+	AfpAndInsuranceConfigurations afpAndInsurance;
 	
 	public ConfigView(){}
 	
@@ -130,7 +138,7 @@ public class ConfigView extends VerticalLayout implements View {
 					}
 				});
 
-				if(!hastPermission(Permission.DEFINIR_VARIABLE_GLOBAL)){
+				if(!SecurityHelper.hastPermission(Permission.DEFINIR_VARIABLE_GLOBAL)){
 					setEnabled(false);
 				}else{
 					setEnabled(true);
@@ -171,7 +179,7 @@ public class ConfigView extends VerticalLayout implements View {
 					}
 				});
 
-				if(!hastPermission(Permission.DEFINIR_VARIABLE_GLOBAL)){
+				if(!SecurityHelper.hastPermission(Permission.DEFINIR_VARIABLE_GLOBAL)){
 					setEnabled(false);
 				}else{
 					setEnabled(true);
@@ -181,6 +189,28 @@ public class ConfigView extends VerticalLayout implements View {
 	}
 
 	private com.vaadin.ui.Component drawAnticipos() {
+		
+		final FieldGroup fg = new FieldGroup();
+		advancepayment = confService.findAdvancePaymentConfigurations();
+		if( advancepayment  == null )
+			advancepayment  = new AdvancePaymentConfigurations();
+		fg.setItemDataSource(new BeanItem<AdvancePaymentConfigurations>(advancepayment));
+		
+		final Property.ValueChangeListener listener = new Property.ValueChangeListener() {
+			
+			@Override
+			public void valueChange(ValueChangeEvent event) {
+				try {
+					fg.commit();
+					AdvancePaymentConfigurations bean = ((BeanItem<AdvancePaymentConfigurations>)fg.getItemDataSource()).getBean();
+					confService.save(bean);
+				} catch (Exception e) {
+					Notification.show("Error al guardar");
+				}
+			}
+		};
+		
+		
 		return new VerticalLayout(){
 			{
 				setMargin(true);
@@ -188,33 +218,98 @@ public class ConfigView extends VerticalLayout implements View {
 
 				addComponent(new FormLayout(){
 					{
-						addComponent(new TextField("Descuento por Permiso","15000"));
-						addComponent(new TextField("Descto Adicional por Falla ","5000"));
+						Field permissionDiscount = fg.buildAndBind("Descuento por Permiso", "permissionDiscount");
+						((TextField)permissionDiscount).setNullRepresentation("");
+						permissionDiscount.addValueChangeListener(listener);
+						
+						Field failureDiscount = fg.buildAndBind("Descuento por Falla", "failureDiscount");
+						((TextField)failureDiscount).setNullRepresentation("");
+						failureDiscount.addValueChangeListener(listener);
+						
+						addComponent(permissionDiscount);
+						addComponent(failureDiscount);
 					}
 				});
+				
+				
+				final BeanItemContainer<AdvancePaymentItem> container = new BeanItemContainer<AdvancePaymentItem>(AdvancePaymentItem.class,advancepayment.getAdvancePaymentTable());
+				
+				HorizontalLayout hl = new HorizontalLayout(){
+					{
+						setSpacing(true);
+						final TextField supleCode = new TextField("Código Suple");
+						addComponent(supleCode);
+						Button add = new Button(null,new Button.ClickListener() {
+							
+							@Override
+							public void buttonClick(ClickEvent event) {
+								try{
+									
+									AdvancePaymentItem advancePaymentItem = new AdvancePaymentItem();
+									advancePaymentItem.setSupleCode(Integer.valueOf(supleCode.getValue()));
+									//TODO hacer dialogo para crear y validar nuevo item
+									advancepayment.addAdvancePaymentItem(advancePaymentItem);
+									confService.save(advancepayment);
+									
+									container.addBean(advancePaymentItem);
+								}catch(Exception e){
+									Notification.show("Error al agregar el nuevo suple",Type.ERROR_MESSAGE);
+									logger.error("Error al agregar el nuevo suple",e);
+								}
+							}
+					}){
+							{
+								setIcon(FontAwesome.PLUS);
+							}
+						};
+						addComponent(add);
+						setComponentAlignment(add, Alignment.BOTTOM_LEFT);
+					}
+				};
+				hl.setWidth("100%");
+				addComponent(hl);
 
-				addComponent(new Table("Tabla Anticipo"){
+				final Table table = new Table("Tabla Anticipo"){
 					{
 						setSizeFull();
-						addContainerProperty("suple_cod", String.class, "");
-						addContainerProperty("suple_monto", String.class, "");
-						addContainerProperty("suple_monto_normal", TextField.class, new TextField());
-						addContainerProperty("suple_monto_aumento", TextField.class, new TextField());
-						setVisibleColumns("suple_cod","suple_monto","suple_monto_normal","suple_monto_aumento");
-						setColumnHeaders("Código Suple","Monto Suple","Normal","Aumento Anticipo");
-
-						int i = 1;
-
-						addItem(new Object[]{"1","105000",new TextField(null,"105000"),new TextField(null,"0")}, i++);
-						addItem(new Object[]{"2","140000",new TextField(null,"140000"),new TextField(null,"0")}, i++);
-						addItem(new Object[]{"3","130000",new TextField(null,"130000"),new TextField(null,"0")}, i++);
-						addItem(new Object[]{"4","250000",new TextField(null,"250000"),new TextField(null,"0")}, i++);
-						addItem(new Object[]{"5","115000",new TextField(null,"115000"),new TextField(null,"0")}, i++);
+						setPageLength(5);
 					}
 
+				};
+				
+				table.setContainerDataSource(container);
+				
+				table.addGeneratedColumn("eliminar", new Table.ColumnGenerator() {
+					
+					@Override
+					public Object generateCell(Table source,final Object itemId, Object columnId) {
+						return new Button(null,new Button.ClickListener() {
+							final AdvancePaymentItem advancePaymentItem = container.getItem(itemId).getBean();
+							@Override
+							public void buttonClick(ClickEvent event) {
+								
+								try{
+									advancepayment.removeAdvancePaymentItem(advancePaymentItem);
+									confService.save(advancepayment);
+									container.removeItem(itemId);
+								}catch(Exception e){
+									Notification.show("Error al quitar elemento",Type.ERROR_MESSAGE);
+									logger.error("Error al quitar una mobilización 2",e);
+								}
+							}
+						}){
+							{setIcon(FontAwesome.TRASH_O);}
+						};
+					}
 				});
+				
+				table.setVisibleColumns("supleCode","supleTotalAmount","supleNormalAmount","supleIncreaseAmount","eliminar");
+				table.setColumnHeaders("Código Suple","Monto Suple","Normal","Aumento Anticipo","Eliminar");
+				table.setEditable(true);
+				
+				addComponent(table);
 
-				if(!hastPermission(Permission.DEFINIR_VARIABLE_GLOBAL)){
+				if(!SecurityHelper.hastPermission(Permission.DEFINIR_VARIABLE_GLOBAL)){
 					setEnabled(false);
 				}else{
 					setEnabled(true);
@@ -224,31 +319,64 @@ public class ConfigView extends VerticalLayout implements View {
 	}
 
 	private com.vaadin.ui.Component drawAFP() {
+		
+		final FieldGroup fg = new FieldGroup();
+		afpAndInsurance = confService.findAfpAndInsuranceConfiguration();
+		if( afpAndInsurance  == null )
+			afpAndInsurance  = new AfpAndInsuranceConfigurations();
+		fg.setItemDataSource(new BeanItem<AfpAndInsuranceConfigurations>(afpAndInsurance));
+		
+		final Property.ValueChangeListener listener = new Property.ValueChangeListener() {
+			
+			@Override
+			public void valueChange(ValueChangeEvent event) {
+				try {
+					fg.commit();
+					AfpAndInsuranceConfigurations bean = ((BeanItem<AfpAndInsuranceConfigurations>)fg.getItemDataSource()).getBean();
+					confService.save(bean);
+				} catch (Exception e) {
+					Notification.show("Error al guardar");
+				}
+			}
+		};
+		
 		return new VerticalLayout(){
 			{
 				setMargin(true);
-				addComponent(new Table("Tabla AFP y Seguro SIS"){
+				setSpacing(true);
+				
+				addComponent(new FormLayout(){
 					{
-						int i = 1;
-						setWidth("100%");
+						Field sis = fg.buildAndBind("SIS", "sis");
+						((TextField)sis).setNullRepresentation("");
+						sis.addValueChangeListener(listener);
 						
-						addContainerProperty("afp", String.class, "");
-						addContainerProperty("tasa", TextField.class, new TextField());
-						addContainerProperty("sis", TextField.class, new TextField());
-						setVisibleColumns("afp","tasa","sis");
-						setColumnHeaders("AFP","Tasa","SIS");
-
-						addItem(new Object[]{"Capital",new TextField(null,"11,44%"),new TextField(null,"1,26%")}, i++);
-						addItem(new Object[]{"Cuprum",new TextField(null,"11,47%"),new TextField(null,"1,26%")}, i++);
-						addItem(new Object[]{"Habitat",new TextField(null,"11,27%"),new TextField(null,"1,26%")}, i++);
-						addItem(new Object[]{"Modelo",new TextField(null,"10,77%"),new TextField(null,"1,26%")}, i++);
-						addItem(new Object[]{"Plan Vital",new TextField(null,"12,36%"),new TextField(null,"1,26%")}, i++);
-						addItem(new Object[]{"Provida",new TextField(null,"11,54%"),new TextField(null,"1,26%")}, i++);
-
-						setPageLength(6);
+						addComponent(sis);
 					}
 				});
-				if(!hastPermission(Permission.DEFINIR_VARIABLE_GLOBAL)){
+				
+				final BeanItemContainer<AfpItem> container = new BeanItemContainer<AfpItem>(AfpItem.class,afpAndInsurance.getAfpTable());
+				container.addNestedContainerProperty("afp.description");
+				
+				final Table table = new Table("Tabla AFP"){
+					{
+						setWidth("100%");
+						setPageLength(6);
+					}
+				};
+				
+				
+				//agrega el listener a los field creados
+				table.setTableFieldFactory(new ListenerFieldFactory(listener));
+				
+				table.setContainerDataSource(container);
+				
+				table.setVisibleColumns("afp.description","rate");
+				table.setColumnHeaders("Afp","Tasa");
+				table.setEditable(true);
+				
+				addComponent(table);
+				if(!SecurityHelper.hastPermission(Permission.DEFINIR_VARIABLE_GLOBAL)){
 					setEnabled(false);
 				}else{
 					setEnabled(true);
@@ -258,7 +386,28 @@ public class ConfigView extends VerticalLayout implements View {
 		};
 	}
 	
-	WageConfigurations configuration;
+	public class ListenerFieldFactory extends DefaultFieldFactory {
+		
+		Property.ValueChangeListener listener = null;
+		public ListenerFieldFactory(Property.ValueChangeListener listener){
+			this.listener = listener;
+		}
+		
+	    public Field createField(Container container,
+	                             Object itemId,
+	                             Object propertyId,
+	                             com.vaadin.ui.Component uiContext) {
+	        Field field = super.createField(container, itemId, propertyId, uiContext);
+	        if(field instanceof TextField){
+				if(!((TextField)field).isReadOnly()){
+					((TextField)field).addValueChangeListener(listener);
+					((TextField)field).setImmediate(true);
+				}
+			}
+	        
+	        return field;
+	    }
+	}
 
 	private com.vaadin.ui.Component drawGlobales() {
 		return new VerticalLayout(){
@@ -268,10 +417,10 @@ public class ConfigView extends VerticalLayout implements View {
 				setMargin(true);
 				
 				final FieldGroup fg = new FieldGroup();
-				configuration = confService.findConfigurations();
-				if( configuration  == null )
-					configuration  = new WageConfigurations();
-				fg.setItemDataSource(new BeanItem<WageConfigurations>(configuration));
+				wageconfiguration = confService.findWageConfigurations();
+				if( wageconfiguration  == null )
+					wageconfiguration  = new WageConfigurations();
+				fg.setItemDataSource(new BeanItem<WageConfigurations>(wageconfiguration));
 				
 				FormLayout form = new FormLayout(){
 					{
@@ -328,29 +477,41 @@ public class ConfigView extends VerticalLayout implements View {
 						
 						final Table table = new Table("Movilización 2"){
 							{
-								int i = 1;
 								setWidth("100%");
 								setPageLength(3);
 							}
 						};
 						
-						final BeanItemContainer<Mobilization2> container = new BeanItemContainer<Mobilization2>(Mobilization2.class,configuration.getMobilizations2());
+						final BeanItemContainer<Mobilization2> container = new BeanItemContainer<Mobilization2>(Mobilization2.class,wageconfiguration.getMobilizations2());
 						container.addNestedContainerProperty("constructionSite.name");
 						table.setContainerDataSource(container);
 						
 						table.addGeneratedColumn("eliminar", new Table.ColumnGenerator() {
 							
 							@Override
-							public Object generateCell(Table source, Object itemId, Object columnId) {
-								return new Button(null,FontAwesome.TRASH_O);
+							public Object generateCell(Table source,final Object itemId, Object columnId) {
+								return new Button(null,new Button.ClickListener() {
+									final Mobilization2 mob = container.getItem(itemId).getBean();
+									@Override
+									public void buttonClick(ClickEvent event) {
+										
+										try{
+											wageconfiguration.removeMobilizations2(mob);
+											confService.save(wageconfiguration);
+											container.removeItem(itemId);
+										}catch(Exception e){
+											Notification.show("Error al quitar elemento",Type.ERROR_MESSAGE);
+											logger.error("Error al quitar una mobilización 2",e);
+										}
+									}
+								}){
+									{setIcon(FontAwesome.TRASH_O);}
+								};
 							}
 						});
 						
 						table.setVisibleColumns("constructionSite.name","amount","eliminar");
 						table.setColumnHeaders("Obra","Monto","Eliminar");
-						
-//						addContainerProperty("monto", TextField.class, new TextField());
-//						addContainerProperty("eliminar", Button.class, new Button(null,FontAwesome.TRASH_O));
 						
 						
 						HorizontalLayout hl = new HorizontalLayout(){
@@ -369,13 +530,11 @@ public class ConfigView extends VerticalLayout implements View {
 										try{
 											
 											ConstructionSite cs = (ConstructionSite) nombre.getValue();
-											logger.debug("cs {}",cs);
 											Mobilization2 mob = new Mobilization2();
 											mob.setAmount(Double.valueOf(monto.getValue()));
 											mob.setConstructionSite(cs);
-											logger.debug("configuration {}",configuration);
-											configuration.addMobilizations2(mob);
-											confService.save(configuration);
+											wageconfiguration.addMobilizations2(mob);
+											confService.save(wageconfiguration);
 											
 											container.addBean(mob);
 										}catch(Exception e){
@@ -383,7 +542,11 @@ public class ConfigView extends VerticalLayout implements View {
 											logger.error("Error al agregar la mobilización 2",e);
 										}
 									}
-							}));
+							}){
+									{
+										setIcon(FontAwesome.PLUS);
+									}
+								});
 							}
 						};
 						hl.setWidth("100%");
@@ -395,7 +558,7 @@ public class ConfigView extends VerticalLayout implements View {
 				};
 				addComponent(form);
 				setComponentAlignment(form, Alignment.MIDDLE_CENTER);
-				if(!hastPermission(Permission.DEFINIR_VARIABLE_GLOBAL)){
+				if(!SecurityHelper.hastPermission(Permission.DEFINIR_VARIABLE_GLOBAL)){
 					setEnabled(false);
 				}else{
 					setEnabled(true);
@@ -403,7 +566,6 @@ public class ConfigView extends VerticalLayout implements View {
 			}
 		};
 	}
-
 
 	private com.vaadin.ui.Component drawMensuales() {
 		return new HorizontalLayout(){
@@ -470,7 +632,7 @@ public class ConfigView extends VerticalLayout implements View {
 				addComponent(form);
 				setComponentAlignment(form, Alignment.MIDDLE_CENTER);
 				
-				if(!hastPermission(Permission.DEFINIR_VARIABLE_GLOBAL)){
+				if(!SecurityHelper.hastPermission(Permission.DEFINIR_VARIABLE_GLOBAL)){
 					setEnabled(false);
 				}else{
 					setEnabled(true);
@@ -480,24 +642,6 @@ public class ConfigView extends VerticalLayout implements View {
 
 	}
 	
-		private boolean hastPermission(Permission... permissions) {
-		if(permissions == null)
-			return true;
-		
-		User usuario = (User) VaadinSession.getCurrent().getAttribute(
-				"usuario");
-		if(usuario.getRole() == null || usuario.getRole().getPermission() == null ){
-			return false;
-		}
-		for(Permission p : permissions){
-			if(!usuario.getRole().getPermission().contains(p))
-				return false;
-		}
-		
-		return true;
-	}
-
-
 	private com.vaadin.ui.Component drawFeriados() {
 		VerticalLayout vl = new VerticalLayout();
 		
@@ -589,7 +733,7 @@ public class ConfigView extends VerticalLayout implements View {
 		
 		vl.addComponent(table);
 		
-		if(!hastPermission(Permission.DEFINIR_VARIABLE_GLOBAL)){
+		if(!SecurityHelper.hastPermission(Permission.DEFINIR_VARIABLE_GLOBAL)){
 			vl.setEnabled(false);
 		}else{
 			vl.setEnabled(true);
@@ -598,7 +742,6 @@ public class ConfigView extends VerticalLayout implements View {
 		
 		return vl;
 	}
-
 
 	@Override
 	public void enter(ViewChangeEvent event) {

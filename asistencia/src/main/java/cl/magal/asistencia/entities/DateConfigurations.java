@@ -1,5 +1,6 @@
 package cl.magal.asistencia.entities;
 
+import java.io.Serializable;
 import java.util.Date;
 
 import javax.persistence.Basic;
@@ -14,8 +15,13 @@ import javax.persistence.TemporalType;
 
 @Entity
 @Table(name = "date_configurations")
-public class DateConfigurations {
+public class DateConfigurations implements Serializable {
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -476018997848461271L;
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)

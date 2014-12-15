@@ -1,5 +1,6 @@
 package cl.magal.asistencia.entities;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -19,8 +20,13 @@ import javax.validation.constraints.Digits;
 
 @Entity
 @Table(name="wage_configurations")
-public class WageConfigurations {
+public class WageConfigurations implements Serializable{
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 2342274495337607698L;
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
@@ -97,7 +103,7 @@ public class WageConfigurations {
 		}
 	}
 	
-	public void removedMobilizations2(Mobilization2 mobilizations2){
+	public void removeMobilizations2(Mobilization2 mobilizations2){
 		if(getMobilizations2().contains(mobilizations2)){
 			getMobilizations2().remove(mobilizations2);
 		}
