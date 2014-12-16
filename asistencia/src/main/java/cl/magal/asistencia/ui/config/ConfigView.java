@@ -1,6 +1,7 @@
 package cl.magal.asistencia.ui.config;
 
 import java.util.Date;
+import java.util.List;
 
 import javax.annotation.PostConstruct;
 
@@ -20,8 +21,10 @@ import cl.magal.asistencia.entities.AfpItem;
 import cl.magal.asistencia.entities.ConstructionSite;
 import cl.magal.asistencia.entities.DateConfigurations;
 import cl.magal.asistencia.entities.Mobilization2;
+import cl.magal.asistencia.entities.TaxationConfigurations;
 import cl.magal.asistencia.entities.WageConfigurations;
 import cl.magal.asistencia.entities.enums.Permission;
+import cl.magal.asistencia.helpers.TaxationConfigurationsHelper;
 import cl.magal.asistencia.services.ConfigurationService;
 import cl.magal.asistencia.services.ConstructionSiteService;
 import cl.magal.asistencia.util.SecurityHelper;
@@ -148,36 +151,29 @@ public class ConfigView extends VerticalLayout implements View {
 	}
 
 	private com.vaadin.ui.Component drawImpuestos() {
+		
 		return new VerticalLayout(){
 			{
 				setMargin(true);
 				setSpacing(true);
+				
+				List<TaxationConfigurations> taxes = confService.findTaxationConfigurations();
+				final BeanItemContainer<TaxationConfigurations> container = new BeanItemContainer<TaxationConfigurations>(TaxationConfigurations.class,taxes);
 
-				addComponent(new Table("Impuesto 2° Categoria"){
+				Table table = new Table("Impuesto 2° Categoria"){
 					{
-						int i = 1;
 						setWidth("100%");
 						setHeightUndefined();
-						addContainerProperty("desde", String.class, "");
-						addContainerProperty("hasta", String.class, "");
-						addContainerProperty("factor", TextField.class, new TextField());
-						addContainerProperty("rebaja", TextField.class, new TextField());
-						addContainerProperty("exento", TextField.class, new TextField());
-						
-						setVisibleColumns("desde","hasta","factor","rebaja","exento");
-						setColumnHeaders("Desde","Hasta","Factor","Rebaja","Exento");
-
-						addItem(new Object[]{"0","$541147,5",new TextField(null,"0"),new TextField(null,"0"),new TextField(null,"0")}, i++);
-						addItem(new Object[]{"$541147,51","$1202550",new TextField(null,"0,04"),new TextField(null,"$21645,9"),new TextField(null,"2,2%")}, i++);
-						addItem(new Object[]{"$1202550,01","$2004250",new TextField(null,"11,27%"),new TextField(null,"$69747,9"),new TextField(null,"4,52%")}, i++);
-						addItem(new Object[]{"$2004250,01","$2805950",new TextField(null,"10,77%"),new TextField(null,"$179981,65"),new TextField(null,"7,09%")}, i++);
-						addItem(new Object[]{"$2805950,01","$3607650",new TextField(null,"12,36%"),new TextField(null,"$446546,9"),new TextField(null,"10,62%")}, i++);
-						addItem(new Object[]{"$3607650,01","$4810200",new TextField(null,"11,54%"),new TextField(null,"$713513"),new TextField(null,"15,57%")}, i++);
-						addItem(new Object[]{"$4810200,01","$6012750",new TextField(null,"11,54%"),new TextField(null,"$958833,2"),new TextField(null,"19,55%")}, i++);
-						addItem(new Object[]{"$6012750,01","más",new TextField(null,"11,54%"),new TextField(null,"$1229406,95"),new TextField(null,"19,55%")}, i++);
+						setPageLength(8);
 
 					}
-				});
+				};
+				table.setContainerDataSource(container);
+				table.setVisibleColumns("from","to","factor","reduction","exempt");
+				table.setColumnHeaders("Desde","Hasta","Factor","Rebaja","Exento");
+				table.setEditable(true);
+				table.setTableFieldFactory(new TaxationFieldFactory());
+				addComponent(table);
 
 				if(!SecurityHelper.hastPermission(Permission.DEFINIR_VARIABLE_GLOBAL)){
 					setEnabled(false);
@@ -386,6 +382,37 @@ public class ConfigView extends VerticalLayout implements View {
 		};
 	}
 	
+	public class TaxationFieldFactory extends DefaultFieldFactory {
+		
+	    public Field createField(final Container container,
+	                             final Object itemId,
+	                             Object propertyId,
+	                             com.vaadin.ui.Component uiContext) {
+	        Field field = super.createField(container, itemId, propertyId, uiContext);
+	        if(field instanceof TextField){
+				if(!((TextField)field).isReadOnly()){
+					((TextField)field).addValueChangeListener(new Property.ValueChangeListener() {
+						
+						@Override
+						public void valueChange(ValueChangeEvent event) {
+							try{
+								TaxationConfigurations tax = ((BeanItem<TaxationConfigurations>)container.getItem(itemId)).getBean();
+								confService.save(tax);
+							}catch(Exception e){
+								Notification.show("Error al guardar el elemento",Type.ERROR_MESSAGE);
+								logger.error("Error al guardad el elemento de impuesto",e);
+							}
+						
+						}
+					});
+					((TextField)field).setImmediate(true);
+				}
+			}
+	        
+	        return field;
+	    }
+	}
+
 	public class ListenerFieldFactory extends DefaultFieldFactory {
 		
 		Property.ValueChangeListener listener = null;

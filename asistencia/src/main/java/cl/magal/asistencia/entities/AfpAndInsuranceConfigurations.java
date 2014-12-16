@@ -32,7 +32,7 @@ public class AfpAndInsuranceConfigurations implements Serializable {
     @Column(name = "afp_and_insuranceId")
 	Long afpAndInsuranceId;
 	
-	@Digits(fraction=2,integer=3,message="Solo es posible definir 2 decimales")
+	@Digits(fraction=2,integer=3,message="Solo es posible definir más de 2 decimales")
 	@Column(name="sis")
 	Double sis;
 	
