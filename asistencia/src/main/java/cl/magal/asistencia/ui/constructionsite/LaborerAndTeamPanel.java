@@ -17,13 +17,17 @@ import org.tepi.filtertable.FilterTable;
 
 import cl.magal.asistencia.entities.ConstructionSite;
 import cl.magal.asistencia.entities.Laborer;
+import cl.magal.asistencia.entities.Mobilization2;
 import cl.magal.asistencia.entities.Team;
+import cl.magal.asistencia.entities.Tool;
 import cl.magal.asistencia.entities.User;
+import cl.magal.asistencia.entities.WageConfigurations;
 import cl.magal.asistencia.entities.enums.Afp;
 import cl.magal.asistencia.entities.enums.Job;
 import cl.magal.asistencia.entities.enums.MaritalStatus;
 import cl.magal.asistencia.entities.enums.Permission;
 import cl.magal.asistencia.entities.enums.Status;
+import cl.magal.asistencia.entities.enums.ToolStatus;
 import cl.magal.asistencia.services.ConstructionSiteService;
 import cl.magal.asistencia.services.UserService;
 import cl.magal.asistencia.util.SecurityHelper;
@@ -74,6 +78,7 @@ public class LaborerAndTeamPanel extends Panel implements View {
 	BeanItemContainer<User> userContainer = new BeanItemContainer<User>(User.class);
 	BeanItemContainer<Team> teamContainer = new BeanItemContainer<Team>(Team.class);
 	BeanItemContainer<Laborer> laborerContainer = new BeanItemContainer<Laborer>(Laborer.class);
+	BeanItemContainer<Tool> toolContainer = new BeanItemContainer<Tool>(Tool.class);
 	
 	BeanItem<ConstructionSite> item;
 	
@@ -529,7 +534,7 @@ public class LaborerAndTeamPanel extends Panel implements View {
 		vl.setMargin(true);
 		vl.setSizeFull();
 		
-		/*1*/
+		/*Herramientas*/
 		VerticalLayout vh = new VerticalLayout();
 		vh.setSizeFull();
 		
@@ -538,37 +543,56 @@ public class LaborerAndTeamPanel extends Panel implements View {
 		hl.setSpacing(true);		
 		vh.addComponent(hl);
 
-		btnAddH = new Button(null,FontAwesome.PLUS);
-		hl.addComponent(btnAddH);
-		btnAddH.addClickListener(new Button.ClickListener() {
-
-			@Override
-			public void buttonClick(ClickEvent event) {
-				final ConstructionSite cs = item.getBean();
-				if(cs == null){
-					Notification.show("Debe seleccionar una obra",Type.ERROR_MESSAGE);
-					return;
-				}
-			}
-		});		
+		final TextField herramienta = new TextField("Herramienta");
+		hl.addComponent(herramienta);
+		final TextField monto_h = new TextField("Monto");
+		hl.addComponent(monto_h);
+		final DateField fecha_h = new DateField("Fecha");
+		hl.addComponent(fecha_h);
+		final TextField cuota_h = new TextField("Cuota");
+		hl.addComponent(cuota_h);
+		final ComboBox estado_h = new ComboBox("Estado");
+		estado_h.setNullSelectionAllowed(false);
+		for(ToolStatus t : ToolStatus.values()){
+			estado_h.addItem(t);
+		}
+		hl.addComponent(estado_h);
+		
 		final Table table_h = new Table("Herramientas"){
 			{
 				setWidth("100%");				
-				addContainerProperty("herramienta", String.class, "");
-				addContainerProperty("monto", String.class, "");
-				addContainerProperty("fecha",String.class, "");
-				addContainerProperty("cuota", String.class, "");
-				addContainerProperty("estado", String.class, "");
-				setVisibleColumns("herramienta","monto","fecha", "cuota", "estado");
+				addContainerProperty("name", String.class, "");
+				addContainerProperty("price", String.class, "");
+				addContainerProperty("dateBuy",String.class, "");
+				addContainerProperty("fee", String.class, "");
+				addContainerProperty("status", String.class, "");
+				setVisibleColumns("name","price","dateBuy", "fee", "status");
 				setColumnHeaders("Herramienta","Monto","Fecha", "Cuota", "Estado");
 
 				setPageLength(4);
 			}
 		};	
 		vh.addComponent(table_h);
+		
+		btnAddH = new Button(null,FontAwesome.PLUS);
+		hl.addComponent(btnAddH);
+		btnAddH.addClickListener(new Button.ClickListener() {
+
+			@Override
+			public void buttonClick(ClickEvent event) {
+				Tool t = new Tool();
+				t.setName(herramienta.getValue());
+				t.setPrice(Integer.valueOf(monto_h.getValue()));
+				t.setFee(Integer.valueOf(cuota_h.getValue()));
+				t.setStatus((ToolStatus)estado_h.getValue());
+				t.setDateBuy(fecha_h.getValue());
+				table_h.setContainerDataSource(toolContainer);
+				toolContainer.addBean(t);
+			}
+		});		
 		vh.setComponentAlignment(hl, Alignment.TOP_RIGHT);
 		
-		/*2*/
+		/*Préstamo*/
 		VerticalLayout vp = new VerticalLayout();
 		vp.setSizeFull();
 		
@@ -577,14 +601,14 @@ public class LaborerAndTeamPanel extends Panel implements View {
 		hl2.setSpacing(true);		
 		vp.addComponent(hl2);
 		
-		TextField monto = new TextField("Monto");
-		hl2.addComponent(monto);
-		DateField fecha = new DateField("Fecha");
-		hl2.addComponent(fecha);
-		TextField cuota = new TextField("Cuota");
-		hl2.addComponent(cuota);
-		TextField estado = new TextField("Estado");
-		hl2.addComponent(estado);
+		TextField monto_p = new TextField("Monto");
+		hl2.addComponent(monto_p);
+		DateField fecha_p = new DateField("Fecha");
+		hl2.addComponent(fecha_p);
+		TextField cuota_p = new TextField("Cuota");
+		hl2.addComponent(cuota_p);
+		TextField estado_p = new TextField("Estado");
+		hl2.addComponent(estado_p);
 		
 		btnAddP = new Button(null,FontAwesome.PLUS);
 		hl2.addComponent(btnAddP);

@@ -15,12 +15,14 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.OneToMany;
 import javax.persistence.PrePersist;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
@@ -140,6 +142,9 @@ public class Laborer implements Serializable {
     
     @ManyToMany(mappedBy="laborers",cascade = { CascadeType.PERSIST, CascadeType.MERGE })
     List<ConstructionSite> constructionSites;
+    
+    @OneToMany(targetEntity=Tool.class,fetch=FetchType.EAGER)
+    List<Tool> tool;
     
     @PrePersist
     public void prePersist(){
@@ -365,6 +370,14 @@ public class Laborer implements Serializable {
 
 	public void setJobCode(Integer jobCode) {
 		this.jobCode = jobCode;
+	}
+	
+	public List<Tool> getTool() {
+		return tool;
+	}
+
+	public void setTool(List<Tool> tool) {
+		this.tool = tool;
 	}
 
 	public void addConstructionSite(ConstructionSite constructionSite) {
