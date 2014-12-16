@@ -9,11 +9,13 @@ import org.springframework.stereotype.Service;
 import cl.magal.asistencia.entities.AdvancePaymentConfigurations;
 import cl.magal.asistencia.entities.AfpAndInsuranceConfigurations;
 import cl.magal.asistencia.entities.DateConfigurations;
+import cl.magal.asistencia.entities.FamilyAllowanceConfigurations;
 import cl.magal.asistencia.entities.TaxationConfigurations;
 import cl.magal.asistencia.entities.WageConfigurations;
 import cl.magal.asistencia.repositories.AdvancePaymentRepository;
 import cl.magal.asistencia.repositories.AfpAndInsuranceRepository;
 import cl.magal.asistencia.repositories.DateConfigurationsRepository;
+import cl.magal.asistencia.repositories.FamilyAllowanceRepository;
 import cl.magal.asistencia.repositories.TaxationRepository;
 import cl.magal.asistencia.repositories.WageConfigurationsRepository;
 
@@ -30,6 +32,8 @@ public class ConfigurationService {
 	AfpAndInsuranceRepository afpInsuranceRepo;
 	@Autowired
 	TaxationRepository taxationRepo;
+	@Autowired
+	FamilyAllowanceRepository familyAllowanceRepo;
 	
 	public DateConfigurations findDateConfigurationsByDate(Date value) {
 		return repo.findByDate(value);
@@ -78,6 +82,10 @@ public class ConfigurationService {
 
 	public List<TaxationConfigurations> findTaxationConfigurations() {
 		return (List<TaxationConfigurations>) taxationRepo.findAll();
+	}
+
+	public void save(FamilyAllowanceConfigurations familyAllowance) {
+		familyAllowanceRepo.save(familyAllowance);
 	}
 
 }

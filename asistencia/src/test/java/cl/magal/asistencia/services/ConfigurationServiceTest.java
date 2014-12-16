@@ -22,6 +22,7 @@ import cl.magal.asistencia.entities.AfpAndInsuranceConfigurations;
 import cl.magal.asistencia.entities.AfpItem;
 import cl.magal.asistencia.entities.ConstructionSite;
 import cl.magal.asistencia.entities.DateConfigurations;
+import cl.magal.asistencia.entities.FamilyAllowanceConfigurations;
 import cl.magal.asistencia.entities.Mobilization2;
 import cl.magal.asistencia.entities.TaxationConfigurations;
 import cl.magal.asistencia.entities.WageConfigurations;
@@ -30,6 +31,7 @@ import cl.magal.asistencia.helpers.AdvancePaymentConfigurationsHelper;
 import cl.magal.asistencia.helpers.AfpAndInsuranceConfigurationsHelper;
 import cl.magal.asistencia.helpers.ConstructionSiteHelper;
 import cl.magal.asistencia.helpers.DateConfigurationsHelper;
+import cl.magal.asistencia.helpers.FamilyAllowanceConfigurationsHelper;
 import cl.magal.asistencia.helpers.TaxationConfigurationsHelper;
 import cl.magal.asistencia.helpers.WageConfigurationsHelper;
 
@@ -419,6 +421,35 @@ public class ConfigurationServiceTest {
 		assertNotEquals("Los elementos guardados no deben ser iguales",tax,tax2);
 		
 	}
+
+	/**
+	 * prueba a guardar una configuración de impuestos
+	 */
+	@Test
+	public void testSaveFamilyAllowanceConfig(){
+		
+		FamilyAllowanceConfigurations familyAllowance = FamilyAllowanceConfigurationsHelper.newFamilyAllowanceConfigurations();
+		service.save(familyAllowance);
+		FamilyAllowanceConfigurationsHelper.verify(familyAllowance);
+		
+	}
 	
+	/**
+	 * prueba a guardar dos configuración de impuestos
+	 */
+	@Test
+	public void testSave2FamilyAllowanceConfig(){
+		
+		TaxationConfigurations tax = TaxationConfigurationsHelper.newTaxationConfigurations();
+		service.save(tax);
+		TaxationConfigurationsHelper.verify(tax);
+		
+		TaxationConfigurations tax2 = TaxationConfigurationsHelper.newTaxationConfigurations();
+		service.save(tax2);
+		TaxationConfigurationsHelper.verify(tax2);
+		
+		assertNotEquals("Los elementos guardados no deben ser iguales",tax,tax2);
+		
+	}
 
 }
