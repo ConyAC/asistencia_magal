@@ -21,7 +21,7 @@ public final class LaborerHelper {
 		laborer.setJob(Job.ALBAÑIL);
 		laborer.setAfp(Afp.MODELO);
 		laborer.setMaritalStatus(MaritalStatus.CASADO);
-		laborer.setRut("12345678-9");
+		laborer.setRut("16127401-1");
 		laborer.setMobileNumber("11223311");
 		//TODO estado
 		return laborer;

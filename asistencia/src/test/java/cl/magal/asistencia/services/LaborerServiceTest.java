@@ -3,15 +3,20 @@ package cl.magal.asistencia.services;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import org.joda.time.DateTime;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import cl.magal.asistencia.entities.ConstructionSite;
 import cl.magal.asistencia.entities.Laborer;
+import cl.magal.asistencia.entities.Vacation;
+import cl.magal.asistencia.helpers.ConstructionSiteHelper;
 import cl.magal.asistencia.helpers.LaborerHelper;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -20,6 +25,9 @@ public class LaborerServiceTest {
 
 	@Autowired
 	LaborerService service;
+	
+	@Autowired
+	ConstructionSiteService constructionService;
 
 	/**
 	 * Almacenar
@@ -35,6 +43,79 @@ public class LaborerServiceTest {
 		
 		LaborerHelper.verify(dbu);		
 		LaborerHelper.verify(l,dbu);		
+	}
+	
+	/**
+	 * Agregar una vacación
+	 */
+	@Test
+	public void testAddVacation() {
+		
+		Laborer l = LaborerHelper.newLaborer();
+		DateTime dt = new DateTime();
+		
+		Vacation vacation = new Vacation();
+		vacation.setFromDate(dt.toDate());
+		vacation.setToDate(dt.plusDays(5).toDate());
+		vacation.setLaborer(l);
+		
+		ConstructionSite cs = ConstructionSiteHelper.newConstrutionSite();
+		constructionService.save(cs);
+		vacation.setConstructionSite(cs);
+		
+		l.addVacation(vacation);
+		
+		service.saveLaborer(l);
+		LaborerHelper.verify(l);
+		
+		Laborer dbu = service.findLaborer(l.getLaborerId());
+		
+		LaborerHelper.verify(dbu);		
+		LaborerHelper.verify(l,dbu);
+		
+		assertTrue("La lista de vacaciones no puede ser vacia",!dbu.getVacations().isEmpty());
+		
+	}
+	/**
+	 * Agregar una vacación
+	 */
+	@Test
+	public void testRemoveVacation() {
+		
+		Laborer l = LaborerHelper.newLaborer();
+		DateTime dt = new DateTime();
+		
+		Vacation vacation = new Vacation();
+		vacation.setFromDate(dt.toDate());
+		vacation.setToDate(dt.plusDays(5).toDate());
+		vacation.setLaborer(l);
+		
+		ConstructionSite cs = ConstructionSiteHelper.newConstrutionSite();
+		constructionService.save(cs);
+		vacation.setConstructionSite(cs);
+		
+		l.addVacation(vacation);
+		
+		service.saveLaborer(l);
+		LaborerHelper.verify(l);
+		
+		Laborer dbu = service.findLaborer(l.getLaborerId());
+		
+		LaborerHelper.verify(dbu);		
+		LaborerHelper.verify(l,dbu);
+		
+		assertTrue("La lista de vacaciones no puede ser vacia",!dbu.getVacations().isEmpty());
+		
+		dbu.getVacations().clear();
+		service.saveLaborer(dbu);
+		
+		Laborer dbu2 = service.findLaborer(l.getLaborerId());
+		
+		LaborerHelper.verify(dbu2);		
+		LaborerHelper.verify(l,dbu2);
+		
+		assertTrue("La lista de vacaciones debe ser vacia",dbu2.getVacations().isEmpty());
+		
 	}
 	
 	/**

@@ -15,6 +15,8 @@ public class IsapreConverter implements AttributeConverter<Isapre, Integer>{
 
 	@Override
 	public Isapre convertToEntityAttribute(Integer arg0) {
+		if(arg0 == null )
+			throw new RuntimeException("Atributo Isapre nulo.");
 		return Isapre.getIsapre(arg0);
 	}
 

@@ -15,12 +15,14 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.OneToMany;
 import javax.persistence.PrePersist;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
@@ -119,20 +121,20 @@ public class Laborer implements Serializable {
     @Column(name="jobCode")
     private Integer jobCode;
     
+    @Column(name = "afp" , nullable = false)
     @Convert(converter = AfpConverter.class)
-    @Column(name = "afp")
     private Afp afp;
     
+    @Column(name="isapre" , nullable = false)
     @Convert(converter = IsapreConverter.class)
-    @Column(name="isapre")
     private Isapre isapre;
     
     @Convert(converter = MaritalStatusConverter.class)
-    @Column(name = "maritalStatus")
+    @Column(name = "maritalStatus", nullable = false)
     private MaritalStatus maritalStatus;
     
     @Convert(converter = NationalityConverter.class)
-    @Column(name="nationality")
+    @Column(name="nationality", nullable = false)
     private Nationality nationality;
     
     @Column(name="photo")
@@ -140,6 +142,9 @@ public class Laborer implements Serializable {
     
     @ManyToMany(mappedBy="laborers",cascade = { CascadeType.PERSIST, CascadeType.MERGE })
     List<ConstructionSite> constructionSites;
+    
+    @OneToMany(mappedBy="laborer",fetch=FetchType.EAGER,cascade = { CascadeType.PERSIST, CascadeType.MERGE },orphanRemoval=true )
+    List<Vacation> vacations = new ArrayList<Vacation>();
     
     @PrePersist
     public void prePersist(){
@@ -151,6 +156,10 @@ public class Laborer implements Serializable {
     		maritalStatus = MaritalStatus.SOLTERO;
     	if(job == null)
     		job = Job.JORNAL;
+    	if(isapre == null)
+    		isapre = Isapre.FONASA;
+    	if(nationality == null)
+    		nationality = Nationality.CHILENA;
 		
     }
     
@@ -366,6 +375,28 @@ public class Laborer implements Serializable {
 	public void setJobCode(Integer jobCode) {
 		this.jobCode = jobCode;
 	}
+	
+	public List<Vacation> getVacations() {
+		return vacations;
+	}
+
+	public void setVacations(List<Vacation> vacations) {
+		this.vacations = vacations;
+	}
+	
+	public void addVacation(Vacation vacation) {
+        if (!getVacations().contains(vacation)) {
+        	getVacations().add(vacation);
+        	vacation.setLaborer(this);
+        }
+    }
+	
+	public void removeVacation(Vacation vacation) {
+        if (getVacations().contains(vacation)) {
+        	getVacations().remove(vacation);
+        	vacation.setLaborer(null);
+        }
+    }
 
 	public void addConstructionSite(ConstructionSite constructionSite) {
         if (!getConstructionSites().contains(constructionSite)) {
