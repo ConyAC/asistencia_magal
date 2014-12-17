@@ -20,11 +20,11 @@ import cl.magal.asistencia.entities.AfpAndInsuranceConfigurations;
 import cl.magal.asistencia.entities.AfpItem;
 import cl.magal.asistencia.entities.ConstructionSite;
 import cl.magal.asistencia.entities.DateConfigurations;
+import cl.magal.asistencia.entities.FamilyAllowanceConfigurations;
 import cl.magal.asistencia.entities.Mobilization2;
 import cl.magal.asistencia.entities.TaxationConfigurations;
 import cl.magal.asistencia.entities.WageConfigurations;
 import cl.magal.asistencia.entities.enums.Permission;
-import cl.magal.asistencia.helpers.TaxationConfigurationsHelper;
 import cl.magal.asistencia.services.ConfigurationService;
 import cl.magal.asistencia.services.ConstructionSiteService;
 import cl.magal.asistencia.util.SecurityHelper;
@@ -69,7 +69,7 @@ public class ConfigView extends VerticalLayout implements View {
 	 */
 	private static final long serialVersionUID = 8538300514577423280L;
 	
-	Logger logger = LoggerFactory.getLogger(ConfigView.class);
+	transient Logger logger = LoggerFactory.getLogger(ConfigView.class);
 
 	public static final String NAME = "configuraciones";
 	BeanItemContainer<ConstructionSite> constructionContainer = new BeanItemContainer<ConstructionSite>(ConstructionSite.class);
@@ -117,29 +117,23 @@ public class ConfigView extends VerticalLayout implements View {
 				setMargin(true);
 				setSpacing(true);
 
-				addComponent(new Table("Asignación Familiar"){
+				List<FamilyAllowanceConfigurations> taxes = confService.findFamylyAllowanceConfigurations();
+				final BeanItemContainer<FamilyAllowanceConfigurations> container = new BeanItemContainer<FamilyAllowanceConfigurations>(FamilyAllowanceConfigurations.class,taxes);
+
+				Table table = new Table("Asignación Familiar"){
 					{
-						int i = 1;
 						setWidth("100%");
 						setHeightUndefined();
-						addContainerProperty("desde", String.class, "");
-						addContainerProperty("hasta", String.class, "");
-						addContainerProperty("mont", TextField.class, new TextField());
-						
-						setVisibleColumns("desde","hasta","mont");
-						setColumnHeaders("Desde","Hasta","Monto");
-
-						addItem(new Object[]{"0","7744",new TextField(null,"0")}, i++);
-						addItem(new Object[]{"8100,64","7744",new TextField(null,"202516")}, i++);
-						addItem(new Object[]{"8100,68","5221",new TextField(null,"202517")}, i++);
-						addItem(new Object[]{"12696,28","5221",new TextField(null,"317407")}, i++);
-						addItem(new Object[]{"12696,32","4650",new TextField(null,"317408")}, i++);
-						addItem(new Object[]{"19801,92","4650",new TextField(null,"495048")}, i++);
-						addItem(new Object[]{"19801,96","0",new TextField(null,"495049")}, i++);
-						addItem(new Object[]{"1000000","0",new TextField(null,"25000000")}, i++);
+						setPageLength(8);
 
 					}
-				});
+				};
+				table.setEditable(true);
+				table.setTableFieldFactory(new OnValueChangeFieldFactory(2));
+				table.setContainerDataSource(container);
+				table.setVisibleColumns("from","to","amount");
+				table.setColumnHeaders("Desde","Hasta","Monto");
+				addComponent(table);
 
 				if(!SecurityHelper.hastPermission(Permission.DEFINIR_VARIABLE_GLOBAL)){
 					setEnabled(false);
@@ -172,7 +166,7 @@ public class ConfigView extends VerticalLayout implements View {
 				table.setVisibleColumns("from","to","factor","reduction","exempt");
 				table.setColumnHeaders("Desde","Hasta","Factor","Rebaja","Exento");
 				table.setEditable(true);
-				table.setTableFieldFactory(new TaxationFieldFactory());
+				table.setTableFieldFactory(new OnValueChangeFieldFactory(1));
 				addComponent(table);
 
 				if(!SecurityHelper.hastPermission(Permission.DEFINIR_VARIABLE_GLOBAL)){
@@ -382,7 +376,12 @@ public class ConfigView extends VerticalLayout implements View {
 		};
 	}
 	
-	public class TaxationFieldFactory extends DefaultFieldFactory {
+	public class OnValueChangeFieldFactory extends DefaultFieldFactory {
+
+		int tipo = 0;
+		public OnValueChangeFieldFactory(int tipo){
+			this.tipo = tipo;
+		}
 		
 	    public Field createField(final Container container,
 	                             final Object itemId,
@@ -396,8 +395,18 @@ public class ConfigView extends VerticalLayout implements View {
 						@Override
 						public void valueChange(ValueChangeEvent event) {
 							try{
-								TaxationConfigurations tax = ((BeanItem<TaxationConfigurations>)container.getItem(itemId)).getBean();
-								confService.save(tax);
+								switch(tipo){
+								case 1:
+									TaxationConfigurations tax = ((BeanItem<TaxationConfigurations>)container.getItem(itemId)).getBean();
+									confService.save(tax);
+									break;
+								case 2:
+									FamilyAllowanceConfigurations family = ((BeanItem<FamilyAllowanceConfigurations>)container.getItem(itemId)).getBean();
+									confService.save(family);
+									break;
+									
+									
+								}
 							}catch(Exception e){
 								Notification.show("Error al guardar el elemento",Type.ERROR_MESSAGE);
 								logger.error("Error al guardad el elemento de impuesto",e);

@@ -246,3 +246,14 @@ insert into taxation_configurations(taxation_configurationsId,fromr,to,factor,re
 insert into taxation_configurations(taxation_configurationsId,fromr,to,factor,reduction,exempt) values(7,4810200.01,6012750,11.54,958833.2, 19.55);
 insert into taxation_configurations(taxation_configurationsId,fromr,to,factor,reduction,exempt) values(8,6012750.01,100000000000,11.54,1229406.95, 19.55);
 
+
+-- asignación familiar
+insert into family_allowance_configurations(family_allowance_configurationsId,fromr,to,amount) values(1,0,7744,0);
+insert into family_allowance_configurations(family_allowance_configurationsId,fromr,to,amount) values(2,8100.64,7744,202516);
+insert into family_allowance_configurations(family_allowance_configurationsId,fromr,to,amount) values(3,8100.68,5221,202517);
+insert into family_allowance_configurations(family_allowance_configurationsId,fromr,to,amount) values(4,12696.28,5221,317407);
+insert into family_allowance_configurations(family_allowance_configurationsId,fromr,to,amount) values(5,12696.32,4650,317408);
+insert into family_allowance_configurations(family_allowance_configurationsId,fromr,to,amount) values(6,19801.92,4650,495048);
+insert into family_allowance_configurations(family_allowance_configurationsId,fromr,to,amount) values(7,19801.96,0,495049);
+insert into family_allowance_configurations(family_allowance_configurationsId,fromr,to,amount) values(8,1000000.64,0,25000000);
+

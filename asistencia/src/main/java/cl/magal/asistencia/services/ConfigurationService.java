@@ -88,4 +88,8 @@ public class ConfigurationService {
 		familyAllowanceRepo.save(familyAllowance);
 	}
 
+	public List<FamilyAllowanceConfigurations> findFamylyAllowanceConfigurations() {
+		return (List<FamilyAllowanceConfigurations>) familyAllowanceRepo.findAll();
+	}
+
 }
