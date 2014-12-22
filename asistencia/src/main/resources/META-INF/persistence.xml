@@ -2,6 +2,7 @@
 <persistence version="2.1" xmlns="http://xmlns.jcp.org/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence http://xmlns.jcp.org/xml/ns/persistence/persistence_2_1.xsd">
 	<persistence-unit name="persistenceUnit" transaction-type="RESOURCE_LOCAL">
 	    <provider>org.hibernate.ejb.HibernatePersistence</provider>
+	    <class>cl.magal.asistencia.entities.Absence</class>
 	    <class>cl.magal.asistencia.entities.AdvancePaymentConfigurations</class>
 	    <class>cl.magal.asistencia.entities.AdvancePaymentItem</class>
 	    <class>cl.magal.asistencia.entities.AfpAndInsuranceConfigurations</class>
@@ -24,6 +25,7 @@
 	    <class>cl.magal.asistencia.entities.User</class>
 	    <class>cl.magal.asistencia.entities.Vacation</class>
 	    <class>cl.magal.asistencia.entities.WageConfigurations</class>
+	    <class>cl.magal.asistencia.entities.converter.AbsenceTypeConverter</class>
 	    <class>cl.magal.asistencia.entities.converter.AfpConverter</class>
 	    <class>cl.magal.asistencia.entities.converter.IsapreConverter</class>
 	    <class>cl.magal.asistencia.entities.converter.JobConverter</class>
@@ -35,7 +37,7 @@
 	    <properties>
 	        <property name="hibernate.dialect" value="org.hibernate.dialect.H2Dialect"/>
 	        <property name="hibernate.hbm2ddl.auto" value="create-drop"/>
-	        <property name="hibernate.show_sql" value="true"/>
+	        <property name="hibernate.show_sql" value="false"/>
 	    </properties>
 	</persistence-unit>
 </persistence>

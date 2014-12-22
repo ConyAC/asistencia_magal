@@ -27,6 +27,9 @@ import cl.magal.asistencia.entities.WageConfigurations;
 import cl.magal.asistencia.entities.enums.Permission;
 import cl.magal.asistencia.services.ConfigurationService;
 import cl.magal.asistencia.services.ConstructionSiteService;
+import cl.magal.asistencia.ui.ListenerFieldFactory;
+import cl.magal.asistencia.ui.OnValueChangeFieldFactory;
+import cl.magal.asistencia.ui.OnValueChangeFieldFactory.OnValueChangeListener;
 import cl.magal.asistencia.util.SecurityHelper;
 
 import com.vaadin.data.Container;
@@ -129,7 +132,19 @@ public class ConfigView extends VerticalLayout implements View {
 					}
 				};
 				table.setEditable(true);
-				table.setTableFieldFactory(new OnValueChangeFieldFactory(2));
+				
+				OnValueChangeListener listener = new OnValueChangeListener(){
+
+					@Override
+					public void onValueChange(Object itemId) {
+						FamilyAllowanceConfigurations family = ((BeanItem<FamilyAllowanceConfigurations>)container.getItem(itemId)).getBean();
+						confService.save(family);
+					}
+					
+				};
+				OnValueChangeFieldFactory factory = new OnValueChangeFieldFactory(2);
+				factory.addListener(listener);
+				table.setTableFieldFactory(factory);
 				table.setContainerDataSource(container);
 				table.setVisibleColumns("from","to","amount");
 				table.setColumnHeaders("Desde","Hasta","Monto");
@@ -166,7 +181,20 @@ public class ConfigView extends VerticalLayout implements View {
 				table.setVisibleColumns("from","to","factor","reduction","exempt");
 				table.setColumnHeaders("Desde","Hasta","Factor","Rebaja","Exento");
 				table.setEditable(true);
-				table.setTableFieldFactory(new OnValueChangeFieldFactory(1));
+				
+				OnValueChangeListener listener = new OnValueChangeListener(){
+
+					@Override
+					public void onValueChange(Object itemId) {
+						TaxationConfigurations tax = ((BeanItem<TaxationConfigurations>)container.getItem(itemId)).getBean();
+						confService.save(tax);
+					}
+					
+				};
+				OnValueChangeFieldFactory factory = new OnValueChangeFieldFactory(1);
+				factory.addListener(listener);
+				
+				table.setTableFieldFactory(factory);
 				addComponent(table);
 
 				if(!SecurityHelper.hastPermission(Permission.DEFINIR_VARIABLE_GLOBAL)){
@@ -376,75 +404,6 @@ public class ConfigView extends VerticalLayout implements View {
 		};
 	}
 	
-	public class OnValueChangeFieldFactory extends DefaultFieldFactory {
-
-		int tipo = 0;
-		public OnValueChangeFieldFactory(int tipo){
-			this.tipo = tipo;
-		}
-		
-	    public Field createField(final Container container,
-	                             final Object itemId,
-	                             Object propertyId,
-	                             com.vaadin.ui.Component uiContext) {
-	        Field field = super.createField(container, itemId, propertyId, uiContext);
-	        if(field instanceof TextField){
-				if(!((TextField)field).isReadOnly()){
-					((TextField)field).addValueChangeListener(new Property.ValueChangeListener() {
-						
-						@Override
-						public void valueChange(ValueChangeEvent event) {
-							try{
-								switch(tipo){
-								case 1:
-									TaxationConfigurations tax = ((BeanItem<TaxationConfigurations>)container.getItem(itemId)).getBean();
-									confService.save(tax);
-									break;
-								case 2:
-									FamilyAllowanceConfigurations family = ((BeanItem<FamilyAllowanceConfigurations>)container.getItem(itemId)).getBean();
-									confService.save(family);
-									break;
-									
-									
-								}
-							}catch(Exception e){
-								Notification.show("Error al guardar el elemento",Type.ERROR_MESSAGE);
-								logger.error("Error al guardad el elemento de impuesto",e);
-							}
-						
-						}
-					});
-					((TextField)field).setImmediate(true);
-				}
-			}
-	        
-	        return field;
-	    }
-	}
-
-	public class ListenerFieldFactory extends DefaultFieldFactory {
-		
-		Property.ValueChangeListener listener = null;
-		public ListenerFieldFactory(Property.ValueChangeListener listener){
-			this.listener = listener;
-		}
-		
-	    public Field createField(Container container,
-	                             Object itemId,
-	                             Object propertyId,
-	                             com.vaadin.ui.Component uiContext) {
-	        Field field = super.createField(container, itemId, propertyId, uiContext);
-	        if(field instanceof TextField){
-				if(!((TextField)field).isReadOnly()){
-					((TextField)field).addValueChangeListener(listener);
-					((TextField)field).setImmediate(true);
-				}
-			}
-	        
-	        return field;
-	    }
-	}
-
 	private com.vaadin.ui.Component drawGlobales() {
 		return new VerticalLayout(){
 			{

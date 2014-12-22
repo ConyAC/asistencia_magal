@@ -19,13 +19,12 @@ import cl.magal.asistencia.entities.ConstructionSite;
 import cl.magal.asistencia.entities.Laborer;
 import cl.magal.asistencia.entities.Team;
 import cl.magal.asistencia.entities.User;
-import cl.magal.asistencia.entities.enums.Afp;
-import cl.magal.asistencia.entities.enums.Job;
-import cl.magal.asistencia.entities.enums.MaritalStatus;
 import cl.magal.asistencia.entities.enums.Permission;
 import cl.magal.asistencia.entities.enums.Status;
 import cl.magal.asistencia.services.ConstructionSiteService;
 import cl.magal.asistencia.services.UserService;
+import cl.magal.asistencia.ui.AbstractWindowEditor;
+import cl.magal.asistencia.ui.AbstractWindowEditor.EditorSavedEvent;
 import cl.magal.asistencia.util.SecurityHelper;
 
 import com.vaadin.data.Property;
@@ -33,6 +32,8 @@ import com.vaadin.data.fieldgroup.BeanFieldGroup;
 import com.vaadin.data.fieldgroup.FieldGroup.CommitException;
 import com.vaadin.data.util.BeanItem;
 import com.vaadin.data.util.BeanItemContainer;
+import com.vaadin.event.ItemClickEvent;
+import com.vaadin.event.ItemClickEvent.ItemClickListener;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.FontAwesome;
@@ -41,9 +42,7 @@ import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.Field;
 import com.vaadin.ui.FormLayout;
-import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Notification.Type;
@@ -52,7 +51,6 @@ import com.vaadin.ui.TabSheet;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.Window;
 
 @Component
 @Scope("prototype")
@@ -63,7 +61,7 @@ public class LaborerAndTeamPanel extends Panel implements View {
 	 */
 	private static final long serialVersionUID = -3552532103677168457L;
 
-	Logger logger = LoggerFactory.getLogger(LaborerAndTeamPanel.class);
+	transient Logger logger = LoggerFactory.getLogger(LaborerAndTeamPanel.class);
 	
 	protected Button editConstructionSite,btnPrint,btnAdd;
 	
@@ -383,109 +381,26 @@ public class LaborerAndTeamPanel extends Panel implements View {
 					return;
 				}
 				
-				final Window window = new Window();
-				window.setWidth("70%");
+				BeanItem<Laborer> item = new BeanItem<Laborer>(new Laborer());
+				LaborerWindow userWindow = new LaborerWindow(item);
 				
-				window.setModal(true);
-				window.center();
-				
-				GridLayout detalleObrero = new GridLayout(2,5);
-				detalleObrero.setMargin(true);
-				detalleObrero.setSpacing(true);
-				
-				
-				window.setContent(new Panel(detalleObrero));
-				
-				HorizontalLayout hl = new HorizontalLayout();
-				hl.setSpacing(true);
-				detalleObrero.addComponent(hl,0,0,1,0);
-				detalleObrero.setComponentAlignment(hl, Alignment.TOP_RIGHT);
-				
-				
-				final BeanFieldGroup<Laborer> fieldGroup = new BeanFieldGroup<Laborer>(Laborer.class);
-		        fieldGroup.setItemDataSource(new BeanItem<Laborer>(new Laborer()));
-
-		        //agrega un boton que hace el commit
-		        Button add = new Button(null,new Button.ClickListener() {
-
-		        	@Override
-		        	public void buttonClick(ClickEvent event) {
-		        		try {
-		        			fieldGroup.commit();
-		        			Laborer laborer = fieldGroup.getItemDataSource().getBean();
-		        			constructionSiteService.addLaborerToConstructionSite(laborer,cs);				
-		        			laborerContainer.addBean(laborer);
-		        			window.close();
-		        		} catch (Exception e) {
-		        			logger.error("Error al guardar la información del obrero");
-		        			Notification.show("Es necesario agregar todos los campos obligatorios", Type.ERROR_MESSAGE);
-		        		}
-
-		        	}
-		        }){{
-		        	setIcon(FontAwesome.SAVE);
-		        }};
-		        hl.addComponent(add);
-		        //detalleObrero.addComponent(add);
-		        //detalleObrero.setComponentAlignment(add, Alignment.TOP_RIGHT);
-		        
-				//boton para imprimir
-				Button btnPrint = new Button(null,new Button.ClickListener() {
+				userWindow.addListener(new AbstractWindowEditor.EditorSavedListener() {
 					
 					@Override
-					public void buttonClick(ClickEvent event) {
-						Notification.show("Imprimiendo");
+					public void editorSaved(EditorSavedEvent event) {
+						try {
+			    			Laborer laborer = ((BeanItem<Laborer>) event.getSavedItem()).getBean();
+			    			constructionSiteService.addLaborerToConstructionSite(laborer,cs);				
+			    			laborerContainer.addBean(laborer);
+			    		} catch (Exception e) {
+			    			logger.error("Error al guardar la información del obrero",e);
+			    			Notification.show("Es necesario agregar todos los campos obligatorios", Type.ERROR_MESSAGE);
+			    		}
 						
 					}
-				}){{
-					setIcon(FontAwesome.PRINT);
-				}};
-				 hl.addComponent(btnPrint);
-				//detalleObrero.addComponent(btnPrint);
-				//detalleObrero.setComponentAlignment(btnPrint, Alignment.TOP_LEFT);        
-		        // Loop through the properties, build fields for them and add the fields
-		        // to this UI
-				 for (Object propertyId : new String[]{"rut","firstname","secondname","lastname", "secondlastname", "dateBirth", "address", "mobileNumber", "phone", "dateAdmission"}) {
-		        	if(propertyId.equals("laborerId") || propertyId.equals("constructionSites") || propertyId.equals("contractId") || propertyId.equals("teamId"))
-		        		;
-		        	else if(propertyId.equals("afp")){
-		        		ComboBox afpField = new ComboBox("AFP");
-		        		afpField.setNullSelectionAllowed(false);
-		    			for(Afp a : Afp.values()){
-		    				afpField.addItem(a);
-		    			}
-		    			detalleObrero.addComponent(afpField);
-		    			fieldGroup.bind(afpField, "afp");    			
-		        	}else if(propertyId.equals("job")){
-		        		ComboBox jobField = new ComboBox("Oficio");
-		        		jobField.setNullSelectionAllowed(false);
-		    			for(Job j : Job.values()){
-		    				jobField.addItem(j);
-		    			}
-		    			detalleObrero.addComponent(jobField);
-		    			fieldGroup.bind(jobField, "job");    
-		        	}else if(propertyId.equals("maritalStatus")){
-		        		ComboBox msField = new ComboBox("Estado Civil");
-		        		msField.setNullSelectionAllowed(false);
-		    			for(MaritalStatus ms : MaritalStatus.values()){
-		    				msField.addItem(ms);
-		    			}
-		    			detalleObrero.addComponent(msField);
-		    			fieldGroup.bind(msField, "maritalStatus");    
-		        	}else{        		
-		        		String t = tradProperty(propertyId);
-		        		Field field = fieldGroup.buildAndBind(t, propertyId);
-		        		if(field instanceof TextField){
-		        			((TextField)field).setNullRepresentation("");
-		        		}
-		        		detalleObrero.addComponent(field);
-		        		detalleObrero.setComponentAlignment(field, Alignment.MIDDLE_CENTER);
-		        	}
-		        }
+				});
 		        
-		        detalleObrero.setWidth("100%");
-		        
-		        UI.getCurrent().addWindow(window);
+		        UI.getCurrent().addWindow(userWindow);
 
 			}
 		});
@@ -498,36 +413,44 @@ public class LaborerAndTeamPanel extends Panel implements View {
 		table.setVisibleColumns("job","firstname","laborerId"); //FIXME laborerId
 		table.setColumnHeaders("Cod","Nombre","Estado");
 		table.setSelectable(true);
+		
+		table.addItemClickListener(new ItemClickListener() {
+			
+			@Override
+			public void itemClick(ItemClickEvent event) {
+				
+				LaborerWindow userWindow = new LaborerWindow((BeanItem) event.getItem());
+				
+				userWindow.addListener(new AbstractWindowEditor.EditorSavedListener() {
+					
+					@Override
+					public void editorSaved(EditorSavedEvent event) {
+						final ConstructionSite cs = item.getBean();
+						if(cs == null){
+							Notification.show("Debe seleccionar una obra",Type.ERROR_MESSAGE);
+							return;
+						}
+						try {
+			    			Laborer laborer = ((BeanItem<Laborer>) event.getSavedItem()).getBean();
+			    			constructionSiteService.addLaborerToConstructionSite(laborer,cs);				
+			    			laborerContainer.addBean(laborer);
+			    		} catch (Exception e) {
+			    			logger.error("Error al guardar la información del obrero",e);
+			    			Notification.show("Es necesario agregar todos los campos obligatorios", Type.ERROR_MESSAGE);
+			    		}
+						
+					}
+				});
+		        
+		        UI.getCurrent().addWindow(userWindow);
+				
+			}
+		});
 
 		vl.addComponent(table);
 		vl.setExpandRatio(table,1.0F);
 
 		return vl;
-	}
-	
-	private String tradProperty(Object propertyId) {
-		if(propertyId.equals("rut"))
-			return "RUT";
-		else if(propertyId.equals("firstname"))
-			return "Primer Nombre";
-		else if(propertyId.equals("secondname"))
-			return "Segundo Nombre";
-		else if(propertyId.equals("lastname"))
-			return "Primer Apellido";
-		else if(propertyId.equals("secondlastname"))
-			return "Segundo Apellido";
-		else if(propertyId.equals("dateBirth"))
-			return "Fecha de Nacimiento";
-		else if(propertyId.equals("address"))
-			return "Direcciòn";
-		else if(propertyId.equals("mobileNumber"))
-			return "Teléfono móvil";
-		else if(propertyId.equals("phone"))
-			return "Teléfono fijo";
-		else if(propertyId.equals("dateAdmission"))
-			return "Fecha de Admisión";
-		else
-			return propertyId.toString();
 	}
 	
 	public void setConstruction(BeanItem<ConstructionSite> item){

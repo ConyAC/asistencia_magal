@@ -3,7 +3,9 @@ package cl.magal.asistencia.entities;
 import java.io.Serializable;
 import java.util.Date;
 
+import javax.persistence.Basic;
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -17,19 +19,24 @@ import javax.persistence.TemporalType;
 import org.joda.time.DateTime;
 import org.joda.time.Days;
 
-@Entity
-@Table(name="vacation")
-public class Vacation implements Serializable {
+import cl.magal.asistencia.entities.converter.AbsenceTypeConverter;
+import cl.magal.asistencia.entities.enums.AbsenceType;
 
+@Entity
+@Table(name="absence")
+public class Absence implements Serializable {
+
+	
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 254150224024395580L;
-	
+	private static final long serialVersionUID = 2396669065703217090L;
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name="vacationId")
-	Long vacationId;
+    @Basic(optional = false)
+	@Column(name="absenceId")
+	Long absenceId;
 	
 	@Temporal(TemporalType.DATE)
 	@Column(name = "from_date" )
@@ -39,20 +46,22 @@ public class Vacation implements Serializable {
 	@Column(name = "to_date" )
 	Date toDate;
 	
-	@ManyToOne
-	@JoinColumn(name ="laborerId")
-	Laborer laborer;
+	String description;
 	
 	@ManyToOne
-	@JoinColumn(name="constructionSiteId")
-	ConstructionSite constructionSite;
+	@JoinColumn(name="laborerId")
+	Laborer laborer;
+	
+	@Column(name="absence_type")
+	@Convert(converter = AbsenceTypeConverter.class)
+	AbsenceType absenceType;
 
-	public Long getVacationId() {
-		return vacationId;
+	public Long getAbsenceId() {
+		return absenceId;
 	}
 
-	public void setVacationId(Long vacationId) {
-		this.vacationId = vacationId;
+	public void setAbsenceId(Long absencesId) {
+		this.absenceId = absencesId;
 	}
 
 	public Date getFromDate() {
@@ -71,6 +80,14 @@ public class Vacation implements Serializable {
 		this.toDate = toDate;
 	}
 
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
 	public Laborer getLaborer() {
 		return laborer;
 	}
@@ -79,17 +96,16 @@ public class Vacation implements Serializable {
 		this.laborer = laborer;
 	}
 
-	public ConstructionSite getConstructionSite() {
-		return constructionSite;
+	public AbsenceType getAbsenceType() {
+		return absenceType;
 	}
 
-	public void setConstructionSite(ConstructionSite constructionSite) {
-		this.constructionSite = constructionSite;
+	public void setAbsenceType(AbsenceType absencesType) {
+		this.absenceType = absencesType;
 	}
 	
 	public int getTotal(){
 		return Days.daysBetween(new DateTime(fromDate), new DateTime(toDate)).getDays();
 	}
 	
-
 }

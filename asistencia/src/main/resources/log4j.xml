@@ -20,11 +20,6 @@
   </logger>
   <logger name='cl.magal.asistencia.ui'>
     <level value='DEBUG' />
-    <appender-ref ref='CONSOLE' />
-  </logger>
- <logger name='cl.magal.asistencia.entities.converter'>
-    <level value='DEBUG' />
-    <appender-ref ref='CONSOLE' />
   </logger>
   <root>
     <level value='ERROR' />

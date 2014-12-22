@@ -140,11 +140,14 @@ public class Laborer implements Serializable {
     @Column(name="photo")
     private String photo;
     
-    @ManyToMany(mappedBy="laborers",cascade = { CascadeType.PERSIST, CascadeType.MERGE })
+    @ManyToMany(mappedBy="laborers",fetch=FetchType.EAGER,cascade = { CascadeType.PERSIST, CascadeType.MERGE })
     List<ConstructionSite> constructionSites;
     
     @OneToMany(mappedBy="laborer",fetch=FetchType.EAGER,cascade = { CascadeType.PERSIST, CascadeType.MERGE },orphanRemoval=true )
     List<Vacation> vacations = new ArrayList<Vacation>();
+    
+    @OneToMany(mappedBy="laborer",fetch=FetchType.EAGER,cascade = { CascadeType.PERSIST, CascadeType.MERGE },orphanRemoval=true )
+    List<Absence> absences = new ArrayList<Absence>();
     
     @PrePersist
     public void prePersist(){
@@ -406,8 +409,30 @@ public class Laborer implements Serializable {
         	constructionSite.getLaborers().add(this);
         }
     }
+	
+    public List<Absence> getAbsences() {
+		return absences;
+	}
 
-    @Override
+	public void setAbsences(List<Absence> absences) {
+		this.absences = absences;
+	}
+	
+	public void addAbsence(Absence absence) {
+        if (!getAbsences().contains(absence)) {
+        	getAbsences().add(absence);
+        	absence.setLaborer(this);
+        }
+    }
+	
+	public void removeAbsence(Absence absence) {
+        if (getAbsences().contains(absence)) {
+        	getAbsences().remove(absence);
+        	absence.setLaborer(null);
+        }
+    }
+
+	@Override
     public int hashCode() {
         int hash = 0;
         hash += (laborerId != null ? laborerId.hashCode() : 0);
