@@ -224,6 +224,8 @@ public class ConstructionSitesView extends BaseView implements View {
 	public void enter(ViewChangeEvent event) {
 		
 		((MagalUI)UI.getCurrent()).setBackVisible(false);
+		((MagalUI)UI.getCurrent()).highlightMenuItem(NAME);
+		
 		reloadData();
 	}
 

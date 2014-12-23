@@ -443,6 +443,7 @@ public class ConstructionSiteView extends BaseView  implements View {
 	public void enter(ViewChangeEvent event) {
 		
 		((MagalUI)UI.getCurrent()).setBackVisible(true);
+		((MagalUI)UI.getCurrent()).highlightMenuItem(NAME);
 		
 		//obtiene los parametros de url
 		if(event.getParameters() != null){

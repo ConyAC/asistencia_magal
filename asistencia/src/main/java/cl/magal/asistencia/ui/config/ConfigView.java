@@ -742,6 +742,8 @@ public class ConfigView extends VerticalLayout implements View {
 	public void enter(ViewChangeEvent event) {
 		
 			((MagalUI)UI.getCurrent()).setBackVisible(false);
+			((MagalUI)UI.getCurrent()).highlightMenuItem(NAME);
+			
 			//agrega las obras TODO segun perfil TODO usar paginación
 			Page<ConstructionSite> page = service.findAllConstructionSite(new PageRequest(0, 20));
 			constructionContainer.removeAllItems();

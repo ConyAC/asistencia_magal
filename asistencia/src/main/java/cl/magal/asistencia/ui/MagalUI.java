@@ -1,5 +1,8 @@
 package cl.magal.asistencia.ui;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.servlet.annotation.WebInitParam;
 import javax.servlet.annotation.WebServlet;
 
@@ -137,13 +140,23 @@ public class MagalUI extends UI implements ErrorHandler {
 		else if(menuName.equals("Configuraciones"))
 			return ConfigView.NAME;
 		else if(menuName.equals("Salir"))
-			return null;
+			return "";
 		else
 			throw new RuntimeException("Nombre de menu si clase conocida.");
 	}
 	
+	List<MenuItem> menuItems = new ArrayList<MenuItem>(5);
 	
-	MenuItem previous = null;
+	public void highlightMenuItem(String URL){
+		for(MenuItem item : menuItems ){
+			if(getUrl(item.getText()).equals(URL))
+				item.setStyleName("highlight");
+			else
+				item.setStyleName(null);
+		}
+	}
+	
+//	MenuItem previous = null;
 	
 	private MenuBar drawMenu() {
 		
@@ -155,30 +168,33 @@ public class MagalUI extends UI implements ErrorHandler {
 		    public void menuSelected(MenuItem selectedItem) {
 		       
 		    	navigator.navigateTo(getUrl(selectedItem.getText()));
-		        if (previous != null)
-		            previous.setStyleName(null);
-		        selectedItem.setStyleName("highlight");
-		        previous = selectedItem;
+//		        if (previous != null)
+//		            previous.setStyleName(null);
+//		        selectedItem.setStyleName("highlight");
+//		        previous = selectedItem;
 		    } 
 		};
 		
 		MenuItem item = menuLayout.addItem("Obras",mycommand);
-		item.setStyleName("highlight");
-		previous=item; 
+		menuItems.add(item);
+//		item.setStyleName("highlight");
+//		previous=item; 
 		
 		item.setIcon(FontAwesome.BUILDING);
 		
 		item = menuLayout.addItem("Histórico",mycommand);
+		menuItems.add(item);
 		
 		item.setIcon(FontAwesome.BOOK);
 		
 		if(SecurityHelper.hastPermission(Permission.CREAR_USUARIO)){
 			item = menuLayout.addItem("Usuarios", mycommand);
-			
 			item.setIcon(FontAwesome.USERS);
+			menuItems.add(item);
 		}
 		
 		item = menuLayout.addItem("Configuraciones",mycommand);
+		menuItems.add(item);
 		
 		item.setIcon(FontAwesome.GEAR);
 		
@@ -189,6 +205,7 @@ public class MagalUI extends UI implements ErrorHandler {
 				logOut();
 			}
 		});
+		menuItems.add(item);
 		
 		item.setIcon(FontAwesome.POWER_OFF);
 		
