@@ -5,7 +5,7 @@ import javax.persistence.Converter;
 
 import cl.magal.asistencia.entities.enums.UserStatus;
 
-@Converter
+@Converter(autoApply=true)
 public class UserStatusConverter implements AttributeConverter<UserStatus, Integer> {
 
 	@Override

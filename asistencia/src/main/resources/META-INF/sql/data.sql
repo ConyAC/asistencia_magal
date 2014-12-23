@@ -211,3 +211,49 @@ INSERT INTO LABORER (LABORERID,ADDRESS,AFP,COMMUNE,CONTRACTID,DATEADMISSION,DATE
 
 MERGE INTO CONSTRUCTION_SITE (CONSTRUCTION_SITEID,ADDRESS,DELETED,NAME,STATUS,PERSONINCHARGEID) VALUES (1,'',0,'Carolina Rabat 4 Etapa B',1,null);
 MERGE INTO CONSTRUCTION_SITE (CONSTRUCTION_SITEID,ADDRESS,DELETED,NAME,STATUS,PERSONINCHARGEID) VALUES (2,'',0,'Edificio Jardines de Olivares',1,null);
+
+
+-- configuraciones
+-- sueldo
+INSERT INTO wage_configurations values (1,200000,50000,30000);
+
+-- anticipos
+INSERT INTO advance_payment_configurations values (1,15000,10000);
+INSERT INTO advance_payment_item values (1,1,0,105000,105000);
+INSERT INTO advance_payment_item values (1,2,0,140000,140000);
+INSERT INTO advance_payment_item values (1,3,0,130000,130000);
+INSERT INTO advance_payment_item values (1,4,0,250000,250000);
+INSERT INTO advance_payment_item values (1,5,0,115000,115000);
+
+-- afp y seguro
+
+insert into afp_and_insurance values(1,1.26);
+
+insert into adf_item values(1,1,11.44);
+insert into adf_item values(1,2,11.47);
+insert into adf_item values(1,3,11.27);
+insert into adf_item values(1,4,10.77);
+insert into adf_item values(1,5,12.36);
+insert into adf_item values(1,6,11.54);
+
+-- impuestos
+insert into taxation_configurations(taxation_configurationsId,fromr,to,factor,reduction,exempt) values(1,0,541147.5,0,0,0);
+insert into taxation_configurations(taxation_configurationsId,fromr,to,factor,reduction,exempt) values(2,541147.51,1202550,0.04,21645.9,2.2);
+insert into taxation_configurations(taxation_configurationsId,fromr,to,factor,reduction,exempt) values(3,1202550.01,2004250,11.27,69747.9,4.52);
+insert into taxation_configurations(taxation_configurationsId,fromr,to,factor,reduction,exempt) values(4,2004250.01,2805950,10.77,179981.65,7.09);
+insert into taxation_configurations(taxation_configurationsId,fromr,to,factor,reduction,exempt) values(5,2805950.01,3607650,12.36,446546.9, 10.62);
+insert into taxation_configurations(taxation_configurationsId,fromr,to,factor,reduction,exempt) values(6,3607650.01,4810200,11.54,713513, 15.57);
+insert into taxation_configurations(taxation_configurationsId,fromr,to,factor,reduction,exempt) values(7,4810200.01,6012750,11.54,958833.2, 19.55);
+insert into taxation_configurations(taxation_configurationsId,fromr,to,factor,reduction,exempt) values(8,6012750.01,100000000000,11.54,1229406.95, 19.55);
+
+
+-- asignación familiar
+insert into family_allowance_configurations(family_allowance_configurationsId,fromr,to,amount) values(1,0,7744,0);
+insert into family_allowance_configurations(family_allowance_configurationsId,fromr,to,amount) values(2,8100.64,7744,202516);
+insert into family_allowance_configurations(family_allowance_configurationsId,fromr,to,amount) values(3,8100.68,5221,202517);
+insert into family_allowance_configurations(family_allowance_configurationsId,fromr,to,amount) values(4,12696.28,5221,317407);
+insert into family_allowance_configurations(family_allowance_configurationsId,fromr,to,amount) values(5,12696.32,4650,317408);
+insert into family_allowance_configurations(family_allowance_configurationsId,fromr,to,amount) values(6,19801.92,4650,495048);
+insert into family_allowance_configurations(family_allowance_configurationsId,fromr,to,amount) values(7,19801.96,0,495049);
+insert into family_allowance_configurations(family_allowance_configurationsId,fromr,to,amount) values(8,1000000.64,0,25000000);
+

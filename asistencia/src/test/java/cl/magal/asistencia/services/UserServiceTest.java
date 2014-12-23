@@ -14,15 +14,21 @@ import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import cl.magal.asistencia.entities.ConstructionSite;
 import cl.magal.asistencia.entities.Role;
 import cl.magal.asistencia.entities.User;
 import cl.magal.asistencia.entities.enums.UserStatus;
+import cl.magal.asistencia.helpers.ConstructionSiteHelper;
 import cl.magal.asistencia.helpers.RoleHelper;
 import cl.magal.asistencia.helpers.UserHelper;
 
@@ -34,6 +40,11 @@ public class UserServiceTest {
 	
 	@Autowired
 	UserService service;
+	@Autowired
+	ConstructionSiteService constructionSiteService;
+	
+	@Autowired
+	private transient AuthenticationManager authenticationManager;
 	
 	@Before
 	public void before(){
@@ -212,7 +223,55 @@ public class UserServiceTest {
 		
 		assertEquals("El email del usuario debe ser igual a ",email, dbu.getEmail());
 		
-	}	
+	}
+	
+	/**
+	 * Permite testear el login de un nuevo usuario
+	 */
+	@Test
+	public void testLogin(){
+		String email = "login@login.com";
+		String password = "123456";
+		User u = UserHelper.newUser();
+		u.setEmail(email);
+		u.setPassword(password);
+		
+		//crea el usuario
+		service.saveUser(u);
+		
+		//y luego intenta logearse 
+		try{
+			UsernamePasswordAuthenticationToken token = 
+	                new UsernamePasswordAuthenticationToken(email, password);
+	        
+	        Authentication authentication = authenticationManager.authenticate(token);
+		}catch(AuthenticationException e){
+			fail("Error al realizar el login");
+		}
+	}
+	
+	/**
+	 * Permite testear un mal login de un nuevo usuario
+	 */
+	@Test(expected=AuthenticationException.class)
+	public void testBadLogin(){
+		String email = "login@login.com";
+		String password = "123456";
+		String badPassword = "654321";
+		User u = UserHelper.newUser();
+		u.setEmail(email);
+		u.setPassword(password);
+		
+		//crea el usuario
+		service.saveUser(u);
+		
+		//y luego intenta logearse 
+		UsernamePasswordAuthenticationToken token = 
+                new UsernamePasswordAuthenticationToken(email, badPassword);
+        
+        Authentication authentication = authenticationManager.authenticate(token);
+		fail("No deberia llegar aquí");
+	}
 	
 	/**
 	 * Listar activos
@@ -231,5 +290,48 @@ public class UserServiceTest {
 		assertNotNull("El usuario no debe estar desactivado", dbu.getStatus());
 	}
 
+	/**
+	 * Test para agregar obras a un usuario
+	 */
+	@Test
+	public void testAddConstructioSite(){
+		//crea dos obras
+		ConstructionSite cs = ConstructionSiteHelper.newConstrutionSite();
+		// lo guarda
+		constructionSiteService.save(cs);
+		//crea dos obras
+		ConstructionSite cs2 = ConstructionSiteHelper.newConstrutionSite();
+		// lo guarda
+		constructionSiteService.save(cs2);
+		
+		//crea un usuario
+		User u = UserHelper.newUser();
+		//crea el usuario
+		service.saveUser(u);
+		
+		//agrega la construction 2 
+		service.addConstructionSiteToUser(cs2, u);
+		
+		User dbu = service.findUser(u.getUserId());
+		
+		//verifica que al recuperar la obra, se obtenga el trabajador guardado
+		assertNotNull("El objeto guardado no puede ser nulo",dbu);
+		assertTrue("El objeto guardado debe contener trabajadores",!dbu.getCs().isEmpty());
+		assertEquals("El objeto guardado debe contener el trabajador agregado",dbu.getCs().get(0),cs2 );
+		
+		//agrega otro mas
+		service.addConstructionSiteToUser(cs,u);
+		
+		dbu = service.findUser(u.getUserId());
+		
+		//los ids de los laborer no pueden ser iguales
+		assertNotEquals("los ids de los laborer no pueden ser iguales",cs2.getConstructionsiteId(),cs.getConstructionsiteId());
+		
+		//verifica que al recuperar la obra, se obtenga el trabajador guardado
+		assertNotNull("El objeto guardado no puede ser nulo",dbu);
+		assertTrue("El objeto guardado debe contener trabajadores",!dbu.getCs().isEmpty());
+		assertEquals("El objeto guardado debe contener el trabajador agregado",dbu.getCs().get(1),cs );
+		
+	}
     
 }

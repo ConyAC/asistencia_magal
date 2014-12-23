@@ -5,7 +5,7 @@ import javax.persistence.Converter;
 
 import cl.magal.asistencia.entities.enums.Job;
 
-@Converter
+@Converter(autoApply=true)
 public class JobConverter implements AttributeConverter<Job, Integer>{
 
 	@Override

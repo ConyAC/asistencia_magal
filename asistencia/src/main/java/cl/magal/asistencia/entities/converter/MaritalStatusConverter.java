@@ -5,7 +5,7 @@ import javax.persistence.Converter;
 
 import cl.magal.asistencia.entities.enums.MaritalStatus;
 
-@Converter
+@Converter(autoApply=true)
 public class MaritalStatusConverter implements AttributeConverter<MaritalStatus, Integer>{
 
 	@Override
