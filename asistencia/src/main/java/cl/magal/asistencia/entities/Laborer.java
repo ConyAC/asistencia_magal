@@ -8,6 +8,7 @@ package cl.magal.asistencia.entities;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 
 import javax.persistence.Basic;
@@ -104,7 +105,7 @@ public class Laborer implements Serializable {
     @Column(name = "contractId")
     private Integer contractId;
     @Column(name = "teamId")
-    private Integer teamId;
+    private Long teamId;
     @Column(name="dependents")
     private Integer dependents;
     @Column(name="town")
@@ -151,6 +152,9 @@ public class Laborer implements Serializable {
     
     @OneToMany(targetEntity=Tool.class,fetch=FetchType.EAGER)
     List<Tool> tool;
+    
+    @ManyToMany(mappedBy="laborers",cascade = { CascadeType.PERSIST, CascadeType.MERGE })
+    List<Team> teams = new LinkedList<Team>();
     
     @PrePersist
     public void prePersist(){
@@ -357,16 +361,16 @@ public class Laborer implements Serializable {
 	public void setAfp(Afp afp) {
 		this.afp = afp;
 	}
-
-	public Integer getTeamId() {
-        return teamId;
-    }
-
-    public void setTeamId(Integer teamId) {
-        this.teamId = teamId;
-    }
     
-    public List<ConstructionSite> getConstructionSites() {
+    public Long getTeamId() {
+		return teamId;
+	}
+
+	public void setTeamId(Long teamId) {
+		this.teamId = teamId;
+	}
+
+	public List<ConstructionSite> getConstructionSites() {
 		return constructionSites;
 	}
 
@@ -374,6 +378,14 @@ public class Laborer implements Serializable {
 		this.constructionSites = constructionSites;
 	}
 	
+	public List<Team> getTeams() {
+		return teams;
+	}
+
+	public void setTeams(List<Team> teams) {
+		this.teams = teams;
+	}
+
 	public Integer getJobCode() {
 		return jobCode;
 	}
@@ -385,6 +397,10 @@ public class Laborer implements Serializable {
 	public List<Vacation> getVacations() {
 		return vacations;
 	}
+	
+	public String getFullname(){
+    	return firstname + " " +lastname;
+    }
 
 	public void setVacations(List<Vacation> vacations) {
 		this.vacations = vacations;
@@ -421,6 +437,15 @@ public class Laborer implements Serializable {
         }
     }
 	
+	public void addTeam(Team team) {
+        if (!getTeams().contains(team)) {
+        	getTeams().add(team);
+        }
+        if (!team.getLaborers().contains(this)) {
+        	team.getLaborers().add(this);
+        }
+    }
+    
     public List<Absence> getAbsences() {
 		return absences;
 	}

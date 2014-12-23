@@ -3,10 +3,15 @@ package cl.magal.asistencia.helpers;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
+
+import java.util.Date;
+
 import cl.magal.asistencia.entities.Laborer;
 import cl.magal.asistencia.entities.enums.Afp;
+import cl.magal.asistencia.entities.enums.Isapre;
 import cl.magal.asistencia.entities.enums.Job;
 import cl.magal.asistencia.entities.enums.MaritalStatus;
+import cl.magal.asistencia.entities.enums.Nationality;
 import cl.magal.asistencia.util.Utils;
 
 public final class LaborerHelper {
@@ -21,8 +26,13 @@ public final class LaborerHelper {
 		laborer.setJob(Job.ALBAÑIL);
 		laborer.setAfp(Afp.MODELO);
 		laborer.setMaritalStatus(MaritalStatus.CASADO);
-		laborer.setRut("16127401-1");
+		laborer.setRut("16627054-5");
 		laborer.setMobileNumber("11223311");
+		laborer.setIsapre(Isapre.FONASA);
+		laborer.setNationality(Nationality.CHILENA);
+		laborer.setAddress("Av. Los Alamos 3663");
+		laborer.setCommune("Puente Alto");
+		laborer.setDateAdmission(new Date());
 		//TODO estado
 		return laborer;
 	}

@@ -92,13 +92,13 @@ public class User implements Serializable {
     private Role role;
     
     @JoinTable(name="user_constructionsite",
-    	    joinColumns = { 
-    	    		@JoinColumn(name = "userId", referencedColumnName = "userId")
-    	     }, 
-    	     inverseJoinColumns = { 
-    	            @JoinColumn(name = "construction_siteId", referencedColumnName = "construction_siteId")
-    	     }
-    		)
+    joinColumns = { 
+    		@JoinColumn(name = "userId", referencedColumnName = "userId")
+     }, 
+     inverseJoinColumns = { 
+            @JoinColumn(name = "construction_siteId", referencedColumnName = "construction_siteId")
+     }
+	)
      @ManyToMany(targetEntity=ConstructionSite.class,fetch=FetchType.EAGER)
      List<ConstructionSite> cs = new LinkedList<ConstructionSite>();
     

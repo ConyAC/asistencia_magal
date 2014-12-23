@@ -7,15 +7,21 @@ package cl.magal.asistencia.entities;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
 
 import javax.persistence.Basic;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
@@ -49,9 +55,10 @@ public class Team implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
     @Column(name = "teamId")
-    private Integer teamId;
+    private Long teamId;
     @Basic(optional = false)
-    @Column(name = "name")
+    @NotNull(message="El nombre es necesario")
+    @Column(name = "name", nullable=false)
     private String name;
     @Column(name = "date")
     @Temporal(TemporalType.TIMESTAMP)
@@ -61,15 +68,26 @@ public class Team implements Serializable {
     @ManyToOne
     private ConstructionSite constructionsite;
     @Basic(optional = false)
-    @JoinColumn(name = "leaderId")
-    @ManyToOne
+    @JoinColumn(name = "laborerId")
+    @ManyToOne(cascade = CascadeType.ALL)
     private Laborer leader;
     @Convert(converter = StatusConverter.class)
     @Column(name = "status",nullable=false)
     @NotNull
     private Status status;//FIXME ocuparemos el mismo o otro enum para el estado de las cuadrillas?
     @Column(name = "deleted")
-    private Boolean deleted;
+    private Boolean deleted;    
+   
+    @JoinTable(name="laborer_team",
+    joinColumns = { 
+    		@JoinColumn(name = "teamId", referencedColumnName = "teamId")
+     }, 
+     inverseJoinColumns = { 	
+            @JoinColumn(name = "laborerId", referencedColumnName = "laborerId")
+     }
+	)
+    @ManyToMany(targetEntity=Laborer.class,fetch=FetchType.EAGER)
+    List<Laborer> laborers = new LinkedList<Laborer>();
 
     @PrePersist
     public void prePersist(){
@@ -80,19 +98,19 @@ public class Team implements Serializable {
     public Team() {
     }
 
-    public Team(Integer teamId) {
+    public Team(Long teamId) {
         this.teamId = teamId;
     }
 
-    public Integer getTeamId() {
-        return teamId;
-    }
+    public Long getTeamId() {
+		return teamId;
+	}
 
-    public void setTeamId(Integer teamId) {
-        this.teamId = teamId;
-    }
+	public void setTeamId(Long teamId) {
+		this.teamId = teamId;
+	}
 
-    public String getName() {
+	public String getName() {
         return name;
     }
 
@@ -138,9 +156,19 @@ public class Team implements Serializable {
 
     public void setDeleted(Boolean deleted) {
         this.deleted = deleted;
-    }
+    }    
+    
+    public List<Laborer> getLaborers() {
+    	if(laborers == null )
+			laborers = new LinkedList<Laborer>();
+		return laborers;
+	}
 
-    @Override
+	public void setLaborers(List<Laborer> laborers) {
+		this.laborers = laborers;
+	}
+
+	@Override
     public int hashCode() {
         int hash = 0;
         hash += (teamId != null ? teamId.hashCode() : 0);
@@ -163,6 +191,15 @@ public class Team implements Serializable {
     @Override
     public String toString() {
         return "jpa.magal.entities.Team[ teamId=" + teamId + " ]";
+    }
+    
+    public void addLaborer(Laborer laborer) {
+        if (!getLaborers().contains(laborer)) {
+        	getLaborers().add(laborer);
+        }
+        if (!laborer.getTeams().contains(this)) {
+            laborer.getTeams().add(this);
+        }
     }
     
 }

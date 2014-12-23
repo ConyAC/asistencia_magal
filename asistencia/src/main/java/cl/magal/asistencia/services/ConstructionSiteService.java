@@ -150,18 +150,13 @@ public class ConstructionSiteService {
 		repo2.save(dbcs);
 	}
 
-	/**
-	 * TODO
-	 * @param team
-	 * @param cs
-	 */
+	@Transactional
 	public void addTeamToConstructionSite(Team team, ConstructionSite cs) {
 		
-		ConstructionSite dbcs = repo2.findOne(cs.getConstructionsiteId());
-		
+		ConstructionSite dbcs = repo2.findOne(cs.getConstructionsiteId());		
 		logger.debug("dbcs "+dbcs);
-		dbcs.addTeam(team);	
 		teamRepo.save(team);
+		dbcs.addTeam(team);	
 		logger.debug("dbcs team "+dbcs.getTeams());
 	}
 
