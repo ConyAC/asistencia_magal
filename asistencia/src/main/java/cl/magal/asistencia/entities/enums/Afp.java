@@ -27,6 +27,11 @@ public enum Afp {
 				return e;
 		throw new RuntimeException("Afp invalid");
 	}
+	
+	public String getDescription(){
+		return description;
+	}
+	
 	@Override
 	public String toString(){
 		return description;

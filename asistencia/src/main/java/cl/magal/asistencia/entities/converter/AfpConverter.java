@@ -5,7 +5,7 @@ import javax.persistence.Converter;
 
 import cl.magal.asistencia.entities.enums.Afp;
 
-@Converter
+@Converter(autoApply=true)
 public class AfpConverter implements AttributeConverter<Afp, Integer>{
 
 	@Override

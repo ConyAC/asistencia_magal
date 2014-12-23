@@ -6,6 +6,7 @@
 package cl.magal.asistencia.entities;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -179,6 +180,8 @@ public class ConstructionSite implements Serializable {
 	}
 	
 	public List<User> getUsers() {
+		if(users == null)
+			users = new ArrayList<User>();
 		return users;
 	}
 

@@ -41,4 +41,6 @@
 			</list>
 		</property>
 	</bean>
+	
+	<import resource="security.xml" />
 </beans>

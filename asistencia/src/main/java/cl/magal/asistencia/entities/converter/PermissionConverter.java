@@ -5,7 +5,7 @@ import javax.persistence.Converter;
 
 import cl.magal.asistencia.entities.enums.Permission;
 
-@Converter
+@Converter(autoApply=true)
 public class PermissionConverter implements AttributeConverter<Permission, Integer>{
 
 	@Override
