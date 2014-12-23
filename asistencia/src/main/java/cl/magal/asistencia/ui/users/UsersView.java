@@ -25,6 +25,7 @@ import cl.magal.asistencia.entities.enums.Permission;
 import cl.magal.asistencia.entities.enums.Status;
 import cl.magal.asistencia.entities.enums.UserStatus;
 import cl.magal.asistencia.services.UserService;
+import cl.magal.asistencia.ui.MagalUI;
 
 import com.vaadin.data.fieldgroup.BeanFieldGroup;
 import com.vaadin.data.fieldgroup.FieldGroup.CommitException;
@@ -45,6 +46,7 @@ import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Panel;
+import com.vaadin.ui.UI;
 import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.OptionGroup;
 import com.vaadin.ui.PasswordField;
@@ -323,6 +325,7 @@ public class UsersView extends HorizontalLayout implements View {
 
 	@Override
 	public void enter(ViewChangeEvent event) {
+		((MagalUI)UI.getCurrent()).setBackVisible(false);
 		reloaData();		
 	}
 	

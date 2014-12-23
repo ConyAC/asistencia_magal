@@ -93,6 +93,8 @@ public class Team implements Serializable {
     public void prePersist(){
     	if(deleted == null )
     		deleted = Boolean.FALSE;
+    	if(status == null)
+    		status = Status.ACTIVE;
     }
     
     public Team() {

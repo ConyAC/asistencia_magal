@@ -28,11 +28,11 @@ import cl.magal.asistencia.entities.enums.Permission;
 import cl.magal.asistencia.services.ConfigurationService;
 import cl.magal.asistencia.services.ConstructionSiteService;
 import cl.magal.asistencia.ui.ListenerFieldFactory;
+import cl.magal.asistencia.ui.MagalUI;
 import cl.magal.asistencia.ui.OnValueChangeFieldFactory;
 import cl.magal.asistencia.ui.OnValueChangeFieldFactory.OnValueChangeListener;
 import cl.magal.asistencia.util.SecurityHelper;
 
-import com.vaadin.data.Container;
 import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.fieldgroup.FieldGroup;
@@ -49,13 +49,13 @@ import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.DateField;
-import com.vaadin.ui.DefaultFieldFactory;
 import com.vaadin.ui.Field;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.InlineDateField;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
+import com.vaadin.ui.UI;
 import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.TabSheet;
 import com.vaadin.ui.Table;
@@ -740,6 +740,8 @@ public class ConfigView extends VerticalLayout implements View {
 
 	@Override
 	public void enter(ViewChangeEvent event) {
+		
+			((MagalUI)UI.getCurrent()).setBackVisible(false);
 			//agrega las obras TODO segun perfil TODO usar paginación
 			Page<ConstructionSite> page = service.findAllConstructionSite(new PageRequest(0, 20));
 			constructionContainer.removeAllItems();

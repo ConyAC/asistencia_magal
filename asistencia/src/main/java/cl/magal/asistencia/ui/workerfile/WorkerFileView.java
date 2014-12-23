@@ -18,6 +18,7 @@ import cl.magal.asistencia.entities.enums.Afp;
 import cl.magal.asistencia.entities.enums.Job;
 import cl.magal.asistencia.entities.enums.MaritalStatus;
 import cl.magal.asistencia.services.LaborerService;
+import cl.magal.asistencia.ui.MagalUI;
 
 import com.vaadin.data.fieldgroup.BeanFieldGroup;
 import com.vaadin.data.fieldgroup.FieldGroup.CommitException;
@@ -40,6 +41,7 @@ import com.vaadin.ui.Notification;
 import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.TextField;
+import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 
 @VaadinView(value=WorkerFileView.NAME)
@@ -307,6 +309,7 @@ public class WorkerFileView extends HorizontalLayout implements View {
 	
 	@Override
 	public void enter(ViewChangeEvent event) {
+		((MagalUI)UI.getCurrent()).setBackVisible(false);
 		reloaData();		
 	}
 	

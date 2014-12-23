@@ -23,7 +23,6 @@ import cl.magal.asistencia.ui.OnValueChangeFieldFactory;
 import com.vaadin.data.Container;
 import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeNotifier;
-import com.vaadin.data.fieldgroup.BeanFieldGroup;
 import com.vaadin.data.util.BeanItem;
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.server.FontAwesome;
@@ -412,9 +411,6 @@ public class LaborerDialog extends AbstractWindowEditor {
 		detalleObrero.setSpacing(true);
 		vl.addComponent(detalleObrero);
 						
-		final BeanFieldGroup<Laborer> fieldGroup = new BeanFieldGroup<Laborer>(Laborer.class);
-        fieldGroup.setItemDataSource(new BeanItem<Laborer>(new Laborer()));
-
         // Loop through the properties, build fields for them and add the fields
         // to this UI
 		 for (Object propertyId : new String[]{"rut","firstname","secondname","lastname", "secondlastname", "dateBirth", "address", "mobileNumber", "phone", "dateAdmission", "job", "afp", "maritalStatus"}) {
@@ -427,7 +423,7 @@ public class LaborerDialog extends AbstractWindowEditor {
     				afpField.addItem(a);
     			}
     			detalleObrero.addComponent(afpField);
-    			fieldGroup.bind(afpField, "afp");   
+    			bind(afpField, "afp");   
         		detalleObrero.setComponentAlignment(afpField, Alignment.MIDDLE_CENTER);
         	}else if(propertyId.equals("job")){
         		ComboBox jobField = new ComboBox("Oficio");
@@ -436,7 +432,7 @@ public class LaborerDialog extends AbstractWindowEditor {
     				jobField.addItem(j);
     			}
     			detalleObrero.addComponent(jobField);
-    			fieldGroup.bind(jobField, "job");    
+    			bind(jobField, "job");    
         		detalleObrero.setComponentAlignment(jobField, Alignment.MIDDLE_CENTER);
         	}else if(propertyId.equals("maritalStatus")){
         		ComboBox msField = new ComboBox("Estado Civil");
@@ -445,11 +441,11 @@ public class LaborerDialog extends AbstractWindowEditor {
     				msField.addItem(ms);
     			}
     			detalleObrero.addComponent(msField);
-    			fieldGroup.bind(msField, "maritalStatus");   
+    			bind(msField, "maritalStatus");   
         		detalleObrero.setComponentAlignment(msField, Alignment.MIDDLE_CENTER);
         	}else{        		
         		String t = tradProperty(propertyId);
-        		Field field = fieldGroup.buildAndBind(t, propertyId);
+        		Field field = buildAndBind(t, propertyId);
         		if(field instanceof TextField){
         			((TextField)field).setNullRepresentation("");
         		}

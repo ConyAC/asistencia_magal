@@ -460,7 +460,6 @@ public class LaborerAndTeamPanel extends Panel implements View {
 			    			logger.error("Error al guardar la información del obrero",e);
 			    			Notification.show("Es necesario agregar todos los campos obligatorios", Type.ERROR_MESSAGE);
 			    		}
-						
 					}
 				});
 		        
@@ -528,7 +527,7 @@ public class LaborerAndTeamPanel extends Panel implements View {
 		        			teamContainer.addBean(team);
 		        			window.close();
 		        		} catch (Exception e) {
-		        			logger.error("Error al guardar la información de la cuadrilla");
+		        			logger.error("Error al guardar la información de la cuadrilla",e);
 		        			Notification.show("Es necesario agregar todos los campos obligatorios", Type.ERROR_MESSAGE);
 		        		}
 		        	}
