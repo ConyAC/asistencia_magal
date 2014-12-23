@@ -18,6 +18,7 @@ import org.tepi.filtertable.FilterTable;
 
 import cl.magal.asistencia.entities.ConstructionSite;
 import cl.magal.asistencia.entities.Laborer;
+import cl.magal.asistencia.entities.Mobilization2;
 import cl.magal.asistencia.entities.Team;
 import cl.magal.asistencia.entities.User;
 import cl.magal.asistencia.entities.enums.Afp;
@@ -536,7 +537,7 @@ public class LaborerAndTeamPanel extends Panel implements View {
 				}
 				
 				final Window window = new Window();
-				window.setWidth("80%");
+				window.setWidth("85%");
 				
 				window.setModal(true);
 				window.center();
@@ -583,11 +584,10 @@ public class LaborerAndTeamPanel extends Panel implements View {
 				 for (Object propertyId : new String[]{"name"}) { //fieldGroup.getUnboundPropertyIds()
 		        	if(propertyId.equals("teamId") || propertyId.equals("constructionsite")|| propertyId.equals("status") || propertyId.equals("deleted") || propertyId.equals("date"))
 		        		;
-		        	else if(propertyId.equals("leader.fullname")){
+		        	else if(propertyId.equals("leader")){//revisars
 		        		logger.debug("INGRESO!!! :");
-		        		ComboBox labName = new ComboBox("Responsable", laborerContainer);		        		
-		        		//labName.setItemCaptionMode(ItemCaptionMode.PROPERTY);
-		        		//labName.setItemCaptionPropertyId("fullname");
+		        		ComboBox labName = new ComboBox("Responsable", laborerContainer);	
+		        		labName.setItemCaptionPropertyId("firstname");
 		    			detalleCuadrilla.addComponent(labName);
 		        	}else if(propertyId.equals("laborers")){
 		        		ComboBox jobField = new ComboBox("Oficio");
@@ -608,8 +608,13 @@ public class LaborerAndTeamPanel extends Panel implements View {
 		        	}
 		        }
 		        
-				 HorizontalLayout test = new HorizontalLayout();
-				
+				HorizontalLayout test = new HorizontalLayout();				
+				final ComboBox nombre = new ComboBox("Responsable",laborerContainer);
+				nombre.setItemCaptionMode(ItemCaptionMode.PROPERTY);
+				nombre.setItemCaptionPropertyId("fullname");
+				test.addComponent(nombre);
+				detalleCuadrilla.addComponent(test);
+					
 				//Seleccionar Obreros
 				FilterTable select_lab =  new FilterTable();
 				Page<Laborer> page = laborerService.findAllLaborer(new PageRequest(0, 20));
@@ -627,7 +632,7 @@ public class LaborerAndTeamPanel extends Panel implements View {
                         return select_check ;
 					}
 				});
-    			
+				
 				select_lab.setVisibleColumns("firstname","job", "my_select");
 				select_lab.setColumnHeaders("Nombre","Oficio", "Seleccionar");
 				select_lab.setSelectable(true);
@@ -636,7 +641,7 @@ public class LaborerAndTeamPanel extends Panel implements View {
 				
 				//Obreros Seleccionados
 				FilterTable selected_lab =  new FilterTable();
-				selected_lab.setContainerDataSource(laborerContainer);
+				selected_lab.setContainerDataSource(laborerContainer); //no no
 				
 				selected_lab.setSizeFull();
 				//selected_lab.setFilterBarVisible(true);
@@ -672,8 +677,17 @@ public class LaborerAndTeamPanel extends Panel implements View {
 		table.setContainerDataSource(teamContainer);
 		table.setSizeFull();
 		table.setFilterBarVisible(true);
-		table.setVisibleColumns("name","leader.firstname","date","status");
-		table.setColumnHeaders("Nombre","Responsable","Fecha","Estado");
+		table.addGeneratedColumn("actions", new CustomTable.ColumnGenerator() {
+			
+			@Override
+			public Object generateCell(CustomTable source, Object itemId,
+					Object columnId) {
+				return new Button(null,FontAwesome.TRASH_O);
+			}
+		});
+
+		table.setVisibleColumns("name","leader.firstname","date","status","actions");
+		table.setColumnHeaders("Nombre","Responsable","Fecha","Estado", "Acciones");
 		table.setSelectable(true);
 
 		vl.addComponent(table);
