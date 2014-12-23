@@ -15,8 +15,8 @@ import org.springframework.stereotype.Component;
 import ru.xpoft.vaadin.VaadinView;
 import cl.magal.asistencia.services.UserService;
 import cl.magal.asistencia.ui.MagalUI;
-import cl.magal.asistencia.ui.constructionsite.ConstructionSiteView;
 import cl.magal.asistencia.ui.constructionsite.ConstructionSitesView;
+import cl.magal.asistencia.util.Constants;
 
 import com.vaadin.event.ShortcutAction.KeyCode;
 import com.vaadin.event.ShortcutListener;
@@ -137,7 +137,7 @@ public class LoginView extends VerticalLayout implements View {
 		                    VaadinSession.getCurrent().setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY, SecurityContextHolder.getContext());
 		                    //busca el usuario en base de datos para guardarlo en la session
 		                    cl.magal.asistencia.entities.User user = userService.findUsuarioByUsername(u);
-		                    VaadinSession.getCurrent().setAttribute("usuario", user);
+		                    VaadinSession.getCurrent().setAttribute(Constants.SESSION_USUARIO, user);
 		                    logger.debug("Login authentication "+authentication);
 		                    signin.removeShortcutListener(enter);
 		                    //quita cualquier mensaje de error que quedara

@@ -19,13 +19,12 @@ import org.tepi.filtertable.FilterTable;
 
 import ru.xpoft.vaadin.VaadinView;
 import cl.magal.asistencia.entities.ConstructionSite;
-import cl.magal.asistencia.entities.Laborer;
 import cl.magal.asistencia.entities.User;
 import cl.magal.asistencia.entities.enums.Permission;
-import cl.magal.asistencia.entities.enums.Status;
 import cl.magal.asistencia.entities.enums.UserStatus;
 import cl.magal.asistencia.services.UserService;
 import cl.magal.asistencia.ui.MagalUI;
+import cl.magal.asistencia.util.SecurityHelper;
 
 import com.vaadin.data.fieldgroup.BeanFieldGroup;
 import com.vaadin.data.fieldgroup.FieldGroup.CommitException;
@@ -36,7 +35,6 @@ import com.vaadin.event.ItemClickEvent.ItemClickListener;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.FontAwesome;
-import com.vaadin.server.VaadinSession;
 import com.vaadin.ui.AbstractSelect.ItemCaptionMode;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
@@ -45,12 +43,11 @@ import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
-import com.vaadin.ui.Panel;
-import com.vaadin.ui.UI;
 import com.vaadin.ui.Notification.Type;
-import com.vaadin.ui.OptionGroup;
+import com.vaadin.ui.Panel;
 import com.vaadin.ui.PasswordField;
 import com.vaadin.ui.TwinColSelect;
+import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 
 @VaadinView(value=UsersView.NAME)
@@ -198,7 +195,7 @@ public class UsersView extends HorizontalLayout implements View {
 		//detalleUsuario.removeAllItems();
 		//detalleUsuario.addAll(cs);
         
-        if(hastPermission(Permission.ASIGNAR_OBRA)){
+        if(SecurityHelper.hastPermission(Permission.ASIGNAR_OBRA)){
 	        //prueba
 			tcsObras = new TwinColSelect("Asignar Obras",constructionContainer);      
 			tcsObras.setWidth("70%");
@@ -304,23 +301,6 @@ public class UsersView extends HorizontalLayout implements View {
 		hl.addComponent(borrarUsuario);
 		
 		return vl;
-	}
-	
-	private boolean hastPermission(Permission... permissions) {
-		if(permissions == null)	
-			return true;
-		
-		User usuario = (User) VaadinSession.getCurrent().getAttribute(
-				"usuario");
-		if(usuario.getRole() == null || usuario.getRole().getPermission() == null ){
-			return false;
-		}
-		for(Permission p : permissions){
-			if(!usuario.getRole().getPermission().contains(p))
-				return false;
-		}
-		
-		return true;
 	}
 
 	@Override

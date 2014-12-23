@@ -14,7 +14,6 @@ import org.springframework.context.annotation.Scope;
 
 import ru.xpoft.vaadin.DiscoveryNavigator;
 import ru.xpoft.vaadin.SpringVaadinServlet;
-import cl.magal.asistencia.entities.enums.Permission;
 import cl.magal.asistencia.ui.config.ConfigView;
 import cl.magal.asistencia.ui.constructionsite.ConstructionSitesView;
 import cl.magal.asistencia.ui.login.LoginView;
@@ -26,6 +25,7 @@ import cl.magal.asistencia.util.SecurityHelper;
 import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.Title;
 import com.vaadin.annotations.VaadinServletConfiguration;
+import com.vaadin.navigator.ViewChangeListener;
 import com.vaadin.server.DefaultErrorHandler;
 import com.vaadin.server.ErrorHandler;
 import com.vaadin.server.FontAwesome;
@@ -110,6 +110,26 @@ public class MagalUI extends UI implements ErrorHandler {
 		content.addStyleName("view-content");
 
 		navigator = new DiscoveryNavigator(UI.getCurrent(), content);
+		
+		navigator.addViewChangeListener(new ViewChangeListener(){
+
+			@Override
+			public boolean beforeViewChange(ViewChangeEvent event) {
+				if(menuItems != null)
+					// verifica los permisos para mostrar los menus
+					for(MenuItem menu : menuItems){
+						menu.setVisible(SecurityHelper.hasMenu(menu.getText()));
+					}
+				return true;
+			}
+
+			@Override
+			public void afterViewChange(ViewChangeEvent event) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+		});
 
 		root.addComponent(content);
 		root.setExpandRatio(content, 1.0F);
@@ -131,18 +151,18 @@ public class MagalUI extends UI implements ErrorHandler {
 		if(menuName == null )
 			throw new RuntimeException("Nombre de menu si clase conocida.");
 		
-		if(menuName.equals("Obras"))
+		if(menuName.equals(Constants.MENU_CONSTRUCTIONSITE))
 			return ConstructionSitesView.NAME;
-		else if(menuName.equals("Histórico"))
+		else if(menuName.equals(Constants.MENU_WORKERFILE))
 			return WorkerFileView.NAME;
-		else if(menuName.equals("Usuarios"))
+		else if(menuName.equals(Constants.MENU_USERS))
 			return UsersView.NAME;
-		else if(menuName.equals("Configuraciones"))
+		else if(menuName.equals(Constants.MENU_CONFIGURATIONS))
 			return ConfigView.NAME;
-		else if(menuName.equals("Salir"))
+		else if(menuName.equals(Constants.MENU_LOGOUT))
 			return "";
 		else
-			throw new RuntimeException("Nombre de menu si clase conocida.");
+			throw new RuntimeException("Nombre de menu sin clase conocida.");
 	}
 	
 	List<MenuItem> menuItems = new ArrayList<MenuItem>(5);
@@ -156,8 +176,6 @@ public class MagalUI extends UI implements ErrorHandler {
 		}
 	}
 	
-//	MenuItem previous = null;
-	
 	private MenuBar drawMenu() {
 		
 		MenuBar menuLayout = new MenuBar();
@@ -168,37 +186,29 @@ public class MagalUI extends UI implements ErrorHandler {
 		    public void menuSelected(MenuItem selectedItem) {
 		       
 		    	navigator.navigateTo(getUrl(selectedItem.getText()));
-//		        if (previous != null)
-//		            previous.setStyleName(null);
-//		        selectedItem.setStyleName("highlight");
-//		        previous = selectedItem;
 		    } 
 		};
 		
-		MenuItem item = menuLayout.addItem("Obras",mycommand);
+		MenuItem item = menuLayout.addItem(Constants.MENU_CONSTRUCTIONSITE,mycommand);
 		menuItems.add(item);
-//		item.setStyleName("highlight");
-//		previous=item; 
 		
 		item.setIcon(FontAwesome.BUILDING);
 		
-		item = menuLayout.addItem("Histórico",mycommand);
+		item = menuLayout.addItem(Constants.MENU_WORKERFILE,mycommand);
 		menuItems.add(item);
 		
 		item.setIcon(FontAwesome.BOOK);
 		
-		if(SecurityHelper.hastPermission(Permission.CREAR_USUARIO)){
-			item = menuLayout.addItem("Usuarios", mycommand);
-			item.setIcon(FontAwesome.USERS);
-			menuItems.add(item);
-		}
+		item = menuLayout.addItem(Constants.MENU_USERS, mycommand);
+		item.setIcon(FontAwesome.USERS);
+		menuItems.add(item);
 		
-		item = menuLayout.addItem("Configuraciones",mycommand);
+		item = menuLayout.addItem(Constants.MENU_CONFIGURATIONS,mycommand);
 		menuItems.add(item);
 		
 		item.setIcon(FontAwesome.GEAR);
 		
-		item = menuLayout.addItem("Salir", new Command() {
+		item = menuLayout.addItem(Constants.MENU_LOGOUT, new Command() {
 			
 			@Override
 			public void menuSelected(MenuItem selectedItem) {
@@ -212,6 +222,8 @@ public class MagalUI extends UI implements ErrorHandler {
 		return menuLayout;
 	}
 	
+	
+	
 	public void logOut(){
 //		SecurityContext context = (SecurityContext) VaadinSession.getCurrent().getAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY);
 //		if( context != null ){
@@ -223,7 +235,7 @@ public class MagalUI extends UI implements ErrorHandler {
 //    	VaadinSession.getCurrent().
 //    	setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY,SecurityContextHolder.createEmptyContext());
     	VaadinSession.getCurrent().setAttribute(Constants.SESSION_USUARIO, null);
-    	VaadinSession.getCurrent().close();
+//    	VaadinSession.getCurrent().close();
     	navigator.navigateTo(LoginView.NAME);
 	}
 	

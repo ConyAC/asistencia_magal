@@ -25,7 +25,7 @@ public class SecurityHelper {
 		if(permissions == null)
 			return true;
 
-		User usuario = (User) VaadinSession.getCurrent().getAttribute("usuario");
+		User usuario = (User) VaadinSession.getCurrent().getAttribute(Constants.SESSION_USUARIO);
 		//si el usuario el nulo, lo rederidige al login
 		if(usuario == null ) {
 			UI.getCurrent().getNavigator().navigateTo(LoginView.NAME);
@@ -40,6 +40,17 @@ public class SecurityHelper {
 				return false;
 		}
 
+		return true;
+	}
+
+	public static boolean hasMenu(String text) {
+		User usuario = (User) VaadinSession.getCurrent().getAttribute(Constants.SESSION_USUARIO);
+		//si el usuario el nulo, lo rederidige al login
+		if(usuario == null ) 
+			return true;
+		
+		if(text.equals(Constants.MENU_USERS) )
+			return hastPermission(Permission.CREAR_USUARIO);
 		return true;
 	}
 }
