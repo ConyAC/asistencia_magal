@@ -145,8 +145,11 @@ public class ConstructionSiteService {
 	public void addLaborerToConstructionSite(Laborer laborer, ConstructionSite cs) {
 		
 		ConstructionSite dbcs = repo2.findOne(cs.getConstructionsiteId());
-		labRepo.save(laborer);
+		logger.debug("laborer "+laborer );
+//		laborer.addConstructionSite(dbcs);
+		labRepo.save(laborer); //FIXME
 		dbcs.addLaborer(laborer);
+		logger.debug("dbcs.getLaborer( ) "+dbcs.getLaborers() );
 		repo2.save(dbcs);
 	}
 

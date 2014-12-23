@@ -30,6 +30,9 @@ import javax.persistence.PrePersist;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import cl.magal.asistencia.entities.converter.StatusConverter;
 import cl.magal.asistencia.entities.enums.Status;
 
@@ -47,6 +50,8 @@ import cl.magal.asistencia.entities.enums.Status;
     @NamedQuery(name = "ConstructionSite.findByDeleted", query = "SELECT c FROM ConstructionSite c WHERE c.deleted = :deleted")})
 	
 public class ConstructionSite implements Serializable {
+	
+	transient Logger logger = LoggerFactory.getLogger(ConstructionSite.class);
 	
     private static final long serialVersionUID = 1L;
     @Id
@@ -80,7 +85,7 @@ public class ConstructionSite implements Serializable {
             @JoinColumn(name = "laborerId", referencedColumnName = "laborerId")
      }
 	)
-    @ManyToMany(targetEntity=Laborer.class,fetch=FetchType.EAGER)
+    @ManyToMany(targetEntity=Laborer.class,fetch=FetchType.EAGER,cascade = { CascadeType.PERSIST, CascadeType.MERGE })
     List<Laborer> laborers = new LinkedList<Laborer>();
     
     @OneToMany(targetEntity=Team.class,fetch=FetchType.EAGER)
@@ -218,6 +223,7 @@ public class ConstructionSite implements Serializable {
 
     public void addLaborer(Laborer laborer) {
         if (!getLaborers().contains(laborer)) {
+        	logger.debug("agregando laborer "+laborer);
         	getLaborers().add(laborer);
         }
         if (!laborer.getConstructionSites().contains(this)) {

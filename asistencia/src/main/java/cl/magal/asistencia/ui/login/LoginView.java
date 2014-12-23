@@ -88,7 +88,7 @@ public class LoginView extends VerticalLayout implements View {
         labels.addComponent(welcome);
         labels.setComponentAlignment(welcome, Alignment.MIDDLE_LEFT);
 
-        Label title = new Label("Sistema Producción");
+        Label title = new Label("Sistema de Asistencia");
         title.setSizeUndefined();
         title.addStyleName("h2");
         title.addStyleName("light");
