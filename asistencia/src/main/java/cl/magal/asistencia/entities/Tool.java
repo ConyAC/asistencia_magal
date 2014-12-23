@@ -7,17 +7,26 @@ package cl.magal.asistencia.entities;
 
 import java.io.Serializable;
 import java.util.Date;
+
 import javax.persistence.Basic;
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.PrePersist;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.validation.constraints.NotNull;
+
+import cl.magal.asistencia.entities.converter.StatusConverter;
+import cl.magal.asistencia.entities.converter.ToolStatusConverter;
+import cl.magal.asistencia.entities.enums.Status;
+import cl.magal.asistencia.entities.enums.ToolStatus;
 
 /**
  *
@@ -38,7 +47,7 @@ public class Tool implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
     @Column(name = "toolId")
-    private Integer toolId;
+    private Long toolId;
     @Basic(optional = false)
     @Column(name = "name")
     private String name;
@@ -50,29 +59,39 @@ public class Tool implements Serializable {
     private Date dateBuy;
     @Column(name = "fee")
     private Integer fee;
+    @Convert(converter = ToolStatusConverter.class)
+    @Column(name = "status",nullable=false)
+    @NotNull
+    private ToolStatus status = ToolStatus.OPERATIONAL;
 
+    @PrePersist
+    void preInsert() {
+       if(status == null)
+    	   status = ToolStatus.OPERATIONAL;
+    }
+    
     public Tool() {
     }
 
-    public Tool(Integer toolId) {
+    public Tool(Long toolId) {
         this.toolId = toolId;
     }
 
-    public Tool(Integer toolId, String name, Date dateBuy) {
+    public Tool(Long toolId, String name, Date dateBuy) {
         this.toolId = toolId;
         this.name = name;
         this.dateBuy = dateBuy;
     }
 
-    public Integer getToolId() {
-        return toolId;
-    }
+    public Long getToolId() {
+		return toolId;
+	}
 
-    public void setToolId(Integer toolId) {
-        this.toolId = toolId;
-    }
+	public void setToolId(Long toolId) {
+		this.toolId = toolId;
+	}
 
-    public String getName() {
+	public String getName() {
         return name;
     }
 
@@ -96,15 +115,23 @@ public class Tool implements Serializable {
         this.dateBuy = dateBuy;
     }
 
-    public Integer getFee() {
-        return fee;
-    }
+	public Integer getFee() {
+		return fee;
+	}
 
-    public void setFee(Integer fee) {
-        this.fee = fee;
-    }
+	public void setFee(Integer fee) {
+		this.fee = fee;
+	}
 
-    @Override
+	public ToolStatus getStatus() {
+		return status;
+	}
+
+	public void setStatus(ToolStatus status) {
+		this.status = status;
+	}
+
+	@Override
     public int hashCode() {
         int hash = 0;
         hash += (toolId != null ? toolId.hashCode() : 0);

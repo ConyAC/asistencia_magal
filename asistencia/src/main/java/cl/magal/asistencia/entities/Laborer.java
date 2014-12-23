@@ -149,6 +149,9 @@ public class Laborer implements Serializable {
     @OneToMany(mappedBy="laborer",fetch=FetchType.EAGER,cascade = { CascadeType.PERSIST, CascadeType.MERGE },orphanRemoval=true )
     List<Absence> absences = new ArrayList<Absence>();
     
+    @OneToMany(targetEntity=Tool.class,fetch=FetchType.EAGER)
+    List<Tool> tool;
+    
     @PrePersist
     public void prePersist(){
     	if(firstname == null)
@@ -400,6 +403,14 @@ public class Laborer implements Serializable {
         	vacation.setLaborer(null);
         }
     }
+    	
+	public List<Tool> getTool() {
+		return tool;
+	}
+
+	public void setTool(List<Tool> tool) {
+		this.tool = tool;
+	}
 
 	public void addConstructionSite(ConstructionSite constructionSite) {
         if (!getConstructionSites().contains(constructionSite)) {

@@ -18,9 +18,14 @@ import org.tepi.filtertable.FilterTable;
 import cl.magal.asistencia.entities.ConstructionSite;
 import cl.magal.asistencia.entities.Laborer;
 import cl.magal.asistencia.entities.Team;
+import cl.magal.asistencia.entities.Tool;
 import cl.magal.asistencia.entities.User;
+import cl.magal.asistencia.entities.enums.Afp;
+import cl.magal.asistencia.entities.enums.Job;
+import cl.magal.asistencia.entities.enums.MaritalStatus;
 import cl.magal.asistencia.entities.enums.Permission;
 import cl.magal.asistencia.entities.enums.Status;
+import cl.magal.asistencia.entities.enums.ToolStatus;
 import cl.magal.asistencia.services.ConstructionSiteService;
 import cl.magal.asistencia.services.UserService;
 import cl.magal.asistencia.ui.AbstractWindowEditor;
@@ -42,12 +47,17 @@ import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.ComboBox;
+import com.vaadin.ui.DateField;
+import com.vaadin.ui.Field;
 import com.vaadin.ui.FormLayout;
+import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.TabSheet;
+import com.vaadin.ui.Table;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
@@ -324,6 +334,14 @@ public class LaborerAndTeamPanel extends Panel implements View {
 		return vl;
 	}
 	
+	protected VerticalLayout test1() {
+		return null;
+	}
+	
+	protected VerticalLayout test2() {
+		return null;
+	}
+	
 	protected VerticalLayout drawLaborer() {
 
 		VerticalLayout vl = new VerticalLayout();
@@ -381,8 +399,9 @@ public class LaborerAndTeamPanel extends Panel implements View {
 					return;
 				}
 				
-				BeanItem<Laborer> item = new BeanItem<Laborer>(new Laborer());
-				LaborerWindow userWindow = new LaborerWindow(item);
+				Laborer laborer = new Laborer();
+				BeanItem<Laborer> item = new BeanItem<Laborer>(laborer);
+				LaborerDialog userWindow = new LaborerDialog(item);
 				
 				userWindow.addListener(new AbstractWindowEditor.EditorSavedListener() {
 					
@@ -401,7 +420,6 @@ public class LaborerAndTeamPanel extends Panel implements View {
 				});
 		        
 		        UI.getCurrent().addWindow(userWindow);
-
 			}
 		});
 
@@ -419,7 +437,7 @@ public class LaborerAndTeamPanel extends Panel implements View {
 			@Override
 			public void itemClick(ItemClickEvent event) {
 				
-				LaborerWindow userWindow = new LaborerWindow((BeanItem) event.getItem());
+				LaborerDialog userWindow = new LaborerDialog((BeanItem) event.getItem());
 				
 				userWindow.addListener(new AbstractWindowEditor.EditorSavedListener() {
 					
@@ -450,6 +468,19 @@ public class LaborerAndTeamPanel extends Panel implements View {
 		vl.addComponent(table);
 		vl.setExpandRatio(table,1.0F);
 
+		return vl;
+	}
+	
+	
+	
+	protected VerticalLayout drawVac() {
+		VerticalLayout vl = new VerticalLayout();
+		vl.setSpacing(true);
+		vl.setMargin(true);
+		vl.setSizeFull();
+		
+		Label l = new Label("En construcción...");
+		vl.addComponent(l);
 		return vl;
 	}
 	

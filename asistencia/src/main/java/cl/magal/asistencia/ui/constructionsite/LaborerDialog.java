@@ -9,11 +9,13 @@ import org.springframework.context.annotation.Scope;
 
 import cl.magal.asistencia.entities.Absence;
 import cl.magal.asistencia.entities.Laborer;
+import cl.magal.asistencia.entities.Tool;
 import cl.magal.asistencia.entities.Vacation;
 import cl.magal.asistencia.entities.enums.AbsenceType;
 import cl.magal.asistencia.entities.enums.Afp;
 import cl.magal.asistencia.entities.enums.Job;
 import cl.magal.asistencia.entities.enums.MaritalStatus;
+import cl.magal.asistencia.entities.enums.ToolStatus;
 import cl.magal.asistencia.services.LaborerService;
 import cl.magal.asistencia.ui.AbstractWindowEditor;
 import cl.magal.asistencia.ui.OnValueChangeFieldFactory;
@@ -21,6 +23,7 @@ import cl.magal.asistencia.ui.OnValueChangeFieldFactory;
 import com.vaadin.data.Container;
 import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeNotifier;
+import com.vaadin.data.fieldgroup.BeanFieldGroup;
 import com.vaadin.data.util.BeanItem;
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.server.FontAwesome;
@@ -44,33 +47,197 @@ import com.vaadin.ui.VerticalLayout;
 
 @org.springframework.stereotype.Component
 @Scope("prototype")
-public class LaborerWindow extends AbstractWindowEditor {
+public class LaborerDialog extends AbstractWindowEditor {
 	
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = -8280001172496734091L;
-	transient Logger logger = LoggerFactory.getLogger(LaborerWindow.class);
+	transient Logger logger = LoggerFactory.getLogger(LaborerDialog.class);
+	
+	protected Button btnAddH, btnAddP;
+	BeanItemContainer<Tool> toolContainer = new BeanItemContainer<Tool>(Tool.class);
 	
 	@Autowired
 	LaborerService service;
 	
-	public LaborerWindow(BeanItem item){
+	public LaborerDialog(BeanItem item){
 		super(item);
 		setWidth("70%");
 	}
-	
 
 	@Override
 	protected Component createBody() {
 		
 		TabSheet tab = new TabSheet();
-		tab.addTab(drawInformation(),"Info");
+		
+		//tab de Resumen
+		//tab.addTab(drawInfo(),"Resumen"); -> no cuando se está creando.
+		//tab de Información
+		tab.addTab(drawInfo(),"Información");
+		//tab de vacaciones
 		tab.addTab(drawVacations(),"Vacaciones");
+		//tab de perstamos y herramientas
+		tab.addTab(drawPyH(),"Préstamos/Herramientas");
+		//tab de accidentes y licencias
 		tab.addTab(drawAccidentesLicencias(),"Accidentes/Licencias");
+		//tab de contratos y finiquitos
+		tab.addTab(drawCyF(),"Contratos/Finiquitos");
+		//tab de histórico
+		tab.addTab(drawHistorico(),"Histórico");
+		
 	    return tab;
 	}
 	
+	protected VerticalLayout drawPyH() {
+		VerticalLayout vl = new VerticalLayout();
+		vl.setSpacing(true);
+		vl.setMargin(true);
+		vl.setSizeFull();
+		
+		/*Herramientas*/
+		VerticalLayout vh = new VerticalLayout();
+		vh.setSizeFull();
+		
+		HorizontalLayout hl = new HorizontalLayout();
+		hl.setWidth("100%");
+		hl.setSpacing(true);		
+		vh.addComponent(hl);
+
+		final TextField herramienta = new TextField("Herramienta");
+		hl.addComponent(herramienta);
+		final TextField monto_h = new TextField("Monto");
+		hl.addComponent(monto_h);
+		final DateField fecha_h = new DateField("Fecha");
+		hl.addComponent(fecha_h);
+		final TextField cuota_h = new TextField("Cuota");
+		hl.addComponent(cuota_h);
+		final ComboBox estado_h = new ComboBox("Estado");
+		estado_h.setNullSelectionAllowed(false);
+		for(ToolStatus t : ToolStatus.values()){
+			estado_h.addItem(t);
+		}
+		hl.addComponent(estado_h);
+		
+		final Table table_h = new Table("Herramientas"){
+			{
+				setWidth("100%");				
+				addContainerProperty("name", String.class, "");
+				addContainerProperty("price", String.class, "");
+				addContainerProperty("dateBuy",String.class, "");
+				addContainerProperty("fee", String.class, "");
+				addContainerProperty("status", String.class, "");
+				setVisibleColumns("name","price","dateBuy", "fee", "status");
+				setColumnHeaders("Herramienta","Monto","Fecha", "Cuota", "Estado");
+
+				setPageLength(4);
+			}
+		};	
+		vh.addComponent(table_h);
+		
+		btnAddH = new Button(null,FontAwesome.PLUS);
+		hl.addComponent(btnAddH);
+		btnAddH.addClickListener(new Button.ClickListener() {
+
+			@Override
+			public void buttonClick(ClickEvent event) {
+				Tool t = new Tool();
+				t.setName(herramienta.getValue());
+				t.setPrice(Integer.valueOf(monto_h.getValue()));
+				t.setFee(Integer.valueOf(cuota_h.getValue()));
+				t.setStatus((ToolStatus)estado_h.getValue());
+				t.setDateBuy(fecha_h.getValue());
+				table_h.setContainerDataSource(toolContainer);
+				toolContainer.addBean(t);
+			}
+		});		
+		vh.setComponentAlignment(hl, Alignment.TOP_RIGHT);
+		
+		/*Préstamo*/
+		VerticalLayout vp = new VerticalLayout();
+		vp.setSizeFull();
+		
+		HorizontalLayout hl2 = new HorizontalLayout();
+		hl2.setWidth("100%");
+		hl2.setSpacing(true);		
+		vp.addComponent(hl2);
+		
+		TextField monto_p = new TextField("Monto");
+		hl2.addComponent(monto_p);
+		DateField fecha_p = new DateField("Fecha");
+		hl2.addComponent(fecha_p);
+		TextField cuota_p = new TextField("Cuota");
+		hl2.addComponent(cuota_p);
+		TextField estado_p = new TextField("Estado");
+		hl2.addComponent(estado_p);
+		
+		btnAddP = new Button(null,FontAwesome.PLUS);
+		hl2.addComponent(btnAddP);
+		btnAddP.addClickListener(new Button.ClickListener() {
+
+			@Override
+			public void buttonClick(ClickEvent event) {
+//				final ConstructionSite cs = item.getBean();
+//				if(cs == null){
+//					Notification.show("Debe seleccionar una obra",Type.ERROR_MESSAGE);
+//					return;
+//				}
+			}
+		});
+		final Table table_p = new Table("Préstamos"){
+			{
+				setWidth("100%");				
+				addContainerProperty("monto", String.class, "");
+				addContainerProperty("fecha", String.class, "");
+				addContainerProperty("cuota", String.class, "");
+				addContainerProperty("estado", String.class, "");
+				setVisibleColumns("monto","fecha", "cuota", "estado");
+				setColumnHeaders("Monto","Fecha", "Cuota", "Estado");
+				
+				setPageLength(4);
+			}
+		};
+		vp.addComponent(table_p);
+		vp.setComponentAlignment(hl2, Alignment.TOP_RIGHT);
+		
+		vl.addComponent(vh);
+		vl.addComponent(vp);
+		
+		return vl;
+	}
+	
+	protected VerticalLayout drawAyL() {
+		VerticalLayout vl = new VerticalLayout();
+		vl.setSpacing(true);
+		vl.setMargin(true);
+		vl.setSizeFull();
+		
+		Label l = new Label("En construcción...");
+		vl.addComponent(l);
+		return vl;
+	}
+	
+	protected VerticalLayout drawCyF() {
+		VerticalLayout vl = new VerticalLayout();
+		vl.setSpacing(true);
+		vl.setMargin(true);
+		vl.setSizeFull();
+		
+		Label l = new Label("En construcción...");
+		vl.addComponent(l);
+		return vl;
+	}
+	
+	protected VerticalLayout drawHistorico() {
+		VerticalLayout vl = new VerticalLayout();
+		vl.setSpacing(true);
+		vl.setMargin(true);
+		vl.setSizeFull();
+		
+		Label l = new Label("En construcción...");
+		vl.addComponent(l);
+		return vl;
+	}
 	
 	private Component drawAccidentesLicencias() {
 		return new VerticalLayout(){
@@ -232,6 +399,68 @@ public class LaborerWindow extends AbstractWindowEditor {
 				addComponent(table);
 			}
 		};
+	}
+	
+	protected VerticalLayout drawInfo() {
+		VerticalLayout vl = new VerticalLayout();
+		vl.setSpacing(true);
+		vl.setMargin(true);
+		vl.setSizeFull();
+				
+		GridLayout detalleObrero = new GridLayout(3,5);
+		detalleObrero.setMargin(true);
+		detalleObrero.setSpacing(true);
+		vl.addComponent(detalleObrero);
+						
+		final BeanFieldGroup<Laborer> fieldGroup = new BeanFieldGroup<Laborer>(Laborer.class);
+        fieldGroup.setItemDataSource(new BeanItem<Laborer>(new Laborer()));
+
+        // Loop through the properties, build fields for them and add the fields
+        // to this UI
+		 for (Object propertyId : new String[]{"rut","firstname","secondname","lastname", "secondlastname", "dateBirth", "address", "mobileNumber", "phone", "dateAdmission", "job", "afp", "maritalStatus"}) {
+        	if(propertyId.equals("laborerId") || propertyId.equals("constructionSites") || propertyId.equals("contractId") || propertyId.equals("teamId"))
+        		;
+        	else if(propertyId.equals("afp")){
+        		ComboBox afpField = new ComboBox("AFP");
+        		afpField.setNullSelectionAllowed(false);
+    			for(Afp a : Afp.values()){
+    				afpField.addItem(a);
+    			}
+    			detalleObrero.addComponent(afpField);
+    			fieldGroup.bind(afpField, "afp");   
+        		detalleObrero.setComponentAlignment(afpField, Alignment.MIDDLE_CENTER);
+        	}else if(propertyId.equals("job")){
+        		ComboBox jobField = new ComboBox("Oficio");
+        		jobField.setNullSelectionAllowed(false);
+    			for(Job j : Job.values()){
+    				jobField.addItem(j);
+    			}
+    			detalleObrero.addComponent(jobField);
+    			fieldGroup.bind(jobField, "job");    
+        		detalleObrero.setComponentAlignment(jobField, Alignment.MIDDLE_CENTER);
+        	}else if(propertyId.equals("maritalStatus")){
+        		ComboBox msField = new ComboBox("Estado Civil");
+        		msField.setNullSelectionAllowed(false);
+    			for(MaritalStatus ms : MaritalStatus.values()){
+    				msField.addItem(ms);
+    			}
+    			detalleObrero.addComponent(msField);
+    			fieldGroup.bind(msField, "maritalStatus");   
+        		detalleObrero.setComponentAlignment(msField, Alignment.MIDDLE_CENTER);
+        	}else{        		
+        		String t = tradProperty(propertyId);
+        		Field field = fieldGroup.buildAndBind(t, propertyId);
+        		if(field instanceof TextField){
+        			((TextField)field).setNullRepresentation("");
+        		}
+        		detalleObrero.addComponent(field);
+        		detalleObrero.setComponentAlignment(field, Alignment.MIDDLE_CENTER);
+        	}
+        }
+        
+        detalleObrero.setWidth("100%");
+		        
+		return vl;
 	}
 
 
