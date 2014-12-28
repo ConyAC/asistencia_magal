@@ -141,7 +141,7 @@ public class Laborer implements Serializable {
     @Column(name="photo")
     private String photo;
     
-    @ManyToMany(mappedBy="laborers",fetch=FetchType.EAGER,cascade = { CascadeType.PERSIST, CascadeType.MERGE })
+    @ManyToMany(mappedBy="laborers")//,fetch=FetchType.EAGER,cascade = { CascadeType.PERSIST, CascadeType.MERGE })
     List<ConstructionSite> constructionSites;
     
     @OneToMany(mappedBy="laborer",fetch=FetchType.EAGER,cascade = { CascadeType.PERSIST, CascadeType.MERGE },orphanRemoval=true )
@@ -149,6 +149,9 @@ public class Laborer implements Serializable {
     
     @OneToMany(mappedBy="laborer",fetch=FetchType.EAGER,cascade = { CascadeType.PERSIST, CascadeType.MERGE },orphanRemoval=true )
     List<Absence> absences = new ArrayList<Absence>();
+    
+    @OneToMany(mappedBy="laborer",fetch=FetchType.EAGER,cascade = { CascadeType.PERSIST, CascadeType.MERGE },orphanRemoval=true )
+    List<Accident> accidents = new ArrayList<Accident>();
     
     @OneToMany(targetEntity=Tool.class,fetch=FetchType.EAGER)
     List<Tool> tool;
@@ -467,6 +470,28 @@ public class Laborer implements Serializable {
         	absence.setLaborer(null);
         }
     }
+    
+	public List<Accident> getAccidents() {
+		return accidents;
+	}
+
+	public void setAccidents(List<Accident> accidents) {
+		this.accidents = accidents;
+	}
+
+	public void addAccident(Accident accident) {
+		if (!getAccidents().contains(accident)) {
+        	getAccidents().add(accident);
+        	accident.setLaborer(this);
+        }
+	}
+	
+	public void removeAccident(Accident accident) {
+        if (getAccidents().contains(accident)) {
+        	getAccidents().remove(accident);
+        	accident.setLaborer(null);
+        }
+    }
 
 	@Override
     public int hashCode() {
@@ -492,5 +517,7 @@ public class Laborer implements Serializable {
     public String toString() {
         return "jpa.magal.entities.Laborer[ laborerId=" + laborerId + " ]";
     }
+
+
     
 }

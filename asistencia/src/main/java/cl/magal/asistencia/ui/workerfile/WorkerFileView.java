@@ -1,6 +1,8 @@
 package cl.magal.asistencia.ui.workerfile;
 
 
+import java.util.List;
+
 import javax.annotation.PostConstruct;
 
 import org.slf4j.Logger;
@@ -19,7 +21,9 @@ import cl.magal.asistencia.entities.enums.Job;
 import cl.magal.asistencia.entities.enums.MaritalStatus;
 import cl.magal.asistencia.services.LaborerService;
 import cl.magal.asistencia.ui.MagalUI;
+import cl.magal.asistencia.ui.workerfile.vo.HistoryVO;
 
+import com.vaadin.data.Property;
 import com.vaadin.data.fieldgroup.BeanFieldGroup;
 import com.vaadin.data.fieldgroup.FieldGroup.CommitException;
 import com.vaadin.data.util.BeanItem;
@@ -29,6 +33,7 @@ import com.vaadin.event.ItemClickEvent.ItemClickListener;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.FontAwesome;
+import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
@@ -39,7 +44,8 @@ import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Notification.Type;
-import com.vaadin.ui.Panel;
+import com.vaadin.ui.TabSheet;
+import com.vaadin.ui.Table;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
@@ -61,10 +67,11 @@ public class WorkerFileView extends HorizontalLayout implements View {
 	@Autowired
 	private transient LaborerService service;
 
-//	VerticalLayout detalleObrero;
 	GridLayout detalleObrero;
 	FilterTable tableObrero;
-
+	Label label1,label2;
+	BeanItemContainer<HistoryVO> historyContainer = new BeanItemContainer<HistoryVO>(HistoryVO.class);
+	
 	public WorkerFileView(){
 		
 		setSizeFull();
@@ -72,24 +79,63 @@ public class WorkerFileView extends HorizontalLayout implements View {
 		addComponent(obreros);
 		setExpandRatio(obreros, 0.2F);
 		
-		Panel panel = new Panel("Ficha Trabajador");
-		detalleObrero = drawDetalleObrero();	
-		panel.setContent(detalleObrero);
-//		panel.setWidth("1200px");
-//		panel.setHeight("620px");
-//		panel.getContent().setSizeUndefined();
-		addComponent(panel);
-		setComponentAlignment(panel, Alignment.TOP_CENTER);
-		setExpandRatio(panel, 0.8F);		
+		TabSheet tab = new TabSheet();
+		
+		tab.addTab(drawOverview(),"Resumen");
+		tab.addTab(drawDetalleObrero(),"Ficha");
+		
+		addComponent(tab);
+		setExpandRatio(tab, 0.8F);		
 	}
 	
-	private GridLayout drawDetalleObrero() {
-//		VerticalLayout vl = new VerticalLayout();
-		GridLayout vl = new GridLayout(2,5);
+	private com.vaadin.ui.Component drawOverview() {
+		
+		historyContainer.addNestedContainerProperty("constructionSite.name");
+		
+		VerticalLayout vl = new VerticalLayout();
 		vl.setMargin(true);
-		vl.addComponent(new Label("Seleccione un obrero para ver su información"));
+		vl.setSizeFull();
+		
+		HorizontalLayout hl = new HorizontalLayout();
+		hl.setSizeFull();
+		vl.addComponent(hl);
+		
+		label1 = new Label("",ContentMode.HTML);
+		hl.addComponent(label1);
+		hl.setExpandRatio(label1,0.8f);
+		
+		label2 = new Label("",ContentMode.HTML);
+		hl.addComponent(label2);
+		hl.setExpandRatio(label2,0.2f);
+		
+		Table table = new Table();
+		table.addGeneratedColumn("endingDate", new Table.ColumnGenerator() {
+			
+			@Override
+			public Object generateCell(Table source, Object itemId, Object columnId) {
+				Property endingDateProp = source.getItem(itemId).getItemProperty(columnId);
+				if(endingDateProp.getValue() == null)
+						return "Sin fecha de termino";
+				else 
+					return endingDateProp.getValue();
+			}
+		});
+		
+		table.setContainerDataSource(historyContainer);
+		table.setWidth("100%");
+		table.setVisibleColumns("constructionSite.name","job","averageWage","reward","numberOfAccidents","endingDate");
+		table.setColumnHeaders("Obra","Rol","Jornal Promedio","Premio","N° Accidentes","Fecha Termino");
+
+		vl.addComponent(table);
 		
 		return vl;
+	}
+
+	private GridLayout drawDetalleObrero() {
+		detalleObrero = new GridLayout(2,5);
+		detalleObrero.setMargin(true);
+		detalleObrero.addComponent(new Label("Seleccione un obrero para ver su información"));
+		return detalleObrero;
 	}
 	
 	
@@ -104,12 +150,22 @@ public class WorkerFileView extends HorizontalLayout implements View {
 		
 		HorizontalLayout hl = new HorizontalLayout();
 		hl.setSpacing(true);
-//		detalleObrero.addComponent(hl);
 		detalleObrero.addComponent(hl,0,0,1,0);
 		detalleObrero.setComponentAlignment(hl, Alignment.TOP_RIGHT);
 		
+		//define la información de resumen
+		Laborer laborer = laborerItem.getBean();
+        //obtiene las obras historicas
+        List<HistoryVO> history = service.getLaborerHistory(laborer);
+        historyContainer.removeAllItems();
+        historyContainer.addAll(history);
+        
+		label1.setValue("<h1><b>"+laborer.getRut()+" : "+laborer.getFullname()+"</b></h1>");
+		label2.setValue("<h1 style='margin-bottom: 1px;' ><b>Activo </h1></b><span >"+laborer.getConstructionSites().get(0).getName()+"</span>");
+		
 		final BeanFieldGroup<Laborer> fieldGroup = new BeanFieldGroup<Laborer>(Laborer.class);
         fieldGroup.setItemDataSource(laborerItem);
+        
 
         //agrega un boton que hace el commit
         Button add = new Button(null,new Button.ClickListener() {
@@ -129,8 +185,6 @@ public class WorkerFileView extends HorizontalLayout implements View {
         	setIcon(FontAwesome.SAVE);
         }};
         hl.addComponent(add);
-        //detalleObrero.addComponent(add);
-        //detalleObrero.setComponentAlignment(add, Alignment.TOP_RIGHT);
         
 		//boton para imprimir
 		Button btnPrint = new Button(null,new Button.ClickListener() {
@@ -311,6 +365,8 @@ public class WorkerFileView extends HorizontalLayout implements View {
 	public void enter(ViewChangeEvent event) {
 		((MagalUI)UI.getCurrent()).setBackVisible(false);
 		((MagalUI)UI.getCurrent()).highlightMenuItem(NAME);
+		//setea el nombre de la sección
+		((MagalUI)UI.getCurrent()).getTitle().setValue("<h1>Histórico</h1>");
 		
 		reloaData();		
 	}

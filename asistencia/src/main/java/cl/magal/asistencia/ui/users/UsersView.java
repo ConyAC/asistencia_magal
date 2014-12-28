@@ -307,6 +307,7 @@ public class UsersView extends HorizontalLayout implements View {
 	public void enter(ViewChangeEvent event) {
 		((MagalUI)UI.getCurrent()).setBackVisible(false);
 		((MagalUI)UI.getCurrent()).highlightMenuItem(NAME);
+		((MagalUI)UI.getCurrent()).getTitle().setValue("<h1>Usuarios</h1>");
 		reloaData();		
 	}
 	

@@ -1,13 +1,18 @@
 package cl.magal.asistencia.ui.constructionsite;
 
 import java.util.Collection;
+import java.util.List;
+
+import javax.annotation.PostConstruct;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 
 import cl.magal.asistencia.entities.Absence;
+import cl.magal.asistencia.entities.Accident;
+import cl.magal.asistencia.entities.AccidentLevel;
+import cl.magal.asistencia.entities.ConstructionSite;
 import cl.magal.asistencia.entities.Laborer;
 import cl.magal.asistencia.entities.Tool;
 import cl.magal.asistencia.entities.Vacation;
@@ -19,12 +24,16 @@ import cl.magal.asistencia.entities.enums.ToolStatus;
 import cl.magal.asistencia.services.LaborerService;
 import cl.magal.asistencia.ui.AbstractWindowEditor;
 import cl.magal.asistencia.ui.OnValueChangeFieldFactory;
+import cl.magal.asistencia.ui.workerfile.vo.HistoryVO;
 
 import com.vaadin.data.Container;
+import com.vaadin.data.Container.Filter;
 import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeNotifier;
 import com.vaadin.data.util.BeanItem;
 import com.vaadin.data.util.BeanItemContainer;
+import com.vaadin.data.util.filter.Compare;
+import com.vaadin.data.util.filter.Not;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.ui.AbstractField;
 import com.vaadin.ui.Alignment;
@@ -44,8 +53,6 @@ import com.vaadin.ui.Table;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
 
-@org.springframework.stereotype.Component
-@Scope("prototype")
 public class LaborerDialog extends AbstractWindowEditor {
 	
 	/**
@@ -55,14 +62,36 @@ public class LaborerDialog extends AbstractWindowEditor {
 	transient Logger logger = LoggerFactory.getLogger(LaborerDialog.class);
 	
 	protected Button btnAddH, btnAddP;
-	BeanItemContainer<Tool> toolContainer = new BeanItemContainer<Tool>(Tool.class);
+	BeanItemContainer<Tool> toolContainer= new BeanItemContainer<Tool>(Tool.class);
+	BeanItemContainer<HistoryVO> historyContainer = new BeanItemContainer<HistoryVO>(HistoryVO.class);
+	
+	ConstructionSite constructionSite;
 	
 	@Autowired
 	LaborerService service;
 	
-	public LaborerDialog(BeanItem item){
+	public LaborerDialog(BeanItem<Laborer> item,ConstructionSite constructionSite, LaborerService service ){
 		super(item);
+		if(constructionSite == null )
+			throw new RuntimeException("Error al crear el dialgo, la obra no puede ser nula.");
+		if(service == null )
+			throw new RuntimeException("Error al crear el dialgo, el servicio de trabajadores no puede ser nulo.");
+		
+		this.constructionSite = constructionSite;
+		this.service = service;
 		setWidth("70%");
+
+		init();
+	}
+	
+	public void init(){
+		super.init();
+		List<HistoryVO> history = service.getLaborerHistory((Laborer) getItem().getBean());
+        historyContainer.addAll(history);
+		historyContainer.addNestedContainerProperty("constructionSite.name");
+		Filter filter = new Compare.Equal("constructionSite", constructionSite);
+		//filtra la obra en la que se encuentra
+		historyContainer.addContainerFilter(new Not(filter));
 	}
 
 	@Override
@@ -79,7 +108,9 @@ public class LaborerDialog extends AbstractWindowEditor {
 		//tab de perstamos y herramientas
 		tab.addTab(drawPyH(),"Préstamos/Herramientas");
 		//tab de accidentes y licencias
-		tab.addTab(drawAccidentesLicencias(),"Accidentes/Licencias");
+		tab.addTab(drawAccidentes(),"Accidentes");
+		//tab de accidentes y licencias
+		tab.addTab(drawLicencias(),"Licencias");
 		//tab de contratos y finiquitos
 		tab.addTab(drawCyF(),"Contratos/Finiquitos");
 		//tab de histórico
@@ -228,17 +259,134 @@ public class LaborerDialog extends AbstractWindowEditor {
 	}
 	
 	protected VerticalLayout drawHistorico() {
+		
 		VerticalLayout vl = new VerticalLayout();
 		vl.setSpacing(true);
 		vl.setMargin(true);
 		vl.setSizeFull();
 		
-		Label l = new Label("En construcción...");
-		vl.addComponent(l);
+		Table table = new Table();
+		table.addGeneratedColumn("endingDate", new Table.ColumnGenerator() {
+			
+			@Override
+			public Object generateCell(Table source, Object itemId, Object columnId) {
+				Property endingDateProp = source.getItem(itemId).getItemProperty(columnId);
+				if(endingDateProp.getValue() == null)
+						return "Sin fecha de termino";
+				else 
+					return endingDateProp.getValue();
+			}
+		});
+		
+		table.setContainerDataSource(historyContainer);
+		table.setWidth("100%");
+		historyContainer.addNestedContainerProperty("constructionSite.name");
+		table.setVisibleColumns("constructionSite.name","job","averageWage","reward","numberOfAccidents","endingDate");
+		table.setColumnHeaders("Obra","Rol","Jornal Promedio","Premio","N° Accidentes","Fecha Termino");
+
+		vl.addComponent(table);
+		
 		return vl;
 	}
 	
-	private Component drawAccidentesLicencias() {
+	private Component drawAccidentes() {
+		return new VerticalLayout(){
+			{
+				final BeanItemContainer<Accident> beanItem = new BeanItemContainer<Accident>(Accident.class);
+				List<Accident> accidents = (List<Accident>)getItem().getItemProperty("accidents").getValue();
+				if(accidents != null && logger != null )
+					logger.debug("accidents {}",accidents);
+				beanItem.addAll(accidents );
+				
+				setMargin(true);
+				setSpacing(true);
+				final Table table = new Table();
+				
+				addComponent(new GridLayout(3,2){
+					{
+						setWidth("100%");
+						addComponent(new Label(""),0,0);
+						
+						addComponent(new Label(""),0,1);
+						
+						addComponent(new Button(null,new Button.ClickListener() {
+							
+							@Override
+							public void buttonClick(ClickEvent event) {
+								Laborer laborer = (Laborer) getItem().getBean();
+								if(laborer == null ) throw new RuntimeException("El trabajador no es válido.");
+								Accident accident = new Accident();
+								laborer.addAccident(accident);
+								beanItem.addBean(accident);
+								
+							}
+						}){{setIcon(FontAwesome.PLUS);}},2,0);
+						
+					}
+				});
+				table.setPageLength(5);
+				table.setWidth("100%");
+				table.setContainerDataSource(beanItem);
+				table.setImmediate(true);
+				
+				table.addGeneratedColumn("total", new Table.ColumnGenerator() {
+					
+					@Override
+					public Object generateCell(Table source, Object itemId, Object columnId) {
+						
+						final BeanItem<?> item = (BeanItem<?>) source.getItem(itemId);
+						final Label label  = new Label(""+ source.getContainerProperty(itemId, columnId).getValue());
+						Property.ValueChangeListener listener = new Property.ValueChangeListener() {
+					            @Override
+					            public void valueChange(Property.ValueChangeEvent event) {
+					                label.setValue(((Accident) item.getBean()).getTotal()+"");
+					            }
+					        };
+						for (String pid: new String[]{"fromDate", "toDate"})
+				            ((ValueChangeNotifier)item.getItemProperty(pid)).addValueChangeListener(listener);
+						
+						return label; 
+					}
+				});
+				
+				table.setTableFieldFactory(new DefaultFieldFactory(){
+					
+					public Field<?> createField(final Container container,
+							final Object itemId,Object propertyId,com.vaadin.ui.Component uiContext) {
+						Field<?> field = null; 
+						if( propertyId.equals("description") ){
+							field = new TextField();
+							((TextField)field).setNullRepresentation("");
+						}
+
+						else if(  propertyId.equals("fromDate") || propertyId.equals("toDate") ){
+							field = new DateField();
+						}
+						else if(  propertyId.equals("accidentLevel") ){
+							field = new ComboBox();
+							field.setPropertyDataSource(container.getContainerProperty(itemId, propertyId));
+							for(AccidentLevel absenceType : AccidentLevel.values()){
+								((ComboBox)field).addItem(absenceType);
+							}
+							
+						} else {
+							return null;
+						}
+						
+						((AbstractField<?>)field).setImmediate(true);
+						return field;
+					}
+				});
+				
+				table.setVisibleColumns("accidentLevel","description","fromDate","toDate","total");
+				table.setColumnHeaders("Gravedad","Descripción","Desde","Hasta","Total días");
+				table.setEditable(true);				
+				addComponent(table);
+			}
+		};
+	}
+	
+	private Component drawLicencias() {
 		return new VerticalLayout(){
 			{
 				final BeanItemContainer<Absence> beanItem = new BeanItemContainer<Absence>(Absence.class);

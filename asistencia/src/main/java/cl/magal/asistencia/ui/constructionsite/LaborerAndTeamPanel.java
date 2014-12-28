@@ -404,8 +404,8 @@ public class LaborerAndTeamPanel extends Panel implements View {
 				}
 				
 				Laborer laborer = new Laborer();
-				BeanItem<Laborer> item = new BeanItem<Laborer>(laborer);
-				LaborerDialog userWindow = new LaborerDialog(item);
+				BeanItem<Laborer> laborerItem = new BeanItem<Laborer>(laborer);
+				LaborerDialog userWindow = new LaborerDialog(laborerItem,item.getBean(),laborerService);
 				
 				userWindow.addListener(new AbstractWindowEditor.EditorSavedListener() {
 					
@@ -441,7 +441,7 @@ public class LaborerAndTeamPanel extends Panel implements View {
 			@Override
 			public void itemClick(ItemClickEvent event) {
 				
-				LaborerDialog userWindow = new LaborerDialog((BeanItem) event.getItem());
+				LaborerDialog userWindow = new LaborerDialog((BeanItem) event.getItem(),item.getBean(),laborerService);
 				
 				userWindow.addListener(new AbstractWindowEditor.EditorSavedListener() {
 					

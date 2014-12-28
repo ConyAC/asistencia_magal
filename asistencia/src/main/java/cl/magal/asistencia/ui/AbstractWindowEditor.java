@@ -56,10 +56,8 @@ public abstract class AbstractWindowEditor extends Window implements ClickListen
 	}
 	
 	protected AbstractWindowEditor(BeanItem item) {
-		
 		if(item == null )
 			throw new RuntimeException("Error al crear el dialgo, el item no puede ser nulo.");
-		
 		this.item = item;
 		binder = new BeanFieldGroup(item.getBean().getClass());
 		getBinder().setItemDataSource(item);
@@ -89,7 +87,10 @@ public abstract class AbstractWindowEditor extends Window implements ClickListen
 		root.setComponentAlignment(footer, Alignment.MIDDLE_RIGHT);
 		
 		setContent(root);
-		
+//		setWindowContent(createBody());
+	}
+	
+	public void init(){
 		setWindowContent(createBody());
 	}
 	

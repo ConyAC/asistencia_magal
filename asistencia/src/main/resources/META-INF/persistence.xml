@@ -3,6 +3,7 @@
 	<persistence-unit name="persistenceUnit" transaction-type="RESOURCE_LOCAL">
 	    <provider>org.hibernate.ejb.HibernatePersistence</provider>
 	    <class>cl.magal.asistencia.entities.Absence</class>
+	    <class>cl.magal.asistencia.entities.Accident</class>
 	    <class>cl.magal.asistencia.entities.AdvancePaymentConfigurations</class>
 	    <class>cl.magal.asistencia.entities.AdvancePaymentItem</class>
 	    <class>cl.magal.asistencia.entities.AfpAndInsuranceConfigurations</class>
@@ -26,6 +27,7 @@
 	    <class>cl.magal.asistencia.entities.Vacation</class>
 	    <class>cl.magal.asistencia.entities.WageConfigurations</class>
 	    <class>cl.magal.asistencia.entities.converter.AbsenceTypeConverter</class>
+	    <class>cl.magal.asistencia.entities.converter.AccidentLevelConverter</class>
 	    <class>cl.magal.asistencia.entities.converter.AfpConverter</class>
 	    <class>cl.magal.asistencia.entities.converter.IsapreConverter</class>
 	    <class>cl.magal.asistencia.entities.converter.JobConverter</class>
@@ -33,8 +35,8 @@
 	    <class>cl.magal.asistencia.entities.converter.NationalityConverter</class>
 	    <class>cl.magal.asistencia.entities.converter.PermissionConverter</class>
 	    <class>cl.magal.asistencia.entities.converter.StatusConverter</class>
-	    <class>cl.magal.asistencia.entities.converter.UserStatusConverter</class>
 	    <class>cl.magal.asistencia.entities.converter.ToolStatusConverter</class>
+	    <class>cl.magal.asistencia.entities.converter.UserStatusConverter</class>
 	    <properties>
 	        <property name="hibernate.dialect" value="org.hibernate.dialect.H2Dialect"/>
 	        <property name="hibernate.hbm2ddl.auto" value="create-drop"/>

@@ -9,6 +9,7 @@ import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 
 import cl.magal.asistencia.entities.ConstructionSite;
+import cl.magal.asistencia.entities.Laborer;
 
 public interface ConstructionSiteRepository extends PagingAndSortingRepository<ConstructionSite, Long> {
 
@@ -40,5 +41,7 @@ public interface ConstructionSiteRepository extends PagingAndSortingRepository<C
 	
 	@Query(value="SELECT cs.* FROM construction_site cs left join user_constructionsite uc on uc.construction_siteId = cs.construction_siteId WHERE uc.userId = :id " , nativeQuery=true)
 	List<ConstructionSite> findByUser(@Param("id")Long userId);
+
+	List<ConstructionSite> findByLaborers(Laborer laborer);
 
 }

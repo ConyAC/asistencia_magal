@@ -9,11 +9,25 @@ import com.vaadin.server.VaadinSession;
 import com.vaadin.ui.UI;
 
 public class SecurityHelper {
+	
+	private static User getUser(){
+		return (User) VaadinSession.getCurrent().getAttribute(
+				Constants.SESSION_USUARIO);
+	}
+	
+	public static boolean isLogged(){
+		return getUser() == null;
+	}
 
 	public static boolean hasConstructionSite(ConstructionSite cs){
 
-		User usuario = (User) VaadinSession.getCurrent().getAttribute(
-				"usuario");
+		User usuario = getUser();
+		//si el usuario el nulo, lo rederidige al login
+		if(usuario == null ) {
+			UI.getCurrent().getNavigator().navigateTo(LoginView.NAME);
+			return false;
+		}
+		
 		if(usuario.getCs()!= null && usuario.getCs().contains(cs) ){
 			return true;
 		}
@@ -25,7 +39,7 @@ public class SecurityHelper {
 		if(permissions == null)
 			return true;
 
-		User usuario = (User) VaadinSession.getCurrent().getAttribute(Constants.SESSION_USUARIO);
+		User usuario = getUser();
 		//si el usuario el nulo, lo rederidige al login
 		if(usuario == null ) {
 			UI.getCurrent().getNavigator().navigateTo(LoginView.NAME);
@@ -44,7 +58,7 @@ public class SecurityHelper {
 	}
 
 	public static boolean hasMenu(String text) {
-		User usuario = (User) VaadinSession.getCurrent().getAttribute(Constants.SESSION_USUARIO);
+		User usuario = getUser();
 		//si el usuario el nulo, lo rederidige al login
 		if(usuario == null ) 
 			return true;

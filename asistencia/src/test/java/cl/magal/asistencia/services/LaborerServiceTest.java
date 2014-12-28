@@ -13,9 +13,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import cl.magal.asistencia.entities.Absence;
+import cl.magal.asistencia.entities.Accident;
+import cl.magal.asistencia.entities.AccidentLevel;
 import cl.magal.asistencia.entities.ConstructionSite;
 import cl.magal.asistencia.entities.Laborer;
 import cl.magal.asistencia.entities.Vacation;
+import cl.magal.asistencia.entities.enums.AbsenceType;
 import cl.magal.asistencia.helpers.ConstructionSiteHelper;
 import cl.magal.asistencia.helpers.LaborerHelper;
 
@@ -115,6 +119,204 @@ public class LaborerServiceTest {
 		LaborerHelper.verify(l,dbu2);
 		
 		assertTrue("La lista de vacaciones debe ser vacia",dbu2.getVacations().isEmpty());
+		
+	}
+	
+	/**
+	 * Agregar una vacación
+	 */
+	@Test
+	public void testAddAccident() {
+		
+		Laborer l = LaborerHelper.newLaborer();
+		DateTime dt = new DateTime();
+		
+		Accident accident = new Accident();
+		accident.setAccidentLevel(AccidentLevel.SERIOUS);
+		accident.setFromDate(dt.toDate());
+		accident.setToDate(dt.plusDays(5).toDate());
+		accident.setLaborer(l);
+		
+		ConstructionSite cs = ConstructionSiteHelper.newConstrutionSite();
+		constructionService.save(cs);
+		
+		l.addAccident(accident);
+		
+		service.saveLaborer(l);
+		LaborerHelper.verify(l);
+		
+		Laborer dbu = service.findLaborer(l.getLaborerId());
+		
+		LaborerHelper.verify(dbu);		
+		LaborerHelper.verify(l,dbu);
+		
+		assertTrue("La lista de ausencias por accidentes no puede ser vacia",!dbu.getAccidents().isEmpty());
+		
+		assertTrue("La lista de ausencias por accidentes debe ser del tipo MEDICAL_LEAVE",dbu.getAccidents().get(0).getAccidentLevel() == AccidentLevel.SERIOUS);
+		
+	}
+	
+	/**
+	 * Test que prueba que al guardar nuevamente un trabajador, no se agregue ningún accidente demás
+	 */
+	@Test
+	public void testAddSameAccident() {
+		
+		Laborer l = LaborerHelper.newLaborer();
+		DateTime dt = new DateTime();
+		
+		Accident accident = new Accident();
+		accident.setAccidentLevel(AccidentLevel.SERIOUS);
+		accident.setFromDate(dt.toDate());
+		accident.setToDate(dt.plusDays(5).toDate());
+		accident.setLaborer(l);
+		
+		ConstructionSite cs = ConstructionSiteHelper.newConstrutionSite();
+		constructionService.save(cs);
+		
+		l.addAccident(accident);
+		
+		service.saveLaborer(l);
+		LaborerHelper.verify(l);
+		
+		Laborer dbu = service.findLaborer(l.getLaborerId());
+		
+		LaborerHelper.verify(dbu);		
+		LaborerHelper.verify(l,dbu);
+		
+		assertTrue("La lista de ausencias por accidentes no puede ser vacia",!dbu.getAccidents().isEmpty());
+		assertTrue("La lista de ausencias por accidentes solo debe tener 1 elemento",dbu.getAccidents().size() == 1 );
+		assertTrue("La lista de ausencias por accidentes debe ser del tipo MEDICAL_LEAVE",dbu.getAccidents().get(0).getAccidentLevel() == AccidentLevel.SERIOUS);
+		service.saveLaborer(dbu);
+		
+		// si se guarda de nuevo no deberia agregar un elemento
+		Laborer dbu2 = service.findLaborer(l.getLaborerId());
+		
+		LaborerHelper.verify(dbu2);		
+		LaborerHelper.verify(l,dbu2);
+		
+		assertTrue("La lista de ausencias por accidentes no puede ser vacia",!dbu2.getAccidents().isEmpty());
+		assertTrue("La lista de ausencias por accidentes solo debe tener 1 elemento",dbu2.getAccidents().size() == 1 );
+		assertTrue("La lista de ausencias por accidentes debe ser del tipo MEDICAL_LEAVE",dbu2.getAccidents().get(0).getAccidentLevel() == AccidentLevel.SERIOUS);
+		
+	}
+	
+	/**
+	 * Agregar una vacación
+	 */
+	@Test
+	public void testRemoveAccident() {
+		
+		Laborer l = LaborerHelper.newLaborer();
+		DateTime dt = new DateTime();
+		
+		Accident accident = new Accident();
+		accident.setAccidentLevel(AccidentLevel.NOT_SERIOUS);
+		accident.setFromDate(dt.toDate());
+		accident.setToDate(dt.plusDays(5).toDate());
+		accident.setLaborer(l);
+		
+		ConstructionSite cs = ConstructionSiteHelper.newConstrutionSite();
+		constructionService.save(cs);
+		
+		l.addAccident(accident);
+		
+		service.saveLaborer(l);
+		LaborerHelper.verify(l);
+		
+		Laborer dbu = service.findLaborer(l.getLaborerId());
+		
+		LaborerHelper.verify(dbu);		
+		LaborerHelper.verify(l,dbu);
+		
+		assertTrue("La lista de ausencias por accidentes no puede ser vacia",!dbu.getAccidents().isEmpty());
+		
+		assertTrue("La lista de ausencias por accidentes debe ser del tipo MEDICAL_LEAVE",dbu.getAccidents().get(0).getAccidentLevel() == AccidentLevel.NOT_SERIOUS);
+		
+		dbu.getAccidents().clear();
+		service.saveLaborer(dbu);
+		
+		Laborer dbu2 = service.findLaborer(l.getLaborerId());
+		
+		LaborerHelper.verify(dbu2);		
+		LaborerHelper.verify(l,dbu2);
+		
+		assertTrue("La lista de vacaciones debe ser vacia",dbu2.getAccidents().isEmpty());
+		
+	}
+	
+	/**
+	 * Agregar una ausencia del tipo licencia
+	 */
+	@Test
+	public void testAddMedicalLicence() {
+		
+		Laborer l = LaborerHelper.newLaborer();
+		DateTime dt = new DateTime();
+		
+		Absence absence = new Absence();
+		absence.setAbsenceType(AbsenceType.MEDICAL_LEAVE);
+		absence.setFromDate(dt.toDate());
+		absence.setToDate(dt.plusDays(5).toDate());
+		absence.setLaborer(l);
+		
+		ConstructionSite cs = ConstructionSiteHelper.newConstrutionSite();
+		constructionService.save(cs);
+		
+		l.addAbsence(absence);
+		
+		service.saveLaborer(l);
+		LaborerHelper.verify(l);
+		
+		Laborer dbu = service.findLaborer(l.getLaborerId());
+		
+		LaborerHelper.verify(dbu);		
+		LaborerHelper.verify(l,dbu);
+		
+		assertTrue("La lista de ausencias por ausencia no puede ser vacia",!dbu.getAbsences().isEmpty());
+		//
+		assertTrue("La lista de ausencias por ausencia debe ser del tipo MEDICAL_LEAVE",dbu.getAbsences().get(0).getAbsenceType() == AbsenceType.MEDICAL_LEAVE);
+		
+	}
+	/**
+	 * Agregar una vacación
+	 */
+	@Test
+	public void testRemoveMedicalLicence() {
+		
+		Laborer l = LaborerHelper.newLaborer();
+		DateTime dt = new DateTime();
+		
+		Absence absence = new Absence();
+		absence.setAbsenceType(AbsenceType.MEDICAL_LEAVE);
+		absence.setFromDate(dt.toDate());
+		absence.setToDate(dt.plusDays(5).toDate());
+		absence.setLaborer(l);
+		
+		ConstructionSite cs = ConstructionSiteHelper.newConstrutionSite();
+		constructionService.save(cs);
+		
+		l.addAbsence(absence);
+		
+		service.saveLaborer(l);
+		LaborerHelper.verify(l);
+		
+		Laborer dbu = service.findLaborer(l.getLaborerId());
+		
+		LaborerHelper.verify(dbu);		
+		LaborerHelper.verify(l,dbu);
+		
+		assertTrue("La lista de vacaciones no puede ser vacia",!dbu.getAbsences().isEmpty());
+		
+		dbu.getAbsences().clear();
+		service.saveLaborer(dbu);
+		
+		Laborer dbu2 = service.findLaborer(l.getLaborerId());
+		
+		LaborerHelper.verify(dbu2);		
+		LaborerHelper.verify(l,dbu2);
+		
+		assertTrue("La lista de vacaciones debe ser vacia",dbu2.getAbsences().isEmpty());
 		
 	}
 	

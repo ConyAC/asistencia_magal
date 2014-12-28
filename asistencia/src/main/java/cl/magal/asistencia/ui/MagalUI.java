@@ -267,6 +267,9 @@ public class MagalUI extends UI implements ErrorHandler {
 	
 	public void setBackVisible(boolean visible){
 		backBtn.setVisible(visible);
+	}
+	
+	public void setTitleVisible(boolean visible){
 		title.setVisible(visible);
 	}
 	
