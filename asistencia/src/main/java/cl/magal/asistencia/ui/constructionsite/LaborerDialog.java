@@ -1,10 +1,30 @@
 package cl.magal.asistencia.ui.constructionsite;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
 import java.util.Collection;
 import java.util.List;
 
-import javax.annotation.PostConstruct;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
+import javax.xml.transform.Result;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.TransformerFactoryConfigurationError;
+import javax.xml.transform.sax.SAXResult;
 
+import org.apache.fop.apps.FOPException;
+import org.apache.fop.apps.FOUserAgent;
+import org.apache.fop.apps.Fop;
+import org.apache.fop.apps.FopFactory;
+import org.apache.fop.apps.MimeConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +41,7 @@ import cl.magal.asistencia.entities.enums.Afp;
 import cl.magal.asistencia.entities.enums.Job;
 import cl.magal.asistencia.entities.enums.MaritalStatus;
 import cl.magal.asistencia.entities.enums.ToolStatus;
+import cl.magal.asistencia.entities.xml.VacationData;
 import cl.magal.asistencia.services.LaborerService;
 import cl.magal.asistencia.ui.AbstractWindowEditor;
 import cl.magal.asistencia.ui.OnValueChangeFieldFactory;
@@ -34,6 +55,7 @@ import com.vaadin.data.util.BeanItem;
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.data.util.filter.Compare;
 import com.vaadin.data.util.filter.Not;
+import com.vaadin.server.FileDownloader;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.ui.AbstractField;
 import com.vaadin.ui.Alignment;
@@ -540,8 +562,43 @@ public class LaborerDialog extends AbstractWindowEditor {
 				
 				table.setTableFieldFactory(new OnValueChangeFieldFactory(2));
 				
-				table.setVisibleColumns("fromDate","toDate","total");
-				table.setColumnHeaders("Desde","Hasta","Total");
+				table.addGeneratedColumn("print", new Table.ColumnGenerator() {
+					
+					@Override
+					public Object generateCell(Table source, Object itemId, Object columnId) {
+						Button btnPrint = new Button(null,FontAwesome.PRINT);
+						
+						final VacationData data = new VacationData();
+						data.setLaborerFullname("fullname");
+						
+//						ByteArrayOutputStream streamSource = getXMLSource(data);
+
+						com.vaadin.server.StreamResource.StreamSource s = new com.vaadin.server.StreamResource.StreamSource() {
+
+				            public InputStream getStream() {
+				                ByteArrayOutputStream stream;
+								try {
+									stream = createPDFFile(getXMLSource(data),"xsl/");
+									InputStream input = new ByteArrayInputStream(stream.toByteArray());
+									return input;
+
+								} catch (Exception e) {
+									logger.error("Error al generar el documento ",e);
+									return null;
+								}
+				                
+				                  
+				            }
+				        };
+				        com.vaadin.server.StreamResource resource = new com.vaadin.server.StreamResource ( s, "ejemplo.pdf");
+						FileDownloader fileDownloader = new FileDownloader(resource);
+				        fileDownloader.extend(btnPrint);
+						return btnPrint;
+					}
+				});
+				
+				table.setVisibleColumns("fromDate","toDate","total","print");
+				table.setColumnHeaders("Desde","Hasta","Total","Imprimir");
 				table.setEditable(true);				
 				addComponent(table);
 			}
@@ -726,6 +783,75 @@ public class LaborerDialog extends AbstractWindowEditor {
 			return "Fecha de Admisión";
 		else
 			return propertyId.toString();
+	}
+	
+	public static final String EXTENSION = ".pdf";
+	public String PRESCRIPTION_URL = "vacation_doc.xsl";
+ 
+	public ByteArrayOutputStream createPDFFile(ByteArrayOutputStream xmlSource, String templateFilePath) throws IOException {
+//		URL url = new File(templateFilePath + PRESCRIPTION_URL).toURI().toURL();
+		ClassLoader classLoader = getClass().getClassLoader();
+		URL url = new File(classLoader.getResource(templateFilePath + PRESCRIPTION_URL).getFile()).toURI().toURL();
+		// creation of transform source
+		javax.xml.transform.stream.StreamSource transformSource = new javax.xml.transform.stream.StreamSource(url.openStream());
+		// create an instance of fop factory
+		FopFactory fopFactory = FopFactory.newInstance();
+		// a user agent is needed for transformation
+		FOUserAgent foUserAgent = fopFactory.newFOUserAgent();
+		// to store output
+		ByteArrayOutputStream pdfoutStream = new ByteArrayOutputStream();
+		javax.xml.transform.stream.StreamSource source = new javax.xml.transform.stream.StreamSource(new ByteArrayInputStream(xmlSource.toByteArray()));
+		Transformer xslfoTransformer;
+		try {
+			TransformerFactory transfact = TransformerFactory.newInstance();
+ 
+			xslfoTransformer = transfact.newTransformer(transformSource);
+			// Construct fop with desired output format
+			Fop fop;
+			try {
+				fop = fopFactory.newFop(MimeConstants.MIME_PDF, foUserAgent, pdfoutStream);
+				// Resulting SAX events (the generated FO)
+				// must be piped through to FOP
+				Result res = new SAXResult(fop.getDefaultHandler());
+ 
+				// Start XSLT transformation and FOP processing
+				try {
+					// everything will happen here..
+					xslfoTransformer.transform(source, res);
+ 
+					// if you want to save PDF file use the following code
+					return pdfoutStream;
+ 
+				} catch (TransformerException e) {
+					e.printStackTrace();
+				}
+			} catch (FOPException e) {
+				e.printStackTrace();
+			}
+		} catch (TransformerConfigurationException e) {
+			e.printStackTrace();
+		} catch (TransformerFactoryConfigurationError e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+ 
+	public ByteArrayOutputStream getXMLSource(VacationData data) throws Exception {
+		JAXBContext context;
+ 
+		ByteArrayOutputStream outStream = new ByteArrayOutputStream();
+ 
+		try {
+			context = JAXBContext.newInstance(VacationData.class);
+			Marshaller m = context.createMarshaller();
+			m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
+			m.marshal(data, outStream);
+		} catch (JAXBException e) {
+ 
+			e.printStackTrace();
+		}
+		return outStream;
+ 
 	}
 
 	
