@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import cl.magal.asistencia.entities.ConstructionSite;
 import cl.magal.asistencia.entities.Laborer;
+import cl.magal.asistencia.entities.LaborerConstructionsite;
 import cl.magal.asistencia.repositories.ConstructionSiteRepository;
 import cl.magal.asistencia.repositories.LaborerRepository;
 import cl.magal.asistencia.ui.workerfile.vo.HistoryVO;
@@ -62,5 +63,16 @@ public class LaborerService {
 		}
 		
 		return result;
+	}
+
+	public LaborerConstructionsite findLaborerOnConstructionSite(
+			LaborerConstructionsite lc) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public void save(LaborerConstructionsite laborer) {
+		// TODO Auto-generated method stub
+		
 	}
 }

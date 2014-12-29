@@ -3,8 +3,6 @@ package cl.magal.asistencia.ui.constructionsite;
 import java.util.Collection;
 import java.util.List;
 
-import javax.annotation.PostConstruct;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,8 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import cl.magal.asistencia.entities.Absence;
 import cl.magal.asistencia.entities.Accident;
 import cl.magal.asistencia.entities.AccidentLevel;
-import cl.magal.asistencia.entities.ConstructionSite;
-import cl.magal.asistencia.entities.Laborer;
+import cl.magal.asistencia.entities.LaborerConstructionsite;
 import cl.magal.asistencia.entities.Tool;
 import cl.magal.asistencia.entities.Vacation;
 import cl.magal.asistencia.entities.enums.AbsenceType;
@@ -65,19 +62,14 @@ public class LaborerDialog extends AbstractWindowEditor {
 	BeanItemContainer<Tool> toolContainer= new BeanItemContainer<Tool>(Tool.class);
 	BeanItemContainer<HistoryVO> historyContainer = new BeanItemContainer<HistoryVO>(HistoryVO.class);
 	
-	ConstructionSite constructionSite;
-	
 	@Autowired
 	LaborerService service;
 	
-	public LaborerDialog(BeanItem<Laborer> item,ConstructionSite constructionSite, LaborerService service ){
+	public LaborerDialog(BeanItem<LaborerConstructionsite> item,LaborerService service ){
 		super(item);
-		if(constructionSite == null )
-			throw new RuntimeException("Error al crear el dialgo, la obra no puede ser nula.");
 		if(service == null )
 			throw new RuntimeException("Error al crear el dialgo, el servicio de trabajadores no puede ser nulo.");
 		
-		this.constructionSite = constructionSite;
 		this.service = service;
 		setWidth("70%");
 
@@ -86,10 +78,11 @@ public class LaborerDialog extends AbstractWindowEditor {
 	
 	public void init(){
 		super.init();
-		List<HistoryVO> history = service.getLaborerHistory((Laborer) getItem().getBean());
+		LaborerConstructionsite laborer = (LaborerConstructionsite) getItem().getBean();
+		List<HistoryVO> history = service.getLaborerHistory(laborer.getLaborer());
         historyContainer.addAll(history);
 		historyContainer.addNestedContainerProperty("constructionSite.name");
-		Filter filter = new Compare.Equal("constructionSite", constructionSite);
+		Filter filter = new Compare.Equal("constructionSite", laborer.getConstructionsite());
 		//filtra la obra en la que se encuentra
 		historyContainer.addContainerFilter(new Not(filter));
 	}
@@ -313,7 +306,7 @@ public class LaborerDialog extends AbstractWindowEditor {
 							
 							@Override
 							public void buttonClick(ClickEvent event) {
-								Laborer laborer = (Laborer) getItem().getBean();
+								LaborerConstructionsite laborer = (LaborerConstructionsite) getItem().getBean();
 								if(laborer == null ) throw new RuntimeException("El trabajador no es válido.");
 								Accident accident = new Accident();
 								laborer.addAccident(accident);
@@ -407,7 +400,7 @@ public class LaborerDialog extends AbstractWindowEditor {
 							
 							@Override
 							public void buttonClick(ClickEvent event) {
-								Laborer laborer = (Laborer) getItem().getBean();
+								LaborerConstructionsite laborer = (LaborerConstructionsite) getItem().getBean();
 								if(laborer == null ) throw new RuntimeException("El trabajador no es válido.");
 								Absence absence = new Absence();
 								laborer.addAbsence(absence);
@@ -503,7 +496,7 @@ public class LaborerDialog extends AbstractWindowEditor {
 							
 							@Override
 							public void buttonClick(ClickEvent event) {
-								Laborer laborer = (Laborer) getItem().getBean();
+								LaborerConstructionsite laborer = (LaborerConstructionsite) getItem().getBean();
 								if(laborer == null ) throw new RuntimeException("El trabajador no es válido.");
 								Vacation vacation = new Vacation();
 								laborer.addVacation(vacation);

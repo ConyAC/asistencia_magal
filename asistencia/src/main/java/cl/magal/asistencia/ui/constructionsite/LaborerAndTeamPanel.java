@@ -17,6 +17,7 @@ import org.tepi.filtertable.FilterTable;
 
 import cl.magal.asistencia.entities.ConstructionSite;
 import cl.magal.asistencia.entities.Laborer;
+import cl.magal.asistencia.entities.LaborerConstructionsite;
 import cl.magal.asistencia.entities.Team;
 import cl.magal.asistencia.entities.User;
 import cl.magal.asistencia.entities.enums.Job;
@@ -77,7 +78,7 @@ public class LaborerAndTeamPanel extends Panel implements View {
 	/** CONTAINERS **/
 	BeanItemContainer<User> userContainer = new BeanItemContainer<User>(User.class);
 	BeanItemContainer<Team> teamContainer = new BeanItemContainer<Team>(Team.class);
-	BeanItemContainer<Laborer> laborerContainer = new BeanItemContainer<Laborer>(Laborer.class);
+	BeanItemContainer<LaborerConstructionsite> laborerContainer = new BeanItemContainer<LaborerConstructionsite>(LaborerConstructionsite.class);
 	
 	BeanItem<ConstructionSite> item;
 	
@@ -301,7 +302,7 @@ public class LaborerAndTeamPanel extends Panel implements View {
 				team.setName("Cuadrilla 1");
 				team.setDate(new Date());
 				team.setStatus(Status.ACTIVE);
-				team.setLeader(laborerContainer.firstItemId());
+				team.setLeader(laborerContainer.firstItemId().getLaborer());
 				constructionSiteService.addTeamToConstructionSite(team,cs);
 
 				teamContainer.addBean(team);
@@ -403,17 +404,19 @@ public class LaborerAndTeamPanel extends Panel implements View {
 					return;
 				}
 				
-				Laborer laborer = new Laborer();
-				BeanItem<Laborer> laborerItem = new BeanItem<Laborer>(laborer);
-				LaborerDialog userWindow = new LaborerDialog(laborerItem,item.getBean(),laborerService);
+				LaborerConstructionsite laborer = new LaborerConstructionsite();
+				laborer.setConstructionsite(item.getBean());
+				
+				BeanItem<LaborerConstructionsite> laborerItem = new BeanItem<LaborerConstructionsite>(laborer);
+				LaborerDialog userWindow = new LaborerDialog(laborerItem,laborerService);
 				
 				userWindow.addListener(new AbstractWindowEditor.EditorSavedListener() {
 					
 					@Override
 					public void editorSaved(EditorSavedEvent event) {
 						try {
-			    			Laborer laborer = ((BeanItem<Laborer>) event.getSavedItem()).getBean();
-			    			constructionSiteService.addLaborerToConstructionSite(laborer,cs);				
+							LaborerConstructionsite laborer = ((BeanItem<LaborerConstructionsite>) event.getSavedItem()).getBean();
+							laborerService.save(laborer);				
 			    			laborerContainer.addBean(laborer);
 			    		} catch (Exception e) {
 			    			logger.error("Error al guardar la información del obrero",e);
@@ -432,7 +435,7 @@ public class LaborerAndTeamPanel extends Panel implements View {
 		table.setSizeFull();
 		table.setFilterBarVisible(true);
 		//TODO estado
-		table.setVisibleColumns("job","firstname","laborerId"); //FIXME laborerId
+		table.setVisibleColumns("laborer.job","laborer.firstname","laborer.laborerId"); //FIXME laborerId
 		table.setColumnHeaders("Cod","Nombre","Estado");
 		table.setSelectable(true);
 		
@@ -441,7 +444,7 @@ public class LaborerAndTeamPanel extends Panel implements View {
 			@Override
 			public void itemClick(ItemClickEvent event) {
 				
-				LaborerDialog userWindow = new LaborerDialog((BeanItem) event.getItem(),item.getBean(),laborerService);
+				LaborerDialog userWindow = new LaborerDialog((BeanItem) event.getItem(),laborerService);
 				
 				userWindow.addListener(new AbstractWindowEditor.EditorSavedListener() {
 					
@@ -453,8 +456,8 @@ public class LaborerAndTeamPanel extends Panel implements View {
 							return;
 						}
 						try {
-			    			Laborer laborer = ((BeanItem<Laborer>) event.getSavedItem()).getBean();
-			    			constructionSiteService.addLaborerToConstructionSite(laborer,cs);				
+			    			LaborerConstructionsite laborer = ((BeanItem<LaborerConstructionsite>) event.getSavedItem()).getBean();
+			    			laborerService.save(laborer);				
 			    			laborerContainer.addBean(laborer);
 			    		} catch (Exception e) {
 			    			logger.error("Error al guardar la información del obrero",e);

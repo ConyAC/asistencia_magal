@@ -18,9 +18,11 @@ import cl.magal.asistencia.entities.Accident;
 import cl.magal.asistencia.entities.AccidentLevel;
 import cl.magal.asistencia.entities.ConstructionSite;
 import cl.magal.asistencia.entities.Laborer;
+import cl.magal.asistencia.entities.LaborerConstructionsite;
 import cl.magal.asistencia.entities.Vacation;
 import cl.magal.asistencia.entities.enums.AbsenceType;
 import cl.magal.asistencia.helpers.ConstructionSiteHelper;
+import cl.magal.asistencia.helpers.LaborerConstructionsiteHelper;
 import cl.magal.asistencia.helpers.LaborerHelper;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -207,19 +209,19 @@ public class LaborerServiceTest {
 	@Test
 	public void testRemoveAccident() {
 		
-		Laborer l = LaborerHelper.newLaborer();
+		LaborerConstructionsite lc = LaborerConstructionsiteHelper.newLaborerConstructionsite();
+		
 		DateTime dt = new DateTime();
 		
 		Accident accident = new Accident();
 		accident.setAccidentLevel(AccidentLevel.NOT_SERIOUS);
 		accident.setFromDate(dt.toDate());
 		accident.setToDate(dt.plusDays(5).toDate());
-		accident.setLaborer(l);
 		
 		ConstructionSite cs = ConstructionSiteHelper.newConstrutionSite();
 		constructionService.save(cs);
 		
-		l.addAccident(accident);
+		lc.addAccident(accident);
 		
 		service.saveLaborer(l);
 		LaborerHelper.verify(l);
@@ -251,27 +253,26 @@ public class LaborerServiceTest {
 	@Test
 	public void testAddMedicalLicence() {
 		
-		Laborer l = LaborerHelper.newLaborer();
+		LaborerConstructionsite lc = LaborerConstructionsiteHelper.newLaborerConstructionsite();
+		
 		DateTime dt = new DateTime();
 		
 		Absence absence = new Absence();
 		absence.setAbsenceType(AbsenceType.MEDICAL_LEAVE);
 		absence.setFromDate(dt.toDate());
 		absence.setToDate(dt.plusDays(5).toDate());
-		absence.setLaborer(l);
+
+		constructionService.save(lc.getConstructionsite());
+		service.saveLaborer(lc.getLaborer());
 		
-		ConstructionSite cs = ConstructionSiteHelper.newConstrutionSite();
-		constructionService.save(cs);
+		lc.addAbsence(absence);
 		
-		l.addAbsence(absence);
+		LaborerConstructionsiteHelper.verify(lc);
 		
-		service.saveLaborer(l);
-		LaborerHelper.verify(l);
+		LaborerConstructionsite dbu = service.findLaborerOnConstructionSite(lc);
 		
-		Laborer dbu = service.findLaborer(l.getLaborerId());
-		
-		LaborerHelper.verify(dbu);		
-		LaborerHelper.verify(l,dbu);
+		LaborerConstructionsiteHelper.verify(dbu);		
+		LaborerConstructionsiteHelper.verify(lc,dbu);
 		
 		assertTrue("La lista de ausencias por ausencia no puede ser vacia",!dbu.getAbsences().isEmpty());
 		//

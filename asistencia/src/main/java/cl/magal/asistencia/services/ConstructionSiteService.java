@@ -16,12 +16,10 @@ import org.springframework.stereotype.Service;
 
 import cl.magal.asistencia.entities.ConstructionSite;
 import cl.magal.asistencia.entities.Laborer;
-import cl.magal.asistencia.entities.Obra;
 import cl.magal.asistencia.entities.Team;
 import cl.magal.asistencia.entities.enums.Status;
 import cl.magal.asistencia.repositories.ConstructionSiteRepository;
 import cl.magal.asistencia.repositories.LaborerRepository;
-import cl.magal.asistencia.repositories.ObraRepository;
 import cl.magal.asistencia.repositories.TeamRepository;
 
 @Service
@@ -105,30 +103,6 @@ public class ConstructionSiteService {
 		return (Integer) repo2.findRawStatusCS(id);
 	}
 	
-	@Autowired
-	@Deprecated
-	ObraRepository repo;
-	
-	public void saveObra(Obra obra) {
-		repo.save(obra);
-	}
-
-	public Obra findObra(Long id) {
-		return repo.findOne(id);
-	}
-
-	public Page<Obra> findAllObra(Pageable page) {
-		return repo.findAll(page);
-	}
-
-	public Obra findObraByNombre(String nombre) {
-		return repo.findByNombre(nombre);
-	}
-
-	public Obra findObraByDireccion(String direccion) {
-		return repo.findByComplicada(direccion).get(0);
-	}
-
 	public Page<Laborer> findLaborerByConstruction(ConstructionSite fisrt) {
 		Page<Laborer> page = new PageImpl<Laborer>(
 				Arrays.asList(new Laborer(),new Laborer(),new Laborer())

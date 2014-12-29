@@ -8,22 +8,18 @@ package cl.magal.asistencia.entities;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.LinkedList;
 import java.util.List;
 
 import javax.persistence.Basic;
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
-import javax.persistence.OneToMany;
 import javax.persistence.PrePersist;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
@@ -144,20 +140,20 @@ public class Laborer implements Serializable {
     @ManyToMany(mappedBy="laborers")//,fetch=FetchType.EAGER,cascade = { CascadeType.PERSIST, CascadeType.MERGE })
     List<ConstructionSite> constructionSites;
     
-    @OneToMany(mappedBy="laborer",fetch=FetchType.EAGER,cascade = { CascadeType.PERSIST, CascadeType.MERGE },orphanRemoval=true )
-    List<Vacation> vacations = new ArrayList<Vacation>();
-    
-    @OneToMany(mappedBy="laborer",fetch=FetchType.EAGER,cascade = { CascadeType.PERSIST, CascadeType.MERGE },orphanRemoval=true )
-    List<Absence> absences = new ArrayList<Absence>();
-    
-    @OneToMany(mappedBy="laborer",fetch=FetchType.EAGER,cascade = { CascadeType.PERSIST, CascadeType.MERGE },orphanRemoval=true )
-    List<Accident> accidents = new ArrayList<Accident>();
-    
-    @OneToMany(targetEntity=Tool.class,fetch=FetchType.EAGER)
-    List<Tool> tool;
-    
-    @ManyToMany(mappedBy="laborers",cascade = { CascadeType.PERSIST, CascadeType.MERGE })
-    List<Team> teams = new LinkedList<Team>();
+//    @OneToMany(mappedBy="laborer",fetch=FetchType.EAGER,cascade = { CascadeType.PERSIST, CascadeType.MERGE },orphanRemoval=true )
+//    List<Vacation> vacations = new ArrayList<Vacation>();
+//    
+//    @OneToMany(mappedBy="laborer",fetch=FetchType.EAGER,cascade = { CascadeType.PERSIST, CascadeType.MERGE },orphanRemoval=true )
+//    List<Absence> absences = new ArrayList<Absence>();
+//    
+//    @OneToMany(mappedBy="laborer",fetch=FetchType.EAGER,cascade = { CascadeType.PERSIST, CascadeType.MERGE },orphanRemoval=true )
+//    List<Accident> accidents = new ArrayList<Accident>();
+//    
+//    @OneToMany(targetEntity=Tool.class,fetch=FetchType.EAGER)
+//    List<Tool> tool;
+//    
+//    @ManyToMany(mappedBy="laborers",cascade = { CascadeType.PERSIST, CascadeType.MERGE })
+//    List<Team> teams = new LinkedList<Team>();
     
     @PrePersist
     public void prePersist(){
@@ -381,14 +377,6 @@ public class Laborer implements Serializable {
 		this.constructionSites = constructionSites;
 	}
 	
-	public List<Team> getTeams() {
-		return teams;
-	}
-
-	public void setTeams(List<Team> teams) {
-		this.teams = teams;
-	}
-
 	public Integer getJobCode() {
 		return jobCode;
 	}
@@ -397,100 +385,8 @@ public class Laborer implements Serializable {
 		this.jobCode = jobCode;
 	}
 	
-	public List<Vacation> getVacations() {
-		return vacations;
-	}
-	
 	public String getFullname(){
     	return firstname + " " +lastname;
-    }
-
-	public void setVacations(List<Vacation> vacations) {
-		this.vacations = vacations;
-	}
-	
-	public void addVacation(Vacation vacation) {
-        if (!getVacations().contains(vacation)) {
-        	getVacations().add(vacation);
-        	vacation.setLaborer(this);
-        }
-    }
-	
-	public void removeVacation(Vacation vacation) {
-        if (getVacations().contains(vacation)) {
-        	getVacations().remove(vacation);
-        	vacation.setLaborer(null);
-        }
-    }
-    	
-	public List<Tool> getTool() {
-		return tool;
-	}
-
-	public void setTool(List<Tool> tool) {
-		this.tool = tool;
-	}
-
-	public void addConstructionSite(ConstructionSite constructionSite) {
-        if (!getConstructionSites().contains(constructionSite)) {
-        	getConstructionSites().add(constructionSite);
-        }
-        if (!constructionSite.getLaborers().contains(this)) {
-        	constructionSite.getLaborers().add(this);
-        }
-    }
-	
-	public void addTeam(Team team) {
-        if (!getTeams().contains(team)) {
-        	getTeams().add(team);
-        }
-        if (!team.getLaborers().contains(this)) {
-        	team.getLaborers().add(this);
-        }
-    }
-    
-    public List<Absence> getAbsences() {
-		return absences;
-	}
-
-	public void setAbsences(List<Absence> absences) {
-		this.absences = absences;
-	}
-	
-	public void addAbsence(Absence absence) {
-        if (!getAbsences().contains(absence)) {
-        	getAbsences().add(absence);
-        	absence.setLaborer(this);
-        }
-    }
-	
-	public void removeAbsence(Absence absence) {
-        if (getAbsences().contains(absence)) {
-        	getAbsences().remove(absence);
-        	absence.setLaborer(null);
-        }
-    }
-    
-	public List<Accident> getAccidents() {
-		return accidents;
-	}
-
-	public void setAccidents(List<Accident> accidents) {
-		this.accidents = accidents;
-	}
-
-	public void addAccident(Accident accident) {
-		if (!getAccidents().contains(accident)) {
-        	getAccidents().add(accident);
-        	accident.setLaborer(this);
-        }
-	}
-	
-	public void removeAccident(Accident accident) {
-        if (getAccidents().contains(accident)) {
-        	getAccidents().remove(accident);
-        	accident.setLaborer(null);
-        }
     }
 
 	@Override

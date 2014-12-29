@@ -6,8 +6,8 @@
 package cl.magal.asistencia.entities;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
-import java.util.LinkedList;
 import java.util.List;
 
 import javax.persistence.Basic;
@@ -45,13 +45,15 @@ import cl.magal.asistencia.entities.enums.Status;
     @NamedQuery(name = "Team.findByTeamId", query = "SELECT t FROM Team t WHERE t.teamId = :teamId"),
     @NamedQuery(name = "Team.findByName", query = "SELECT t FROM Team t WHERE t.name = :name"),
     @NamedQuery(name = "Team.findByDate", query = "SELECT t FROM Team t WHERE t.date = :date"),
-    @NamedQuery(name = "Team.findByConstructionsite", query = "SELECT t FROM Team t WHERE t.constructionsite = :constructionsite"),
     @NamedQuery(name = "Team.findByUser", query = "SELECT t FROM Team t WHERE t.leader = :leader"),
     @NamedQuery(name = "Team.findByStatusId", query = "SELECT t FROM Team t WHERE t.status = :status"),
     @NamedQuery(name = "Team.findByDeleted", query = "SELECT t FROM Team t WHERE t.deleted = :deleted")})
 public class Team implements Serializable {
-    private static final long serialVersionUID = 1L;
-    @Id
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = -7401353696020559155L;
+	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
     @Column(name = "teamId")
@@ -63,10 +65,6 @@ public class Team implements Serializable {
     @Column(name = "date")
     @Temporal(TemporalType.TIMESTAMP)
     private Date date;
-    @Basic(optional = false)
-    @JoinColumn(name = "construction_siteId")
-    @ManyToOne
-    private ConstructionSite constructionsite;
     @Basic(optional = false)
     @JoinColumn(name = "laborerId")
     @ManyToOne(cascade = CascadeType.ALL)
@@ -83,11 +81,11 @@ public class Team implements Serializable {
     		@JoinColumn(name = "teamId", referencedColumnName = "teamId")
      }, 
      inverseJoinColumns = { 	
-            @JoinColumn(name = "laborerId", referencedColumnName = "laborerId")
+            @JoinColumn(name = "laborerConstructionsiteId", referencedColumnName = "laborerConstructionsiteId")
      }
 	)
-    @ManyToMany(targetEntity=Laborer.class,fetch=FetchType.EAGER)
-    List<Laborer> laborers = new LinkedList<Laborer>();
+    @ManyToMany(targetEntity=LaborerConstructionsite.class,fetch=FetchType.EAGER)
+    List<LaborerConstructionsite> laborers = new ArrayList<LaborerConstructionsite>();
 
     @PrePersist
     public void prePersist(){
@@ -128,20 +126,12 @@ public class Team implements Serializable {
         this.date = date;
     }
 
-    public ConstructionSite getConstructionsite() {
-        return constructionsite;
-    }
-
     public Laborer getLeader() {
 		return leader;
 	}
 
 	public void setLeader(Laborer leader) {
 		this.leader = leader;
-	}
-
-	public void setConstructionsite(ConstructionSite constructionsite) {
-		this.constructionsite = constructionsite;
 	}
 
     public Status getStatus() {
@@ -160,13 +150,11 @@ public class Team implements Serializable {
         this.deleted = deleted;
     }    
     
-    public List<Laborer> getLaborers() {
-    	if(laborers == null )
-			laborers = new LinkedList<Laborer>();
+    public List<LaborerConstructionsite> getLaborers() {
 		return laborers;
 	}
 
-	public void setLaborers(List<Laborer> laborers) {
+	public void setLaborers(List<LaborerConstructionsite> laborers) {
 		this.laborers = laborers;
 	}
 
@@ -189,19 +177,19 @@ public class Team implements Serializable {
         }
         return true;
     }
-
-    @Override
-    public String toString() {
-        return "jpa.magal.entities.Team[ teamId=" + teamId + " ]";
-    }
     
-    public void addLaborer(Laborer laborer) {
+    public void addLaborer(LaborerConstructionsite laborer) {
         if (!getLaborers().contains(laborer)) {
         	getLaborers().add(laborer);
         }
         if (!laborer.getTeams().contains(this)) {
             laborer.getTeams().add(this);
         }
+    }
+    
+    @Override
+    public String toString() {
+        return "jpa.magal.entities.Team[ teamId=" + teamId + " ]";
     }
     
 }
