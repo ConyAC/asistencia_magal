@@ -56,9 +56,14 @@
 	
 	<!-- Velocity -->
 	
-    <bean id="velocityEngine" class="org.springframework.ui.velocity.VelocityEngineFactoryBean" 
-          p:resourceLoaderPath="classpath:/templates" 
-          p:preferFileSystemAccess="false" />
+     <bean id="velocityEngine" class="org.springframework.ui.velocity.VelocityEngineFactoryBean"> 
+	  <property name="velocityProperties">
+	   <props>
+	    <prop key="resource.loader">class</prop>
+	    <prop key="class.resource.loader.class">org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader</prop>
+	   </props>
+	  </property>
+	 </bean> 
 	
 	<import resource="security.xml" />
 

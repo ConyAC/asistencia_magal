@@ -6,6 +6,7 @@ import java.util.List;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.velocity.app.VelocityEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -97,7 +98,8 @@ public class LaborerAndTeamPanel extends Panel implements View {
 	transient TeamService teamService;
 	@Autowired
 	transient LaborerService laborerService;
-	
+	@Autowired
+	private VelocityEngine velocityEngine;
 	
 	Button asistenciaBtn;
 	
@@ -405,7 +407,7 @@ public class LaborerAndTeamPanel extends Panel implements View {
 				
 				Laborer laborer = new Laborer();
 				BeanItem<Laborer> laborerItem = new BeanItem<Laborer>(laborer);
-				LaborerDialog userWindow = new LaborerDialog(laborerItem,item.getBean(),laborerService);
+				LaborerDialog userWindow = new LaborerDialog(laborerItem,item.getBean(),laborerService,velocityEngine);
 				
 				userWindow.addListener(new AbstractWindowEditor.EditorSavedListener() {
 					
@@ -441,7 +443,7 @@ public class LaborerAndTeamPanel extends Panel implements View {
 			@Override
 			public void itemClick(ItemClickEvent event) {
 				
-				LaborerDialog userWindow = new LaborerDialog((BeanItem) event.getItem(),item.getBean(),laborerService);
+				LaborerDialog userWindow = new LaborerDialog((BeanItem) event.getItem(),item.getBean(),laborerService,velocityEngine);
 				
 				userWindow.addListener(new AbstractWindowEditor.EditorSavedListener() {
 					
