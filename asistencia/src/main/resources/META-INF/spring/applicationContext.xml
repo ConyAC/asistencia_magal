@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:p="http://www.springframework.org/schema/p"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
 	xmlns:jdbc="http://www.springframework.org/schema/jdbc"
 	xmlns:jpa="http://www.springframework.org/schema/data/jpa"
@@ -52,6 +53,17 @@
 			</list>
 		</property>
 	</bean>
+	
+	<!-- Velocity -->
+	
+     <bean id="velocityEngine" class="org.springframework.ui.velocity.VelocityEngineFactoryBean"> 
+	  <property name="velocityProperties">
+	   <props>
+	    <prop key="resource.loader">class</prop>
+	    <prop key="class.resource.loader.class">org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader</prop>
+	   </props>
+	  </property>
+	 </bean> 
 	
 	<import resource="security.xml" />
 

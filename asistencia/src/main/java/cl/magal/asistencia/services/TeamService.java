@@ -49,7 +49,6 @@ public class TeamService {
 		Team dbt = rep.findOne(t.getTeamId());
 		laborer.setTeamId(t.getTeamId());
 		labRepo.save(laborer);
-		dbt.addLaborer(laborer);
 		rep.save(dbt);
 	}
 	

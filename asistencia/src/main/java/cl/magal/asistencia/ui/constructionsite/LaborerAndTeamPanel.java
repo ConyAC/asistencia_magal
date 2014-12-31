@@ -6,6 +6,7 @@ import java.util.List;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.velocity.app.VelocityEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -98,7 +99,8 @@ public class LaborerAndTeamPanel extends Panel implements View {
 	transient TeamService teamService;
 	@Autowired
 	transient LaborerService laborerService;
-	
+	@Autowired
+	private VelocityEngine velocityEngine;
 	
 	Button asistenciaBtn;
 	
@@ -577,7 +579,7 @@ public class LaborerAndTeamPanel extends Panel implements View {
 					
 				//Seleccionar Obreros
 				FilterTable select_lab =  new FilterTable();
-				Page<Laborer> page = laborerService.findAllLaborer(new PageRequest(0, 20));
+				Page<LaborerConstructionsite> page = laborerService.findAllLaborerConstructionsite(new PageRequest(0, 20));
 				select_lab.setContainerDataSource(laborerContainer);
 				laborerContainer.addAll(page.getContent());
 				
@@ -720,7 +722,7 @@ public class LaborerAndTeamPanel extends Panel implements View {
 		}
 		
 		setEnabledDetail(true,item);
-		List<Laborer> laborers = constructionSiteService.getLaborerByConstruction(item.getBean());
+		List<LaborerConstructionsite> laborers = constructionSiteService.getLaborerByConstruction(item.getBean());
 		laborerContainer.removeAllItems();
 		laborerContainer.addAll(laborers);
 		

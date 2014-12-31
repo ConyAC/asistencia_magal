@@ -234,7 +234,6 @@ public class ConstructionSite implements Serializable {
     public void addTeam(Team team) {
         if (!getTeams().contains(team)) {
         	getTeams().add(team);
-            team.setConstructionsite(this) ;
         }
 
         

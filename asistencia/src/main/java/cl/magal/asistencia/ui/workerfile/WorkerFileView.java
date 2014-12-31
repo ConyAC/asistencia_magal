@@ -16,6 +16,7 @@ import org.tepi.filtertable.FilterTable;
 
 import ru.xpoft.vaadin.VaadinView;
 import cl.magal.asistencia.entities.Laborer;
+import cl.magal.asistencia.entities.LaborerConstructionsite;
 import cl.magal.asistencia.entities.enums.Afp;
 import cl.magal.asistencia.entities.enums.Job;
 import cl.magal.asistencia.entities.enums.MaritalStatus;
@@ -62,7 +63,7 @@ public class WorkerFileView extends HorizontalLayout implements View {
 	
 	private transient Logger logger = LoggerFactory.getLogger(WorkerFileView.class);	
 	public static final String NAME = "fichas";	
-	BeanItemContainer<Laborer> laborerContainer = new BeanItemContainer<Laborer>(Laborer.class);
+	BeanItemContainer<LaborerConstructionsite> laborerContainer = new BeanItemContainer<LaborerConstructionsite>(LaborerConstructionsite.class);
 	
 	@Autowired
 	private transient LaborerService service;
@@ -139,7 +140,7 @@ public class WorkerFileView extends HorizontalLayout implements View {
 	}
 	
 	
-	private void setLaborer(BeanItem<Laborer> laborerItem){
+	private void setLaborer(BeanItem<LaborerConstructionsite> laborerItem){
 		
 		//obtiene el vertical Layout
 		detalleObrero.removeAllComponents();
@@ -154,7 +155,8 @@ public class WorkerFileView extends HorizontalLayout implements View {
 		detalleObrero.setComponentAlignment(hl, Alignment.TOP_RIGHT);
 		
 		//define la información de resumen
-		Laborer laborer = laborerItem.getBean();
+		LaborerConstructionsite lc = laborerItem.getBean();
+		Laborer laborer = lc.getLaborer();
         //obtiene las obras historicas
         List<HistoryVO> history = service.getLaborerHistory(laborer);
         historyContainer.removeAllItems();
@@ -282,7 +284,7 @@ public class WorkerFileView extends HorizontalLayout implements View {
 			
 			@Override
 			public void itemClick(ItemClickEvent event) {
-				setLaborer((BeanItem<Laborer>)event.getItem());
+				setLaborer((BeanItem<LaborerConstructionsite>)event.getItem());
 			}
 		});
 		
@@ -313,6 +315,7 @@ public class WorkerFileView extends HorizontalLayout implements View {
 			@Override
 			public void buttonClick(ClickEvent event) {
 				
+				LaborerConstructionsite lc = new LaborerConstructionsite();
 				Laborer l = new Laborer();
 				l.setFirstname("Nuevo Trabajador");
 				l.setLastname("");
@@ -328,7 +331,8 @@ public class WorkerFileView extends HorizontalLayout implements View {
 				
 				service.saveLaborer(l);
 				//laborerContainer.addBean(l);
-				BeanItem<Laborer> item = laborerContainer.addBean(l);
+				lc.setLaborer(l);
+				BeanItem<LaborerConstructionsite> item = laborerContainer.addBean(lc);
 				setLaborer(item);
 			}
 		});
@@ -372,7 +376,7 @@ public class WorkerFileView extends HorizontalLayout implements View {
 	}
 	
 	public void reloaData(){
-		Page<Laborer> page = service.findAllLaborer(new PageRequest(0, 20));
+		Page<LaborerConstructionsite> page = service.findAllLaborerConstructionsite(new PageRequest(0, 20));
 		laborerContainer.removeAllItems();
 		laborerContainer.addAll(page.getContent());
 		

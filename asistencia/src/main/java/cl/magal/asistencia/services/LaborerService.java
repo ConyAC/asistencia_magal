@@ -12,6 +12,7 @@ import cl.magal.asistencia.entities.ConstructionSite;
 import cl.magal.asistencia.entities.Laborer;
 import cl.magal.asistencia.entities.LaborerConstructionsite;
 import cl.magal.asistencia.repositories.ConstructionSiteRepository;
+import cl.magal.asistencia.repositories.LaborerConstructionsiteRepository;
 import cl.magal.asistencia.repositories.LaborerRepository;
 import cl.magal.asistencia.ui.workerfile.vo.HistoryVO;
 import cl.magal.asistencia.util.Utils;
@@ -21,6 +22,8 @@ public class LaborerService {
 
 	@Autowired
 	LaborerRepository rep;
+	@Autowired
+	LaborerConstructionsiteRepository repConstruction;
 	@Autowired
 	ConstructionSiteRepository constructionSiteRepo;
 	
@@ -40,8 +43,8 @@ public class LaborerService {
 		rep.delete(id);
 	}
 	
-	public Page<Laborer> findAllLaborer(Pageable page) {
-		return rep.findAll(page);
+	public Page<LaborerConstructionsite> findAllLaborerConstructionsite(Pageable page) {
+		return repConstruction.findAll(page);
 	}
 
 	public List<HistoryVO> getLaborerHistory(Laborer laborer) {

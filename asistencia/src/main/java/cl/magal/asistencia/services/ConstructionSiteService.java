@@ -16,9 +16,11 @@ import org.springframework.stereotype.Service;
 
 import cl.magal.asistencia.entities.ConstructionSite;
 import cl.magal.asistencia.entities.Laborer;
+import cl.magal.asistencia.entities.LaborerConstructionsite;
 import cl.magal.asistencia.entities.Team;
 import cl.magal.asistencia.entities.enums.Status;
 import cl.magal.asistencia.repositories.ConstructionSiteRepository;
+import cl.magal.asistencia.repositories.LaborerConstructionsiteRepository;
 import cl.magal.asistencia.repositories.LaborerRepository;
 import cl.magal.asistencia.repositories.TeamRepository;
 
@@ -31,6 +33,8 @@ public class ConstructionSiteService {
 	ConstructionSiteRepository repo2;
 	@Autowired
 	LaborerRepository labRepo;
+	@Autowired
+	LaborerConstructionsiteRepository labcsRepo;
 	@Autowired
 	TeamRepository teamRepo;
 	
@@ -110,8 +114,8 @@ public class ConstructionSiteService {
 		return page;
 	}
 
-	public List<Laborer> getLaborerByConstruction(ConstructionSite cs) {
-		List<Laborer> laborers = labRepo.findByConstructionSite(cs.getConstructionsiteId());
+	public List<LaborerConstructionsite> getLaborerByConstruction(ConstructionSite cs) {
+		List<LaborerConstructionsite> laborers = labcsRepo.findByConstructionsite(cs);
 		return laborers;
 	}
 
@@ -142,7 +146,6 @@ public class ConstructionSiteService {
 		List<Team> teamAlls = (List<Team>) teamRepo.findAll();
 		for(Team t : teamAlls){
 			logger.debug("t "+t);
-			logger.debug("t.getConstructionsite "+t.getConstructionsite());
 		}
 		List<Team> teams = teamRepo.findByConstructionsite(cs);
 		logger.debug("teams "+teams);
