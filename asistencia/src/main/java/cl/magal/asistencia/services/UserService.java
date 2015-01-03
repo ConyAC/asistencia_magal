@@ -33,7 +33,6 @@ import cl.magal.asistencia.repositories.RoleRepository;
 import cl.magal.asistencia.repositories.UserRepository;
 
 @Service
-@Transactional(readOnly = true)
 public class UserService implements UserDetailsService {
 	static Logger logger = LoggerFactory.getLogger(UserService.class);
 	

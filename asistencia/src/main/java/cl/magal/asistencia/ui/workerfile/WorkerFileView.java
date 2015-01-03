@@ -163,7 +163,7 @@ public class WorkerFileView extends HorizontalLayout implements View {
         historyContainer.addAll(history);
         
 		label1.setValue("<h1><b>"+laborer.getRut()+" : "+laborer.getFullname()+"</b></h1>");
-		label2.setValue("<h1 style='margin-bottom: 1px;' ><b>Activo </h1></b><span >"+laborer.getConstructionSites().get(0).getName()+"</span>");
+//		label2.setValue("<h1 style='margin-bottom: 1px;' ><b>Activo </h1></b><span >"+laborer.getConstructionSites().get(0).getName()+"</span>");
 		
 		final BeanFieldGroup<Laborer> fieldGroup = new BeanFieldGroup<Laborer>(Laborer.class);
         fieldGroup.setItemDataSource(laborerItem);
@@ -350,7 +350,7 @@ public class WorkerFileView extends HorizontalLayout implements View {
 					return;
 				}
 				//TODO dialogo de confirmación
-				service.deleteLaborer(l.getLaborerId());
+				service.delete(l);
 				laborerContainer.removeItem(l);
 				
 				setLaborer(null);

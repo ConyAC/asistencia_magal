@@ -66,8 +66,8 @@ public class Team implements Serializable {
     @Temporal(TemporalType.TIMESTAMP)
     private Date date;
     @Basic(optional = false)
-    @JoinColumn(name = "laborerId")
     @ManyToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "LABORERID")
     private Laborer leader;
     @Convert(converter = StatusConverter.class)
     @Column(name = "status",nullable=false)
@@ -76,17 +76,20 @@ public class Team implements Serializable {
     @Column(name = "deleted")
     private Boolean deleted;    
    
-    @JoinTable(name="laborer_team",
-    joinColumns = { 
-    		@JoinColumn(name = "teamId", referencedColumnName = "teamId")
-     }, 
-     inverseJoinColumns = { 	
-            @JoinColumn(name = "laborerConstructionsiteId", referencedColumnName = "laborerConstructionsiteId")
-     }
-	)
-    @ManyToMany(targetEntity=LaborerConstructionsite.class,fetch=FetchType.EAGER)
-    List<LaborerConstructionsite> laborers = new ArrayList<LaborerConstructionsite>();
-
+//    @JoinTable(name="laborer_team",
+//    joinColumns = { 
+//    		@JoinColumn(name = "teamId", referencedColumnName = "teamId")
+//     }, 
+//     inverseJoinColumns = { 	
+//            @JoinColumn(name = "LABORER_CONSTRUCTIONSITEID", referencedColumnName = "LABORER_CONSTRUCTIONSITEID")
+//     }
+//	)
+//    @ManyToMany(targetEntity=LaborerConstructionsite.class,fetch=FetchType.EAGER)
+//    List<LaborerConstructionsite> laborers = new ArrayList<LaborerConstructionsite>();
+//
+//    
+//    ConstructionSite constructionsite;
+    
     @PrePersist
     public void prePersist(){
     	if(deleted == null )
@@ -150,13 +153,13 @@ public class Team implements Serializable {
         this.deleted = deleted;
     }    
     
-    public List<LaborerConstructionsite> getLaborers() {
-		return laborers;
-	}
-
-	public void setLaborers(List<LaborerConstructionsite> laborers) {
-		this.laborers = laborers;
-	}
+//    public List<LaborerConstructionsite> getLaborers() {
+//		return laborers;
+//	}
+//
+//	public void setLaborers(List<LaborerConstructionsite> laborers) {
+//		this.laborers = laborers;
+//	}
 
 	@Override
     public int hashCode() {
@@ -177,15 +180,15 @@ public class Team implements Serializable {
         }
         return true;
     }
-    
-    public void addLaborer(LaborerConstructionsite laborer) {
-        if (!getLaborers().contains(laborer)) {
-        	getLaborers().add(laborer);
-        }
-        if (!laborer.getTeams().contains(this)) {
-            laborer.getTeams().add(this);
-        }
-    }
+//    
+//    public void addLaborer(LaborerConstructionsite laborer) {
+//        if (!getLaborers().contains(laborer)) {
+//        	getLaborers().add(laborer);
+//        }
+//        if (!laborer.getTeams().contains(this)) {
+//            laborer.getTeams().add(this);
+//        }
+//    }
     
     @Override
     public String toString() {

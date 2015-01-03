@@ -11,15 +11,16 @@ import java.util.Date;
 import java.util.List;
 
 import javax.persistence.Basic;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.ManyToMany;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.OneToMany;
 import javax.persistence.PrePersist;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
@@ -29,12 +30,10 @@ import javax.validation.constraints.Pattern;
 
 import cl.magal.asistencia.entities.converter.AfpConverter;
 import cl.magal.asistencia.entities.converter.IsapreConverter;
-import cl.magal.asistencia.entities.converter.JobConverter;
 import cl.magal.asistencia.entities.converter.MaritalStatusConverter;
 import cl.magal.asistencia.entities.converter.NationalityConverter;
 import cl.magal.asistencia.entities.enums.Afp;
 import cl.magal.asistencia.entities.enums.Isapre;
-import cl.magal.asistencia.entities.enums.Job;
 import cl.magal.asistencia.entities.enums.MaritalStatus;
 import cl.magal.asistencia.entities.enums.Nationality;
 import cl.magal.asistencia.entities.validator.RutDigit;
@@ -60,14 +59,12 @@ import cl.magal.asistencia.entities.validator.RutDigit;
     @NamedQuery(name = "Laborer.findByPhone", query = "SELECT l FROM Laborer l WHERE l.phone = :phone"),
     @NamedQuery(name = "Laborer.findByDateAdmission", query = "SELECT l FROM Laborer l WHERE l.dateAdmission = :dateAdmission"),
     @NamedQuery(name = "Laborer.findByContractId", query = "SELECT l FROM Laborer l WHERE l.contractId = :contractId"),
-    @NamedQuery(name = "Laborer.findByJobId", query = "SELECT l FROM Laborer l WHERE l.job = :job"),
     @NamedQuery(name = "Laborer.findByAfpId", query = "SELECT l FROM Laborer l WHERE l.afp = :afp"),
-    @NamedQuery(name = "Laborer.findByTeamId", query = "SELECT l FROM Laborer l WHERE l.teamId = :teamId")})
+    })
 public class Laborer implements Serializable {
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Basic(optional = false)
     @Column(name = "laborerId")
     private Long laborerId;
     @Basic(optional = false)
@@ -100,8 +97,6 @@ public class Laborer implements Serializable {
     private Date dateAdmission;
     @Column(name = "contractId")
     private Integer contractId;
-    @Column(name = "teamId")
-    private Long teamId;
     @Column(name="dependents")
     private Integer dependents;
     @Column(name="town")
@@ -111,13 +106,6 @@ public class Laborer implements Serializable {
     @Column(name="wedge")
     private Integer wedge;
 
-    @Convert(converter = JobConverter.class)
-    @Column(name = "job")
-    private Job job;
-    
-    @Column(name="jobCode")
-    private Integer jobCode;
-    
     @Column(name = "afp" , nullable = false)
     @Convert(converter = AfpConverter.class)
     private Afp afp;
@@ -137,8 +125,8 @@ public class Laborer implements Serializable {
     @Column(name="photo")
     private String photo;
     
-    @ManyToMany(mappedBy="laborers")//,fetch=FetchType.EAGER,cascade = { CascadeType.PERSIST, CascadeType.MERGE })
-    List<ConstructionSite> constructionSites;
+    @OneToMany(mappedBy="laborer", cascade = { CascadeType.REMOVE},orphanRemoval=true)//,fetch=FetchType.EAGER,cascade = { CascadeType.PERSIST, CascadeType.MERGE })
+    List<LaborerConstructionsite> laborerConstructionSites = new ArrayList<LaborerConstructionsite>();
     
 //    @OneToMany(mappedBy="laborer",fetch=FetchType.EAGER,cascade = { CascadeType.PERSIST, CascadeType.MERGE },orphanRemoval=true )
 //    List<Vacation> vacations = new ArrayList<Vacation>();
@@ -163,8 +151,6 @@ public class Laborer implements Serializable {
     		afp = Afp.MODELO;
     	if(maritalStatus == null )
     		maritalStatus = MaritalStatus.SOLTERO;
-    	if(job == null)
-    		job = Job.JORNAL;
     	if(isapre == null)
     		isapre = Isapre.FONASA;
     	if(nationality == null)
@@ -173,7 +159,6 @@ public class Laborer implements Serializable {
     }
     
     public Laborer() {
-    	constructionSites = new ArrayList<ConstructionSite>();
     }
 
     public Laborer(Long laborerId) {
@@ -345,14 +330,6 @@ public class Laborer implements Serializable {
         this.contractId = contractId;
     }
 
-    public Job getJob() {
-		return job;
-	}
-
-	public void setJob(Job job) {
-		this.job = job;
-	}
-
     public Afp getAfp() {
 		return afp;
 	}
@@ -360,31 +337,16 @@ public class Laborer implements Serializable {
 	public void setAfp(Afp afp) {
 		this.afp = afp;
 	}
-    
-    public Long getTeamId() {
-		return teamId;
+
+	public List<LaborerConstructionsite> getLaborerConstructionSites() {
+		return laborerConstructionSites;
 	}
 
-	public void setTeamId(Long teamId) {
-		this.teamId = teamId;
+	public void setLaborerConstructionSites(
+			List<LaborerConstructionsite> laborerConstructionSites) {
+		this.laborerConstructionSites = laborerConstructionSites;
 	}
 
-	public List<ConstructionSite> getConstructionSites() {
-		return constructionSites;
-	}
-
-	public void setConstructionSites(List<ConstructionSite> constructionSites) {
-		this.constructionSites = constructionSites;
-	}
-	
-	public Integer getJobCode() {
-		return jobCode;
-	}
-
-	public void setJobCode(Integer jobCode) {
-		this.jobCode = jobCode;
-	}
-	
 	public String getFullname(){
     	return firstname + " " +lastname;
     }

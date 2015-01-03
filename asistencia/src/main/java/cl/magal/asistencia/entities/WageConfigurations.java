@@ -29,7 +29,6 @@ public class WageConfigurations implements Serializable{
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Basic(optional = false)
     @Column(name = "wage_configurationsId")
 	Long wageConfigurationsId;
 	
@@ -45,10 +44,10 @@ public class WageConfigurations implements Serializable{
 	@Column(name ="mobilization")
 	Double mobilization;
 	
-	@ElementCollection(fetch=FetchType.EAGER)
+	@ElementCollection(targetClass=Mobilization2.class)
 	@CollectionTable(
 	        name="Mobilization2",
-	        joinColumns=@JoinColumn(name="wage_configurationsId")
+	        joinColumns=@JoinColumn(name="WAGE_CONFIGURATIONSID")
 	  )
 	List<Mobilization2> mobilizations2 = new LinkedList<Mobilization2>();
 	

@@ -19,8 +19,8 @@ import org.joda.time.Days;
 
 @Entity
 @Table(name="vacation")
-public class Vacation implements Serializable {
 
+public class Vacation implements Serializable {
 	/**
 	 * 
 	 */
@@ -40,13 +40,9 @@ public class Vacation implements Serializable {
 	Date toDate;
 	
 	@ManyToOne
-	@JoinColumn(name ="laborerId")
-	Laborer laborer;
+	@JoinColumn(name ="LABORER_CONSTRUCTIONSITEID")
+	LaborerConstructionsite laborerConstructionSite;
 	
-	@ManyToOne
-	@JoinColumn(name="constructionSiteId")
-	ConstructionSite constructionSite;
-
 	public Long getVacationId() {
 		return vacationId;
 	}
@@ -71,22 +67,15 @@ public class Vacation implements Serializable {
 		this.toDate = toDate;
 	}
 
-	public Laborer getLaborer() {
-		return laborer;
+	public LaborerConstructionsite getLaborerConstructionSite() {
+		return laborerConstructionSite;
 	}
 
-	public void setLaborer(Laborer laborer) {
-		this.laborer = laborer;
+	public void setLaborerConstructionSite(
+			LaborerConstructionsite laborerConstructionSite) {
+		this.laborerConstructionSite = laborerConstructionSite;
 	}
 
-	public ConstructionSite getConstructionSite() {
-		return constructionSite;
-	}
-
-	public void setConstructionSite(ConstructionSite constructionSite) {
-		this.constructionSite = constructionSite;
-	}
-	
 	public int getTotal(){
 		return Days.daysBetween(new DateTime(fromDate), new DateTime(toDate)).getDays();
 	}

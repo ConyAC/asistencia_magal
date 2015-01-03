@@ -20,9 +20,11 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToMany;
+import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
+import javax.persistence.PrePersist;
 import javax.persistence.Table;
 
 import cl.magal.asistencia.entities.converter.JobConverter;
@@ -50,15 +52,17 @@ public class LaborerConstructionsite implements Serializable {
 	@Id
     @Basic(optional = false)
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name="laborerConstructionsiteId")
+	@Column(name="LABORER_CONSTRUCTIONSITEID")
 	Long id;
 	
-    @Basic(optional = false)
+    @ManyToOne
     @JoinColumn(name = "laborerId")
     private Laborer laborer;
-    @Basic(optional = false)
-    @JoinColumn(name = "construction_siteId")
+    
+    @ManyToOne
+    @JoinColumn(name = "CONSTRUCTION_SITEID")
     private ConstructionSite constructionsite;
+    
     @Column(name = "active")
     private Short active;
     
@@ -69,32 +73,39 @@ public class LaborerConstructionsite implements Serializable {
     @Column(name="jobCode")
     private Integer jobCode;
     
-    @OneToMany(mappedBy="laborer",fetch=FetchType.EAGER,cascade = { CascadeType.PERSIST, CascadeType.MERGE },orphanRemoval=true )
+    @OneToMany(mappedBy="laborerConstructionSite",fetch=FetchType.EAGER,cascade = { CascadeType.MERGE,CascadeType.REMOVE,CascadeType.PERSIST },orphanRemoval=true )
     List<Vacation> vacations = new ArrayList<Vacation>();
     
-    @OneToMany(mappedBy="laborer",fetch=FetchType.EAGER,cascade = { CascadeType.PERSIST, CascadeType.MERGE },orphanRemoval=true )
+    @OneToMany(mappedBy="laborerConstructionSite",fetch=FetchType.EAGER,cascade = { CascadeType.MERGE,CascadeType.REMOVE,CascadeType.PERSIST },orphanRemoval=true )
     List<Absence> absences = new ArrayList<Absence>();
     
-    @OneToMany(mappedBy="laborer",fetch=FetchType.EAGER,cascade = { CascadeType.PERSIST, CascadeType.MERGE },orphanRemoval=true )
+    @OneToMany(mappedBy="laborerConstructionSite",fetch=FetchType.EAGER,cascade = { CascadeType.MERGE,CascadeType.REMOVE,CascadeType.PERSIST },orphanRemoval=true )
     List<Accident> accidents = new ArrayList<Accident>();
     
-    @OneToMany(targetEntity=Tool.class,fetch=FetchType.EAGER)
+    @OneToMany(mappedBy="laborerConstructionSite",fetch=FetchType.EAGER,cascade = { CascadeType.MERGE,CascadeType.REMOVE,CascadeType.PERSIST },orphanRemoval=true )
     List<Tool> tool = new ArrayList<Tool>();
     
-    @ManyToMany(mappedBy="laborers",cascade = { CascadeType.PERSIST, CascadeType.MERGE })
-    List<Team> teams = new ArrayList<Team>();
+//    @ManyToMany(mappedBy="laborers")
+//    List<Team> teams = new ArrayList<Team>();
 
+    
+    @PrePersist
+    public void prePersist(){
+    	if(job == null)
+    		job = Job.JORNAL;
+    }
+    
     public LaborerConstructionsite() {
     }
 
 
-    public List<Team> getTeams() {
-		return teams;
-	}
-
-	public void setTeams(List<Team> teams) {
-		this.teams = teams;
-	}
+//    public List<Team> getTeams() {
+//		return teams;
+//	}
+//
+//	public void setTeams(List<Team> teams) {
+//		this.teams = teams;
+//	}
 
 	public Integer getJobCode() {
 		return jobCode;
@@ -115,14 +126,14 @@ public class LaborerConstructionsite implements Serializable {
 	public void addVacation(Vacation vacation) {
         if (!getVacations().contains(vacation)) {
         	getVacations().add(vacation);
-        	vacation.setLaborer(this.laborer);
+        	vacation.setLaborerConstructionSite(this);
         }
     }
 	
 	public void removeVacation(Vacation vacation) {
         if (getVacations().contains(vacation)) {
         	getVacations().remove(vacation);
-        	vacation.setLaborer(null);
+        	vacation.setLaborerConstructionSite(null);
         }
     }
     	
@@ -134,14 +145,14 @@ public class LaborerConstructionsite implements Serializable {
 		this.tool = tool;
 	}
 	
-	public void addTeam(Team team) {
-        if (!getTeams().contains(team)) {
-        	getTeams().add(team);
-        }
-        if (!team.getLaborers().contains(this)) {
-        	team.getLaborers().add(this);
-        }
-    }
+//	public void addTeam(Team team) {
+//        if (!getTeams().contains(team)) {
+//        	getTeams().add(team);
+//        }
+//        if (!team.getLaborers().contains(this)) {
+//        	team.getLaborers().add(this);
+//        }
+//    }
     
     public List<Absence> getAbsences() {
 		return absences;
@@ -154,14 +165,14 @@ public class LaborerConstructionsite implements Serializable {
 	public void addAbsence(Absence absence) {
         if (!getAbsences().contains(absence)) {
         	getAbsences().add(absence);
-        	absence.setLaborer(this.laborer);
+        	absence.setLaborerConstructionSite(this);
         }
     }
 	
 	public void removeAbsence(Absence absence) {
         if (getAbsences().contains(absence)) {
         	getAbsences().remove(absence);
-        	absence.setLaborer(null);
+        	absence.setLaborerConstructionSite(null);
         }
     }
     
@@ -176,14 +187,14 @@ public class LaborerConstructionsite implements Serializable {
 	public void addAccident(Accident accident) {
 		if (!getAccidents().contains(accident)) {
         	getAccidents().add(accident);
-        	accident.setLaborer(this.laborer);
+        	accident.setLaborerConstructionSite(this);
         }
 	}
 	
 	public void removeAccident(Accident accident) {
         if (getAccidents().contains(accident)) {
         	getAccidents().remove(accident);
-        	accident.setLaborer(null);
+        	accident.setLaborerConstructionSite(null);
         }
     }
 	
@@ -235,8 +246,7 @@ public class LaborerConstructionsite implements Serializable {
 	public void setJob(Job job) {
 		this.job = job;
 	}
-
-
+	
 	@Override
 	public int hashCode() {
 		final int prime = 31;

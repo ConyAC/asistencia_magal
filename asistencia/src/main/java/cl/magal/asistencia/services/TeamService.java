@@ -2,8 +2,6 @@ package cl.magal.asistencia.services;
 
 import java.util.List;
 
-import javax.transaction.Transactional;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,7 +9,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import cl.magal.asistencia.entities.ConstructionSite;
 import cl.magal.asistencia.entities.Laborer;
 import cl.magal.asistencia.entities.Team;
 import cl.magal.asistencia.repositories.LaborerRepository;
@@ -44,10 +41,9 @@ public class TeamService {
 		return rep.findAll(page);
 	}
 	
-	@Transactional
 	public void addLaborerToTeam(Laborer laborer, Team t) {		
 		Team dbt = rep.findOne(t.getTeamId());
-		laborer.setTeamId(t.getTeamId());
+//		laborer.setTeamId(t.getTeamId());
 		labRepo.save(laborer);
 		rep.save(dbt);
 	}

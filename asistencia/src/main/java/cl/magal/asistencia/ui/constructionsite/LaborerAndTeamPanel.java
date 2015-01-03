@@ -726,9 +726,9 @@ public class LaborerAndTeamPanel extends Panel implements View {
 		laborerContainer.removeAllItems();
 		laborerContainer.addAll(laborers);
 		
-		List<Team> teams = constructionSiteService.getTeamsByConstruction(item.getBean());
-		teamContainer.removeAllItems();
-		teamContainer.addAll(teams);
+//		List<Team> teams = constructionSiteService.getTeamsByConstruction(item.getBean());
+//		teamContainer.removeAllItems();
+//		teamContainer.addAll(teams);
 	}
 	
 	protected void setEnabledDetail(boolean enable,BeanItem<ConstructionSite> item) {

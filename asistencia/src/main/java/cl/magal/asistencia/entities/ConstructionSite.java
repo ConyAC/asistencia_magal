@@ -88,8 +88,8 @@ public class ConstructionSite implements Serializable {
     @ManyToMany(targetEntity=Laborer.class,fetch=FetchType.EAGER,cascade = { CascadeType.PERSIST, CascadeType.MERGE })
     List<Laborer> laborers = new LinkedList<Laborer>();
     
-    @OneToMany(targetEntity=Team.class,fetch=FetchType.EAGER)
-    List<Team> teams = new LinkedList<Team>();
+//    @OneToMany(targetEntity=Team.class,fetch=FetchType.EAGER)
+//    List<Team> teams = new LinkedList<Team>();
     
     @ManyToMany(mappedBy="cs",cascade = { CascadeType.PERSIST, CascadeType.MERGE })
     List<User> users;
@@ -176,13 +176,13 @@ public class ConstructionSite implements Serializable {
 		this.personInCharge = personInCharge;
 	}
 	
-	public List<Team> getTeams() {
-		return teams;
-	}
-
-	public void setTeams(List<Team> teams) {
-		this.teams = teams;
-	}
+//	public List<Team> getTeams() {
+//		return teams;
+//	}
+//
+//	public void setTeams(List<Team> teams) {
+//		this.teams = teams;
+//	}
 	
 	public List<User> getUsers() {
 		if(users == null)
@@ -221,22 +221,20 @@ public class ConstructionSite implements Serializable {
         return "jpa.magal.entities.ConstructionSite[ constructionsiteId=" + constructionsiteId + " ]";
     }
 
-    public void addLaborer(Laborer laborer) {
-        if (!getLaborers().contains(laborer)) {
-        	logger.debug("agregando laborer "+laborer);
-        	getLaborers().add(laborer);
-        }
-        if (!laborer.getConstructionSites().contains(this)) {
-            laborer.getConstructionSites().add(this);
-        }
-    }
-    
-    public void addTeam(Team team) {
-        if (!getTeams().contains(team)) {
-        	getTeams().add(team);
-        }
-
-        
-    }
+//    public void addLaborer(Laborer laborer) {
+//        if (!getLaborers().contains(laborer)) {
+//        	logger.debug("agregando laborer "+laborer);
+//        	getLaborers().add(laborer);
+//        }
+//        if (!laborer.getConstructionSites().contains(this)) {
+//            laborer.getConstructionSites().add(this);
+//        }
+//    }
+//    
+//    public void addTeam(Team team) {
+//        if (!getTeams().contains(team)) {
+//        	getTeams().add(team);
+//        }
+//    }
     
 }

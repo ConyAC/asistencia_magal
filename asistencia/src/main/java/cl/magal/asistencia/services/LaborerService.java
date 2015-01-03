@@ -3,6 +3,8 @@ package cl.magal.asistencia.services;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -19,6 +21,8 @@ import cl.magal.asistencia.util.Utils;
 
 @Service
 public class LaborerService {
+	
+	Logger logger = LoggerFactory.getLogger(LaborerService.class);
 
 	@Autowired
 	LaborerRepository rep;
@@ -27,8 +31,9 @@ public class LaborerService {
 	@Autowired
 	ConstructionSiteRepository constructionSiteRepo;
 	
-	public void saveLaborer(Laborer l) {
-		rep.save(l);
+	public Laborer saveLaborer(Laborer l) {
+		Laborer laborer = rep.save(l);
+		return laborer;
 	}
 	
 	public Laborer findLaborer(Long id){
@@ -39,8 +44,8 @@ public class LaborerService {
 		return (Integer) rep.findRawJobLaborer(id);
 	}
 	
-	public void deleteLaborer(Long id){
-		rep.delete(id);
+	public void delete(Laborer laborer){
+		rep.delete(laborer);
 	}
 	
 	public Page<LaborerConstructionsite> findAllLaborerConstructionsite(Pageable page) {
@@ -52,13 +57,13 @@ public class LaborerService {
 		List<HistoryVO> result =  new ArrayList<HistoryVO>();
 		//busca todas las obras en que ha trabajado
 		List<ConstructionSite> constructionSites = constructionSiteRepo.findByLaborers(laborer);
-		laborer.setConstructionSites(constructionSites);
+//		laborer.setConstructionSites(constructionSites);
 		//por cada una crea un vo
 		for(ConstructionSite constructionSite : constructionSites ){
 			HistoryVO vo = new HistoryVO();
 			vo.setConstructionSite(constructionSite);
 			//considerar el job historico
-			vo.setJob(laborer.getJob()); 
+//			vo.setJob(laborer.getJob()); 
 			vo.setAverageWage(Double.valueOf(Utils.random(9000, 15000)));
 			vo.setNumberOfAccidents(Utils.random(0, 15));
 			vo.setReward(Double.valueOf(Utils.random(19000, 150000)));
@@ -68,14 +73,21 @@ public class LaborerService {
 		return result;
 	}
 
-	public LaborerConstructionsite findLaborerOnConstructionSite(
-			LaborerConstructionsite lc) {
-		// TODO Auto-generated method stub
-		return null;
+	/**
+	 * Permite recuperar la información de un obrero en una obra en particular
+	 * @param constructionsite
+	 * @param laborer
+	 * @return
+	 */
+	public LaborerConstructionsite findLaborerOnConstructionSite(ConstructionSite constructionsite,Laborer laborer) {
+		return repConstruction.findByConstructionsiteAndLaborer(constructionsite,laborer);
 	}
 
-	public void save(LaborerConstructionsite laborer) {
-		// TODO Auto-generated method stub
-		
+	/**
+	 * Permite guardar toda la información de un obrero dentro de una obra
+	 * @param laborerConstructionSite
+	 */
+	public void save(LaborerConstructionsite laborerConstructionSite) {
+		repConstruction.save(laborerConstructionSite);
 	}
 }

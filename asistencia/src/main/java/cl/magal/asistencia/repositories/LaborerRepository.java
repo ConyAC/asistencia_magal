@@ -8,7 +8,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 
-import cl.magal.asistencia.entities.ConstructionSite;
 import cl.magal.asistencia.entities.Laborer;
 
 public interface LaborerRepository extends PagingAndSortingRepository<Laborer, Long> {
@@ -18,7 +17,8 @@ public interface LaborerRepository extends PagingAndSortingRepository<Laborer, L
 	@Query(value="SELECT l.job FROM laborer l WHERE l.laborerId = :id " , nativeQuery=true)
 	Integer findRawJobLaborer(@Param("id") Long id);
 
-	@Query(value="SELECT l.* FROM laborer l left join laborer_constructionsite lc on lc.laborerId = l.laborerId WHERE lc.construction_siteId = :id " , nativeQuery=true)
+//	@Query(value="SELECT l.* FROM laborer l left join laborer_constructionsite lc on lc.laborerId = l.laborerId WHERE lc.construction_siteId = :id " , nativeQuery=true)
+	@Query(value="SELECT lc.laborer FROM LaborerConstructionsite lc WHERE lc.constructionsite.constructionsiteId = :id ")
 	List<Laborer> findByConstructionSite(@Param("id")Long csId);
 	
 	@Query(value="SELECT l.* FROM laborer l WHERE l.teamId = :id " , nativeQuery=true)

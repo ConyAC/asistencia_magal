@@ -49,8 +49,8 @@ public class Absence implements Serializable {
 	String description;
 	
 	@ManyToOne
-	@JoinColumn(name="laborerId")
-	Laborer laborer;
+	@JoinColumn(name="LABORER_CONSTRUCTIONSITEID")
+	LaborerConstructionsite laborerConstructionSite;
 	
 	@Column(name="absence_type")
 	@Convert(converter = AbsenceTypeConverter.class)
@@ -88,14 +88,6 @@ public class Absence implements Serializable {
 		this.description = description;
 	}
 
-	public Laborer getLaborer() {
-		return laborer;
-	}
-
-	public void setLaborer(Laborer laborer) {
-		this.laborer = laborer;
-	}
-
 	public AbsenceType getAbsenceType() {
 		return absenceType;
 	}
@@ -107,5 +99,14 @@ public class Absence implements Serializable {
 	public int getTotal(){
 		return Days.daysBetween(new DateTime(fromDate), new DateTime(toDate)).getDays();
 	}
-	
+
+	public LaborerConstructionsite getLaborerConstructionSite() {
+		return laborerConstructionSite;
+	}
+
+	public void setLaborerConstructionSite(
+			LaborerConstructionsite laborerConstructionSite) {
+		this.laborerConstructionSite = laborerConstructionSite;
+	}
+		
 }

@@ -4,7 +4,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
-import javax.transaction.Transactional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,7 +71,6 @@ public class ConstructionSiteService {
 		labRepo.save(laborer);
 	}
 
-	@Transactional
 	public ConstructionSite findConstructionSite(Long id) {
 		ConstructionSite cs =repo2.findOneNotDeleted(id);
 		if(cs != null){
@@ -119,38 +117,36 @@ public class ConstructionSiteService {
 		return laborers;
 	}
 
-	@Transactional
 	public void addLaborerToConstructionSite(Laborer laborer, ConstructionSite cs) {
 		
 		ConstructionSite dbcs = repo2.findOne(cs.getConstructionsiteId());
 		logger.debug("laborer "+laborer );
 //		laborer.addConstructionSite(dbcs);
 		labRepo.save(laborer); //FIXME
-		dbcs.addLaborer(laborer);
+//		dbcs.addLaborer(laborer);
 		logger.debug("dbcs.getLaborer( ) "+dbcs.getLaborers() );
 		repo2.save(dbcs);
 	}
 
-	@Transactional
 	public void addTeamToConstructionSite(Team team, ConstructionSite cs) {
 		
 		ConstructionSite dbcs = repo2.findOne(cs.getConstructionsiteId());		
 		logger.debug("dbcs "+dbcs);
 		teamRepo.save(team);
-		dbcs.addTeam(team);	
-		logger.debug("dbcs team "+dbcs.getTeams());
+//		dbcs.addTeam(team);	
+//		logger.debug("dbcs team "+dbcs.getTeams());
 	}
 
-	public List<Team> getTeamsByConstruction(ConstructionSite cs) {
-		logger.debug("cs "+cs);
-		List<Team> teamAlls = (List<Team>) teamRepo.findAll();
-		for(Team t : teamAlls){
-			logger.debug("t "+t);
-		}
-		List<Team> teams = teamRepo.findByConstructionsite(cs);
-		logger.debug("teams "+teams);
-		return teams;
-	}
+//	public List<Team> getTeamsByConstruction(ConstructionSite cs) {
+//		logger.debug("cs "+cs);
+//		List<Team> teamAlls = (List<Team>) teamRepo.findAll();
+//		for(Team t : teamAlls){
+//			logger.debug("t "+t);
+//		}
+//		List<Team> teams = teamRepo.findByConstructionsite(cs);
+//		logger.debug("teams "+teams);
+//		return teams;
+//	}
 
 	/**
 	 * permite borrar toda la tabla
