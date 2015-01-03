@@ -37,6 +37,11 @@
 	<bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean" >
 		<property name="dataSource" ref="datasource"></property>
 		<property name="persistenceUnitName" value="persistenceUnit"></property>
+		<property name="jpaPropertyMap">
+			<map>
+				<entry key="eclipselink.weaving" value="false" />
+			</map>
+		</property>
 	</bean>
 	
 	<!--  Transacción manager -->

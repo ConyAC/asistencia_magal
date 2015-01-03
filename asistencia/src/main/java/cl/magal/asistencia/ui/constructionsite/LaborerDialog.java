@@ -627,7 +627,7 @@ public class LaborerDialog extends AbstractWindowEditor {
 					afpField.addItem(a);
 				}
 				detalleObrero.addComponent(afpField);
-				bind(afpField, "afp");   
+				bind(afpField, "laborer.afp");   
 				detalleObrero.setComponentAlignment(afpField, Alignment.MIDDLE_CENTER);
 			}else if(propertyId.equals("job")){
 				ComboBox jobField = new ComboBox("Oficio");
@@ -645,11 +645,11 @@ public class LaborerDialog extends AbstractWindowEditor {
 					msField.addItem(ms);
 				}
 				detalleObrero.addComponent(msField);
-				bind(msField, "maritalStatus");   
+				bind(msField, "laborer.maritalStatus");   
 				detalleObrero.setComponentAlignment(msField, Alignment.MIDDLE_CENTER);
 			}else{        		
 				String t = tradProperty(propertyId);
-				Field field = buildAndBind(t, propertyId);
+				Field field = buildAndBind(t, "laborer."+propertyId);
 				if(field instanceof TextField){
 					((TextField)field).setNullRepresentation("");
 				}

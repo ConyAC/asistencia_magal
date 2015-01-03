@@ -123,6 +123,7 @@ public class LaborerAndTeamPanel extends Panel implements View {
 
 	public LaborerAndTeamPanel() {
 		teamContainer.addNestedContainerProperty("leader.firstname");
+		laborerContainer.addNestedContainerBean("laborer");
 		//crea el tab con trabajadores y cuadrillas
 		TabSheet tab = new TabSheet();
 		tab.setSizeFull();
@@ -437,7 +438,8 @@ public class LaborerAndTeamPanel extends Panel implements View {
 		table.setSizeFull();
 		table.setFilterBarVisible(true);
 		//TODO estado
-		table.setVisibleColumns("laborer.job","laborer.firstname","laborer.laborerId"); //FIXME laborerId
+//		table.setVisibleColumns("laborer.job","laborer.firstname","laborer.laborerId"); //FIXME laborerId
+		table.setVisibleColumns("job","laborer.firstname","laborer.laborerId"); //FIXME laborerId
 		table.setColumnHeaders("Cod","Nombre","Estado");
 		table.setSelectable(true);
 		

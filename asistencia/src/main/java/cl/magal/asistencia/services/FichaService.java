@@ -20,10 +20,10 @@ public class FichaService {
 	public ConstructionSite findConstructionSite(Long id){
 		return rep.findOneNotDeleted(id);
 	}
-	
-	public ConstructionSite findByAddress(String address){
-		return rep.findByAddress(address).get(0);
-	}
+//	
+//	public ConstructionSite findByAddress(String address){
+//		return rep.findByAddress(address).get(0);
+//	}
 	
 /*
 	public Obra findObraByNombre(String nombre) {

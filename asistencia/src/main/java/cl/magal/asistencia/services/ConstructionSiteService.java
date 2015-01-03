@@ -29,7 +29,7 @@ public class ConstructionSiteService {
 	Logger logger = LoggerFactory.getLogger(ConstructionSiteService.class);
 	
 	@Autowired
-	ConstructionSiteRepository repo2;
+	ConstructionSiteRepository constructionSiterepo;
 	@Autowired
 	LaborerRepository labRepo;
 	@Autowired
@@ -39,32 +39,10 @@ public class ConstructionSiteService {
 	
 	@PostConstruct
 	public void init(){
-		//si no existe obras crea 2 de muestra
-		
-		List<ConstructionSite> obras = repo2.findAllNotDeteled();
-		if( obras.isEmpty() ){
-
-			ConstructionSite obra = new ConstructionSite();
-			obra.setName("Edificio Jardines de Olivares");
-			obra.setStatus(Status.ACTIVE);
-			obra.setAddress("");
-			obra.setDeleted(false);
-			
-			repo2.save(obra);
-			
-			obra = new ConstructionSite();
-			obra.setName("Edificio Parque Sebastián Elcano");
-			obra.setStatus(Status.ACTIVE);
-			obra.setAddress("");
-			obra.setDeleted(false);
-			
-			repo2.save(obra);
-		}
-		
 	}
 	
 	public void save(ConstructionSite obra) {
-		repo2.save(obra);
+		constructionSiterepo.save(obra);
 	}
 	
 	public void save(Laborer laborer) {
@@ -72,7 +50,7 @@ public class ConstructionSiteService {
 	}
 
 	public ConstructionSite findConstructionSite(Long id) {
-		ConstructionSite cs =repo2.findOneNotDeleted(id);
+		ConstructionSite cs =constructionSiterepo.findOneNotDeleted(id);
 		if(cs != null){
 			//recupera la lista de trabajadores
 			List<Laborer> lbs = labRepo.findByConstructionSite(id);
@@ -82,28 +60,28 @@ public class ConstructionSiteService {
 	}
 
 	public Page<ConstructionSite> findAllConstructionSite(Pageable page) {
-		return repo2.findAllNotDeteled(page);
+		return constructionSiterepo.findAllNotDeteled(page);
 	}
 
 	public ConstructionSite findConstructionSiteByNombre(String nombre) {
-		return repo2.findByName(nombre);
+		return constructionSiterepo.findByName(nombre);
 	}
 
 	public ConstructionSite findConstructionSiteByDireccion(String direccion) {
-		return repo2.findByComplicada(direccion).get(0);
+		return constructionSiterepo.findByComplicada(direccion).get(0);
 	}
 	
 	public void deleteCS(Long id){
-		ConstructionSite cs = repo2.findOne(id);
+		ConstructionSite cs = constructionSiterepo.findOne(id);
 		if(cs == null )
 			throw new RuntimeException("El elemento que se trata de eliminar no existe");
 		cs.setDeleted(true);
-		repo2.save(cs);
+		constructionSiterepo.save(cs);
 	}
 	
-	public Integer findRawStatusCS(Long id) {
-		return (Integer) repo2.findRawStatusCS(id);
-	}
+//	public Integer findRawStatusCS(Long id) {
+//		return (Integer) constructionSiterepo.findRawStatusCS(id);
+//	}
 	
 	public Page<Laborer> findLaborerByConstruction(ConstructionSite fisrt) {
 		Page<Laborer> page = new PageImpl<Laborer>(
@@ -119,18 +97,18 @@ public class ConstructionSiteService {
 
 	public void addLaborerToConstructionSite(Laborer laborer, ConstructionSite cs) {
 		
-		ConstructionSite dbcs = repo2.findOne(cs.getConstructionsiteId());
+		ConstructionSite dbcs = constructionSiterepo.findOne(cs.getConstructionsiteId());
 		logger.debug("laborer "+laborer );
 //		laborer.addConstructionSite(dbcs);
 		labRepo.save(laborer); //FIXME
 //		dbcs.addLaborer(laborer);
 		logger.debug("dbcs.getLaborer( ) "+dbcs.getLaborers() );
-		repo2.save(dbcs);
+		constructionSiterepo.save(dbcs);
 	}
 
 	public void addTeamToConstructionSite(Team team, ConstructionSite cs) {
 		
-		ConstructionSite dbcs = repo2.findOne(cs.getConstructionsiteId());		
+		ConstructionSite dbcs = constructionSiterepo.findOne(cs.getConstructionsiteId());		
 		logger.debug("dbcs "+dbcs);
 		teamRepo.save(team);
 //		dbcs.addTeam(team);	
@@ -152,7 +130,7 @@ public class ConstructionSiteService {
 	 * permite borrar toda la tabla
 	 */
 	public void clear() {
-		repo2.deleteAll();
+		constructionSiterepo.deleteAll();
 	}
 
 }

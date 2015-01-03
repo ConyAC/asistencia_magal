@@ -45,7 +45,7 @@ public class UserService implements UserDetailsService {
 	@Autowired
 	ConstructionSiteRepository repoCS;
 	
-	@PostConstruct
+//	@PostConstruct
 	public void init(){
 		//si no existe un usuario admin, lo crea
 		String userName = "admin@admin.com";
@@ -173,6 +173,9 @@ public class UserService implements UserDetailsService {
 	 */
 	@Override
 	  public UserDetails loadUserByUsername(String userName) throws UsernameNotFoundException {
+		//SOLO PARA TESTING CREA USUARIOS SI NO EXISTEN
+		init();
+		
 		//recupera el usuario desde base de datos
 		cl.magal.asistencia.entities.User entityUser = rep.findByEmail(userName);
 		if( entityUser == null ){
