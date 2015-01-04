@@ -222,6 +222,7 @@ public class ConstructionSitesView extends BaseView implements View {
 
 	@Override
 	public void enter(ViewChangeEvent event) {
+		
 		//oculta el boton de detroceso
 		((MagalUI)UI.getCurrent()).setBackVisible(false);
 		((MagalUI)UI.getCurrent()).highlightMenuItem(NAME);

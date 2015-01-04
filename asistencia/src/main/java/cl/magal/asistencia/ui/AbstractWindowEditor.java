@@ -149,9 +149,13 @@ public abstract class AbstractWindowEditor extends Window implements ClickListen
 				return;
 			}
 			try {
-				preCommit();
+				if(!preCommit())
+					return;
 				getBinder().commit();
-				postCommit();
+				
+				if(!postCommit())
+					return;
+				
 				fireEvent(new EditorSavedEvent(this, item));
 			} catch (EmptyValueException e){
 				Notification.show("Falta un campo requerido",Type.HUMANIZED_MESSAGE);
@@ -172,12 +176,12 @@ public abstract class AbstractWindowEditor extends Window implements ClickListen
 		close();
 	}
 	
-	protected void preCommit(){
-		
+	protected boolean preCommit(){
+		return true;
 	}
 	
-	protected void postCommit(){
-		
+	protected boolean postCommit(){
+		return true;
 	}
 	
 	/**

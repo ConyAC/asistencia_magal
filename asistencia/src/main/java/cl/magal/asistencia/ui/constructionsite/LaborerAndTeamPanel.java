@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
+import javax.validation.ConstraintViolationException;
 
 import org.apache.velocity.app.VelocityEngine;
 import org.slf4j.Logger;
@@ -14,10 +15,10 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.TransactionSystemException;
 import org.tepi.filtertable.FilterTable;
 
 import cl.magal.asistencia.entities.ConstructionSite;
-import cl.magal.asistencia.entities.Laborer;
 import cl.magal.asistencia.entities.LaborerConstructionsite;
 import cl.magal.asistencia.entities.Team;
 import cl.magal.asistencia.entities.User;
@@ -31,6 +32,7 @@ import cl.magal.asistencia.services.UserService;
 import cl.magal.asistencia.ui.AbstractWindowEditor;
 import cl.magal.asistencia.ui.AbstractWindowEditor.EditorSavedEvent;
 import cl.magal.asistencia.util.SecurityHelper;
+import cl.magal.asistencia.util.Utils;
 
 import com.vaadin.data.Property;
 import com.vaadin.data.fieldgroup.BeanFieldGroup;
@@ -448,25 +450,38 @@ public class LaborerAndTeamPanel extends Panel implements View {
 			@Override
 			public void itemClick(ItemClickEvent event) {
 				
-				LaborerDialog userWindow = new LaborerDialog((BeanItem) event.getItem(),laborerService);
+				final BeanItem<LaborerConstructionsite> beanItem = (BeanItem<LaborerConstructionsite>) event.getItem();
+				LaborerDialog userWindow = new LaborerDialog(beanItem,laborerService){
+					@Override
+					protected boolean postCommit() {
+						final ConstructionSite cs = item.getBean();
+						if(cs == null){
+							Notification.show("Debe seleccionar una obra",Type.ERROR_MESSAGE);
+							return false;
+						}
+						try {
+//			    			LaborerConstructionsite laborer = ((BeanItem<LaborerConstructionsite>) event.getSavedItem()).getBean();
+							LaborerConstructionsite laborer = beanItem.getBean();
+			    			laborerService.save(laborer);	
+			    			return true;
+			    		} catch (TransactionSystemException e) {
+			    			ConstraintViolationException e1 = (ConstraintViolationException) e.getCause().getCause();
+			    			logger.error("TransactionSystemException {}",e1);
+			    			Notification.show("Error al validar los datos:\n"+Utils.printConstraintMessages(e1.getConstraintViolations()), Type.ERROR_MESSAGE);
+			    			return false;
+			    		}catch (Exception e){
+			    			logger.error("Error al guardar la información del obrero",e);
+			    			Notification.show("Ocurrió un error al intentar guardar el trabajador", Type.ERROR_MESSAGE);
+			    			return false;
+			    		}
+					}
+				};
 				
 				userWindow.addListener(new AbstractWindowEditor.EditorSavedListener() {
 					
 					@Override
 					public void editorSaved(EditorSavedEvent event) {
-						final ConstructionSite cs = item.getBean();
-						if(cs == null){
-							Notification.show("Debe seleccionar una obra",Type.ERROR_MESSAGE);
-							return;
-						}
-						try {
-			    			LaborerConstructionsite laborer = ((BeanItem<LaborerConstructionsite>) event.getSavedItem()).getBean();
-			    			laborerService.save(laborer);				
-			    			laborerContainer.addBean(laborer);
-			    		} catch (Exception e) {
-			    			logger.error("Error al guardar la información del obrero",e);
-			    			Notification.show("Es necesario agregar todos los campos obligatorios", Type.ERROR_MESSAGE);
-			    		}
+						
 					}
 				});
 		        

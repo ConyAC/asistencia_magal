@@ -80,8 +80,8 @@ public class Laborer implements Serializable {
     private String secondlastname;
     @NotNull(message="El rut es necesario")
     @Column(name = "rut", nullable=false)
-    @Pattern(regexp="^([0-9])+\\-([kK0-9])+$",message="El rut no es válido.")
-    @RutDigit(message="El rut no es válido.")
+    @Pattern(regexp="^([0-9])+\\-([kK0-9])+$",message="El rut '%s' no es válido.")
+    @RutDigit(message="El rut '%s' no es válido.")
     private String rut;
     @Column(name = "dateBirth")
     @Temporal(TemporalType.TIMESTAMP)
