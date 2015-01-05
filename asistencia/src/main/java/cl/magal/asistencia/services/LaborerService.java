@@ -22,34 +22,34 @@ import cl.magal.asistencia.util.Utils;
 @Service
 public class LaborerService {
 	
-	Logger logger = LoggerFactory.getLogger(LaborerService.class);
+	transient Logger logger = LoggerFactory.getLogger(LaborerService.class);
 
 	@Autowired
-	LaborerRepository rep;
+	LaborerRepository laborerRepo;
 	@Autowired
-	LaborerConstructionsiteRepository repConstruction;
+	LaborerConstructionsiteRepository laborerConstructionsiteRepo;
 	@Autowired
 	ConstructionSiteRepository constructionSiteRepo;
 	
 	public Laborer saveLaborer(Laborer l) {
-		Laborer laborer = rep.save(l);
+		Laborer laborer = laborerRepo.save(l);
 		return laborer;
 	}
 	
 	public Laborer findLaborer(Long id){
-		return rep.findOne(id);
+		return laborerRepo.findOne(id);
 	}
 	
 	public Integer findRawJobLaborer(Long id) {
-		return (Integer) rep.findRawJobLaborer(id);
+		return (Integer) laborerRepo.findRawJobLaborer(id);
 	}
 	
 	public void delete(Laborer laborer){
-		rep.delete(laborer);
+		laborerRepo.delete(laborer);
 	}
 	
 	public Page<LaborerConstructionsite> findAllLaborerConstructionsite(Pageable page) {
-		return repConstruction.findAll(page);
+		return laborerConstructionsiteRepo.findAll(page);
 	}
 
 	public List<HistoryVO> getLaborerHistory(Laborer laborer) {
@@ -80,7 +80,7 @@ public class LaborerService {
 	 * @return
 	 */
 	public LaborerConstructionsite findLaborerOnConstructionSite(ConstructionSite constructionsite,Laborer laborer) {
-		return repConstruction.findByConstructionsiteAndLaborer(constructionsite,laborer);
+		return laborerConstructionsiteRepo.findByConstructionsiteAndLaborer(constructionsite,laborer);
 	}
 
 	/**
@@ -88,6 +88,12 @@ public class LaborerService {
 	 * @param laborerConstructionSite
 	 */
 	public void save(LaborerConstructionsite laborerConstructionSite) {
-		repConstruction.save(laborerConstructionSite);
+		laborerConstructionsiteRepo.save(laborerConstructionSite);
+//		//si no existe, guarda el objeto laborar-constructionsite
+//		if(laborerConstructionSite.getId() == null )
+//			laborerConstructionsiteRepo.save(laborerConstructionSite);
+//		//guarda los elementos importantes
+//		laborerRepo.save(laborerConstructionSite.getLaborer());
+		
 	}
 }

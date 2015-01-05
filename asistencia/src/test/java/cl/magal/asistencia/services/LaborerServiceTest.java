@@ -32,13 +32,13 @@ import cl.magal.asistencia.helpers.LaborerHelper;
 @Transactional
 public class LaborerServiceTest {
 	
-	Logger logger = LoggerFactory.getLogger(LaborerServiceTest.class);
+	transient Logger logger = LoggerFactory.getLogger(LaborerServiceTest.class);
 
 	@Autowired
-	LaborerService service;
+	transient LaborerService service;
 	
 	@Autowired
-	ConstructionSiteService constructionService;
+	transient ConstructionSiteService constructionService;
 
 	/**
 	 * Agregar una vacación

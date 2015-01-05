@@ -73,8 +73,8 @@ public class LaborerDialog extends AbstractWindowEditor {
 	BeanItemContainer<HistoryVO> historyContainer = new BeanItemContainer<HistoryVO>(HistoryVO.class);
 
 	@Autowired
-	LaborerService service;
-	private VelocityEngine velocityEngine;
+	transient LaborerService service;
+	transient private VelocityEngine velocityEngine;
 	
 	public LaborerDialog(BeanItem<LaborerConstructionsite> item,LaborerService service ){
 		super(item);
@@ -107,7 +107,7 @@ public class LaborerDialog extends AbstractWindowEditor {
 		//tab de Resumen
 		//tab.addTab(drawInfo(),"Resumen"); -> no cuando se está creando.
 		//tab de Información
-		tab.addTab(drawInfo(),"Información");
+		tab.addTab(drawInfo(),"Información4");
 		//tab de vacaciones
 		tab.addTab(drawVacations(),"Vacaciones");
 		//tab de perstamos y herramientas

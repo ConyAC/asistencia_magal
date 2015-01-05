@@ -102,7 +102,7 @@ public class LaborerAndTeamPanel extends Panel implements View {
 	@Autowired
 	transient LaborerService laborerService;
 	@Autowired
-	private VelocityEngine velocityEngine;
+	transient private VelocityEngine velocityEngine;
 	
 	Button asistenciaBtn;
 	
@@ -451,6 +451,7 @@ public class LaborerAndTeamPanel extends Panel implements View {
 			public void itemClick(ItemClickEvent event) {
 				
 				final BeanItem<LaborerConstructionsite> beanItem = (BeanItem<LaborerConstructionsite>) event.getItem();
+				logger.debug("laborer constructionsite click item {} rut {} ",beanItem.getBean(),beanItem.getBean().getLaborer().getRut());
 				LaborerDialog userWindow = new LaborerDialog(beanItem,laborerService){
 					@Override
 					protected boolean postCommit() {
@@ -462,6 +463,7 @@ public class LaborerAndTeamPanel extends Panel implements View {
 						try {
 //			    			LaborerConstructionsite laborer = ((BeanItem<LaborerConstructionsite>) event.getSavedItem()).getBean();
 							LaborerConstructionsite laborer = beanItem.getBean();
+							logger.debug("laborer constructionsite {}, rut {} postcommit ",laborer,laborer.getLaborer().getRut());
 			    			laborerService.save(laborer);	
 			    			return true;
 			    		} catch (TransactionSystemException e) {

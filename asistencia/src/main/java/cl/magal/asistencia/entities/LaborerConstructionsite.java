@@ -58,7 +58,7 @@ public class LaborerConstructionsite implements Serializable {
     @JoinColumn(name = "laborerId")
     private Laborer laborer;
     
-    @ManyToOne
+    @ManyToOne(cascade=CascadeType.REFRESH)
     @JoinColumn(name = "CONSTRUCTION_SITEID")
     private ConstructionSite constructionsite;
     
@@ -72,16 +72,16 @@ public class LaborerConstructionsite implements Serializable {
     @Column(name="jobCode")
     private Integer jobCode;
     
-    @OneToMany(mappedBy="laborerConstructionSite",fetch=FetchType.EAGER,cascade = { CascadeType.MERGE,CascadeType.REMOVE,CascadeType.PERSIST },orphanRemoval=true )
+    @OneToMany(mappedBy="laborerConstructionSite",fetch=FetchType.LAZY,cascade = { CascadeType.MERGE,CascadeType.REMOVE,CascadeType.PERSIST },orphanRemoval=true )
     List<Vacation> vacations = new ArrayList<Vacation>();
     
-    @OneToMany(mappedBy="laborerConstructionSite",fetch=FetchType.EAGER,cascade = { CascadeType.MERGE,CascadeType.REMOVE,CascadeType.PERSIST },orphanRemoval=true )
+    @OneToMany(mappedBy="laborerConstructionSite",fetch=FetchType.LAZY,cascade = { CascadeType.MERGE,CascadeType.REMOVE,CascadeType.PERSIST },orphanRemoval=true )
     List<Absence> absences = new ArrayList<Absence>();
     
-    @OneToMany(mappedBy="laborerConstructionSite",fetch=FetchType.EAGER,cascade = { CascadeType.MERGE,CascadeType.REMOVE,CascadeType.PERSIST },orphanRemoval=true )
+    @OneToMany(mappedBy="laborerConstructionSite",fetch=FetchType.LAZY,cascade = { CascadeType.MERGE,CascadeType.REMOVE,CascadeType.PERSIST },orphanRemoval=true )
     List<Accident> accidents = new ArrayList<Accident>();
     
-    @OneToMany(mappedBy="laborerConstructionSite",fetch=FetchType.EAGER,cascade = { CascadeType.MERGE,CascadeType.REMOVE,CascadeType.PERSIST },orphanRemoval=true )
+    @OneToMany(mappedBy="laborerConstructionSite",fetch=FetchType.LAZY,cascade = { CascadeType.MERGE,CascadeType.REMOVE,CascadeType.PERSIST },orphanRemoval=true )
     List<Tool> tool = new ArrayList<Tool>();
     
 //    @ManyToMany(mappedBy="laborers")
