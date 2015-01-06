@@ -15,6 +15,8 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.PrePersist;
@@ -23,9 +25,7 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.validation.constraints.NotNull;
 
-import cl.magal.asistencia.entities.converter.StatusConverter;
 import cl.magal.asistencia.entities.converter.ToolStatusConverter;
-import cl.magal.asistencia.entities.enums.Status;
 import cl.magal.asistencia.entities.enums.ToolStatus;
 
 /**
@@ -83,6 +83,10 @@ public class Tool implements Serializable {
         this.dateBuy = dateBuy;
     }
 
+    @ManyToOne
+	@JoinColumn(name ="laborerId")
+	Laborer laborer;
+    
     public Long getToolId() {
 		return toolId;
 	}
@@ -129,6 +133,14 @@ public class Tool implements Serializable {
 
 	public void setStatus(ToolStatus status) {
 		this.status = status;
+	}	
+	
+	public Laborer getLaborer() {
+		return laborer;
+	}
+
+	public void setLaborer(Laborer laborer) {
+		this.laborer = laborer;
 	}
 
 	@Override

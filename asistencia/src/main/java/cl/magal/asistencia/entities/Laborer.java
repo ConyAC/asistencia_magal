@@ -153,8 +153,14 @@ public class Laborer implements Serializable {
     @OneToMany(mappedBy="laborer",fetch=FetchType.EAGER,cascade = { CascadeType.PERSIST, CascadeType.MERGE },orphanRemoval=true )
     List<Accident> accidents = new ArrayList<Accident>();
     
-    @OneToMany(targetEntity=Tool.class,fetch=FetchType.EAGER)
-    List<Tool> tool;
+    @OneToMany(mappedBy="laborer",fetch=FetchType.EAGER,cascade = { CascadeType.PERSIST, CascadeType.MERGE },orphanRemoval=true )
+    List<Tool> tool = new ArrayList<Tool>();
+    
+    @OneToMany(mappedBy="laborer",fetch=FetchType.EAGER,cascade = { CascadeType.PERSIST, CascadeType.MERGE },orphanRemoval=true )
+    List<Loan> loan = new ArrayList<Loan>();
+    
+    /*@OneToMany(targetEntity=Tool.class,fetch=FetchType.EAGER)
+    List<Tool> tool;*/
     
     @ManyToMany(mappedBy="laborers",cascade = { CascadeType.PERSIST, CascadeType.MERGE })
     List<Team> teams = new LinkedList<Team>();
@@ -431,6 +437,13 @@ public class Laborer implements Serializable {
 		this.tool = tool;
 	}
 
+	public void addTool(Tool tool) {
+        if (!getTool().contains(tool)) {
+        	getTool().add(tool);
+        	tool.setLaborer(this);
+        }
+    }
+	
 	public void addConstructionSite(ConstructionSite constructionSite) {
         if (!getConstructionSites().contains(constructionSite)) {
         	getConstructionSites().add(constructionSite);
@@ -492,7 +505,22 @@ public class Laborer implements Serializable {
         	accident.setLaborer(null);
         }
     }
+	
+	public List<Loan> getLoan() {
+		return loan;
+	}
 
+	public void setLoan(List<Loan> loan) {
+		this.loan = loan;
+	}
+
+	public void addLoan(Loan loan) {
+		if (!getLoan().contains(loan)) {
+        	getLoan().add(loan);
+        	loan.setLaborer(this);
+        }
+	}
+	
 	@Override
     public int hashCode() {
         int hash = 0;
