@@ -13,9 +13,13 @@ import org.springframework.stereotype.Service;
 import cl.magal.asistencia.entities.ConstructionSite;
 import cl.magal.asistencia.entities.Laborer;
 import cl.magal.asistencia.entities.LaborerConstructionsite;
+import cl.magal.asistencia.repositories.AbsenceRepositoy;
+import cl.magal.asistencia.repositories.AccidentRepository;
 import cl.magal.asistencia.repositories.ConstructionSiteRepository;
 import cl.magal.asistencia.repositories.LaborerConstructionsiteRepository;
 import cl.magal.asistencia.repositories.LaborerRepository;
+import cl.magal.asistencia.repositories.ToolRepository;
+import cl.magal.asistencia.repositories.VacationRepository;
 import cl.magal.asistencia.ui.workerfile.vo.HistoryVO;
 import cl.magal.asistencia.util.Utils;
 
@@ -30,6 +34,14 @@ public class LaborerService {
 	LaborerConstructionsiteRepository laborerConstructionsiteRepo;
 	@Autowired
 	ConstructionSiteRepository constructionSiteRepo;
+	@Autowired
+	AbsenceRepositoy absenceRepo;
+	@Autowired
+	VacationRepository vacationRepo;
+	@Autowired
+	AccidentRepository accidentRepo;
+	@Autowired
+	ToolRepository toolRepo;
 	
 	public Laborer saveLaborer(Laborer l) {
 		Laborer laborer = laborerRepo.save(l);
@@ -88,12 +100,16 @@ public class LaborerService {
 	 * @param laborerConstructionSite
 	 */
 	public void save(LaborerConstructionsite laborerConstructionSite) {
-		laborerConstructionsiteRepo.save(laborerConstructionSite);
+//		laborerConstructionsiteRepo.save(laborerConstructionSite);
 //		//si no existe, guarda el objeto laborar-constructionsite
 //		if(laborerConstructionSite.getId() == null )
 //			laborerConstructionsiteRepo.save(laborerConstructionSite);
 //		//guarda los elementos importantes
-//		laborerRepo.save(laborerConstructionSite.getLaborer());
+		laborerRepo.save(laborerConstructionSite.getLaborer());
+		vacationRepo.save(laborerConstructionSite.getVacations());
+		absenceRepo.save(laborerConstructionSite.getAbsences());
+		accidentRepo.save(laborerConstructionSite.getAccidents());
+		toolRepo.save(laborerConstructionSite.getTool());
 		
 	}
 }

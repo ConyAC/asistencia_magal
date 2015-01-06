@@ -298,6 +298,22 @@ public class LaborerServiceTest {
 	}
 	
 	/**
+	 * Debe fallar si el obrero tiene un rut inválido
+	 */
+	@Test
+	public void testFailSaveGoodRutLaborer() {
+		String goodRut = "16127401-1"; 
+		Laborer l = LaborerHelper.newLaborer();
+		l.setRut(goodRut);
+
+		service.saveLaborer(l);	
+		
+		Laborer dbu = service.findLaborer(l.getLaborerId());
+		
+		assertEquals("El rut debe ser el mismo",goodRut,dbu.getRut());
+	}
+	
+	/**
 	 * Debe fallar si el obrero no tiene nombre completo
 	 */
 	@Test(expected=Exception.class)
@@ -317,6 +333,18 @@ public class LaborerServiceTest {
 	public void testFailSaveRutLaborer() {
 		Laborer l = LaborerHelper.newLaborer();
 		l.setRut(null);
+
+		service.saveLaborer(l);		
+		fail("error");
+	}
+	
+	/**
+	 * Debe fallar si el obrero tiene un rut inválido
+	 */
+	@Test(expected=Exception.class)
+	public void testFailSaveBadRutLaborer() {
+		Laborer l = LaborerHelper.newLaborer();
+		l.setRut("1-1");
 
 		service.saveLaborer(l);		
 		fail("error");

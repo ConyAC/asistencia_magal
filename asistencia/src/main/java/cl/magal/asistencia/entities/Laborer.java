@@ -11,7 +11,6 @@ import java.util.Date;
 import java.util.List;
 
 import javax.persistence.Basic;
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
@@ -27,6 +26,8 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
+
+import org.hibernate.validator.constraints.NotEmpty;
 
 import cl.magal.asistencia.entities.converter.AfpConverter;
 import cl.magal.asistencia.entities.converter.IsapreConverter;
@@ -69,16 +70,19 @@ public class Laborer implements Serializable {
     private Long laborerId;
     @Basic(optional = false)
     @NotNull(message="El nombre es necesario")
+    @NotEmpty(message="El nombre es necesario")
     @Column(name = "firstname", nullable=false)
     private String firstname;
     @Column(name = "secondname")
     private String secondname;
     @NotNull(message="El apellido es necesario")
+    @NotEmpty(message="El apellido es necesario")
     @Column(name = "lastname", nullable=false)
     private String lastname;
     @Column(name = "secondlastname")
     private String secondlastname;
     @NotNull(message="El rut es necesario")
+    @NotEmpty(message="El rut es necesario")
     @Column(name = "rut", nullable=false)
     @Pattern(regexp="^([0-9])+\\-([kK0-9])+$",message="El rut '%s' no es válido.")
     @RutDigit(message="El rut '%s' no es válido.")
@@ -125,7 +129,7 @@ public class Laborer implements Serializable {
     @Column(name="photo")
     private String photo;
     
-    @OneToMany(mappedBy="laborer", cascade = { CascadeType.REMOVE},orphanRemoval=true)//,fetch=FetchType.EAGER,cascade = { CascadeType.PERSIST, CascadeType.MERGE })
+    @OneToMany(mappedBy="laborer", orphanRemoval=true)//,fetch=FetchType.EAGER,cascade = { CascadeType.PERSIST, CascadeType.MERGE })
     List<LaborerConstructionsite> laborerConstructionSites = new ArrayList<LaborerConstructionsite>();
     
 //    @OneToMany(mappedBy="laborer",fetch=FetchType.EAGER,cascade = { CascadeType.PERSIST, CascadeType.MERGE },orphanRemoval=true )

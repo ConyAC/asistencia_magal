@@ -16,6 +16,7 @@ import org.springframework.ui.velocity.VelocityEngineUtils;
 import cl.magal.asistencia.entities.Absence;
 import cl.magal.asistencia.entities.Accident;
 import cl.magal.asistencia.entities.AccidentLevel;
+import cl.magal.asistencia.entities.Laborer;
 import cl.magal.asistencia.entities.LaborerConstructionsite;
 import cl.magal.asistencia.entities.Tool;
 import cl.magal.asistencia.entities.Vacation;
@@ -37,6 +38,7 @@ import com.vaadin.data.util.BeanItem;
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.data.util.filter.Compare;
 import com.vaadin.data.util.filter.Not;
+import com.vaadin.data.validator.BeanValidator;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.StreamResource;
 import com.vaadin.ui.AbstractField;
@@ -649,9 +651,10 @@ public class LaborerDialog extends AbstractWindowEditor {
 				detalleObrero.setComponentAlignment(msField, Alignment.MIDDLE_CENTER);
 			}else{        		
 				String t = tradProperty(propertyId);
-				Field field = buildAndBind(t, "laborer."+propertyId);
+				Field<?> field = buildAndBind(t, "laborer."+propertyId);
 				if(field instanceof TextField){
 					((TextField)field).setNullRepresentation("");
+					field.addValidator(new BeanValidator(Laborer.class, (String) propertyId));
 				}
 				detalleObrero.addComponent(field);
 				detalleObrero.setComponentAlignment(field, Alignment.MIDDLE_CENTER);

@@ -27,12 +27,12 @@
 		<property name="username" value="sa" />
 		<property name="password" value="" />
 	</bean>
-	
+	<!--
 	<jdbc:initialize-database data-source="datasource">
 	    <jdbc:script location="classpath:/META-INF/sql/schema.sql"/>
 	    <jdbc:script location="classpath:/META-INF/sql/data.sql"/>
 	</jdbc:initialize-database>
-	
+	-->
 	<!--  Entity Manager Factory -->
 	<bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean" >
 		<property name="dataSource" ref="datasource"></property>

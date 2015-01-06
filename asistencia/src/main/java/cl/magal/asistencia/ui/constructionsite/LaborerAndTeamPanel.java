@@ -455,27 +455,28 @@ public class LaborerAndTeamPanel extends Panel implements View {
 				LaborerDialog userWindow = new LaborerDialog(beanItem,laborerService){
 					@Override
 					protected boolean postCommit() {
-						final ConstructionSite cs = item.getBean();
-						if(cs == null){
-							Notification.show("Debe seleccionar una obra",Type.ERROR_MESSAGE);
-							return false;
-						}
-						try {
-//			    			LaborerConstructionsite laborer = ((BeanItem<LaborerConstructionsite>) event.getSavedItem()).getBean();
-							LaborerConstructionsite laborer = beanItem.getBean();
-							logger.debug("laborer constructionsite {}, rut {} postcommit ",laborer,laborer.getLaborer().getRut());
-			    			laborerService.save(laborer);	
-			    			return true;
-			    		} catch (TransactionSystemException e) {
-			    			ConstraintViolationException e1 = (ConstraintViolationException) e.getCause().getCause();
-			    			logger.error("TransactionSystemException {}",e1);
-			    			Notification.show("Error al validar los datos:\n"+Utils.printConstraintMessages(e1.getConstraintViolations()), Type.ERROR_MESSAGE);
-			    			return false;
-			    		}catch (Exception e){
-			    			logger.error("Error al guardar la información del obrero",e);
-			    			Notification.show("Ocurrió un error al intentar guardar el trabajador", Type.ERROR_MESSAGE);
-			    			return false;
-			    		}
+//						final ConstructionSite cs = item.getBean();
+//						if(cs == null){
+//							Notification.show("Debe seleccionar una obra",Type.ERROR_MESSAGE);
+//							return false;
+//						}
+//						try {
+////			    			LaborerConstructionsite laborer = ((BeanItem<LaborerConstructionsite>) event.getSavedItem()).getBean();
+//							LaborerConstructionsite laborer = beanItem.getBean();
+//							logger.debug("laborer constructionsite {}, rut {} postcommit ",laborer,laborer.getLaborer().getRut());
+//			    			laborerService.save(laborer);	
+//			    			return true;
+//			    		} catch (TransactionSystemException e) {
+//			    			ConstraintViolationException e1 = (ConstraintViolationException) e.getCause().getCause();
+//			    			logger.error("TransactionSystemException {}",e1);
+//			    			Notification.show("Error al validar los datos:\n"+Utils.printConstraintMessages(e1.getConstraintViolations()), Type.ERROR_MESSAGE);
+//			    			return false;
+//			    		}catch (Exception e){
+//			    			logger.error("Error al guardar la información del obrero",e);
+//			    			Notification.show("Ocurrió un error al intentar guardar el trabajador", Type.ERROR_MESSAGE);
+//			    			return false;
+//			    		}
+						return true;
 					}
 				};
 				
@@ -483,7 +484,31 @@ public class LaborerAndTeamPanel extends Panel implements View {
 					
 					@Override
 					public void editorSaved(EditorSavedEvent event) {
-						
+						final ConstructionSite cs = item.getBean();
+						if(cs == null){
+							Notification.show("Debe seleccionar una obra",Type.ERROR_MESSAGE);
+//							return false;
+							return ;
+						}
+						try {
+//			    			LaborerConstructionsite laborer = ((BeanItem<LaborerConstructionsite>) event.getSavedItem()).getBean();
+							LaborerConstructionsite laborer = beanItem.getBean();
+							logger.debug("laborer constructionsite {}, rut {} postcommit ",laborer,laborer.getLaborer().getRut());
+			    			laborerService.save(laborer);	
+//			    			return true;
+			    			return;
+			    		} catch (TransactionSystemException e) {
+			    			ConstraintViolationException e1 = (ConstraintViolationException) e.getCause().getCause();
+			    			logger.error("TransactionSystemException {}",e1);
+			    			Notification.show("Error al validar los datos:\n"+Utils.printConstraintMessages(e1.getConstraintViolations()), Type.ERROR_MESSAGE);
+//			    			return false;
+			    			return;
+			    		}catch (Exception e){
+			    			logger.error("Error al guardar la información del obrero",e);
+			    			Notification.show("Ocurrió un error al intentar guardar el trabajador", Type.ERROR_MESSAGE);
+//			    			return false;
+			    			return;
+			    		}
 					}
 				});
 		        

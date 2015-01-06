@@ -12,6 +12,7 @@ import com.vaadin.data.fieldgroup.BeanFieldGroup;
 import com.vaadin.data.fieldgroup.FieldGroup.CommitException;
 import com.vaadin.data.util.BeanItem;
 import com.vaadin.data.util.NestedMethodProperty;
+import com.vaadin.data.validator.BeanValidator;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.AbstractField;
 import com.vaadin.ui.Alignment;
@@ -119,7 +120,8 @@ public abstract class AbstractWindowEditor extends Window implements ClickListen
 	protected Field<?> buildAndBind(String caption, Object propertyId) {		
 		//si la propiedad no existe como tal, intenta agregar la propiedad nested
 		addNestedPropertyIfNeeded(propertyId);
-		return getBinder().buildAndBind(caption, propertyId);
+		Field<?> field = getBinder().buildAndBind(caption, propertyId);
+		return field;
 	}
 	
 	/**
@@ -144,10 +146,11 @@ public abstract class AbstractWindowEditor extends Window implements ClickListen
 	@Override
 	public void buttonClick(ClickEvent event) {
 		if (event.getButton() == btnGuardar) {
-			if(!getBinder().isValid()){
-				Notification.show("Falta parámetro obligatorio");
-				return;
-			}
+//			if(!getBinder().isValid()){
+//				Notification.show("Falta parámetro obligatorio");
+//				getBinder().
+//				return;
+//			}
 			try {
 				if(!preCommit())
 					return;
@@ -162,7 +165,7 @@ public abstract class AbstractWindowEditor extends Window implements ClickListen
 				logger.error("EmptyValueException",e);
 				return;
 			} catch (CommitException e) {
-				Notification.show("Debe ingresar todos los elementos requeridos",Type.HUMANIZED_MESSAGE);
+				Notification.show("Existen valores inválidos",Type.ERROR_MESSAGE);
 				logger.error("CommitException",e);
 				for (Component c: root){
 					try{ ((AbstractField)c).setValidationVisible(true); }catch(Exception e1){}

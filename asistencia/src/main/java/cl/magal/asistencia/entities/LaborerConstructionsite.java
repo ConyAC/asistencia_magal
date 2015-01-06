@@ -58,8 +58,8 @@ public class LaborerConstructionsite implements Serializable {
     @JoinColumn(name = "laborerId")
     private Laborer laborer;
     
-    @ManyToOne(cascade=CascadeType.REFRESH)
-    @JoinColumn(name = "CONSTRUCTION_SITEID")
+    @ManyToOne
+    @JoinColumn(name = "CONSTRUCTION_SITEID",updatable=false,nullable=false)
     private ConstructionSite constructionsite;
     
     @Column(name = "active")
@@ -72,16 +72,16 @@ public class LaborerConstructionsite implements Serializable {
     @Column(name="jobCode")
     private Integer jobCode;
     
-    @OneToMany(mappedBy="laborerConstructionSite",fetch=FetchType.LAZY,cascade = { CascadeType.MERGE,CascadeType.REMOVE,CascadeType.PERSIST },orphanRemoval=true )
+    @OneToMany(mappedBy="laborerConstructionSite",fetch=FetchType.LAZY,orphanRemoval=true )
     List<Vacation> vacations = new ArrayList<Vacation>();
     
-    @OneToMany(mappedBy="laborerConstructionSite",fetch=FetchType.LAZY,cascade = { CascadeType.MERGE,CascadeType.REMOVE,CascadeType.PERSIST },orphanRemoval=true )
+    @OneToMany(mappedBy="laborerConstructionSite",fetch=FetchType.LAZY,orphanRemoval=true )
     List<Absence> absences = new ArrayList<Absence>();
     
-    @OneToMany(mappedBy="laborerConstructionSite",fetch=FetchType.LAZY,cascade = { CascadeType.MERGE,CascadeType.REMOVE,CascadeType.PERSIST },orphanRemoval=true )
+    @OneToMany(mappedBy="laborerConstructionSite",fetch=FetchType.LAZY,orphanRemoval=true )
     List<Accident> accidents = new ArrayList<Accident>();
     
-    @OneToMany(mappedBy="laborerConstructionSite",fetch=FetchType.LAZY,cascade = { CascadeType.MERGE,CascadeType.REMOVE,CascadeType.PERSIST },orphanRemoval=true )
+    @OneToMany(mappedBy="laborerConstructionSite",fetch=FetchType.LAZY,orphanRemoval=true )
     List<Tool> tool = new ArrayList<Tool>();
     
 //    @ManyToMany(mappedBy="laborers")
