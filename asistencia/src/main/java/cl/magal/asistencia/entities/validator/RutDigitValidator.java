@@ -18,7 +18,7 @@ public class RutDigitValidator implements ConstraintValidator<RutDigit, String> 
 		if( rutTemp == null || rutTemp.length != 2 )
 			return false;
 		
-		if (rutTemp[1].compareTo(Digito(Integer.valueOf(rutTemp[0]))) == 0 ) {
+		if (rutTemp[1].compareToIgnoreCase(Digito(Integer.valueOf(rutTemp[0]))) == 0 ) {
 			return true;
 		}
 		return false;

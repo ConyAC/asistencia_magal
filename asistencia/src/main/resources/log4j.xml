@@ -21,6 +21,9 @@
   <logger name='cl.magal.asistencia.ui'>
     <level value='DEBUG' />
   </logger>
+  <logger name='cl.magal.asistencia.util'>
+      <level value='DEBUG' />
+  </logger>
   <root>
     <level value='ERROR' />
     <appender-ref ref='CONSOLE' />

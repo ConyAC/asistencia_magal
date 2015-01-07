@@ -40,7 +40,7 @@ public class Vacation implements Serializable {
 	Date toDate;
 	
 	@ManyToOne
-	@JoinColumn(name ="LABORER_CONSTRUCTIONSITEID")
+	@JoinColumn(name ="LABORER_CONSTRUCTIONSITEID",updatable=false)
 	LaborerConstructionsite laborerConstructionSite;
 	
 	public Long getVacationId() {

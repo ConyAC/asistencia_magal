@@ -5,10 +5,14 @@ import java.util.Set;
 
 import javax.validation.ConstraintViolation;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class Utils {
 	
-	final static Random r = new Random();
+	static Logger logger = LoggerFactory.getLogger(Utils.class);
 	
+	final static Random r = new Random();
 	
 	public static int random(){
 		return random(10,100);
@@ -20,6 +24,7 @@ public class Utils {
 		StringBuilder sb = new StringBuilder();
 		for(ConstraintViolation constraintViolation : constraintViolations){
 			sb.append(String.format(constraintViolation.getMessage(), constraintViolation.getInvalidValue()) ).append("\n");
+			logger.debug(" error en validar mensaje : {} valor: {} ",constraintViolation.getMessage(),constraintViolation.getInvalidValue());
 		}
 		return sb.toString();
 	}

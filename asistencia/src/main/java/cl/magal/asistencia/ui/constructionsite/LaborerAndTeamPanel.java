@@ -452,33 +452,7 @@ public class LaborerAndTeamPanel extends Panel implements View {
 				
 				final BeanItem<LaborerConstructionsite> beanItem = (BeanItem<LaborerConstructionsite>) event.getItem();
 				logger.debug("laborer constructionsite click item {} rut {} ",beanItem.getBean(),beanItem.getBean().getLaborer().getRut());
-				LaborerDialog userWindow = new LaborerDialog(beanItem,laborerService){
-					@Override
-					protected boolean postCommit() {
-//						final ConstructionSite cs = item.getBean();
-//						if(cs == null){
-//							Notification.show("Debe seleccionar una obra",Type.ERROR_MESSAGE);
-//							return false;
-//						}
-//						try {
-////			    			LaborerConstructionsite laborer = ((BeanItem<LaborerConstructionsite>) event.getSavedItem()).getBean();
-//							LaborerConstructionsite laborer = beanItem.getBean();
-//							logger.debug("laborer constructionsite {}, rut {} postcommit ",laborer,laborer.getLaborer().getRut());
-//			    			laborerService.save(laborer);	
-//			    			return true;
-//			    		} catch (TransactionSystemException e) {
-//			    			ConstraintViolationException e1 = (ConstraintViolationException) e.getCause().getCause();
-//			    			logger.error("TransactionSystemException {}",e1);
-//			    			Notification.show("Error al validar los datos:\n"+Utils.printConstraintMessages(e1.getConstraintViolations()), Type.ERROR_MESSAGE);
-//			    			return false;
-//			    		}catch (Exception e){
-//			    			logger.error("Error al guardar la información del obrero",e);
-//			    			Notification.show("Ocurrió un error al intentar guardar el trabajador", Type.ERROR_MESSAGE);
-//			    			return false;
-//			    		}
-						return true;
-					}
-				};
+				LaborerDialog userWindow = new LaborerDialog(beanItem,laborerService);
 				
 				userWindow.addListener(new AbstractWindowEditor.EditorSavedListener() {
 					

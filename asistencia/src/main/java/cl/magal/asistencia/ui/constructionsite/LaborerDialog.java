@@ -2,6 +2,7 @@ package cl.magal.asistencia.ui.constructionsite;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -109,7 +110,7 @@ public class LaborerDialog extends AbstractWindowEditor {
 		//tab de Resumen
 		//tab.addTab(drawInfo(),"Resumen"); -> no cuando se está creando.
 		//tab de Información
-		tab.addTab(drawInfo(),"Información4");
+		tab.addTab(drawInfo(),"Información");
 		//tab de vacaciones
 		tab.addTab(drawVacations(),"Vacaciones");
 		//tab de perstamos y herramientas
@@ -485,16 +486,16 @@ public class LaborerDialog extends AbstractWindowEditor {
 			}
 		};
 	}
-
+	BeanItemContainer<Vacation> vacationContainer;
 	private Component drawVacations() {
 		return new VerticalLayout(){
 			{
-				final BeanItemContainer<Vacation> beanItem = new BeanItemContainer<Vacation>(Vacation.class);
-				beanItem.addAll((Collection<? extends Vacation>) getItem().getItemProperty("vacations").getValue());
-
+				vacationContainer = new BeanItemContainer<Vacation>(Vacation.class);
+				vacationContainer.addAll(new ArrayList<Vacation>((Collection<? extends Vacation>) getItem().getItemProperty("vacations").getValue()));
+				
 				setMargin(true);
 				setSpacing(true);
-				final Table table = new Table();
+				Table vacationTable = new Table();
 
 				addComponent(new GridLayout(3,2){
 					{
@@ -509,22 +510,18 @@ public class LaborerDialog extends AbstractWindowEditor {
 
 							@Override
 							public void buttonClick(ClickEvent event) {
-								LaborerConstructionsite laborer = (LaborerConstructionsite) getItem().getBean();
-								if(laborer == null ) throw new RuntimeException("El trabajador no es válido.");
 								Vacation vacation = new Vacation();
-								laborer.addVacation(vacation);
-								beanItem.addBean(vacation);
+								vacationContainer.addBean(vacation);
 
 							}
 						}){{setIcon(FontAwesome.PLUS);}},2,0);
 
 					}
 				});
-				table.setPageLength(5);
-				table.setWidth("100%");
-				table.setContainerDataSource(beanItem);
-				table.setImmediate(true);
-				table.addGeneratedColumn("total", new Table.ColumnGenerator() {
+				vacationTable.setPageLength(5);
+				vacationTable.setWidth("100%");
+				vacationTable.setContainerDataSource(vacationContainer);
+				vacationTable.addGeneratedColumn("total", new Table.ColumnGenerator() {
 
 					@Override
 					public Object generateCell(Table source, Object itemId, Object columnId) {
@@ -544,9 +541,9 @@ public class LaborerDialog extends AbstractWindowEditor {
 					}
 				});
 
-				table.setTableFieldFactory(new OnValueChangeFieldFactory(2));
+				vacationTable.setTableFieldFactory(new OnValueChangeFieldFactory(2));
 
-				table.addGeneratedColumn("print", new Table.ColumnGenerator() {
+				vacationTable.addGeneratedColumn("print", new Table.ColumnGenerator() {
 
 					@Override
 					public Object generateCell(Table source, Object itemId, Object columnId) {
@@ -598,10 +595,10 @@ public class LaborerDialog extends AbstractWindowEditor {
 
 				});
 
-				table.setVisibleColumns("fromDate","toDate","total","print");
-				table.setColumnHeaders("Desde","Hasta","Total","Imprimir");
-				table.setEditable(true);				
-				addComponent(table);
+				vacationTable.setVisibleColumns("fromDate","toDate","total","print");
+				vacationTable.setColumnHeaders("Desde","Hasta","Total","Imprimir");
+				vacationTable.setEditable(true);				
+				addComponent(vacationTable);
 			}
 		};
 	}
@@ -856,5 +853,19 @@ public class LaborerDialog extends AbstractWindowEditor {
 	// 
 	//	}
 
+	@Override
+	protected boolean preCommit() {
+		for(Vacation vacation : vacationContainer.getItemIds()){
+			LaborerConstructionsite laborer = (LaborerConstructionsite) getItem().getBean();
+			laborer.addVacation(vacation);
+		}
+		getItem().getItemProperty("vacations").setValue(vacationContainer.getItemIds());
+		return super.preCommit();
+	}
+	
+	@Override
+	protected boolean preDiscard() {
+		return super.preDiscard();
+	}
 
 }

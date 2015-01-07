@@ -12,7 +12,6 @@ import com.vaadin.data.fieldgroup.BeanFieldGroup;
 import com.vaadin.data.fieldgroup.FieldGroup.CommitException;
 import com.vaadin.data.util.BeanItem;
 import com.vaadin.data.util.NestedMethodProperty;
-import com.vaadin.data.validator.BeanValidator;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.AbstractField;
 import com.vaadin.ui.Alignment;
@@ -40,8 +39,8 @@ public abstract class AbstractWindowEditor extends Window implements ClickListen
 	/**
 	 * ITEM
 	 */
-	private BeanItem item;
-	protected BeanItem getItem(){
+	private BeanItem<?> item;
+	protected BeanItem<?> getItem(){
 		return item;
 	}
 	
@@ -51,12 +50,12 @@ public abstract class AbstractWindowEditor extends Window implements ClickListen
 	/**
 	 * BINDER
 	 */
-	private BeanFieldGroup binder;
-	protected BeanFieldGroup getBinder(){
+	private BeanFieldGroup<?> binder;
+	protected BeanFieldGroup<?> getBinder(){
 		return binder;
 	}
 	
-	protected AbstractWindowEditor(BeanItem item) {
+	protected AbstractWindowEditor(BeanItem<?> item) {
 		if(item == null )
 			throw new RuntimeException("Error al crear el dialgo, el item no puede ser nulo.");
 		this.item = item;
@@ -174,11 +173,25 @@ public abstract class AbstractWindowEditor extends Window implements ClickListen
 			}
 			
 		} else if (event.getButton() == btnCancelar) {
+			if(!preDiscard())
+				return;
+			logger.debug("llamando discard");
 			getBinder().discard();
+			
+			if(!postDiscard())
+				return;
 		}
 		close();
 	}
 	
+	protected boolean postDiscard() {
+		return true;
+	}
+
+	protected boolean preDiscard() {
+		return true;
+	}
+
 	protected boolean preCommit(){
 		return true;
 	}

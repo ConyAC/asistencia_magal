@@ -23,6 +23,7 @@ import javax.persistence.PrePersist;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.validation.constraints.Max;
 import javax.validation.constraints.NotNull;
 
 import cl.magal.asistencia.entities.converter.ToolStatusConverter;
@@ -52,6 +53,7 @@ public class Tool implements Serializable {
     @Column(name = "name")
     private String name;
     @Column(name = "price")
+    @Max(value=50000)
     private Integer price;
     @Basic(optional = false)
     @Column(name = "dateBuy")

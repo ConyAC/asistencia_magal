@@ -6,6 +6,9 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.util.Iterator;
+import java.util.List;
+
 import org.joda.time.DateTime;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -25,6 +28,7 @@ import cl.magal.asistencia.entities.Laborer;
 import cl.magal.asistencia.entities.LaborerConstructionsite;
 import cl.magal.asistencia.entities.Vacation;
 import cl.magal.asistencia.entities.enums.AbsenceType;
+import cl.magal.asistencia.entities.validator.RutDigitValidator;
 import cl.magal.asistencia.helpers.LaborerHelper;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -40,6 +44,20 @@ public class LaborerServiceTest {
 	@Autowired
 	transient ConstructionSiteService constructionService;
 
+	@Test
+	public void searchInvalidRut(){
+		RutDigitValidator rdv = new RutDigitValidator();
+		
+		List<Laborer> laborers = service.findAllLaborer();
+		for (Iterator iterator = laborers.iterator(); iterator.hasNext();) {
+			Laborer laborer = (Laborer) iterator.next();
+			if(!rdv.isValid(laborer.getRut(), null)){
+				String split = laborer.getRut().split("-")[0];
+				logger.debug("id {} , {} {}",laborer.getLaborerId(),laborer.getRut(),rdv.Digito(Integer.valueOf(split)));
+			}
+		}
+	}
+	
 	/**
 	 * Agregar una vacación
 	 */

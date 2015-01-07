@@ -100,16 +100,10 @@ public class LaborerService {
 	 * @param laborerConstructionSite
 	 */
 	public void save(LaborerConstructionsite laborerConstructionSite) {
-//		laborerConstructionsiteRepo.save(laborerConstructionSite);
-//		//si no existe, guarda el objeto laborar-constructionsite
-//		if(laborerConstructionSite.getId() == null )
-//			laborerConstructionsiteRepo.save(laborerConstructionSite);
-//		//guarda los elementos importantes
-		laborerRepo.save(laborerConstructionSite.getLaborer());
-		vacationRepo.save(laborerConstructionSite.getVacations());
-		absenceRepo.save(laborerConstructionSite.getAbsences());
-		accidentRepo.save(laborerConstructionSite.getAccidents());
-		toolRepo.save(laborerConstructionSite.getTool());
-		
+		laborerConstructionsiteRepo.save(laborerConstructionSite);		
+	}
+
+	public List<Laborer> findAllLaborer() {
+		return (List<Laborer>) laborerRepo.findAll();
 	}
 }

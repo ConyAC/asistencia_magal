@@ -63,8 +63,11 @@ import cl.magal.asistencia.entities.validator.RutDigit;
     @NamedQuery(name = "Laborer.findByAfpId", query = "SELECT l FROM Laborer l WHERE l.afp = :afp"),
     })
 public class Laborer implements Serializable {
-    private static final long serialVersionUID = 1L;
-    @Id
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = -8378442753721527646L;
+	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "laborerId")
     private Long laborerId;
