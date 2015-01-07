@@ -17,7 +17,6 @@ import cl.magal.asistencia.entities.Accident;
 import cl.magal.asistencia.entities.AccidentLevel;
 import cl.magal.asistencia.entities.ConstructionSite;
 import cl.magal.asistencia.entities.Laborer;
-
 import cl.magal.asistencia.entities.Loan;
 import cl.magal.asistencia.entities.Tool;
 import cl.magal.asistencia.entities.Vacation;
@@ -128,7 +127,6 @@ public class LaborerDialog extends AbstractWindowEditor {
 
 		return tab;
 	}	
-	
 	protected VerticalLayout drawPyH() {
 		VerticalLayout vl = new VerticalLayout();
 		vl.setSpacing(true);
@@ -173,7 +171,8 @@ public class LaborerDialog extends AbstractWindowEditor {
 				((AbstractField<?>)field).setImmediate(true);
 				return field;
 			}
-		});		
+		});
+		
 		tableTool.setVisibleColumns("name","price","dateBuy","fee");
 		tableTool.setColumnHeaders("Herramienta","Monto","Fecha","Cuota");
 		tableTool.setEditable(true);				
@@ -181,6 +180,7 @@ public class LaborerDialog extends AbstractWindowEditor {
 
 		btnAddH = new Button(null,FontAwesome.PLUS);
 		hl.addComponent(btnAddH);
+		
 		btnAddH.addClickListener(new Button.ClickListener() {
 
 			@Override
@@ -538,6 +538,8 @@ public class LaborerDialog extends AbstractWindowEditor {
 								Vacation vacation = new Vacation();
 								laborer.addVacation(vacation);
 								beanItem.addBean(vacation);
+								
+								logger.debug("ingreso {}", vacation.getVacationId());
 
 							}
 						}){{setIcon(FontAwesome.PLUS);}},2,0);

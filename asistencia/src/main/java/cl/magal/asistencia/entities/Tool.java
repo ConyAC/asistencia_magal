@@ -42,8 +42,11 @@ import cl.magal.asistencia.entities.enums.ToolStatus;
     @NamedQuery(name = "Tool.findByDateBuy", query = "SELECT t FROM Tool t WHERE t.dateBuy = :dateBuy"),
     @NamedQuery(name = "Tool.findByFee", query = "SELECT t FROM Tool t WHERE t.fee = :fee")})
 public class Tool implements Serializable {
-    private static final long serialVersionUID = 1L;
-    @Id
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = -2293674300761217662L;
+	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
     @Column(name = "toolId")
@@ -143,25 +146,25 @@ public class Tool implements Serializable {
 		this.laborer = laborer;
 	}
 
-	@Override
-    public int hashCode() {
-        int hash = 0;
-        hash += (toolId != null ? toolId.hashCode() : 0);
-        return hash;
-    }
-
-    @Override
-    public boolean equals(Object object) {
-        // TODO: Warning - this method won't work in the case the id fields are not set
-        if (!(object instanceof Tool)) {
-            return false;
-        }
-        Tool other = (Tool) object;
-        if ((this.toolId == null && other.toolId != null) || (this.toolId != null && !this.toolId.equals(other.toolId))) {
-            return false;
-        }
-        return true;
-    }
+//	@Override
+//    public int hashCode() {
+//        int hash = 0;
+//        hash += (toolId != null ? toolId.hashCode() : 0);
+//        return hash;
+//    }
+//
+//    @Override
+//    public boolean equals(Object object) {
+//        // TODO: Warning - this method won't work in the case the id fields are not set
+//        if (!(object instanceof Tool)) {
+//            return false;
+//        }
+//        Tool other = (Tool) object;
+//        if ((this.toolId == null && other.toolId != null) || (this.toolId != null && !this.toolId.equals(other.toolId))) {
+//            return false;
+//        }
+//        return true;
+//    }
 
     @Override
     public String toString() {
