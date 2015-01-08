@@ -63,7 +63,8 @@ public class ConstructionSite implements Serializable {
     private String address;
     @Column(name = "deleted")
     private Boolean deleted = Boolean.FALSE;
-    
+    @Column(name = "code",nullable=true)
+    private String code;
     @Column(name = "name",nullable=false)
     @NotNull
     String name;
@@ -192,6 +193,14 @@ public class ConstructionSite implements Serializable {
 
 	public void setUsers(List<User> users) {
 		this.users = users;
+	}
+	
+	public String getCode() {
+		return code;
+	}
+
+	public void setCode(String code) {
+		this.code = code;
 	}
 
 	@Override

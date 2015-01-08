@@ -1,7 +1,10 @@
 package cl.magal.asistencia.ui.constructionsite;
 
+import java.util.List;
+
 import javax.annotation.PostConstruct;
 
+import org.apache.velocity.app.VelocityEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,14 +13,18 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
 import org.tepi.filtertable.FilterTable;
+import org.vaadin.dialogs.ConfirmDialog;
 
 import ru.xpoft.vaadin.VaadinView;
 import cl.magal.asistencia.entities.ConstructionSite;
+import cl.magal.asistencia.entities.User;
 import cl.magal.asistencia.entities.enums.Permission;
 import cl.magal.asistencia.services.ConstructionSiteService;
 import cl.magal.asistencia.services.UserService;
+import cl.magal.asistencia.ui.AbstractWindowEditor;
 import cl.magal.asistencia.ui.BaseView;
 import cl.magal.asistencia.ui.MagalUI;
+import cl.magal.asistencia.ui.AbstractWindowEditor.EditorSavedEvent;
 import cl.magal.asistencia.util.SecurityHelper;
 
 import com.vaadin.data.fieldgroup.BeanFieldGroup;
@@ -31,6 +38,7 @@ import com.vaadin.server.FontAwesome;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
+import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.CustomTable;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Notification;
@@ -55,7 +63,7 @@ public class ConstructionSitesView extends BaseView implements View {
 
 	BeanFieldGroup<ConstructionSite> bfg = new BeanFieldGroup<ConstructionSite>(ConstructionSite.class);
 	BeanItemContainer<ConstructionSite> constructionContainer = new BeanItemContainer<ConstructionSite>(ConstructionSite.class);
-	
+	BeanItemContainer<User> itemUser = new BeanItemContainer<User>(User.class);
 	FilterTable table;
 	VerticalLayout detalleLayout;
 
@@ -63,7 +71,9 @@ public class ConstructionSitesView extends BaseView implements View {
 	private transient ConstructionSiteService service;
 	@Autowired
 	private transient UserService userService;
-
+	@Autowired
+	private VelocityEngine velocityEngine;
+	
 	HorizontalLayout root,detailLayout;
 	Panel panelConstructions;
 
@@ -114,48 +124,48 @@ public class ConstructionSitesView extends BaseView implements View {
 		//agrega solo si tiene los permisos
 		if( SecurityHelper.hastPermission(Permission.CREAR_OBRA,Permission.ELIMINAR_OBRA)){
 		
-			//botones agrega y eliminar
+			//botones agrega
 			HorizontalLayout hl = new HorizontalLayout();
 			hl.setSpacing(true);
 	
 			vl.addComponent(hl);
 			vl.setComponentAlignment(hl, Alignment.BOTTOM_RIGHT);
 			Button agregaObra = new Button(null,FontAwesome.PLUS);
-			//agregando obras dummy
+
+			
 			agregaObra.addClickListener(new Button.ClickListener() {
-	
-				/**
-				 * 
-				 */
-				private static final long serialVersionUID = 3844920778615955739L;
-	
+
 				@Override
-				public void buttonClick(ClickEvent event) {
-					ConstructionSite obra = new ConstructionSite();
-					obra.setName("Nueva Obra");
-					service.save(obra);
-					BeanItem<ConstructionSite> item = constructionContainer.addBean(obra);
-//					setConstruction(item);
+				public void buttonClick(ClickEvent event) {								
+					List<User> users = service.getAllUsers();
+					itemUser.removeAllItems();
+					itemUser.addAll(users);
+					
+					ConstructionSite cs = new ConstructionSite();
+					BeanItem<ConstructionSite> csItem = new BeanItem<ConstructionSite>(cs);
+					ConstructionSiteDialog csWindow = new ConstructionSiteDialog(csItem, itemUser, service, velocityEngine);
+					
+					csWindow.addListener(new AbstractWindowEditor.EditorSavedListener() {
+						
+						@Override
+						public void editorSaved(EditorSavedEvent event) {
+							try {
+								ConstructionSite obra = ((BeanItem<ConstructionSite>) event.getSavedItem()).getBean();
+								service.save(obra);
+								constructionContainer.addBean(obra);
+				    		} catch (Exception e) {
+				    			logger.error("Error al guardar la información de la obra",e);
+				    			Notification.show("Es necesario agregar todos los campos obligatorios", Type.ERROR_MESSAGE);
+				    		}
+							
+						}
+					});
+			        
+			        UI.getCurrent().addWindow(csWindow);
 				}
-			});
+		});		
+			
 			hl.addComponent(agregaObra);
-			Button borrarObra = new Button(null,FontAwesome.TRASH_O);
-			borrarObra.addClickListener(new Button.ClickListener() {
-	
-				@Override
-				public void buttonClick(ClickEvent event) {
-					ConstructionSite cs = (ConstructionSite) table.getValue();
-					if(cs == null){
-						Notification.show("Debe seleccionar una obra para eliminar");
-						return;
-					}
-					service.deleteCS(cs.getConstructionsiteId());
-					constructionContainer.removeItem(cs);
-//					setConstruction(null);
-	
-				}
-			});
-			hl.addComponent(borrarObra);
 		}
 
 		//la tabla con su buscador buscador
@@ -170,11 +180,80 @@ public class ConstructionSitesView extends BaseView implements View {
 		table.setSizeFull();
 		table.setFilterBarVisible(true);
 		table.addGeneratedColumn("actions", new CustomTable.ColumnGenerator() {
-			
+		
 			@Override
-			public Object generateCell(CustomTable source, Object itemId,
+			public Object generateCell(CustomTable source, final Object itemId,
 					Object columnId) {
-				return new Button(null,FontAwesome.TRASH_O);
+				HorizontalLayout hl = new HorizontalLayout();
+				
+				if( SecurityHelper.hastPermission(Permission.ELIMINAR_OBRA)){
+					hl.setSpacing(true);
+							
+					//Marcar como eliminada una obra
+					Button borrarObra = new Button(null,FontAwesome.TRASH_O);
+					borrarObra.addClickListener(new Button.ClickListener() {
+						
+						@Override
+						public void buttonClick(ClickEvent event) {
+							//recupera el elemento seleccionado		
+							ConfirmDialog.show(UI.getCurrent(), "Confirmar Acción:", "¿Está seguro de eliminar la obra seleccionada?",
+							        "Eliminar", "Cancelar", new ConfirmDialog.Listener() {
+
+							            public void onClose(ConfirmDialog dialog) {
+							                if (dialog.isConfirmed()) {
+							                    // Confirmed to continue
+							                	ConstructionSite cs = (ConstructionSite) table.getValue();
+												service.deleteCS(cs.getConstructionsiteId());
+												constructionContainer.removeItem(cs);		
+							                } else {
+							                    // User did not confirm
+							                   ;
+							                }
+							            }
+							        });		
+							}
+					});
+					hl.addComponent(borrarObra);
+				}
+				
+				if( SecurityHelper.hastPermission(Permission.EDITAR_OBRA)){
+					//Editar datos de una obra
+					Button editarObra = new Button(null,FontAwesome.EDIT);
+					editarObra.addClickListener(new Button.ClickListener() {
+						
+						@Override
+						public void buttonClick(ClickEvent event) {
+							List<User> users = service.getAllUsers();
+							itemUser.removeAllItems();
+							itemUser.addAll(users);
+							
+							ConstructionSiteDialog csWindow = new ConstructionSiteDialog((BeanItem) itemId, itemUser, service, velocityEngine);
+							
+							csWindow.addListener(new AbstractWindowEditor.EditorSavedListener() {
+								
+								@Override
+								public void editorSaved(EditorSavedEvent event) {
+									try {
+										ConstructionSite obra = ((BeanItem<ConstructionSite>) event.getSavedItem()).getBean();
+										service.save(obra);
+										constructionContainer.addBean(obra);
+						    		} catch (Exception e) {
+						    			logger.error("Error al guardar la información de la obra",e);
+						    			Notification.show("Es necesario agregar todos los campos obligatorios", Type.ERROR_MESSAGE);
+						    		}
+									
+								}
+							});
+					        
+					        UI.getCurrent().addWindow(csWindow);					
+						}
+						
+					});			
+					editarObra.setData(constructionContainer);
+					
+					hl.addComponent(editarObra);
+				}
+				return hl;
 			}
 		});
 		
@@ -235,7 +314,6 @@ public class ConstructionSitesView extends BaseView implements View {
 		Page<ConstructionSite> page = service.findAllConstructionSite(new PageRequest(0, 20));
 		constructionContainer.removeAllItems();
 		constructionContainer.addAll(page.getContent());
-
 	}
 
 }
