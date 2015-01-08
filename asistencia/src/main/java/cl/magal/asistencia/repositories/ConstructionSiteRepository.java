@@ -42,6 +42,7 @@ public interface ConstructionSiteRepository extends PagingAndSortingRepository<C
 	@Query(value="SELECT cs FROM ConstructionSite cs WHERE :id MEMBER OF cs.users " )
 	List<ConstructionSite> findByUser(@Param("id")Long userId);
 
-	List<ConstructionSite> findByLaborers(Laborer laborer);
+	@Query(value="SELECT cs FROM ConstructionSite cs WHERE :laborer MEMBER OF cs.laborers " )
+	List<ConstructionSite> findByLaborers(@Param("laborer")Laborer laborer);
 
 }

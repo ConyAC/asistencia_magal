@@ -48,6 +48,7 @@ import com.vaadin.ui.AbstractSelect.ItemCaptionMode;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
+import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.CustomTable;
@@ -413,7 +414,7 @@ public class LaborerAndTeamPanel extends Panel implements View {
 				laborer.setConstructionsite(item.getBean());
 				
 				BeanItem<LaborerConstructionsite> laborerItem = new BeanItem<LaborerConstructionsite>(laborer);
-				LaborerDialog userWindow = new LaborerDialog(laborerItem,laborerService);
+				AddLaborerDialog userWindow = new AddLaborerDialog(laborerItem,laborerService);
 				
 				userWindow.addListener(new AbstractWindowEditor.EditorSavedListener() {
 					
@@ -436,13 +437,32 @@ public class LaborerAndTeamPanel extends Panel implements View {
 		});
 
 		FilterTable table =  new FilterTable();
+		
+		table.addGeneratedColumn("actions", new CustomTable.ColumnGenerator() {
+			
+			@Override
+			public Object generateCell(CustomTable source, final Object itemId,Object columnId) {
+				final BeanItem<LaborerConstructionsite> laborerConstruction = (BeanItem<LaborerConstructionsite>) laborerContainer.getItem(itemId);
+				return new Button(null,new Button.ClickListener(){
+					@Override
+					public void buttonClick(ClickEvent event) {
+						laborerService.remove(laborerConstruction.getBean());
+						laborerContainer.removeItem(itemId);
+					}
+				}){
+					
+					{ setIcon(FontAwesome.TRASH_O);}
+				};
+			}
+		});
+		
 		table.setContainerDataSource(laborerContainer);
 		table.setSizeFull();
 		table.setFilterBarVisible(true);
 		//TODO estado
 //		table.setVisibleColumns("laborer.job","laborer.firstname","laborer.laborerId"); //FIXME laborerId
-		table.setVisibleColumns("job","laborer.firstname","laborer.laborerId"); //FIXME laborerId
-		table.setColumnHeaders("Cod","Nombre","Estado");
+		table.setVisibleColumns("job","laborer.firstname","laborer.laborerId","actions"); //FIXME laborerId
+		table.setColumnHeaders("Cod","Nombre","Estado","Acciones");
 		table.setSelectable(true);
 		
 		table.addItemClickListener(new ItemClickListener() {

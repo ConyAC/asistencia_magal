@@ -86,7 +86,6 @@ public class LaborerDialog extends AbstractWindowEditor {
 
 		this.velocityEngine = velocityEngine;
 		this.service = service;
-		setWidth("70%");
 
 		init();
 	}

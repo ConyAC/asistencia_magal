@@ -6,7 +6,7 @@ import org.junit.Test;
 
 public class RutDigitValidatorTest {
 
-	String rut  = "18696154-5";
+	String rut  = "19976949-0";
 	
 	@Test
 	public void testRutDigitValidator(){

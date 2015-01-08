@@ -3,12 +3,19 @@ package cl.magal.asistencia.services;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.validation.ConstraintViolationException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.TransactionSystemException;
+
+import com.vaadin.data.util.BeanItem;
+import com.vaadin.ui.Notification;
+import com.vaadin.ui.Notification.Type;
 
 import cl.magal.asistencia.entities.ConstructionSite;
 import cl.magal.asistencia.entities.Laborer;
@@ -105,5 +112,18 @@ public class LaborerService {
 
 	public List<Laborer> findAllLaborer() {
 		return (List<Laborer>) laborerRepo.findAll();
+	}
+
+	public List<Laborer> getAllLaborerExceptThisConstruction(ConstructionSite constructionsite) {
+		return laborerRepo.findAllExceptThisConstruction(constructionsite);
+	}
+
+	public void remove(LaborerConstructionsite laborerConstruction) {
+		try{
+			laborerConstructionsiteRepo.delete(laborerConstruction);
+		}catch(TransactionSystemException e){
+			ConstraintViolationException e1 = (ConstraintViolationException) e.getCause().getCause();
+			logger.error("TransactionSystemException {}",e1);
+		}
 	}
 }

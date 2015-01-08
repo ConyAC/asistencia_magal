@@ -58,6 +58,19 @@ public class LaborerServiceTest {
 		}
 	}
 	
+	@Test
+	public void findLaborerNotInConstructionSite(){
+		
+		Long constructionSiteId = 1L;
+		Long laborerIdToFind = 412L; 
+		ConstructionSite constructionSite = constructionService.findConstructionSite(constructionSiteId);
+		List<Laborer> laborers = service.getAllLaborerExceptThisConstruction(constructionSite);
+		
+		assertNotNull("La lista de laborer no puede ser nula",laborers);
+		assertTrue("La lista de laborer no puede ser vacia",!laborers.isEmpty());
+		assertEquals("el laborer no es el esperado",laborerIdToFind,laborers.get(0).getLaborerId());
+	}
+	
 	/**
 	 * Agregar una vacación
 	 */

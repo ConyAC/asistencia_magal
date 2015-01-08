@@ -71,6 +71,7 @@ public abstract class AbstractWindowEditor extends Window implements ClickListen
 		footer.setSpacing(true);
 		
 		root.setMargin(true);
+		setWidth("70%");
 				
 		btnGuardar = new Button("Guardar", this);
 		btnGuardar.addStyleName("default");
