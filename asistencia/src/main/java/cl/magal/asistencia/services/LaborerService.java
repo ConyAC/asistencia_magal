@@ -13,16 +13,14 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.TransactionSystemException;
 
-import com.vaadin.data.util.BeanItem;
-import com.vaadin.ui.Notification;
-import com.vaadin.ui.Notification.Type;
-
 import cl.magal.asistencia.entities.ConstructionSite;
 import cl.magal.asistencia.entities.Laborer;
 import cl.magal.asistencia.entities.LaborerConstructionsite;
+import cl.magal.asistencia.entities.enums.Job;
 import cl.magal.asistencia.repositories.AbsenceRepositoy;
 import cl.magal.asistencia.repositories.AccidentRepository;
 import cl.magal.asistencia.repositories.ConstructionSiteRepository;
+import cl.magal.asistencia.repositories.ContractRepository;
 import cl.magal.asistencia.repositories.LaborerConstructionsiteRepository;
 import cl.magal.asistencia.repositories.LaborerRepository;
 import cl.magal.asistencia.repositories.ToolRepository;
@@ -49,6 +47,8 @@ public class LaborerService {
 	AccidentRepository accidentRepo;
 	@Autowired
 	ToolRepository toolRepo;
+	@Autowired
+	ContractRepository contractRepo;
 	
 	public Laborer saveLaborer(Laborer l) {
 		Laborer laborer = laborerRepo.save(l);
@@ -107,6 +107,10 @@ public class LaborerService {
 	 * @param laborerConstructionSite
 	 */
 	public void save(LaborerConstructionsite laborerConstructionSite) {
+		//si es nulo, da error
+		if(laborerConstructionSite == null)
+			throw new RuntimeException("La relación trabajador-obra no puede ser nula");
+		//guarda los contratos
 		laborerConstructionsiteRepo.save(laborerConstructionSite);		
 	}
 
@@ -125,5 +129,10 @@ public class LaborerService {
 			ConstraintViolationException e1 = (ConstraintViolationException) e.getCause().getCause();
 			logger.error("TransactionSystemException {}",e1);
 		}
+	}
+
+	public String getNextJobCode(Job value, ConstructionSite constructionsite) {
+		//TODO
+		return value.ordinal()+"";
 	}
 }

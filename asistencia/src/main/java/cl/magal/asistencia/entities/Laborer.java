@@ -24,6 +24,7 @@ import javax.persistence.PrePersist;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 
@@ -44,7 +45,8 @@ import cl.magal.asistencia.entities.validator.RutDigit;
  * @author Constanza
  */
 @Entity
-@Table(name = "laborer")
+@Table(name = "laborer",
+	uniqueConstraints = @UniqueConstraint(columnNames = { "rut" }) )
 @NamedQueries({
     @NamedQuery(name = "Laborer.findAll", query = "SELECT l FROM Laborer l"),
     @NamedQuery(name = "Laborer.findByLaborerId", query = "SELECT l FROM Laborer l WHERE l.laborerId = :laborerId"),
@@ -60,9 +62,10 @@ import cl.magal.asistencia.entities.validator.RutDigit;
     @NamedQuery(name = "Laborer.findByPhone", query = "SELECT l FROM Laborer l WHERE l.phone = :phone"),
     @NamedQuery(name = "Laborer.findByDateAdmission", query = "SELECT l FROM Laborer l WHERE l.dateAdmission = :dateAdmission"),
     @NamedQuery(name = "Laborer.findByContractId", query = "SELECT l FROM Laborer l WHERE l.contractId = :contractId"),
-    @NamedQuery(name = "Laborer.findByAfpId", query = "SELECT l FROM Laborer l WHERE l.afp = :afp"),
+    @NamedQuery(name = "Laborer.findByAfpId", query = "SELECT l FROM Laborer l WHERE l.afp = :afp")
     })
 public class Laborer implements Serializable {
+
     /**
 	 * 
 	 */
@@ -86,7 +89,7 @@ public class Laborer implements Serializable {
     private String secondlastname;
     @NotNull(message="El rut es necesario")
     @NotEmpty(message="El rut es necesario")
-    @Column(name = "rut", nullable=false)
+    @Column(name = "rut", nullable=false,unique=true)
     @Pattern(regexp="^([0-9])+\\-([kK0-9])+$",message="El rut '%s' no es válido.")
     @RutDigit(message="El rut '%s' no es válido.")
     private String rut;
@@ -355,7 +358,7 @@ public class Laborer implements Serializable {
 	}
 
 	public String getFullname(){
-    	return firstname + " " +lastname;
+    	return (firstname != null ? firstname : "") + " " + (lastname != null ? lastname : "");
     }
 
 	@Override

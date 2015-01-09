@@ -72,8 +72,6 @@ public class ConstructionSiteView extends BaseView  implements View {
 
 	public ConstructionSiteView(){
 
-		logger.debug("obras");
-
 		setSizeFull();
 
 		root = new HorizontalLayout();

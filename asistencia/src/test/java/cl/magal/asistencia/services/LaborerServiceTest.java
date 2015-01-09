@@ -22,12 +22,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import cl.magal.asistencia.entities.Absence;
 import cl.magal.asistencia.entities.Accident;
-import cl.magal.asistencia.entities.AccidentLevel;
 import cl.magal.asistencia.entities.ConstructionSite;
 import cl.magal.asistencia.entities.Laborer;
 import cl.magal.asistencia.entities.LaborerConstructionsite;
 import cl.magal.asistencia.entities.Vacation;
 import cl.magal.asistencia.entities.enums.AbsenceType;
+import cl.magal.asistencia.entities.enums.AccidentLevel;
 import cl.magal.asistencia.entities.validator.RutDigitValidator;
 import cl.magal.asistencia.helpers.LaborerHelper;
 

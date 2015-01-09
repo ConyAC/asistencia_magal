@@ -11,6 +11,7 @@
 	    <class>cl.magal.asistencia.entities.AdvancePaymentItem</class>
 	    <class>cl.magal.asistencia.entities.AfpAndInsuranceConfigurations</class>
 	    <class>cl.magal.asistencia.entities.AfpItem</class>
+	    <class>cl.magal.asistencia.entities.Annexed</class>
 	    <class>cl.magal.asistencia.entities.Attachment</class>
 	    <class>cl.magal.asistencia.entities.ConstructionSite</class>
 	    <class>cl.magal.asistencia.entities.Contract</class>

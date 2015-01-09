@@ -41,6 +41,9 @@ import com.vaadin.data.util.BeanItem;
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.event.ItemClickEvent;
 import com.vaadin.event.ItemClickEvent.ItemClickListener;
+import com.vaadin.event.ShortcutAction.KeyCode;
+import com.vaadin.event.ShortcutAction.ModifierKey;
+import com.vaadin.event.ShortcutListener;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.FontAwesome;
@@ -48,7 +51,6 @@ import com.vaadin.ui.AbstractSelect.ItemCaptionMode;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.CustomTable;
@@ -127,6 +129,7 @@ public class LaborerAndTeamPanel extends Panel implements View {
 	public LaborerAndTeamPanel() {
 		teamContainer.addNestedContainerProperty("leader.firstname");
 		laborerContainer.addNestedContainerBean("laborer");
+		laborerContainer.addNestedContainerBean("activeContract");
 		//crea el tab con trabajadores y cuadrillas
 		TabSheet tab = new TabSheet();
 		tab.setSizeFull();
@@ -399,7 +402,16 @@ public class LaborerAndTeamPanel extends Panel implements View {
 		btnAdd = new Button(null,FontAwesome.PLUS);
 		hl.addComponent(btnAdd);
 		hl.setComponentAlignment(btnAdd, Alignment.TOP_RIGHT);
+		
+		ShortcutListener enter = new ShortcutListener("Entrar",
+				KeyCode.ENTER, new int[]{ModifierKey.CTRL }) {
+			@Override
+			public void handleAction(Object sender, Object target) {
+				btnAdd.click();
+			}
 
+		};
+		
 		btnAdd.addClickListener(new Button.ClickListener() {
 
 			@Override
@@ -435,6 +447,8 @@ public class LaborerAndTeamPanel extends Panel implements View {
 		        UI.getCurrent().addWindow(userWindow);
 			}
 		});
+		
+		btnAdd.addShortcutListener(enter);
 
 		FilterTable table =  new FilterTable();
 		
@@ -459,10 +473,19 @@ public class LaborerAndTeamPanel extends Panel implements View {
 		table.setContainerDataSource(laborerContainer);
 		table.setSizeFull();
 		table.setFilterBarVisible(true);
+		
+		table.addGeneratedColumn("confirmed", new CustomTable.ColumnGenerator() {
+			
+			@Override
+			public Object generateCell(CustomTable source, Object itemId,Object columnId) {
+				return (Boolean)source.getContainerProperty(itemId, columnId).getValue() ? "Si": "No";
+			}
+		});
+		
 		//TODO estado
 //		table.setVisibleColumns("laborer.job","laborer.firstname","laborer.laborerId"); //FIXME laborerId
-		table.setVisibleColumns("job","laborer.firstname","laborer.laborerId","actions"); //FIXME laborerId
-		table.setColumnHeaders("Cod","Nombre","Estado","Acciones");
+		table.setVisibleColumns("activeContract.jobAndCode","laborer.fullname","activeContract.step","confirmed","actions"); //FIXME laborerId
+		table.setColumnHeaders("Cod","Nombre","Etapa","Confirmado","Acciones");
 		table.setSelectable(true);
 		
 		table.addItemClickListener(new ItemClickListener() {
@@ -472,7 +495,7 @@ public class LaborerAndTeamPanel extends Panel implements View {
 				
 				final BeanItem<LaborerConstructionsite> beanItem = (BeanItem<LaborerConstructionsite>) event.getItem();
 				logger.debug("laborer constructionsite click item {} rut {} ",beanItem.getBean(),beanItem.getBean().getLaborer().getRut());
-				LaborerDialog userWindow = new LaborerDialog(beanItem,laborerService);
+				LaborerConstructionDialog userWindow = new LaborerConstructionDialog(beanItem,laborerService);
 				
 				userWindow.addListener(new AbstractWindowEditor.EditorSavedListener() {
 					

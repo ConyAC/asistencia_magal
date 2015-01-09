@@ -5,6 +5,8 @@ import java.lang.reflect.Method;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.DuplicateKeyException;
+import org.springframework.transaction.TransactionSystemException;
 
 import com.vaadin.data.Item;
 import com.vaadin.data.Validator.EmptyValueException;
@@ -47,6 +49,22 @@ public abstract class AbstractWindowEditor extends Window implements ClickListen
 	private VerticalLayout root = new VerticalLayout();
 	private Button btnGuardar,btnCancelar;
 	
+	public Button getBtnGuardar() {
+		return btnGuardar;
+	}
+
+	public void setBtnGuardar(Button btnGuardar) {
+		this.btnGuardar = btnGuardar;
+	}
+
+	public Button getBtnCancelar() {
+		return btnCancelar;
+	}
+
+	public void setBtnCancelar(Button btnCancelar) {
+		this.btnCancelar = btnCancelar;
+	}
+
 	/**
 	 * BINDER
 	 */
@@ -171,12 +189,26 @@ public abstract class AbstractWindowEditor extends Window implements ClickListen
 					try{ ((AbstractField)c).setValidationVisible(true); }catch(Exception e1){}
 				}
 				return;
+			} catch (com.vaadin.event.ListenerMethod.MethodException e){
+				logger.error("Exception {}",e);
+				//obtiene la transaction.TransactionSystemException
+				TransactionSystemException e1 = (TransactionSystemException) e.getCause();
+    			if(e1.getMessage().contains("Violación de indice de Unicidad ó Clave primaria")){
+    				if(e1.getMessage().contains("LABORER(RUT)"))
+    					Notification.show("El rut ya existe en la base.",Type.ERROR_MESSAGE);
+    				else
+    					throw new DuplicateKeyException("Clave duplicada",e1);
+    			}
+    			return;
+			} catch(Exception e){
+				logger.error("Exception {}",e);
+    			Notification.show("Error al validar los datos:", Type.ERROR_MESSAGE);
+				return ;
 			}
 			
 		} else if (event.getButton() == btnCancelar) {
 			if(!preDiscard())
 				return;
-			logger.debug("llamando discard");
 			getBinder().discard();
 			
 			if(!postDiscard())

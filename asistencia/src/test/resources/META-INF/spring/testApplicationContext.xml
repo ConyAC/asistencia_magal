@@ -42,9 +42,13 @@
 	<bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
 		<property name="entityManagerFactory" ref="entityManagerFactory"></property>
 	</bean>
-
+	
+	<!-- traductor de excepciones de repo -->
+    <bean class="org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor" />
+    
 	<!-- JPA Repositories -->
 	<jpa:repositories base-package="cl.magal.asistencia.repositories"></jpa:repositories>
+
 
 	<bean id="messageSource"
 		class="org.springframework.context.support.ResourceBundleMessageSource">

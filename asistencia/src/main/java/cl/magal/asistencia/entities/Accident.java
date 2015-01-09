@@ -20,6 +20,7 @@ import org.joda.time.DateTime;
 import org.joda.time.Days;
 
 import cl.magal.asistencia.entities.converter.AccidentLevelConverter;
+import cl.magal.asistencia.entities.enums.AccidentLevel;
 
 @Entity
 @Table(name="accident")

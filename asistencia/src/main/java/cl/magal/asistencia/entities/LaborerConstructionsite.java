@@ -12,7 +12,6 @@ import java.util.List;
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
-import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -23,10 +22,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
-import javax.persistence.PrePersist;
 import javax.persistence.Table;
 
-import cl.magal.asistencia.entities.converter.JobConverter;
 import cl.magal.asistencia.entities.enums.Job;
 
 /**
@@ -65,12 +62,14 @@ public class LaborerConstructionsite implements Serializable {
     @Column(name = "active")
     private Short active;
     
-    @Convert(converter = JobConverter.class)
-    @Column(name = "job")
-    private Job job;
+    /**
+     * Define si un trabajador está confirmado en la obra o no
+     */
+    @Column(name = "confirmed")
+    private boolean confirmed;
     
-    @Column(name="jobCode")
-    private Integer jobCode;
+    @Column(name="reward")
+    private int reward;
     
     @OneToMany(mappedBy="laborerConstructionSite",fetch=FetchType.LAZY,orphanRemoval=true )
     List<Vacation> vacations = new ArrayList<Vacation>();
@@ -84,15 +83,21 @@ public class LaborerConstructionsite implements Serializable {
     @OneToMany(mappedBy="laborerConstructionSite",fetch=FetchType.LAZY,orphanRemoval=true )
     List<Tool> tool = new ArrayList<Tool>();
     
+    @OneToMany(mappedBy="laborerConstructionSite",fetch=FetchType.LAZY,cascade={CascadeType.PERSIST},orphanRemoval=true )
+    List<Contract> contracts = new ArrayList<Contract>();
+   
+    /**
+     * Define la etapa para la cual está contratado el trabajador actual
+     */
+    transient private String step;
+    /**
+     * define el contrato activo o el primero
+     */
+    transient Contract activeContract;
+	
+    
 //    @ManyToMany(mappedBy="laborers")
 //    List<Team> teams = new ArrayList<Team>();
-
-    
-    @PrePersist
-    public void prePersist(){
-    	if(job == null)
-    		job = Job.JORNAL;
-    }
     
     public LaborerConstructionsite() {
     }
@@ -106,14 +111,6 @@ public class LaborerConstructionsite implements Serializable {
 //		this.teams = teams;
 //	}
 
-	public Integer getJobCode() {
-		return jobCode;
-	}
-
-	public void setJobCode(Integer jobCode) {
-		this.jobCode = jobCode;
-	}
-	
 	public List<Vacation> getVacations() {
 		return vacations;
 	}
@@ -144,16 +141,7 @@ public class LaborerConstructionsite implements Serializable {
 		this.tool = tool;
 	}
 	
-//	public void addTeam(Team team) {
-//        if (!getTeams().contains(team)) {
-//        	getTeams().add(team);
-//        }
-//        if (!team.getLaborers().contains(this)) {
-//        	team.getLaborers().add(this);
-//        }
-//    }
-    
-    public List<Absence> getAbsences() {
+	public List<Absence> getAbsences() {
 		return absences;
 	}
 
@@ -197,6 +185,13 @@ public class LaborerConstructionsite implements Serializable {
         }
     }
 	
+	public void addContract(Contract contract) {
+		if (!getContracts().contains(contract)) {
+			getContracts().add(contract);
+			contract.setLaborerConstructionSite(this);
+        }
+	}
+	
     public Long getId() {
 		return id;
 	}
@@ -235,57 +230,67 @@ public class LaborerConstructionsite implements Serializable {
 	public void setActive(Short active) {
 		this.active = active;
 	}
-
-
-	public Job getJob() {
-		return job;
+	
+	public boolean isConfirmed() {
+		return confirmed;
 	}
 
 
-	public void setJob(Job job) {
-		this.job = job;
+	public void setConfirmed(boolean confirmed) {
+		this.confirmed = confirmed;
+	}
+
+
+	public int getReward() {
+		return reward;
+	}
+
+
+	public void setReward(int reward) {
+		this.reward = reward;
+	}
+
+
+	public List<Contract> getContracts() {
+		return contracts;
+	}
+
+
+	public void setContracts(List<Contract> contracts) {
+		this.contracts = contracts;
 	}
 	
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime
-				* result
-				+ ((constructionsite == null) ? 0 : constructionsite.hashCode());
-		result = prime * result + ((id == null) ? 0 : id.hashCode());
-		result = prime * result + ((laborer == null) ? 0 : laborer.hashCode());
-		return result;
+	public Contract getActiveContract(){
+		if(activeContract == null ){
+			// recorre los contratos buscando el activo
+			// si la lista de contratos no es vacia entonces asigna el primera
+			if(!getContracts().isEmpty()){
+				activeContract = getContracts().get(0);
+				for (int i = 0; i < getContracts().size(); i++) {
+					if(getContracts().get(i).isActive()){
+						activeContract = getContracts().get(i);
+						break;
+					}
+				}
+			}
+		}
+		return activeContract;
+	}
+	/**
+	 * VARIABLES SOLO LECTURA PARA RESCATAR LA INFORMACION DEL CONTRACTO ACTIVO
+	 * @return
+	 */
+	public Job getJob() {
+		return getActiveContract() != null ? getActiveContract().getJob() : null;
 	}
 
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		LaborerConstructionsite other = (LaborerConstructionsite) obj;
-		if (constructionsite == null) {
-			if (other.constructionsite != null)
-				return false;
-		} else if (!constructionsite.equals(other.constructionsite))
-			return false;
-		if (id == null) {
-			if (other.id != null)
-				return false;
-		} else if (!id.equals(other.id))
-			return false;
-		if (laborer == null) {
-			if (other.laborer != null)
-				return false;
-		} else if (!laborer.equals(other.laborer))
-			return false;
-		return true;
+	public Integer getJobCode() {
+		return getActiveContract() != null ? getActiveContract().getJobCode() : null;
 	}
 
+	public String getStep() {
+		return step;
+	}
 
 	@Override
     public String toString() {
