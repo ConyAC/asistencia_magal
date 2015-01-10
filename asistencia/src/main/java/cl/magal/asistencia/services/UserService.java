@@ -329,7 +329,7 @@ public class UserService implements UserDetailsService {
 	}
 	
 	public List<ConstructionSite> getObraByUser( cl.magal.asistencia.entities.User u) {
-		List<ConstructionSite> cs = repoCS.findByUser(u.getUserId());
+		List<ConstructionSite> cs = repoCS.findByUser(u);
 		return cs;
 	}
 

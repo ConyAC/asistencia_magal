@@ -4,6 +4,7 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,6 +17,7 @@ import org.springframework.ui.velocity.VelocityEngineUtils;
 
 import cl.magal.asistencia.entities.Absence;
 import cl.magal.asistencia.entities.Accident;
+import cl.magal.asistencia.entities.Annexed;
 import cl.magal.asistencia.entities.LaborerConstructionsite;
 import cl.magal.asistencia.entities.Tool;
 import cl.magal.asistencia.entities.Vacation;
@@ -250,7 +252,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 	}
 
 	protected Component drawCyF() {
-		GridLayout gl = new GridLayout(3,6);
+		GridLayout gl = new GridLayout(2,10);
 		gl.setSpacing(true);
 		gl.setMargin(true);
 		gl.setSizeFull();
@@ -264,6 +266,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 				final Map<String, Object> input = new HashMap<String, Object>();
 				input.put("constructionSite", ((LaborerConstructionsite)getItem().getBean()).getConstructionsite());
 				input.put("laborer", ((LaborerConstructionsite)getItem().getBean()).getLaborer());
+				input.put("contract", ((LaborerConstructionsite)getItem().getBean()).getActiveContract());
 				input.put("tools", new DateTool());
 				final String body = VelocityEngineUtils.mergeTemplateIntoString(velocityEngine, "templates/temporary_work_contract_doc.vm", "UTF-8", input);
 
@@ -274,7 +277,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 						return new ByteArrayInputStream(body.getBytes());
 					}
 				};
-				StreamResource resource = new StreamResource(source2, "TestReport.html");
+				StreamResource resource = new StreamResource(source2, "Contrato"+((LaborerConstructionsite)getItem().getBean()).getJobCode()+".html");
 
 				Window window = new Window();
 				window.setResizable(true);
@@ -301,6 +304,80 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 		gl.addComponent(new Label("Código"),columna++,fila);gl.addComponent(new Label(getItem().getItemProperty("activeContract.jobCode")),columna--,fila++);
 		gl.addComponent(new Label("Fecha Inicio"),columna++,fila);gl.addComponent(new Label(getItem().getItemProperty("activeContract.startDate")),columna--,fila++);
 		gl.addComponent(new Label("Fecha Termino"),columna++,fila);gl.addComponent(new Label(getItem().getItemProperty("activeContract.terminationDate")),columna--,fila++);
+		
+		gl.addComponent(new Label("<hr />",ContentMode.HTML),columna++,fila,columna--,fila++);
+
+		final BeanItemContainer<Annexed> beanContainerAnnexeds = new BeanItemContainer<Annexed>(Annexed.class); 
+		gl.addComponent(new Label("<h1>Anexos</h1>",ContentMode.HTML),columna++,fila);
+		gl.addComponent(new Button(null,new Button.ClickListener() {
+			
+			@Override
+			public void buttonClick(ClickEvent event) {
+				Annexed annexed = new Annexed();
+				annexed.setStartDate(new Date());
+				annexed.setStep("Nueva etapa");
+				beanContainerAnnexeds.addBean(annexed);
+				
+			}
+		}){{setIcon(FontAwesome.PLUS);}},columna--,fila++);
+		
+
+		Table table = new Table(null,beanContainerAnnexeds){
+			{
+				setWidth("100%");
+				setHeight("200px");
+				
+			}
+		};
+		table.addGeneratedColumn("print", new Table.ColumnGenerator() {
+			
+			@Override
+			public Object generateCell(Table source, final Object itemId, Object columnId) {
+				return new Button(null,new Button.ClickListener() {
+					
+					@Override
+					public void buttonClick(ClickEvent event) {
+						
+						final Map<String, Object> input = new HashMap<String, Object>();
+						input.put("constructionSite", ((LaborerConstructionsite)getItem().getBean()).getConstructionsite());
+						input.put("laborer", ((LaborerConstructionsite)getItem().getBean()).getLaborer());
+						input.put("contract", ((LaborerConstructionsite)getItem().getBean()).getActiveContract());
+						input.put("annexed", (beanContainerAnnexeds.getItem(itemId).getBean()));
+						input.put("tools", new DateTool());
+						final String body = VelocityEngineUtils.mergeTemplateIntoString(velocityEngine, "templates/annex_contract_doc.vm", "UTF-8", input);
+
+						StreamResource.StreamSource source2 = new StreamResource.StreamSource() {
+
+							public InputStream getStream() {
+								//throw new UnsupportedOperationException("Not supported yet.");
+								return new ByteArrayInputStream(body.getBytes());
+							}
+						};
+						StreamResource resource = new StreamResource(source2, "Contrato"+((LaborerConstructionsite)getItem().getBean()).getJobCode()+".html");
+
+						Window window = new Window();
+						window.setResizable(true);
+						window.setWidth("60%");
+						window.setHeight("60%");
+						window.center();
+						BrowserFrame e = new BrowserFrame();
+						e.setSizeFull();
+
+						// Here we create a new StreamResource which downloads our StreamSource,
+						// which is our pdf.
+						// Set the right mime type
+						//						        resource.setMIMEType("application/pdf");
+						resource.setMIMEType("text/html");
+
+						e.setSource(resource);
+						window.setContent(e);
+						UI.getCurrent().addWindow(window);
+					}
+				}){ { setIcon(FontAwesome.PRINT);}};
+			}
+		});
+		
+		gl.addComponent(table,columna++,fila,columna--,fila++);
 		return gl;
 	}
 
