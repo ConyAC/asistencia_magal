@@ -76,7 +76,7 @@ public class Contract implements Serializable {
     @Column(name = "settlement")
     private Integer settlement;
     @Column(name = "contractDescription")
-    String annexedDescription;
+    String contractDescription;
     @Convert(converter = JobConverter.class)
     @Column(name = "job")
     private Job job;
@@ -189,12 +189,12 @@ public class Contract implements Serializable {
 		this.settlement = settlement;
 	}
 	
-	public String getAnnexedDescription() {
-		return annexedDescription;
+	public String getContractDescription() {
+		return contractDescription;
 	}
 
-	public void setAnnexedDescription(String annexedDescription) {
-		this.annexedDescription = annexedDescription;
+	public void setContractDescription(String contractDescription) {
+		this.contractDescription = contractDescription;
 	}
 
 	public Job getJob() {

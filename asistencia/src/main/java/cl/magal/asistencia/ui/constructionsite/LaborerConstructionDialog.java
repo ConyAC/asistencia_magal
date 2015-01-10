@@ -9,9 +9,9 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.velocity.app.VelocityEngine;
+import org.apache.velocity.tools.generic.DateTool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.ui.velocity.VelocityEngineUtils;
 
 import cl.magal.asistencia.entities.Absence;
@@ -21,6 +21,7 @@ import cl.magal.asistencia.entities.Tool;
 import cl.magal.asistencia.entities.Vacation;
 import cl.magal.asistencia.entities.enums.AbsenceType;
 import cl.magal.asistencia.entities.enums.AccidentLevel;
+import cl.magal.asistencia.entities.enums.Job;
 import cl.magal.asistencia.entities.enums.ToolStatus;
 import cl.magal.asistencia.services.LaborerService;
 import cl.magal.asistencia.ui.AbstractWindowEditor;
@@ -37,6 +38,7 @@ import com.vaadin.data.util.filter.Compare;
 import com.vaadin.data.util.filter.Not;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.StreamResource;
+import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.AbstractField;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.BrowserFrame;
@@ -69,11 +71,10 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 	BeanItemContainer<Tool> toolContainer= new BeanItemContainer<Tool>(Tool.class);
 	BeanItemContainer<HistoryVO> historyContainer = new BeanItemContainer<HistoryVO>(HistoryVO.class);
 
-	@Autowired
 	transient LaborerService service;
 	transient private VelocityEngine velocityEngine;
 	
-	public LaborerConstructionDialog(BeanItem<LaborerConstructionsite> item,LaborerService service ){
+	public LaborerConstructionDialog(BeanItem<LaborerConstructionsite> item,LaborerService service ,VelocityEngine velocityEngine){
 		super(item);
 		if(service == null )
 			throw new RuntimeException("Error al crear el dialgo, el servicio de trabajadores no puede ser nulo.");
@@ -248,15 +249,59 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 		return vl;
 	}
 
-	protected VerticalLayout drawCyF() {
-		VerticalLayout vl = new VerticalLayout();
-		vl.setSpacing(true);
-		vl.setMargin(true);
-		vl.setSizeFull();
+	protected Component drawCyF() {
+		GridLayout gl = new GridLayout(3,6);
+		gl.setSpacing(true);
+		gl.setMargin(true);
+		gl.setSizeFull();
 
-		Label l = new Label("En construcción...");
-		vl.addComponent(l);
-		return vl;
+		int fila = 0, columna = 0;
+		gl.addComponent(new Label("<h1>Contrato</h1>",ContentMode.HTML),columna++,fila);
+		gl.addComponent(new Button(null,new Button.ClickListener() {
+			
+			@Override
+			public void buttonClick(ClickEvent event) {
+				final Map<String, Object> input = new HashMap<String, Object>();
+				input.put("constructionSite", ((LaborerConstructionsite)getItem().getBean()).getConstructionsite());
+				input.put("laborer", ((LaborerConstructionsite)getItem().getBean()).getLaborer());
+				input.put("tools", new DateTool());
+				final String body = VelocityEngineUtils.mergeTemplateIntoString(velocityEngine, "templates/temporary_work_contract_doc.vm", "UTF-8", input);
+
+				StreamResource.StreamSource source2 = new StreamResource.StreamSource() {
+
+					public InputStream getStream() {
+						//throw new UnsupportedOperationException("Not supported yet.");
+						return new ByteArrayInputStream(body.getBytes());
+					}
+				};
+				StreamResource resource = new StreamResource(source2, "TestReport.html");
+
+				Window window = new Window();
+				window.setResizable(true);
+				window.setWidth("60%");
+				window.setHeight("60%");
+				window.center();
+				BrowserFrame e = new BrowserFrame();
+				e.setSizeFull();
+
+				// Here we create a new StreamResource which downloads our StreamSource,
+				// which is our pdf.
+				// Set the right mime type
+				//						        resource.setMIMEType("application/pdf");
+				resource.setMIMEType("text/html");
+
+				e.setSource(resource);
+				window.setContent(e);
+				UI.getCurrent().addWindow(window);
+			}
+		}){{setIcon(FontAwesome.PRINT);}},columna--,fila++);
+		
+		gl.addComponent(new Label("Etapa"),columna++,fila);gl.addComponent(new Label(getItem().getItemProperty("activeContract.step")),columna--,fila++);
+		gl.addComponent(new Label("Trabajo"),columna++,fila);gl.addComponent(new Label( ((Job)getItem().getItemProperty("activeContract.job").getValue()).toString()),columna--,fila++);
+		gl.addComponent(new Label("Código"),columna++,fila);gl.addComponent(new Label(getItem().getItemProperty("activeContract.jobCode")),columna--,fila++);
+		gl.addComponent(new Label("Fecha Inicio"),columna++,fila);gl.addComponent(new Label(getItem().getItemProperty("activeContract.startDate")),columna--,fila++);
+		gl.addComponent(new Label("Fecha Termino"),columna++,fila);gl.addComponent(new Label(getItem().getItemProperty("activeContract.terminationDate")),columna--,fila++);
+		return gl;
 	}
 
 	protected VerticalLayout drawHistorico() {

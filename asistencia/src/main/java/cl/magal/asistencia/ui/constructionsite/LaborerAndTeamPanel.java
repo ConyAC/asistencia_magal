@@ -495,7 +495,7 @@ public class LaborerAndTeamPanel extends Panel implements View {
 				
 				final BeanItem<LaborerConstructionsite> beanItem = (BeanItem<LaborerConstructionsite>) event.getItem();
 				logger.debug("laborer constructionsite click item {} rut {} ",beanItem.getBean(),beanItem.getBean().getLaborer().getRut());
-				LaborerConstructionDialog userWindow = new LaborerConstructionDialog(beanItem,laborerService);
+				LaborerConstructionDialog userWindow = new LaborerConstructionDialog(beanItem,laborerService,velocityEngine);
 				
 				userWindow.addListener(new AbstractWindowEditor.EditorSavedListener() {
 					
