@@ -458,7 +458,7 @@ CREATE TABLE IF NOT EXISTS "CONTRACT"
 	-- finiquito
 	settlement integer, 
 	startDate timestamp NOT NULL, 
-	step varchar(512) NOT NULL, 
+	step varchar(512) NOT NULL,
 	terminationDate timestamp, 
 	timeduration double, 
 	valueTreatment integer, 

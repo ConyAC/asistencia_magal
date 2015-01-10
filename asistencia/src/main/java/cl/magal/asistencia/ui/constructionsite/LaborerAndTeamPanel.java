@@ -426,7 +426,7 @@ public class LaborerAndTeamPanel extends Panel implements View {
 				laborer.setConstructionsite(item.getBean());
 				
 				BeanItem<LaborerConstructionsite> laborerItem = new BeanItem<LaborerConstructionsite>(laborer);
-				AddLaborerDialog userWindow = new AddLaborerDialog(laborerItem,laborerService);
+				AddLaborerContractDialog userWindow = new AddLaborerContractDialog(laborerItem,laborerService,true);
 				
 				userWindow.addListener(new AbstractWindowEditor.EditorSavedListener() {
 					
@@ -450,7 +450,7 @@ public class LaborerAndTeamPanel extends Panel implements View {
 		
 		btnAdd.addShortcutListener(enter);
 
-		FilterTable table =  new FilterTable();
+		final FilterTable table =  new FilterTable();
 		
 		table.addGeneratedColumn("actions", new CustomTable.ColumnGenerator() {
 			
@@ -512,6 +512,8 @@ public class LaborerAndTeamPanel extends Panel implements View {
 							LaborerConstructionsite laborer = beanItem.getBean();
 							logger.debug("laborer constructionsite {}, rut {} postcommit ",laborer,laborer.getLaborer().getRut());
 			    			laborerService.save(laborer);	
+			    			int index = laborerContainer.indexOfId(beanItem);
+			    			table.refreshRowCache();
 //			    			return true;
 			    			return;
 			    		} catch (TransactionSystemException e) {

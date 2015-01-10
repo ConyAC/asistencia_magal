@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.TransactionSystemException;
 
 import cl.magal.asistencia.entities.ConstructionSite;
+import cl.magal.asistencia.entities.Contract;
 import cl.magal.asistencia.entities.Laborer;
 import cl.magal.asistencia.entities.LaborerConstructionsite;
 import cl.magal.asistencia.entities.enums.Job;
@@ -70,23 +71,34 @@ public class LaborerService {
 	public Page<LaborerConstructionsite> findAllLaborerConstructionsite(Pageable page) {
 		return laborerConstructionsiteRepo.findAll(page);
 	}
+	public Page<Laborer> findAllLaborer(Pageable page) {
+		return laborerRepo.findAll(page);
+	}
 
 	public List<HistoryVO> getLaborerHistory(Laborer laborer) {
 		
 		List<HistoryVO> result =  new ArrayList<HistoryVO>();
 		//busca todas las obras en que ha trabajado
-		List<ConstructionSite> constructionSites = constructionSiteRepo.findByLaborers(laborer);
+		List<LaborerConstructionsite> laborerConstructionsites = laborerConstructionsiteRepo.findByLaborer(laborer);
 //		laborer.setConstructionSites(constructionSites);
 		//por cada una crea un vo
-		for(ConstructionSite constructionSite : constructionSites ){
-			HistoryVO vo = new HistoryVO();
-			vo.setConstructionSite(constructionSite);
-			//considerar el job historico
-//			vo.setJob(laborer.getJob()); 
-			vo.setAverageWage(Double.valueOf(Utils.random(9000, 15000)));
-			vo.setNumberOfAccidents(Utils.random(0, 15));
-			vo.setReward(Double.valueOf(Utils.random(19000, 150000)));
-			result.add(vo);
+		for(LaborerConstructionsite laborerConstructionsite : laborerConstructionsites ){
+			//por cada contrato
+			for(Contract contract : laborerConstructionsite.getContracts() ){
+				HistoryVO vo = new HistoryVO();
+				vo.setConstructionSite(laborerConstructionsite.getConstructionsite());
+				//considerar el job historico
+				vo.setJob(contract.getJob()); 
+				vo.setNumberOfAccidents(laborerConstructionsite.getAccidents().size());
+				vo.setStartingDate(contract.getStartDate());
+				vo.setEndingDate(contract.getTerminationDate());
+				vo.setActive(contract.isActive());
+				//TODO
+				vo.setReward(Double.valueOf(Utils.random(19000, 150000)));
+				vo.setAverageWage(Double.valueOf(Utils.random(9000, 15000)));
+				
+				result.add(vo);
+			}
 		}
 		
 		return result;
@@ -135,4 +147,6 @@ public class LaborerService {
 		//TODO
 		return value.ordinal()+"";
 	}
+
+	
 }

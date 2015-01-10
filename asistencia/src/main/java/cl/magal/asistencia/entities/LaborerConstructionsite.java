@@ -71,19 +71,19 @@ public class LaborerConstructionsite implements Serializable {
     @Column(name="reward")
     private int reward;
     
-    @OneToMany(mappedBy="laborerConstructionSite",fetch=FetchType.LAZY,orphanRemoval=true )
+    @OneToMany(mappedBy="laborerConstructionSite",fetch=FetchType.LAZY,cascade={CascadeType.PERSIST,CascadeType.MERGE},orphanRemoval=true )
     List<Vacation> vacations = new ArrayList<Vacation>();
     
-    @OneToMany(mappedBy="laborerConstructionSite",fetch=FetchType.LAZY,orphanRemoval=true )
+    @OneToMany(mappedBy="laborerConstructionSite",fetch=FetchType.LAZY,cascade={CascadeType.PERSIST,CascadeType.MERGE},orphanRemoval=true )
     List<Absence> absences = new ArrayList<Absence>();
     
-    @OneToMany(mappedBy="laborerConstructionSite",fetch=FetchType.LAZY,orphanRemoval=true )
+    @OneToMany(mappedBy="laborerConstructionSite",fetch=FetchType.LAZY,cascade={CascadeType.PERSIST,CascadeType.MERGE},orphanRemoval=true )
     List<Accident> accidents = new ArrayList<Accident>();
     
-    @OneToMany(mappedBy="laborerConstructionSite",fetch=FetchType.LAZY,orphanRemoval=true )
+    @OneToMany(mappedBy="laborerConstructionSite",fetch=FetchType.LAZY,cascade={CascadeType.PERSIST,CascadeType.MERGE},orphanRemoval=true )
     List<Tool> tool = new ArrayList<Tool>();
     
-    @OneToMany(mappedBy="laborerConstructionSite",fetch=FetchType.LAZY,cascade={CascadeType.PERSIST},orphanRemoval=true )
+    @OneToMany(mappedBy="laborerConstructionSite",fetch=FetchType.LAZY,cascade={CascadeType.PERSIST,CascadeType.MERGE},orphanRemoval=true )
     List<Contract> contracts = new ArrayList<Contract>();
    
     /**
@@ -258,6 +258,13 @@ public class LaborerConstructionsite implements Serializable {
 
 	public void setContracts(List<Contract> contracts) {
 		this.contracts = contracts;
+	}
+	
+	public void refreshActiveContract(){
+		for(Contract contract : getContracts()){
+			contract.setActive(false);
+		}
+		activeContract = null;
 	}
 	
 	public Contract getActiveContract(){

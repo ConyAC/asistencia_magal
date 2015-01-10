@@ -84,7 +84,7 @@ public class Contract implements Serializable {
     @Column(name="jobCode")
     private Integer jobCode;
     
-    private boolean active;
+    private Boolean active;
     
     @ManyToOne
     @JoinColumn(name="LABORER_CONSTRUCTIONSITEID")
@@ -187,6 +187,7 @@ public class Contract implements Serializable {
 
 	public void setSettlement(Integer settlement) {
 		this.settlement = settlement;
+		setActive(false);
 	}
 	
 	public String getContractDescription() {

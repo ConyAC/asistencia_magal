@@ -13,5 +13,6 @@ public interface LaborerConstructionsiteRepository extends
 
 	List<LaborerConstructionsite> findByConstructionsite(ConstructionSite constructionsite);
 	LaborerConstructionsite findByConstructionsiteAndLaborer(ConstructionSite constructionsite, Laborer laborer);
+	List<LaborerConstructionsite> findByLaborer(Laborer laborer);
 
 }

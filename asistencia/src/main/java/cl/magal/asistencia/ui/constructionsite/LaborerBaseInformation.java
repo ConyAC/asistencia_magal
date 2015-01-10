@@ -32,12 +32,12 @@ public class LaborerBaseInformation extends VerticalLayout {
 		return binder;
 	}
 
-	protected LaborerBaseInformation(BeanFieldGroup<?> fg) {
+	public LaborerBaseInformation(BeanFieldGroup<?> fg) {
 		this.binder = fg;
 		init();
 	}
 	
-	protected LaborerBaseInformation(BeanFieldGroup<?> fg,String prefix) {
+	public LaborerBaseInformation(BeanFieldGroup<?> fg,String prefix) {
 		this.binder = fg;
 		this.prefix = prefix + ".";
 		init();

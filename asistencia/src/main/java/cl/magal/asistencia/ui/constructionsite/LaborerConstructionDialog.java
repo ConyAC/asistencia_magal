@@ -18,6 +18,7 @@ import org.springframework.ui.velocity.VelocityEngineUtils;
 import cl.magal.asistencia.entities.Absence;
 import cl.magal.asistencia.entities.Accident;
 import cl.magal.asistencia.entities.Annexed;
+import cl.magal.asistencia.entities.Contract;
 import cl.magal.asistencia.entities.LaborerConstructionsite;
 import cl.magal.asistencia.entities.Tool;
 import cl.magal.asistencia.entities.Vacation;
@@ -54,6 +55,8 @@ import com.vaadin.ui.Field;
 import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
+import com.vaadin.ui.Notification;
+import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.TabSheet;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.TextField;
@@ -89,11 +92,11 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 
 	public void init(){
 		super.init();
-		LaborerConstructionsite laborer = (LaborerConstructionsite) getItem().getBean();
-		List<HistoryVO> history = service.getLaborerHistory(laborer.getLaborer());
+		LaborerConstructionsite laborerConstructionsite = (LaborerConstructionsite) getItem().getBean();
+		List<HistoryVO> history = service.getLaborerHistory(laborerConstructionsite.getLaborer());
 		historyContainer.addAll(history);
 		historyContainer.addNestedContainerProperty("constructionSite.name");
-		Filter filter = new Compare.Equal("constructionSite", laborer.getConstructionsite());
+		Filter filter = new Compare.Equal("constructionSite", laborerConstructionsite.getConstructionsite());
 		//filtra la obra en la que se encuentra
 		historyContainer.addContainerFilter(new Not(filter));
 	}
@@ -240,18 +243,10 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 		return vl;
 	}
 
-	protected VerticalLayout drawAyL() {
-		VerticalLayout vl = new VerticalLayout();
-		vl.setSpacing(true);
-		vl.setMargin(true);
-		vl.setSizeFull();
-
-		Label l = new Label("En construcción...");
-		vl.addComponent(l);
-		return vl;
-	}
-
 	protected Component drawCyF() {
+		
+		final Contract activeContract = ((LaborerConstructionsite)getItem().getBean()).getActiveContract();
+		
 		GridLayout gl = new GridLayout(2,10);
 		gl.setSpacing(true);
 		gl.setMargin(true);
@@ -259,48 +254,120 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 
 		int fila = 0, columna = 0;
 		gl.addComponent(new Label("<h1>Contrato</h1>",ContentMode.HTML),columna++,fila);
-		gl.addComponent(new Button(null,new Button.ClickListener() {
-			
-			@Override
-			public void buttonClick(ClickEvent event) {
-				final Map<String, Object> input = new HashMap<String, Object>();
-				input.put("constructionSite", ((LaborerConstructionsite)getItem().getBean()).getConstructionsite());
-				input.put("laborer", ((LaborerConstructionsite)getItem().getBean()).getLaborer());
-				input.put("contract", ((LaborerConstructionsite)getItem().getBean()).getActiveContract());
-				input.put("tools", new DateTool());
-				final String body = VelocityEngineUtils.mergeTemplateIntoString(velocityEngine, "templates/temporary_work_contract_doc.vm", "UTF-8", input);
+		gl.addComponent( new HorizontalLayout(){
+			{
+				setSpacing(true);
 
-				StreamResource.StreamSource source2 = new StreamResource.StreamSource() {
+				Button btnPrint = new Button(null,new Button.ClickListener() {
 
-					public InputStream getStream() {
-						//throw new UnsupportedOperationException("Not supported yet.");
-						return new ByteArrayInputStream(body.getBytes());
+					@Override
+					public void buttonClick(ClickEvent event) {
+						final Map<String, Object> input = new HashMap<String, Object>();
+						input.put("constructionSite", ((LaborerConstructionsite)getItem().getBean()).getConstructionsite());
+						input.put("laborer", ((LaborerConstructionsite)getItem().getBean()).getLaborer());
+						input.put("contract", activeContract);
+						input.put("tools", new DateTool());
+						final String body = VelocityEngineUtils.mergeTemplateIntoString(velocityEngine, "templates/temporary_work_contract_doc.vm", "UTF-8", input);
+
+						StreamResource.StreamSource source2 = new StreamResource.StreamSource() {
+
+							public InputStream getStream() {
+								//throw new UnsupportedOperationException("Not supported yet.");
+								return new ByteArrayInputStream(body.getBytes());
+							}
+						};
+						StreamResource resource = new StreamResource(source2, "Contrato"+((LaborerConstructionsite)getItem().getBean()).getJobCode()+".html");
+
+						Window window = new Window();
+						window.setResizable(true);
+						window.setWidth("60%");
+						window.setHeight("60%");
+						window.center();
+						BrowserFrame e = new BrowserFrame();
+						e.setSizeFull();
+
+						// Here we create a new StreamResource which downloads our StreamSource,
+						// which is our pdf.
+						// Set the right mime type
+						//						        resource.setMIMEType("application/pdf");
+						resource.setMIMEType("text/html");
+
+						e.setSource(resource);
+						window.setContent(e);
+						UI.getCurrent().addWindow(window);
 					}
-				};
-				StreamResource resource = new StreamResource(source2, "Contrato"+((LaborerConstructionsite)getItem().getBean()).getJobCode()+".html");
+				}){{setIcon(FontAwesome.PRINT); setDescription("Imprimir");}};
+				addComponent(btnPrint);
+				
+				Button btnEdit = new Button(null,FontAwesome.PENCIL);
+				final Button btnChangeJob = new Button(null,FontAwesome.CHILD);
+				final Button btnSettlement = new Button(null,FontAwesome.FILE_TEXT);
+				
+				btnSettlement.setDescription("Finiquitar");
+				btnEdit.setDescription("Editar");
+				btnChangeJob.setDescription("Cambiar Oficio");
+				
+				btnEdit.addClickListener(new Button.ClickListener() {
 
-				Window window = new Window();
-				window.setResizable(true);
-				window.setWidth("60%");
-				window.setHeight("60%");
-				window.center();
-				BrowserFrame e = new BrowserFrame();
-				e.setSizeFull();
-
-				// Here we create a new StreamResource which downloads our StreamSource,
-				// which is our pdf.
-				// Set the right mime type
-				//						        resource.setMIMEType("application/pdf");
-				resource.setMIMEType("text/html");
-
-				e.setSource(resource);
-				window.setContent(e);
-				UI.getCurrent().addWindow(window);
+					@Override
+					public void buttonClick(ClickEvent event) {
+						
+					}
+				});
+				addComponent(btnEdit);
+				
+				btnChangeJob.addClickListener(new Button.ClickListener() {
+					
+					@Override
+					public void buttonClick(ClickEvent event) {
+						
+						AddLaborerContractDialog userWindow = new AddLaborerContractDialog(getItem(),service,false);
+						
+						userWindow.addListener(new AbstractWindowEditor.EditorSavedListener() {
+							
+							@Override
+							public void editorSaved(EditorSavedEvent event) {
+								try {
+									//TODO definir si guardará o no el estado del laborer en esta etapa
+									//LaborerConstructionsite laborer = ((BeanItem<LaborerConstructionsite>) event.getSavedItem()).getBean();
+									//service.save(laborer);
+									replaceComponent(btnChangeJob,btnSettlement);
+					    		} catch (Exception e) {
+					    			logger.error("Error al guardar la información del obrero",e);
+					    			Notification.show("Es necesario agregar todos los campos obligatorios", Type.ERROR_MESSAGE);
+					    		}
+							}
+						});
+				        
+				        UI.getCurrent().addWindow(userWindow);
+					}
+				});
+			
+				btnSettlement.addClickListener(new Button.ClickListener() {
+					
+					@Override
+					public void buttonClick(ClickEvent event) {
+						//TODO calcular finiquito
+						//setea un finiquito
+						activeContract.setSettlement(100000);
+						//se asegura de marcar inactivos todos los contratos
+						for(Contract contract : ((LaborerConstructionsite)getItem().getBean()).getContracts())
+							contract.setActive(false);
+						
+						replaceComponent(btnSettlement, btnChangeJob);
+					}
+				});
+				
+				if(activeContract.getSettlement() == null ){
+					addComponent(btnSettlement);
+				}else{
+					addComponent(btnChangeJob);
+				}
 			}
-		}){{setIcon(FontAwesome.PRINT);}},columna--,fila++);
-		
+		},columna--,fila++);
+
 		gl.addComponent(new Label("Etapa"),columna++,fila);gl.addComponent(new Label(getItem().getItemProperty("activeContract.step")),columna--,fila++);
-		gl.addComponent(new Label("Trabajo"),columna++,fila);gl.addComponent(new Label( ((Job)getItem().getItemProperty("activeContract.job").getValue()).toString()),columna--,fila++);
+		gl.addComponent(new Label("Oficio"),columna++,fila);gl.addComponent(new Label( ((Job)getItem().getItemProperty("activeContract.job").getValue()).toString()),columna--,fila++);
 		gl.addComponent(new Label("Código"),columna++,fila);gl.addComponent(new Label(getItem().getItemProperty("activeContract.jobCode")),columna--,fila++);
 		gl.addComponent(new Label("Fecha Inicio"),columna++,fila);gl.addComponent(new Label(getItem().getItemProperty("activeContract.startDate")),columna--,fila++);
 		gl.addComponent(new Label("Fecha Termino"),columna++,fila);gl.addComponent(new Label(getItem().getItemProperty("activeContract.terminationDate")),columna--,fila++);
@@ -309,17 +376,22 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 
 		final BeanItemContainer<Annexed> beanContainerAnnexeds = new BeanItemContainer<Annexed>(Annexed.class); 
 		gl.addComponent(new Label("<h1>Anexos</h1>",ContentMode.HTML),columna++,fila);
-		gl.addComponent(new Button(null,new Button.ClickListener() {
-			
-			@Override
-			public void buttonClick(ClickEvent event) {
-				Annexed annexed = new Annexed();
-				annexed.setStartDate(new Date());
-				annexed.setStep("Nueva etapa");
-				beanContainerAnnexeds.addBean(annexed);
-				
+		gl.addComponent( new HorizontalLayout(){
+			{
+				Button AgregarAnexo = new Button(null,new Button.ClickListener() {
+					
+					@Override
+					public void buttonClick(ClickEvent event) {
+						Annexed annexed = new Annexed();
+						annexed.setStartDate(new Date());
+						annexed.setStep("Nueva etapa");
+						beanContainerAnnexeds.addBean(annexed);
+						
+					}
+				}){{setIcon(FontAwesome.PLUS);}};
+				addComponent(AgregarAnexo);
 			}
-		}){{setIcon(FontAwesome.PLUS);}},columna--,fila++);
+		},columna--,fila++);
 		
 
 		Table table = new Table(null,beanContainerAnnexeds){

@@ -2,6 +2,7 @@ package cl.magal.asistencia.ui.constructionsite;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,6 +15,7 @@ import cl.magal.asistencia.entities.enums.Permission;
 import cl.magal.asistencia.services.LaborerService;
 import cl.magal.asistencia.ui.AbstractWindowEditor;
 import cl.magal.asistencia.util.SecurityHelper;
+import cl.magal.asistencia.util.Utils;
 
 import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeEvent;
@@ -33,28 +35,38 @@ import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
 
-public class AddLaborerDialog extends AbstractWindowEditor implements NewItemHandler {
+public class AddLaborerContractDialog extends AbstractWindowEditor implements NewItemHandler {
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 3250481772094615264L;
 
-	Logger logger = LoggerFactory.getLogger(AddLaborerDialog.class);
+	Logger logger = LoggerFactory.getLogger(AddLaborerContractDialog.class);
 
 	transient LaborerService laborerService;
 	BeanItemContainer<Laborer> laborers = new BeanItemContainer<Laborer>(Laborer.class);
-	protected AddLaborerDialog(BeanItem<?> item,LaborerService laborerService) {
+	boolean addLaborer = false;
+	protected AddLaborerContractDialog(BeanItem<?> item,LaborerService laborerService,boolean addLaborer) {
 		super(item);
 		this.laborerService= laborerService;
+		this.addLaborer = addLaborer;
 		init();
 	}
 
 	public void init(){
-		laborers.addAll( laborerService.getAllLaborerExceptThisConstruction(((BeanItem<LaborerConstructionsite>)getItem()).getBean().getConstructionsite()));
+		if(addLaborer)
+			laborers.addAll( laborerService.getAllLaborerExceptThisConstruction(((BeanItem<LaborerConstructionsite>)getItem()).getBean().getConstructionsite()));
+		else {
+			laborers.addBean(((LaborerConstructionsite) getItem().getBean()).getLaborer());
+		}
 		logger.debug("laborers {}",laborers);
 		//cambia el texto del guardar
-		getBtnGuardar().setCaption("Agregar Trabajador");
+		if(addLaborer)
+			getBtnGuardar().setCaption("Agregar Trabajador");
+		else
+			getBtnGuardar().setCaption("Agregar Contrato");
+		
 		getBtnGuardar().setIcon(FontAwesome.PLUS_CIRCLE);
 		super.init();
 	}
@@ -74,10 +86,16 @@ public class AddLaborerDialog extends AbstractWindowEditor implements NewItemHan
 		cb.setItemCaptionMode(ItemCaptionMode.PROPERTY);
 		cb.setItemCaptionPropertyId("rut");
 		cb.setTabIndex(1);
+		if(!addLaborer){
+			cb.select(laborers.firstItemId());
+		}
+		
+		cb.setEnabled(addLaborer);
 
 		final TextField lbNombre = new TextField("Nombre:");
 		lbNombre.setReadOnly(true);
 		final Button btn = new Button(null,FontAwesome.FLOPPY_O );
+		btn.setEnabled(addLaborer);
 		btn.addClickListener(new Button.ClickListener() {
 			
 			@Override
@@ -102,7 +120,7 @@ public class AddLaborerDialog extends AbstractWindowEditor implements NewItemHan
 						//refresca el item en el combobox
 						laborers.removeAllItems();
 						laborers.addAll( laborerService.getAllLaborerExceptThisConstruction(((BeanItem<LaborerConstructionsite>)getItem()).getBean().getConstructionsite()));
-						setLabelValue( lbNombre , laborer.getFullname());
+						Utils.setLabelValue( lbNombre , laborer.getFullname());
 						if ( laborer.getLaborerId() != null )
 							btn.setIcon(FontAwesome.PENCIL);
 						else
@@ -121,7 +139,7 @@ public class AddLaborerDialog extends AbstractWindowEditor implements NewItemHan
 			public void valueChange(ValueChangeEvent event) {
 				Laborer laborer = (Laborer)cb.getValue();
 				if(laborer != null){
-					setLabelValue( lbNombre , laborer.getFullname());
+					Utils.setLabelValue( lbNombre , laborer.getFullname());
 					if ( laborer.getLaborerId() != null )
 						btn.setIcon(FontAwesome.PENCIL);
 					else
@@ -161,7 +179,7 @@ public class AddLaborerDialog extends AbstractWindowEditor implements NewItemHan
 			@Override
 			public void valueChange(ValueChangeEvent event) {
 				String newCode = laborerService.getNextJobCode((Job) event.getProperty().getValue() ,((BeanItem<LaborerConstructionsite>) getItem()).getBean().getConstructionsite() );
-				setLabelValue(lbCodJob,newCode);
+				Utils.setLabelValue(lbCodJob,newCode);
 			}
 		});
 		
@@ -193,12 +211,6 @@ public class AddLaborerDialog extends AbstractWindowEditor implements NewItemHan
 		cb.select(laborer);
 	}
 	
-	private void setLabelValue(TextField tf, String value){
-		tf.setReadOnly(false);
-		tf.setValue(value);
-		tf.setReadOnly(true);
-	}
-	
 	@Override
 	protected boolean preCommit() {
 		String msj = null;
@@ -228,6 +240,8 @@ public class AddLaborerDialog extends AbstractWindowEditor implements NewItemHan
 			contract.setJob(job);
 			contract.setJobCode(Integer.valueOf(lbCodJob.getValue()));
 			contract.setStep(lbStep.getValue());
+			contract.setActive(true);
+			((BeanItem<LaborerConstructionsite>) getItem()).getBean().refreshActiveContract();
 
 			((BeanItem<LaborerConstructionsite>) getItem()).getBean().addContract(contract);
 		}

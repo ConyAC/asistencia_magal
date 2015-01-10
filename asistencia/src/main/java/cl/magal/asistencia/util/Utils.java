@@ -8,6 +8,8 @@ import javax.validation.ConstraintViolation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.vaadin.ui.TextField;
+
 public class Utils {
 	
 	static Logger logger = LoggerFactory.getLogger(Utils.class);
@@ -27,6 +29,12 @@ public class Utils {
 			logger.debug(" error en validar mensaje : {} valor: {} ",constraintViolation.getMessage(),constraintViolation.getInvalidValue());
 		}
 		return sb.toString();
+	}
+	
+	public static void setLabelValue(TextField tf, String value){
+		tf.setReadOnly(false);
+		tf.setValue(value);
+		tf.setReadOnly(true);
 	}
 	
 }
