@@ -23,6 +23,7 @@ import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.Field;
 import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.Panel;
 import com.vaadin.ui.TabSheet;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
@@ -66,10 +67,10 @@ public class ConstructionSiteDialog extends AbstractWindowEditor {
 	@Override
 	protected Component createBody() {
 
-		TabSheet tab = new TabSheet();
-		tab.addTab(drawObra(),"Crear Obra");
+		Panel panel = new Panel();
+		panel.setContent(drawObra());
 
-		return tab;
+		return panel;
 	}
 	
 	protected VerticalLayout drawObra() {

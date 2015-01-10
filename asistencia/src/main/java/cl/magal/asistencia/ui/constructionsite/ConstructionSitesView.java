@@ -144,7 +144,7 @@ public class ConstructionSitesView extends BaseView implements View {
 					ConstructionSite cs = new ConstructionSite();
 					BeanItem<ConstructionSite> csItem = new BeanItem<ConstructionSite>(cs);
 					ConstructionSiteDialog csWindow = new ConstructionSiteDialog(csItem, itemUser, service, velocityEngine);
-					
+					csWindow.setCaption("Crear Obra");
 					csWindow.addListener(new AbstractWindowEditor.EditorSavedListener() {
 						
 						@Override
@@ -199,9 +199,9 @@ public class ConstructionSitesView extends BaseView implements View {
 							
 							BeanItem<ConstructionSite> csItem = constructionContainer.getItem(itemId);
 							ConstructionSiteDialog csWindow = new ConstructionSiteDialog(csItem, itemUser, service, velocityEngine);
-							
+							csWindow.setCaption("Editar Obra");
 							csWindow.addListener(new AbstractWindowEditor.EditorSavedListener() {
-								
+							
 								@Override
 								public void editorSaved(EditorSavedEvent event) {
 									try {
@@ -233,16 +233,14 @@ public class ConstructionSitesView extends BaseView implements View {
 					borrarObra.addClickListener(new Button.ClickListener() {
 						
 						@Override
-						public void buttonClick(ClickEvent event) {
-							//recupera el elemento seleccionado		
+						public void buttonClick(ClickEvent event) {	
 							ConfirmDialog.show(UI.getCurrent(), "Confirmar Acción:", "¿Está seguro de eliminar la obra seleccionada?",
 							        "Eliminar", "Cancelar", new ConfirmDialog.Listener() {
 
 							            public void onClose(ConfirmDialog dialog) {
 							                if (dialog.isConfirmed()) {
 							                    // Confirmed to continue
-							                	ConstructionSite cs = (ConstructionSite) table.getValue();
-							                	logger.debug("LALLA{}",cs);
+							                	ConstructionSite cs = (ConstructionSite) itemId;
 												service.deleteCS(cs.getConstructionsiteId());
 												constructionContainer.removeItem(cs);		
 							                } else {
