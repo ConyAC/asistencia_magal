@@ -50,7 +50,8 @@ public class ConstructionSiteService {
 			ConstructionSite obra = new ConstructionSite();
 			obra.setName("Edificio Jardines de Olivares");
 			obra.setStatus(Status.ACTIVE);
-			obra.setAddress("");
+			obra.setAddress("Av. Las Condes 93849");
+			obra.setCode("21234");
 			obra.setDeleted(false);
 			
 			repo2.save(obra);
@@ -58,7 +59,8 @@ public class ConstructionSiteService {
 			obra = new ConstructionSite();
 			obra.setName("Edificio Parque Sebastián Elcano");
 			obra.setStatus(Status.ACTIVE);
-			obra.setAddress("");
+			obra.setAddress("Av. Pajaritos 3434");
+			obra.setCode("564334");
 			obra.setDeleted(false);
 			
 			repo2.save(obra);

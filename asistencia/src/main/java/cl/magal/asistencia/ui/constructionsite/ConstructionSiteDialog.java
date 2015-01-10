@@ -8,6 +8,8 @@ import org.springframework.data.domain.PageRequest;
 
 import cl.magal.asistencia.entities.ConstructionSite;
 import cl.magal.asistencia.entities.User;
+import cl.magal.asistencia.entities.enums.Job;
+import cl.magal.asistencia.entities.enums.Status;
 import cl.magal.asistencia.services.ConstructionSiteService;
 import cl.magal.asistencia.services.UserService;
 import cl.magal.asistencia.ui.AbstractWindowEditor;
@@ -76,10 +78,19 @@ public class ConstructionSiteDialog extends AbstractWindowEditor {
 		vl.setMargin(true);
 		vl.setSizeFull();
 			
-		for (Object propertyId : new String[]{"name", "code", "address"}) {
-        	if(propertyId.equals("constructionsiteId") || propertyId.equals("deleted")|| propertyId.equals("status"))
+		for (Object propertyId : new String[]{"name", "code", "address","status"}) {
+        	if(propertyId.equals("constructionsiteId") || propertyId.equals("deleted"))
         		;
-        	else{        		
+        	else if(propertyId.equals("status")){
+			ComboBox statusField = new ComboBox("Estado");
+			statusField.setNullSelectionAllowed(false);
+			for(Status s : Status.values()){
+				statusField.addItem(s);
+			}
+			vl.addComponent(statusField);
+			bind(statusField, "status");    
+			vl.setComponentAlignment(statusField, Alignment.MIDDLE_LEFT);
+        	}else{        		
         		String t = tradProperty(propertyId);
         		Field field = buildAndBind(t, propertyId);
         		if(field instanceof TextField){

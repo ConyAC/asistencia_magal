@@ -186,36 +186,6 @@ public class ConstructionSitesView extends BaseView implements View {
 					Object columnId) {
 				HorizontalLayout hl = new HorizontalLayout();
 				
-				if( SecurityHelper.hastPermission(Permission.ELIMINAR_OBRA)){
-					hl.setSpacing(true);
-							
-					//Marcar como eliminada una obra
-					Button borrarObra = new Button(null,FontAwesome.TRASH_O);
-					borrarObra.addClickListener(new Button.ClickListener() {
-						
-						@Override
-						public void buttonClick(ClickEvent event) {
-							//recupera el elemento seleccionado		
-							ConfirmDialog.show(UI.getCurrent(), "Confirmar Acción:", "¿Está seguro de eliminar la obra seleccionada?",
-							        "Eliminar", "Cancelar", new ConfirmDialog.Listener() {
-
-							            public void onClose(ConfirmDialog dialog) {
-							                if (dialog.isConfirmed()) {
-							                    // Confirmed to continue
-							                	ConstructionSite cs = (ConstructionSite) table.getValue();
-												service.deleteCS(cs.getConstructionsiteId());
-												constructionContainer.removeItem(cs);		
-							                } else {
-							                    // User did not confirm
-							                   ;
-							                }
-							            }
-							        });		
-							}
-					});
-					hl.addComponent(borrarObra);
-				}
-				
 				if( SecurityHelper.hastPermission(Permission.EDITAR_OBRA)){
 					//Editar datos de una obra
 					Button editarObra = new Button(null,FontAwesome.EDIT);
@@ -227,7 +197,8 @@ public class ConstructionSitesView extends BaseView implements View {
 							itemUser.removeAllItems();
 							itemUser.addAll(users);
 							
-							ConstructionSiteDialog csWindow = new ConstructionSiteDialog((BeanItem) itemId, itemUser, service, velocityEngine);
+							BeanItem<ConstructionSite> csItem = constructionContainer.getItem(itemId);
+							ConstructionSiteDialog csWindow = new ConstructionSiteDialog(csItem, itemUser, service, velocityEngine);
 							
 							csWindow.addListener(new AbstractWindowEditor.EditorSavedListener() {
 								
@@ -252,6 +223,37 @@ public class ConstructionSitesView extends BaseView implements View {
 					editarObra.setData(constructionContainer);
 					
 					hl.addComponent(editarObra);
+				}
+				
+				if( SecurityHelper.hastPermission(Permission.ELIMINAR_OBRA)){
+					hl.setSpacing(true);
+							
+					//Marcar como eliminada una obra
+					Button borrarObra = new Button(null,FontAwesome.TRASH_O);
+					borrarObra.addClickListener(new Button.ClickListener() {
+						
+						@Override
+						public void buttonClick(ClickEvent event) {
+							//recupera el elemento seleccionado		
+							ConfirmDialog.show(UI.getCurrent(), "Confirmar Acción:", "¿Está seguro de eliminar la obra seleccionada?",
+							        "Eliminar", "Cancelar", new ConfirmDialog.Listener() {
+
+							            public void onClose(ConfirmDialog dialog) {
+							                if (dialog.isConfirmed()) {
+							                    // Confirmed to continue
+							                	ConstructionSite cs = (ConstructionSite) table.getValue();
+							                	logger.debug("LALLA{}",cs);
+												service.deleteCS(cs.getConstructionsiteId());
+												constructionContainer.removeItem(cs);		
+							                } else {
+							                    // User did not confirm
+							                   ;
+							                }
+							            }
+							        });		
+							}
+					});
+					hl.addComponent(borrarObra);
 				}
 				return hl;
 			}

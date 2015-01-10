@@ -71,6 +71,7 @@ public class UserService implements UserDetailsService {
 			// CREA EL USUARIO ADMIN
 			String password = "123456";			
 			usuario = new cl.magal.asistencia.entities.User();
+			usuario.setUserId(1L);
 			usuario.setFirstname("Joseph");
 			usuario.setRut("16127401-1");
 			usuario.setLastname("O'Shea");

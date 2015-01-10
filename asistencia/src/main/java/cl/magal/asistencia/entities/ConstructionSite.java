@@ -30,6 +30,7 @@ import javax.persistence.PrePersist;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 
+import org.hibernate.validator.constraints.NotEmpty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,14 +60,19 @@ public class ConstructionSite implements Serializable {
     @Basic(optional = false)
     @Column(name = "construction_siteId")
     private Long constructionsiteId;
-    @Column(name = "address",nullable=true)
+    @NotEmpty(message="La dirección es obligatoria.")
+	@NotNull(message="La dirección es obligatoria.")
+    @Column(name = "address",nullable=false)
     private String address;
     @Column(name = "deleted")
     private Boolean deleted = Boolean.FALSE;
-    @Column(name = "code",nullable=true)
-    private String code;
+    @NotEmpty(message="El código es obligatorio.")
+    @NotNull(message="El código es obligatorio.")
+    @Column(name = "code",nullable=false)
+    String code;
+    @NotEmpty(message="El nombre es obligatorio.")
+   	@NotNull(message="El nombre es obligatorio.")
     @Column(name = "name",nullable=false)
-    @NotNull
     String name;
     
     @JoinColumn(name="personInChargeId")
