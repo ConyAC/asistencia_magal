@@ -56,7 +56,7 @@ public class Tool implements Serializable {
     @Column(name = "name")
     private String name;
     @Column(name = "price")
-    @Max(value=50000)
+    @Max(value=500000)
     private Integer price;
     @Basic(optional = false)
     @Column(name = "dateBuy")
