@@ -51,6 +51,10 @@ public class Loan implements Serializable {
     @Column(name = "status",nullable=false)
     @NotNull
     private LoanStatus status = LoanStatus.ACTIVE;
+    
+    @ManyToOne
+	@JoinColumn(name="LABORER_CONSTRUCTIONSITEID")
+	LaborerConstructionsite laborerConstructionSite;
 
     @PrePersist
     void preInsert() {
@@ -69,10 +73,6 @@ public class Loan implements Serializable {
         this.loanId = loanId;
         this.dateBuy = dateBuy;
     }
-
-    @ManyToOne
-	@JoinColumn(name ="laborerId")
-	Laborer laborer;
     
     public Long getLoanId() {
 		return loanId;
@@ -113,13 +113,14 @@ public class Loan implements Serializable {
 	public void setStatus(LoanStatus status) {
 		this.status = status;
 	}
-
-	public Laborer getLaborer() {
-		return laborer;
+	
+	public LaborerConstructionsite getLaborerConstructionSite() {
+		return laborerConstructionSite;
 	}
 
-	public void setLaborer(Laborer laborer) {
-		this.laborer = laborer;
+	public void setLaborerConstructionSite(
+			LaborerConstructionsite laborerConstructionSite) {
+		this.laborerConstructionSite = laborerConstructionSite;
 	}
 
 	@Override

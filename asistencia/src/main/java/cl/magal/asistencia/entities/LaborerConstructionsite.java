@@ -85,6 +85,9 @@ public class LaborerConstructionsite implements Serializable {
     
     @OneToMany(mappedBy="laborerConstructionSite",fetch=FetchType.LAZY,cascade={CascadeType.PERSIST,CascadeType.MERGE},orphanRemoval=true )
     List<Contract> contracts = new ArrayList<Contract>();
+    
+    @OneToMany(mappedBy="laborerConstructionSite",fetch=FetchType.EAGER,cascade = { CascadeType.PERSIST, CascadeType.MERGE },orphanRemoval=true )
+    List<Loan> loan = new ArrayList<Loan>();
    
     /**
      * Define la etapa para la cual está contratado el trabajador actual
@@ -140,6 +143,13 @@ public class LaborerConstructionsite implements Serializable {
 	public void setTool(List<Tool> tool) {
 		this.tool = tool;
 	}
+	
+	public void addTool(Tool tool) {
+        if (!getTool().contains(tool)) {
+        	getTool().add(tool);
+        	tool.setLaborerConstructionSite(this);
+        }
+    }
 	
 	public List<Absence> getAbsences() {
 		return absences;
@@ -298,6 +308,23 @@ public class LaborerConstructionsite implements Serializable {
 	public String getStep() {
 		return step;
 	}
+	
+	public List<Loan> getLoan() {
+		return loan;
+	}
+
+	public void setLoan(List<Loan> loan) {
+		this.loan = loan;
+	}
+
+	public void addLoan(Loan loan) {
+		if (!getLoan().contains(loan)) {
+        	getLoan().add(loan);
+        	loan.setLaborerConstructionSite(this);
+        }
+	}
+	
+	
 
 	@Override
     public String toString() {

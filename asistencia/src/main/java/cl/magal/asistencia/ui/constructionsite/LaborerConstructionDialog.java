@@ -20,12 +20,13 @@ import cl.magal.asistencia.entities.Accident;
 import cl.magal.asistencia.entities.Annexed;
 import cl.magal.asistencia.entities.Contract;
 import cl.magal.asistencia.entities.LaborerConstructionsite;
+import cl.magal.asistencia.entities.Loan;
 import cl.magal.asistencia.entities.Tool;
 import cl.magal.asistencia.entities.Vacation;
 import cl.magal.asistencia.entities.enums.AbsenceType;
 import cl.magal.asistencia.entities.enums.AccidentLevel;
 import cl.magal.asistencia.entities.enums.Job;
-import cl.magal.asistencia.entities.enums.ToolStatus;
+import cl.magal.asistencia.entities.enums.LoanStatus;
 import cl.magal.asistencia.services.LaborerService;
 import cl.magal.asistencia.ui.AbstractWindowEditor;
 import cl.magal.asistencia.ui.OnValueChangeFieldFactory;
@@ -132,7 +133,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 		vl.setMargin(true);
 		vl.setSizeFull();
 
-		/*Herramientas*/
+		/********** Herramientas **********/
 		VerticalLayout vh = new VerticalLayout();
 		vh.setSizeFull();
 
@@ -141,56 +142,60 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 		hl.setSpacing(true);		
 		vh.addComponent(hl);
 
-		final TextField herramienta = new TextField("Herramienta");
-		hl.addComponent(herramienta);
-		final TextField monto_h = new TextField("Monto");
-		hl.addComponent(monto_h);
-		final DateField fecha_h = new DateField("Fecha");
-		hl.addComponent(fecha_h);
-		final TextField cuota_h = new TextField("Cuota");
-		hl.addComponent(cuota_h);
-		final ComboBox estado_h = new ComboBox("Estado");
-		estado_h.setNullSelectionAllowed(false);
-		for(ToolStatus t : ToolStatus.values()){
-			estado_h.addItem(t);
-		}
-		hl.addComponent(estado_h);
+		final BeanItemContainer<Tool> beanItemTool = new BeanItemContainer<Tool>(Tool.class);
+		List<Tool> tools = (List<Tool>)getItem().getItemProperty("tool").getValue();
+		if(tools != null && logger != null )
+			logger.debug("tools {}",tools);
+		beanItemTool.addAll(tools);
 
-		final Table table_h = new Table("Herramientas"){
-			{
-				setWidth("100%");				
-				addContainerProperty("name", String.class, "");
-				addContainerProperty("price", String.class, "");
-				addContainerProperty("dateBuy",String.class, "");
-				addContainerProperty("fee", String.class, "");
-				addContainerProperty("status", String.class, "");
-				setVisibleColumns("name","price","dateBuy", "fee", "status");
-				setColumnHeaders("Herramienta","Monto","Fecha", "Cuota", "Estado");
+		final Table tableTool = new Table("Herramientas");
+		tableTool.setPageLength(3);
+		tableTool.setWidth("100%");
+		tableTool.setContainerDataSource(beanItemTool);
+		tableTool.setImmediate(true);
+		tableTool.setTableFieldFactory(new DefaultFieldFactory(){
 
-				setPageLength(4);
+			public Field<?> createField(final Container container,
+					final Object itemId, Object propertyId, com.vaadin.ui.Component uiContext) {
+				Field<?> field = null; 
+				if( propertyId.equals("name") || propertyId.equals("price") || propertyId.equals("fee")){
+					field = new TextField();
+					((TextField)field).setNullRepresentation("");
+				}
+				else if(  propertyId.equals("dateBuy") ){
+					field = new DateField();
+				}
+				else {
+					return null;
+				}
+				((AbstractField<?>)field).setImmediate(true);
+				return field;
 			}
-		};	
-		vh.addComponent(table_h);
+		});
+		
+		tableTool.setVisibleColumns("name","price","dateBuy","fee");
+		tableTool.setColumnHeaders("Herramienta","Monto","Fecha","Cuota");
+		tableTool.setEditable(true);				
+		vh.addComponent(tableTool);
 
 		btnAddH = new Button(null,FontAwesome.PLUS);
 		hl.addComponent(btnAddH);
+		
 		btnAddH.addClickListener(new Button.ClickListener() {
 
 			@Override
 			public void buttonClick(ClickEvent event) {
-				Tool t = new Tool();
-				t.setName(herramienta.getValue());
-				t.setPrice(Integer.valueOf(monto_h.getValue()));
-				t.setFee(Integer.valueOf(cuota_h.getValue()));
-				t.setStatus((ToolStatus)estado_h.getValue());
-				t.setDateBuy(fecha_h.getValue());
-				table_h.setContainerDataSource(toolContainer);
-				toolContainer.addBean(t);
+				
+				LaborerConstructionsite laborer = (LaborerConstructionsite) getItem().getBean();
+				if(laborer == null ) throw new RuntimeException("El trabajador no es válido.");
+				Tool tool = new Tool();
+				laborer.addTool(tool);
+				beanItemTool.addBean(tool);
 			}
 		});		
 		vh.setComponentAlignment(hl, Alignment.TOP_RIGHT);
 
-		/*Préstamo*/
+		/********** Préstamo **********/
 		VerticalLayout vp = new VerticalLayout();
 		vp.setSizeFull();
 
@@ -199,14 +204,11 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 		hl2.setSpacing(true);		
 		vp.addComponent(hl2);
 
-		TextField monto_p = new TextField("Monto");
-		hl2.addComponent(monto_p);
-		DateField fecha_p = new DateField("Fecha");
-		hl2.addComponent(fecha_p);
-		TextField cuota_p = new TextField("Cuota");
-		hl2.addComponent(cuota_p);
-		TextField estado_p = new TextField("Estado");
-		hl2.addComponent(estado_p);
+		final BeanItemContainer<Loan> beanItemLoan = new BeanItemContainer<Loan>(Loan.class);
+		List<Loan> loans = (List<Loan>)getItem().getItemProperty("loan").getValue();
+		if(loans != null && logger != null )
+			logger.debug("loans {}",loans);
+		beanItemLoan.addAll(loans);
 
 		btnAddP = new Button(null,FontAwesome.PLUS);
 		hl2.addComponent(btnAddP);
@@ -214,27 +216,50 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 
 			@Override
 			public void buttonClick(ClickEvent event) {
-				//				final ConstructionSite cs = item.getBean();
-				//				if(cs == null){
-				//					Notification.show("Debe seleccionar una obra",Type.ERROR_MESSAGE);
-				//					return;
-				//				}
+				LaborerConstructionsite laborer = (LaborerConstructionsite) getItem().getBean();
+				if(laborer == null ) throw new RuntimeException("El trabajador no es válido.");
+				Loan loan = new Loan();
+				laborer.addLoan(loan);
+				beanItemLoan.addBean(loan);
 			}
 		});
-		final Table table_p = new Table("Préstamos"){
-			{
-				setWidth("100%");				
-				addContainerProperty("monto", String.class, "");
-				addContainerProperty("fecha", String.class, "");
-				addContainerProperty("cuota", String.class, "");
-				addContainerProperty("estado", String.class, "");
-				setVisibleColumns("monto","fecha", "cuota", "estado");
-				setColumnHeaders("Monto","Fecha", "Cuota", "Estado");
+		
+		final Table tableLoan = new Table("Préstamos");
+		tableLoan.setPageLength(3);
+		tableLoan.setWidth("100%");
+		tableLoan.setContainerDataSource(beanItemLoan);
+		tableLoan.setImmediate(true);		
+		tableLoan.setTableFieldFactory(new DefaultFieldFactory(){
 
-				setPageLength(4);
+			public Field<?> createField(final Container container,
+					final Object itemId,Object propertyId,com.vaadin.ui.Component uiContext) {
+				Field<?> field = null; 
+				if( propertyId.equals("price") || propertyId.equals("fee")){
+					field = new TextField();
+					((TextField)field).setNullRepresentation("");
+				}
+				else  if( propertyId.equals("status") ){
+					field = new ComboBox();
+					field.setPropertyDataSource(container.getContainerProperty(itemId, propertyId));
+					for(LoanStatus ls : LoanStatus.values()){
+						((ComboBox)field).addItem(ls);
+					}
+				}
+				else if(  propertyId.equals("dateBuy") ){
+					field = new DateField();
+				}
+				else {
+					return null;
+				}
+				((AbstractField<?>)field).setImmediate(true);
+				return field;
 			}
-		};
-		vp.addComponent(table_p);
+		});
+		
+		tableLoan.setVisibleColumns("price","dateBuy", "fee", "status");
+		tableLoan.setColumnHeaders("Monto","Fecha", "Cuota", "Estado");
+		tableLoan.setEditable(true);		
+		vp.addComponent(tableLoan);
 		vp.setComponentAlignment(hl2, Alignment.TOP_RIGHT);
 
 		vl.addComponent(vh);
