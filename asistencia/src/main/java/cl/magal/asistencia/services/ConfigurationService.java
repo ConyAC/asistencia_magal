@@ -1,10 +1,19 @@
 package cl.magal.asistencia.services;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import javax.validation.ConstraintViolationException;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+	
+
+
 
 import cl.magal.asistencia.entities.AdvancePaymentConfigurations;
 import cl.magal.asistencia.entities.AfpAndInsuranceConfigurations;
@@ -18,9 +27,12 @@ import cl.magal.asistencia.repositories.DateConfigurationsRepository;
 import cl.magal.asistencia.repositories.FamilyAllowanceRepository;
 import cl.magal.asistencia.repositories.TaxationRepository;
 import cl.magal.asistencia.repositories.WageConfigurationsRepository;
+import cl.magal.asistencia.util.Utils;
 
 @Service
 public class ConfigurationService {
+	
+	Logger logger = LoggerFactory.getLogger(ConfigurationService.class);
 
 	@Autowired
 	DateConfigurationsRepository repo;

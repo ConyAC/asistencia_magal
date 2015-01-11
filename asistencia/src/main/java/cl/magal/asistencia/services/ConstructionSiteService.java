@@ -17,11 +17,13 @@ import cl.magal.asistencia.entities.ConstructionSite;
 import cl.magal.asistencia.entities.Laborer;
 import cl.magal.asistencia.entities.LaborerConstructionsite;
 import cl.magal.asistencia.entities.Team;
+import cl.magal.asistencia.entities.User;
 import cl.magal.asistencia.entities.enums.Status;
 import cl.magal.asistencia.repositories.ConstructionSiteRepository;
 import cl.magal.asistencia.repositories.LaborerConstructionsiteRepository;
 import cl.magal.asistencia.repositories.LaborerRepository;
 import cl.magal.asistencia.repositories.TeamRepository;
+import cl.magal.asistencia.repositories.UserRepository;
 
 @Service
 public class ConstructionSiteService {
@@ -36,6 +38,8 @@ public class ConstructionSiteService {
 	LaborerConstructionsiteRepository labcsRepo;
 	@Autowired
 	TeamRepository teamRepo;
+	@Autowired
+	UserRepository userRepo;
 	
 	@PostConstruct
 	public void init(){
@@ -126,6 +130,10 @@ public class ConstructionSiteService {
 //		return teams;
 //	}
 
+	public List<User> getAllUsers() {
+		return (List<User>) userRepo.findAllNotDeteled();
+	}
+	
 	/**
 	 * permite borrar toda la tabla
 	 */
