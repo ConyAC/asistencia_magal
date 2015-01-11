@@ -399,57 +399,60 @@ public class LaborerAndTeamPanel extends Panel implements View {
 			}
 		});
 
-		btnAdd = new Button(null,FontAwesome.PLUS);
-		hl.addComponent(btnAdd);
-		hl.setComponentAlignment(btnAdd, Alignment.TOP_RIGHT);
-		
-		ShortcutListener enter = new ShortcutListener("Entrar",
-				KeyCode.ENTER, new int[]{ModifierKey.CTRL }) {
-			@Override
-			public void handleAction(Object sender, Object target) {
-				btnAdd.click();
-			}
-
-		};
-		
-		btnAdd.addClickListener(new Button.ClickListener() {
-
-			@Override
-			public void buttonClick(ClickEvent event) {
-				final ConstructionSite cs = item.getBean();
-				if(cs == null){
-					Notification.show("Debe seleccionar una obra",Type.ERROR_MESSAGE);
-					return;
+		//agrega solo si tiene los permisos
+		if( SecurityHelper.hastPermission(Permission.CREAR_OBRERO)){
+			btnAdd = new Button(null,FontAwesome.PLUS);
+			hl.addComponent(btnAdd);
+			hl.setComponentAlignment(btnAdd, Alignment.TOP_RIGHT);
+			
+			ShortcutListener enter = new ShortcutListener("Entrar",
+					KeyCode.ENTER, new int[]{ModifierKey.CTRL }) {
+				@Override
+				public void handleAction(Object sender, Object target) {
+					btnAdd.click();
 				}
-				
-				LaborerConstructionsite laborer = new LaborerConstructionsite();
-				laborer.setConstructionsite(item.getBean());
-				
-				BeanItem<LaborerConstructionsite> laborerItem = new BeanItem<LaborerConstructionsite>(laborer);
-				AddLaborerContractDialog userWindow = new AddLaborerContractDialog(laborerItem,laborerService,true);
-				
-				userWindow.addListener(new AbstractWindowEditor.EditorSavedListener() {
-					
-					@Override
-					public void editorSaved(EditorSavedEvent event) {
-						try {
-							LaborerConstructionsite laborer = ((BeanItem<LaborerConstructionsite>) event.getSavedItem()).getBean();
-							laborerService.save(laborer);				
-			    			laborerContainer.addBean(laborer);
-			    		} catch (Exception e) {
-			    			logger.error("Error al guardar la información del obrero",e);
-			    			Notification.show("Es necesario agregar todos los campos obligatorios", Type.ERROR_MESSAGE);
-			    		}
-						
+	
+			};
+			
+			btnAdd.addClickListener(new Button.ClickListener() {
+	
+				@Override
+				public void buttonClick(ClickEvent event) {
+					final ConstructionSite cs = item.getBean();
+					if(cs == null){
+						Notification.show("Debe seleccionar una obra",Type.ERROR_MESSAGE);
+						return;
 					}
-				});
-		        
-		        UI.getCurrent().addWindow(userWindow);
-			}
-		});
-		
-		btnAdd.addShortcutListener(enter);
+					
+					LaborerConstructionsite laborer = new LaborerConstructionsite();
+					laborer.setConstructionsite(item.getBean());
+					
+					BeanItem<LaborerConstructionsite> laborerItem = new BeanItem<LaborerConstructionsite>(laborer);
+					AddLaborerContractDialog userWindow = new AddLaborerContractDialog(laborerItem,laborerService,true);
+					
+					userWindow.addListener(new AbstractWindowEditor.EditorSavedListener() {
+						
+						@Override
+						public void editorSaved(EditorSavedEvent event) {
+							try {
+								LaborerConstructionsite laborer = ((BeanItem<LaborerConstructionsite>) event.getSavedItem()).getBean();
+								laborerService.save(laborer);				
+				    			laborerContainer.addBean(laborer);
+				    		} catch (Exception e) {
+				    			logger.error("Error al guardar la información del obrero",e);
+				    			Notification.show("Es necesario agregar todos los campos obligatorios", Type.ERROR_MESSAGE);
+				    		}
+							
+						}
+					});
+			        
+			        UI.getCurrent().addWindow(userWindow);
+				}
+			});
+			
+			btnAdd.addShortcutListener(enter);
 
+		}
 		final FilterTable table =  new FilterTable();
 		
 		table.addGeneratedColumn("actions", new CustomTable.ColumnGenerator() {
@@ -548,7 +551,7 @@ public class LaborerAndTeamPanel extends Panel implements View {
 		vl.setMargin(true);
 		vl.setSizeFull();
 
-		Button btnAdd = new Button(null,FontAwesome.PLUS);
+		btnAdd = new Button(null,FontAwesome.PLUS);
 		vl.addComponent(btnAdd);
 		vl.setComponentAlignment(btnAdd, Alignment.TOP_RIGHT);
 		btnAdd.addClickListener(new Button.ClickListener() {
@@ -657,6 +660,9 @@ public class LaborerAndTeamPanel extends Panel implements View {
                         return select_check ;
 					}
 				});
+				
+//				laborerContainer.addNestedContainerBean("laborer");
+//				tableObrero.setVisibleColumns("laborer.rut","laborer.firstname");
 				
 				select_lab.setVisibleColumns("firstname","job", "my_select");
 				select_lab.setColumnHeaders("Nombre","Oficio", "Seleccionar");

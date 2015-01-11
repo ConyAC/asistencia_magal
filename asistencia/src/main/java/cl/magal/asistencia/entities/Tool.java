@@ -67,7 +67,7 @@ public class Tool implements Serializable {
     @Convert(converter = ToolStatusConverter.class)
     @Column(name = "status",nullable=false)
     @NotNull
-    private ToolStatus status = ToolStatus.OPERATIONAL;
+    private ToolStatus status = ToolStatus.EN_DEUDA;
     @ManyToOne
 	@JoinColumn(name="LABORER_CONSTRUCTIONSITEID")
 	LaborerConstructionsite laborerConstructionSite;
@@ -75,7 +75,7 @@ public class Tool implements Serializable {
     @PrePersist
     void preInsert() {
        if(status == null)
-    	   status = ToolStatus.OPERATIONAL;
+    	   status = ToolStatus.EN_DEUDA;
     }
     
     public Tool() {
@@ -90,10 +90,6 @@ public class Tool implements Serializable {
         this.name = name;
         this.dateBuy = dateBuy;
     }
-
-    @ManyToOne
-	@JoinColumn(name ="laborerId")
-	Laborer laborer;
     
     public Long getToolId() {
 		return toolId;
@@ -143,10 +139,6 @@ public class Tool implements Serializable {
 		this.status = status;
 	}	
 	
-	public Laborer getLaborer() {
-		return laborer;
-	}
-
 	public LaborerConstructionsite getLaborerConstructionSite() {
 		return laborerConstructionSite;
 	}
@@ -154,10 +146,6 @@ public class Tool implements Serializable {
 	public void setLaborerConstructionSite(
 			LaborerConstructionsite laborerConstructionSite) {
 		this.laborerConstructionSite = laborerConstructionSite;
-	}
-
-	public void setLaborer(Laborer laborer) {
-		this.laborer = laborer;
 	}
 
 //	@Override

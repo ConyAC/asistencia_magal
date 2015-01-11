@@ -15,6 +15,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.PrePersist;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.validation.constraints.Max;
 import javax.validation.constraints.NotNull;
 
 import cl.magal.asistencia.entities.converter.LoanStatusConverter;
@@ -44,6 +45,7 @@ public class Loan implements Serializable {
     @Temporal(TemporalType.TIMESTAMP)
     private Date dateBuy;
     
+    @Max(value=6)
     @Column(name = "fee")
     private Integer fee;
     
@@ -123,25 +125,25 @@ public class Loan implements Serializable {
 		this.laborerConstructionSite = laborerConstructionSite;
 	}
 
-	@Override
-    public int hashCode() {
-        int hash = 0;
-        hash += (loanId != null ? loanId.hashCode() : 0);
-        return hash;
-    }
-
-    @Override
-    public boolean equals(Object object) {
-        // TODO: Warning - this method won't work in the case the id fields are not set
-        if (!(object instanceof Loan)) {
-            return false;
-        }
-        Loan other = (Loan) object;
-        if ((this.loanId == null && other.loanId != null) || (this.loanId != null && !this.loanId.equals(other.loanId))) {
-            return false;
-        }
-        return true;
-    }
+//	@Override
+//    public int hashCode() {
+//        int hash = 0;
+//        hash += (loanId != null ? loanId.hashCode() : 0);
+//        return hash;
+//    }
+//
+//    @Override
+//    public boolean equals(Object object) {
+//        // TODO: Warning - this method won't work in the case the id fields are not set
+//        if (!(object instanceof Loan)) {
+//            return false;
+//        }
+//        Loan other = (Loan) object;
+//        if ((this.loanId == null && other.loanId != null) || (this.loanId != null && !this.loanId.equals(other.loanId))) {
+//            return false;
+//        }
+//        return true;
+//    }
 
     @Override
     public String toString() {

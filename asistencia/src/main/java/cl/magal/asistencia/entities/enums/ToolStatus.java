@@ -1,12 +1,12 @@
 package cl.magal.asistencia.entities.enums;
 
 public enum ToolStatus {
-	OPERATIONAL(1,"Operativa"),
-	INOPERATIVE(2,"No Operativa"),
-	IN_WORKSHOP(3,"En Taller");
+	PAGADA(1,"Pagada"),
+	EN_DEUDA(2,"En deuda");
 
 	int i;
 	String description;
+	
 	private ToolStatus(int i,String description) {
 		this.i = i;
 		this.description = description;

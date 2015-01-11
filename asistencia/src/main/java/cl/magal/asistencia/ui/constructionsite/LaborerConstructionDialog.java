@@ -27,6 +27,7 @@ import cl.magal.asistencia.entities.enums.AbsenceType;
 import cl.magal.asistencia.entities.enums.AccidentLevel;
 import cl.magal.asistencia.entities.enums.Job;
 import cl.magal.asistencia.entities.enums.LoanStatus;
+import cl.magal.asistencia.entities.enums.ToolStatus;
 import cl.magal.asistencia.services.LaborerService;
 import cl.magal.asistencia.ui.AbstractWindowEditor;
 import cl.magal.asistencia.ui.OnValueChangeFieldFactory;
@@ -74,7 +75,6 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 	transient Logger logger = LoggerFactory.getLogger(LaborerConstructionDialog.class);
 
 	protected Button btnAddH, btnAddP;
-	BeanItemContainer<Tool> toolContainer= new BeanItemContainer<Tool>(Tool.class);
 	BeanItemContainer<HistoryVO> historyContainer = new BeanItemContainer<HistoryVO>(HistoryVO.class);
 
 	transient LaborerService service;
@@ -148,36 +148,6 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 			logger.debug("tools {}",tools);
 		beanItemTool.addAll(tools);
 
-		final Table tableTool = new Table("Herramientas");
-		tableTool.setPageLength(3);
-		tableTool.setWidth("100%");
-		tableTool.setContainerDataSource(beanItemTool);
-		tableTool.setImmediate(true);
-		tableTool.setTableFieldFactory(new DefaultFieldFactory(){
-
-			public Field<?> createField(final Container container,
-					final Object itemId, Object propertyId, com.vaadin.ui.Component uiContext) {
-				Field<?> field = null; 
-				if( propertyId.equals("name") || propertyId.equals("price") || propertyId.equals("fee")){
-					field = new TextField();
-					((TextField)field).setNullRepresentation("");
-				}
-				else if(  propertyId.equals("dateBuy") ){
-					field = new DateField();
-				}
-				else {
-					return null;
-				}
-				((AbstractField<?>)field).setImmediate(true);
-				return field;
-			}
-		});
-		
-		tableTool.setVisibleColumns("name","price","dateBuy","fee");
-		tableTool.setColumnHeaders("Herramienta","Monto","Fecha","Cuota");
-		tableTool.setEditable(true);				
-		vh.addComponent(tableTool);
-
 		btnAddH = new Button(null,FontAwesome.PLUS);
 		hl.addComponent(btnAddH);
 		
@@ -193,6 +163,43 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 				beanItemTool.addBean(tool);
 			}
 		});		
+		
+		final Table tableTool = new Table("Herramientas");
+		tableTool.setPageLength(3);
+		tableTool.setWidth("100%");
+		tableTool.setContainerDataSource(beanItemTool);
+		tableTool.setImmediate(true);
+		tableTool.setTableFieldFactory(new DefaultFieldFactory(){
+
+			public Field<?> createField(final Container container,
+					final Object itemId, Object propertyId, com.vaadin.ui.Component uiContext) {
+				Field<?> field = null; 
+				if( propertyId.equals("name") || propertyId.equals("price") || propertyId.equals("fee")){
+					field = new TextField();
+					((TextField)field).setNullRepresentation("");
+				}
+				else  if( propertyId.equals("status") ){
+					field = new ComboBox();
+					field.setPropertyDataSource(container.getContainerProperty(itemId, propertyId));
+					for(ToolStatus ts : ToolStatus.values()){
+						((ComboBox)field).addItem(ts);
+					}
+				}
+				else if(  propertyId.equals("dateBuy") ){
+					field = new DateField();
+				}
+				else {
+					return null;
+				}
+				((AbstractField<?>)field).setImmediate(true);
+				return field;
+			}
+		});
+		
+		tableTool.setVisibleColumns("name","price","dateBuy","fee","status");
+		tableTool.setColumnHeaders("Herramienta","Monto","Fecha","Cuota","Estado");
+		tableTool.setEditable(true);				
+		vh.addComponent(tableTool);
 		vh.setComponentAlignment(hl, Alignment.TOP_RIGHT);
 
 		/********** Préstamo **********/
@@ -702,6 +709,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 	private Component drawVacations() {
 		return new VerticalLayout(){
 			{
+				
 				vacationContainer = new BeanItemContainer<Vacation>(Vacation.class);
 				vacationContainer.addAll(new ArrayList<Vacation>((Collection<? extends Vacation>) getItem().getItemProperty("vacations").getValue()));
 				

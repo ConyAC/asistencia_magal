@@ -1,5 +1,9 @@
 package cl.magal.asistencia.ui.constructionsite;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
+
 import cl.magal.asistencia.entities.Laborer;
 import cl.magal.asistencia.entities.enums.Afp;
 import cl.magal.asistencia.entities.enums.MaritalStatus;
@@ -8,11 +12,18 @@ import com.vaadin.data.fieldgroup.BeanFieldGroup;
 import com.vaadin.data.util.BeanItem;
 import com.vaadin.data.util.NestedMethodProperty;
 import com.vaadin.data.validator.BeanValidator;
+import com.vaadin.server.FileResource;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.ComboBox;
+import com.vaadin.ui.Embedded;
 import com.vaadin.ui.Field;
 import com.vaadin.ui.GridLayout;
+import com.vaadin.ui.Notification;
 import com.vaadin.ui.TextField;
+import com.vaadin.ui.Upload;
+import com.vaadin.ui.Upload.Receiver;
+import com.vaadin.ui.Upload.SucceededEvent;
+import com.vaadin.ui.Upload.SucceededListener;
 import com.vaadin.ui.VerticalLayout;
 
 public class LaborerBaseInformation extends VerticalLayout {
@@ -101,6 +112,46 @@ public class LaborerBaseInformation extends VerticalLayout {
 				detalleObrero.setComponentAlignment(field, Alignment.MIDDLE_CENTER);
 			}
 		}
+		
+		
+		Upload upload = new Upload("Cargar fotografía", null);
+		upload.setButtonCaption("Iniciar carga");
+		detalleObrero.addComponent(upload);
+		detalleObrero.setComponentAlignment(upload, Alignment.MIDDLE_CENTER);
+		        
+		// Show uploaded file in this placeholder
+		final Embedded image = new Embedded("Uploaded Image");
+		image.setVisible(false);
+		detalleObrero.addComponent(image);
+
+		// Implement both receiver that saves upload in a file and
+		// listener for successful upload
+		class ImageUploader implements Receiver, SucceededListener {
+		    public File file;
+		    
+		    public OutputStream receiveUpload(String filename, String mimeType) {
+		        // Create upload stream
+		        FileOutputStream fos = null; // Output stream to write to
+		        try {
+		            // Open the file for writing.
+		            file = new File("C:\\Users\\Constanza\\temp" + filename);
+		            fos = new FileOutputStream(file);
+		        } catch (final java.io.FileNotFoundException e) {		            
+		                    Notification.show("Error al guardar");
+		            return null;
+		        }
+		        return fos; // Return the output stream to write to
+		    }
+
+		    public void uploadSucceeded(SucceededEvent event) {
+		        // Show the uploaded file in the image viewer
+		        image.setVisible(true);
+		        image.setSource(new FileResource(file));
+		    }
+		};
+		final ImageUploader uploader = new ImageUploader(); 
+		upload.setReceiver(uploader);
+		upload.addListener(uploader);
 
 		detalleObrero.setWidth("100%");
 

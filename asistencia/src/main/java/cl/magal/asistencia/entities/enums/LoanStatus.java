@@ -1,8 +1,8 @@
 package cl.magal.asistencia.entities.enums;
 
 public enum LoanStatus {
-	ACTIVE(1,"active"),
-	INACTIVE(2,"inactive");
+	ACTIVE(1,"Activa"),
+	INACTIVE(2,"Inactiva");
 	
 	int i;
 	String description;
