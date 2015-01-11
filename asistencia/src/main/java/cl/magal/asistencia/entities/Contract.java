@@ -233,10 +233,23 @@ public class Contract implements Serializable {
 	public String getJobAndCode(){
 		return (getJob() != null ? getJob().toString():"")+" ("+getJobCode()+")";
 	}
-
+	
 	@Override
     public String toString() {
         return "jpa.magal.entities.Contract[ contractId=" + contractId + " ]";
     }
+
+	public String dump() {
+		return "Contract [contractId=" + contractId + ", name=" + name
+				+ ", timeduration=" + timeduration + ", startDate=" + startDate
+				+ ", terminationDate=" + terminationDate + ", valueTreatment="
+				+ valueTreatment + ", step=" + step + ", settlement="
+				+ settlement + ", contractDescription=" + contractDescription
+				+ ", job=" + job + ", jobCode=" + jobCode + ", active="
+				+ active + ", laborerConstructionSite="
+				+ laborerConstructionSite + ", annexeds=" + annexeds + "]";
+	}
+
+	
     
 }

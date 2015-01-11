@@ -6,6 +6,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
@@ -23,11 +24,13 @@ import org.springframework.transaction.annotation.Transactional;
 import cl.magal.asistencia.entities.Absence;
 import cl.magal.asistencia.entities.Accident;
 import cl.magal.asistencia.entities.ConstructionSite;
+import cl.magal.asistencia.entities.Contract;
 import cl.magal.asistencia.entities.Laborer;
 import cl.magal.asistencia.entities.LaborerConstructionsite;
 import cl.magal.asistencia.entities.Vacation;
 import cl.magal.asistencia.entities.enums.AbsenceType;
 import cl.magal.asistencia.entities.enums.AccidentLevel;
+import cl.magal.asistencia.entities.enums.Job;
 import cl.magal.asistencia.entities.validator.RutDigitValidator;
 import cl.magal.asistencia.helpers.LaborerHelper;
 
@@ -43,6 +46,217 @@ public class LaborerServiceTest {
 	
 	@Autowired
 	transient ConstructionSiteService constructionService;
+
+	/**
+	 * Al agregar un trabajaador a la obra, éste debe tener el código siguiente disponible según su oficio
+	 */
+	@Test(expected=Exception.class)
+	public void noSaveWithOutContract(){
+		Long constructionSiteId = 1L;
+		Long laborerIdToFind = 412L; 
+		ConstructionSite constructionSite = constructionService.findConstructionSite(constructionSiteId);
+		Laborer laborer = service.findLaborer(laborerIdToFind);
+		LaborerConstructionsite lc = new LaborerConstructionsite();
+		lc.setConstructionsite(constructionSite);
+		lc.setLaborer(laborer);
+		lc.setActive((short) 1);
+		lc.setConfirmed(true);
+		service.save(lc);
+		fail("no puede llegar hasta aquí es necesario al menos un contrato");
+	}
+	
+	/**
+	 * Al agregar un trabajaador a la obra, éste debe tener el código siguiente disponible según su oficio
+	 */
+	@Test
+	public void getJobCodeJornal(){
+		
+		Long constructionSiteId = 1L;
+		Long laborerIdToFind = 412L; 
+		ConstructionSite constructionSite = constructionService.findConstructionSite(constructionSiteId);
+		Laborer laborer = service.findLaborer(laborerIdToFind);
+		LaborerConstructionsite lc = new LaborerConstructionsite();
+		lc.setConstructionsite(constructionSite);
+		lc.setLaborer(laborer);
+		lc.setActive((short) 1);
+		lc.setConfirmed(true);
+		
+		Job job = Job.JORNAL;
+		
+		Contract contract = new Contract();
+		contract.setActive(true);
+		contract.setName(laborer.getFullname());
+		contract.setJob(job);
+		Integer jobcode = service.getNextJobCode(contract.getJob(), constructionSite);
+		
+		assertNotNull("El jobcode no puede ser nulo",jobcode);
+		
+		logger.debug("{}",jobcode);
+		contract.setJobCode(jobcode);
+		contract.setLaborerConstructionSite(lc);
+		contract.setStep("Excavación");
+		contract.setStartDate(new Date());
+
+		lc.addContract(contract);
+		
+		service.save(lc);
+		
+		LaborerConstructionsite dblc = service.findLaborerOnConstructionSite(constructionSite, laborer);
+		
+		assertNotNull("La relación obra-obrero no puede ser nula",dblc);
+		assertNotNull("La lista de contratos no puede ser nula",dblc.getContracts());
+		assertTrue("La lista de contratos no puede ser vacia",!dblc.getContracts().isEmpty());
+		assertTrue("Código mal asignado "+dblc.getContracts().get(0).dump(),dblc.getContracts().get(0).getJobCode() >= job.getMin() );
+		assertTrue("Código mal asignado "+dblc.getContracts().get(0).dump(),dblc.getContracts().get(0).getJobCode() <= job.getMax() );
+		
+		contract = new Contract();
+		contract.setActive(true);
+		contract.setName(laborer.getFullname());
+		contract.setJob(job);
+		jobcode = service.getNextJobCode(contract.getJob(), constructionSite);
+		
+		assertNotNull("El jobcode no puede ser nulo",jobcode);
+		
+		logger.debug("{}",jobcode);
+		contract.setJobCode(jobcode);
+		contract.setLaborerConstructionSite(lc);
+		contract.setStep("Excavación");
+		contract.setStartDate(new Date());
+
+		lc.addContract(contract);
+		
+		service.save(lc);
+		
+		dblc = service.findLaborerOnConstructionSite(constructionSite, laborer);
+		
+		assertNotNull("La relación obra-obrero no puede ser nula",dblc);
+		assertNotNull("La lista de contratos no puede ser nula",dblc.getContracts());
+		assertTrue("La lista de contratos no puede ser vacia",!dblc.getContracts().isEmpty());
+		assertTrue("Código mal asignado "+dblc.getContracts().get(0).dump(),dblc.getContracts().get(0).getJobCode() >= job.getMin() );
+		assertTrue("Código mal asignado "+dblc.getContracts().get(0).dump(),dblc.getContracts().get(0).getJobCode() <= job.getMax() );
+		
+		contract = new Contract();
+		contract.setActive(true);
+		contract.setName(laborer.getFullname());
+		contract.setJob(job);
+		jobcode = service.getNextJobCode(contract.getJob(), constructionSite);
+		
+		assertNotNull("El jobcode no puede ser nulo",jobcode);
+		
+		logger.debug("{}",jobcode);
+		contract.setJobCode(jobcode);
+		contract.setLaborerConstructionSite(lc);
+		contract.setStep("Excavación");
+		contract.setStartDate(new Date());
+
+		lc.addContract(contract);
+		
+		service.save(lc);
+		
+		dblc = service.findLaborerOnConstructionSite(constructionSite, laborer);
+		
+		assertNotNull("La relación obra-obrero no puede ser nula",dblc);
+		assertNotNull("La lista de contratos no puede ser nula",dblc.getContracts());
+		assertTrue("La lista de contratos no puede ser vacia",!dblc.getContracts().isEmpty());
+		assertTrue("Código mal asignado "+dblc.getContracts().get(0).dump(),dblc.getContracts().get(0).getJobCode() >= job.getMin() );
+		assertTrue("Código mal asignado "+dblc.getContracts().get(0).dump(),dblc.getContracts().get(0).getJobCode() <= job.getMax() );
+	}
+	
+	/**
+	 * Al agregar un trabajaador a la obra, éste debe tener el código siguiente disponible según su oficio
+	 */
+	@Test
+	public void getJobCodeAlbañil(){
+		Long constructionSiteId = 1L;
+		Long laborerIdToFind = 412L; 
+		ConstructionSite constructionSite = constructionService.findConstructionSite(constructionSiteId);
+		Laborer laborer = service.findLaborer(laborerIdToFind);
+		LaborerConstructionsite lc = new LaborerConstructionsite();
+		lc.setConstructionsite(constructionSite);
+		lc.setLaborer(laborer);
+		lc.setActive((short) 1);
+		lc.setConfirmed(true);
+		
+		Job job = Job.ALBAÑIL;
+		
+		Contract contract = new Contract();
+		contract.setActive(true);
+		contract.setName(laborer.getFullname());
+		contract.setJob(job);
+		Integer jobcode = service.getNextJobCode(contract.getJob(), constructionSite);
+		
+		assertNotNull("El jobcode no puede ser nulo",jobcode);
+		
+		logger.debug("{}",jobcode);
+		contract.setJobCode(jobcode);
+		contract.setLaborerConstructionSite(lc);
+		contract.setStep("Excavación");
+		contract.setStartDate(new Date());
+
+		lc.addContract(contract);
+		
+		service.save(lc);
+		
+		LaborerConstructionsite dblc = service.findLaborerOnConstructionSite(constructionSite, laborer);
+		
+		assertNotNull("La relación obra-obrero no puede ser nula",dblc);
+		assertNotNull("La lista de contratos no puede ser nula",dblc.getContracts());
+		assertTrue("La lista de contratos no puede ser vacia",!dblc.getContracts().isEmpty());
+		assertTrue("Código mal asignado "+dblc.getContracts().get(0).dump(),dblc.getContracts().get(0).getJobCode() >= job.getMin() );
+		assertTrue("Código mal asignado "+dblc.getContracts().get(0).dump(),dblc.getContracts().get(0).getJobCode() <= job.getMax() );
+		
+		contract = new Contract();
+		contract.setActive(true);
+		contract.setName(laborer.getFullname());
+		contract.setJob(job);
+		jobcode = service.getNextJobCode(contract.getJob(), constructionSite);
+		
+		assertNotNull("El jobcode no puede ser nulo",jobcode);
+		
+		logger.debug("{}",jobcode);
+		contract.setJobCode(jobcode);
+		contract.setLaborerConstructionSite(lc);
+		contract.setStep("Excavación");
+		contract.setStartDate(new Date());
+
+		lc.addContract(contract);
+		
+		service.save(lc);
+		
+		dblc = service.findLaborerOnConstructionSite(constructionSite, laborer);
+		
+		assertNotNull("La relación obra-obrero no puede ser nula",dblc);
+		assertNotNull("La lista de contratos no puede ser nula",dblc.getContracts());
+		assertTrue("La lista de contratos no puede ser vacia",!dblc.getContracts().isEmpty());
+		assertTrue("Código mal asignado "+dblc.getContracts().get(0).dump(),dblc.getContracts().get(0).getJobCode() >= job.getMin() );
+		assertTrue("Código mal asignado "+dblc.getContracts().get(0).dump(),dblc.getContracts().get(0).getJobCode() <= job.getMax() );
+		
+		contract = new Contract();
+		contract.setActive(true);
+		contract.setName(laborer.getFullname());
+		contract.setJob(job);
+		jobcode = service.getNextJobCode(contract.getJob(), constructionSite);
+		
+		assertNotNull("El jobcode no puede ser nulo",jobcode);
+		
+		logger.debug("{}",jobcode);
+		contract.setJobCode(jobcode);
+		contract.setLaborerConstructionSite(lc);
+		contract.setStep("Excavación");
+		contract.setStartDate(new Date());
+
+		lc.addContract(contract);
+		
+		service.save(lc);
+		
+		dblc = service.findLaborerOnConstructionSite(constructionSite, laborer);
+		
+		assertNotNull("La relación obra-obrero no puede ser nula",dblc);
+		assertNotNull("La lista de contratos no puede ser nula",dblc.getContracts());
+		assertTrue("La lista de contratos no puede ser vacia",!dblc.getContracts().isEmpty());
+		assertTrue("Código mal asignado "+dblc.getContracts().get(0).dump(),dblc.getContracts().get(0).getJobCode() >= job.getMin() );
+		assertTrue("Código mal asignado "+dblc.getContracts().get(0).dump(),dblc.getContracts().get(0).getJobCode() <= job.getMax() );
+	}
 
 	@Test
 	public void searchInvalidRut(){

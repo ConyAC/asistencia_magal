@@ -298,22 +298,22 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 				}){{setIcon(FontAwesome.PRINT); setDescription("Imprimir");}};
 				addComponent(btnPrint);
 				
-				Button btnEdit = new Button(null,FontAwesome.PENCIL);
+//				Button btnEdit = new Button(null,FontAwesome.PENCIL);
 				final Button btnChangeJob = new Button(null,FontAwesome.CHILD);
 				final Button btnSettlement = new Button(null,FontAwesome.FILE_TEXT);
 				
 				btnSettlement.setDescription("Finiquitar");
-				btnEdit.setDescription("Editar");
+//				btnEdit.setDescription("Editar");
 				btnChangeJob.setDescription("Cambiar Oficio");
 				
-				btnEdit.addClickListener(new Button.ClickListener() {
-
-					@Override
-					public void buttonClick(ClickEvent event) {
-						
-					}
-				});
-				addComponent(btnEdit);
+//				btnEdit.addClickListener(new Button.ClickListener() {
+//
+//					@Override
+//					public void buttonClick(ClickEvent event) {
+//						
+//					}
+//				});
+//				addComponent(btnEdit);
 				
 				btnChangeJob.addClickListener(new Button.ClickListener() {
 					

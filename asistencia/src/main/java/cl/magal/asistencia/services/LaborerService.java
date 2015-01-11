@@ -122,6 +122,9 @@ public class LaborerService {
 		//si es nulo, da error
 		if(laborerConstructionSite == null)
 			throw new RuntimeException("La relación trabajador-obra no puede ser nula");
+		//es necesario que tenga algún contrato
+		if(laborerConstructionSite.getContracts().isEmpty())
+			throw new RuntimeException("La relación trabajador-obra debe tener al menos un contrato asociado");
 		//guarda los contratos
 		laborerConstructionsiteRepo.save(laborerConstructionSite);		
 	}
@@ -143,9 +146,9 @@ public class LaborerService {
 		}
 	}
 
-	public String getNextJobCode(Job value, ConstructionSite constructionsite) {
-		//TODO
-		return value.ordinal()+"";
+	public Integer getNextJobCode(Job value, ConstructionSite constructionsite) {
+		Integer jobCode =  contractRepo.findJobCodeByConstructionsiteAndBetweenMinAndMax( constructionsite, value.getMin(),value.getMax());
+		return jobCode != null ? jobCode + 1 : value.getMin();
 	}
 
 	

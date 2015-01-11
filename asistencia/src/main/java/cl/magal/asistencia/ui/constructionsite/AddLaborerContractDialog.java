@@ -2,7 +2,6 @@ package cl.magal.asistencia.ui.constructionsite;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -182,7 +181,7 @@ public class AddLaborerContractDialog extends AbstractWindowEditor implements Ne
 			
 			@Override
 			public void valueChange(ValueChangeEvent event) {
-				String newCode = laborerService.getNextJobCode((Job) event.getProperty().getValue() ,((BeanItem<LaborerConstructionsite>) getItem()).getBean().getConstructionsite() );
+				String newCode = laborerService.getNextJobCode((Job) event.getProperty().getValue() ,((BeanItem<LaborerConstructionsite>) getItem()).getBean().getConstructionsite() )+"";
 				Utils.setLabelValue(lbCodJob,newCode);
 			}
 		});
