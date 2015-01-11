@@ -43,5 +43,12 @@ public enum Job {
 	@Override
 	public String toString(){
 		return description;
+	}
+
+	public static Job getJob(String value) {
+		for(Job e : Job.values())
+			if(e.description.compareToIgnoreCase(value) == 0 )
+				return e;
+		throw new RuntimeException("Job invalid");
 	}	
 }

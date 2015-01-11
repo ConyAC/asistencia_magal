@@ -24,11 +24,11 @@ import cl.magal.asistencia.entities.Tool;
 import cl.magal.asistencia.entities.Vacation;
 import cl.magal.asistencia.entities.enums.AbsenceType;
 import cl.magal.asistencia.entities.enums.AccidentLevel;
-import cl.magal.asistencia.entities.enums.Job;
 import cl.magal.asistencia.entities.enums.ToolStatus;
 import cl.magal.asistencia.services.LaborerService;
 import cl.magal.asistencia.ui.AbstractWindowEditor;
 import cl.magal.asistencia.ui.OnValueChangeFieldFactory;
+import cl.magal.asistencia.ui.converter.JobToStringConverter;
 import cl.magal.asistencia.ui.workerfile.vo.HistoryVO;
 
 import com.vaadin.data.Container;
@@ -247,6 +247,8 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 		
 		final Contract activeContract = ((LaborerConstructionsite)getItem().getBean()).getActiveContract();
 		
+		final BeanItem<Contract> beanItemContract = new BeanItem<Contract>(activeContract);
+		
 		GridLayout gl = new GridLayout(2,10);
 		gl.setSpacing(true);
 		gl.setMargin(true);
@@ -329,8 +331,14 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 							public void editorSaved(EditorSavedEvent event) {
 								try {
 									//TODO definir si guardará o no el estado del laborer en esta etapa
-									//LaborerConstructionsite laborer = ((BeanItem<LaborerConstructionsite>) event.getSavedItem()).getBean();
+									LaborerConstructionsite laborer = ((BeanItem<LaborerConstructionsite>) event.getSavedItem()).getBean();
 									//service.save(laborer);
+									beanItemContract.getItemProperty("step").setValue(laborer.getActiveContract().getStep());
+									beanItemContract.getItemProperty("job").setValue(laborer.getActiveContract().getJob());
+									beanItemContract.getItemProperty("jobCode").setValue(laborer.getActiveContract().getJobCode());
+									beanItemContract.getItemProperty("startDate").setValue(laborer.getActiveContract().getStartDate());
+									beanItemContract.getItemProperty("terminationDate").setValue(laborer.getActiveContract().getTerminationDate());
+									
 									replaceComponent(btnChangeJob,btnSettlement);
 					    		} catch (Exception e) {
 					    			logger.error("Error al guardar la información del obrero",e);
@@ -366,11 +374,11 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 			}
 		},columna--,fila++);
 
-		gl.addComponent(new Label("Etapa"),columna++,fila);gl.addComponent(new Label(getItem().getItemProperty("activeContract.step")),columna--,fila++);
-		gl.addComponent(new Label("Oficio"),columna++,fila);gl.addComponent(new Label( ((Job)getItem().getItemProperty("activeContract.job").getValue()).toString()),columna--,fila++);
-		gl.addComponent(new Label("Código"),columna++,fila);gl.addComponent(new Label(getItem().getItemProperty("activeContract.jobCode")),columna--,fila++);
-		gl.addComponent(new Label("Fecha Inicio"),columna++,fila);gl.addComponent(new Label(getItem().getItemProperty("activeContract.startDate")),columna--,fila++);
-		gl.addComponent(new Label("Fecha Termino"),columna++,fila);gl.addComponent(new Label(getItem().getItemProperty("activeContract.terminationDate")),columna--,fila++);
+		gl.addComponent(new Label("Etapa"),columna++,fila);gl.addComponent(new Label(){{setPropertyDataSource(beanItemContract.getItemProperty("step")); setImmediate(true);}},columna--,fila++);
+		gl.addComponent(new Label("Oficio"),columna++,fila);gl.addComponent(new Label(){{setConverter(new JobToStringConverter());setPropertyDataSource(beanItemContract.getItemProperty("job"));}},columna--,fila++);
+		gl.addComponent(new Label("Código"),columna++,fila);gl.addComponent(new Label(){{setPropertyDataSource(beanItemContract.getItemProperty("jobCode"));}},columna--,fila++);
+		gl.addComponent(new Label("Fecha Inicio"),columna++,fila);gl.addComponent(new Label(){{setPropertyDataSource(beanItemContract.getItemProperty("startDate"));}},columna--,fila++);
+		gl.addComponent(new Label("Fecha Termino"),columna++,fila);gl.addComponent(new Label(){{ setPropertyDataSource(beanItemContract.getItemProperty("terminationDate"));}},columna--,fila++);
 		
 		gl.addComponent(new Label("<hr />",ContentMode.HTML),columna++,fila,columna--,fila++);
 
