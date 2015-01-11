@@ -512,18 +512,34 @@ public class LaborerAndTeamPanel extends Panel implements View {
 							LaborerConstructionsite laborer = beanItem.getBean();
 							logger.debug("laborer constructionsite {}, rut {} postcommit ",laborer,laborer.getLaborer().getRut());
 			    			laborerService.save(laborer);	
-			    			int index = laborerContainer.indexOfId(beanItem);
 			    			table.refreshRowCache();
 //			    			return true;
 			    			return;
 			    		} catch (TransactionSystemException e) {
-			    			ConstraintViolationException e1 = (ConstraintViolationException) e.getCause().getCause();
-			    			logger.error("TransactionSystemException {}",e1);
-			    			Notification.show("Error al validar los datos:\n"+Utils.printConstraintMessages(e1.getConstraintViolations()), Type.ERROR_MESSAGE);
+			    			
+			    			Throwable e1 = e.getCause() != null ? e.getCause().getCause() : e;
+			    			if( e1 == null ){
+			    				logger.error("Error al intentar guardar el trabajador",e);
+			    				Notification.show("Error al intentar guardar el trabajador", Type.ERROR_MESSAGE);
+			    				return;
+			    			}
+			    			if(e1 instanceof ConstraintViolationException ){
+			    				logger.error("Error de constraint "+Utils.printConstraintMessages(((ConstraintViolationException) e1).getConstraintViolations()),e);
+			    				Notification.show("Error al validar los datos:\n"+Utils.printConstraintMessages(((ConstraintViolationException) e1).getConstraintViolations()), Type.ERROR_MESSAGE);
+			    			}else{
+			    				logger.error("Error al intentar guardar el trabajador",e);
+			    				logger.error("Error al intentar guardar el trabajador",e1);
+			    				Notification.show("Error al intentar guardar el trabajador", Type.ERROR_MESSAGE);
+			    			}
+			    			
 //			    			return false;
 			    			return;
 			    		}catch (Exception e){
-			    			logger.error("Error al guardar la información del obrero",e);
+			    			
+			    			if(e instanceof ConstraintViolationException )
+			    				logger.error("Error de constraint "+Utils.printConstraintMessages(((ConstraintViolationException) e).getConstraintViolations()),e);
+			    			else
+			    				logger.error("Error al guardar la información del obrero",e);
 			    			Notification.show("Ocurrió un error al intentar guardar el trabajador", Type.ERROR_MESSAGE);
 //			    			return false;
 			    			return;

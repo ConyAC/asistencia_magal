@@ -246,7 +246,6 @@ public class AddLaborerContractDialog extends AbstractWindowEditor implements Ne
 			contract.setStep(lbStep.getValue());
 			contract.setActive(true);
 			((BeanItem<LaborerConstructionsite>) getItem()).getBean().refreshActiveContract();
-
 			((BeanItem<LaborerConstructionsite>) getItem()).getBean().addContract(contract);
 		}
 		

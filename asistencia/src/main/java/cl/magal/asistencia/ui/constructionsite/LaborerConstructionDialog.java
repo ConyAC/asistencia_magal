@@ -4,7 +4,6 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,13 +31,10 @@ import cl.magal.asistencia.ui.converter.JobToStringConverter;
 import cl.magal.asistencia.ui.workerfile.vo.HistoryVO;
 
 import com.vaadin.data.Container;
-import com.vaadin.data.Container.Filter;
 import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeNotifier;
 import com.vaadin.data.util.BeanItem;
 import com.vaadin.data.util.BeanItemContainer;
-import com.vaadin.data.util.filter.Compare;
-import com.vaadin.data.util.filter.Not;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.StreamResource;
 import com.vaadin.shared.ui.label.ContentMode;
@@ -96,9 +92,9 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 		List<HistoryVO> history = service.getLaborerHistory(laborerConstructionsite.getLaborer());
 		historyContainer.addAll(history);
 		historyContainer.addNestedContainerProperty("constructionSite.name");
-		Filter filter = new Compare.Equal("constructionSite", laborerConstructionsite.getConstructionsite());
-		//filtra la obra en la que se encuentra
-		historyContainer.addContainerFilter(new Not(filter));
+//		Filter filter = new Compare.Equal("constructionSite", laborerConstructionsite.getConstructionsite());
+//		//filtra la obra en la que se encuentra
+//		historyContainer.addContainerFilter(new Not(filter));
 	}
 
 	@Override
@@ -393,11 +389,27 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 					
 					@Override
 					public void buttonClick(ClickEvent event) {
-						Annexed annexed = new Annexed();
-						annexed.setStartDate(new Date());
-						annexed.setStep("Nueva etapa");
-						beanContainerAnnexeds.addBean(annexed);
 						
+						AddAnnexedContractDialog userWindow = new AddAnnexedContractDialog(beanItemContract);
+						userWindow.addListener(new AbstractWindowEditor.EditorSavedListener() {
+							
+							@Override
+							public void editorSaved(EditorSavedEvent event) {
+								try {
+									//TODO definir si guardará o no el estado del laborer en esta etapa
+//									Contract newBeanItem = (BeanItem<Contract>) event.getSavedItem();
+									
+									beanContainerAnnexeds.removeAllItems();
+									beanContainerAnnexeds.addAll((Collection<? extends Annexed>) beanItemContract.getItemProperty("annexeds").getValue());
+									
+					    		} catch (Exception e) {
+					    			logger.error("Error al guardar la información del obrero",e);
+					    			Notification.show("Es necesario agregar todos los campos obligatorios", Type.ERROR_MESSAGE);
+					    		}
+							}
+						});
+				        
+				        UI.getCurrent().addWindow(userWindow);
 					}
 				}){{setIcon(FontAwesome.PLUS);}};
 				addComponent(AgregarAnexo);
@@ -458,6 +470,9 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 				}){ { setIcon(FontAwesome.PRINT);}};
 			}
 		});
+		
+		annexedTable.setVisibleColumns("step","startDate","terminationDate","print");
+		annexedTable.setColumnHeaders("Etapa","Fecha de inicio","Fecha de termino","Imprimir");
 		
 		gl.addComponent(annexedTable,columna++,fila,columna--,fila++);
 		return gl;

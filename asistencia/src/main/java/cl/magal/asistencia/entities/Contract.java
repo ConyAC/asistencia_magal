@@ -181,6 +181,13 @@ public class Contract implements Serializable {
 	public void setAnnexeds(List<Annexed> annexeds) {
 		this.annexeds = annexeds;
 	}
+	
+	public void addAnnexed(Annexed annexed){
+		 if (!getAnnexeds().contains(annexed)) {
+			 getAnnexeds().add(annexed);
+	     	annexed.setContract(this);
+	     }
+	}
 
 	public Integer getSettlement() {
 		return settlement;
