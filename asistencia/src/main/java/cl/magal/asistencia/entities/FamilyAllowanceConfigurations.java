@@ -28,15 +28,15 @@ public class FamilyAllowanceConfigurations implements Serializable {
     @Column(name = "family_allowance_configurationsId")
 	Long familyAllowanceConfigurationsId;
 	
-	@Digits(fraction = 1, integer = 6)
+	@Digits(fraction = 2, integer = 8)
 	@Column(name ="fromr")
 	Double from;
 	
-	@Digits(fraction = 1, integer = 6)
+	@Digits(fraction = 2, integer = 8)
 	@Column(name ="to")
 	Double to;
 	
-	@Digits(fraction = 2, integer = 6)
+	@Digits(fraction = 2, integer = 8)
 	@Column(name ="amount")
 	Double amount;
 

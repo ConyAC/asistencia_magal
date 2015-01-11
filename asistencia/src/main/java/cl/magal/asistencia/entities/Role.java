@@ -57,8 +57,8 @@ public class Role implements Serializable {
 
     //tabla intermedia entre role y sus permisos    
     @ElementCollection(targetClass=Permission.class,fetch=FetchType.EAGER)
-    @CollectionTable(name="permission", joinColumns = @JoinColumn(name = "roleId"))
-    @Column(name="role_permission")
+    @CollectionTable(name="permissions", joinColumns = @JoinColumn(name = "roleId"))
+    @Column(name="role_permissions")
     @Enumerated(EnumType.STRING) 
     Set<Permission> permission; 
     

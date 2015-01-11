@@ -25,6 +25,8 @@ public class HistoryVO implements Serializable {
 	Double reward;
 	Integer numberOfAccidents;
 	Date endingDate;
+	Date startingDate;
+	boolean active;
 	
 	public ConstructionSite getConstructionSite() {
 		return constructionSite;
@@ -62,7 +64,16 @@ public class HistoryVO implements Serializable {
 	public void setEndingDate(Date endingDate) {
 		this.endingDate = endingDate;
 	}
-	
-	
-
+	public Date getStartingDate() {
+		return startingDate;
+	}
+	public void setStartingDate(Date startingDate) {
+		this.startingDate = startingDate;
+	}
+	public boolean isActive() {
+		return active;
+	}
+	public void setActive(boolean active) {
+		this.active = active;
+	}
 }

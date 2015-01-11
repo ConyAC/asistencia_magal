@@ -30,6 +30,7 @@ import javax.persistence.PrePersist;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 
+import org.hibernate.validator.constraints.NotEmpty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,13 +60,19 @@ public class ConstructionSite implements Serializable {
     @Basic(optional = false)
     @Column(name = "construction_siteId")
     private Long constructionsiteId;
-    @Column(name = "address",nullable=true)
+    @NotEmpty(message="La dirección es obligatoria.")
+	@NotNull(message="La dirección es obligatoria.")
+    @Column(name = "address",nullable=false)
     private String address;
     @Column(name = "deleted")
     private Boolean deleted = Boolean.FALSE;
-    
+    @NotEmpty(message="El código es obligatorio.")
+    @NotNull(message="El código es obligatorio.")
+    @Column(name = "code",nullable=false)
+    String code;
+    @NotEmpty(message="El nombre es obligatorio.")
+   	@NotNull(message="El nombre es obligatorio.")
     @Column(name = "name",nullable=false)
-    @NotNull
     String name;
     
     @JoinColumn(name="personInChargeId")
@@ -88,8 +95,8 @@ public class ConstructionSite implements Serializable {
     @ManyToMany(targetEntity=Laborer.class,fetch=FetchType.EAGER,cascade = { CascadeType.PERSIST, CascadeType.MERGE })
     List<Laborer> laborers = new LinkedList<Laborer>();
     
-    @OneToMany(targetEntity=Team.class,fetch=FetchType.EAGER)
-    List<Team> teams = new LinkedList<Team>();
+//    @OneToMany(targetEntity=Team.class,fetch=FetchType.EAGER)
+//    List<Team> teams = new LinkedList<Team>();
     
     @ManyToMany(mappedBy="cs",cascade = { CascadeType.PERSIST, CascadeType.MERGE })
     List<User> users;
@@ -176,13 +183,13 @@ public class ConstructionSite implements Serializable {
 		this.personInCharge = personInCharge;
 	}
 	
-	public List<Team> getTeams() {
-		return teams;
-	}
-
-	public void setTeams(List<Team> teams) {
-		this.teams = teams;
-	}
+//	public List<Team> getTeams() {
+//		return teams;
+//	}
+//
+//	public void setTeams(List<Team> teams) {
+//		this.teams = teams;
+//	}
 	
 	public List<User> getUsers() {
 		if(users == null)
@@ -192,6 +199,14 @@ public class ConstructionSite implements Serializable {
 
 	public void setUsers(List<User> users) {
 		this.users = users;
+	}
+	
+	public String getCode() {
+		return code;
+	}
+
+	public void setCode(String code) {
+		this.code = code;
 	}
 
 	@Override
@@ -221,23 +236,20 @@ public class ConstructionSite implements Serializable {
         return "jpa.magal.entities.ConstructionSite[ constructionsiteId=" + constructionsiteId + " ]";
     }
 
-    public void addLaborer(Laborer laborer) {
-        if (!getLaborers().contains(laborer)) {
-        	logger.debug("agregando laborer "+laborer);
-        	getLaborers().add(laborer);
-        }
-        if (!laborer.getConstructionSites().contains(this)) {
-            laborer.getConstructionSites().add(this);
-        }
-    }
-    
-    public void addTeam(Team team) {
-        if (!getTeams().contains(team)) {
-        	getTeams().add(team);
-            team.setConstructionsite(this) ;
-        }
-
-        
-    }
+//    public void addLaborer(Laborer laborer) {
+//        if (!getLaborers().contains(laborer)) {
+//        	logger.debug("agregando laborer "+laborer);
+//        	getLaborers().add(laborer);
+//        }
+//        if (!laborer.getConstructionSites().contains(this)) {
+//            laborer.getConstructionSites().add(this);
+//        }
+//    }
+//    
+//    public void addTeam(Team team) {
+//        if (!getTeams().contains(team)) {
+//        	getTeams().add(team);
+//        }
+//    }
     
 }

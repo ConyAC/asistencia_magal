@@ -20,6 +20,7 @@ import org.joda.time.DateTime;
 import org.joda.time.Days;
 
 import cl.magal.asistencia.entities.converter.AccidentLevelConverter;
+import cl.magal.asistencia.entities.enums.AccidentLevel;
 
 @Entity
 @Table(name="accident")
@@ -47,8 +48,8 @@ public class Accident implements Serializable {
 	String description;
 	
 	@ManyToOne
-	@JoinColumn(name="laborerId")
-	Laborer laborer;
+	@JoinColumn(name="LABORER_CONSTRUCTIONSITEID")
+	LaborerConstructionsite laborerConstructionSite;
 	
 	@Column(name="accident_level")
 	@Convert(converter = AccidentLevelConverter.class)
@@ -88,12 +89,13 @@ public class Accident implements Serializable {
 		this.description = description;
 	}
 
-	public Laborer getLaborer() {
-		return laborer;
+	public LaborerConstructionsite getLaborerConstructionSite() {
+		return laborerConstructionSite;
 	}
 
-	public void setLaborer(Laborer laborer) {
-		this.laborer = laborer;
+	public void setLaborerConstructionSite(
+			LaborerConstructionsite laborerConstructionSite) {
+		this.laborerConstructionSite = laborerConstructionSite;
 	}
 
 	public AccidentLevel getAccidentLevel() {

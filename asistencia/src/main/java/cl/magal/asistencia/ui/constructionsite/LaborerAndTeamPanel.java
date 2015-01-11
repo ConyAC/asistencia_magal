@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
+import javax.validation.ConstraintViolationException;
 
 import org.apache.velocity.app.VelocityEngine;
 import org.slf4j.Logger;
@@ -14,10 +15,11 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.TransactionSystemException;
 import org.tepi.filtertable.FilterTable;
 
 import cl.magal.asistencia.entities.ConstructionSite;
-import cl.magal.asistencia.entities.Laborer;
+import cl.magal.asistencia.entities.LaborerConstructionsite;
 import cl.magal.asistencia.entities.Team;
 import cl.magal.asistencia.entities.User;
 import cl.magal.asistencia.entities.enums.Job;
@@ -30,6 +32,7 @@ import cl.magal.asistencia.services.UserService;
 import cl.magal.asistencia.ui.AbstractWindowEditor;
 import cl.magal.asistencia.ui.AbstractWindowEditor.EditorSavedEvent;
 import cl.magal.asistencia.util.SecurityHelper;
+import cl.magal.asistencia.util.Utils;
 
 import com.vaadin.data.Property;
 import com.vaadin.data.fieldgroup.BeanFieldGroup;
@@ -38,6 +41,9 @@ import com.vaadin.data.util.BeanItem;
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.event.ItemClickEvent;
 import com.vaadin.event.ItemClickEvent.ItemClickListener;
+import com.vaadin.event.ShortcutAction.KeyCode;
+import com.vaadin.event.ShortcutAction.ModifierKey;
+import com.vaadin.event.ShortcutListener;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.FontAwesome;
@@ -78,7 +84,7 @@ public class LaborerAndTeamPanel extends Panel implements View {
 	/** CONTAINERS **/
 	BeanItemContainer<User> userContainer = new BeanItemContainer<User>(User.class);
 	BeanItemContainer<Team> teamContainer = new BeanItemContainer<Team>(Team.class);
-	BeanItemContainer<Laborer> laborerContainer = new BeanItemContainer<Laborer>(Laborer.class);
+	BeanItemContainer<LaborerConstructionsite> laborerContainer = new BeanItemContainer<LaborerConstructionsite>(LaborerConstructionsite.class);
 	
 	BeanItem<ConstructionSite> item;
 	
@@ -99,7 +105,7 @@ public class LaborerAndTeamPanel extends Panel implements View {
 	@Autowired
 	transient LaborerService laborerService;
 	@Autowired
-	private VelocityEngine velocityEngine;
+	transient private VelocityEngine velocityEngine;
 	
 	Button asistenciaBtn;
 	
@@ -122,6 +128,8 @@ public class LaborerAndTeamPanel extends Panel implements View {
 
 	public LaborerAndTeamPanel() {
 		teamContainer.addNestedContainerProperty("leader.firstname");
+		laborerContainer.addNestedContainerBean("laborer");
+		laborerContainer.addNestedContainerBean("activeContract");
 		//crea el tab con trabajadores y cuadrillas
 		TabSheet tab = new TabSheet();
 		tab.setSizeFull();
@@ -303,7 +311,7 @@ public class LaborerAndTeamPanel extends Panel implements View {
 				team.setName("Cuadrilla 1");
 				team.setDate(new Date());
 				team.setStatus(Status.ACTIVE);
-				team.setLeader(laborerContainer.firstItemId());
+				team.setLeader(laborerContainer.firstItemId().getLaborer());
 				constructionSiteService.addTeamToConstructionSite(team,cs);
 
 				teamContainer.addBean(team);
@@ -394,7 +402,16 @@ public class LaborerAndTeamPanel extends Panel implements View {
 		btnAdd = new Button(null,FontAwesome.PLUS);
 		hl.addComponent(btnAdd);
 		hl.setComponentAlignment(btnAdd, Alignment.TOP_RIGHT);
+		
+		ShortcutListener enter = new ShortcutListener("Entrar",
+				KeyCode.ENTER, new int[]{ModifierKey.CTRL }) {
+			@Override
+			public void handleAction(Object sender, Object target) {
+				btnAdd.click();
+			}
 
+		};
+		
 		btnAdd.addClickListener(new Button.ClickListener() {
 
 			@Override
@@ -405,17 +422,19 @@ public class LaborerAndTeamPanel extends Panel implements View {
 					return;
 				}
 				
-				Laborer laborer = new Laborer();
-				BeanItem<Laborer> laborerItem = new BeanItem<Laborer>(laborer);
-				LaborerDialog userWindow = new LaborerDialog(laborerItem,item.getBean(),laborerService,velocityEngine);
+				LaborerConstructionsite laborer = new LaborerConstructionsite();
+				laborer.setConstructionsite(item.getBean());
+				
+				BeanItem<LaborerConstructionsite> laborerItem = new BeanItem<LaborerConstructionsite>(laborer);
+				AddLaborerContractDialog userWindow = new AddLaborerContractDialog(laborerItem,laborerService,true);
 				
 				userWindow.addListener(new AbstractWindowEditor.EditorSavedListener() {
 					
 					@Override
 					public void editorSaved(EditorSavedEvent event) {
 						try {
-			    			Laborer laborer = ((BeanItem<Laborer>) event.getSavedItem()).getBean();
-			    			constructionSiteService.addLaborerToConstructionSite(laborer,cs);				
+							LaborerConstructionsite laborer = ((BeanItem<LaborerConstructionsite>) event.getSavedItem()).getBean();
+							laborerService.save(laborer);				
 			    			laborerContainer.addBean(laborer);
 			    		} catch (Exception e) {
 			    			logger.error("Error al guardar la información del obrero",e);
@@ -428,14 +447,45 @@ public class LaborerAndTeamPanel extends Panel implements View {
 		        UI.getCurrent().addWindow(userWindow);
 			}
 		});
+		
+		btnAdd.addShortcutListener(enter);
 
-		FilterTable table =  new FilterTable();
+		final FilterTable table =  new FilterTable();
+		
+		table.addGeneratedColumn("actions", new CustomTable.ColumnGenerator() {
+			
+			@Override
+			public Object generateCell(CustomTable source, final Object itemId,Object columnId) {
+				final BeanItem<LaborerConstructionsite> laborerConstruction = (BeanItem<LaborerConstructionsite>) laborerContainer.getItem(itemId);
+				return new Button(null,new Button.ClickListener(){
+					@Override
+					public void buttonClick(ClickEvent event) {
+						laborerService.remove(laborerConstruction.getBean());
+						laborerContainer.removeItem(itemId);
+					}
+				}){
+					
+					{ setIcon(FontAwesome.TRASH_O);}
+				};
+			}
+		});
+		
 		table.setContainerDataSource(laborerContainer);
 		table.setSizeFull();
 		table.setFilterBarVisible(true);
+		
+		table.addGeneratedColumn("confirmed", new CustomTable.ColumnGenerator() {
+			
+			@Override
+			public Object generateCell(CustomTable source, Object itemId,Object columnId) {
+				return (Boolean)source.getContainerProperty(itemId, columnId).getValue() ? "Si": "No";
+			}
+		});
+		
 		//TODO estado
-		table.setVisibleColumns("job","firstname","laborerId"); //FIXME laborerId
-		table.setColumnHeaders("Cod","Nombre","Estado");
+//		table.setVisibleColumns("laborer.job","laborer.firstname","laborer.laborerId"); //FIXME laborerId
+		table.setVisibleColumns("activeContract.jobAndCode","laborer.fullname","activeContract.step","confirmed","actions"); //FIXME laborerId
+		table.setColumnHeaders("Cod","Nombre","Etapa","Confirmado","Acciones");
 		table.setSelectable(true);
 		
 		table.addItemClickListener(new ItemClickListener() {
@@ -443,7 +493,9 @@ public class LaborerAndTeamPanel extends Panel implements View {
 			@Override
 			public void itemClick(ItemClickEvent event) {
 				
-				LaborerDialog userWindow = new LaborerDialog((BeanItem) event.getItem(),item.getBean(),laborerService,velocityEngine);
+				final BeanItem<LaborerConstructionsite> beanItem = (BeanItem<LaborerConstructionsite>) event.getItem();
+				logger.debug("laborer constructionsite click item {} rut {} ",beanItem.getBean(),beanItem.getBean().getLaborer().getRut());
+				LaborerConstructionDialog userWindow = new LaborerConstructionDialog(beanItem,laborerService,velocityEngine);
 				
 				userWindow.addListener(new AbstractWindowEditor.EditorSavedListener() {
 					
@@ -452,15 +504,29 @@ public class LaborerAndTeamPanel extends Panel implements View {
 						final ConstructionSite cs = item.getBean();
 						if(cs == null){
 							Notification.show("Debe seleccionar una obra",Type.ERROR_MESSAGE);
-							return;
+//							return false;
+							return ;
 						}
 						try {
-			    			Laborer laborer = ((BeanItem<Laborer>) event.getSavedItem()).getBean();
-			    			constructionSiteService.addLaborerToConstructionSite(laborer,cs);				
-			    			laborerContainer.addBean(laborer);
-			    		} catch (Exception e) {
+//			    			LaborerConstructionsite laborer = ((BeanItem<LaborerConstructionsite>) event.getSavedItem()).getBean();
+							LaborerConstructionsite laborer = beanItem.getBean();
+							logger.debug("laborer constructionsite {}, rut {} postcommit ",laborer,laborer.getLaborer().getRut());
+			    			laborerService.save(laborer);	
+			    			int index = laborerContainer.indexOfId(beanItem);
+			    			table.refreshRowCache();
+//			    			return true;
+			    			return;
+			    		} catch (TransactionSystemException e) {
+			    			ConstraintViolationException e1 = (ConstraintViolationException) e.getCause().getCause();
+			    			logger.error("TransactionSystemException {}",e1);
+			    			Notification.show("Error al validar los datos:\n"+Utils.printConstraintMessages(e1.getConstraintViolations()), Type.ERROR_MESSAGE);
+//			    			return false;
+			    			return;
+			    		}catch (Exception e){
 			    			logger.error("Error al guardar la información del obrero",e);
-			    			Notification.show("Es necesario agregar todos los campos obligatorios", Type.ERROR_MESSAGE);
+			    			Notification.show("Ocurrió un error al intentar guardar el trabajador", Type.ERROR_MESSAGE);
+//			    			return false;
+			    			return;
 			    		}
 					}
 				});
@@ -576,7 +642,7 @@ public class LaborerAndTeamPanel extends Panel implements View {
 					
 				//Seleccionar Obreros
 				FilterTable select_lab =  new FilterTable();
-				Page<Laborer> page = laborerService.findAllLaborer(new PageRequest(0, 20));
+				Page<LaborerConstructionsite> page = laborerService.findAllLaborerConstructionsite(new PageRequest(0, 20));
 				select_lab.setContainerDataSource(laborerContainer);
 				laborerContainer.addAll(page.getContent());
 				
@@ -719,13 +785,13 @@ public class LaborerAndTeamPanel extends Panel implements View {
 		}
 		
 		setEnabledDetail(true,item);
-		List<Laborer> laborers = constructionSiteService.getLaborerByConstruction(item.getBean());
+		List<LaborerConstructionsite> laborers = constructionSiteService.getLaborerByConstruction(item.getBean());
 		laborerContainer.removeAllItems();
 		laborerContainer.addAll(laborers);
 		
-		List<Team> teams = constructionSiteService.getTeamsByConstruction(item.getBean());
-		teamContainer.removeAllItems();
-		teamContainer.addAll(teams);
+//		List<Team> teams = constructionSiteService.getTeamsByConstruction(item.getBean());
+//		teamContainer.removeAllItems();
+//		teamContainer.addAll(teams);
 	}
 	
 	protected void setEnabledDetail(boolean enable,BeanItem<ConstructionSite> item) {

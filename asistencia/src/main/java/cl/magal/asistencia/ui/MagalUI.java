@@ -115,10 +115,13 @@ public class MagalUI extends UI implements ErrorHandler {
 
 			@Override
 			public boolean beforeViewChange(ViewChangeEvent event) {
-				if(menuItems != null)
-					// verifica los permisos para mostrar los menus
-					for(MenuItem menu : menuItems){
-						menu.setVisible(SecurityHelper.hasMenu(menu.getText()));
+				//verifica que está logeado
+				if(SecurityHelper.isLogged()){
+					if(menuItems != null)
+						// verifica los permisos para mostrar los menus
+						for(MenuItem menu : menuItems){
+							menu.setVisible(SecurityHelper.hasMenu(menu.getText()));
+						}
 					}
 				return true;
 			}

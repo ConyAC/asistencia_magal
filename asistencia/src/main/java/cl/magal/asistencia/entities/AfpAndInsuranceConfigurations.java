@@ -38,7 +38,7 @@ public class AfpAndInsuranceConfigurations implements Serializable {
 	
 	@ElementCollection(fetch=FetchType.EAGER)
 	@CollectionTable(
-	        name="adf_item",
+	        name="afp_item",
 	        joinColumns=@JoinColumn(name="afp_and_insuranceId")
 	  )
 	List<AfpItem> afpTable = new LinkedList<AfpItem>();

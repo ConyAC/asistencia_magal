@@ -903,7 +903,7 @@
  */
 
 .v-vaadin-version:after {
-	content: "7.3.6";
+	content: "7.3.7";
 }
 
 .v-widget {
@@ -1646,6 +1646,11 @@ div.v-layout.v-horizontal.v-widget {
 	color: #4396ea;
 }
 
+.magaltheme a.v-disabled {
+	opacity: 0.5;
+	filter: alpha(opacity=50) ;
+}
+
 .magaltheme .v-disabled {
 	cursor: default !important;
 }
@@ -2208,6 +2213,11 @@ div.v-layout.v-horizontal.v-widget {
 	color: #4396ea;
 }
 
+.magaltheme .v-button-link.v-disabled {
+	opacity: 0.5;
+	filter: alpha(opacity=50) ;
+}
+
 .magaltheme .v-button-tiny {
 	height: 28px;
 	padding: 0 13px;
@@ -2412,28 +2422,6 @@ div.v-layout.v-horizontal.v-widget {
 	height: 19px;
 }
 
-:root .magaltheme .v-checkbox > input ~ label:before:after {
-	border: inherit;
-	top: -1px;
-	right: -1px;
-	bottom: -1px;
-	left: -1px;
-}
-
-:root .magaltheme .v-checkbox > input ~ label:before:hover:after {
-	background-color: rgba(186, 186, 186, 0.1);
-}
-
-:root .magaltheme .v-checkbox > input ~ label:before:focus:after {
-	border-color: #197de1;
-	-webkit-box-shadow: 0 0 0 2px rgba(25, 125, 225, 0.5);
-	box-shadow: 0 0 0 2px rgba(25, 125, 225, 0.5);
-}
-
-:root .magaltheme .v-checkbox > input ~ label:before:active:after {
-	background-color: rgba(125, 125, 125, 0.2);
-}
-
 :root .magaltheme .v-checkbox > input ~ label:after {
 	content: "\f00c";
 	font-family: FontAwesome;
@@ -2451,23 +2439,24 @@ div.v-layout.v-horizontal.v-widget {
 	color: #197de1;
 }
 
-:root .magaltheme .v-checkbox > input[disabled]  ~ label, :root .magaltheme .v-checkbox > input[disabled]  ~ label .v-icon, :root .magaltheme .v-checkbox > input[disabled]  ~ .v-icon {
-	cursor: default;
-}
-
-:root .magaltheme .v-checkbox > input[disabled]  ~ label:before, :root .magaltheme .v-checkbox > input[disabled]  ~ label:after {
-	opacity: 0.5;
-	filter: alpha(opacity=50) ;
-}
-
-:root .magaltheme .v-checkbox > input[disabled]:active ~ label:after {
-	background: transparent;
-}
-
 .magaltheme .v-checkbox > .v-icon, .magaltheme .v-checkbox > label .v-icon {
 	margin: 0 6px 0 3px;
 	min-width: 1em;
 	cursor: pointer;
+}
+
+.magaltheme .v-checkbox.v-disabled  > label, .magaltheme .v-checkbox.v-disabled  > .v-icon {
+	cursor: default;
+	opacity: 0.5;
+	filter: alpha(opacity=50) ;
+}
+
+.magaltheme .v-checkbox.v-disabled  > label > .v-icon {
+	cursor: default;
+}
+
+:root .magaltheme .v-checkbox.v-disabled > input:active ~ label:after {
+	background: transparent;
 }
 
 .magaltheme .v-checkbox-small {
@@ -2546,28 +2535,6 @@ div.v-layout.v-horizontal.v-widget {
 	height: 16px;
 }
 
-:root .magaltheme .v-checkbox-small > input ~ label:before:after {
-	border: inherit;
-	top: -1px;
-	right: -1px;
-	bottom: -1px;
-	left: -1px;
-}
-
-:root .magaltheme .v-checkbox-small > input ~ label:before:hover:after {
-	background-color: rgba(186, 186, 186, 0.1);
-}
-
-:root .magaltheme .v-checkbox-small > input ~ label:before:focus:after {
-	border-color: #197de1;
-	-webkit-box-shadow: 0 0 0 2px rgba(25, 125, 225, 0.5);
-	box-shadow: 0 0 0 2px rgba(25, 125, 225, 0.5);
-}
-
-:root .magaltheme .v-checkbox-small > input ~ label:before:active:after {
-	background-color: rgba(125, 125, 125, 0.2);
-}
-
 :root .magaltheme .v-checkbox-small > input ~ label:after {
 	content: "\f00c";
 	font-family: FontAwesome;
@@ -2585,23 +2552,24 @@ div.v-layout.v-horizontal.v-widget {
 	color: #197de1;
 }
 
-:root .magaltheme .v-checkbox-small > input[disabled]  ~ label, :root .magaltheme .v-checkbox-small > input[disabled]  ~ label .v-icon, :root .magaltheme .v-checkbox-small > input[disabled]  ~ .v-icon {
-	cursor: default;
-}
-
-:root .magaltheme .v-checkbox-small > input[disabled]  ~ label:before, :root .magaltheme .v-checkbox-small > input[disabled]  ~ label:after {
-	opacity: 0.5;
-	filter: alpha(opacity=50) ;
-}
-
-:root .magaltheme .v-checkbox-small > input[disabled]:active ~ label:after {
-	background: transparent;
-}
-
 .magaltheme .v-checkbox-small > .v-icon, .magaltheme .v-checkbox-small > label .v-icon {
 	margin: 0 5px 0 3px;
 	min-width: 1em;
 	cursor: pointer;
+}
+
+.magaltheme .v-checkbox-small.v-disabled  > label, .magaltheme .v-checkbox-small.v-disabled  > .v-icon {
+	cursor: default;
+	opacity: 0.5;
+	filter: alpha(opacity=50) ;
+}
+
+.magaltheme .v-checkbox-small.v-disabled  > label > .v-icon {
+	cursor: default;
+}
+
+:root .magaltheme .v-checkbox-small.v-disabled > input:active ~ label:after {
+	background: transparent;
 }
 
 .magaltheme .v-checkbox-large {
@@ -2680,28 +2648,6 @@ div.v-layout.v-horizontal.v-widget {
 	height: 22px;
 }
 
-:root .magaltheme .v-checkbox-large > input ~ label:before:after {
-	border: inherit;
-	top: -1px;
-	right: -1px;
-	bottom: -1px;
-	left: -1px;
-}
-
-:root .magaltheme .v-checkbox-large > input ~ label:before:hover:after {
-	background-color: rgba(186, 186, 186, 0.1);
-}
-
-:root .magaltheme .v-checkbox-large > input ~ label:before:focus:after {
-	border-color: #197de1;
-	-webkit-box-shadow: 0 0 0 2px rgba(25, 125, 225, 0.5);
-	box-shadow: 0 0 0 2px rgba(25, 125, 225, 0.5);
-}
-
-:root .magaltheme .v-checkbox-large > input ~ label:before:active:after {
-	background-color: rgba(125, 125, 125, 0.2);
-}
-
 :root .magaltheme .v-checkbox-large > input ~ label:after {
 	content: "\f00c";
 	font-family: FontAwesome;
@@ -2719,23 +2665,24 @@ div.v-layout.v-horizontal.v-widget {
 	color: #197de1;
 }
 
-:root .magaltheme .v-checkbox-large > input[disabled]  ~ label, :root .magaltheme .v-checkbox-large > input[disabled]  ~ label .v-icon, :root .magaltheme .v-checkbox-large > input[disabled]  ~ .v-icon {
-	cursor: default;
-}
-
-:root .magaltheme .v-checkbox-large > input[disabled]  ~ label:before, :root .magaltheme .v-checkbox-large > input[disabled]  ~ label:after {
-	opacity: 0.5;
-	filter: alpha(opacity=50) ;
-}
-
-:root .magaltheme .v-checkbox-large > input[disabled]:active ~ label:after {
-	background: transparent;
-}
-
 .magaltheme .v-checkbox-large > .v-icon, .magaltheme .v-checkbox-large > label .v-icon {
 	margin: 0 7px 0 4px;
 	min-width: 1em;
 	cursor: pointer;
+}
+
+.magaltheme .v-checkbox-large.v-disabled  > label, .magaltheme .v-checkbox-large.v-disabled  > .v-icon {
+	cursor: default;
+	opacity: 0.5;
+	filter: alpha(opacity=50) ;
+}
+
+.magaltheme .v-checkbox-large.v-disabled  > label > .v-icon {
+	cursor: default;
+}
+
+:root .magaltheme .v-checkbox-large.v-disabled > input:active ~ label:after {
+	background: transparent;
 }
 
 .magaltheme .v-filterselect {
@@ -5075,6 +5022,8 @@ div.v-layout.v-horizontal.v-widget {
 	-ms-backface-visibility: hidden;
 	backface-visibility: hidden;
 	margin-top: 5px !important;
+	margin-bottom: 5px !important;
+	margin-right: 5px !important;
 	cursor: default;
 	width: auto;
 }
@@ -6564,12 +6513,6 @@ div.v-layout.v-horizontal.v-widget {
 	cursor: default;
 }
 
-.magaltheme .v-menubar-popup.v-menubar-popup-animate-out {
-	-webkit-animation: none;
-	-moz-animation: none;
-	animation: none;
-}
-
 .magaltheme .v-menubar-small {
 	height: 31px;
 	padding: 0 14px;
@@ -6742,28 +6685,6 @@ div.v-layout.v-horizontal.v-widget {
 	height: 19px;
 }
 
-:root .magaltheme .v-radiobutton > input ~ label:before:after {
-	border: inherit;
-	top: -1px;
-	right: -1px;
-	bottom: -1px;
-	left: -1px;
-}
-
-:root .magaltheme .v-radiobutton > input ~ label:before:hover:after {
-	background-color: rgba(186, 186, 186, 0.1);
-}
-
-:root .magaltheme .v-radiobutton > input ~ label:before:focus:after {
-	border-color: #197de1;
-	-webkit-box-shadow: 0 0 0 2px rgba(25, 125, 225, 0.5);
-	box-shadow: 0 0 0 2px rgba(25, 125, 225, 0.5);
-}
-
-:root .magaltheme .v-radiobutton > input ~ label:before:active:after {
-	background-color: rgba(125, 125, 125, 0.2);
-}
-
 :root .magaltheme .v-radiobutton > input ~ label:after {
 	content: "\f00c";
 	font-family: FontAwesome;
@@ -6781,23 +6702,24 @@ div.v-layout.v-horizontal.v-widget {
 	color: #197de1;
 }
 
-:root .magaltheme .v-radiobutton > input[disabled]  ~ label, :root .magaltheme .v-radiobutton > input[disabled]  ~ label .v-icon, :root .magaltheme .v-radiobutton > input[disabled]  ~ .v-icon {
-	cursor: default;
-}
-
-:root .magaltheme .v-radiobutton > input[disabled]  ~ label:before, :root .magaltheme .v-radiobutton > input[disabled]  ~ label:after {
-	opacity: 0.5;
-	filter: alpha(opacity=50) ;
-}
-
-:root .magaltheme .v-radiobutton > input[disabled]:active ~ label:after {
-	background: transparent;
-}
-
 .magaltheme .v-radiobutton > .v-icon, .magaltheme .v-radiobutton > label .v-icon {
 	margin: 0 6px 0 3px;
 	min-width: 1em;
 	cursor: pointer;
+}
+
+.magaltheme .v-radiobutton.v-disabled  > label, .magaltheme .v-radiobutton.v-disabled  > .v-icon {
+	cursor: default;
+	opacity: 0.5;
+	filter: alpha(opacity=50) ;
+}
+
+.magaltheme .v-radiobutton.v-disabled  > label > .v-icon {
+	cursor: default;
+}
+
+:root .magaltheme .v-radiobutton.v-disabled > input:active ~ label:after {
+	background: transparent;
 }
 
 :root .magaltheme .v-radiobutton > input:checked ~ label:after {
@@ -6909,28 +6831,6 @@ div.v-layout.v-horizontal.v-widget {
 	height: 16px;
 }
 
-:root .magaltheme .v-select-optiongroup-small .v-checkbox > input ~ label:before:after {
-	border: inherit;
-	top: -1px;
-	right: -1px;
-	bottom: -1px;
-	left: -1px;
-}
-
-:root .magaltheme .v-select-optiongroup-small .v-checkbox > input ~ label:before:hover:after {
-	background-color: rgba(186, 186, 186, 0.1);
-}
-
-:root .magaltheme .v-select-optiongroup-small .v-checkbox > input ~ label:before:focus:after {
-	border-color: #197de1;
-	-webkit-box-shadow: 0 0 0 2px rgba(25, 125, 225, 0.5);
-	box-shadow: 0 0 0 2px rgba(25, 125, 225, 0.5);
-}
-
-:root .magaltheme .v-select-optiongroup-small .v-checkbox > input ~ label:before:active:after {
-	background-color: rgba(125, 125, 125, 0.2);
-}
-
 :root .magaltheme .v-select-optiongroup-small .v-checkbox > input ~ label:after {
 	content: "\f00c";
 	font-family: FontAwesome;
@@ -6948,23 +6848,24 @@ div.v-layout.v-horizontal.v-widget {
 	color: #197de1;
 }
 
-:root .magaltheme .v-select-optiongroup-small .v-checkbox > input[disabled]  ~ label, :root .magaltheme .v-select-optiongroup-small .v-checkbox > input[disabled]  ~ label .v-icon, :root .magaltheme .v-select-optiongroup-small .v-checkbox > input[disabled]  ~ .v-icon {
-	cursor: default;
-}
-
-:root .magaltheme .v-select-optiongroup-small .v-checkbox > input[disabled]  ~ label:before, :root .magaltheme .v-select-optiongroup-small .v-checkbox > input[disabled]  ~ label:after {
-	opacity: 0.5;
-	filter: alpha(opacity=50) ;
-}
-
-:root .magaltheme .v-select-optiongroup-small .v-checkbox > input[disabled]:active ~ label:after {
-	background: transparent;
-}
-
 .magaltheme .v-select-optiongroup-small .v-checkbox > .v-icon, .magaltheme .v-select-optiongroup-small .v-checkbox > label .v-icon {
 	margin: 0 5px 0 3px;
 	min-width: 1em;
 	cursor: pointer;
+}
+
+.magaltheme .v-select-optiongroup-small .v-checkbox.v-disabled  > label, .magaltheme .v-select-optiongroup-small .v-checkbox.v-disabled  > .v-icon {
+	cursor: default;
+	opacity: 0.5;
+	filter: alpha(opacity=50) ;
+}
+
+.magaltheme .v-select-optiongroup-small .v-checkbox.v-disabled  > label > .v-icon {
+	cursor: default;
+}
+
+:root .magaltheme .v-select-optiongroup-small .v-checkbox.v-disabled > input:active ~ label:after {
+	background: transparent;
 }
 
 .magaltheme .v-select-optiongroup-small .v-radiobutton {
@@ -7042,28 +6943,6 @@ div.v-layout.v-horizontal.v-widget {
 	height: 16px;
 }
 
-:root .magaltheme .v-select-optiongroup-small .v-radiobutton > input ~ label:before:after {
-	border: inherit;
-	top: -1px;
-	right: -1px;
-	bottom: -1px;
-	left: -1px;
-}
-
-:root .magaltheme .v-select-optiongroup-small .v-radiobutton > input ~ label:before:hover:after {
-	background-color: rgba(186, 186, 186, 0.1);
-}
-
-:root .magaltheme .v-select-optiongroup-small .v-radiobutton > input ~ label:before:focus:after {
-	border-color: #197de1;
-	-webkit-box-shadow: 0 0 0 2px rgba(25, 125, 225, 0.5);
-	box-shadow: 0 0 0 2px rgba(25, 125, 225, 0.5);
-}
-
-:root .magaltheme .v-select-optiongroup-small .v-radiobutton > input ~ label:before:active:after {
-	background-color: rgba(125, 125, 125, 0.2);
-}
-
 :root .magaltheme .v-select-optiongroup-small .v-radiobutton > input ~ label:after {
 	content: "\f00c";
 	font-family: FontAwesome;
@@ -7081,23 +6960,24 @@ div.v-layout.v-horizontal.v-widget {
 	color: #197de1;
 }
 
-:root .magaltheme .v-select-optiongroup-small .v-radiobutton > input[disabled]  ~ label, :root .magaltheme .v-select-optiongroup-small .v-radiobutton > input[disabled]  ~ label .v-icon, :root .magaltheme .v-select-optiongroup-small .v-radiobutton > input[disabled]  ~ .v-icon {
-	cursor: default;
-}
-
-:root .magaltheme .v-select-optiongroup-small .v-radiobutton > input[disabled]  ~ label:before, :root .magaltheme .v-select-optiongroup-small .v-radiobutton > input[disabled]  ~ label:after {
-	opacity: 0.5;
-	filter: alpha(opacity=50) ;
-}
-
-:root .magaltheme .v-select-optiongroup-small .v-radiobutton > input[disabled]:active ~ label:after {
-	background: transparent;
-}
-
 .magaltheme .v-select-optiongroup-small .v-radiobutton > .v-icon, .magaltheme .v-select-optiongroup-small .v-radiobutton > label .v-icon {
 	margin: 0 5px 0 3px;
 	min-width: 1em;
 	cursor: pointer;
+}
+
+.magaltheme .v-select-optiongroup-small .v-radiobutton.v-disabled  > label, .magaltheme .v-select-optiongroup-small .v-radiobutton.v-disabled  > .v-icon {
+	cursor: default;
+	opacity: 0.5;
+	filter: alpha(opacity=50) ;
+}
+
+.magaltheme .v-select-optiongroup-small .v-radiobutton.v-disabled  > label > .v-icon {
+	cursor: default;
+}
+
+:root .magaltheme .v-select-optiongroup-small .v-radiobutton.v-disabled > input:active ~ label:after {
+	background: transparent;
 }
 
 :root .magaltheme .v-select-optiongroup-small .v-radiobutton > input:checked ~ label:after {
@@ -7209,28 +7089,6 @@ div.v-layout.v-horizontal.v-widget {
 	height: 22px;
 }
 
-:root .magaltheme .v-select-optiongroup-large .v-checkbox > input ~ label:before:after {
-	border: inherit;
-	top: -1px;
-	right: -1px;
-	bottom: -1px;
-	left: -1px;
-}
-
-:root .magaltheme .v-select-optiongroup-large .v-checkbox > input ~ label:before:hover:after {
-	background-color: rgba(186, 186, 186, 0.1);
-}
-
-:root .magaltheme .v-select-optiongroup-large .v-checkbox > input ~ label:before:focus:after {
-	border-color: #197de1;
-	-webkit-box-shadow: 0 0 0 2px rgba(25, 125, 225, 0.5);
-	box-shadow: 0 0 0 2px rgba(25, 125, 225, 0.5);
-}
-
-:root .magaltheme .v-select-optiongroup-large .v-checkbox > input ~ label:before:active:after {
-	background-color: rgba(125, 125, 125, 0.2);
-}
-
 :root .magaltheme .v-select-optiongroup-large .v-checkbox > input ~ label:after {
 	content: "\f00c";
 	font-family: FontAwesome;
@@ -7248,23 +7106,24 @@ div.v-layout.v-horizontal.v-widget {
 	color: #197de1;
 }
 
-:root .magaltheme .v-select-optiongroup-large .v-checkbox > input[disabled]  ~ label, :root .magaltheme .v-select-optiongroup-large .v-checkbox > input[disabled]  ~ label .v-icon, :root .magaltheme .v-select-optiongroup-large .v-checkbox > input[disabled]  ~ .v-icon {
-	cursor: default;
-}
-
-:root .magaltheme .v-select-optiongroup-large .v-checkbox > input[disabled]  ~ label:before, :root .magaltheme .v-select-optiongroup-large .v-checkbox > input[disabled]  ~ label:after {
-	opacity: 0.5;
-	filter: alpha(opacity=50) ;
-}
-
-:root .magaltheme .v-select-optiongroup-large .v-checkbox > input[disabled]:active ~ label:after {
-	background: transparent;
-}
-
 .magaltheme .v-select-optiongroup-large .v-checkbox > .v-icon, .magaltheme .v-select-optiongroup-large .v-checkbox > label .v-icon {
 	margin: 0 7px 0 4px;
 	min-width: 1em;
 	cursor: pointer;
+}
+
+.magaltheme .v-select-optiongroup-large .v-checkbox.v-disabled  > label, .magaltheme .v-select-optiongroup-large .v-checkbox.v-disabled  > .v-icon {
+	cursor: default;
+	opacity: 0.5;
+	filter: alpha(opacity=50) ;
+}
+
+.magaltheme .v-select-optiongroup-large .v-checkbox.v-disabled  > label > .v-icon {
+	cursor: default;
+}
+
+:root .magaltheme .v-select-optiongroup-large .v-checkbox.v-disabled > input:active ~ label:after {
+	background: transparent;
 }
 
 .magaltheme .v-select-optiongroup-large .v-radiobutton {
@@ -7342,28 +7201,6 @@ div.v-layout.v-horizontal.v-widget {
 	height: 22px;
 }
 
-:root .magaltheme .v-select-optiongroup-large .v-radiobutton > input ~ label:before:after {
-	border: inherit;
-	top: -1px;
-	right: -1px;
-	bottom: -1px;
-	left: -1px;
-}
-
-:root .magaltheme .v-select-optiongroup-large .v-radiobutton > input ~ label:before:hover:after {
-	background-color: rgba(186, 186, 186, 0.1);
-}
-
-:root .magaltheme .v-select-optiongroup-large .v-radiobutton > input ~ label:before:focus:after {
-	border-color: #197de1;
-	-webkit-box-shadow: 0 0 0 2px rgba(25, 125, 225, 0.5);
-	box-shadow: 0 0 0 2px rgba(25, 125, 225, 0.5);
-}
-
-:root .magaltheme .v-select-optiongroup-large .v-radiobutton > input ~ label:before:active:after {
-	background-color: rgba(125, 125, 125, 0.2);
-}
-
 :root .magaltheme .v-select-optiongroup-large .v-radiobutton > input ~ label:after {
 	content: "\f00c";
 	font-family: FontAwesome;
@@ -7381,23 +7218,24 @@ div.v-layout.v-horizontal.v-widget {
 	color: #197de1;
 }
 
-:root .magaltheme .v-select-optiongroup-large .v-radiobutton > input[disabled]  ~ label, :root .magaltheme .v-select-optiongroup-large .v-radiobutton > input[disabled]  ~ label .v-icon, :root .magaltheme .v-select-optiongroup-large .v-radiobutton > input[disabled]  ~ .v-icon {
-	cursor: default;
-}
-
-:root .magaltheme .v-select-optiongroup-large .v-radiobutton > input[disabled]  ~ label:before, :root .magaltheme .v-select-optiongroup-large .v-radiobutton > input[disabled]  ~ label:after {
-	opacity: 0.5;
-	filter: alpha(opacity=50) ;
-}
-
-:root .magaltheme .v-select-optiongroup-large .v-radiobutton > input[disabled]:active ~ label:after {
-	background: transparent;
-}
-
 .magaltheme .v-select-optiongroup-large .v-radiobutton > .v-icon, .magaltheme .v-select-optiongroup-large .v-radiobutton > label .v-icon {
 	margin: 0 7px 0 4px;
 	min-width: 1em;
 	cursor: pointer;
+}
+
+.magaltheme .v-select-optiongroup-large .v-radiobutton.v-disabled  > label, .magaltheme .v-select-optiongroup-large .v-radiobutton.v-disabled  > .v-icon {
+	cursor: default;
+	opacity: 0.5;
+	filter: alpha(opacity=50) ;
+}
+
+.magaltheme .v-select-optiongroup-large .v-radiobutton.v-disabled  > label > .v-icon {
+	cursor: default;
+}
+
+:root .magaltheme .v-select-optiongroup-large .v-radiobutton.v-disabled > input:active ~ label:after {
+	background: transparent;
 }
 
 :root .magaltheme .v-select-optiongroup-large .v-radiobutton > input:checked ~ label:after {
@@ -7458,6 +7296,11 @@ div.v-layout.v-horizontal.v-widget {
 
 .magaltheme .v-link:hover {
 	color: #4396ea;
+}
+
+.magaltheme .v-link.v-disabled {
+	opacity: 0.5;
+	filter: alpha(opacity=50) ;
 }
 
 .magaltheme .v-link a {
@@ -10851,6 +10694,11 @@ div.v-layout.v-horizontal.v-widget {
 
 .magaltheme .v-popupview:hover {
 	color: #4396ea;
+}
+
+.magaltheme .v-popupview.v-disabled {
+	opacity: 0.5;
+	filter: alpha(opacity=50) ;
 }
 
 .magaltheme .v-popupview-popup {

@@ -27,15 +27,26 @@
 		<property name="username" value="sa" />
 		<property name="password" value="" />
 	</bean>
-	
 	<jdbc:initialize-database data-source="datasource">
+	    <jdbc:script location="classpath:/META-INF/sql/schema.sql"/>
 	    <jdbc:script location="classpath:/META-INF/sql/data.sql"/>
 	</jdbc:initialize-database>
+	
+	<bean id="jpaDialect" class="org.springframework.orm.jpa.vendor.EclipseLinkJpaDialect" />
 	
 	<!--  Entity Manager Factory -->
 	<bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean" >
 		<property name="dataSource" ref="datasource"></property>
 		<property name="persistenceUnitName" value="persistenceUnit"></property>
+		<property name="jpaDialect" ref="jpaDialect" />
+    	<property name="jpaVendorAdapter">
+        	<bean class="org.springframework.orm.jpa.vendor.EclipseLinkJpaVendorAdapter" />
+         </property>
+		<property name="jpaPropertyMap">
+			<map>
+				<entry key="eclipselink.weaving" value="false" />
+			</map>
+		</property>
 	</bean>
 	
 	<!--  Transacción manager -->
@@ -45,6 +56,8 @@
 	
 	<!-- JPA Repositories -->
 	<jpa:repositories base-package="cl.magal.asistencia.repositories"></jpa:repositories>
+	<!-- traductor de excepciones de repo -->
+    <bean class="org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor" />
 
 	<bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource">
 		<property name="basenames">
@@ -63,7 +76,7 @@
 	    <prop key="class.resource.loader.class">org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader</prop>
 	   </props>
 	  </property>
-	 </bean> 
+	 </bean>
 	
 	<import resource="security.xml" />
 

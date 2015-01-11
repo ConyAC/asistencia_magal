@@ -6,18 +6,29 @@
 package cl.magal.asistencia.entities;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+
 import javax.persistence.Basic;
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+
+import cl.magal.asistencia.entities.converter.JobConverter;
+import cl.magal.asistencia.entities.enums.Job;
 
 /**
  *
@@ -34,8 +45,11 @@ import javax.persistence.TemporalType;
     @NamedQuery(name = "Contract.findByTerminationDate", query = "SELECT c FROM Contract c WHERE c.terminationDate = :terminationDate"),
     @NamedQuery(name = "Contract.findByValueTreatment", query = "SELECT c FROM Contract c WHERE c.valueTreatment = :valueTreatment")})
 public class Contract implements Serializable {
-    private static final long serialVersionUID = 1L;
-    @Id
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = -8847261508253427546L;
+	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
     @Column(name = "contractId")
@@ -57,6 +71,27 @@ public class Contract implements Serializable {
     @Basic(optional = false)
     @Column(name = "valueTreatment")
     private int valueTreatment;
+    @Column(name = "step")
+    private String step;
+    @Column(name = "settlement")
+    private Integer settlement;
+    @Column(name = "contractDescription")
+    String contractDescription;
+    @Convert(converter = JobConverter.class)
+    @Column(name = "job")
+    private Job job;
+    
+    @Column(name="jobCode")
+    private Integer jobCode;
+    
+    private Boolean active;
+    
+    @ManyToOne
+    @JoinColumn(name="LABORER_CONSTRUCTIONSITEID")
+	LaborerConstructionsite laborerConstructionSite;
+    
+    @OneToMany(mappedBy="contract",fetch=FetchType.LAZY,orphanRemoval=true )
+    List<Annexed> annexeds = new ArrayList<Annexed>();
 
     public Contract() {
     }
@@ -121,28 +156,77 @@ public class Contract implements Serializable {
     public void setValueTreatment(int valueTreatment) {
         this.valueTreatment = valueTreatment;
     }
+    public String getStep() {
+		return step;
+	}
 
-    @Override
-    public int hashCode() {
-        int hash = 0;
-        hash += (contractId != null ? contractId.hashCode() : 0);
-        return hash;
-    }
+	public void setStep(String step) {
+		this.step = step;
+	}
 
-    @Override
-    public boolean equals(Object object) {
-        // TODO: Warning - this method won't work in the case the id fields are not set
-        if (!(object instanceof Contract)) {
-            return false;
-        }
-        Contract other = (Contract) object;
-        if ((this.contractId == null && other.contractId != null) || (this.contractId != null && !this.contractId.equals(other.contractId))) {
-            return false;
-        }
-        return true;
-    }
+	public LaborerConstructionsite getLaborerConstructionSite() {
+		return laborerConstructionSite;
+	}
 
-    @Override
+	public void setLaborerConstructionSite(
+			LaborerConstructionsite laborerConstructionSite) {
+		this.laborerConstructionSite = laborerConstructionSite;
+	}
+
+	public List<Annexed> getAnnexeds() {
+		return annexeds;
+	}
+
+	public void setAnnexeds(List<Annexed> annexeds) {
+		this.annexeds = annexeds;
+	}
+
+	public Integer getSettlement() {
+		return settlement;
+	}
+
+	public void setSettlement(Integer settlement) {
+		this.settlement = settlement;
+		setActive(false);
+	}
+	
+	public String getContractDescription() {
+		return contractDescription;
+	}
+
+	public void setContractDescription(String contractDescription) {
+		this.contractDescription = contractDescription;
+	}
+
+	public Job getJob() {
+		return job;
+	}
+
+	public void setJob(Job job) {
+		this.job = job;
+	}
+
+	public Integer getJobCode() {
+		return jobCode;
+	}
+
+	public void setJobCode(Integer jobCode) {
+		this.jobCode = jobCode;
+	}
+
+	public boolean isActive() {
+		return active;
+	}
+
+	public void setActive(boolean active) {
+		this.active = active;
+	}
+	
+	public String getJobAndCode(){
+		return (getJob() != null ? getJob().toString():"")+" ("+getJobCode()+")";
+	}
+
+	@Override
     public String toString() {
         return "jpa.magal.entities.Contract[ contractId=" + contractId + " ]";
     }

@@ -28,23 +28,23 @@ public class TaxationConfigurations implements Serializable {
     @Column(name = "taxation_configurationsId")
 	Long taxationConfigurationsId;
 	
-	@Digits(fraction = 1, integer = 6)
+	@Digits(fraction = 2, integer = 12)
 	@Column(name ="fromr")
 	Double from;
 	
-	@Digits(fraction = 1, integer = 6)
+	@Digits(fraction = 2, integer = 12)
 	@Column(name ="to")
 	Double to;
 	
-	@Digits(fraction = 2, integer = 6)
+	@Digits(fraction = 2, integer = 12)
 	@Column(name ="factor")
 	Double factor;
 	
-	@Digits(fraction = 1, integer = 6)
+	@Digits(fraction = 2, integer = 12)
 	@Column(name ="reduction")
 	Double reduction;
 	
-	@Digits(fraction = 1, integer = 6)
+	@Digits(fraction = 2, integer = 12)
 	@Column(name ="exempt")
 	Double exempt;
 

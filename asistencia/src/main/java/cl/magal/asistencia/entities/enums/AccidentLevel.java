@@ -1,4 +1,4 @@
-package cl.magal.asistencia.entities;
+package cl.magal.asistencia.entities.enums;
 
 
 public enum AccidentLevel {

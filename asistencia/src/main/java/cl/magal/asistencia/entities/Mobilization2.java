@@ -4,12 +4,12 @@ import java.io.Serializable;
 
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
-import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
-import javax.persistence.OneToOne;
+import javax.persistence.Table;
 import javax.validation.constraints.Digits;
 
 @Embeddable
+@Table(name="Mobilization2")
 public class Mobilization2 implements Serializable {
 	
 	/**
@@ -17,8 +17,7 @@ public class Mobilization2 implements Serializable {
 	 */
 	private static final long serialVersionUID = 8278432240240965377L;
 
-	@JoinColumn(name="construction_siteId")
-	@OneToOne(fetch=FetchType.EAGER)
+	@JoinColumn(name="LINKED_CONSTRUCTION_SITEID")
 	ConstructionSite constructionSite;
 	
 	@Digits(fraction = 0, integer = 6)

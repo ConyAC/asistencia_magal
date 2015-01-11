@@ -72,8 +72,6 @@ public class ConstructionSiteView extends BaseView  implements View {
 
 	public ConstructionSiteView(){
 
-		logger.debug("obras");
-
 		setSizeFull();
 
 		root = new HorizontalLayout();
@@ -482,7 +480,6 @@ public class ConstructionSiteView extends BaseView  implements View {
 		//setea el nombre de la construccion en el titulo
 		((MagalUI)UI.getCurrent()).getTitle().setValue("<h1>"+cs.getName()+"</h1>");
 		
-		//si tiene al menos un elemento selecciona el primero
 		laborerAndTeamPanel.setConstruction( new BeanItem<ConstructionSite>(cs) );
 		
 	}

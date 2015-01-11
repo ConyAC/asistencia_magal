@@ -45,13 +45,15 @@ import cl.magal.asistencia.entities.enums.Status;
     @NamedQuery(name = "Team.findByTeamId", query = "SELECT t FROM Team t WHERE t.teamId = :teamId"),
     @NamedQuery(name = "Team.findByName", query = "SELECT t FROM Team t WHERE t.name = :name"),
     @NamedQuery(name = "Team.findByDate", query = "SELECT t FROM Team t WHERE t.date = :date"),
-    @NamedQuery(name = "Team.findByConstructionsite", query = "SELECT t FROM Team t WHERE t.constructionsite = :constructionsite"),
     @NamedQuery(name = "Team.findByUser", query = "SELECT t FROM Team t WHERE t.leader = :leader"),
     @NamedQuery(name = "Team.findByStatusId", query = "SELECT t FROM Team t WHERE t.status = :status"),
     @NamedQuery(name = "Team.findByDeleted", query = "SELECT t FROM Team t WHERE t.deleted = :deleted")})
 public class Team implements Serializable {
-    private static final long serialVersionUID = 1L;
-    @Id
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = -7401353696020559155L;
+	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
     @Column(name = "teamId")
@@ -64,12 +66,8 @@ public class Team implements Serializable {
     @Temporal(TemporalType.TIMESTAMP)
     private Date date;
     @Basic(optional = false)
-    @JoinColumn(name = "construction_siteId")
-    @ManyToOne
-    private ConstructionSite constructionsite;
-    @Basic(optional = false)
-    @JoinColumn(name = "laborerId")
     @ManyToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "LABORERID")
     private Laborer leader;
     @Convert(converter = StatusConverter.class)
     @Column(name = "status",nullable=false)
@@ -88,7 +86,7 @@ public class Team implements Serializable {
 	)
     @ManyToMany(targetEntity=Laborer.class,fetch=FetchType.EAGER)
     List<Laborer> laborers = new LinkedList<Laborer>();
-
+    
     @PrePersist
     public void prePersist(){
     	if(deleted == null )
@@ -128,20 +126,12 @@ public class Team implements Serializable {
         this.date = date;
     }
 
-    public ConstructionSite getConstructionsite() {
-        return constructionsite;
-    }
-
     public Laborer getLeader() {
 		return leader;
 	}
 
 	public void setLeader(Laborer leader) {
 		this.leader = leader;
-	}
-
-	public void setConstructionsite(ConstructionSite constructionsite) {
-		this.constructionsite = constructionsite;
 	}
 
     public Status getStatus() {

@@ -3,7 +3,7 @@ package cl.magal.asistencia.entities.converter;
 import javax.persistence.AttributeConverter;
 import javax.persistence.Converter;
 
-import cl.magal.asistencia.entities.AccidentLevel;
+import cl.magal.asistencia.entities.enums.AccidentLevel;
 
 @Converter(autoApply=true)
 public class AccidentLevelConverter implements AttributeConverter<AccidentLevel, Integer>{

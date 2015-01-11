@@ -6,47 +6,69 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.util.Iterator;
+import java.util.List;
+
 import org.joda.time.DateTime;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import cl.magal.asistencia.entities.Absence;
 import cl.magal.asistencia.entities.Accident;
-import cl.magal.asistencia.entities.AccidentLevel;
 import cl.magal.asistencia.entities.ConstructionSite;
 import cl.magal.asistencia.entities.Laborer;
+import cl.magal.asistencia.entities.LaborerConstructionsite;
 import cl.magal.asistencia.entities.Vacation;
 import cl.magal.asistencia.entities.enums.AbsenceType;
-import cl.magal.asistencia.helpers.ConstructionSiteHelper;
+import cl.magal.asistencia.entities.enums.AccidentLevel;
+import cl.magal.asistencia.entities.validator.RutDigitValidator;
 import cl.magal.asistencia.helpers.LaborerHelper;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = { "/META-INF/spring/testApplicationContext.xml" })
+@Transactional
 public class LaborerServiceTest {
+	
+	transient Logger logger = LoggerFactory.getLogger(LaborerServiceTest.class);
 
 	@Autowired
-	LaborerService service;
+	transient LaborerService service;
 	
 	@Autowired
-	ConstructionSiteService constructionService;
+	transient ConstructionSiteService constructionService;
 
-	/**
-	 * Almacenar
-	 */
 	@Test
-	public void testSaveLaborer() {
+	public void searchInvalidRut(){
+		RutDigitValidator rdv = new RutDigitValidator();
 		
-		Laborer l = LaborerHelper.newLaborer();
-		service.saveLaborer(l);
-		LaborerHelper.verify(l);
+		List<Laborer> laborers = service.findAllLaborer();
+		for (Iterator iterator = laborers.iterator(); iterator.hasNext();) {
+			Laborer laborer = (Laborer) iterator.next();
+			if(!rdv.isValid(laborer.getRut(), null)){
+				String split = laborer.getRut().split("-")[0];
+				logger.debug("id {} , {} {}",laborer.getLaborerId(),laborer.getRut(),rdv.Digito(Integer.valueOf(split)));
+			}
+		}
+	}
+	
+	@Test
+	public void findLaborerNotInConstructionSite(){
 		
-		Laborer dbu = service.findLaborer(l.getLaborerId());
+		Long constructionSiteId = 1L;
+		Long laborerIdToFind = 412L; 
+		ConstructionSite constructionSite = constructionService.findConstructionSite(constructionSiteId);
+		List<Laborer> laborers = service.getAllLaborerExceptThisConstruction(constructionSite);
 		
-		LaborerHelper.verify(dbu);		
-		LaborerHelper.verify(l,dbu);		
+		assertNotNull("La lista de laborer no puede ser nula",laborers);
+		assertTrue("La lista de laborer no puede ser vacia",!laborers.isEmpty());
+		assertEquals("el laborer no es el esperado",laborerIdToFind,laborers.get(0).getLaborerId());
 	}
 	
 	/**
@@ -55,27 +77,19 @@ public class LaborerServiceTest {
 	@Test
 	public void testAddVacation() {
 		
-		Laborer l = LaborerHelper.newLaborer();
+		LaborerConstructionsite lc = getLaborerConstructionsiteExisting();
+		
 		DateTime dt = new DateTime();
 		
 		Vacation vacation = new Vacation();
 		vacation.setFromDate(dt.toDate());
 		vacation.setToDate(dt.plusDays(5).toDate());
-		vacation.setLaborer(l);
 		
-		ConstructionSite cs = ConstructionSiteHelper.newConstrutionSite();
-		constructionService.save(cs);
-		vacation.setConstructionSite(cs);
+		lc.addVacation(vacation);
 		
-		l.addVacation(vacation);
+		service.save(lc);
 		
-		service.saveLaborer(l);
-		LaborerHelper.verify(l);
-		
-		Laborer dbu = service.findLaborer(l.getLaborerId());
-		
-		LaborerHelper.verify(dbu);		
-		LaborerHelper.verify(l,dbu);
+		LaborerConstructionsite dbu = getLaborerConstructionsiteExisting();
 		
 		assertTrue("La lista de vacaciones no puede ser vacia",!dbu.getVacations().isEmpty());
 		
@@ -86,38 +100,23 @@ public class LaborerServiceTest {
 	@Test
 	public void testRemoveVacation() {
 		
-		Laborer l = LaborerHelper.newLaborer();
+		LaborerConstructionsite lc = getLaborerConstructionsiteExisting();
+		
 		DateTime dt = new DateTime();
 		
 		Vacation vacation = new Vacation();
 		vacation.setFromDate(dt.toDate());
 		vacation.setToDate(dt.plusDays(5).toDate());
-		vacation.setLaborer(l);
 		
-		ConstructionSite cs = ConstructionSiteHelper.newConstrutionSite();
-		constructionService.save(cs);
-		vacation.setConstructionSite(cs);
+		lc.addVacation(vacation);
 		
-		l.addVacation(vacation);
+		service.save(lc);
 		
-		service.saveLaborer(l);
-		LaborerHelper.verify(l);
-		
-		Laborer dbu = service.findLaborer(l.getLaborerId());
-		
-		LaborerHelper.verify(dbu);		
-		LaborerHelper.verify(l,dbu);
-		
-		assertTrue("La lista de vacaciones no puede ser vacia",!dbu.getVacations().isEmpty());
-		
+		LaborerConstructionsite dbu = getLaborerConstructionsiteExisting();
 		dbu.getVacations().clear();
-		service.saveLaborer(dbu);
+		service.save(dbu);
 		
-		Laborer dbu2 = service.findLaborer(l.getLaborerId());
-		
-		LaborerHelper.verify(dbu2);		
-		LaborerHelper.verify(l,dbu2);
-		
+		LaborerConstructionsite dbu2 = getLaborerConstructionsiteExisting();
 		assertTrue("La lista de vacaciones debe ser vacia",dbu2.getVacations().isEmpty());
 		
 	}
@@ -128,31 +127,25 @@ public class LaborerServiceTest {
 	@Test
 	public void testAddAccident() {
 		
-		Laborer l = LaborerHelper.newLaborer();
+		LaborerConstructionsite lc = getLaborerConstructionsiteExisting();
+		
+		AccidentLevel level = AccidentLevel.SERIOUS;
+		
 		DateTime dt = new DateTime();
 		
 		Accident accident = new Accident();
-		accident.setAccidentLevel(AccidentLevel.SERIOUS);
+		accident.setAccidentLevel(level);
 		accident.setFromDate(dt.toDate());
 		accident.setToDate(dt.plusDays(5).toDate());
-		accident.setLaborer(l);
 		
-		ConstructionSite cs = ConstructionSiteHelper.newConstrutionSite();
-		constructionService.save(cs);
+		lc.addAccident(accident);
 		
-		l.addAccident(accident);
+		service.save(lc);
 		
-		service.saveLaborer(l);
-		LaborerHelper.verify(l);
-		
-		Laborer dbu = service.findLaborer(l.getLaborerId());
-		
-		LaborerHelper.verify(dbu);		
-		LaborerHelper.verify(l,dbu);
-		
+		LaborerConstructionsite dbu = getLaborerConstructionsiteExisting();
+
 		assertTrue("La lista de ausencias por accidentes no puede ser vacia",!dbu.getAccidents().isEmpty());
-		
-		assertTrue("La lista de ausencias por accidentes debe ser del tipo MEDICAL_LEAVE",dbu.getAccidents().get(0).getAccidentLevel() == AccidentLevel.SERIOUS);
+		assertTrue("La lista de ausencias por accidentes debe ser de la gravedad "+level.name(),dbu.getAccidents().get(0).getAccidentLevel() == level);
 		
 	}
 	
@@ -162,38 +155,30 @@ public class LaborerServiceTest {
 	@Test
 	public void testAddSameAccident() {
 		
-		Laborer l = LaborerHelper.newLaborer();
+		LaborerConstructionsite lc = getLaborerConstructionsiteExisting();
+		
 		DateTime dt = new DateTime();
 		
 		Accident accident = new Accident();
 		accident.setAccidentLevel(AccidentLevel.SERIOUS);
 		accident.setFromDate(dt.toDate());
 		accident.setToDate(dt.plusDays(5).toDate());
-		accident.setLaborer(l);
 		
-		ConstructionSite cs = ConstructionSiteHelper.newConstrutionSite();
-		constructionService.save(cs);
+		lc.addAccident(accident);
+		service.save(lc);
+		logger.debug("accidente 1 {} ",accident.getAccidentId());
 		
-		l.addAccident(accident);
+		LaborerConstructionsite dbu = getLaborerConstructionsiteExisting();
 		
-		service.saveLaborer(l);
-		LaborerHelper.verify(l);
+		Accident accident2 = dbu.getAccidents().get(0);  
+		//agrega el mismo accidente de antes
+		dbu.addAccident(accident2);
+		service.save(dbu);
 		
-		Laborer dbu = service.findLaborer(l.getLaborerId());
-		
-		LaborerHelper.verify(dbu);		
-		LaborerHelper.verify(l,dbu);
-		
-		assertTrue("La lista de ausencias por accidentes no puede ser vacia",!dbu.getAccidents().isEmpty());
-		assertTrue("La lista de ausencias por accidentes solo debe tener 1 elemento",dbu.getAccidents().size() == 1 );
-		assertTrue("La lista de ausencias por accidentes debe ser del tipo MEDICAL_LEAVE",dbu.getAccidents().get(0).getAccidentLevel() == AccidentLevel.SERIOUS);
-		service.saveLaborer(dbu);
+		logger.debug("accidente 2 {} ",accident2);
 		
 		// si se guarda de nuevo no deberia agregar un elemento
-		Laborer dbu2 = service.findLaborer(l.getLaborerId());
-		
-		LaborerHelper.verify(dbu2);		
-		LaborerHelper.verify(l,dbu2);
+		LaborerConstructionsite dbu2  = getLaborerConstructionsiteExisting();
 		
 		assertTrue("La lista de ausencias por accidentes no puede ser vacia",!dbu2.getAccidents().isEmpty());
 		assertTrue("La lista de ausencias por accidentes solo debe tener 1 elemento",dbu2.getAccidents().size() == 1 );
@@ -207,42 +192,53 @@ public class LaborerServiceTest {
 	@Test
 	public void testRemoveAccident() {
 		
-		Laborer l = LaborerHelper.newLaborer();
+		LaborerConstructionsite lc = getLaborerConstructionsiteExisting();
+		
+		AccidentLevel level = AccidentLevel.NOT_SERIOUS;
+		
 		DateTime dt = new DateTime();
 		
 		Accident accident = new Accident();
-		accident.setAccidentLevel(AccidentLevel.NOT_SERIOUS);
+		accident.setAccidentLevel(level);
 		accident.setFromDate(dt.toDate());
 		accident.setToDate(dt.plusDays(5).toDate());
-		accident.setLaborer(l);
 		
-		ConstructionSite cs = ConstructionSiteHelper.newConstrutionSite();
-		constructionService.save(cs);
+		lc.addAccident(accident);
+		// TODO en vez de agregarlo en el test, deberia existir un elemento ya creado en la base y eliminarlo
+		service.save(lc);
 		
-		l.addAccident(accident);
-		
-		service.saveLaborer(l);
-		LaborerHelper.verify(l);
-		
-		Laborer dbu = service.findLaborer(l.getLaborerId());
-		
-		LaborerHelper.verify(dbu);		
-		LaborerHelper.verify(l,dbu);
-		
-		assertTrue("La lista de ausencias por accidentes no puede ser vacia",!dbu.getAccidents().isEmpty());
-		
-		assertTrue("La lista de ausencias por accidentes debe ser del tipo MEDICAL_LEAVE",dbu.getAccidents().get(0).getAccidentLevel() == AccidentLevel.NOT_SERIOUS);
-		
+		LaborerConstructionsite dbu = getLaborerConstructionsiteExisting();
+
 		dbu.getAccidents().clear();
-		service.saveLaborer(dbu);
+		service.save(dbu);
 		
-		Laborer dbu2 = service.findLaborer(l.getLaborerId());
+		LaborerConstructionsite dbu2 = getLaborerConstructionsiteExisting();
 		
-		LaborerHelper.verify(dbu2);		
-		LaborerHelper.verify(l,dbu2);
+		assertTrue("La lista de accidentes debe ser vacia",dbu2.getAccidents().isEmpty());
 		
-		assertTrue("La lista de vacaciones debe ser vacia",dbu2.getAccidents().isEmpty());
+	}
+	
+	/**
+	 * Obtiene la asociación trabajador obra que se sabe que existe
+	 */
+	@Test
+	public void testFinLaborerOnConstructionSite() {
 		
+		//busca al obrero 207 en la obra 1
+		LaborerConstructionsite laborerConstructionsite =  getLaborerConstructionsiteExisting();
+		
+		assertNotNull("El obrero en la obra no puede ser nulo", laborerConstructionsite);
+	}
+	
+	/**
+	 * Obtiene nulo para una asociación de trabajador obra que se sabe que NO existe
+	 */
+	@Test
+	public void testFinLaborerOnConstructionSiteNotExisting() {
+		
+		LaborerConstructionsite laborerConstructionsite = getLaborerConstructionsiteNotExisting();
+		
+		assertNull("El obrero en la obra debe ser nulo", laborerConstructionsite);
 	}
 	
 	/**
@@ -251,137 +247,101 @@ public class LaborerServiceTest {
 	@Test
 	public void testAddMedicalLicence() {
 		
-		Laborer l = LaborerHelper.newLaborer();
+		LaborerConstructionsite laborerConstructionsite = getLaborerConstructionsiteExisting();
+		logger.debug("laborerConstructionsite {} ",laborerConstructionsite.getId());
 		DateTime dt = new DateTime();
 		
 		Absence absence = new Absence();
 		absence.setAbsenceType(AbsenceType.MEDICAL_LEAVE);
 		absence.setFromDate(dt.toDate());
 		absence.setToDate(dt.plusDays(5).toDate());
-		absence.setLaborer(l);
+
+		laborerConstructionsite.addAbsence(absence);
+		service.save(laborerConstructionsite);
+//		LaborerConstructionsite dbu = service.findLaborerOnConstructionSite(laborerConstructionsite);
+		LaborerConstructionsite dbu = getLaborerConstructionsiteExisting();
+		logger.debug("laborerConstructionsite {} ",dbu.getId());
 		
-		ConstructionSite cs = ConstructionSiteHelper.newConstrutionSite();
-		constructionService.save(cs);
-		
-		l.addAbsence(absence);
-		
-		service.saveLaborer(l);
-		LaborerHelper.verify(l);
-		
-		Laborer dbu = service.findLaborer(l.getLaborerId());
-		
-		LaborerHelper.verify(dbu);		
-		LaborerHelper.verify(l,dbu);
-		
-		assertTrue("La lista de ausencias por ausencia no puede ser vacia",!dbu.getAbsences().isEmpty());
-		//
-		assertTrue("La lista de ausencias por ausencia debe ser del tipo MEDICAL_LEAVE",dbu.getAbsences().get(0).getAbsenceType() == AbsenceType.MEDICAL_LEAVE);
+		assertNotNull("El obrero en la obra no puede ser nulo", dbu);
+		assertTrue("La lista de ausencias no puede ser vacia",!dbu.getAbsences().isEmpty());
+		assertTrue("La lista de ausencias debe ser del tipo MEDICAL_LEAVE",dbu.getAbsences().get(0).getAbsenceType() == AbsenceType.MEDICAL_LEAVE);
 		
 	}
+	
 	/**
 	 * Agregar una vacación
 	 */
 	@Test
 	public void testRemoveMedicalLicence() {
 		
-		Laborer l = LaborerHelper.newLaborer();
-		DateTime dt = new DateTime();
+		LaborerConstructionsite laborerConstructionsite = getLaborerConstructionsiteExisting();
 		
-		Absence absence = new Absence();
-		absence.setAbsenceType(AbsenceType.MEDICAL_LEAVE);
-		absence.setFromDate(dt.toDate());
-		absence.setToDate(dt.plusDays(5).toDate());
-		absence.setLaborer(l);
+		laborerConstructionsite.getAbsences().clear();
+		service.save(laborerConstructionsite);
 		
-		ConstructionSite cs = ConstructionSiteHelper.newConstrutionSite();
-		constructionService.save(cs);
-		
-		l.addAbsence(absence);
-		
-		service.saveLaborer(l);
-		LaborerHelper.verify(l);
-		
-		Laborer dbu = service.findLaborer(l.getLaborerId());
-		
-		LaborerHelper.verify(dbu);		
-		LaborerHelper.verify(l,dbu);
-		
-		assertTrue("La lista de vacaciones no puede ser vacia",!dbu.getAbsences().isEmpty());
-		
-		dbu.getAbsences().clear();
-		service.saveLaborer(dbu);
-		
-		Laborer dbu2 = service.findLaborer(l.getLaborerId());
-		
-		LaborerHelper.verify(dbu2);		
-		LaborerHelper.verify(l,dbu2);
-		
+		LaborerConstructionsite dbu2 = getLaborerConstructionsiteExisting();
 		assertTrue("La lista de vacaciones debe ser vacia",dbu2.getAbsences().isEmpty());
 		
 	}
 	
 	/**
-	 * Encontrar
+	 * Encontrar existente
 	 */
 	@Test
 	public void testFindLaborer() {
 		
-		Laborer l = LaborerHelper.newLaborer();	
-
-		service.saveLaborer(l);
-		LaborerHelper.verify(l);
-		
-		Laborer dbl = service.findLaborer(l.getLaborerId());		
+		//por los datos de test, sé que existe el 207
+		Long laborerId = 207L;
+		Laborer dbl = service.findLaborer(laborerId);		
 		assertNotNull("El obrero no puede ser nulo", dbl);
 		
-		assertEquals("El rut del obrero debe ser igual a ", "12345678-9", dbl.getRut());
+	}
+	
+	/**
+	 * No encontrar trabajador inexistente
+	 */
+	@Test
+	public void testFindLaborerNotExisting() {
+		
+		//por los datos de test, sé que existe el 207
+		Long laborerId = 208L;
+		Laborer dbl = service.findLaborer(laborerId);		
+		assertNull("El obrero debe ser nulo", dbl);
 		
 	}
 	
 	/**
-	 * Actualizaciòn
+	 * Almacenar
+	 * @Transactional(propagation = Propagation.NOT_SUPPORTED)  pues no debe esperar la transacción pues si no, no obtiene el identity
 	 */
 	@Test
-	public void testUpdate() {
+	@Transactional(propagation = Propagation.NOT_SUPPORTED) 
+	public void testSaveLaborer() {
 		
 		Laborer l = LaborerHelper.newLaborer();
-
-		service.saveLaborer(l);
-		LaborerHelper.verify(l);
+		Laborer saved = service.saveLaborer(l);
+		LaborerHelper.verify(saved);
 		
-		Laborer dbl = service.findLaborer(l.getLaborerId());		
-		LaborerHelper.verify(dbl);
-		LaborerHelper.verify(l, dbl);
+		Laborer dbu = service.findLaborer(l.getLaborerId());
 		
-		l.setMobileNumber("99899098");	
-		service.saveLaborer(l);
-		
-		dbl = service.findLaborer(l.getLaborerId());		
-		LaborerHelper.verify(l, dbl);	
-				
+		LaborerHelper.verify(dbu);		
+		LaborerHelper.verify(l,dbu);		
 	}
 	
 	/**
-	 * Eliminar
+	 * Debe fallar si el obrero tiene un rut inválido
 	 */
 	@Test
-	public void testDelete() {
-		
+	public void testFailSaveGoodRutLaborer() {
+		String goodRut = "16127401-1"; 
 		Laborer l = LaborerHelper.newLaborer();
+		l.setRut(goodRut);
 
-		service.saveLaborer(l);
-		LaborerHelper.verify(l);
+		service.saveLaborer(l);	
 		
-		Laborer dbl = service.findLaborer(l.getLaborerId());	
-		LaborerHelper.verify(dbl);
-		LaborerHelper.verify(l, dbl);
-				
-		service.deleteLaborer(l.getLaborerId());		
+		Laborer dbu = service.findLaborer(l.getLaborerId());
 		
-		dbl = service.findLaborer(l.getLaborerId());		
-				
-		assertNull("El obrero debe ser nulo luego de la eliminacion", dbl );
-		
+		assertEquals("El rut debe ser el mismo",goodRut,dbu.getRut());
 	}
 	
 	/**
@@ -408,4 +368,81 @@ public class LaborerServiceTest {
 		service.saveLaborer(l);		
 		fail("error");
 	}
+	
+	/**
+	 * Debe fallar si el obrero tiene un rut inválido
+	 */
+	@Test(expected=Exception.class)
+	public void testFailSaveBadRutLaborer() {
+		Laborer l = LaborerHelper.newLaborer();
+		l.setRut("1-1");
+
+		service.saveLaborer(l);		
+		fail("error");
+	}
+	
+	/**
+	 * Actualizaciòn
+	 */
+	@Test
+	public void testUpdateMobileNumber() {
+		
+		Long laborerId = 207L;
+		String newMobileNumer = "99899098"; 
+		Laborer dbl = service.findLaborer(laborerId);	
+
+		dbl.setMobileNumber(newMobileNumer);	
+		service.saveLaborer(dbl);
+		dbl = service.findLaborer(dbl.getLaborerId());
+		
+		assertNotNull("El obrero no puede ser nulo", dbl);
+		assertEquals("El obrero no tiene el celular que se definió", newMobileNumer,  dbl.getMobileNumber() );
+				
+	}
+	
+	
+	/**
+	 * Eliminar
+	 */
+	@Test
+	public void testDelete() {
+		
+		Long laborerId = 207L;
+		Laborer dbl = service.findLaborer(laborerId);	
+		logger.debug("db1 {}",dbl);
+		service.delete(dbl);		
+		logger.debug("db1 {}",dbl);
+		Laborer db2 = service.findLaborer(laborerId);
+		logger.debug("db2 {}",db2);
+		assertNull("El obrero debe ser nulo luego de la eliminacion", db2 );
+		
+	}
+	
+	/**
+	 * METODOS UTILITARIOS
+	 */
+	
+
+	private LaborerConstructionsite getLaborerConstructionsiteNotExisting(){
+		//se sabe por lo datos de prueba que existe la obra con id 1
+		Long constructionSiteId = 1L;
+		Long laborerId = 208L;
+		ConstructionSite cs = constructionService.findConstructionSite(constructionSiteId);
+		Laborer laborer = new Laborer();
+		laborer.setLaborerId(laborerId);
+		//busca al obrero 207 en la obra 1
+		return service.findLaborerOnConstructionSite(cs,laborer);
+	}
+	
+	private LaborerConstructionsite getLaborerConstructionsiteExisting(){
+		//se sabe por lo datos de prueba que existe la obra con id 1
+		Long constructionSiteId = 1L;
+		Long laborerId = 207L;
+		ConstructionSite cs = constructionService.findConstructionSite(constructionSiteId);
+		Laborer laborer = new Laborer();
+		laborer.setLaborerId(laborerId);
+		//busca al obrero 207 en la obra 1
+		return service.findLaborerOnConstructionSite(cs,laborer);
+	}
+	
 }

@@ -33,7 +33,6 @@ import cl.magal.asistencia.repositories.RoleRepository;
 import cl.magal.asistencia.repositories.UserRepository;
 
 @Service
-@Transactional(readOnly = true)
 public class UserService implements UserDetailsService {
 	static Logger logger = LoggerFactory.getLogger(UserService.class);
 	
@@ -46,7 +45,7 @@ public class UserService implements UserDetailsService {
 	@Autowired
 	ConstructionSiteRepository repoCS;
 	
-	@PostConstruct
+//	@PostConstruct
 	public void init(){
 		//si no existe un usuario admin, lo crea
 		String userName = "admin@admin.com";
@@ -71,6 +70,7 @@ public class UserService implements UserDetailsService {
 			// CREA EL USUARIO ADMIN
 			String password = "123456";			
 			usuario = new cl.magal.asistencia.entities.User();
+			usuario.setUserId(1L);
 			usuario.setFirstname("Joseph");
 			usuario.setRut("16127401-1");
 			usuario.setLastname("O'Shea");
@@ -174,6 +174,9 @@ public class UserService implements UserDetailsService {
 	 */
 	@Override
 	  public UserDetails loadUserByUsername(String userName) throws UsernameNotFoundException {
+		//SOLO PARA TESTING CREA USUARIOS SI NO EXISTEN
+		init();
+		
 		//recupera el usuario desde base de datos
 		cl.magal.asistencia.entities.User entityUser = rep.findByEmail(userName);
 		if( entityUser == null ){
@@ -327,7 +330,7 @@ public class UserService implements UserDetailsService {
 	}
 	
 	public List<ConstructionSite> getObraByUser( cl.magal.asistencia.entities.User u) {
-		List<ConstructionSite> cs = repoCS.findByUser(u.getUserId());
+		List<ConstructionSite> cs = repoCS.findByUser(u);
 		return cs;
 	}
 

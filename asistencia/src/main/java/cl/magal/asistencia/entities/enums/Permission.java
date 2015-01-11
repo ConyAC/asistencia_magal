@@ -24,7 +24,8 @@ public enum Permission {
 	VISUALIZAR_CARGA_MASIVA_VACACIONES(20, "Visualizar Carga Masiva"),
 	EDITAR_ASISTENCIA(21, "Editar Asistencia"),
 	IMPRIMIR_OBREROS(22, "Imprimir Obreros"),
-	EDITAR_OBRA_NOASIGNADAS(24, "Editar Obra");
+	EDITAR_OBRA_NOASIGNADAS(24, "Editar Obra"), 
+	CONFIRMAR_OBREROS(25,"Confirmar Obreros");
 
 	
 	int i;

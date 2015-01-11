@@ -1,13 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <persistence version="2.1" xmlns="http://xmlns.jcp.org/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence http://xmlns.jcp.org/xml/ns/persistence/persistence_2_1.xsd">
 	<persistence-unit name="persistenceUnit" transaction-type="RESOURCE_LOCAL">
+	    <!-- 
 	    <provider>org.hibernate.ejb.HibernatePersistence</provider>
+	     -->
+	     <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider> 
 	    <class>cl.magal.asistencia.entities.Absence</class>
 	    <class>cl.magal.asistencia.entities.Accident</class>
 	    <class>cl.magal.asistencia.entities.AdvancePaymentConfigurations</class>
 	    <class>cl.magal.asistencia.entities.AdvancePaymentItem</class>
 	    <class>cl.magal.asistencia.entities.AfpAndInsuranceConfigurations</class>
 	    <class>cl.magal.asistencia.entities.AfpItem</class>
+	    <class>cl.magal.asistencia.entities.Annexed</class>
 	    <class>cl.magal.asistencia.entities.Attachment</class>
 	    <class>cl.magal.asistencia.entities.ConstructionSite</class>
 	    <class>cl.magal.asistencia.entities.Contract</class>
@@ -18,7 +22,6 @@
 	    <class>cl.magal.asistencia.entities.LaborerHistoricTeam</class>
 	    <class>cl.magal.asistencia.entities.LaborerTool</class>
 	    <class>cl.magal.asistencia.entities.Mobilization2</class>
-	    <class>cl.magal.asistencia.entities.Obra</class>
 	    <class>cl.magal.asistencia.entities.Role</class>
 	    <class>cl.magal.asistencia.entities.TaxationConfigurations</class>
 	    <class>cl.magal.asistencia.entities.Team</class>
@@ -39,10 +42,26 @@
 	    <class>cl.magal.asistencia.entities.converter.ToolStatusConverter</class>
 	    <class>cl.magal.asistencia.entities.converter.UserStatusConverter</class>
 	    <class>cl.magal.asistencia.entities.converter.LoanStatusConverter</class>
+	    <!-- HIBERNATE PROPERTY  -->
+	    <!-- 
 	    <properties>
 	        <property name="hibernate.dialect" value="org.hibernate.dialect.H2Dialect"/>
-	        <property name="hibernate.hbm2ddl.auto" value="create-drop"/>
-	        <property name="hibernate.show_sql" value="false"/>
+	        <property name="hibernate.hbm2ddl.auto" value="update"/>
+	        <property name="hibernate.show_sql" value="true"/>
 	    </properties>
+	     -->
+	    <!-- ECLIPSELINK PROPERTY  -->
+	    <properties>
+			 	        
+	        <!--
+	        <property name="eclipselink.ddl-generation" value="create-or-extend-tables"/>
+            <property name="eclipselink.logging.level" value="FINE"/>
+            <property name="eclipselink.logging.level.sql" value="FINE"/>
+            <property name="eclipselink.logging.parameters" value="true"/>
+             -->
+            <property name="eclipselink.logging.level" value="OFF"/>
+            <property name="eclipselink.logging.level.sql" value="OFF"/>
+            <property name="eclipselink.logging.parameters" value="false"/>
+        </properties>
 	</persistence-unit>
 </persistence>

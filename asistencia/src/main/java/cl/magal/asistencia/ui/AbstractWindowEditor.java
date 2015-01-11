@@ -5,6 +5,8 @@ import java.lang.reflect.Method;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.DuplicateKeyException;
+import org.springframework.transaction.TransactionSystemException;
 
 import com.vaadin.data.Item;
 import com.vaadin.data.Validator.EmptyValueException;
@@ -39,23 +41,39 @@ public abstract class AbstractWindowEditor extends Window implements ClickListen
 	/**
 	 * ITEM
 	 */
-	private BeanItem item;
-	protected BeanItem getItem(){
+	private BeanItem<?> item;
+	protected BeanItem<?> getItem(){
 		return item;
 	}
 	
 	private VerticalLayout root = new VerticalLayout();
 	private Button btnGuardar,btnCancelar;
 	
+	public Button getBtnGuardar() {
+		return btnGuardar;
+	}
+
+	public void setBtnGuardar(Button btnGuardar) {
+		this.btnGuardar = btnGuardar;
+	}
+
+	public Button getBtnCancelar() {
+		return btnCancelar;
+	}
+
+	public void setBtnCancelar(Button btnCancelar) {
+		this.btnCancelar = btnCancelar;
+	}
+
 	/**
 	 * BINDER
 	 */
-	private BeanFieldGroup binder;
-	protected BeanFieldGroup getBinder(){
+	private BeanFieldGroup<?> binder;
+	protected BeanFieldGroup<?> getBinder(){
 		return binder;
 	}
 	
-	protected AbstractWindowEditor(BeanItem item) {
+	protected AbstractWindowEditor(BeanItem<?> item) {
 		if(item == null )
 			throw new RuntimeException("Error al crear el dialgo, el item no puede ser nulo.");
 		this.item = item;
@@ -71,6 +89,7 @@ public abstract class AbstractWindowEditor extends Window implements ClickListen
 		footer.setSpacing(true);
 		
 		root.setMargin(true);
+		setWidth("70%");
 				
 		btnGuardar = new Button("Guardar", this);
 		btnGuardar.addStyleName("default");
@@ -119,7 +138,8 @@ public abstract class AbstractWindowEditor extends Window implements ClickListen
 	protected Field<?> buildAndBind(String caption, Object propertyId) {		
 		//si la propiedad no existe como tal, intenta agregar la propiedad nested
 		addNestedPropertyIfNeeded(propertyId);
-		return getBinder().buildAndBind(caption, propertyId);
+		Field<?> field = getBinder().buildAndBind(caption, propertyId);
+		return field;
 	}
 	
 	/**
@@ -144,40 +164,73 @@ public abstract class AbstractWindowEditor extends Window implements ClickListen
 	@Override
 	public void buttonClick(ClickEvent event) {
 		if (event.getButton() == btnGuardar) {
-			if(!getBinder().isValid()){
-				Notification.show("Falta parámetro obligatorio");
-				return;
-			}
+//			if(!getBinder().isValid()){
+//				Notification.show("Falta parámetro obligatorio");
+//				getBinder().
+//				return;
+//			}
 			try {
-				preCommit();
+				if(!preCommit())
+					return;
 				getBinder().commit();
-				postCommit();
+				
+				if(!postCommit())
+					return;
+				
 				fireEvent(new EditorSavedEvent(this, item));
 			} catch (EmptyValueException e){
 				Notification.show("Falta un campo requerido",Type.HUMANIZED_MESSAGE);
 				logger.error("EmptyValueException",e);
 				return;
 			} catch (CommitException e) {
-				Notification.show("Debe ingresar todos los elementos requeridos",Type.HUMANIZED_MESSAGE);
+				Notification.show("Existen valores inválidos",Type.ERROR_MESSAGE);
 				logger.error("CommitException",e);
 				for (Component c: root){
 					try{ ((AbstractField)c).setValidationVisible(true); }catch(Exception e1){}
 				}
 				return;
+			} catch (com.vaadin.event.ListenerMethod.MethodException e){
+				logger.error("Exception {}",e);
+				//obtiene la transaction.TransactionSystemException
+				TransactionSystemException e1 = (TransactionSystemException) e.getCause();
+    			if(e1.getMessage().contains("Violación de indice de Unicidad ó Clave primaria")){
+    				if(e1.getMessage().contains("LABORER(RUT)"))
+    					Notification.show("El rut ya existe en la base.",Type.ERROR_MESSAGE);
+    				else
+    					throw new DuplicateKeyException("Clave duplicada",e1);
+    			}
+    			return;
+			} catch(Exception e){
+				logger.error("Exception {}",e);
+    			Notification.show("Error al validar los datos:", Type.ERROR_MESSAGE);
+				return ;
 			}
 			
 		} else if (event.getButton() == btnCancelar) {
+			if(!preDiscard())
+				return;
 			getBinder().discard();
+			
+			if(!postDiscard())
+				return;
 		}
 		close();
 	}
 	
-	protected void preCommit(){
-		
+	protected boolean postDiscard() {
+		return true;
+	}
+
+	protected boolean preDiscard() {
+		return true;
+	}
+
+	protected boolean preCommit(){
+		return true;
 	}
 	
-	protected void postCommit(){
-		
+	protected boolean postCommit(){
+		return true;
 	}
 	
 	/**
