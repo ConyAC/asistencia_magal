@@ -26,6 +26,7 @@ import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Notification.Type;
+import com.vaadin.ui.Panel;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
 
@@ -89,7 +90,9 @@ public abstract class AbstractWindowEditor extends Window implements ClickListen
 		footer.setSpacing(true);
 		
 		root.setMargin(true);
+		root.setSizeFull();
 		setWidth("70%");
+		setHeight("60%");
 				
 		btnGuardar = new Button("Guardar", this);
 		btnGuardar.addStyleName("default");
@@ -105,6 +108,7 @@ public abstract class AbstractWindowEditor extends Window implements ClickListen
 		root.addComponent(footer);
 		root.setComponentAlignment(footer, Alignment.MIDDLE_RIGHT);
 		
+//		setContent(new Panel(root));
 		setContent(root);
 //		setWindowContent(createBody());
 	}

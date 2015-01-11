@@ -57,6 +57,7 @@ import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Notification.Type;
+import com.vaadin.ui.Panel;
 import com.vaadin.ui.TabSheet;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.TextField;
@@ -105,6 +106,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 	protected Component createBody() {
 
 		TabSheet tab = new TabSheet();
+		tab.setSizeFull();
 
 		//tab de Resumen
 		//tab.addTab(drawInfo(),"Resumen"); -> no cuando se está creando.
@@ -252,7 +254,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 		GridLayout gl = new GridLayout(2,10);
 		gl.setSpacing(true);
 		gl.setMargin(true);
-		gl.setSizeFull();
+		gl.setWidth("100%");
 
 		int fila = 0, columna = 0;
 		gl.addComponent(new Label("<h1>Contrato</h1>",ContentMode.HTML),columna++,fila);
@@ -405,7 +407,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 		Table table = new Table(null,beanContainerAnnexeds){
 			{
 				setWidth("100%");
-				setHeight("200px");
+//				setHeight("200px");
 				
 			}
 		};
