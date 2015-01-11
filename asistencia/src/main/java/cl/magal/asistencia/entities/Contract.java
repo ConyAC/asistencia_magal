@@ -11,6 +11,7 @@ import java.util.Date;
 import java.util.List;
 
 import javax.persistence.Basic;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
@@ -90,7 +91,7 @@ public class Contract implements Serializable {
     @JoinColumn(name="LABORER_CONSTRUCTIONSITEID")
 	LaborerConstructionsite laborerConstructionSite;
     
-    @OneToMany(mappedBy="contract",fetch=FetchType.LAZY,orphanRemoval=true )
+    @OneToMany(mappedBy="contract",fetch=FetchType.LAZY,cascade={CascadeType.PERSIST,CascadeType.MERGE},orphanRemoval=true )
     List<Annexed> annexeds = new ArrayList<Annexed>();
 
     public Contract() {

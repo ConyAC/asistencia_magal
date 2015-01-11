@@ -57,7 +57,6 @@ import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Notification.Type;
-import com.vaadin.ui.Panel;
 import com.vaadin.ui.TabSheet;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.TextField;
@@ -385,6 +384,8 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 		gl.addComponent(new Label("<hr />",ContentMode.HTML),columna++,fila,columna--,fila++);
 
 		final BeanItemContainer<Annexed> beanContainerAnnexeds = new BeanItemContainer<Annexed>(Annexed.class); 
+		beanContainerAnnexeds.addAll((Collection<? extends Annexed>) beanItemContract.getItemProperty("annexeds").getValue());
+		
 		gl.addComponent(new Label("<h1>Anexos</h1>",ContentMode.HTML),columna++,fila);
 		gl.addComponent( new HorizontalLayout(){
 			{
@@ -404,14 +405,14 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 		},columna--,fila++);
 		
 
-		Table table = new Table(null,beanContainerAnnexeds){
+		Table annexedTable = new Table(null,beanContainerAnnexeds){
 			{
 				setWidth("100%");
 //				setHeight("200px");
 				
 			}
 		};
-		table.addGeneratedColumn("print", new Table.ColumnGenerator() {
+		annexedTable.addGeneratedColumn("print", new Table.ColumnGenerator() {
 			
 			@Override
 			public Object generateCell(Table source, final Object itemId, Object columnId) {
@@ -431,7 +432,6 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 						StreamResource.StreamSource source2 = new StreamResource.StreamSource() {
 
 							public InputStream getStream() {
-								//throw new UnsupportedOperationException("Not supported yet.");
 								return new ByteArrayInputStream(body.getBytes());
 							}
 						};
@@ -459,7 +459,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 			}
 		});
 		
-		gl.addComponent(table,columna++,fila,columna--,fila++);
+		gl.addComponent(annexedTable,columna++,fila,columna--,fila++);
 		return gl;
 	}
 
@@ -511,7 +511,6 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 					{
 						setWidth("100%");
 						addComponent(new Label(""),0,0);
-
 						addComponent(new Label(""),0,1);
 
 						addComponent(new Button(null,new Button.ClickListener() {
