@@ -156,27 +156,21 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 		GridLayout gl = new GridLayout(2,10);
 		gl.setSpacing(true);
 		gl.setMargin(true);
-		gl.setSizeFull();
-
-		// Find the application directory
-		String basepath = VaadinService.getCurrent().getBaseDirectory().getAbsolutePath();
-		// Image as a file resource
-		FileResource resource = new FileResource(new File(basepath + "/WEB-INF/images/" + getItem().getItemProperty("laborer.photo").getValue()));
-
-		// Show the image in the application
-		HorizontalLayout t = new HorizontalLayout();
-		t.setWidth("100%");
-		t.setSpacing(true);		
-		gl.addComponent(t);
-		
-		Embedded image = new Embedded("", resource);
-		image.setWidth("350");
-		image.setHeight("400");
-		t.addComponent(image);       
-		t.setComponentAlignment(image, Alignment.TOP_LEFT);
+		gl.setWidth("100%");
 		
 		gl.addComponent( new HorizontalLayout(){
 			{
+				// Find the application directory
+				String basepath = VaadinService.getCurrent().getBaseDirectory().getAbsolutePath();
+				// Image as a file resource
+				FileResource resource = new FileResource(new File(basepath + "/WEB-INF/images/" + getItem().getItemProperty("laborer.photo").getValue()));
+
+				Embedded image = new Embedded("", resource);
+				image.setWidth("350");
+				image.setHeight("400");
+				addComponent(image);       
+				setComponentAlignment(image, Alignment.TOP_LEFT);
+				
 				setSpacing(true);
 
 				Button btnPrint = new Button(null,new Button.ClickListener() {
@@ -234,7 +228,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 				});		
 				addComponent(acceptObrero);
 			}
-		});
+		},0,0,1,0);
 
 		//if(getItem().getItemProperty("laborer.photo") != null)
 			//gl.addComponent(new Label("Fecha de Admisión"));gl.addComponent(new Label(getItem().getItemProperty("laborer.photo")));
@@ -257,11 +251,11 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 		VerticalLayout vl = new VerticalLayout();
 		vl.setSpacing(true);
 		vl.setMargin(true);
-		vl.setSizeFull();
+		vl.setWidth("100%");
 
 		/********** Herramientas **********/
 		VerticalLayout vh = new VerticalLayout();
-		vh.setSizeFull();
+		vh.setWidth("100%");
 
 		HorizontalLayout hl = new HorizontalLayout();
 		hl.setWidth("100%");

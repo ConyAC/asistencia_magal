@@ -523,8 +523,7 @@ public class LaborerAndTeamPanel extends Panel implements View {
 			}
 		});
 
-		//agrega solo si tiene los permisos
-		if( SecurityHelper.hastPermission(Permission.CREAR_OBRERO)){
+		//agrega solo si tiene los permisos //siempre se debe crear pues solo se deshabilita si no se tiene permiso
 		btnAdd = new Button(null,FontAwesome.PLUS);
 		hl.addComponent(btnAdd);
 		hl.setComponentAlignment(btnAdd, Alignment.TOP_RIGHT);
@@ -576,7 +575,6 @@ public class LaborerAndTeamPanel extends Panel implements View {
 
 		btnAdd.addShortcutListener(enter);
 
-		}
 		final FilterTable table =  new FilterTable();
 
 		table.addGeneratedColumn("actions", new CustomTable.ColumnGenerator() {
@@ -943,7 +941,7 @@ public class LaborerAndTeamPanel extends Panel implements View {
 			if( editConstructionSite != null )
 				editConstructionSite.setEnabled(true);
 			btnPrint.setEnabled(true);
-			btnAdd.setEnabled(true);;
+			btnAdd.setEnabled(true);
 		}else{
 			if( editConstructionSite != null )
 				editConstructionSite.setEnabled(false);

@@ -56,7 +56,7 @@ public class AddLaborerContractDialog extends AbstractWindowEditor implements Ne
 	public void init(){
 		
 		setWidth("50%");
-		setHeight("30%");
+		setHeight("300px");
 		
 		if(addLaborer)
 			laborers.addAll( laborerService.getAllLaborerExceptThisConstruction(((BeanItem<LaborerConstructionsite>)getItem()).getBean().getConstructionsite()));

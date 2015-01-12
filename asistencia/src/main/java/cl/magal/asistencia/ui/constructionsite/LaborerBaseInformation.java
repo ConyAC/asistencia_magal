@@ -61,7 +61,7 @@ public class LaborerBaseInformation extends VerticalLayout {
 	private void init(){
 		setSpacing(true);
 		setMargin(true);
-		setSizeFull();
+		setWidth("100%");
 
 		GridLayout detalleObrero = new GridLayout(3,5);
 		detalleObrero.setMargin(true);
