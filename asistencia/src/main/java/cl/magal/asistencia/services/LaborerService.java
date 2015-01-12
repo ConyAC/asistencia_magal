@@ -24,6 +24,7 @@ import cl.magal.asistencia.repositories.ConstructionSiteRepository;
 import cl.magal.asistencia.repositories.ContractRepository;
 import cl.magal.asistencia.repositories.LaborerConstructionsiteRepository;
 import cl.magal.asistencia.repositories.LaborerRepository;
+import cl.magal.asistencia.repositories.LoanRepository;
 import cl.magal.asistencia.repositories.ToolRepository;
 import cl.magal.asistencia.repositories.VacationRepository;
 import cl.magal.asistencia.ui.workerfile.vo.HistoryVO;
@@ -50,6 +51,8 @@ public class LaborerService {
 	ToolRepository toolRepo;
 	@Autowired
 	ContractRepository contractRepo;
+	@Autowired
+	LoanRepository loanRepo; 
 	
 	public Laborer saveLaborer(Laborer l) {
 		Laborer laborer = laborerRepo.save(l);

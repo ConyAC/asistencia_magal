@@ -523,6 +523,8 @@ public class LaborerAndTeamPanel extends Panel implements View {
 			}
 		});
 
+		//agrega solo si tiene los permisos
+		if( SecurityHelper.hastPermission(Permission.CREAR_OBRERO)){
 		btnAdd = new Button(null,FontAwesome.PLUS);
 		hl.addComponent(btnAdd);
 		hl.setComponentAlignment(btnAdd, Alignment.TOP_RIGHT);
@@ -574,6 +576,7 @@ public class LaborerAndTeamPanel extends Panel implements View {
 
 		btnAdd.addShortcutListener(enter);
 
+		}
 		final FilterTable table =  new FilterTable();
 
 		table.addGeneratedColumn("actions", new CustomTable.ColumnGenerator() {

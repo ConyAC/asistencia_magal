@@ -7,3 +7,4 @@ import cl.magal.asistencia.entities.Tool;
 public interface ToolRepository extends PagingAndSortingRepository<Tool, Long> {
 
 }
+

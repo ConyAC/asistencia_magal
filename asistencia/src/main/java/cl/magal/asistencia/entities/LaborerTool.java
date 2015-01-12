@@ -32,7 +32,7 @@ public class LaborerTool implements Serializable {
     private Integer laborerId;
     @Basic(optional = false)
     @Column(name = "toolId")
-    private int toolId;
+    private Long toolId;
 
     public LaborerTool() {
     }
@@ -41,7 +41,7 @@ public class LaborerTool implements Serializable {
         this.laborerId = laborerId;
     }
 
-    public LaborerTool(Integer laborerId, int toolId) {
+    public LaborerTool(Integer laborerId, Long toolId) {
         this.laborerId = laborerId;
         this.toolId = toolId;
     }
@@ -54,11 +54,11 @@ public class LaborerTool implements Serializable {
         this.laborerId = laborerId;
     }
 
-    public int getToolId() {
+    public Long getToolId() {
         return toolId;
     }
 
-    public void setToolId(int toolId) {
+    public void setToolId(Long toolId) {
         this.toolId = toolId;
     }
 

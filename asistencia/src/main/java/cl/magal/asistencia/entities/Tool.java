@@ -43,8 +43,11 @@ import cl.magal.asistencia.entities.enums.ToolStatus;
     @NamedQuery(name = "Tool.findByDateBuy", query = "SELECT t FROM Tool t WHERE t.dateBuy = :dateBuy"),
     @NamedQuery(name = "Tool.findByFee", query = "SELECT t FROM Tool t WHERE t.fee = :fee")})
 public class Tool implements Serializable {
-    private static final long serialVersionUID = 1L;
-    @Id
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = -2293674300761217662L;
+	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
     @Column(name = "toolId")
@@ -53,7 +56,7 @@ public class Tool implements Serializable {
     @Column(name = "name")
     private String name;
     @Column(name = "price")
-    @Max(value=50000)
+    @Max(value=500000)
     private Integer price;
     @Basic(optional = false)
     @Column(name = "dateBuy")
@@ -64,7 +67,7 @@ public class Tool implements Serializable {
     @Convert(converter = ToolStatusConverter.class)
     @Column(name = "status",nullable=false)
     @NotNull
-    private ToolStatus status = ToolStatus.OPERATIONAL;
+    private ToolStatus status = ToolStatus.EN_DEUDA;
     @ManyToOne
 	@JoinColumn(name="LABORER_CONSTRUCTIONSITEID")
 	LaborerConstructionsite laborerConstructionSite;
@@ -72,7 +75,7 @@ public class Tool implements Serializable {
     @PrePersist
     void preInsert() {
        if(status == null)
-    	   status = ToolStatus.OPERATIONAL;
+    	   status = ToolStatus.EN_DEUDA;
     }
     
     public Tool() {
@@ -87,7 +90,7 @@ public class Tool implements Serializable {
         this.name = name;
         this.dateBuy = dateBuy;
     }
-
+    
     public Long getToolId() {
 		return toolId;
 	}
@@ -134,8 +137,8 @@ public class Tool implements Serializable {
 
 	public void setStatus(ToolStatus status) {
 		this.status = status;
-	}
-
+	}	
+	
 	public LaborerConstructionsite getLaborerConstructionSite() {
 		return laborerConstructionSite;
 	}
@@ -145,25 +148,25 @@ public class Tool implements Serializable {
 		this.laborerConstructionSite = laborerConstructionSite;
 	}
 
-	@Override
-    public int hashCode() {
-        int hash = 0;
-        hash += (toolId != null ? toolId.hashCode() : 0);
-        return hash;
-    }
-
-    @Override
-    public boolean equals(Object object) {
-        // TODO: Warning - this method won't work in the case the id fields are not set
-        if (!(object instanceof Tool)) {
-            return false;
-        }
-        Tool other = (Tool) object;
-        if ((this.toolId == null && other.toolId != null) || (this.toolId != null && !this.toolId.equals(other.toolId))) {
-            return false;
-        }
-        return true;
-    }
+//	@Override
+//    public int hashCode() {
+//        int hash = 0;
+//        hash += (toolId != null ? toolId.hashCode() : 0);
+//        return hash;
+//    }
+//
+//    @Override
+//    public boolean equals(Object object) {
+//        // TODO: Warning - this method won't work in the case the id fields are not set
+//        if (!(object instanceof Tool)) {
+//            return false;
+//        }
+//        Tool other = (Tool) object;
+//        if ((this.toolId == null && other.toolId != null) || (this.toolId != null && !this.toolId.equals(other.toolId))) {
+//            return false;
+//        }
+//        return true;
+//    }
 
     @Override
     public String toString() {

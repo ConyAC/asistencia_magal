@@ -1,13 +1,13 @@
 package cl.magal.asistencia.entities.enums;
 
-public enum ToolStatus {
-	PAGADA(1,"Pagada"),
-	EN_DEUDA(2,"En deuda");
-
+public enum LoanStatus {
+	ACTIVE(1,"Activa"),
+	INACTIVE(2,"Inactiva");
+	
 	int i;
 	String description;
 	
-	private ToolStatus(int i,String description) {
+	private LoanStatus(int i, String description) {
 		this.i = i;
 		this.description = description;
 	}
@@ -16,11 +16,11 @@ public enum ToolStatus {
 		return i;
 	}
 	
-	public static ToolStatus getToolStatus(int i){
-		for(ToolStatus e : ToolStatus.values())
+	public static LoanStatus getLoanStatus(int i){
+		for(LoanStatus e : LoanStatus.values())
 			if(e.getCorrelative() == i )
 				return e;
-		throw new RuntimeException("invalid Tool Status");
+		throw new RuntimeException("invalid Loan Status");
 	}
 	
 	@Override

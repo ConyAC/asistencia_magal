@@ -22,6 +22,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 import cl.magal.asistencia.entities.enums.Job;
@@ -71,6 +72,19 @@ public class LaborerConstructionsite implements Serializable {
     @Column(name="reward")
     private int reward;
     
+    /**
+     * Bloqueo de un obrero en determinada obra
+     */
+    @Column(name = "block")
+    private boolean block;
+    
+    @JoinColumn(name="personBlockId")
+    @OneToOne
+    User personBlock;
+    
+    @Column(name = "comment")
+    private String comment;
+    
     @OneToMany(mappedBy="laborerConstructionSite",fetch=FetchType.LAZY,cascade={CascadeType.PERSIST,CascadeType.MERGE},orphanRemoval=true )
     List<Vacation> vacations = new ArrayList<Vacation>();
     
@@ -80,11 +94,14 @@ public class LaborerConstructionsite implements Serializable {
     @OneToMany(mappedBy="laborerConstructionSite",fetch=FetchType.LAZY,cascade={CascadeType.PERSIST,CascadeType.MERGE},orphanRemoval=true )
     List<Accident> accidents = new ArrayList<Accident>();
     
-    @OneToMany(mappedBy="laborerConstructionSite",fetch=FetchType.LAZY,cascade={CascadeType.PERSIST,CascadeType.MERGE},orphanRemoval=true )
+    @OneToMany(mappedBy="laborerConstructionSite",fetch=FetchType.EAGER,cascade={CascadeType.PERSIST,CascadeType.MERGE},orphanRemoval=true )
     List<Tool> tool = new ArrayList<Tool>();
     
     @OneToMany(mappedBy="laborerConstructionSite",fetch=FetchType.LAZY,cascade={CascadeType.PERSIST,CascadeType.MERGE},orphanRemoval=true )
     List<Contract> contracts = new ArrayList<Contract>();
+    
+    @OneToMany(mappedBy="laborerConstructionSite",fetch=FetchType.EAGER,cascade = { CascadeType.PERSIST, CascadeType.MERGE },orphanRemoval=true )
+    List<Loan> loan = new ArrayList<Loan>();
    
     /**
      * Define la etapa para la cual está contratado el trabajador actual
@@ -140,6 +157,13 @@ public class LaborerConstructionsite implements Serializable {
 	public void setTool(List<Tool> tool) {
 		this.tool = tool;
 	}
+	
+	public void addTool(Tool tool) {
+        if (!getTool().contains(tool)) {
+        	getTool().add(tool);
+        	tool.setLaborerConstructionSite(this);
+        }
+    }
 	
 	public List<Absence> getAbsences() {
 		return absences;
@@ -301,6 +325,56 @@ public class LaborerConstructionsite implements Serializable {
 	public String getStep() {
 		return step;
 	}
+	
+	public List<Loan> getLoan() {
+		return loan;
+	}
+
+	public void setLoan(List<Loan> loan) {
+		this.loan = loan;
+	}
+
+	public void addLoan(Loan loan) {
+		if (!getLoan().contains(loan)) {
+        	getLoan().add(loan);
+        	loan.setLaborerConstructionSite(this);
+        }
+	}
+	
+	/**
+	 * 
+	 * @return
+	 */
+
+	public boolean isBlock() {
+		return block;
+	}
+
+
+	public void setBlock(boolean block) {
+		this.block = block;
+	}
+
+
+	public User getPersonBlock() {
+		return personBlock;
+	}
+
+
+	public void setPersonBlock(User personBlock) {
+		this.personBlock = personBlock;
+	}
+
+
+	public String getComment() {
+		return comment;
+	}
+
+
+	public void setComment(String comment) {
+		this.comment = comment;
+	}
+
 
 	@Override
     public String toString() {
