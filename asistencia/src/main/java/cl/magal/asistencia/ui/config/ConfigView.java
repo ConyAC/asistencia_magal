@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.annotation.PostConstruct;
 
+import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -577,23 +578,6 @@ public class ConfigView extends VerticalLayout implements View {
 						setSizeUndefined();
 						InlineDateField  mes = new InlineDateField("Mes");
 						mes.setResolution(Resolution.MONTH);
-						mes.addValueChangeListener(new Property.ValueChangeListener() {
-							
-							@Override
-							public void valueChange(ValueChangeEvent event) {
-								
-								//busca la configuración del mes
-								Date date = (Date)event.getProperty().getValue();
-								DateConfigurations config = confService.findDateConfigurationsByDate(date);
-								
-								if(config == null ){
-									config = new DateConfigurations();
-									config.setDate(date);
-								}
-								
-								fg.setItemDataSource(new BeanItem<DateConfigurations>(config));
-							}
-						});
 						
 						Property.ValueChangeListener listener = new Property.ValueChangeListener() {
 							
@@ -610,18 +594,50 @@ public class ConfigView extends VerticalLayout implements View {
 						};
 						addComponent(mes);
 //						fg.bind(mes, "date");
-						Field advance = fg.buildAndBind("Fecha Cierre Anticipo", "advance");
+						final DateField advance = (DateField) fg.buildAndBind("Fecha Cierre Anticipo", "advance");
 						advance.addValueChangeListener(listener);
 						addComponent(advance);
-						Field assistance = fg.buildAndBind("Fecha Cierre Asistencia", "assistance");
+						final DateField assistance = (DateField) fg.buildAndBind("Fecha Cierre Asistencia", "assistance");
 						assistance.addValueChangeListener(listener);
 						addComponent(assistance);
-						Field beginDeal = fg.buildAndBind("Fecha Inicio Trato", "beginDeal");
+						final DateField beginDeal = (DateField) fg.buildAndBind("Fecha Inicio Trato", "beginDeal");
 						beginDeal.addValueChangeListener(listener);
 						addComponent(beginDeal);
-						Field finishDeal = fg.buildAndBind("Fecha Fin Trato", "finishDeal");
+						final DateField finishDeal = (DateField) fg.buildAndBind("Fecha Fin Trato", "finishDeal");
 						finishDeal.addValueChangeListener(listener);
 						addComponent(finishDeal);
+						
+						mes.addValueChangeListener(new Property.ValueChangeListener() {
+							
+							@Override
+							public void valueChange(ValueChangeEvent event) {
+								
+								//busca la configuración del mes
+								Date date = (Date)event.getProperty().getValue();
+								DateConfigurations config = confService.findDateConfigurationsByDate(date);
+								
+								if(config == null ){
+									config = new DateConfigurations();
+									config.setDate(date);
+								}
+								
+								advance.setRangeStart(null);advance.setRangeEnd(null);
+								assistance.setRangeEnd(null);assistance.setRangeStart(null);
+								beginDeal.setRangeEnd(null);beginDeal.setRangeStart(null);
+								finishDeal.setRangeEnd(null);finishDeal.setRangeStart(null);
+								
+								fg.setItemDataSource(new BeanItem<DateConfigurations>(config));
+								
+								//calcula el inicio y final del mes
+								Date current = config.getDate();
+								Date endDate = new DateTime(current).dayOfMonth().withMaximumValue().toDate();
+								Date startDate = new DateTime(current).withDayOfMonth(1).toDate();
+								advance.setRangeStart(startDate);advance.setRangeEnd(endDate);
+								assistance.setRangeEnd(endDate);assistance.setRangeStart(startDate);
+								beginDeal.setRangeEnd(endDate);beginDeal.setRangeStart(startDate);
+								finishDeal.setRangeEnd(endDate);finishDeal.setRangeStart(startDate);
+							}
+						});
 					}
 				};
 				addComponent(form);
