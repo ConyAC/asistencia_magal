@@ -292,10 +292,9 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 
 					@Override
 					public void buttonClick(ClickEvent event) {
+						
 						final Map<String, Object> input = new HashMap<String, Object>();
-						input.put("constructionSite", ((LaborerConstructionsite)getItem().getBean()).getConstructionsite());
-						input.put("laborer", ((LaborerConstructionsite)getItem().getBean()).getLaborer());
-						input.put("contract", activeContract);
+						input.put("laborerConstructions", new LaborerConstructionsite[] {(LaborerConstructionsite)getItem().getBean()});
 						input.put("tools", new DateTool());
 						final String body = VelocityEngineUtils.mergeTemplateIntoString(velocityEngine, "templates/temporary_work_contract_doc.vm", "UTF-8", input);
 
@@ -313,6 +312,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 						window.setWidth("60%");
 						window.setHeight("60%");
 						window.center();
+						window.setModal(true);
 						BrowserFrame e = new BrowserFrame();
 						e.setSizeFull();
 
@@ -472,10 +472,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 					public void buttonClick(ClickEvent event) {
 
 						final Map<String, Object> input = new HashMap<String, Object>();
-						input.put("constructionSite", ((LaborerConstructionsite)getItem().getBean()).getConstructionsite());
-						input.put("laborer", ((LaborerConstructionsite)getItem().getBean()).getLaborer());
-						input.put("contract", ((LaborerConstructionsite)getItem().getBean()).getActiveContract());
-						input.put("annexed", (beanContainerAnnexeds.getItem(itemId).getBean()));
+						input.put("laborerConstructions", new LaborerConstructionsite[] {(LaborerConstructionsite)getItem().getBean()});
 						input.put("tools", new DateTool());
 						final String body = VelocityEngineUtils.mergeTemplateIntoString(velocityEngine, "templates/annex_contract_doc.vm", "UTF-8", input);
 
@@ -485,13 +482,14 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 								return new ByteArrayInputStream(body.getBytes());
 							}
 						};
-						StreamResource resource = new StreamResource(source2, "Contrato"+((LaborerConstructionsite)getItem().getBean()).getJobCode()+".html");
+						StreamResource resource = new StreamResource(source2, "Anexo"+((LaborerConstructionsite)getItem().getBean()).getJobCode()+".html");
 
 						Window window = new Window();
 						window.setResizable(true);
 						window.setWidth("60%");
 						window.setHeight("60%");
 						window.center();
+						window.setModal(true);
 						BrowserFrame e = new BrowserFrame();
 						e.setSizeFull();
 
@@ -821,8 +819,8 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 							public void buttonClick(ClickEvent event) {
 
 								final Map<String, Object> input = new HashMap<String, Object>();
-								input.put("constructionSite", ((LaborerConstructionsite)getItem().getBean()).getConstructionsite());
-								input.put("laborer", ((LaborerConstructionsite)getItem().getBean()).getLaborer());
+								input.put("laborerConstructions", new LaborerConstructionsite[] {(LaborerConstructionsite)getItem().getBean()});
+								input.put("tools", new DateTool());
 								final String body = VelocityEngineUtils.mergeTemplateIntoString(velocityEngine, "templates/vacation_doc.vm", "UTF-8", input);
 
 								StreamResource.StreamSource source2 = new StreamResource.StreamSource() {

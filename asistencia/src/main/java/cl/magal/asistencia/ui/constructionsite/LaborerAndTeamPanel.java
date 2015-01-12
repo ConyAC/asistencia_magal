@@ -1,13 +1,20 @@
 package cl.magal.asistencia.ui.constructionsite;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import javax.annotation.PostConstruct;
 import javax.validation.ConstraintViolationException;
 
 import org.apache.velocity.app.VelocityEngine;
+import org.apache.velocity.tools.generic.DateTool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +23,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionSystemException;
+import org.springframework.ui.velocity.VelocityEngineUtils;
 import org.tepi.filtertable.FilterTable;
 
 import cl.magal.asistencia.entities.ConstructionSite;
@@ -39,6 +47,7 @@ import com.vaadin.data.fieldgroup.BeanFieldGroup;
 import com.vaadin.data.fieldgroup.FieldGroup.CommitException;
 import com.vaadin.data.util.BeanItem;
 import com.vaadin.data.util.BeanItemContainer;
+import com.vaadin.data.util.ObjectProperty;
 import com.vaadin.event.ItemClickEvent;
 import com.vaadin.event.ItemClickEvent.ItemClickListener;
 import com.vaadin.event.ShortcutAction.KeyCode;
@@ -47,8 +56,10 @@ import com.vaadin.event.ShortcutListener;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.FontAwesome;
+import com.vaadin.server.StreamResource;
 import com.vaadin.ui.AbstractSelect.ItemCaptionMode;
 import com.vaadin.ui.Alignment;
+import com.vaadin.ui.BrowserFrame;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.CheckBox;
@@ -78,23 +89,23 @@ public class LaborerAndTeamPanel extends Panel implements View {
 	private static final long serialVersionUID = -3552532103677168457L;
 
 	transient Logger logger = LoggerFactory.getLogger(LaborerAndTeamPanel.class);
-	
+
 	protected Button editConstructionSite,btnPrint,btnAdd;
-	
+
 	/** CONTAINERS **/
 	BeanItemContainer<User> userContainer = new BeanItemContainer<User>(User.class);
 	BeanItemContainer<Team> teamContainer = new BeanItemContainer<Team>(Team.class);
 	BeanItemContainer<LaborerConstructionsite> laborerContainer = new BeanItemContainer<LaborerConstructionsite>(LaborerConstructionsite.class);
-	
+
 	BeanItem<ConstructionSite> item;
-	
+
 	/** FIELD GROUP **/
 	BeanFieldGroup<ConstructionSite> bfg = new BeanFieldGroup<ConstructionSite>(ConstructionSite.class);
 	/** LAYOUTS **/
 	VerticalLayout detalleLayout;
 	HorizontalLayout detailLayout;
 	private TwinColSelect tcsLaborer;
-	
+
 	/** SERVICES **/
 	@Autowired
 	transient UserService userService;
@@ -106,9 +117,9 @@ public class LaborerAndTeamPanel extends Panel implements View {
 	transient LaborerService laborerService;
 	@Autowired
 	transient private VelocityEngine velocityEngine;
-	
+
 	Button asistenciaBtn;
-	
+
 	boolean hasConstructionDetails;
 
 	public void setHasAttendanceButton(boolean hasAttendanceButton) {
@@ -133,7 +144,7 @@ public class LaborerAndTeamPanel extends Panel implements View {
 		//crea el tab con trabajadores y cuadrillas
 		TabSheet tab = new TabSheet();
 		tab.setSizeFull();
-		
+
 		//tab de trabajadores
 		tab.addTab(drawLaborer(),"Trabajadores");
 
@@ -142,20 +153,20 @@ public class LaborerAndTeamPanel extends Panel implements View {
 		//rellena el panel de la información de obra
 		setContent(tab);
 	}
-	
-	
+
+
 	@Override
 	public void enter(ViewChangeEvent event) {
 		Page<User> users = userService.findAllActiveUser(new PageRequest(0, 20));
 		userContainer.removeAllItems();
 		userContainer.addAll(users.getContent());
 	}
-	
+
 	@PostConstruct
 	public void init(){
-		
+
 	}
-	
+
 	protected VerticalLayout drawContructionDetail() {
 		detalleLayout = new VerticalLayout(); 
 		detalleLayout.setSizeFull();
@@ -180,7 +191,7 @@ public class LaborerAndTeamPanel extends Panel implements View {
 
 		return detalleLayout;
 	}
-	
+
 	protected HorizontalLayout drawTopDetails() {
 
 		HorizontalLayout hl = new HorizontalLayout();
@@ -203,11 +214,11 @@ public class LaborerAndTeamPanel extends Panel implements View {
 			bfg.bind(nameField, "name");
 
 			vlInfo.addComponent(nameField);
-			
+
 			if(SecurityHelper.hastPermission(Permission.EDITAR_OBRA) ){
 				//agrega un boton que hace el commit
 				editConstructionSite = new Button(null,new Button.ClickListener() {
-	
+
 					@Override
 					public void buttonClick(ClickEvent event) {
 						try {
@@ -217,7 +228,7 @@ public class LaborerAndTeamPanel extends Panel implements View {
 							logger.error("Error al guardar la información la obra",e);
 							Notification.show("Error al guardar la información del usuario", Type.ERROR_MESSAGE);
 						}
-	
+
 					}
 				}){{
 					setIcon(FontAwesome.SAVE);
@@ -267,7 +278,7 @@ public class LaborerAndTeamPanel extends Panel implements View {
 
 			@Override
 			public void buttonClick(ClickEvent event) {
-//				switchPanels();
+				//				switchPanels();
 				asistencia.setEnabled(true);
 			}
 		});
@@ -275,9 +286,9 @@ public class LaborerAndTeamPanel extends Panel implements View {
 
 		asistencia.setSizeFull();
 		vlIBotones.addComponent(asistencia);
-//		Button vacaciones = new Button("Carga Masiva Vacaciones",FontAwesome.UPLOAD);
-//		vacaciones.setSizeFull();
-//		vlIBotones.addComponent(vacaciones);
+		//		Button vacaciones = new Button("Carga Masiva Vacaciones",FontAwesome.UPLOAD);
+		//		vacaciones.setSizeFull();
+		//		vlIBotones.addComponent(vacaciones);
 
 		Button configuraciones = new Button("Configuraciones Obra",FontAwesome.GEARS);
 		configuraciones.setSizeFull();
@@ -286,7 +297,7 @@ public class LaborerAndTeamPanel extends Panel implements View {
 
 		return hl;
 	}
-	
+
 	protected VerticalLayout drawCuadrillas() {
 		VerticalLayout vl = new VerticalLayout();
 		vl.setSizeFull();
@@ -318,28 +329,28 @@ public class LaborerAndTeamPanel extends Panel implements View {
 
 			}
 		});
-		
+
 		FilterTable table =  new FilterTable(){
 
 			@Override
-            protected String formatPropertyValue(Object rowId, Object colId,
-            		Property<?> property) {
-                Object v = property.getValue();
-                if (v instanceof Date) {
-                    Date dateValue = (Date) v;
-                    SimpleDateFormat sdf = new SimpleDateFormat("dd MMM yyyy");
-                    return sdf.format(dateValue);
-                }
-                return super.formatPropertyValue(rowId, colId, property);
-            }
+			protected String formatPropertyValue(Object rowId, Object colId,
+					Property<?> property) {
+				Object v = property.getValue();
+				if (v instanceof Date) {
+					Date dateValue = (Date) v;
+					SimpleDateFormat sdf = new SimpleDateFormat("dd MMM yyyy");
+					return sdf.format(dateValue);
+				}
+				return super.formatPropertyValue(rowId, colId, property);
+			}
 		};
-		
+
 		table.setContainerDataSource(teamContainer);
 		table.setSizeFull();
 		table.setFilterBarVisible(true);
 		table.setVisibleColumns("name","leader.firstname","date","status");
 		table.setColumnHeaders("Nombre","Responsable","Fecha","Estado");
-		
+
 		table.setSelectable(true);
 
 		vl.addComponent(table);
@@ -347,15 +358,20 @@ public class LaborerAndTeamPanel extends Panel implements View {
 
 		return vl;
 	}
-	
+
 	protected VerticalLayout test1() {
 		return null;
 	}
-	
+
 	protected VerticalLayout test2() {
 		return null;
 	}
-	
+
+	/**
+	 * Lista de trabajadores seleccionados
+	 */
+	final Set<Object> selectedItemIds = new HashSet<Object>();
+
 	protected VerticalLayout drawLaborer() {
 
 		VerticalLayout vl = new VerticalLayout();
@@ -367,13 +383,13 @@ public class LaborerAndTeamPanel extends Panel implements View {
 		HorizontalLayout hl = new HorizontalLayout();
 		hl.setWidth("100%");
 		hl.setSpacing(true);
-		
+
 		asistenciaBtn = new Button("Asistencia",FontAwesome.CHECK);
 		asistenciaBtn.addClickListener(new Button.ClickListener() {
 
 			@Override
 			public void buttonClick(ClickEvent event) {
-//				switchPanels();
+				//				switchPanels();
 				asistenciaBtn.setEnabled(true);
 			}
 		});
@@ -383,7 +399,7 @@ public class LaborerAndTeamPanel extends Panel implements View {
 		hl.addComponent(asistenciaBtn);
 		hl.setComponentAlignment(asistenciaBtn, Alignment.TOP_CENTER);
 		hl.setExpandRatio(asistenciaBtn, 1.0F);
-		
+
 		vl.addComponent(hl);
 
 		btnPrint = new Button(null,FontAwesome.PRINT);
@@ -394,7 +410,115 @@ public class LaborerAndTeamPanel extends Panel implements View {
 
 			@Override
 			public void buttonClick(ClickEvent event) {
-				Notification.show("Imprimiendo");
+				if(selectedItemIds.isEmpty()){
+					Notification.show("Para imprimir masivamente, primero debe seleccionar uno más trabajadores");
+					return;
+				}
+				
+				final ObjectProperty contracts = new ObjectProperty(false, Boolean.class);
+				final ObjectProperty vacations = new ObjectProperty(false, Boolean.class);
+				final ObjectProperty anexxeds = new ObjectProperty(false, Boolean.class);
+				
+				final Window w = new Window("Impresión masiva");
+				w.center();
+				w.setModal(true);
+				
+				w.setContent(new HorizontalLayout(){
+					{
+						setSpacing(true);
+						setMargin(true);
+						addComponent(new CheckBox("Contrato"){{setPropertyDataSource(contracts);}});
+						addComponent(new CheckBox("Anexos"){{setPropertyDataSource(anexxeds);}});
+						addComponent(new CheckBox("Últimas Vacaciones"){{setPropertyDataSource(vacations);}});
+						
+						addComponent(new Button(null,new Button.ClickListener() {
+							
+							@Override
+							public void buttonClick(ClickEvent event) {
+								
+								final Map<String, Object> input = new HashMap<String, Object>();
+								input.put("laborerConstructions", selectedItemIds);
+								input.put("tools", new DateTool());
+								
+								final StringBuilder sb = new StringBuilder();
+								if((Boolean) contracts.getValue()){
+									sb.append( VelocityEngineUtils.mergeTemplateIntoString(velocityEngine, "templates/temporary_work_contract_doc.vm", "UTF-8", input) );
+								}
+								if((Boolean) anexxeds.getValue()){
+									sb.append( VelocityEngineUtils.mergeTemplateIntoString(velocityEngine, "templates/annex_contract_doc.vm", "UTF-8", input) );
+								}
+								if((Boolean) vacations.getValue()){
+									sb.append( VelocityEngineUtils.mergeTemplateIntoString(velocityEngine, "templates/vacation_doc.vm", "UTF-8", input) );
+								}
+								
+								StreamResource.StreamSource source2 = new StreamResource.StreamSource() {
+
+									public InputStream getStream() {
+										//throw new UnsupportedOperationException("Not supported yet.");
+										return new ByteArrayInputStream(sb.toString().getBytes());
+									}
+								};
+								StreamResource resource = new StreamResource(source2, "Documentos Masivos.html");
+								
+								BrowserFrame e = new BrowserFrame();
+								e.setSizeFull();
+
+								// Here we create a new StreamResource which downloads our StreamSource,
+								// which is our pdf.
+								// Set the right mime type
+								//						        resource.setMIMEType("application/pdf");
+								resource.setMIMEType("text/html");
+
+								e.setSource(resource);
+								w.setContent(e);
+								w.setWidth("60%");
+								w.setHeight("60%");
+							}
+						}){ {setIcon(FontAwesome.PRINT);} } );
+					}
+				});
+				
+				UI.getCurrent().addWindow(w);
+				
+				
+				final Map<String, Object> input = new HashMap<String, Object>();
+				input.put("laborerConstructions", selectedItemIds);
+				input.put("tools", new DateTool());
+				final String body = VelocityEngineUtils.mergeTemplateIntoString(velocityEngine, "templates/annex_contract_doc.vm", "UTF-8", input);
+
+				StreamResource.StreamSource source2 = new StreamResource.StreamSource() {
+
+					public InputStream getStream() {
+						//throw new UnsupportedOperationException("Not supported yet.");
+						return new ByteArrayInputStream(body.getBytes());
+					}
+				};
+				StreamResource resource = new StreamResource(source2, "Contratos Masivos.html");
+
+				Window window = new Window();
+				window.setResizable(true);
+				window.setWidth("60%");
+				window.setHeight("60%");
+				window.center();
+				window.setModal(true);
+				
+				BrowserFrame e = new BrowserFrame();
+				e.setSizeFull();
+
+				// Here we create a new StreamResource which downloads our StreamSource,
+				// which is our pdf.
+				// Set the right mime type
+				//						        resource.setMIMEType("application/pdf");
+				resource.setMIMEType("text/html");
+
+				e.setSource(resource);
+				window.setContent(e);
+//				UI.getCurrent().addWindow(window);
+				
+				
+//				for(Object lc : selectedItemIds){
+//					Notification.show("Imprimiendo "+((LaborerConstructionsite) lc).getLaborer().getFullname());
+//				}
 
 			}
 		});
@@ -402,7 +526,7 @@ public class LaborerAndTeamPanel extends Panel implements View {
 		btnAdd = new Button(null,FontAwesome.PLUS);
 		hl.addComponent(btnAdd);
 		hl.setComponentAlignment(btnAdd, Alignment.TOP_RIGHT);
-		
+
 		ShortcutListener enter = new ShortcutListener("Entrar",
 				KeyCode.ENTER, new int[]{ModifierKey.CTRL }) {
 			@Override
@@ -411,7 +535,7 @@ public class LaborerAndTeamPanel extends Panel implements View {
 			}
 
 		};
-		
+
 		btnAdd.addClickListener(new Button.ClickListener() {
 
 			@Override
@@ -421,39 +545,39 @@ public class LaborerAndTeamPanel extends Panel implements View {
 					Notification.show("Debe seleccionar una obra",Type.ERROR_MESSAGE);
 					return;
 				}
-				
+
 				LaborerConstructionsite laborer = new LaborerConstructionsite();
 				laborer.setConstructionsite(item.getBean());
-				
+
 				BeanItem<LaborerConstructionsite> laborerItem = new BeanItem<LaborerConstructionsite>(laborer);
 				AddLaborerContractDialog userWindow = new AddLaborerContractDialog(laborerItem,laborerService,true);
-				
+
 				userWindow.addListener(new AbstractWindowEditor.EditorSavedListener() {
-					
+
 					@Override
 					public void editorSaved(EditorSavedEvent event) {
 						try {
 							LaborerConstructionsite laborer = ((BeanItem<LaborerConstructionsite>) event.getSavedItem()).getBean();
 							laborerService.save(laborer);				
-			    			laborerContainer.addBean(laborer);
-			    		} catch (Exception e) {
-			    			logger.error("Error al guardar la información del obrero",e);
-			    			Notification.show("Es necesario agregar todos los campos obligatorios", Type.ERROR_MESSAGE);
-			    		}
-						
+							laborerContainer.addBean(laborer);
+						} catch (Exception e) {
+							logger.error("Error al guardar la información del obrero",e);
+							Notification.show("Es necesario agregar todos los campos obligatorios", Type.ERROR_MESSAGE);
+						}
+
 					}
 				});
-		        
-		        UI.getCurrent().addWindow(userWindow);
+
+				UI.getCurrent().addWindow(userWindow);
 			}
 		});
-		
+
 		btnAdd.addShortcutListener(enter);
 
 		final FilterTable table =  new FilterTable();
-		
+
 		table.addGeneratedColumn("actions", new CustomTable.ColumnGenerator() {
-			
+
 			@Override
 			public Object generateCell(CustomTable source, final Object itemId,Object columnId) {
 				final BeanItem<LaborerConstructionsite> laborerConstruction = (BeanItem<LaborerConstructionsite>) laborerContainer.getItem(itemId);
@@ -464,91 +588,115 @@ public class LaborerAndTeamPanel extends Panel implements View {
 						laborerContainer.removeItem(itemId);
 					}
 				}){
-					
+
 					{ setIcon(FontAwesome.TRASH_O);}
 				};
 			}
 		});
-		
+
+
+		table.addGeneratedColumn("selected", new CustomTable.ColumnGenerator() {
+
+			@Override
+			public Object generateCell(CustomTable source, final Object itemId,Object columnId) {
+				boolean selected = selectedItemIds.contains(itemId);
+				/* When the chekboc value changes, add/remove the itemId from the selectedItemIds set */
+				final CheckBox cb = new CheckBox("", selected);
+				cb.addValueChangeListener(new Property.ValueChangeListener() {
+					@Override
+					public void valueChange(Property.ValueChangeEvent event) {
+						if(selectedItemIds.contains(itemId)){
+							selectedItemIds.remove(itemId);
+						} else {
+							selectedItemIds.add(itemId);
+						}
+					}
+				});
+				return cb;
+			}
+		});
+
 		table.setContainerDataSource(laborerContainer);
 		table.setSizeFull();
 		table.setFilterBarVisible(true);
-		
+
 		table.addGeneratedColumn("confirmed", new CustomTable.ColumnGenerator() {
-			
+
 			@Override
 			public Object generateCell(CustomTable source, Object itemId,Object columnId) {
 				return (Boolean)source.getContainerProperty(itemId, columnId).getValue() ? "Si": "No";
 			}
 		});
-		
+
 		//TODO estado
-//		table.setVisibleColumns("laborer.job","laborer.firstname","laborer.laborerId"); //FIXME laborerId
-		table.setVisibleColumns("activeContract.jobAndCode","laborer.fullname","activeContract.step","confirmed","actions"); //FIXME laborerId
-		table.setColumnHeaders("Cod","Nombre","Etapa","Confirmado","Acciones");
-		table.setSelectable(true);
+		//		table.setVisibleColumns("laborer.job","laborer.firstname","laborer.laborerId"); //FIXME laborerId
+		table.setVisibleColumns("selected","activeContract.jobAndCode","laborer.fullname","activeContract.step","confirmed","actions"); //FIXME laborerId
+		table.setColumnHeaders("","Cod","Nombre","Etapa","Confirmado","Acciones");
+		table.setColumnWidth("selected", 40);
 		
+		table.setSelectable(true);
+
 		table.addItemClickListener(new ItemClickListener() {
-			
+
 			@Override
 			public void itemClick(ItemClickEvent event) {
-				
+
 				final BeanItem<LaborerConstructionsite> beanItem = (BeanItem<LaborerConstructionsite>) event.getItem();
 				logger.debug("laborer constructionsite click item {} rut {} ",beanItem.getBean(),beanItem.getBean().getLaborer().getRut());
 				LaborerConstructionDialog userWindow = new LaborerConstructionDialog(beanItem,laborerService,velocityEngine);
-				
+
 				userWindow.addListener(new AbstractWindowEditor.EditorSavedListener() {
-					
+
 					@Override
 					public void editorSaved(EditorSavedEvent event) {
 						final ConstructionSite cs = item.getBean();
 						if(cs == null){
 							Notification.show("Debe seleccionar una obra",Type.ERROR_MESSAGE);
-//							return false;
+							//							return false;
 							return ;
 						}
 						try {
-//			    			LaborerConstructionsite laborer = ((BeanItem<LaborerConstructionsite>) event.getSavedItem()).getBean();
+							//			    			LaborerConstructionsite laborer = ((BeanItem<LaborerConstructionsite>) event.getSavedItem()).getBean();
 							LaborerConstructionsite laborer = beanItem.getBean();
 							logger.debug("laborer constructionsite {}, rut {} postcommit ",laborer,laborer.getLaborer().getRut());
-			    			laborerService.save(laborer);	
-			    			table.refreshRowCache();
-//			    			return true;
-			    			return;
-			    		} catch (TransactionSystemException e) {
-			    			
-			    			Throwable e1 = e.getCause() != null ? e.getCause().getCause() : e;
-			    			if( e1 == null ){
-			    				logger.error("Error al intentar guardar el trabajador",e);
-			    				Notification.show("Error al intentar guardar el trabajador", Type.ERROR_MESSAGE);
-			    				return;
-			    			}
-			    			if(e1 instanceof ConstraintViolationException ){
-			    				logger.error("Error de constraint "+Utils.printConstraintMessages(((ConstraintViolationException) e1).getConstraintViolations()),e);
-			    				Notification.show("Error al validar los datos:\n"+Utils.printConstraintMessages(((ConstraintViolationException) e1).getConstraintViolations()), Type.ERROR_MESSAGE);
-			    			}else{
-			    				logger.error("Error al intentar guardar el trabajador",e);
-			    				logger.error("Error al intentar guardar el trabajador",e1);
-			    				Notification.show("Error al intentar guardar el trabajador", Type.ERROR_MESSAGE);
-			    			}
-			    			
-//			    			return false;
-			    			return;
-			    		}catch (Exception e){
-			    			
-			    			if(e instanceof ConstraintViolationException )
-			    				logger.error("Error de constraint "+Utils.printConstraintMessages(((ConstraintViolationException) e).getConstraintViolations()),e);
-			    			else
-			    				logger.error("Error al guardar la información del obrero",e);
-			    			Notification.show("Ocurrió un error al intentar guardar el trabajador", Type.ERROR_MESSAGE);
-//			    			return false;
-			    			return;
-			    		}
+							laborerService.save(laborer);	
+							table.refreshRowCache();
+							//			    			return true;
+							return;
+						} catch (TransactionSystemException e) {
+
+							Throwable e1 = e.getCause() != null ? e.getCause().getCause() : e;
+							if( e1 == null ){
+								logger.error("Error al intentar guardar el trabajador",e);
+								Notification.show("Error al intentar guardar el trabajador", Type.ERROR_MESSAGE);
+								return;
+							}
+							if(e1 instanceof ConstraintViolationException ){
+								logger.error("Error de constraint "+Utils.printConstraintMessages(((ConstraintViolationException) e1).getConstraintViolations()),e);
+								Notification.show("Error al validar los datos:\n"+Utils.printConstraintMessages(((ConstraintViolationException) e1).getConstraintViolations()), Type.ERROR_MESSAGE);
+							}else{
+								logger.error("Error al intentar guardar el trabajador",e);
+								logger.error("Error al intentar guardar el trabajador",e1);
+								Notification.show("Error al intentar guardar el trabajador", Type.ERROR_MESSAGE);
+							}
+
+							//			    			return false;
+							return;
+						}catch (Exception e){
+
+							if(e instanceof ConstraintViolationException )
+								logger.error("Error de constraint "+Utils.printConstraintMessages(((ConstraintViolationException) e).getConstraintViolations()),e);
+							else
+								logger.error("Error al guardar la información del obrero",e);
+							Notification.show("Ocurrió un error al intentar guardar el trabajador", Type.ERROR_MESSAGE);
+							//			    			return false;
+							return;
+						}
 					}
 				});
-		        
-		        UI.getCurrent().addWindow(userWindow);
-				
+
+				UI.getCurrent().addWindow(userWindow);
+
 			}
 		});
 
@@ -557,7 +705,7 @@ public class LaborerAndTeamPanel extends Panel implements View {
 
 		return vl;
 	}
-	
+
 	protected VerticalLayout drawTeam() {
 		VerticalLayout vl = new VerticalLayout();
 		vl.setSpacing(true);
@@ -576,118 +724,118 @@ public class LaborerAndTeamPanel extends Panel implements View {
 					Notification.show("Debe seleccionar una obra",Type.ERROR_MESSAGE);
 					return;
 				}
-				
+
 				final Window window = new Window();
 				window.setWidth("85%");
-				
+
 				window.setModal(true);
 				window.center();
-				
+
 				VerticalLayout detalleCuadrilla = new VerticalLayout();
 				detalleCuadrilla.setMargin(true);
 				detalleCuadrilla.setSpacing(true);
-				
+
 				Panel panel = new Panel("Crear Cuadrilla");
 				panel.setContent(detalleCuadrilla);
 				window.setContent(panel);
-				
+
 				HorizontalLayout hl = new HorizontalLayout();
 				hl.setSpacing(true);
 				detalleCuadrilla.addComponent(hl);
 				detalleCuadrilla.setComponentAlignment(hl, Alignment.TOP_RIGHT);
-								
+
 				final BeanFieldGroup<Team> fieldGroup = new BeanFieldGroup<Team>(Team.class);
-		        fieldGroup.setItemDataSource(new BeanItem<Team>(new Team()));
+				fieldGroup.setItemDataSource(new BeanItem<Team>(new Team()));
 
-		        //agrega un boton que hace el commit
-		        Button add = new Button(null,new Button.ClickListener() {
+				//agrega un boton que hace el commit
+				Button add = new Button(null,new Button.ClickListener() {
 
-		        	@Override
-		        	public void buttonClick(ClickEvent event) {
-		        		try {
-		        			fieldGroup.commit();
-		        			Team team = fieldGroup.getItemDataSource().getBean();
-		        			constructionSiteService.addTeamToConstructionSite(team, cs);		
-		        			teamContainer.addBean(team);
-		        			window.close();
-		        		} catch (Exception e) {
-		        			logger.error("Error al guardar la información de la cuadrilla",e);
-		        			Notification.show("Es necesario agregar todos los campos obligatorios", Type.ERROR_MESSAGE);
-		        		}
-		        	}
-		        }){{
-		        	setIcon(FontAwesome.SAVE);
-		        }};
-		        hl.addComponent(add);
-		            
-		        // Loop through the properties, build fields for them and add the fields
-		        // to this UI				
-				 for (Object propertyId : new String[]{"name"}) { //fieldGroup.getUnboundPropertyIds()
-		        	if(propertyId.equals("teamId") || propertyId.equals("constructionsite")|| propertyId.equals("status") || propertyId.equals("deleted") || propertyId.equals("date"))
-		        		;
-		        	else if(propertyId.equals("leader")){//revisars
-		        		logger.debug("INGRESO!!! :");
-		        		ComboBox labName = new ComboBox("Responsable", laborerContainer);	
-		        		labName.setItemCaptionPropertyId("firstname");
-		    			detalleCuadrilla.addComponent(labName);
-		        	}else if(propertyId.equals("laborers")){
-		        		ComboBox jobField = new ComboBox("Oficio");
-		        		jobField.setNullSelectionAllowed(false);
-		    			for(Job j : Job.values()){
-		    				jobField.addItem(j);
-		    			}
-		    			detalleCuadrilla.addComponent(jobField);
-		    			fieldGroup.bind(jobField, "laborers");    
-		        	}else{        		
-		        		String t = tradProperty(propertyId);
-		        		Field field = fieldGroup.buildAndBind(t, propertyId);
-		        		if(field instanceof TextField){
-		        			((TextField)field).setNullRepresentation("");
-		        		}
-		        		detalleCuadrilla.addComponent(field);
-		        		detalleCuadrilla.setComponentAlignment(field, Alignment.MIDDLE_LEFT);
-		        	}
-		        }
-		        
+					@Override
+					public void buttonClick(ClickEvent event) {
+						try {
+							fieldGroup.commit();
+							Team team = fieldGroup.getItemDataSource().getBean();
+							constructionSiteService.addTeamToConstructionSite(team, cs);		
+							teamContainer.addBean(team);
+							window.close();
+						} catch (Exception e) {
+							logger.error("Error al guardar la información de la cuadrilla",e);
+							Notification.show("Es necesario agregar todos los campos obligatorios", Type.ERROR_MESSAGE);
+						}
+					}
+				}){{
+					setIcon(FontAwesome.SAVE);
+				}};
+				hl.addComponent(add);
+
+				// Loop through the properties, build fields for them and add the fields
+				// to this UI				
+				for (Object propertyId : new String[]{"name"}) { //fieldGroup.getUnboundPropertyIds()
+					if(propertyId.equals("teamId") || propertyId.equals("constructionsite")|| propertyId.equals("status") || propertyId.equals("deleted") || propertyId.equals("date"))
+						;
+					else if(propertyId.equals("leader")){//revisars
+						logger.debug("INGRESO!!! :");
+						ComboBox labName = new ComboBox("Responsable", laborerContainer);	
+						labName.setItemCaptionPropertyId("firstname");
+						detalleCuadrilla.addComponent(labName);
+					}else if(propertyId.equals("laborers")){
+						ComboBox jobField = new ComboBox("Oficio");
+						jobField.setNullSelectionAllowed(false);
+						for(Job j : Job.values()){
+							jobField.addItem(j);
+						}
+						detalleCuadrilla.addComponent(jobField);
+						fieldGroup.bind(jobField, "laborers");    
+					}else{        		
+						String t = tradProperty(propertyId);
+						Field field = fieldGroup.buildAndBind(t, propertyId);
+						if(field instanceof TextField){
+							((TextField)field).setNullRepresentation("");
+						}
+						detalleCuadrilla.addComponent(field);
+						detalleCuadrilla.setComponentAlignment(field, Alignment.MIDDLE_LEFT);
+					}
+				}
+
 				HorizontalLayout test = new HorizontalLayout();				
 				final ComboBox nombre = new ComboBox("Responsable",laborerContainer);
 				nombre.setItemCaptionMode(ItemCaptionMode.PROPERTY);
 				nombre.setItemCaptionPropertyId("fullname");
 				test.addComponent(nombre);
 				detalleCuadrilla.addComponent(test);
-					
+
 				//Seleccionar Obreros
 				FilterTable select_lab =  new FilterTable();
 				Page<LaborerConstructionsite> page = laborerService.findAllLaborerConstructionsite(new PageRequest(0, 20));
 				select_lab.setContainerDataSource(laborerContainer);
 				laborerContainer.addAll(page.getContent());
-				
+
 				select_lab.setSizeFull();
 				select_lab.setFilterBarVisible(true);
 				select_lab.addGeneratedColumn("my_select", new CustomTable.ColumnGenerator() {
-					
+
 					@Override
 					public Object generateCell(CustomTable source, Object itemId,
 							Object columnId) {
 						CheckBox select_check = new CheckBox();
-                        return select_check ;
+						return select_check ;
 					}
 				});
-				
+
 				select_lab.setVisibleColumns("firstname","job", "my_select");
 				select_lab.setColumnHeaders("Nombre","Oficio", "Seleccionar");
 				select_lab.setSelectable(true);
 				select_lab.setWidth("600px");
 				select_lab.setHeight("400px");
-				
+
 				//Obreros Seleccionados
 				FilterTable selected_lab =  new FilterTable();
 				selected_lab.setContainerDataSource(laborerContainer); //no no
-				
+
 				selected_lab.setSizeFull();
 				//selected_lab.setFilterBarVisible(true);
 				selected_lab.addGeneratedColumn("my_remove", new CustomTable.ColumnGenerator() {
-					
+
 					@Override
 					public Object generateCell(CustomTable source, Object itemId,
 							Object columnId) {
@@ -695,31 +843,31 @@ public class LaborerAndTeamPanel extends Panel implements View {
 						return remove_check;
 					}
 				});
-				
+
 				selected_lab.setVisibleColumns("firstname","job", "my_remove");
 				selected_lab.setColumnHeaders("Nombre","Oficio", "Quitar");
 				selected_lab.setSelectable(true);
 				selected_lab.setWidth("600px");
 				selected_lab.setHeight("400px");
-				
+
 				test.setSpacing(true);
 				test.addComponent(select_lab);
 				test.addComponent(selected_lab);
-				 
+
 				detalleCuadrilla.addComponent(test);				
 				detalleCuadrilla.setWidth("100%");
-		        
-		        UI.getCurrent().addWindow(window);
+
+				UI.getCurrent().addWindow(window);
 
 			}
 		});		
-		
+
 		FilterTable table =  new FilterTable();
 		table.setContainerDataSource(teamContainer);
 		table.setSizeFull();
 		table.setFilterBarVisible(true);
 		table.addGeneratedColumn("actions", new CustomTable.ColumnGenerator() {
-			
+
 			@Override
 			public Object generateCell(CustomTable source, Object itemId,
 					Object columnId) {
@@ -736,20 +884,20 @@ public class LaborerAndTeamPanel extends Panel implements View {
 
 		return vl;
 	}
-	
-	
-	
+
+
+
 	protected VerticalLayout drawVac() {
 		VerticalLayout vl = new VerticalLayout();
 		vl.setSpacing(true);
 		vl.setMargin(true);
 		vl.setSizeFull();
-		
+
 		Label l = new Label("En construcción...");
 		vl.addComponent(l);
 		return vl;
 	}
-	
+
 	private String tradProperty(Object propertyId) {
 		if(propertyId.equals("rut"))
 			return "RUT";
@@ -778,16 +926,16 @@ public class LaborerAndTeamPanel extends Panel implements View {
 		else
 			return propertyId.toString();
 	}
-	
+
 	public void setConstruction(BeanItem<ConstructionSite> item){
 		if(item == null ){
-			
+
 			setEnabledDetail(false,new BeanItem<ConstructionSite>(new ConstructionSite()));
 			return;
 		}
-		
+
 		this.item = item;
-		
+
 		if( SecurityHelper.hastPermission(Permission.CREAR_OBRA) || SecurityHelper.hasConstructionSite(item.getBean())){
 			if( editConstructionSite != null )
 				editConstructionSite.setEnabled(true);
@@ -799,22 +947,22 @@ public class LaborerAndTeamPanel extends Panel implements View {
 			btnPrint.setEnabled(false);
 			btnAdd.setEnabled(false);
 		}
-		
+
 		setEnabledDetail(true,item);
 		List<LaborerConstructionsite> laborers = constructionSiteService.getLaborerByConstruction(item.getBean());
 		laborerContainer.removeAllItems();
 		laborerContainer.addAll(laborers);
-		
-//		List<Team> teams = constructionSiteService.getTeamsByConstruction(item.getBean());
-//		teamContainer.removeAllItems();
-//		teamContainer.addAll(teams);
+
+		//		List<Team> teams = constructionSiteService.getTeamsByConstruction(item.getBean());
+		//		teamContainer.removeAllItems();
+		//		teamContainer.addAll(teams);
 	}
-	
+
 	protected void setEnabledDetail(boolean enable,BeanItem<ConstructionSite> item) {
 		bfg.setEnabled(enable);
 		bfg.setItemDataSource(item);
 		if(detailLayout != null)
 			detailLayout.setEnabled(enable);
-		
+
 	}
 }

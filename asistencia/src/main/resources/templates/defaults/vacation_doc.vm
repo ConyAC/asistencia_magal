@@ -2,32 +2,13 @@
 <html>
 	 <head>
 		<meta charset="UTF-8">
-		<style>
-	
-	@media all {
-	.page-break	{ display: none; }
-	.print-hidden	{  }
-	}
-	
-	@media print {
-		.page-break	{ display: block; page-break-before: always; }
-		.print-hidden	{ display: none; }
-	}
-	
-	</style>
 	</head> 
 	<body style="color:#7379A0">
 		
-		<div class="print-hidden" style="text-align:center;">
+		<div style="text-align:center;">
 			<input type="button" onclick="javascript:print()" value="Imprimir" /> <br /><br />
 		</div>
-		
-		<br />
-		
-#foreach( $laborerConstruction in $laborerConstructions)
-#foreach( $vacation in $laborerConstruction.vacations )
-    #if($foreach.last) 
-		<table border="1" cellpadding="0" cellspacing="0" style="width:100%;margin:10px">
+		<table border="1" cellpadding="0" cellspacing="0" style="width:100%;">
 			<tr>
 				<td style="background-color:#FFF3F7">
 					<h1 style="margin:10px;">COMPROBANTE DE FERIADO</h1>
@@ -43,7 +24,7 @@
 						</tr>
 						<tr>
 							<td>
-								<p>${laborerConstruction.constructionsite.name}</p>
+								<p>${constructionSite.name}</p>
 							</td>
 							<td>
 								<xsl:value-of select="VacationData/day" />
@@ -68,7 +49,7 @@
 					trabajador:
 					<br />
 					<br />
-					DON ${laborerConstruction.laborer.fullname} RUT: ${laborerConstruction.laborer.rut}
+					DON ${laborer.fullname} RUT: ${laborer.rut}
 				</td>
 			</tr>
 			<tr>
@@ -220,12 +201,6 @@
 					</p>
 				</td>
 			</tr>
-		</table> 
-		<br />
-		<br />
-		<div class="page-break"></div>
-    #end
-#end
-#end
+		</table>
 	</body>
 </html>
