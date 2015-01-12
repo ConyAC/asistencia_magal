@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.velocity.app.VelocityEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,13 +16,16 @@ import org.springframework.stereotype.Component;
 import org.tepi.filtertable.FilterTable;
 
 import ru.xpoft.vaadin.VaadinView;
+import cl.magal.asistencia.entities.Contract;
 import cl.magal.asistencia.entities.Laborer;
+import cl.magal.asistencia.entities.LaborerConstructionsite;
+import cl.magal.asistencia.entities.Vacation;
 import cl.magal.asistencia.services.LaborerService;
 import cl.magal.asistencia.ui.MagalUI;
 import cl.magal.asistencia.ui.constructionsite.LaborerBaseInformation;
-import cl.magal.asistencia.ui.workerfile.vo.HistoryVO;
+import cl.magal.asistencia.ui.constructionsite.LaborerConstructionDialog;
+import cl.magal.asistencia.util.Utils;
 
-import com.vaadin.data.Property;
 import com.vaadin.data.fieldgroup.BeanFieldGroup;
 import com.vaadin.data.util.BeanItem;
 import com.vaadin.data.util.BeanItemContainer;
@@ -34,6 +38,7 @@ import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
+import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
@@ -56,10 +61,12 @@ public class WorkerFileView extends HorizontalLayout implements View {
 	public static final String NAME = "fichas";	
 	BeanItemContainer<Laborer> laborerContainer = new BeanItemContainer<Laborer>(Laborer.class);
 	BeanFieldGroup<Laborer> fieldGroup = new BeanFieldGroup<Laborer>(Laborer.class);
-	BeanItemContainer<HistoryVO> historyContainer = new BeanItemContainer<HistoryVO>(HistoryVO.class);
+	BeanItemContainer<LaborerConstructionsite> historyContainer = new BeanItemContainer<LaborerConstructionsite>(LaborerConstructionsite.class);
 	
 	@Autowired
 	private transient LaborerService service;
+	@Autowired
+	transient private VelocityEngine velocityEngine;
 
 	LaborerBaseInformation detalleObrero;
 	FilterTable tableObrero;
@@ -83,7 +90,7 @@ public class WorkerFileView extends HorizontalLayout implements View {
 
 	private com.vaadin.ui.Component drawOverview() {
 
-		historyContainer.addNestedContainerProperty("constructionSite.name");
+		historyContainer.addNestedContainerProperty("constructionsite.name");
 
 		VerticalLayout vl = new VerticalLayout();
 		vl.setMargin(true);
@@ -102,15 +109,70 @@ public class WorkerFileView extends HorizontalLayout implements View {
 		hl.setExpandRatio(label2,0.2f);
 
 		Table table = new Table();
-		table.addGeneratedColumn("endingDate", new Table.ColumnGenerator() {
-
+//		table.addGeneratedColumn("endingDate", new Table.ColumnGenerator() {
+//
+//			@Override
+//			public Object generateCell(Table source, Object itemId, Object columnId) {
+//				Property endingDateProp = source.getItem(itemId).getItemProperty(columnId);
+//				if(endingDateProp.getValue() == null)
+//					return "Sin fecha de termino";
+//				else 
+//					return endingDateProp.getValue();
+//			}
+//		});
+		
+		table.addGeneratedColumn("contracts", new Table.ColumnGenerator() {
+			
 			@Override
 			public Object generateCell(Table source, Object itemId, Object columnId) {
-				Property endingDateProp = source.getItem(itemId).getItemProperty(columnId);
-				if(endingDateProp.getValue() == null)
-					return "Sin fecha de termino";
-				else 
-					return endingDateProp.getValue();
+				
+				List<Contract> contracts = (List<Contract>) source.getContainerProperty(itemId, columnId).getValue();
+				
+//				VerticalLayout vl = new VerticalLayout();
+//				vl.setSpacing(true);
+//				vl.setMargin(true);
+				
+				GridLayout vl = new GridLayout(3,contracts.size());
+				vl.setSpacing(true);
+//				vl.setMargin(true);
+				
+				StringBuilder sb = new StringBuilder();
+				if(contracts == null || contracts.isEmpty()){
+					sb.append("Sin contratos");
+				}else{
+					for(Contract contract : contracts){
+						sb.append(contract.getJob().toString()).append("(").append(contract.getJobCode()).append(") ");
+						vl.addComponent(new Label(sb.toString(),ContentMode.HTML));
+						vl.addComponent(new Label(contract.getStep(),ContentMode.HTML));
+						vl.addComponent(new Label(contract.isActive() ? "Activo" : "Inactivo",ContentMode.HTML));
+						sb.setLength(0);
+					}
+				}
+				return vl;
+			}
+		});
+		
+		table.addGeneratedColumn("numberOfAccidents", new Table.ColumnGenerator() {
+			
+			@Override
+			public Object generateCell(Table source, Object itemId, Object columnId) {
+				List<Vacation> vacations = (List<Vacation>) source.getItem(itemId).getItemProperty("vacations").getValue();
+				StringBuilder sb = new StringBuilder();
+				if(vacations == null || vacations.isEmpty()){
+					sb.append("0");
+				}else{
+					sb.append(vacations.size());
+				}
+				return new Label(sb.toString());
+			}
+		});
+		
+		table.addGeneratedColumn("averageWage", new Table.ColumnGenerator() {
+			
+			@Override
+			public Object generateCell(Table source, Object itemId, Object columnId) {
+				//TODO Calcular jornal promedio
+				return new Label(Utils.random(7000, 15000)+"");
 			}
 		});
 
@@ -119,13 +181,25 @@ public class WorkerFileView extends HorizontalLayout implements View {
 			
 			@Override
 			public Object generateCell(Table source, Object itemId, Object columnId) {
-				return (Boolean) source.getItem(itemId).getItemProperty(columnId).getValue()  ? "Activo":"No activo";
+				return (Short)source.getItem(itemId).getItemProperty(columnId).getValue() == 1  ? "Activo":"No activo";
 			}
 		});
 		table.setWidth("100%");
-		table.setVisibleColumns("constructionSite.name","job","active","averageWage","reward","numberOfAccidents","startingDate","endingDate");
-		table.setColumnHeaders("Obra","Rol","Estado","Jornal Promedio","Premio","N° Accidentes","Fecha Inicio","Fecha Termino");
-
+		table.setVisibleColumns("constructionsite.name","averageWage","reward","numberOfAccidents","contracts","active"//,"startingDate","endingDate"
+				);
+		table.setColumnHeaders("Obra","Jornal Promedio","Premio","N° Accidentes","Oficios","Estado"//,"Fecha Inicio","Fecha Termino"
+				);
+		
+		table.addItemClickListener(new ItemClickListener() {
+			
+			@Override
+			public void itemClick(ItemClickEvent event) {
+				final BeanItem<LaborerConstructionsite> beanItem = (BeanItem<LaborerConstructionsite>) event.getItem();
+				LaborerConstructionDialog userWindow = new LaborerConstructionDialog(beanItem,service,velocityEngine,true);
+		        UI.getCurrent().addWindow(userWindow);
+			}
+		});
+		
 		vl.addComponent(table);
 
 		return vl;
@@ -151,10 +225,15 @@ public class WorkerFileView extends HorizontalLayout implements View {
 		fieldGroup.setItemDataSource(laborerItem);
 
 		//obtiene las obras historicas
-		List<HistoryVO> history = service.getLaborerHistory(laborerItem.getBean());
+//		List<HistoryVO> history = service.getLaborerHistory(laborerItem.getBean());
+//		historyContainer.removeAllItems();
+//		historyContainer.addAll(history);
+
+		List<LaborerConstructionsite> history = service.findAllLaborerConstructionsiteByLaborer(laborerItem.getBean());
 		historyContainer.removeAllItems();
 		historyContainer.addAll(history);
 
+		
 		//		//obtiene el vertical Layout
 		//		detalleObrero.removeAllComponents();
 		//		if(laborerItem == null){

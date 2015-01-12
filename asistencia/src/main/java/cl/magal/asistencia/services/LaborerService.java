@@ -151,5 +151,9 @@ public class LaborerService {
 		return jobCode != null ? jobCode + 1 : value.getMin();
 	}
 
+	public List<LaborerConstructionsite> findAllLaborerConstructionsiteByLaborer(Laborer laborer) {
+		return laborerConstructionsiteRepo.findByLaborer(laborer);
+	}
+
 	
 }
