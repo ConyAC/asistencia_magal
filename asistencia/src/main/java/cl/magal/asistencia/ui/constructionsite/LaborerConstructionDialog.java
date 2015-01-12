@@ -27,8 +27,8 @@ import cl.magal.asistencia.entities.enums.ToolStatus;
 import cl.magal.asistencia.services.LaborerService;
 import cl.magal.asistencia.ui.AbstractWindowEditor;
 import cl.magal.asistencia.ui.OnValueChangeFieldFactory;
-import cl.magal.asistencia.ui.converter.JobToStringConverter;
 import cl.magal.asistencia.ui.workerfile.vo.HistoryVO;
+import cl.magal.asistencia.util.Utils;
 
 import com.vaadin.data.Container;
 import com.vaadin.data.Property;
@@ -139,7 +139,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 	}
 
 	protected VerticalLayout drawPyH() {
-		
+
 		VerticalLayout vl = new VerticalLayout();
 		vl.setSpacing(true);
 		vl.setMargin(true);
@@ -163,15 +163,15 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 				setPageLength(4);
 			}
 		};
-		
+
 		if(!readOnly){
-			
+
 			HorizontalLayout hl = new HorizontalLayout();
 			hl.setWidth("100%");
 			hl.setSpacing(true);		
 			vh.addComponent(hl);
 			vh.setComponentAlignment(hl, Alignment.TOP_RIGHT);
-	
+
 			final TextField herramienta = new TextField("Herramienta");
 			hl.addComponent(herramienta);
 			final TextField monto_h = new TextField("Monto");
@@ -186,7 +186,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 				estado_h.addItem(t);
 			}
 			hl.addComponent(estado_h);
-		
+
 			btnAddH = new Button(null,FontAwesome.PLUS);
 			hl.addComponent(btnAddH);
 			btnAddH.addClickListener(new Button.ClickListener() {
@@ -213,13 +213,13 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 		vp.setSizeFull();
 
 		if(!readOnly){
-			
+
 			HorizontalLayout hl2 = new HorizontalLayout();
 			hl2.setWidth("100%");
 			hl2.setSpacing(true);		
 			vp.addComponent(hl2);
 			vp.setComponentAlignment(hl2, Alignment.TOP_RIGHT);
-	
+
 			TextField monto_p = new TextField("Monto");
 			hl2.addComponent(monto_p);
 			DateField fecha_p = new DateField("Fecha");
@@ -270,12 +270,17 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 
 		final Contract activeContract = ((LaborerConstructionsite)getItem().getBean()).getActiveContract();
 
-		final BeanItem<Contract> beanItemContract = new BeanItem<Contract>(activeContract);
+		VerticalLayout vl = new VerticalLayout();
+		vl.setSpacing(true);
+		vl.setMargin(true);
+		vl.setWidth("100%");
 
-		GridLayout gl = new GridLayout(2,10);
+		final GridLayout gl = new GridLayout(2,10);
 		gl.setSpacing(true);
-		gl.setMargin(true);
-		gl.setWidth("100%");
+		gl.setSizeFull();
+		vl.addComponent(gl);
+		
+		final BeanItemContainer<Annexed> beanContainerAnnexeds = new BeanItemContainer<Annexed>(Annexed.class); 
 
 		int fila = 0, columna = 0;
 		gl.addComponent(new Label("<h1>Contrato</h1>",ContentMode.HTML),columna++,fila);
@@ -356,13 +361,9 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 									try {
 										//TODO definir si guardará o no el estado del laborer en esta etapa
 										LaborerConstructionsite laborer = ((BeanItem<LaborerConstructionsite>) event.getSavedItem()).getBean();
-										//service.save(laborer);
-										beanItemContract.getItemProperty("step").setValue(laborer.getActiveContract().getStep());
-										beanItemContract.getItemProperty("job").setValue(laborer.getActiveContract().getJob());
-										beanItemContract.getItemProperty("jobCode").setValue(laborer.getActiveContract().getJobCode());
-										beanItemContract.getItemProperty("startDate").setValue(laborer.getActiveContract().getStartDate());
-										beanItemContract.getItemProperty("terminationDate").setValue(laborer.getActiveContract().getTerminationDate());
-
+										setContractGl(laborer.getActiveContract());
+										beanContainerAnnexeds.removeAllItems();
+										
 										replaceComponent(btnChangeJob,btnSettlement);
 									} catch (Exception e) {
 										logger.error("Error al guardar la información del obrero",e);
@@ -383,9 +384,6 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 							//setea un finiquito
 							activeContract.setSettlement(100000);
 							//se asegura de marcar inactivos todos los contratos
-							for(Contract contract : ((LaborerConstructionsite)getItem().getBean()).getContracts())
-								contract.setActive(false);
-
 							replaceComponent(btnSettlement, btnChangeJob);
 						}
 					});
@@ -399,37 +397,49 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 			}
 		},columna--,fila++);
 
-		gl.addComponent(new Label("Etapa"),columna++,fila);gl.addComponent(new Label(){{setPropertyDataSource(beanItemContract.getItemProperty("step")); setImmediate(true);}},columna--,fila++);
-		gl.addComponent(new Label("Oficio"),columna++,fila);gl.addComponent(new Label(){{setConverter(new JobToStringConverter());setPropertyDataSource(beanItemContract.getItemProperty("job"));}},columna--,fila++);
-		gl.addComponent(new Label("Código"),columna++,fila);gl.addComponent(new Label(){{setPropertyDataSource(beanItemContract.getItemProperty("jobCode"));}},columna--,fila++);
-		gl.addComponent(new Label("Fecha Inicio"),columna++,fila);gl.addComponent(new Label(){{setPropertyDataSource(beanItemContract.getItemProperty("startDate"));}},columna--,fila++);
-		gl.addComponent(new Label("Fecha Termino"),columna++,fila);gl.addComponent(new Label(){{ setPropertyDataSource(beanItemContract.getItemProperty("terminationDate"));}},columna--,fila++);
+		lbStep = new Label(){{ setImmediate(true);}};
+		lbJob = new Label(){{setImmediate(true);}};
+		lbJobCode = new Label(){{setImmediate(true);}};
+		lbStarting = new Label(){{setImmediate(true);}};
+		lbEnding = new Label(){{ setImmediate(true);}};
+		gl.addComponent(new Label("Etapa"),columna++,fila);gl.addComponent(lbStep,columna--,fila++);
+		gl.addComponent(new Label("Oficio"),columna++,fila);gl.addComponent(lbJob,columna--,fila++);
+		gl.addComponent(new Label("Código"),columna++,fila);gl.addComponent(lbJobCode,columna--,fila++);
+		gl.addComponent(new Label("Fecha Inicio"),columna++,fila);gl.addComponent(lbStarting,columna--,fila++);
+		gl.addComponent(new Label("Fecha Termino"),columna++,fila);gl.addComponent(lbEnding,columna--,fila++);
+		setContractGl(activeContract);
 
-		gl.addComponent(new Label("<hr />",ContentMode.HTML),columna++,fila,columna--,fila++);
+		GridLayout gl2 = new GridLayout(2,10);
+		gl2.setSpacing(true);
+		gl2.setSizeFull();
+		vl.addComponent(gl2);
 
-		final BeanItemContainer<Annexed> beanContainerAnnexeds = new BeanItemContainer<Annexed>(Annexed.class); 
-		beanContainerAnnexeds.addAll((Collection<? extends Annexed>) beanItemContract.getItemProperty("annexeds").getValue());
+		columna = 0; fila = 0; 
 
-		gl.addComponent(new Label("<h1>Anexos</h1>",ContentMode.HTML),columna++,fila);
+		gl2.addComponent(new Label("<hr />",ContentMode.HTML),columna++,fila,columna--,fila++);
+
+		beanContainerAnnexeds.addAll((Collection<? extends Annexed>) activeContract.getAnnexeds());
+
+		gl2.addComponent(new Label("<h1>Anexos</h1>",ContentMode.HTML),columna++,fila);
 		if(!readOnly)
-			gl.addComponent( new HorizontalLayout(){
+			gl2.addComponent( new HorizontalLayout(){
 				{
 					Button AgregarAnexo = new Button(null,new Button.ClickListener() {
 
 						@Override
 						public void buttonClick(ClickEvent event) {
 
-							AddAnnexedContractDialog userWindow = new AddAnnexedContractDialog(beanItemContract);
+							AddAnnexedContractDialog userWindow = new AddAnnexedContractDialog(new BeanItem<Contract>(((LaborerConstructionsite)getItem().getBean()).getActiveContract()));
 							userWindow.addListener(new AbstractWindowEditor.EditorSavedListener() {
 
 								@Override
 								public void editorSaved(EditorSavedEvent event) {
 									try {
 										//TODO definir si guardará o no el estado del laborer en esta etapa
-										//									Contract newBeanItem = (BeanItem<Contract>) event.getSavedItem();
+										BeanItem<Contract>	newBeanItem = (BeanItem<Contract>) event.getSavedItem();
 
 										beanContainerAnnexeds.removeAllItems();
-										beanContainerAnnexeds.addAll((Collection<? extends Annexed>) beanItemContract.getItemProperty("annexeds").getValue());
+										beanContainerAnnexeds.addAll((Collection<? extends Annexed>) newBeanItem.getItemProperty("annexeds").getValue());
 
 									} catch (Exception e) {
 										logger.error("Error al guardar la información del obrero",e);
@@ -502,8 +512,20 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 		annexedTable.setVisibleColumns("step","startDate","terminationDate","print");
 		annexedTable.setColumnHeaders("Etapa","Fecha de inicio","Fecha de termino","Imprimir");
 
-		gl.addComponent(annexedTable,columna++,fila,columna--,fila++);
-		return gl;
+		gl2.addComponent(annexedTable,columna++,fila,columna--,fila++);
+		return vl;
+	}
+
+	Label lbStep ,lbJob ,lbJobCode ,lbStarting, lbEnding;
+
+	private void setContractGl(final Contract activeContract) {
+
+		lbStep.setValue(activeContract.getStep());
+		lbJob.setValue(activeContract.getJob().toString());
+		lbJobCode.setValue(activeContract.getJobCode()+"");
+		lbStarting.setValue(Utils.date2String( activeContract.getStartDate()));
+		lbEnding.setValue(Utils.date2String( activeContract.getTerminationDate()));
+
 	}
 
 	protected VerticalLayout drawHistorico() {

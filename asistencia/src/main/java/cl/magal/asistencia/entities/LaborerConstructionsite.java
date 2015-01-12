@@ -187,6 +187,12 @@ public class LaborerConstructionsite implements Serializable {
 	
 	public void addContract(Contract contract) {
 		if (!getContracts().contains(contract)) {
+			//marca todos los otros contratos inactivos
+			for(Contract c : getContracts())
+				c.setActive(false);
+			//refresca el contrato activo
+			refreshActiveContract();
+			
 			getContracts().add(contract);
 			contract.setLaborerConstructionSite(this);
         }
@@ -261,9 +267,6 @@ public class LaborerConstructionsite implements Serializable {
 	}
 	
 	public void refreshActiveContract(){
-		for(Contract contract : getContracts()){
-			contract.setActive(false);
-		}
 		activeContract = null;
 	}
 	

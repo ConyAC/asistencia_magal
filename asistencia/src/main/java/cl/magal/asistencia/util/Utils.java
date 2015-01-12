@@ -1,10 +1,13 @@
 package cl.magal.asistencia.util;
 
+import java.util.Date;
 import java.util.Random;
 import java.util.Set;
 
 import javax.validation.ConstraintViolation;
 
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,6 +38,12 @@ public class Utils {
 		tf.setReadOnly(false);
 		tf.setValue(value);
 		tf.setReadOnly(true);
+	}
+	
+	DateTime dt = new DateTime();
+	
+	public static String date2String(Date date){
+		return DateTimeFormat.forPattern("dd/MM/yyyy").print(new DateTime(date));
 	}
 	
 }

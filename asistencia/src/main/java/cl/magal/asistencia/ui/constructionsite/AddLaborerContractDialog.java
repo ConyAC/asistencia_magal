@@ -232,9 +232,11 @@ public class AddLaborerContractDialog extends AbstractWindowEditor implements Ne
 		if(msj != null)
 			Notification.show(msj,Type.ERROR_MESSAGE);
 		else{ //si pasa todas las validaciones, lo agrega al item para guardar
-			//dependiendo del perfil lo marca como confirmado o no
-			((BeanItem<LaborerConstructionsite>) getItem()).getBean().setConfirmed( SecurityHelper.hastPermission(Permission.CONFIRMAR_OBREROS) );
-			((BeanItem<LaborerConstructionsite>) getItem()).getBean().setLaborer(laborer);
+			if(addLaborer){
+				//dependiendo del perfil lo marca como confirmado o no
+				((BeanItem<LaborerConstructionsite>) getItem()).getBean().setConfirmed( SecurityHelper.hastPermission(Permission.CONFIRMAR_OBREROS) );
+				((BeanItem<LaborerConstructionsite>) getItem()).getBean().setLaborer(laborer);
+			}
 			
 			//crea el contrato
 			Contract contract = new Contract();
