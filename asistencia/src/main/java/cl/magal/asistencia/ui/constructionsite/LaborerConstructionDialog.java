@@ -1,6 +1,7 @@
 package cl.magal.asistencia.ui.constructionsite;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -50,8 +51,10 @@ import com.vaadin.data.util.BeanItem;
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.data.util.filter.Compare;
 import com.vaadin.data.util.filter.Not;
+import com.vaadin.server.FileResource;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.StreamResource;
+import com.vaadin.server.VaadinService;
 import com.vaadin.server.VaadinSession;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.AbstractField;
@@ -63,10 +66,12 @@ import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.DateField;
 import com.vaadin.ui.DefaultFieldFactory;
+import com.vaadin.ui.Embedded;
 import com.vaadin.ui.Field;
 import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
+import com.vaadin.ui.Link;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.TabSheet;
@@ -147,7 +152,22 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 		gl.setMargin(true);
 		gl.setSizeFull();
 
-		gl.addComponent(new Label("<h1>foto...</h1>",ContentMode.HTML));
+		// Find the application directory
+		String basepath = VaadinService.getCurrent().getBaseDirectory().getAbsolutePath();
+		// Image as a file resource
+		FileResource resource = new FileResource(new File(basepath + "/WEB-INF/images/" + getItem().getItemProperty("laborer.photo").getValue()));
+
+		// Show the image in the application
+		HorizontalLayout t = new HorizontalLayout();
+		t.setWidth("100%");
+		t.setSpacing(true);		
+		gl.addComponent(t);
+		
+		Embedded image = new Embedded("", resource);
+		image.setWidth("350");
+		image.setHeight("400");
+		t.addComponent(image);       
+		t.setComponentAlignment(image, Alignment.TOP_LEFT);
 		
 		gl.addComponent( new HorizontalLayout(){
 			{
