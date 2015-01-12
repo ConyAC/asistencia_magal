@@ -237,7 +237,14 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 		gl.addComponent(new Label("Trabajador"));gl.addComponent(new Label(getItem().getItemProperty("laborer.fullname")));
 		gl.addComponent(new Label("Rut"));gl.addComponent(new Label(getItem().getItemProperty("laborer.rut")));
 		gl.addComponent(new Label("Fecha de Nacimiento"));gl.addComponent(new Label(getItem().getItemProperty("laborer.dateBirth")));
-		gl.addComponent(new Label("Estado Civil"));gl.addComponent(new Label(((MaritalStatus)getItem().getItemProperty("laborer.maritalStatus").getValue()).toString()));
+		String marital = MaritalStatus.CASADO.toString();
+		try{
+			marital = ((MaritalStatus)getItem().getItemProperty("laborer.maritalStatus").getValue()).toString();
+		}catch(Exception e){
+			//FIXME 
+		}
+		
+		gl.addComponent(new Label("Estado Civil"));gl.addComponent(new Label(marital));
 		gl.addComponent(new Label("Dirección"));gl.addComponent(new Label(getItem().getItemProperty("laborer.address")));
 		if(getItem().getItemProperty("laborer.mobileNumber") != null)
 			gl.addComponent(new Label("Celular"));gl.addComponent(new Label(getItem().getItemProperty("laborer.mobileNumber")));
