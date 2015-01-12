@@ -148,6 +148,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 		gl.setSizeFull();
 
 		gl.addComponent(new Label("<h1>foto...</h1>",ContentMode.HTML));
+		
 		gl.addComponent( new HorizontalLayout(){
 			{
 				setSpacing(true);
@@ -164,14 +165,10 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 				Button bloquear = new Button(null,FontAwesome.LOCK);					
 				bloquear.addClickListener(new Button.ClickListener() {
 					public void buttonClick(ClickEvent event) {								
-//						List<User> users = serviceUser.getAllUsers();
-//						itemUser.removeAllItems();
-//						itemUser.addAll(users);
-						
-						User user_session = (User) VaadinSession.getCurrent().getAttribute(Constants.SESSION_USUARIO);
+
 						LaborerConstructionsite cs = new LaborerConstructionsite();
 						BeanItem<LaborerConstructionsite> csItem = new BeanItem<LaborerConstructionsite>(cs);						
-						LaborerBlockDialog lbWindow = new LaborerBlockDialog(csItem, user_session, velocityEngine);
+						LaborerBlockDialog lbWindow = new LaborerBlockDialog(csItem, velocityEngine);
 						
 						lbWindow.setCaption("Bloquear Trabajador");
 						lbWindow.addListener(new AbstractWindowEditor.EditorSavedListener() {
@@ -202,8 +199,11 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 				acceptObrero.addClickListener(new Button.ClickListener() {
 					@Override
 					public void buttonClick(ClickEvent event) {
-						Notification.show("Imprimiendo");
-
+						LaborerConstructionsite laborer = (LaborerConstructionsite) getItem().getBean();
+						if(laborer == null ) 
+							throw new RuntimeException("El trabajador no es válido.");
+						laborer.setConfirmed(true);
+						Notification.show("Trabajador aceptado.");
 					}
 				});		
 				addComponent(acceptObrero);
