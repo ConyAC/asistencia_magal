@@ -139,10 +139,11 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 	}
 
 	protected VerticalLayout drawPyH() {
+		
 		VerticalLayout vl = new VerticalLayout();
 		vl.setSpacing(true);
 		vl.setMargin(true);
-		vl.setSizeFull();
+		vl.setWidth("100%");
 
 		/*Herramientas*/
 		VerticalLayout vh = new VerticalLayout();
