@@ -21,7 +21,8 @@ CREATE TABLE IF NOT EXISTS "LABORER"
    SECONDNAME varchar(255),
    TEAMID bigint,
    TOWN varchar(255),
-   WEDGE integer
+   WEDGE integer,
+   PROVENANCE varchar(255)
 )
 ;
 CREATE UNIQUE INDEX IF NOT EXISTS PK_LABORER ON "LABORER"(LABORERID)
@@ -152,6 +153,9 @@ CREATE TABLE IF NOT EXISTS "LABORER_CONSTRUCTIONSITE"
    ACTIVE smallint,
    CONFIRMED smallint,
    REWARD integer,
+   BLOCK boolean,
+   PERSONBLOCKID bigint,
+   COMMENT varchar(255),
    -- JOB integer not null,
    -- JOBCODE integer not null,
    CONSTRUCTION_SITEID integer NOT NULL

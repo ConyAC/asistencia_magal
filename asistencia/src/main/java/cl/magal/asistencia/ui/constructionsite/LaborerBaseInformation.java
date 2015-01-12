@@ -18,6 +18,7 @@ import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Embedded;
 import com.vaadin.ui.Field;
 import com.vaadin.ui.GridLayout;
+import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.Upload;
@@ -34,6 +35,7 @@ public class LaborerBaseInformation extends VerticalLayout {
 	private static final long serialVersionUID = 453082527742097304L;
 	
 	String prefix = "";
+	boolean viewElement;
 	
 	/**
 	 * BINDER
@@ -43,14 +45,16 @@ public class LaborerBaseInformation extends VerticalLayout {
 		return binder;
 	}
 
-	public LaborerBaseInformation(BeanFieldGroup<?> fg) {
+	public LaborerBaseInformation(BeanFieldGroup<?> fg, boolean viewElement) {
 		this.binder = fg;
+		this.viewElement = viewElement;
 		init();
 	}
 	
-	public LaborerBaseInformation(BeanFieldGroup<?> fg,String prefix) {
+	public LaborerBaseInformation(BeanFieldGroup<?> fg,String prefix, boolean viewElement) {
 		this.binder = fg;
 		this.prefix = prefix + ".";
+		this.viewElement = viewElement;
 		init();
 	}
 		
@@ -67,7 +71,7 @@ public class LaborerBaseInformation extends VerticalLayout {
 		// Loop through the properties, build fields for them and add the fields
 		// to this UI
 		for (Object propertyId : new String[]{"rut","firstname","secondname","lastname", "secondlastname", "dateBirth", "address", "mobileNumber", "phone", "dateAdmission", //"job",
-				"afp", "maritalStatus"}) {
+				"afp", "maritalStatus", "provenance"}) {
 			if(propertyId.equals("laborerId") || propertyId.equals("constructionSites") || propertyId.equals("contractId") || propertyId.equals("teamId"))
 				;
 			else if(propertyId.equals("afp")){
@@ -113,46 +117,56 @@ public class LaborerBaseInformation extends VerticalLayout {
 			}
 		}
 		
-		
-		Upload upload = new Upload("Cargar fotografía", null);
-		upload.setButtonCaption("Iniciar carga");
-		detalleObrero.addComponent(upload);
-		detalleObrero.setComponentAlignment(upload, Alignment.MIDDLE_CENTER);
-		        
-		// Show uploaded file in this placeholder
-		final Embedded image = new Embedded("Uploaded Image");
-		image.setVisible(false);
-		detalleObrero.addComponent(image);
-
-		// Implement both receiver that saves upload in a file and
-		// listener for successful upload
-		class ImageUploader implements Receiver, SucceededListener {
-		    public File file;
-		    
-		    public OutputStream receiveUpload(String filename, String mimeType) {
-		        // Create upload stream
-		        FileOutputStream fos = null; // Output stream to write to
-		        try {
-		            // Open the file for writing.
-		            file = new File("C:\\Users\\Constanza\\temp" + filename);
-		            fos = new FileOutputStream(file);
-		        } catch (final java.io.FileNotFoundException e) {		            
-		                    Notification.show("Error al guardar");
-		            return null;
-		        }
-		        return fos; // Return the output stream to write to
-		    }
-
-		    public void uploadSucceeded(SucceededEvent event) {
-		        // Show the uploaded file in the image viewer
-		        image.setVisible(true);
-		        image.setSource(new FileResource(file));
-		    }
-		};
-		final ImageUploader uploader = new ImageUploader(); 
-		upload.setReceiver(uploader);
-		upload.addListener(uploader);
-
+		if(viewElement){
+			HorizontalLayout hl = new HorizontalLayout();
+			hl.setWidth("250%");
+			hl.setSpacing(true);
+			
+			Upload upload = new Upload("Cargar fotografía", null);
+			upload.setButtonCaption("Iniciar carga");
+			
+			hl.addComponent(upload);
+			hl.setComponentAlignment(upload, Alignment.TOP_LEFT);
+					        
+			// Show uploaded file in this placeholder
+			final Embedded image = new Embedded();
+			image.setVisible(false);
+			hl.addComponent(image);
+			
+			// Implement both receiver that saves upload in a file and
+			// listener for successful upload
+			class ImageUploader implements Receiver, SucceededListener {
+			    public File file;
+			    
+			    public OutputStream receiveUpload(String filename, String mimeType) {
+			        // Create upload stream
+			        FileOutputStream fos = null; // Output stream to write to
+			        try {
+			            // Open the file for writing.
+			            file = new File("C:\\Users\\Constanza\\temp" + filename);
+			            fos = new FileOutputStream(file);
+			        } catch (final java.io.FileNotFoundException e) {
+			        	new Notification("No es posible acceder al archivo", e.getMessage());
+			            //Notification.show("Error al guardar la imagen.");
+			            return null;
+			        }
+			        return fos; // Return the output stream to write to
+			    }
+	
+			    public void uploadSucceeded(SucceededEvent event) {
+			        // Show the uploaded file in the image viewer
+			        image.setVisible(true);
+			        image.setHeight("100");
+			        image.setWidth("100");
+			        image.setSource(new FileResource(file));
+			    }
+			};
+			final ImageUploader uploader = new ImageUploader(); 
+			upload.setReceiver(uploader);
+			upload.addListener(uploader);
+	
+			detalleObrero.addComponent(hl);
+		}
 		detalleObrero.setWidth("100%");
 
 	}
@@ -180,6 +194,8 @@ public class LaborerBaseInformation extends VerticalLayout {
 			return "Teléfono fijo";
 		else if(propertyId.equals("dateAdmission"))
 			return "Fecha de Admisión";
+		else if(propertyId.equals("provenance"))
+			return "Procedencia";
 		else
 			return propertyId.toString();
 	}

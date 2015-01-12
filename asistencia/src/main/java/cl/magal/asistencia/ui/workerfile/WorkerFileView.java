@@ -134,7 +134,7 @@ public class WorkerFileView extends HorizontalLayout implements View {
 	private com.vaadin.ui.Component drawDetalleObrero() {
 		//crea un objeto vacio para que cree bien la interfaz
 		fieldGroup.setItemDataSource(new BeanItem<Laborer>(new Laborer()));
-		detalleObrero = new LaborerBaseInformation(fieldGroup);
+		detalleObrero = new LaborerBaseInformation(fieldGroup, false);
 		detalleObrero.setMargin(true);
 		return detalleObrero;
 	}

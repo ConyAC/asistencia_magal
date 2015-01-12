@@ -37,7 +37,7 @@ public class LaborerDialog extends AbstractWindowEditor {
 
 	@Override
 	protected Component createBody() {
-		return new LaborerBaseInformation(getBinder());
+		return new LaborerBaseInformation(getBinder(), false);
 	}
 	
 	@Override

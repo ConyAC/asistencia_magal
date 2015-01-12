@@ -118,6 +118,8 @@ public class Laborer implements Serializable {
     private String commune;
     @Column(name="wedge")
     private Integer wedge;
+    @Column(name="provenance")
+    private String provenance;
 
     @Column(name = "afp" , nullable = false)
     @Convert(converter = AfpConverter.class)
@@ -390,8 +392,16 @@ public class Laborer implements Serializable {
         	team.getLaborers().add(this);
         }
     }
+	
+    public String getProvenance() {
+		return provenance;
+	}
 
-    @Override
+	public void setProvenance(String provenance) {
+		this.provenance = provenance;
+	}
+
+	@Override
     public boolean equals(Object object) {
         // TODO: Warning - this method won't work in the case the id fields are not set
         if (!(object instanceof Laborer)) {

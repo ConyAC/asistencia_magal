@@ -13,25 +13,34 @@ import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.tools.generic.DateTool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.ui.velocity.VelocityEngineUtils;
 
 import cl.magal.asistencia.entities.Absence;
 import cl.magal.asistencia.entities.Accident;
 import cl.magal.asistencia.entities.Annexed;
+import cl.magal.asistencia.entities.ConstructionSite;
 import cl.magal.asistencia.entities.Contract;
+import cl.magal.asistencia.entities.Laborer;
 import cl.magal.asistencia.entities.LaborerConstructionsite;
 import cl.magal.asistencia.entities.Loan;
 import cl.magal.asistencia.entities.Tool;
+import cl.magal.asistencia.entities.User;
 import cl.magal.asistencia.entities.Vacation;
 import cl.magal.asistencia.entities.enums.AbsenceType;
 import cl.magal.asistencia.entities.enums.AccidentLevel;
 import cl.magal.asistencia.entities.enums.Job;
 import cl.magal.asistencia.entities.enums.LoanStatus;
+import cl.magal.asistencia.entities.enums.MaritalStatus;
 import cl.magal.asistencia.entities.enums.ToolStatus;
+import cl.magal.asistencia.services.ConstructionSiteService;
 import cl.magal.asistencia.services.LaborerService;
+import cl.magal.asistencia.services.UserService;
 import cl.magal.asistencia.ui.AbstractWindowEditor;
 import cl.magal.asistencia.ui.OnValueChangeFieldFactory;
+import cl.magal.asistencia.ui.AbstractWindowEditor.EditorSavedEvent;
 import cl.magal.asistencia.ui.workerfile.vo.HistoryVO;
+import cl.magal.asistencia.util.Constants;
 
 import com.vaadin.data.Container;
 import com.vaadin.data.Container.Filter;
@@ -43,6 +52,7 @@ import com.vaadin.data.util.filter.Compare;
 import com.vaadin.data.util.filter.Not;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.StreamResource;
+import com.vaadin.server.VaadinSession;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.AbstractField;
 import com.vaadin.ui.Alignment;
@@ -76,7 +86,10 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 
 	protected Button btnAddH, btnAddP;
 	BeanItemContainer<HistoryVO> historyContainer = new BeanItemContainer<HistoryVO>(HistoryVO.class);
-
+	BeanItemContainer<LaborerConstructionsite> constructionContainer = new BeanItemContainer<LaborerConstructionsite>(LaborerConstructionsite.class);
+	BeanItemContainer<User> itemUser = new BeanItemContainer<User>(User.class);
+	
+	transient UserService serviceUser;
 	transient LaborerService service;
 	transient private VelocityEngine velocityEngine;
 	
@@ -108,9 +121,9 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 		TabSheet tab = new TabSheet();
 
 		//tab de Resumen
-		//tab.addTab(drawInfo(),"Resumen"); -> no cuando se está creando.
+		tab.addTab(drawSummary(),"Resumen");
 		//tab de Información
-		tab.addTab(new LaborerBaseInformation(getBinder(),"laborer"),"Información");
+		tab.addTab(new LaborerBaseInformation(getBinder(),"laborer", true),"Información");
 		//tab de vacaciones
 		tab.addTab(drawVacations(),"Vacaciones");
 		//tab de perstamos y herramientas
@@ -127,6 +140,92 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 		return tab;
 	}
 
+	protected Component drawSummary() {	
+		
+		GridLayout gl = new GridLayout(2,10);
+		gl.setSpacing(true);
+		gl.setMargin(true);
+		gl.setSizeFull();
+
+		gl.addComponent(new Label("<h1>foto...</h1>",ContentMode.HTML));
+		gl.addComponent( new HorizontalLayout(){
+			{
+				setSpacing(true);
+
+				Button btnPrint = new Button(null,new Button.ClickListener() {
+
+					@Override
+					public void buttonClick(ClickEvent event) {
+						Notification.show("Imprimiendo");
+					}
+				}){{setIcon(FontAwesome.PRINT); setDescription("Imprimir");}};
+				addComponent(btnPrint);
+				
+				Button bloquear = new Button(null,FontAwesome.LOCK);					
+				bloquear.addClickListener(new Button.ClickListener() {
+					public void buttonClick(ClickEvent event) {								
+//						List<User> users = serviceUser.getAllUsers();
+//						itemUser.removeAllItems();
+//						itemUser.addAll(users);
+						
+						User user_session = (User) VaadinSession.getCurrent().getAttribute(Constants.SESSION_USUARIO);
+						LaborerConstructionsite cs = new LaborerConstructionsite();
+						BeanItem<LaborerConstructionsite> csItem = new BeanItem<LaborerConstructionsite>(cs);						
+						LaborerBlockDialog lbWindow = new LaborerBlockDialog(csItem, user_session, velocityEngine);
+						
+						lbWindow.setCaption("Bloquear Trabajador");
+						lbWindow.addListener(new AbstractWindowEditor.EditorSavedListener() {
+							
+							@Override
+							public void editorSaved(EditorSavedEvent event) {
+								try {
+									LaborerConstructionsite lc = (LaborerConstructionsite) getItem().getBean();
+									if(lc == null ) 
+										throw new RuntimeException("El trabajador no es válido.");
+									lc.setPersonBlock((User) VaadinSession.getCurrent().getAttribute(Constants.SESSION_USUARIO));
+									service.save(lc);
+									constructionContainer.addBean(lc);
+					    		} catch (Exception e) {
+					    			logger.error("Error al guardar la información de la obra",e);
+					    			Notification.show("Es necesario agregar todos los campos obligatorios", Type.ERROR_MESSAGE);
+					    		}
+								
+							}
+						});
+				        
+				        UI.getCurrent().addWindow(lbWindow);
+					}
+				});		
+				addComponent(bloquear);
+				
+				Button acceptObrero = new Button(null,FontAwesome.CHECK);					
+				acceptObrero.addClickListener(new Button.ClickListener() {
+					@Override
+					public void buttonClick(ClickEvent event) {
+						Notification.show("Imprimiendo");
+
+					}
+				});		
+				addComponent(acceptObrero);
+			}
+		});
+
+		//if(getItem().getItemProperty("laborer.photo") != null)
+			//gl.addComponent(new Label("Fecha de Admisión"));gl.addComponent(new Label(getItem().getItemProperty("laborer.photo")));
+		gl.addComponent(new Label("Trabajador"));gl.addComponent(new Label(getItem().getItemProperty("laborer.fullname")));
+		gl.addComponent(new Label("Rut"));gl.addComponent(new Label(getItem().getItemProperty("laborer.rut")));
+		gl.addComponent(new Label("Fecha de Nacimiento"));gl.addComponent(new Label(getItem().getItemProperty("laborer.dateBirth")));
+		gl.addComponent(new Label("Estado Civil"));gl.addComponent(new Label(((MaritalStatus)getItem().getItemProperty("laborer.maritalStatus").getValue()).toString()));
+		gl.addComponent(new Label("Dirección"));gl.addComponent(new Label(getItem().getItemProperty("laborer.address")));
+		if(getItem().getItemProperty("laborer.mobileNumber") != null)
+			gl.addComponent(new Label("Celular"));gl.addComponent(new Label(getItem().getItemProperty("laborer.mobileNumber")));
+		gl.addComponent(new Label("Teléfono"));gl.addComponent(new Label(getItem().getItemProperty("laborer.phone")));
+		if(getItem().getItemProperty("laborer.dateAdmission").getValue() != null)
+			gl.addComponent(new Label("Fecha de Admisión")); gl.addComponent(new Label(getItem().getItemProperty("laborer.dateAdmission")));
+				
+		return gl;
+	}
+	
 	protected VerticalLayout drawPyH() {
 		VerticalLayout vl = new VerticalLayout();
 		vl.setSpacing(true);
@@ -1001,5 +1100,4 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 	protected boolean preDiscard() {
 		return super.preDiscard();
 	}
-
 }
