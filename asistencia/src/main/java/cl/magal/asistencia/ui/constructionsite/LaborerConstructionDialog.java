@@ -160,6 +160,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 		
 		gl.addComponent( new HorizontalLayout(){
 			{
+				try{
 				// Find the application directory
 				String basepath = VaadinService.getCurrent().getBaseDirectory().getAbsolutePath();
 				// Image as a file resource
@@ -170,6 +171,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 				image.setHeight("400");
 				addComponent(image);       
 				setComponentAlignment(image, Alignment.TOP_LEFT);
+				}catch(Exception e){ /*FIXME falla silenciosamente*/ }
 				
 				setSpacing(true);
 
