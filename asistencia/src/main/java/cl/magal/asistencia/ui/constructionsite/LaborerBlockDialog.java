@@ -40,8 +40,8 @@ public class LaborerBlockDialog extends AbstractWindowEditor {
 		super(item);
 
 		this.velocityEngine = velocityEngine;
-		this.service = service;
-		setWidth("70%");
+		setWidth("50%");
+		setHeight("50%");
 		
 		init();
 	}
@@ -77,6 +77,7 @@ public class LaborerBlockDialog extends AbstractWindowEditor {
 				comment.setHeight("100");
 				vl.addComponent(comment);
 				vl.setComponentAlignment(comment, Alignment.MIDDLE_LEFT);
+				logger.debug("LzzzL"+ comment.getValue());
 			}else{        		
         		String t = tradProperty(propertyId);
         		Field field = buildAndBind(t, propertyId);

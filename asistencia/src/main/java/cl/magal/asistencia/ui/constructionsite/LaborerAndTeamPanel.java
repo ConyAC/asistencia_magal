@@ -625,7 +625,11 @@ public class LaborerAndTeamPanel extends Panel implements View {
 
 			@Override
 			public Object generateCell(CustomTable source, Object itemId,Object columnId) {
-				return (Boolean)source.getContainerProperty(itemId, columnId).getValue() ? "Si": "No";
+				if((Boolean)source.getContainerProperty(itemId, columnId).getValue()){
+					return "Si";
+				}else
+					return "No";
+				//return (Boolean)source.getContainerProperty(itemId, columnId).getValue() ? "Si": "No";
 			}
 		});
 

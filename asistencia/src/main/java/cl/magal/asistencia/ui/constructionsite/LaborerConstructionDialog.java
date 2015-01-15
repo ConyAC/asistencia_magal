@@ -18,6 +18,7 @@ import org.springframework.ui.velocity.VelocityEngineUtils;
 import cl.magal.asistencia.entities.Absence;
 import cl.magal.asistencia.entities.Accident;
 import cl.magal.asistencia.entities.Annexed;
+import cl.magal.asistencia.entities.ConstructionSite;
 import cl.magal.asistencia.entities.Contract;
 import cl.magal.asistencia.entities.LaborerConstructionsite;
 import cl.magal.asistencia.entities.Loan;
@@ -198,10 +199,14 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 							@Override
 							public void editorSaved(EditorSavedEvent event) {
 								try {
-									LaborerConstructionsite lc = (LaborerConstructionsite) getItem().getBean();
-									if(lc == null ) 
-										throw new RuntimeException("El trabajador no es válido.");
+									/*ConstructionSite obra = ((BeanItem<ConstructionSite>) event.getSavedItem()).getBean();
+										service.save(obra);
+										constructionContainer.addBean(obra);
+										*/
+									LaborerConstructionsite lc = (LaborerConstructionsite) getItem().getBean();								
 									lc.setPersonBlock((User) VaadinSession.getCurrent().getAttribute(Constants.SESSION_USUARIO));
+									
+									logger.debug("LL"+constructionContainer.getItem("comment"));
 									service.save(lc);
 									constructionContainer.addBean(lc);
 					    		} catch (Exception e) {
@@ -215,6 +220,8 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 				        UI.getCurrent().addWindow(lbWindow);
 					}
 				});		
+				bloquear.setData(constructionContainer);
+				bloquear.setDescription("Bloquear");
 				addComponent(bloquear);
 				
 				Button acceptObrero = new Button(null,FontAwesome.CHECK);					
@@ -225,9 +232,11 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 						if(laborer == null ) 
 							throw new RuntimeException("El trabajador no es válido.");
 						laborer.setConfirmed(true);
-						Notification.show("Trabajador aceptado.");
+						service.save(laborer);
+						Notification.show("Trabajador confirmado.");
 					}
 				});		
+				bloquear.setDescription("Confirmar");
 				addComponent(acceptObrero);
 			}
 		},0,0,1,0);
