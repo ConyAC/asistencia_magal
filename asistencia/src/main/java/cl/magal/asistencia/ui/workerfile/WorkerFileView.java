@@ -118,11 +118,14 @@ public class WorkerFileView extends HorizontalLayout implements View {
 		hl.addComponent(label2);
 		hl.setExpandRatio(label2,0.2f);
 
-		//VerticalLayout vh = new VerticalLayout();
-		GridLayout vh = new GridLayout(2,3);
+		HorizontalLayout f = new HorizontalLayout();
+		f.setSpacing(true);
+		vl.addComponent(f);
+		
+		VerticalLayout vh = new VerticalLayout();
 		vh.setWidth("100%");
 		vh.setSpacing(true);
-		vl.addComponent(vh);
+		f.addComponent(vh);
 
 		fullname.addStyleName("title-summary");
 		vh.addComponent(fullname);
@@ -130,17 +133,15 @@ public class WorkerFileView extends HorizontalLayout implements View {
 		String basepath = VaadinService.getCurrent().getBaseDirectory().getAbsolutePath();
 		// Image as a file resource
 		FileResource resource = new FileResource(new File(basepath + "/WEB-INF/images/1.JPG" /*+photo.getValue()*/));
-		logger.debug("xSS"+photo);
 		Embedded image = new Embedded("", resource);
 		image.setWidth("100");
 		image.setHeight("100");
-		vh.addComponent(image);     
-		vh.setComponentAlignment(image, Alignment.MIDDLE_RIGHT);
-
+		image.addStyleName("image-laborer-h");
 		
 		vh.addComponent(rut);
 		vh.addComponent(job);
-
+		f.addComponent(image);
+		
 		Table table = new Table();
 		table.addStyleName("table-summary");
 //		table.addGeneratedColumn("endingDate", new Table.ColumnGenerator() {
