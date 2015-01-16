@@ -1,6 +1,7 @@
 package cl.magal.asistencia.ui.workerfile;
 
 
+import java.io.File;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
@@ -33,11 +34,14 @@ import com.vaadin.event.ItemClickEvent;
 import com.vaadin.event.ItemClickEvent.ItemClickListener;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
+import com.vaadin.server.FileResource;
 import com.vaadin.server.FontAwesome;
+import com.vaadin.server.VaadinService;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
+import com.vaadin.ui.Embedded;
 import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
@@ -71,6 +75,7 @@ public class WorkerFileView extends HorizontalLayout implements View {
 	LaborerBaseInformation detalleObrero;
 	FilterTable tableObrero;
 	Label label1,label2;
+	Label fullname, rut, job, photo;
 
 	public WorkerFileView(){
 
@@ -92,6 +97,11 @@ public class WorkerFileView extends HorizontalLayout implements View {
 
 		historyContainer.addNestedContainerProperty("constructionsite.name");
 
+		fullname = new Label();
+		rut = new Label();
+		job = new Label();
+		photo = new Label();
+		
 		VerticalLayout vl = new VerticalLayout();
 		vl.setMargin(true);
 		vl.setSizeFull();
@@ -108,7 +118,31 @@ public class WorkerFileView extends HorizontalLayout implements View {
 		hl.addComponent(label2);
 		hl.setExpandRatio(label2,0.2f);
 
+		//VerticalLayout vh = new VerticalLayout();
+		GridLayout vh = new GridLayout(2,3);
+		vh.setWidth("100%");
+		vh.setSpacing(true);
+		vl.addComponent(vh);
+
+		fullname.addStyleName("title-summary");
+		vh.addComponent(fullname);
+		
+		String basepath = VaadinService.getCurrent().getBaseDirectory().getAbsolutePath();
+		// Image as a file resource
+		FileResource resource = new FileResource(new File(basepath + "/WEB-INF/images/1.JPG" /*+photo.getValue()*/));
+		logger.debug("xSS"+photo);
+		Embedded image = new Embedded("", resource);
+		image.setWidth("100");
+		image.setHeight("100");
+		vh.addComponent(image);     
+		vh.setComponentAlignment(image, Alignment.MIDDLE_RIGHT);
+
+		
+		vh.addComponent(rut);
+		vh.addComponent(job);
+
 		Table table = new Table();
+		table.addStyleName("table-summary");
 //		table.addGeneratedColumn("endingDate", new Table.ColumnGenerator() {
 //
 //			@Override
@@ -141,6 +175,8 @@ public class WorkerFileView extends HorizontalLayout implements View {
 					sb.append("Sin contratos");
 				}else{
 					for(Contract contract : contracts){
+						if(contract.isActive())
+							job.setValue(contract.getJob().toString());
 						sb.append(contract.getJob().toString()).append("(").append(contract.getJobCode()).append(") ");
 						vl.addComponent(new Label(sb.toString(),ContentMode.HTML));
 						vl.addComponent(new Label(contract.getStep(),ContentMode.HTML));
@@ -185,6 +221,7 @@ public class WorkerFileView extends HorizontalLayout implements View {
 			}
 		});
 		table.setWidth("100%");
+		table.setHeight("250");
 		table.setVisibleColumns("constructionsite.name","averageWage","reward","numberOfAccidents","contracts","active"//,"startingDate","endingDate"
 				);
 		table.setColumnHeaders("Obra","Jornal Promedio","Premio","N° Accidentes","Oficios","Estado"//,"Fecha Inicio","Fecha Termino"
@@ -232,6 +269,10 @@ public class WorkerFileView extends HorizontalLayout implements View {
 		List<LaborerConstructionsite> history = service.findAllLaborerConstructionsiteByLaborer(laborerItem.getBean());
 		historyContainer.removeAllItems();
 		historyContainer.addAll(history);
+		
+		fullname.setValue(laborerItem.getBean().getFullname());
+		rut.setValue(laborerItem.getBean().getRut());
+		photo.setValue(laborerItem.getBean().getPhoto());
 
 		
 		//		//obtiene el vertical Layout

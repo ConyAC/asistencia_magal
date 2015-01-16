@@ -12118,3 +12118,12 @@ div.v-layout.v-horizontal.v-widget {
 .magaltheme .no-margin h1 {
 	margin: 0 !important;
 }
+
+.magaltheme .title-summary { 
+	font-weight: bold;
+	font-size: 28px;
+}
+
+.magaltheme .table-summary { 
+	margin-top: 10px;
+}
