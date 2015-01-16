@@ -155,11 +155,11 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 
 	protected Component drawSummary() {	
 		
-		GridLayout gl = new GridLayout(2,10);
+		GridLayout gl = new GridLayout(3,10);
 		gl.setSpacing(true);
 		gl.setMargin(true);
 		gl.setWidth("100%");
-		
+			
 		gl.addComponent( new HorizontalLayout(){
 			{
 				try{
@@ -176,7 +176,31 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 				}catch(Exception e){ /*FIXME falla silenciosamente*/ }
 				
 				setSpacing(true);
-
+				
+				VerticalLayout hl = new VerticalLayout();
+				addComponent(hl);
+				setComponentAlignment(hl, Alignment.MIDDLE_CENTER);
+				//gl.setComponentAlignment(hl, Alignment.MIDDLE_CENTER);
+				
+				hl.addComponent(new Label(getItem().getItemProperty("laborer.fullname")));
+				hl.addComponent(new Label(getItem().getItemProperty("laborer.rut")));
+				hl.addComponent(new Label(getItem().getItemProperty("laborer.dateBirth")));
+				String marital = MaritalStatus.CASADO.toString();
+				try{
+					marital = ((MaritalStatus)getItem().getItemProperty("laborer.maritalStatus").getValue()).toString();
+				}catch(Exception e){
+					//FIXME 
+				}
+				
+				hl.addComponent(new Label(marital));
+				hl.addComponent(new Label(getItem().getItemProperty("laborer.address")));
+				if(getItem().getItemProperty("laborer.mobileNumber") != null || getItem().getItemProperty("laborer.phone") != null)
+					hl.addComponent(new Label(getItem().getItemProperty("laborer.mobileNumber").getValue() +" - "+getItem().getItemProperty("laborer.phone").getValue()));
+				if(getItem().getItemProperty("laborer.dateAdmission").getValue() != null)
+					hl.addComponent(new Label(getItem().getItemProperty("laborer.dateAdmission")));
+						
+				setSpacing(true);
+					
 				Button btnPrint = new Button(null,new Button.ClickListener() {
 
 					@Override
@@ -233,27 +257,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 				addComponent(acceptObrero);
 			}
 		},0,0,1,0);
-
-		//if(getItem().getItemProperty("laborer.photo") != null)
-			//gl.addComponent(new Label("Fecha de Admisión"));gl.addComponent(new Label(getItem().getItemProperty("laborer.photo")));
-		gl.addComponent(new Label("Trabajador"));gl.addComponent(new Label(getItem().getItemProperty("laborer.fullname")));
-		gl.addComponent(new Label("Rut"));gl.addComponent(new Label(getItem().getItemProperty("laborer.rut")));
-		gl.addComponent(new Label("Fecha de Nacimiento"));gl.addComponent(new Label(getItem().getItemProperty("laborer.dateBirth")));
-		String marital = MaritalStatus.CASADO.toString();
-		try{
-			marital = ((MaritalStatus)getItem().getItemProperty("laborer.maritalStatus").getValue()).toString();
-		}catch(Exception e){
-			//FIXME 
-		}
 		
-		gl.addComponent(new Label("Estado Civil"));gl.addComponent(new Label(marital));
-		gl.addComponent(new Label("Dirección"));gl.addComponent(new Label(getItem().getItemProperty("laborer.address")));
-		if(getItem().getItemProperty("laborer.mobileNumber") != null)
-			gl.addComponent(new Label("Celular"));gl.addComponent(new Label(getItem().getItemProperty("laborer.mobileNumber")));
-		gl.addComponent(new Label("Teléfono"));gl.addComponent(new Label(getItem().getItemProperty("laborer.phone")));
-		if(getItem().getItemProperty("laborer.dateAdmission").getValue() != null)
-			gl.addComponent(new Label("Fecha de Admisión")); gl.addComponent(new Label(getItem().getItemProperty("laborer.dateAdmission")));
-				
 		return gl;
 	}
 	
