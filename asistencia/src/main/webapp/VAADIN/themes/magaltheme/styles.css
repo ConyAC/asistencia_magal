@@ -12118,3 +12118,7 @@ div.v-layout.v-horizontal.v-widget {
 .magaltheme .no-margin h1 {
 	margin: 0 !important;
 }
+
+.magaltheme .pending-laborer{
+	background-color: red;
+}

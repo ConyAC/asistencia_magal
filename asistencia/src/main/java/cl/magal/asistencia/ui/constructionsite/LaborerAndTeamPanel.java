@@ -626,6 +626,7 @@ public class LaborerAndTeamPanel extends Panel implements View {
 			@Override
 			public Object generateCell(CustomTable source, Object itemId,Object columnId) {
 				if((Boolean)source.getContainerProperty(itemId, columnId).getValue()){
+					source.addStyleName("pending-laborer");
 					return "Si";
 				}else
 					return "No";
