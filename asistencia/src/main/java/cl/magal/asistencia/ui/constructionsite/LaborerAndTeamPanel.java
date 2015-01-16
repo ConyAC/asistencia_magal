@@ -631,7 +631,7 @@ public class LaborerAndTeamPanel extends Panel implements View {
 
 		//TODO estado
 		//		table.setVisibleColumns("laborer.job","laborer.firstname","laborer.laborerId"); //FIXME laborerId
-		table.setVisibleColumns("selected","activeContract.jobAndCode","laborer.fullname","activeContract.step","confirmed","actions"); //FIXME laborerId
+		table.setVisibleColumns("selected","activeContract.jobCode","laborer.fullname","activeContract.step","confirmed","actions"); //FIXME laborerId
 		table.setColumnHeaders("","Cod","Nombre","Etapa","Confirmado","Acciones");
 		table.setColumnWidth("selected", 40);
 		
