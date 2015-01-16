@@ -12,8 +12,10 @@ import java.util.List;
 
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
+import javax.persistence.CollectionTable;
 import javax.persistence.Column;
 import javax.persistence.Convert;
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -25,7 +27,6 @@ import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
-import javax.persistence.OneToMany;
 import javax.persistence.PrePersist;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
@@ -100,6 +101,11 @@ public class ConstructionSite implements Serializable {
     
     @ManyToMany(mappedBy="cs",cascade = { CascadeType.PERSIST, CascadeType.MERGE })
     List<User> users;
+    
+    @ElementCollection(targetClass=String.class)
+	@CollectionTable(name="CONSTRUCTIONSITE_STEP")
+    @Column(name="STEP")
+	List<String> steps = new LinkedList<String>();
     
     /**
      * Obliga a que status sea activo, si no viene uno seteado
@@ -207,6 +213,14 @@ public class ConstructionSite implements Serializable {
 
 	public void setCode(String code) {
 		this.code = code;
+	}
+
+	public List<String> getSteps() {
+		return steps;
+	}
+
+	public void setSteps(List<String> steps) {
+		this.steps = steps;
 	}
 
 	@Override

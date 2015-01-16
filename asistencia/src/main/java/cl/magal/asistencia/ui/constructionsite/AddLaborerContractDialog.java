@@ -41,7 +41,7 @@ public class AddLaborerContractDialog extends AbstractWindowEditor implements Ne
 	 */
 	private static final long serialVersionUID = 3250481772094615264L;
 
-	Logger logger = LoggerFactory.getLogger(AddLaborerContractDialog.class);
+	transient Logger logger = LoggerFactory.getLogger(AddLaborerContractDialog.class);
 
 	transient LaborerService laborerService;
 	BeanItemContainer<Laborer> laborers = new BeanItemContainer<Laborer>(Laborer.class);
@@ -74,8 +74,8 @@ public class AddLaborerContractDialog extends AbstractWindowEditor implements Ne
 		super.init();
 	}
 	
-	ComboBox cb,cbJob;
-	TextField lbCodJob,lbStep;
+	ComboBox cb,cbJob,cbStep;
+	TextField lbCodJob;
 	
 	@Override
 	protected Component createBody() {
@@ -89,13 +89,15 @@ public class AddLaborerContractDialog extends AbstractWindowEditor implements Ne
 		cb.setItemCaptionMode(ItemCaptionMode.PROPERTY);
 		cb.setItemCaptionPropertyId("rut");
 		cb.setTabIndex(1);
-		if(!addLaborer){
-			cb.select(laborers.firstItemId());
-		}
 		
 		cb.setEnabled(addLaborer);
 
 		final TextField lbNombre = new TextField("Nombre:");
+		if(!addLaborer){
+			cb.select(laborers.firstItemId());
+			Utils.setLabelValue( lbNombre , laborers.firstItemId().getFullname());
+		}
+
 		lbNombre.setReadOnly(true);
 		final Button btn = new Button(null,FontAwesome.FLOPPY_O );
 		btn.setEnabled(addLaborer);
@@ -187,12 +189,12 @@ public class AddLaborerContractDialog extends AbstractWindowEditor implements Ne
 		});
 		
 		//text de etapa
-		lbStep = new TextField("Etapa");
-		lbStep.setImmediate(true);
-		lbStep.setTabIndex(4);
-		lbStep.setRequired(true);
-		lbStep.setRequiredError("Debe definir una etapa");
-		gl.addComponent(lbStep);
+		cbStep = new ComboBox("Etapa",((BeanItem<LaborerConstructionsite>) getItem()).getBean().getConstructionsite().getSteps());
+		cbStep.setImmediate(true);
+		cbStep.setTabIndex(4);
+		cbStep.setRequired(true);
+		cbStep.setRequiredError("Debe definir una etapa");
+		gl.addComponent(cbStep);
 		
 		return gl;
 	}
@@ -226,8 +228,8 @@ public class AddLaborerContractDialog extends AbstractWindowEditor implements Ne
 			msj = "Debe crear el trabajador antes de agregarlo";
 		else if( !cbJob.isValid() )
 			msj = cbJob.getRequiredError();
-		else if( !lbStep.isValid() )
-			msj = lbStep.getRequiredError();
+		else if( !cbStep.isValid() )
+			msj = cbStep.getRequiredError();
 		
 		if(msj != null)
 			Notification.show(msj,Type.ERROR_MESSAGE);
@@ -244,7 +246,7 @@ public class AddLaborerContractDialog extends AbstractWindowEditor implements Ne
 			contract.setName(laborer.getFullname());
 			contract.setJob(job);
 			contract.setJobCode(Integer.valueOf(lbCodJob.getValue()));
-			contract.setStep(lbStep.getValue());
+			contract.setStep((String) cbStep.getValue());
 			contract.setActive(true);
 			((BeanItem<LaborerConstructionsite>) getItem()).getBean().refreshActiveContract();
 			((BeanItem<LaborerConstructionsite>) getItem()).getBean().addContract(contract);

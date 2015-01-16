@@ -35,6 +35,7 @@ import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeNotifier;
 import com.vaadin.data.util.BeanItem;
 import com.vaadin.data.util.BeanItemContainer;
+import com.vaadin.data.util.ObjectProperty;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.StreamResource;
 import com.vaadin.shared.ui.label.ContentMode;
@@ -43,6 +44,7 @@ import com.vaadin.ui.Alignment;
 import com.vaadin.ui.BrowserFrame;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
+import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.DateField;
@@ -301,7 +303,6 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 						StreamResource.StreamSource source2 = new StreamResource.StreamSource() {
 
 							public InputStream getStream() {
-								//throw new UnsupportedOperationException("Not supported yet.");
 								return new ByteArrayInputStream(body.getBytes());
 							}
 						};
@@ -380,6 +381,72 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 
 						@Override
 						public void buttonClick(ClickEvent event) {
+							//permite imprimir la carta de renuncia
+							final Window w = new Window("Cartas de renuncias");
+							w.center();
+							w.setModal(true);
+							
+							final ObjectProperty carta1 = new ObjectProperty(false, Boolean.class);
+							final ObjectProperty carta2 = new ObjectProperty(false, Boolean.class);
+							final ObjectProperty carta3 = new ObjectProperty(false, Boolean.class);
+							
+							w.setContent(new HorizontalLayout(){
+								{
+									setSpacing(true);
+									setMargin(true);
+									addComponent(new CheckBox("Contrato"){{setPropertyDataSource(carta1);}});
+									addComponent(new CheckBox("Anexos"){{setPropertyDataSource(carta3);}});
+									addComponent(new CheckBox("Últimas Vacaciones"){{setPropertyDataSource(carta2);}});
+									
+									addComponent(new Button(null,new Button.ClickListener() {
+										
+										@Override
+										public void buttonClick(ClickEvent event) {
+											
+											final Map<String, Object> input = new HashMap<String, Object>();
+											input.put("laborerConstructions", new LaborerConstructionsite[] {(LaborerConstructionsite)getItem().getBean()});
+											input.put("tools", new DateTool());
+											
+											final StringBuilder sb = new StringBuilder();
+											if((Boolean) carta1.getValue()){
+												sb.append( VelocityEngineUtils.mergeTemplateIntoString(velocityEngine, "templates/temporary_work_contract_doc.vm", "UTF-8", input) );
+											}
+											if((Boolean) carta3.getValue()){
+												sb.append( VelocityEngineUtils.mergeTemplateIntoString(velocityEngine, "templates/annex_contract_doc.vm", "UTF-8", input) );
+											}
+											if((Boolean) carta2.getValue()){
+												sb.append( VelocityEngineUtils.mergeTemplateIntoString(velocityEngine, "templates/vacation_doc.vm", "UTF-8", input) );
+											}
+											
+											StreamResource.StreamSource source2 = new StreamResource.StreamSource() {
+
+												public InputStream getStream() {
+													//throw new UnsupportedOperationException("Not supported yet.");
+													return new ByteArrayInputStream(sb.toString().getBytes());
+												}
+											};
+											StreamResource resource = new StreamResource(source2, "Documentos Masivos.html");
+											
+											BrowserFrame e = new BrowserFrame();
+											e.setSizeFull();
+
+											// Here we create a new StreamResource which downloads our StreamSource,
+											// which is our pdf.
+											// Set the right mime type
+											//						        resource.setMIMEType("application/pdf");
+											resource.setMIMEType("text/html");
+
+											e.setSource(resource);
+											w.setContent(e);
+											w.setWidth("60%");
+											w.setHeight("60%");
+										}
+									}){ {setIcon(FontAwesome.PRINT);} } );
+								}
+							});
+							
+							UI.getCurrent().addWindow(w);
+							
 							//TODO calcular finiquito
 							//setea un finiquito
 							activeContract.setSettlement(100000);
@@ -460,6 +527,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 		Table annexedTable = new Table(null,beanContainerAnnexeds){
 			{
 				setWidth("100%");
+				setPageLength(5);
 			}
 		};
 		annexedTable.addGeneratedColumn("print", new Table.ColumnGenerator() {

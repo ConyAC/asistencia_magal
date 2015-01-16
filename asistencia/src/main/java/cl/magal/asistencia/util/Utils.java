@@ -45,5 +45,8 @@ public class Utils {
 	public static String date2String(Date date){
 		return DateTimeFormat.forPattern("dd/MM/yyyy").print(new DateTime(date));
 	}
+	public static boolean NotNullOrEmpty(String etapa) {
+		return etapa != null && etapa.length() != 0;
+	}
 	
 }

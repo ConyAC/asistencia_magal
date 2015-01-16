@@ -11,6 +11,7 @@ import cl.magal.asistencia.ui.AbstractWindowEditor;
 
 import com.vaadin.data.util.BeanItem;
 import com.vaadin.server.FontAwesome;
+import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.Notification;
@@ -33,8 +34,8 @@ public class AddAnnexedContractDialog extends AbstractWindowEditor {
 
 	public void init(){
 		
-		setWidth("50%");
-		setHeight("30%");
+		setWidth("20%");
+		setHeight("20%");
 		
 		//cambia el texto del guardar
 		getBtnGuardar().setCaption("Agregar Anexo");
@@ -42,18 +43,18 @@ public class AddAnnexedContractDialog extends AbstractWindowEditor {
 		super.init();
 	}
 	
-	TextField lbStep;
+	ComboBox lbStep;
 	
 	@Override
 	protected Component createBody() {
 		
-		GridLayout gl = new GridLayout(3,3);
+		GridLayout gl = new GridLayout();
 		gl.setSpacing(true);
 		gl.setMargin(true);
 		
 		
 		//text de etapa
-		lbStep = new TextField("Etapa");
+		lbStep = new ComboBox("Etapa",((BeanItem<Contract>) getItem()).getBean().getLaborerConstructionSite().getConstructionsite().getSteps());
 		lbStep.setImmediate(true);
 		lbStep.setTabIndex(4);
 		lbStep.setRequired(true);
@@ -78,7 +79,7 @@ public class AddAnnexedContractDialog extends AbstractWindowEditor {
 			//crea el contrato
 			Annexed annexed = new Annexed(); 
 			annexed.setStartDate(new Date());
-			annexed.setStep(lbStep.getValue());
+			annexed.setStep((String) lbStep.getValue());
 
 			((BeanItem<Contract>) getItem()).getBean().addAnnexed(annexed);
 		}
