@@ -28,6 +28,7 @@
 	    <class>cl.magal.asistencia.entities.Tool</class>
 	    <class>cl.magal.asistencia.entities.User</class>
 	    <class>cl.magal.asistencia.entities.Vacation</class>
+	    <class>cl.magal.asistencia.entities.Loan</class>
 	    <class>cl.magal.asistencia.entities.WageConfigurations</class>
 	    <class>cl.magal.asistencia.entities.converter.AbsenceTypeConverter</class>
 	    <class>cl.magal.asistencia.entities.converter.AccidentLevelConverter</class>
@@ -40,6 +41,7 @@
 	    <class>cl.magal.asistencia.entities.converter.StatusConverter</class>
 	    <class>cl.magal.asistencia.entities.converter.ToolStatusConverter</class>
 	    <class>cl.magal.asistencia.entities.converter.UserStatusConverter</class>
+	    <class>cl.magal.asistencia.entities.converter.LoanStatusConverter</class>
 	    <!-- HIBERNATE PROPERTY  -->
 	    <!-- 
 	    <properties>

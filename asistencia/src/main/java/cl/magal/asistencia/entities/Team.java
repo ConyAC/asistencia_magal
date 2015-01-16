@@ -6,8 +6,8 @@
 package cl.magal.asistencia.entities;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 
 import javax.persistence.Basic;
@@ -76,19 +76,16 @@ public class Team implements Serializable {
     @Column(name = "deleted")
     private Boolean deleted;    
    
-//    @JoinTable(name="laborer_team",
-//    joinColumns = { 
-//    		@JoinColumn(name = "teamId", referencedColumnName = "teamId")
-//     }, 
-//     inverseJoinColumns = { 	
-//            @JoinColumn(name = "LABORER_CONSTRUCTIONSITEID", referencedColumnName = "LABORER_CONSTRUCTIONSITEID")
-//     }
-//	)
-//    @ManyToMany(targetEntity=LaborerConstructionsite.class,fetch=FetchType.EAGER)
-//    List<LaborerConstructionsite> laborers = new ArrayList<LaborerConstructionsite>();
-//
-//    
-//    ConstructionSite constructionsite;
+    @JoinTable(name="laborer_team",
+    joinColumns = { 
+    		@JoinColumn(name = "teamId", referencedColumnName = "teamId")
+     }, 
+     inverseJoinColumns = { 	
+            @JoinColumn(name = "laborerId", referencedColumnName = "laborerId")
+     }
+	)
+    @ManyToMany(targetEntity=Laborer.class,fetch=FetchType.EAGER)
+    List<Laborer> laborers = new LinkedList<Laborer>();
     
     @PrePersist
     public void prePersist(){
@@ -153,13 +150,15 @@ public class Team implements Serializable {
         this.deleted = deleted;
     }    
     
-//    public List<LaborerConstructionsite> getLaborers() {
-//		return laborers;
-//	}
-//
-//	public void setLaborers(List<LaborerConstructionsite> laborers) {
-//		this.laborers = laborers;
-//	}
+    public List<Laborer> getLaborers() {
+    	if(laborers == null )
+			laborers = new LinkedList<Laborer>();
+		return laborers;
+	}
+
+	public void setLaborers(List<Laborer> laborers) {
+		this.laborers = laborers;
+	}
 
 	@Override
     public int hashCode() {
@@ -180,19 +179,19 @@ public class Team implements Serializable {
         }
         return true;
     }
-//    
-//    public void addLaborer(LaborerConstructionsite laborer) {
-//        if (!getLaborers().contains(laborer)) {
-//        	getLaborers().add(laborer);
-//        }
-//        if (!laborer.getTeams().contains(this)) {
-//            laborer.getTeams().add(this);
-//        }
-//    }
-    
+
     @Override
     public String toString() {
         return "jpa.magal.entities.Team[ teamId=" + teamId + " ]";
+    }
+    
+    public void addLaborer(Laborer laborer) {
+        if (!getLaborers().contains(laborer)) {
+        	getLaborers().add(laborer);
+        }
+        if (!laborer.getTeams().contains(this)) {
+            laborer.getTeams().add(this);
+        }
     }
     
 }

@@ -8,15 +8,18 @@ package cl.magal.asistencia.entities;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 
 import javax.persistence.Basic;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.ManyToMany;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
@@ -115,6 +118,8 @@ public class Laborer implements Serializable {
     private String commune;
     @Column(name="wedge")
     private Integer wedge;
+    @Column(name="provenance")
+    private String provenance;
 
     @Column(name = "afp" , nullable = false)
     @Convert(converter = AfpConverter.class)
@@ -152,6 +157,9 @@ public class Laborer implements Serializable {
 //    
 //    @ManyToMany(mappedBy="laborers",cascade = { CascadeType.PERSIST, CascadeType.MERGE })
 //    List<Team> teams = new LinkedList<Team>();
+    
+    @ManyToMany(mappedBy="laborers",cascade = { CascadeType.PERSIST, CascadeType.MERGE })
+    List<Team> teams = new LinkedList<Team>();
     
     @PrePersist
     public void prePersist(){
@@ -360,15 +368,40 @@ public class Laborer implements Serializable {
 	public String getFullname(){
     	return (firstname != null ? firstname : "") + " " + (lastname != null ? lastname : "");
     }
-
+	
 	@Override
     public int hashCode() {
         int hash = 0;
         hash += (laborerId != null ? laborerId.hashCode() : 0);
         return hash;
     }
+	
+	public List<Team> getTeams() {
+		return teams;
+	}
 
-    @Override
+	public void setTeams(List<Team> teams) {
+		this.teams = teams;
+	}
+	
+	public void addTeam(Team team) {
+        if (!getTeams().contains(team)) {
+        	getTeams().add(team);
+        }
+        if (!team.getLaborers().contains(this)) {
+        	team.getLaborers().add(this);
+        }
+    }
+	
+    public String getProvenance() {
+		return provenance;
+	}
+
+	public void setProvenance(String provenance) {
+		this.provenance = provenance;
+	}
+
+	@Override
     public boolean equals(Object object) {
         // TODO: Warning - this method won't work in the case the id fields are not set
         if (!(object instanceof Laborer)) {

@@ -1,6 +1,7 @@
 package cl.magal.asistencia.ui.constructionsite;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -19,15 +20,21 @@ import cl.magal.asistencia.entities.Accident;
 import cl.magal.asistencia.entities.Annexed;
 import cl.magal.asistencia.entities.Contract;
 import cl.magal.asistencia.entities.LaborerConstructionsite;
+import cl.magal.asistencia.entities.Loan;
 import cl.magal.asistencia.entities.Tool;
+import cl.magal.asistencia.entities.User;
 import cl.magal.asistencia.entities.Vacation;
 import cl.magal.asistencia.entities.enums.AbsenceType;
 import cl.magal.asistencia.entities.enums.AccidentLevel;
+import cl.magal.asistencia.entities.enums.LoanStatus;
+import cl.magal.asistencia.entities.enums.MaritalStatus;
 import cl.magal.asistencia.entities.enums.ToolStatus;
 import cl.magal.asistencia.services.LaborerService;
+import cl.magal.asistencia.services.UserService;
 import cl.magal.asistencia.ui.AbstractWindowEditor;
 import cl.magal.asistencia.ui.OnValueChangeFieldFactory;
 import cl.magal.asistencia.ui.workerfile.vo.HistoryVO;
+import cl.magal.asistencia.util.Constants;
 import cl.magal.asistencia.util.Utils;
 
 import com.vaadin.data.Container;
@@ -36,8 +43,11 @@ import com.vaadin.data.Property.ValueChangeNotifier;
 import com.vaadin.data.util.BeanItem;
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.data.util.ObjectProperty;
+import com.vaadin.server.FileResource;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.StreamResource;
+import com.vaadin.server.VaadinService;
+import com.vaadin.server.VaadinSession;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.AbstractField;
 import com.vaadin.ui.Alignment;
@@ -49,6 +59,7 @@ import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.DateField;
 import com.vaadin.ui.DefaultFieldFactory;
+import com.vaadin.ui.Embedded;
 import com.vaadin.ui.Field;
 import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.HorizontalLayout;
@@ -71,9 +82,11 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 	transient Logger logger = LoggerFactory.getLogger(LaborerConstructionDialog.class);
 
 	protected Button btnAddH, btnAddP;
-	BeanItemContainer<Tool> toolContainer= new BeanItemContainer<Tool>(Tool.class);
 	BeanItemContainer<HistoryVO> historyContainer = new BeanItemContainer<HistoryVO>(HistoryVO.class);
-
+	BeanItemContainer<LaborerConstructionsite> constructionContainer = new BeanItemContainer<LaborerConstructionsite>(LaborerConstructionsite.class);
+	BeanItemContainer<User> itemUser = new BeanItemContainer<User>(User.class);
+	
+	transient UserService serviceUser;
 	transient LaborerService service;
 	transient private VelocityEngine velocityEngine;
 
@@ -119,10 +132,10 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 		tab.setSizeFull();
 
 		//tab de Resumen
-		//tab.addTab(drawInfo(),"Resumen"); -> no cuando se está creando.
+		tab.addTab(drawSummary(),"Resumen");
 		//tab de Información
 		if(!readOnly)
-			tab.addTab(new LaborerBaseInformation(getBinder(),"laborer"),"Información");
+			tab.addTab(new LaborerBaseInformation(getBinder(),"laborer",true),"Información");
 		//tab de vacaciones
 		tab.addTab(drawVacations(),"Vacaciones");
 		//tab de perstamos y herramientas
@@ -140,6 +153,110 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 		return tab;
 	}
 
+	protected Component drawSummary() {	
+		
+		GridLayout gl = new GridLayout(2,10);
+		gl.setSpacing(true);
+		gl.setMargin(true);
+		gl.setWidth("100%");
+		
+		gl.addComponent( new HorizontalLayout(){
+			{
+				try{
+				// Find the application directory
+				String basepath = VaadinService.getCurrent().getBaseDirectory().getAbsolutePath();
+				// Image as a file resource
+				FileResource resource = new FileResource(new File(basepath + "/WEB-INF/images/" + getItem().getItemProperty("laborer.photo").getValue()));
+
+				Embedded image = new Embedded("", resource);
+				image.setWidth("350");
+				image.setHeight("400");
+				addComponent(image);       
+				setComponentAlignment(image, Alignment.TOP_LEFT);
+				}catch(Exception e){ /*FIXME falla silenciosamente*/ }
+				
+				setSpacing(true);
+
+				Button btnPrint = new Button(null,new Button.ClickListener() {
+
+					@Override
+					public void buttonClick(ClickEvent event) {
+						Notification.show("Imprimiendo");
+					}
+				}){{setIcon(FontAwesome.PRINT); setDescription("Imprimir");}};
+				addComponent(btnPrint);
+				
+				Button bloquear = new Button(null,FontAwesome.LOCK);					
+				bloquear.addClickListener(new Button.ClickListener() {
+					public void buttonClick(ClickEvent event) {								
+
+						LaborerConstructionsite cs = new LaborerConstructionsite();
+						BeanItem<LaborerConstructionsite> csItem = new BeanItem<LaborerConstructionsite>(cs);						
+						LaborerBlockDialog lbWindow = new LaborerBlockDialog(csItem, velocityEngine);
+						
+						lbWindow.setCaption("Bloquear Trabajador");
+						lbWindow.addListener(new AbstractWindowEditor.EditorSavedListener() {
+							
+							@Override
+							public void editorSaved(EditorSavedEvent event) {
+								try {
+									LaborerConstructionsite lc = (LaborerConstructionsite) getItem().getBean();
+									if(lc == null ) 
+										throw new RuntimeException("El trabajador no es válido.");
+									lc.setPersonBlock((User) VaadinSession.getCurrent().getAttribute(Constants.SESSION_USUARIO));
+									service.save(lc);
+									constructionContainer.addBean(lc);
+					    		} catch (Exception e) {
+					    			logger.error("Error al guardar la información de la obra",e);
+					    			Notification.show("Es necesario agregar todos los campos obligatorios", Type.ERROR_MESSAGE);
+					    		}
+								
+							}
+						});
+				        
+				        UI.getCurrent().addWindow(lbWindow);
+					}
+				});		
+				addComponent(bloquear);
+				
+				Button acceptObrero = new Button(null,FontAwesome.CHECK);					
+				acceptObrero.addClickListener(new Button.ClickListener() {
+					@Override
+					public void buttonClick(ClickEvent event) {
+						LaborerConstructionsite laborer = (LaborerConstructionsite) getItem().getBean();
+						if(laborer == null ) 
+							throw new RuntimeException("El trabajador no es válido.");
+						laborer.setConfirmed(true);
+						Notification.show("Trabajador aceptado.");
+					}
+				});		
+				addComponent(acceptObrero);
+			}
+		},0,0,1,0);
+
+		//if(getItem().getItemProperty("laborer.photo") != null)
+			//gl.addComponent(new Label("Fecha de Admisión"));gl.addComponent(new Label(getItem().getItemProperty("laborer.photo")));
+		gl.addComponent(new Label("Trabajador"));gl.addComponent(new Label(getItem().getItemProperty("laborer.fullname")));
+		gl.addComponent(new Label("Rut"));gl.addComponent(new Label(getItem().getItemProperty("laborer.rut")));
+		gl.addComponent(new Label("Fecha de Nacimiento"));gl.addComponent(new Label(getItem().getItemProperty("laborer.dateBirth")));
+		String marital = MaritalStatus.CASADO.toString();
+		try{
+			marital = ((MaritalStatus)getItem().getItemProperty("laborer.maritalStatus").getValue()).toString();
+		}catch(Exception e){
+			//FIXME 
+		}
+		
+		gl.addComponent(new Label("Estado Civil"));gl.addComponent(new Label(marital));
+		gl.addComponent(new Label("Dirección"));gl.addComponent(new Label(getItem().getItemProperty("laborer.address")));
+		if(getItem().getItemProperty("laborer.mobileNumber") != null)
+			gl.addComponent(new Label("Celular"));gl.addComponent(new Label(getItem().getItemProperty("laborer.mobileNumber")));
+		gl.addComponent(new Label("Teléfono"));gl.addComponent(new Label(getItem().getItemProperty("laborer.phone")));
+		if(getItem().getItemProperty("laborer.dateAdmission").getValue() != null)
+			gl.addComponent(new Label("Fecha de Admisión")); gl.addComponent(new Label(getItem().getItemProperty("laborer.dateAdmission")));
+				
+		return gl;
+	}
+	
 	protected VerticalLayout drawPyH() {
 
 		VerticalLayout vl = new VerticalLayout();
@@ -147,120 +264,141 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 		vl.setMargin(true);
 		vl.setWidth("100%");
 
-		/*Herramientas*/
+		/********** Herramientas **********/
 		VerticalLayout vh = new VerticalLayout();
-		vh.setSizeFull();
+		vh.setWidth("100%");
 
-		final Table table_h = new Table("Herramientas"){
-			{
-				setWidth("100%");				
-				addContainerProperty("name", String.class, "");
-				addContainerProperty("price", String.class, "");
-				addContainerProperty("dateBuy",String.class, "");
-				addContainerProperty("fee", String.class, "");
-				addContainerProperty("status", String.class, "");
-				setVisibleColumns("name","price","dateBuy", "fee", "status");
-				setColumnHeaders("Herramienta","Monto","Fecha", "Cuota", "Estado");
+		HorizontalLayout hl = new HorizontalLayout();
+		hl.setWidth("100%");
+		hl.setSpacing(true);		
+		vh.addComponent(hl);
 
-				setPageLength(4);
-			}
-		};
+		final BeanItemContainer<Tool> beanItemTool = new BeanItemContainer<Tool>(Tool.class);
+		List<Tool> tools = (List<Tool>)getItem().getItemProperty("tool").getValue();
+		beanItemTool.addAll(tools);
 
 		if(!readOnly){
-
-			HorizontalLayout hl = new HorizontalLayout();
-			hl.setWidth("100%");
-			hl.setSpacing(true);		
-			vh.addComponent(hl);
-			vh.setComponentAlignment(hl, Alignment.TOP_RIGHT);
-
-			final TextField herramienta = new TextField("Herramienta");
-			hl.addComponent(herramienta);
-			final TextField monto_h = new TextField("Monto");
-			hl.addComponent(monto_h);
-			final DateField fecha_h = new DateField("Fecha");
-			hl.addComponent(fecha_h);
-			final TextField cuota_h = new TextField("Cuota");
-			hl.addComponent(cuota_h);
-			final ComboBox estado_h = new ComboBox("Estado");
-			estado_h.setNullSelectionAllowed(false);
-			for(ToolStatus t : ToolStatus.values()){
-				estado_h.addItem(t);
-			}
-			hl.addComponent(estado_h);
-
 			btnAddH = new Button(null,FontAwesome.PLUS);
 			hl.addComponent(btnAddH);
+			
 			btnAddH.addClickListener(new Button.ClickListener() {
-
+	
 				@Override
 				public void buttonClick(ClickEvent event) {
-					Tool t = new Tool();
-					t.setName(herramienta.getValue());
-					t.setPrice(Integer.valueOf(monto_h.getValue()));
-					t.setFee(Integer.valueOf(cuota_h.getValue()));
-					t.setStatus((ToolStatus)estado_h.getValue());
-					t.setDateBuy(fecha_h.getValue());
-					table_h.setContainerDataSource(toolContainer);
-					toolContainer.addBean(t);
+					
+					LaborerConstructionsite laborer = (LaborerConstructionsite) getItem().getBean();
+					if(laborer == null ) throw new RuntimeException("El trabajador no es válido.");
+					Tool tool = new Tool();
+					laborer.addTool(tool);
+					beanItemTool.addBean(tool);
 				}
-			});		
+			});	
 		}
+		
+		final Table tableTool = new Table("Herramientas");
+		tableTool.setPageLength(3);
+		tableTool.setWidth("100%");
+		tableTool.setContainerDataSource(beanItemTool);
+		tableTool.setImmediate(true);
+		tableTool.setTableFieldFactory(new DefaultFieldFactory(){
 
-		table_h.setReadOnly(readOnly);
-		vh.addComponent(table_h);
+			public Field<?> createField(final Container container,
+					final Object itemId, Object propertyId, com.vaadin.ui.Component uiContext) {
+				Field<?> field = null; 
+				if( propertyId.equals("name") || propertyId.equals("price") || propertyId.equals("fee")){
+					field = new TextField();
+					((TextField)field).setNullRepresentation("");
+				}
+				else  if( propertyId.equals("status") ){
+					field = new ComboBox();
+					field.setPropertyDataSource(container.getContainerProperty(itemId, propertyId));
+					for(ToolStatus ts : ToolStatus.values()){
+						((ComboBox)field).addItem(ts);
+					}
+				}
+				else if(  propertyId.equals("dateBuy") ){
+					field = new DateField();
+				}
+				else {
+					return null;
+				}
+				((AbstractField<?>)field).setImmediate(true);
+				return field;
+			}
+		});
+		
+		tableTool.setVisibleColumns("name","price","dateBuy","fee","status");
+		tableTool.setColumnHeaders("Herramienta","Monto","Fecha","Cuota","Estado");
+		tableTool.setEditable(true);				
+		vh.addComponent(tableTool);
+		vh.setComponentAlignment(hl, Alignment.TOP_RIGHT);
 
-		/*Préstamo*/
+		/********** Préstamo **********/
 		VerticalLayout vp = new VerticalLayout();
 		vp.setSizeFull();
 
+		HorizontalLayout hl2 = new HorizontalLayout();
+		hl2.setWidth("100%");
+		hl2.setSpacing(true);		
+		vp.addComponent(hl2);
+
+		final BeanItemContainer<Loan> beanItemLoan = new BeanItemContainer<Loan>(Loan.class);
+		List<Loan> loans = (List<Loan>)getItem().getItemProperty("loan").getValue();
+		beanItemLoan.addAll(loans);
+
 		if(!readOnly){
-
-			HorizontalLayout hl2 = new HorizontalLayout();
-			hl2.setWidth("100%");
-			hl2.setSpacing(true);		
-			vp.addComponent(hl2);
-			vp.setComponentAlignment(hl2, Alignment.TOP_RIGHT);
-
-			TextField monto_p = new TextField("Monto");
-			hl2.addComponent(monto_p);
-			DateField fecha_p = new DateField("Fecha");
-			hl2.addComponent(fecha_p);
-			TextField cuota_p = new TextField("Cuota");
-			hl2.addComponent(cuota_p);
-			TextField estado_p = new TextField("Estado");
-			hl2.addComponent(estado_p);
-
 			btnAddP = new Button(null,FontAwesome.PLUS);
 			hl2.addComponent(btnAddP);
 			btnAddP.addClickListener(new Button.ClickListener() {
-
+	
 				@Override
 				public void buttonClick(ClickEvent event) {
-					//				final ConstructionSite cs = item.getBean();
-					//				if(cs == null){
-					//					Notification.show("Debe seleccionar una obra",Type.ERROR_MESSAGE);
-					//					return;
-					//				}
+					LaborerConstructionsite laborer = (LaborerConstructionsite) getItem().getBean();
+					if(laborer == null ) throw new RuntimeException("El trabajador no es válido.");
+					Loan loan = new Loan();
+					laborer.addLoan(loan);
+					beanItemLoan.addBean(loan);
 				}
 			});
 		}
+		
+		final Table tableLoan = new Table("Préstamos");
+		tableLoan.setPageLength(3);
+		tableLoan.setWidth("100%");
+		tableLoan.setContainerDataSource(beanItemLoan);
+		tableLoan.setImmediate(true);		
+		tableLoan.setTableFieldFactory(new DefaultFieldFactory(){
 
-		final Table table_p = new Table("Préstamos"){
-			{
-				setWidth("100%");				
-				addContainerProperty("monto", String.class, "");
-				addContainerProperty("fecha", String.class, "");
-				addContainerProperty("cuota", String.class, "");
-				addContainerProperty("estado", String.class, "");
-				setVisibleColumns("monto","fecha", "cuota", "estado");
-				setColumnHeaders("Monto","Fecha", "Cuota", "Estado");
-
-				setPageLength(4);
+			public Field<?> createField(final Container container,
+					final Object itemId,Object propertyId,com.vaadin.ui.Component uiContext) {
+				Field<?> field = null; 
+				if( propertyId.equals("price") || propertyId.equals("fee")){
+					field = new TextField();
+					((TextField)field).setNullRepresentation("");
+				}
+				else  if( propertyId.equals("status") ){
+					field = new ComboBox();
+					field.setPropertyDataSource(container.getContainerProperty(itemId, propertyId));
+					for(LoanStatus ls : LoanStatus.values()){
+						((ComboBox)field).addItem(ls);
+					}
+				}
+				else if(  propertyId.equals("dateBuy") ){
+					field = new DateField();
+				}
+				else {
+					return null;
+				}
+				((AbstractField<?>)field).setImmediate(true);
+				return field;
 			}
-		};
-		table_p.setReadOnly(readOnly);
-		vp.addComponent(table_p);
+		});
+		
+		tableLoan.setVisibleColumns("price","dateBuy", "fee", "status");
+		tableLoan.setColumnHeaders("Monto","Fecha", "Cuota", "Estado");
+		tableLoan.setEditable(true);		
+		vp.addComponent(tableLoan);
+		vp.setComponentAlignment(hl2, Alignment.TOP_RIGHT);
 
 		vl.addComponent(vh);
 		vl.addComponent(vp);
@@ -949,5 +1087,4 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 	protected boolean preDiscard() {
 		return super.preDiscard();
 	}
-
 }

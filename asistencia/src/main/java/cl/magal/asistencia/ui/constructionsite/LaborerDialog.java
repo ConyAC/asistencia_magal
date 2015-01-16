@@ -37,9 +37,9 @@ public class LaborerDialog extends AbstractWindowEditor {
 
 	@Override
 	protected Component createBody() {
-		return new LaborerBaseInformation(getBinder());
+		return new LaborerBaseInformation(getBinder(), false);
 	}
-
+	
 	@Override
 	protected boolean preCommit() {
 		return super.preCommit();
@@ -49,5 +49,5 @@ public class LaborerDialog extends AbstractWindowEditor {
 	protected boolean preDiscard() {
 		return super.preDiscard();
 	}
-
+	
 }
