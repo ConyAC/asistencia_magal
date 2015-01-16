@@ -62,6 +62,7 @@ public class Tool implements Serializable {
     @Column(name = "dateBuy")
     @Temporal(TemporalType.TIMESTAMP)
     private Date dateBuy;
+    @Max(value=6)
     @Column(name = "fee")
     private Integer fee;
     @Convert(converter = ToolStatusConverter.class)
