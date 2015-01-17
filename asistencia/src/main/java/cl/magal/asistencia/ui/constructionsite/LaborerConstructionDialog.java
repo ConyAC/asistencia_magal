@@ -191,7 +191,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 				}){{setIcon(FontAwesome.PRINT); setDescription("Imprimir");}};
 				addComponent(btnPrint);
 				
-				//if( SecurityHelper.hastPermission(Permission.BLOQUEAR_OBRERO)){
+				if( SecurityHelper.hastPermission(Permission.BLOQUEAR_OBRERO)){
 					Button bloquear = new Button(null,FontAwesome.LOCK);					
 					bloquear.addClickListener(new Button.ClickListener() {
 						public void buttonClick(ClickEvent event) {								
@@ -222,7 +222,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 					bloquear.setData(constructionContainer);
 					bloquear.setDescription("Bloquear");
 					addComponent(bloquear);
-				//}
+				}
 				
 				if( SecurityHelper.hastPermission(Permission.CONFIRMAR_OBREROS)){
 					Button acceptObrero = new Button(null,FontAwesome.CHECK);					
