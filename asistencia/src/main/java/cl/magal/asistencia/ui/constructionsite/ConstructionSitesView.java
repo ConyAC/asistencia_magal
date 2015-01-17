@@ -4,7 +4,6 @@ import java.util.List;
 
 import javax.annotation.PostConstruct;
 
-import org.apache.velocity.app.VelocityEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,9 +21,9 @@ import cl.magal.asistencia.entities.enums.Permission;
 import cl.magal.asistencia.services.ConstructionSiteService;
 import cl.magal.asistencia.services.UserService;
 import cl.magal.asistencia.ui.AbstractWindowEditor;
+import cl.magal.asistencia.ui.AbstractWindowEditor.EditorSavedEvent;
 import cl.magal.asistencia.ui.BaseView;
 import cl.magal.asistencia.ui.MagalUI;
-import cl.magal.asistencia.ui.AbstractWindowEditor.EditorSavedEvent;
 import cl.magal.asistencia.util.SecurityHelper;
 
 import com.vaadin.data.fieldgroup.BeanFieldGroup;
@@ -38,10 +37,10 @@ import com.vaadin.server.FontAwesome;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.CustomTable;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Notification;
+import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
@@ -71,8 +70,6 @@ public class ConstructionSitesView extends BaseView implements View {
 	private transient ConstructionSiteService service;
 	@Autowired
 	private transient UserService userService;
-	@Autowired
-	private VelocityEngine velocityEngine;
 	
 	HorizontalLayout root,detailLayout;
 	Panel panelConstructions;
@@ -143,7 +140,7 @@ public class ConstructionSitesView extends BaseView implements View {
 					
 					ConstructionSite cs = new ConstructionSite();
 					BeanItem<ConstructionSite> csItem = new BeanItem<ConstructionSite>(cs);
-					ConstructionSiteDialog csWindow = new ConstructionSiteDialog(csItem, itemUser, service, velocityEngine);
+					ConstructionSiteDialog csWindow = new ConstructionSiteDialog(csItem, itemUser, service);
 					csWindow.setCaption("Crear Obra");
 					csWindow.addListener(new AbstractWindowEditor.EditorSavedListener() {
 						
@@ -198,7 +195,7 @@ public class ConstructionSitesView extends BaseView implements View {
 							itemUser.addAll(users);
 							
 							BeanItem<ConstructionSite> csItem = constructionContainer.getItem(itemId);
-							ConstructionSiteDialog csWindow = new ConstructionSiteDialog(csItem, itemUser, service, velocityEngine);
+							ConstructionSiteDialog csWindow = new ConstructionSiteDialog(csItem, itemUser, service);
 							csWindow.setCaption("Editar Obra");
 							csWindow.addListener(new AbstractWindowEditor.EditorSavedListener() {
 							
@@ -259,6 +256,7 @@ public class ConstructionSitesView extends BaseView implements View {
 		
 		table.setVisibleColumns("name","status","actions");
 		table.setColumnHeaders("Nombre","Estado","Acciones");
+		table.setColumnWidth("actions", 150);
 		table.setSelectable(true);
 
 
