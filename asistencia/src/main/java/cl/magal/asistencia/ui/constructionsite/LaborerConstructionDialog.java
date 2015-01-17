@@ -57,6 +57,7 @@ import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Component;
+import com.vaadin.ui.CustomTable;
 import com.vaadin.ui.DateField;
 import com.vaadin.ui.DefaultFieldFactory;
 import com.vaadin.ui.Embedded;
@@ -314,11 +315,9 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 					((TextField)field).setNullRepresentation("");
 				}
 				else  if( propertyId.equals("status") ){
-					field = new ComboBox();
-					field.setPropertyDataSource(container.getContainerProperty(itemId, propertyId));
-					for(ToolStatus ts : ToolStatus.values()){
-						((ComboBox)field).addItem(ts);
-					}
+					field = new TextField();
+					((TextField)field).setNullRepresentation("fg");
+					field.setEnabled(false);
 				}
 				else if(  propertyId.equals("dateBuy") ){
 					field = new DateField();
@@ -328,6 +327,27 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 				}
 				((AbstractField<?>)field).setImmediate(true);
 				return field;
+			}
+		});
+		
+		tableTool.addGeneratedColumn("selected", new Table.ColumnGenerator() {
+
+			@Override
+			public Component generateCell(Table source, Object itemId, Object columnId) {
+				//boolean selected = selectedItemIds.contains(itemId);
+				/* When the chekboc value changes, add/remove the itemId from the selectedItemIds set */
+				final CheckBox cb = new CheckBox("");
+				cb.addValueChangeListener(new Property.ValueChangeListener() {
+					@Override
+					public void valueChange(Property.ValueChangeEvent event) {
+						/*if(selectedItemIds.contains(itemId)){
+							selectedItemIds.remove(itemId);
+						} else {
+							selectedItemIds.add(itemId);
+						}*/
+					}
+				});
+				return cb;
 			}
 		});
 		
