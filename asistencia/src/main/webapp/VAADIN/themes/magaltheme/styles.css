@@ -12119,6 +12119,7 @@ div.v-layout.v-horizontal.v-widget {
 	margin: 0 !important;
 }
 
-.magaltheme .pending-laborer{
+.magaltheme .v-table-cell-content-pending-laborer{
 	background-color: red;
+	color: white;
 }

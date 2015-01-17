@@ -42,6 +42,7 @@ import cl.magal.asistencia.ui.AbstractWindowEditor.EditorSavedEvent;
 import cl.magal.asistencia.util.SecurityHelper;
 import cl.magal.asistencia.util.Utils;
 
+import com.vaadin.data.Item;
 import com.vaadin.data.Property;
 import com.vaadin.data.fieldgroup.BeanFieldGroup;
 import com.vaadin.data.fieldgroup.FieldGroup.CommitException;
@@ -626,7 +627,6 @@ public class LaborerAndTeamPanel extends Panel implements View {
 			@Override
 			public Object generateCell(CustomTable source, Object itemId,Object columnId) {
 				if((Boolean)source.getContainerProperty(itemId, columnId).getValue()){
-					source.addStyleName("pending-laborer");
 					return "Si";
 				}else
 					return "No";
@@ -705,7 +705,20 @@ public class LaborerAndTeamPanel extends Panel implements View {
 
 			}
 		});
+		
+		table.setCellStyleGenerator(new FilterTable.CellStyleGenerator() {
+			@Override
+			public String getStyle(CustomTable source, Object itemId,
+					Object propertyId) {
 
+				if (!(Boolean) table.getItem(itemId).getItemProperty("confirmed").getValue()) {
+	                return "pending-laborer";
+	            }else
+	            	return "";				
+				}
+		    });
+
+		table.refreshRowCache();
 		vl.addComponent(table);
 		vl.setExpandRatio(table,1.0F);
 

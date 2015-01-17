@@ -64,6 +64,7 @@ public class UserService implements UserDetailsService {
 			perm.add(Permission.ASIGNAR_OBRA);
 			perm.add(Permission.CREAR_USUARIO);
 			perm.add(Permission.DEFINIR_VARIABLE_GLOBAL);
+			perm.add(Permission.CONFIRMAR_OBREROS);
 			role.setPermission(perm);	
 			repRole.save(role);
 			
@@ -121,6 +122,7 @@ public class UserService implements UserDetailsService {
 			role.setName("Administrador Obra");
 			perm = new HashSet<Permission>();	
 			perm.add(Permission.EDITAR_OBRA);
+			perm.add(Permission.CONFIRMAR_OBREROS);
 			role.setPermission(perm);
 			repRole.save(role);
 			

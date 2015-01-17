@@ -1,22 +1,17 @@
 package cl.magal.asistencia.ui.constructionsite;
 
-import java.util.List;
 
 import org.apache.velocity.app.VelocityEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import cl.magal.asistencia.entities.ConstructionSite;
 import cl.magal.asistencia.entities.LaborerConstructionsite;
-import cl.magal.asistencia.entities.Tool;
 import cl.magal.asistencia.entities.User;
-import cl.magal.asistencia.services.ConstructionSiteService;
 import cl.magal.asistencia.services.LaborerService;
 import cl.magal.asistencia.ui.AbstractWindowEditor;
 import cl.magal.asistencia.util.Constants;
 
 import com.vaadin.data.util.BeanItem;
-import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.server.VaadinSession;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Component;
@@ -36,8 +31,6 @@ public class LaborerBlockDialog extends AbstractWindowEditor {
 	
 	transient Logger logger = LoggerFactory.getLogger(LaborerBlockDialog.class);
 
-	ConstructionSite constructionSite;	
-	ConstructionSiteService service;
 	LaborerService lab;
 	private VelocityEngine velocityEngine;
 
@@ -77,7 +70,7 @@ public class LaborerBlockDialog extends AbstractWindowEditor {
 		for (Object propertyId : new String[]{"comment"}) {
         	if(propertyId.equals("constructionsiteId") || propertyId.equals("deleted"))
         		;        
-        	else if(  propertyId.equals("comment")){
+        	else if(propertyId.equals("comment")){
 				TextArea comment = new TextArea("Comentario");
 				comment.setNullRepresentation("");
 				comment.setWidth("500");
@@ -85,6 +78,7 @@ public class LaborerBlockDialog extends AbstractWindowEditor {
 				vl.addComponent(comment);
 				bind(comment, "comment"); 
 				vl.setComponentAlignment(comment, Alignment.MIDDLE_LEFT);
+				logger.debug("desde dialog"+comment.getValue());
 			}else{        		
         		String t = tradProperty(propertyId);
         		Field field = buildAndBind(t, propertyId);
