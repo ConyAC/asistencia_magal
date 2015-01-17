@@ -13,6 +13,7 @@ import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.tools.generic.DateTool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.ui.velocity.VelocityEngineUtils;
 
 import cl.magal.asistencia.entities.Absence;
@@ -30,6 +31,7 @@ import cl.magal.asistencia.entities.enums.AccidentLevel;
 import cl.magal.asistencia.entities.enums.LoanStatus;
 import cl.magal.asistencia.entities.enums.MaritalStatus;
 import cl.magal.asistencia.entities.enums.ToolStatus;
+import cl.magal.asistencia.services.ConstructionSiteService;
 import cl.magal.asistencia.services.LaborerService;
 import cl.magal.asistencia.services.UserService;
 import cl.magal.asistencia.ui.AbstractWindowEditor;
@@ -191,7 +193,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 
 						LaborerConstructionsite cs = new LaborerConstructionsite();
 						BeanItem<LaborerConstructionsite> csItem = new BeanItem<LaborerConstructionsite>(cs);						
-						LaborerBlockDialog lbWindow = new LaborerBlockDialog(csItem, velocityEngine);
+						LaborerBlockDialog lbWindow = new LaborerBlockDialog(csItem, service, velocityEngine);
 						
 						lbWindow.setCaption("Bloquear Trabajador");
 						lbWindow.addListener(new AbstractWindowEditor.EditorSavedListener() {
@@ -199,14 +201,11 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 							@Override
 							public void editorSaved(EditorSavedEvent event) {
 								try {
-									/*ConstructionSite obra = ((BeanItem<ConstructionSite>) event.getSavedItem()).getBean();
-										service.save(obra);
-										constructionContainer.addBean(obra);
-										*/
-									LaborerConstructionsite lc = (LaborerConstructionsite) getItem().getBean();								
+									LaborerConstructionsite lc = (LaborerConstructionsite) getItem().getBean();
+									//LaborerConstructionsite lc = ((BeanItem<LaborerConstructionsite>) event.getSavedItem()).getBean();
 									lc.setPersonBlock((User) VaadinSession.getCurrent().getAttribute(Constants.SESSION_USUARIO));
 									
-									logger.debug("LL"+constructionContainer.getItem("comment"));
+									logger.debug("LL"+lc.getComment());
 									service.save(lc);
 									constructionContainer.addBean(lc);
 					    		} catch (Exception e) {
