@@ -34,7 +34,7 @@ public class LaborerBlockDialog extends AbstractWindowEditor {
 	LaborerService lab;
 	private VelocityEngine velocityEngine;
 
-	public LaborerBlockDialog(BeanItem<LaborerConstructionsite> item, LaborerService lab, VelocityEngine velocityEngine){
+	public LaborerBlockDialog(BeanItem<?> item, LaborerService lab, VelocityEngine velocityEngine){
 		super(item);
 
 		this.velocityEngine = velocityEngine;
@@ -78,7 +78,6 @@ public class LaborerBlockDialog extends AbstractWindowEditor {
 				vl.addComponent(comment);
 				bind(comment, "comment"); 
 				vl.setComponentAlignment(comment, Alignment.MIDDLE_LEFT);
-				logger.debug("desde dialog"+comment.getValue());
 			}else{        		
         		String t = tradProperty(propertyId);
         		Field field = buildAndBind(t, propertyId);

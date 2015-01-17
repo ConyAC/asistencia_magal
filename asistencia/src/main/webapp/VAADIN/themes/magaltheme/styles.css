@@ -12123,3 +12123,29 @@ div.v-layout.v-horizontal.v-widget {
 	background-color: red;
 	color: white;
 }
+
+.magaltheme .laborer-block{
+    background: gray;
+    color: white;
+    font-size: 12px;
+    font-weight: bold;
+    font-style: italic;
+    width: 90px !important;
+    margin-right: -11px;
+	margin-top: 17px;
+}
+
+.magaltheme .laborer-confirmed{
+    background: red;
+    color: white;
+    font-size: 12px;
+    font-weight: bold;
+    font-style: italic;
+    width: 90px !important;
+	margin-top: 17px;
+}
+
+.magaltheme .v-table-cell-content-block-laborer{
+	background-color: gray;
+	color: white;
+}

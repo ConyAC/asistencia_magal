@@ -189,28 +189,23 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 				}){{setIcon(FontAwesome.PRINT); setDescription("Imprimir");}};
 				addComponent(btnPrint);
 				
-				if( SecurityHelper.hastPermission(Permission.BLOQUEAR_OBRERO)){
+				//if( SecurityHelper.hastPermission(Permission.BLOQUEAR_OBRERO)){
 					Button bloquear = new Button(null,FontAwesome.LOCK);					
 					bloquear.addClickListener(new Button.ClickListener() {
 						public void buttonClick(ClickEvent event) {								
 						
-							BeanItem<LaborerConstructionsite> csItem = constructionContainer.getItem(getItem().getBean());
-							LaborerBlockDialog lbWindow = new LaborerBlockDialog(csItem, service, velocityEngine);
+							LaborerBlockDialog lbWindow = new LaborerBlockDialog(getItem(), service, velocityEngine);
 							lbWindow.setCaption("Bloquear Trabajador");
-							lbWindow.addListener(new AbstractWindowEditor.EditorSavedListener() {
-							
+							lbWindow.addListener(new AbstractWindowEditor.EditorSavedListener() {							
 								
 								@Override
 								public void editorSaved(EditorSavedEvent event) {
-									try {
-										
-										//LaborerConstructionsite lc = (LaborerConstructionsite) getItem().getBean();
+									try {										
 										LaborerConstructionsite lc = ((BeanItem<LaborerConstructionsite>) event.getSavedItem()).getBean();
 										lc.setPersonBlock((User) VaadinSession.getCurrent().getAttribute(Constants.SESSION_USUARIO));
-										lc.setComment("comnetario en duro");
+										lc.setBlock(true);
 										service.save(lc);
 										constructionContainer.addBean(lc);
-										//logger.debug("container de laborercs"+constructionContainer.getItem(getItem().getBean()).getItemProperty("comment").getValue());
 						    		} catch (Exception e) {
 						    			logger.error("Error al guardar la información de la obra",e);
 						    			Notification.show("Es necesario agregar todos los campos obligatorios", Type.ERROR_MESSAGE);
@@ -225,7 +220,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 					bloquear.setData(constructionContainer);
 					bloquear.setDescription("Bloquear");
 					addComponent(bloquear);
-				}
+				//}
 				
 				if( SecurityHelper.hastPermission(Permission.CONFIRMAR_OBREROS)){
 					Button acceptObrero = new Button(null,FontAwesome.CHECK);					

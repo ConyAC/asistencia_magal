@@ -92,6 +92,7 @@ public class LaborerAndTeamPanel extends Panel implements View {
 	transient Logger logger = LoggerFactory.getLogger(LaborerAndTeamPanel.class);
 
 	protected Button editConstructionSite,btnPrint,btnAdd;
+	protected Label block, confirmed;
 
 	/** CONTAINERS **/
 	BeanItemContainer<User> userContainer = new BeanItemContainer<User>(User.class);
@@ -398,14 +399,26 @@ public class LaborerAndTeamPanel extends Panel implements View {
 
 		asistenciaBtn.setWidth("200px");
 		hl.addComponent(asistenciaBtn);
-		hl.setComponentAlignment(asistenciaBtn, Alignment.TOP_CENTER);
-		hl.setExpandRatio(asistenciaBtn, 1.0F);
+		hl.setComponentAlignment(asistenciaBtn, Alignment.TOP_LEFT);
 
 		vl.addComponent(hl);
 
+		HorizontalLayout hl2 = new HorizontalLayout();
+		hl2.setSpacing(true);
+
+		block = new Label("Bloqueado");
+		block.addStyleName("laborer-block");
+		hl2.addComponent(block);
+		
+		confirmed = new Label("No Confirmado");
+		confirmed.addStyleName("laborer-confirmed");
+		hl2.addComponent(confirmed);
+		
 		btnPrint = new Button(null,FontAwesome.PRINT);
-		hl.addComponent(btnPrint);
-		hl.setComponentAlignment(btnPrint, Alignment.TOP_RIGHT);
+		hl2.addComponent(btnPrint);
+		
+		hl.addComponent(hl2);
+		hl.setComponentAlignment(hl2, Alignment.TOP_RIGHT);
 
 		btnPrint.addClickListener(new Button.ClickListener() {
 
@@ -526,9 +539,8 @@ public class LaborerAndTeamPanel extends Panel implements View {
 
 		//agrega solo si tiene los permisos //siempre se debe crear pues solo se deshabilita si no se tiene permiso
 		btnAdd = new Button(null,FontAwesome.PLUS);
-		hl.addComponent(btnAdd);
-		hl.setComponentAlignment(btnAdd, Alignment.TOP_RIGHT);
-
+		hl2.addComponent(btnAdd);
+		
 		ShortcutListener enter = new ShortcutListener("Entrar",
 				KeyCode.ENTER, new int[]{ModifierKey.CTRL }) {
 			@Override
@@ -622,22 +634,21 @@ public class LaborerAndTeamPanel extends Panel implements View {
 		table.setSizeFull();
 		table.setFilterBarVisible(true);
 
-		table.addGeneratedColumn("confirmed", new CustomTable.ColumnGenerator() {
-
-			@Override
-			public Object generateCell(CustomTable source, Object itemId,Object columnId) {
-				if((Boolean)source.getContainerProperty(itemId, columnId).getValue()){
-					return "Si";
-				}else
-					return "No";
-				//return (Boolean)source.getContainerProperty(itemId, columnId).getValue() ? "Si": "No";
-			}
-		});
+//		table.addGeneratedColumn("confirmed", new CustomTable.ColumnGenerator() {
+//
+//			@Override
+//			public Object generateCell(CustomTable source, Object itemId,Object columnId) {
+//				if((Boolean)source.getContainerProperty(itemId, columnId).getValue()){
+//					return "Si";
+//				}else
+//					return "No";
+//			}
+//		});
 
 		//TODO estado
 		//		table.setVisibleColumns("laborer.job","laborer.firstname","laborer.laborerId"); //FIXME laborerId
-		table.setVisibleColumns("selected","activeContract.jobAndCode","laborer.fullname","activeContract.step","confirmed","actions"); //FIXME laborerId
-		table.setColumnHeaders("","Cod","Nombre","Etapa","Confirmado","Acciones");
+		table.setVisibleColumns("selected","activeContract.jobAndCode","laborer.fullname","activeContract.step","actions"); //FIXME laborerId
+		table.setColumnHeaders("","Cod","Nombre","Etapa","Acciones");
 		table.setColumnWidth("selected", 40);
 		
 		table.setSelectable(true);
@@ -713,6 +724,8 @@ public class LaborerAndTeamPanel extends Panel implements View {
 
 				if (!(Boolean) table.getItem(itemId).getItemProperty("confirmed").getValue()) {
 	                return "pending-laborer";
+	            }else if((Boolean) table.getItem(itemId).getItemProperty("block").getValue()){
+	            	return "block-laborer";
 	            }else
 	            	return "";				
 				}
