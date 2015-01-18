@@ -1,11 +1,19 @@
 package cl.magal.asistencia.ui.constructionsite;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
+import org.apache.velocity.app.VelocityEngine;
+import org.apache.velocity.tools.generic.DateTool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.ui.velocity.VelocityEngineUtils;
 
+import cl.magal.asistencia.entities.ConstructionSite;
 import cl.magal.asistencia.entities.Contract;
 import cl.magal.asistencia.entities.Laborer;
 import cl.magal.asistencia.entities.LaborerConstructionsite;
@@ -13,6 +21,8 @@ import cl.magal.asistencia.entities.enums.Job;
 import cl.magal.asistencia.entities.enums.Permission;
 import cl.magal.asistencia.services.LaborerService;
 import cl.magal.asistencia.ui.AbstractWindowEditor;
+import cl.magal.asistencia.ui.MagalUI;
+import cl.magal.asistencia.util.Constants;
 import cl.magal.asistencia.util.SecurityHelper;
 import cl.magal.asistencia.util.Utils;
 
@@ -21,18 +31,23 @@ import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.util.BeanItem;
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.server.FontAwesome;
+import com.vaadin.server.StreamResource;
+import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.AbstractSelect.ItemCaptionMode;
 import com.vaadin.ui.AbstractSelect.NewItemHandler;
 import com.vaadin.ui.Alignment;
+import com.vaadin.ui.BrowserFrame;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.GridLayout;
+import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
+import com.vaadin.ui.Window;
 
 public class AddLaborerContractDialog extends AbstractWindowEditor implements NewItemHandler {
 
@@ -46,6 +61,9 @@ public class AddLaborerContractDialog extends AbstractWindowEditor implements Ne
 	transient LaborerService laborerService;
 	BeanItemContainer<Laborer> laborers = new BeanItemContainer<Laborer>(Laborer.class);
 	boolean addLaborer = false;
+	
+	transient private VelocityEngine velocityEngine;
+	
 	protected AddLaborerContractDialog(BeanItem<?> item,LaborerService laborerService,boolean addLaborer) {
 		super(item);
 		this.laborerService= laborerService;
@@ -54,6 +72,8 @@ public class AddLaborerContractDialog extends AbstractWindowEditor implements Ne
 	}
 
 	public void init(){
+		
+		velocityEngine = (VelocityEngine) ((MagalUI)UI.getCurrent()).getSpringBean(Constants.VELOCITY_ENGINE_BEAN);
 		
 		setWidth("50%");
 		setHeight("300px");
@@ -80,7 +100,7 @@ public class AddLaborerContractDialog extends AbstractWindowEditor implements Ne
 	@Override
 	protected Component createBody() {
 		
-		GridLayout gl = new GridLayout(3,3);
+		GridLayout gl = new GridLayout(3,6);
 		gl.setSpacing(true);
 		gl.setMargin(true);
 		
@@ -98,6 +118,8 @@ public class AddLaborerContractDialog extends AbstractWindowEditor implements Ne
 			Utils.setLabelValue( lbNombre , laborers.firstItemId().getFullname());
 		}
 
+		final Label provenience = new Label("",ContentMode.HTML);
+		
 		lbNombre.setReadOnly(true);
 		final Button btn = new Button(null,FontAwesome.FLOPPY_O );
 		btn.setEnabled(addLaborer);
@@ -149,6 +171,15 @@ public class AddLaborerContractDialog extends AbstractWindowEditor implements Ne
 						btn.setIcon(FontAwesome.PENCIL);
 					else
 						btn.setIcon(FontAwesome.FLOPPY_O );
+					
+					//muestra la procedencia
+					if(addLaborer){
+						ConstructionSite lastConstructionSite = laborerService.getLastConstructionSite(laborer);
+						logger.debug("lastConstructionSite {}",lastConstructionSite);
+						if(lastConstructionSite != null )
+						provenience.setValue("<span style='color:red'>Obra anterior: "+lastConstructionSite.getName()+"</span>");
+					}
+					
 				}
 			}
 		});
@@ -161,6 +192,10 @@ public class AddLaborerContractDialog extends AbstractWindowEditor implements Ne
 		
 		gl.addComponent(btn);
 		gl.setComponentAlignment(btn, Alignment.BOTTOM_RIGHT);
+		//agrega un label para mostrar la última obra en la que participó
+		if(addLaborer)
+			gl.addComponent(provenience,0,1,2,1);
+		
 		//campos asociados a la obra/contrato
 		cbJob = new ComboBox("Oficio");
 		cbJob.setTabIndex(3);
@@ -253,6 +288,55 @@ public class AddLaborerContractDialog extends AbstractWindowEditor implements Ne
 		}
 		
 		return msj == null;
+	}
+
+	/**
+	 * Luego de guardar la información, imprime los documentos asociados
+	 */
+	@Override
+	protected boolean postCommit() {
+		
+		// imprime el contrato, el pacto horas extras y el acuse de recivo para ser impresos
+		final Map<String, Object> input = new HashMap<String, Object>();
+		input.put("laborerConstructions", new LaborerConstructionsite[] {(LaborerConstructionsite)getItem().getBean()});
+		input.put("tools", new DateTool());
+		
+		final StringBuilder sb = new StringBuilder();
+		
+		// contrato
+		sb.append( VelocityEngineUtils.mergeTemplateIntoString(velocityEngine, "templates/temporary_work_contract_doc.vm", "UTF-8", input));
+		// pacto horas extras
+		sb.append( VelocityEngineUtils.mergeTemplateIntoString(velocityEngine, "templates/covenant_overtime.vm", "UTF-8", input) );
+		// acuse recibo
+		sb.append( VelocityEngineUtils.mergeTemplateIntoString(velocityEngine, "templates/acknowledgment_of_receipt.vm", "UTF-8", input) );
+
+		StreamResource.StreamSource source2 = new StreamResource.StreamSource() {
+
+			public InputStream getStream() {
+				return new ByteArrayInputStream(sb.toString().getBytes());
+			}
+		};
+		StreamResource resource = new StreamResource(source2, "Documentos de "+((LaborerConstructionsite)getItem().getBean()).getJobCode()+".html");
+
+		Window window = new Window();
+		window.setResizable(true);
+		window.setWidth("60%");
+		window.setHeight("60%");
+		window.center();
+		window.setModal(true);
+		BrowserFrame e = new BrowserFrame();
+		e.setSizeFull();
+
+		// Here we create a new StreamResource which downloads our StreamSource,
+		// which is our pdf.
+		// Set the right mime type
+		//						        resource.setMIMEType("application/pdf");
+		resource.setMIMEType("text/html");
+
+		e.setSource(resource);
+		window.setContent(e);
+		UI.getCurrent().addWindow(window);
+		return true;
 	}
 
 }

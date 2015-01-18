@@ -24,6 +24,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
+import javax.persistence.PrePersist;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -86,6 +87,7 @@ public class Contract implements Serializable {
     private Integer jobCode;
     
     private Boolean active;
+    private Boolean finished;
     
     @ManyToOne
     @JoinColumn(name="LABORER_CONSTRUCTIONSITEID")
@@ -95,6 +97,14 @@ public class Contract implements Serializable {
     List<Annexed> annexeds = new ArrayList<Annexed>();
 
     public Contract() {
+    }
+    
+    @PrePersist
+    public void prePersist(){
+    	if(finished == null )
+    		finished = false;
+    	if(active == null)
+    		active = true;
     }
 
     public Contract(Integer contractId) {
@@ -229,7 +239,14 @@ public class Contract implements Serializable {
 	public void setActive(boolean active) {
 		this.active = active;
 	}
-	
+	public Boolean isFinished() {
+		return finished;
+	}
+
+	public void setFinished(Boolean finished) {
+		this.finished = finished;
+	}
+
 	public String getJobAndCode(){
 		return (getJob() != null ? getJob().toString():"")+" ("+getJobCode()+")";
 	}

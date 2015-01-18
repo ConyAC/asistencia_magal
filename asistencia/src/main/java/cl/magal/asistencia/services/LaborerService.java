@@ -158,5 +158,17 @@ public class LaborerService {
 		return laborerConstructionsiteRepo.findByLaborer(laborer);
 	}
 
+	/**
+	 * 
+	 * @param laborer
+	 * @return
+	 */
+	public ConstructionSite getLastConstructionSite(Laborer laborer) {
+		LaborerConstructionsite cs = laborerConstructionsiteRepo.findFirstByLaborerOrderByContractsStartDateDesc(laborer);
+		if(cs != null)
+			return cs.getConstructionsite();
+		return null;
+	}
+
 	
 }

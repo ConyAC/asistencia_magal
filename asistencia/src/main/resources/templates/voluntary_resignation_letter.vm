@@ -1,0 +1,87 @@
+<?xml version='1.0'?>
+<html>
+	 <head>
+		<meta charset="UTF-8">
+		<style>
+	
+	@media all {
+	.page-break	{ display: none; }
+	.print-hidden	{  }
+	}
+	
+	@media print {
+		.page-break	{ display: block; page-break-before: always; }
+		.print-hidden	{ display: none; }
+	}
+	
+	</style>
+	</head>
+	<body>
+	
+	<div class="print-hidden" style="text-align:center;">
+			<input type="button" onclick="javascript:print()" value="Imprimir" /> <br /><br />
+		</div>
+		
+
+	
+#foreach( $laborerConstruction in $laborerConstructions )
+
+		<br />		
+		
+		<div style="text-align:right;line-height: 0.2;">
+		    Santiago, $tools.format('dd', $tools.date) de $tools.format('MMM yyyy', $tools.date)
+		</div>
+		
+		<br />
+		<table cellpadding="0" cellspacing="0" border="0" style="width:100%;" />
+		<tr><td colspan="2" style="text-align:leftt; text-decoration: underline;"><h2>SE&Ntilde;ORES</h2></td></tr>
+		<tr><td style="text-align:leftt; ">EMPRESA	:	Constructora e Inmobiliaria Magal Ltda.</td></tr>
+		<tr><td style="text-align:leftt; ">RUT 		:	89.651.600-0</td></tr>
+		<tr><td>DOMICILIO	:......................................</td></tr>
+		<tr><td>COMUNA	:	.....................................</td></tr>
+		</table>
+		<br />
+		De mi consideraci&oacute;n :
+		<br />
+		<p>Por intermedio de la presente comunico a ustedes mi renuncia voluntaria, en conformidad al art&iacute;culo 159 N&deg;2, del C&oacute;digo del Trabajo y 177, del mismo cuerpo legal, la cual se har&aacute; efectiva a contar del d&iacute;a .........................................................</p>
+		<p>Agradecido el haberme permitido laboral en vuestra empresa le comunico que los motivos de mi renuncia son ............................................................................. </p>
+		Atentamente
+		<br />
+	<div style="float:right;">
+	<table cellpadding="0" cellspacing="0" border="0" style="text-align:leftt;margin:10px">
+        <tr>
+            <th>
+            <hr style="width:200px" />
+            Firma del Trabajador	
+            </th>
+        </tr>
+        <tr>
+            <th>
+            Nombre : ${laborerConstruction.laborer.fullname}
+            </th>
+        </tr>
+        <tr>
+            <th>
+            Rut : ${laborerConstruction.laborer.rut}
+            </th>
+        </tr>
+     </table>
+     <br />
+     <table cellpadding="0" cellspacing="0" border="0" style="text-align:leftt;margin:10px">
+        <tr>
+            <th>
+            Obra : ${laborerConstruction.constructionsite.name}
+            </th>
+		</tr>
+        <tr>
+            <th>
+            Rol	: ${laborerConstruction.activeContract.job} 
+            </th>
+        </tr>
+	</table>
+	</div>
+		<div class="page-break"></div>
+#end
+	</body>
+</html>
+
