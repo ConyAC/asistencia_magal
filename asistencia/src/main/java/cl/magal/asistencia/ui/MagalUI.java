@@ -74,7 +74,7 @@ public class MagalUI extends UI implements ErrorHandler {
 	Button backBtn; 
 	Label title;
 	
-	SpringContextHelper helper;
+	transient SpringContextHelper helper;
 	
 	public Object getSpringBean(final String beanRef){
 		return helper.getBean(beanRef);

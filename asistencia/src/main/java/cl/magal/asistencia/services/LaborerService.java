@@ -170,5 +170,9 @@ public class LaborerService {
 		return null;
 	}
 
+	public List<Laborer> getAllLaborer(ConstructionSite cs) {
+		return laborerRepo.findByConstructionSite(cs.getConstructionsiteId());
+	}
+
 	
 }

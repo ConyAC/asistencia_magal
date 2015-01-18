@@ -1,6 +1,7 @@
 package cl.magal.asistencia.ui.workerfile;
 
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
@@ -16,16 +17,23 @@ import org.springframework.stereotype.Component;
 import org.tepi.filtertable.FilterTable;
 
 import ru.xpoft.vaadin.VaadinView;
+import cl.magal.asistencia.entities.ConstructionSite;
 import cl.magal.asistencia.entities.Contract;
 import cl.magal.asistencia.entities.Laborer;
 import cl.magal.asistencia.entities.LaborerConstructionsite;
 import cl.magal.asistencia.entities.Vacation;
+import cl.magal.asistencia.services.ConstructionSiteService;
 import cl.magal.asistencia.services.LaborerService;
 import cl.magal.asistencia.ui.MagalUI;
 import cl.magal.asistencia.ui.constructionsite.LaborerBaseInformation;
 import cl.magal.asistencia.ui.constructionsite.LaborerConstructionDialog;
 import cl.magal.asistencia.util.Utils;
 
+import com.vaadin.data.Container.Filter;
+import com.vaadin.data.Container.Filterable;
+import com.vaadin.data.Item;
+import com.vaadin.data.Property;
+import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.fieldgroup.BeanFieldGroup;
 import com.vaadin.data.util.BeanItem;
 import com.vaadin.data.util.BeanItemContainer;
@@ -35,9 +43,11 @@ import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.shared.ui.label.ContentMode;
+import com.vaadin.ui.AbstractSelect.ItemCaptionMode;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
+import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
@@ -66,6 +76,8 @@ public class WorkerFileView extends HorizontalLayout implements View {
 	@Autowired
 	private transient LaborerService service;
 	@Autowired
+	private transient ConstructionSiteService constructionsiteService;
+	@Autowired
 	transient private VelocityEngine velocityEngine;
 
 	LaborerBaseInformation detalleObrero;
@@ -73,19 +85,89 @@ public class WorkerFileView extends HorizontalLayout implements View {
 	Label label1,label2;
 
 	public WorkerFileView(){
+	}
+	
+	@PostConstruct
+	public void init(){
 
 		setSizeFull();
 		VerticalLayout obreros = drawObreros();		
 		addComponent(obreros);
 		setExpandRatio(obreros, 0.2F);
 
+		VerticalLayout vl = new VerticalLayout();
+		vl.setSizeFull();
+		vl.setMargin(true);
+
+		//botones agrega y eliminar
+		HorizontalLayout hl = new HorizontalLayout();
+		hl.setSpacing(true);
+		vl.addComponent(hl);
+		vl.setComponentAlignment(hl, Alignment.TOP_RIGHT);
+		Button agregaObrero = new Button(null,FontAwesome.PLUS);
+		//agregando obras dummy
+		agregaObrero.addClickListener(new Button.ClickListener() {
+
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = -5582668940084219150L;			
+
+			@Override
+			public void buttonClick(ClickEvent event) {
+
+//						LaborerConstructionsite lc = new LaborerConstructionsite();
+//						Laborer l = new Laborer();
+//						l.setFirstname("Nuevo Trabajador");
+//						l.setLastname("");
+//						l.setRut("");
+//						//l.setAfp(Afp.CAPITAL);
+//						l.setAddress("");
+//						//l.setJob(Job.ALBAÑIL);
+//						//l.setMaritalStatus(MaritalStatus.CASADO);
+//						l.setPhone("");
+//						l.setMobileNumber("");
+//						l.setSecondlastname("");
+//						l.setSecondname("");
+//
+//						service.saveLaborer(l);
+//						//laborerContainer.addBean(l);
+//						lc.setLaborer(l);
+//						BeanItem<LaborerConstructionsite> item = laborerContainer.addBean(lc);
+//						setLaborer(item);
+			}
+		});
+
+		hl.addComponent(agregaObrero);
+		Button borrarObrero = new Button(null,FontAwesome.TRASH_O);
+		borrarObrero.addClickListener(new Button.ClickListener() {
+
+			@Override
+			public void buttonClick(ClickEvent event) {
+				//recupera el elemento seleccionado
+				Laborer l = (Laborer) tableObrero.getValue();
+				if(l == null){
+					Notification.show("Debe seleccionar un obrero para eliminarlo");
+					return;
+				}
+				//TODO dialogo de confirmación
+				service.delete(l);
+				laborerContainer.removeItem(l);
+
+				setLaborer(null);
+			}
+		});
+		hl.addComponent(borrarObrero);
+		
 		TabSheet tab = new TabSheet();
 
 		tab.addTab(drawOverview(),"Resumen");
 		tab.addTab(drawDetalleObrero(),"Ficha");
 
-		addComponent(tab);
-		setExpandRatio(tab, 0.8F);		
+		vl.addComponent(tab);
+		vl.setExpandRatio(tab, 1.0F);
+		addComponent(vl);
+		setExpandRatio(vl, 0.8F);		
 	}
 
 	private com.vaadin.ui.Component drawOverview() {
@@ -353,83 +435,72 @@ public class WorkerFileView extends HorizontalLayout implements View {
 				setLaborer((BeanItem<Laborer>)event.getItem());
 			}
 		});
+		
+		cbConstructionsites.addValueChangeListener(new Property.ValueChangeListener() {
+
+			//agrega un filtro a la tabla
+			@Override
+			public void valueChange(ValueChangeEvent event) {
+				final List<Laborer> laborers;
+				if(cbConstructionsites.getValue() != null ){
+					laborers = service.getAllLaborer((ConstructionSite)cbConstructionsites.getValue());
+				}else{
+					laborers = null;
+				}
+				
+				Filterable f = ((Filterable) tableObrero.getContainerDataSource());
+				//guarda los filtros anteriores
+				List<Filter> beforeFilter = new ArrayList<Filter>(3);
+				for(Filter filter : f.getContainerFilters()){
+					if(filter.appliesToProperty("rut") ||  filter.appliesToProperty("fullname"))
+						beforeFilter.add(filter);
+				}
+				//quita todos los filtros
+				f.removeAllContainerFilters();
+				//agrega los filtros anteriores
+				for(Filter filter : beforeFilter){
+					f.addContainerFilter(filter);
+				}
+				//agrega el filtro de obra si existe
+				if( laborers != null )
+					f.addContainerFilter(new Filter() {
+						@Override
+						public boolean passesFilter(Object itemId, Item item)
+								throws UnsupportedOperationException {
+							//si la lista de trabajadores es nula, no filtra
+							return item != null && Utils.contains(laborers,((Long) item.getItemProperty("laborerId").getValue()));
+						}
+						@Override
+						public boolean appliesToProperty(Object propertyId) {
+							return "custom".equals(propertyId);
+						}
+					});
+			}
+		});
 
 		return tableObrero;
 	}
+	ComboBox cbConstructionsites;
 
 	private VerticalLayout drawObreros() {
 
 		VerticalLayout vl = new VerticalLayout();
 		vl.setMargin(true);
-
+		
+		List<ConstructionSite> constructionsites = constructionsiteService.findAllConstructionSite();
+		cbConstructionsites = new ComboBox("Obra",new BeanItemContainer<ConstructionSite>(ConstructionSite.class,constructionsites));
+		cbConstructionsites.setWidth("100%");
+		cbConstructionsites.setItemCaptionMode(ItemCaptionMode.PROPERTY);
+		cbConstructionsites.setItemCaptionPropertyId("name");
+		
+		vl.addComponent(cbConstructionsites);
+		
 		//la tabla con su buscador buscador
 		vl.addComponent(drawTablaObreros());
-		//botones agrega y eliminar
-		HorizontalLayout hl = new HorizontalLayout();
-		hl.setSpacing(true);
-		vl.addComponent(hl);
-		vl.setComponentAlignment(hl, Alignment.BOTTOM_CENTER );
-		Button agregaObrero = new Button(null,FontAwesome.PLUS);
-		//agregando obras dummy
-		agregaObrero.addClickListener(new Button.ClickListener() {
-
-			/**
-			 * 
-			 */
-			private static final long serialVersionUID = -5582668940084219150L;			
-
-			@Override
-			public void buttonClick(ClickEvent event) {
-
-//				LaborerConstructionsite lc = new LaborerConstructionsite();
-//				Laborer l = new Laborer();
-//				l.setFirstname("Nuevo Trabajador");
-//				l.setLastname("");
-//				l.setRut("");
-//				//l.setAfp(Afp.CAPITAL);
-//				l.setAddress("");
-//				//l.setJob(Job.ALBAÑIL);
-//				//l.setMaritalStatus(MaritalStatus.CASADO);
-//				l.setPhone("");
-//				l.setMobileNumber("");
-//				l.setSecondlastname("");
-//				l.setSecondname("");
-//
-//				service.saveLaborer(l);
-//				//laborerContainer.addBean(l);
-//				lc.setLaborer(l);
-//				BeanItem<LaborerConstructionsite> item = laborerContainer.addBean(lc);
-//				setLaborer(item);
-			}
-		});
-
-		hl.addComponent(agregaObrero);
-		Button borrarObrero = new Button(null,FontAwesome.TRASH_O);
-		borrarObrero.addClickListener(new Button.ClickListener() {
-
-			@Override
-			public void buttonClick(ClickEvent event) {
-				//recupera el elemento seleccionado
-				Laborer l = (Laborer) tableObrero.getValue();
-				if(l == null){
-					Notification.show("Debe seleccionar un obrero para eliminarlo");
-					return;
-				}
-				//TODO dialogo de confirmación
-				service.delete(l);
-				laborerContainer.removeItem(l);
-
-				setLaborer(null);
-			}
-		});
-		hl.addComponent(borrarObrero);
 
 		return vl;
 	}
 
-	@PostConstruct
-	private void init(){
-	}
 
 	@Override
 	public void enter(ViewChangeEvent event) {
