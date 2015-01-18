@@ -11,5 +11,6 @@ public final class Constants {
 	public static final String MENU_CONFIGURATIONS = "Configuraciones";
 	public static final String MENU_LOGOUT = "Salir";
 	public static final String VELOCITY_ENGINE_BEAN = "velocityEngine";
+	public static final String LABORER_SERVICE_BEAN = "laborerService";
 
 }

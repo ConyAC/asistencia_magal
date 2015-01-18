@@ -144,4 +144,9 @@ public class ConstructionSiteService {
 		constructionSiterepo.deleteAll();
 	}
 
+	public void save(Team team) {
+		teamRepo.save(team);
+		
+	}
+
 }
