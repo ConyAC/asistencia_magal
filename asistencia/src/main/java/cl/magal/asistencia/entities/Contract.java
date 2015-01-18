@@ -24,6 +24,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
+import javax.persistence.PrePersist;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -96,6 +97,14 @@ public class Contract implements Serializable {
     List<Annexed> annexeds = new ArrayList<Annexed>();
 
     public Contract() {
+    }
+    
+    @PrePersist
+    public void prePersist(){
+    	if(finished == null )
+    		finished = false;
+    	if(active == null)
+    		active = true;
     }
 
     public Contract(Integer contractId) {

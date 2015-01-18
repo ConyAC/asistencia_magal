@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ui.velocity.VelocityEngineUtils;
 
+import cl.magal.asistencia.entities.ConstructionSite;
 import cl.magal.asistencia.entities.Contract;
 import cl.magal.asistencia.entities.Laborer;
 import cl.magal.asistencia.entities.LaborerConstructionsite;
@@ -31,6 +32,7 @@ import com.vaadin.data.util.BeanItem;
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.StreamResource;
+import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.AbstractSelect.ItemCaptionMode;
 import com.vaadin.ui.AbstractSelect.NewItemHandler;
 import com.vaadin.ui.Alignment;
@@ -40,6 +42,7 @@ import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.GridLayout;
+import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.TextField;
@@ -97,7 +100,7 @@ public class AddLaborerContractDialog extends AbstractWindowEditor implements Ne
 	@Override
 	protected Component createBody() {
 		
-		GridLayout gl = new GridLayout(3,3);
+		GridLayout gl = new GridLayout(3,6);
 		gl.setSpacing(true);
 		gl.setMargin(true);
 		
@@ -115,6 +118,8 @@ public class AddLaborerContractDialog extends AbstractWindowEditor implements Ne
 			Utils.setLabelValue( lbNombre , laborers.firstItemId().getFullname());
 		}
 
+		final Label provenience = new Label("",ContentMode.HTML);
+		
 		lbNombre.setReadOnly(true);
 		final Button btn = new Button(null,FontAwesome.FLOPPY_O );
 		btn.setEnabled(addLaborer);
@@ -166,6 +171,15 @@ public class AddLaborerContractDialog extends AbstractWindowEditor implements Ne
 						btn.setIcon(FontAwesome.PENCIL);
 					else
 						btn.setIcon(FontAwesome.FLOPPY_O );
+					
+					//muestra la procedencia
+					if(addLaborer){
+						ConstructionSite lastConstructionSite = laborerService.getLastConstructionSite(laborer);
+						logger.debug("lastConstructionSite {}",lastConstructionSite);
+						if(lastConstructionSite != null )
+						provenience.setValue("<span style='color:red'>Obra anterior: "+lastConstructionSite.getName()+"</span>");
+					}
+					
 				}
 			}
 		});
@@ -178,6 +192,10 @@ public class AddLaborerContractDialog extends AbstractWindowEditor implements Ne
 		
 		gl.addComponent(btn);
 		gl.setComponentAlignment(btn, Alignment.BOTTOM_RIGHT);
+		//agrega un label para mostrar la última obra en la que participó
+		if(addLaborer)
+			gl.addComponent(provenience,0,1,2,1);
+		
 		//campos asociados a la obra/contrato
 		cbJob = new ComboBox("Oficio");
 		cbJob.setTabIndex(3);
