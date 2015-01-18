@@ -466,11 +466,12 @@ public class LaborerAndTeamPanel extends Panel implements View {
 								// Here we create a new StreamResource which downloads our StreamSource,
 								// which is our pdf.
 								// Set the right mime type
-								//						        resource.setMIMEType("application/pdf");
+								//resource.setMIMEType("application/pdf");
 								resource.setMIMEType("text/html");
 
 								e.setSource(resource);
 								w.setContent(e);
+								w.center();
 								w.setWidth("60%");
 								w.setHeight("60%");
 							}
