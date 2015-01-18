@@ -470,12 +470,17 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 
 				//				Button btnEdit = new Button(null,FontAwesome.PENCIL);
 				if(!readOnly){
+					
+					final HorizontalLayout hl = this;
+					
 					final Button btnChangeJob = new Button(null,FontAwesome.CHILD);
+					final Button btnFinishContract = new Button(null,FontAwesome.TIMES);
 					final Button btnSettlement = new Button(null,FontAwesome.FILE_TEXT);
 
-					btnSettlement.setDescription("Finiquitar");
 					//				btnEdit.setDescription("Editar");
 					btnChangeJob.setDescription("Cambiar Oficio");
+					btnFinishContract.setDescription("Término de Contrato");
+					btnSettlement.setDescription("Cálcular Finiquito");
 
 					//				btnEdit.addClickListener(new Button.ClickListener() {
 					//
@@ -503,7 +508,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 										setContractGl(laborer.getActiveContract());
 										beanContainerAnnexeds.removeAllItems();
 										
-										replaceComponent(btnChangeJob,btnSettlement);
+										hl.replaceComponent(btnChangeJob,btnFinishContract);
 									} catch (Exception e) {
 										logger.error("Error al guardar la información del obrero",e);
 										Notification.show("Es necesario agregar todos los campos obligatorios", Type.ERROR_MESSAGE);
@@ -515,7 +520,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 						}
 					});
 
-					btnSettlement.addClickListener(new Button.ClickListener() {
+					btnFinishContract.addClickListener(new Button.ClickListener() {
 
 						@Override
 						public void buttonClick(ClickEvent event) {
@@ -524,8 +529,9 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 							w.center();
 							w.setModal(true);
 							
-							w.setContent(new HorizontalLayout(){
+							w.setContent(new VerticalLayout(){
 								{
+									
 									setSpacing(true);
 									setMargin(true);
 									final OptionGroup og = new OptionGroup("Tipo de Término",
@@ -534,67 +540,100 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 													"Ausencia Reiterada"));
 									addComponent(og);
 									
-									addComponent(new Button(null,new Button.ClickListener() {
-										
-										@Override
-										public void buttonClick(ClickEvent event) {
-											
-											final Map<String, Object> input = new HashMap<String, Object>();
-											input.put("laborerConstructions", new LaborerConstructionsite[] {(LaborerConstructionsite)getItem().getBean()});
-											input.put("tools", new DateTool());
-											
-											final StringBuilder sb = new StringBuilder();
-											if(((String) og.getValue()).compareTo("Voluntaria") == 0){
-												sb.append( VelocityEngineUtils.mergeTemplateIntoString(velocityEngine, "templates/voluntary_resignation_letter.vm", "UTF-8", input) );
-											}else
-												if(((String) og.getValue()).compareTo("Término de Contrato") == 0){
-												sb.append( VelocityEngineUtils.mergeTemplateIntoString(velocityEngine, "templates/dismissal_letter_for_completion_of_work.vm", "UTF-8", input) );
-											}else
-												if(((String) og.getValue()).compareTo("Ausencia Reiterada") == 0){
-												sb.append( VelocityEngineUtils.mergeTemplateIntoString(velocityEngine, "templates/dismissal_letter_for_absence.vm", "UTF-8", input) );
-											}
-											
-											StreamResource.StreamSource source2 = new StreamResource.StreamSource() {
+									addComponent(new HorizontalLayout(){
+										{
+											// boton aceptar
+											addComponent(new Button("Aceptar",new Button.ClickListener() {
+												
+												@Override
+												public void buttonClick(ClickEvent event) {
+													
+													if( og.getValue() == null ){
+														Notification.show("Debe seleccionar una causa de término.",Type.WARNING_MESSAGE);
+														return;
+													}
+													
+													final Map<String, Object> input = new HashMap<String, Object>();
+													input.put("laborerConstructions", new LaborerConstructionsite[] {(LaborerConstructionsite)getItem().getBean()});
+													input.put("tools", new DateTool());
+													
+													final StringBuilder sb = new StringBuilder();
+													if(((String) og.getValue()).compareTo("Voluntaria") == 0){
+														sb.append( VelocityEngineUtils.mergeTemplateIntoString(velocityEngine, "templates/voluntary_resignation_letter.vm", "UTF-8", input) );
+													}else
+														if(((String) og.getValue()).compareTo("Término de Contrato") == 0){
+														sb.append( VelocityEngineUtils.mergeTemplateIntoString(velocityEngine, "templates/dismissal_letter_for_completion_of_work.vm", "UTF-8", input) );
+													}else
+														if(((String) og.getValue()).compareTo("Ausencia Reiterada") == 0){
+														sb.append( VelocityEngineUtils.mergeTemplateIntoString(velocityEngine, "templates/dismissal_letter_for_absence.vm", "UTF-8", input) );
+													}
+													
+													StreamResource.StreamSource source2 = new StreamResource.StreamSource() {
 
-												public InputStream getStream() {
-													//throw new UnsupportedOperationException("Not supported yet.");
-													return new ByteArrayInputStream(sb.toString().getBytes());
+														public InputStream getStream() {
+															//throw new UnsupportedOperationException("Not supported yet.");
+															return new ByteArrayInputStream(sb.toString().getBytes());
+														}
+													};
+													StreamResource resource = new StreamResource(source2, (String) og.getValue());
+													
+													BrowserFrame e = new BrowserFrame();
+													e.setSizeFull();
+
+													// Here we create a new StreamResource which downloads our StreamSource,
+													// which is our pdf.
+													// Set the right mime type
+													//						        resource.setMIMEType("application/pdf");
+													resource.setMIMEType("text/html");
+
+													e.setSource(resource);
+													w.setContent(e);
+													w.center();
+													w.setWidth("60%");
+													w.setHeight("60%");
+													
+													activeContract.setFinished(true);
+													//se asegura de marcar inactivos todos los contratos
+													hl.replaceComponent(btnFinishContract,btnSettlement );
 												}
-											};
-											StreamResource resource = new StreamResource(source2, (String) og.getValue());
+											}){ {setIcon(FontAwesome.CHECK_CIRCLE_O);} } );
 											
-											BrowserFrame e = new BrowserFrame();
-											e.setSizeFull();
-
-											// Here we create a new StreamResource which downloads our StreamSource,
-											// which is our pdf.
-											// Set the right mime type
-											//						        resource.setMIMEType("application/pdf");
-											resource.setMIMEType("text/html");
-
-											e.setSource(resource);
-											w.setContent(e);
-											w.setWidth("60%");
-											w.setHeight("60%");
+											// boton aceptar
+											addComponent(new Button("Cancelar",new Button.ClickListener() {
+												
+												@Override
+												public void buttonClick(ClickEvent event) {
+													w.close();
+												}
+											}){{addStyleName("link");}});
 										}
-									}){ {setIcon(FontAwesome.PRINT);} } );
+									});
 								}
 							});
 							
 							UI.getCurrent().addWindow(w);
-							
+						}
+					});
+					
+					btnSettlement.addClickListener(new Button.ClickListener() {
+
+						@Override
+						public void buttonClick(ClickEvent event) {
+
 							//TODO calcular finiquito
 							//setea un finiquito
 							activeContract.setSettlement(100000);
 							//se asegura de marcar inactivos todos los contratos
-							replaceComponent(btnSettlement, btnChangeJob);
+							hl.replaceComponent(btnSettlement, btnChangeJob);
 						}
 					});
 
-					if(activeContract.getSettlement() == null ){
-						addComponent(btnSettlement);
-					}else{
+					if(activeContract == null ){
 						addComponent(btnChangeJob);
+					}else if(!activeContract.isFinished()){
+						addComponent(btnFinishContract);
+					}else if(activeContract.getSettlement() == null ){
+						addComponent(btnSettlement);
 					}
 				}
 			}

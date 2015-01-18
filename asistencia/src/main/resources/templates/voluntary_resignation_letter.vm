@@ -40,6 +40,7 @@
 		<tr><td>DOMICILIO	:......................................</td></tr>
 		<tr><td>COMUNA	:	.....................................</td></tr>
 		</table>
+		<br />
 		De mi consideraci&oacute;n :
 		<br />
 		<p>Por intermedio de la presente comunico a ustedes mi renuncia voluntaria, en conformidad al art&iacute;culo 159 N&deg;2, del C&oacute;digo del Trabajo y 177, del mismo cuerpo legal, la cual se har&aacute; efectiva a contar del d&iacute;a .........................................................</p>
@@ -56,12 +57,12 @@
         </tr>
         <tr>
             <th>
-            Nombre ${laborerConstruction.laborer.fullname}
+            Nombre : ${laborerConstruction.laborer.fullname}
             </th>
         </tr>
         <tr>
             <th>
-            Rut ${laborerConstruction.laborer.rut}
+            Rut : ${laborerConstruction.laborer.rut}
             </th>
         </tr>
      </table>
@@ -69,7 +70,7 @@
      <table cellpadding="0" cellspacing="0" border="0" style="text-align:leftt;margin:10px">
         <tr>
             <th>
-            Obra: ${laborerConstruction.constructionsite.name}
+            Obra : ${laborerConstruction.constructionsite.name}
             </th>
 		</tr>
         <tr>
