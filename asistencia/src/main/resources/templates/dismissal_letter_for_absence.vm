@@ -27,7 +27,7 @@
 		<br />		
 		
 		<div style="text-align:right;line-height: 0.2;">
-		    Santiago, $tools.format('dd', $tools.date) de $tools.format('MMM yyyy', $tools.date)
+		    Santiago, $tools.format('dd', $tools.date) de $tools.format('MMMM yyyy', $tools.date)
 		</div>
 		
 		<br />
