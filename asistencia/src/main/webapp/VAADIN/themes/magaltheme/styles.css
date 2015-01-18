@@ -12149,3 +12149,16 @@ div.v-layout.v-horizontal.v-widget {
 	background-color: gray;
 	color: white;
 }
+
+.magaltheme .title-summary { 
+	font-weight: bold;
+	font-size: 28px;
+}
+
+.magaltheme .table-summary { 
+	margin-top: 10px;
+}
+
+.magaltheme .image-laborer-h {
+	margin-top: -16px;
+}
