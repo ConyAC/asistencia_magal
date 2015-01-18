@@ -86,6 +86,7 @@ public class Contract implements Serializable {
     private Integer jobCode;
     
     private Boolean active;
+    private Boolean finished;
     
     @ManyToOne
     @JoinColumn(name="LABORER_CONSTRUCTIONSITEID")
@@ -229,7 +230,14 @@ public class Contract implements Serializable {
 	public void setActive(boolean active) {
 		this.active = active;
 	}
-	
+	public Boolean isFinished() {
+		return finished;
+	}
+
+	public void setFinished(Boolean finished) {
+		this.finished = finished;
+	}
+
 	public String getJobAndCode(){
 		return (getJob() != null ? getJob().toString():"")+" ("+getJobCode()+")";
 	}

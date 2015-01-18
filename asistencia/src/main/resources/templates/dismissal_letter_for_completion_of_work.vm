@@ -1,0 +1,74 @@
+<?xml version='1.0'?>
+<html>
+	 <head>
+		<meta charset="UTF-8">
+		<style>
+	
+	@media all {
+	.page-break	{ display: none; }
+	.print-hidden	{  }
+	}
+	
+	@media print {
+		.page-break	{ display: block; page-break-before: always; }
+		.print-hidden	{ display: none; }
+	}
+	
+	</style>
+	</head>
+	<body>
+	
+	<div class="print-hidden" style="text-align:center;">
+		<input type="button" onclick="javascript:print()" value="Imprimir" /> <br /><br />
+	</div>
+			
+#foreach( $laborerConstruction in $laborerConstructions )
+
+		<br />		
+		
+		<div style="text-align:right;line-height: 0.2;">
+		    Santiago, $tools.format('dd', $tools.date) de $tools.format('MMM yyyy', $tools.date)
+		</div>
+		
+		<br />
+		<table cellpadding="0" cellspacing="0" border="0" style="width:100%;" />
+		<tr><td colspan="2" style="text-align:leftt;"><h2>SE&Ntilde;OR</h2></td></tr>
+		<tr><td><p>${laborerConstruction.laborer.fullname}, RUN ${laborerConstruction.laborer.rut}, ROL ${laborerConstruction.activeContract.jobCode}</p></td></tr>
+		<tr><td style="text-align:leftt;text-decoration: underline; ">PRESENTE</td></tr>
+		</table>
+		<br />
+		De mi consideraci&oacute;n :
+		<br />
+		<p>Por intermedio de la presente, comunico a Ud. que con fecha ..... de .......................... de 201..., se ha puesto t&eacute;rmino a su contrato de trabajo.</p>
+		<p>Causal invocada : DFL N&deg; 1 Art. 159 N&deg; 5, esto es, Conclusi&oacute;n del Trabajo o servicio que dio origen al Contrato de Trabajo, Especificamos que de acuerdo al contrato de trabajo es t&eacute;rmino de ${laborerConstruction.activeContract.step} </p>
+		<p>Las cotizaciones previsionales se encuentran canceladas, al d&iacute;a en la instituci&oacute;n previsional que corresponde.</p>
+		Saludan Atte. A Ud.
+		<br />
+		<br />
+		<br />
+		<table cellpadding="0" cellspacing="0" border="0" style="text-align:leftt;margin:10px;width:100%">
+        <tr>
+            <th>
+            <hr style="width:200px" />
+            Firma del Trabajador	
+            </th>
+			<th>
+            <hr style="width:200px" />
+            Constructora Magal Ltda.
+            </th>
+        </tr>
+        <tr>
+            <th>
+            </th>
+            <th>
+            Obra : ${laborerConstruction.constructionsite.name}
+            </th>
+            
+        </tr>
+     </table>
+     <br />
+	 <div class="page-break"></div>
+#end
+	</body>
+</html>
+
