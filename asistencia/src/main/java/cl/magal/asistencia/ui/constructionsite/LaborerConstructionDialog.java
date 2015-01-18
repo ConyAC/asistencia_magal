@@ -177,15 +177,15 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 				}catch(Exception e){ /*FIXME falla silenciosamente*/ }
 				
 				setSpacing(true);
-
-				Button btnPrint = new Button(null,new Button.ClickListener() {
-
-					@Override
-					public void buttonClick(ClickEvent event) {
-						Notification.show("Imprimiendo");
-					}
-				}){{setIcon(FontAwesome.PRINT); setDescription("Imprimir");}};
-				addComponent(btnPrint);
+//				POR AHORA OCULTAR ESTE BOTON HASTA QUE SE DEFINA BIEN QUE HARA Y SI VA
+//				Button btnPrint = new Button(null,new Button.ClickListener() {
+//
+//					@Override
+//					public void buttonClick(ClickEvent event) {
+//						Notification.show("Imprimiendo");
+//					}
+//				}){{setIcon(FontAwesome.PRINT); setDescription("Imprimir");}};
+//				addComponent(btnPrint);
 				
 				Button bloquear = new Button(null,FontAwesome.LOCK);					
 				bloquear.addClickListener(new Button.ClickListener() {
@@ -242,6 +242,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 		gl.addComponent(new Label("Premio"));gl.addComponent(new TextField(getItem().getItemProperty("reward")){{
 			setNullRepresentation("");
 			addValidator(new BeanValidator(LaborerConstructionsite.class,"reward"));
+			setReadOnly(readOnly);
 		}});
 		gl.addComponent(new Label("Fecha de Nacimiento"));gl.addComponent(new Label(getItem().getItemProperty("laborer.dateBirth")));
 		String marital = MaritalStatus.CASADO.toString();
@@ -256,8 +257,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 		if(getItem().getItemProperty("laborer.mobileNumber") != null)
 			gl.addComponent(new Label("Celular"));gl.addComponent(new Label(getItem().getItemProperty("laborer.mobileNumber")));
 		gl.addComponent(new Label("Teléfono"));gl.addComponent(new Label(getItem().getItemProperty("laborer.phone")));
-		if(getItem().getItemProperty("laborer.dateAdmission").getValue() != null)
-			gl.addComponent(new Label("Fecha de Admisión")); gl.addComponent(new Label(getItem().getItemProperty("laborer.dateAdmission")));
+		gl.addComponent(new Label("Fecha de Admisión")); gl.addComponent(new Label(getItem().getItemProperty("laborer.dateAdmission")));
 				
 		return gl;
 	}

@@ -17,11 +17,11 @@ import org.springframework.stereotype.Component;
 import org.tepi.filtertable.FilterTable;
 
 import ru.xpoft.vaadin.VaadinView;
+import cl.magal.asistencia.entities.Accident;
 import cl.magal.asistencia.entities.ConstructionSite;
 import cl.magal.asistencia.entities.Contract;
 import cl.magal.asistencia.entities.Laborer;
 import cl.magal.asistencia.entities.LaborerConstructionsite;
-import cl.magal.asistencia.entities.Vacation;
 import cl.magal.asistencia.services.ConstructionSiteService;
 import cl.magal.asistencia.services.LaborerService;
 import cl.magal.asistencia.ui.MagalUI;
@@ -238,7 +238,7 @@ public class WorkerFileView extends HorizontalLayout implements View {
 			
 			@Override
 			public Object generateCell(Table source, Object itemId, Object columnId) {
-				List<Vacation> vacations = (List<Vacation>) source.getItem(itemId).getItemProperty("vacations").getValue();
+				List<Accident> vacations = (List<Accident>) source.getItem(itemId).getItemProperty("accidents").getValue();
 				StringBuilder sb = new StringBuilder();
 				if(vacations == null || vacations.isEmpty()){
 					sb.append("0");
