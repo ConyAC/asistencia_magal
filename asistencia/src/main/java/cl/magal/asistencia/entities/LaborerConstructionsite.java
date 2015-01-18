@@ -24,6 +24,7 @@ import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import javax.validation.constraints.Digits;
 
 import cl.magal.asistencia.entities.enums.Job;
 
@@ -69,6 +70,7 @@ public class LaborerConstructionsite implements Serializable {
     @Column(name = "confirmed")
     private boolean confirmed;
     
+    @Digits(fraction=0,integer=1000000 , message ="El premio debe ser un valor numérico.")
     @Column(name="reward")
     private int reward;
     

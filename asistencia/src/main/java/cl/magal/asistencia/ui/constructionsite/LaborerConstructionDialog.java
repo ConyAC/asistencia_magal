@@ -43,6 +43,7 @@ import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeNotifier;
 import com.vaadin.data.util.BeanItem;
 import com.vaadin.data.util.BeanItemContainer;
+import com.vaadin.data.validator.BeanValidator;
 import com.vaadin.server.FileResource;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.StreamResource;
@@ -238,6 +239,10 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 			//gl.addComponent(new Label("Fecha de Admisión"));gl.addComponent(new Label(getItem().getItemProperty("laborer.photo")));
 		gl.addComponent(new Label("Trabajador"));gl.addComponent(new Label(getItem().getItemProperty("laborer.fullname")));
 		gl.addComponent(new Label("Rut"));gl.addComponent(new Label(getItem().getItemProperty("laborer.rut")));
+		gl.addComponent(new Label("Premio"));gl.addComponent(new TextField(getItem().getItemProperty("reward")){{
+			setNullRepresentation("");
+			addValidator(new BeanValidator(LaborerConstructionsite.class,"reward"));
+		}});
 		gl.addComponent(new Label("Fecha de Nacimiento"));gl.addComponent(new Label(getItem().getItemProperty("laborer.dateBirth")));
 		String marital = MaritalStatus.CASADO.toString();
 		try{
