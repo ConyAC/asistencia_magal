@@ -316,7 +316,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 				}
 				else  if( propertyId.equals("status") ){
 					field = new TextField();
-					((TextField)field).setNullRepresentation("fg");
+					((TextField)field).setNullRepresentation("En deuda");
 					field.setEnabled(false);
 				}
 				else if(  propertyId.equals("dateBuy") ){
@@ -340,19 +340,19 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 				cb.addValueChangeListener(new Property.ValueChangeListener() {
 					@Override
 					public void valueChange(Property.ValueChangeEvent event) {
-						/*if(selectedItemIds.contains(itemId)){
-							selectedItemIds.remove(itemId);
-						} else {
-							selectedItemIds.add(itemId);
-						}*/
+						logger.debug("checkbox : "+ getItem().getBean());
+						boolean value = (Boolean) event.getProperty().getValue();
+						if(value){
+							;
+						}
 					}
 				});
 				return cb;
 			}
 		});
 		
-		tableTool.setVisibleColumns("name","price","dateBuy","fee","status");
-		tableTool.setColumnHeaders("Herramienta","Monto","Fecha","Cuota","Estado");
+		tableTool.setVisibleColumns("name","price","dateBuy","fee","selected","status");
+		tableTool.setColumnHeaders("Herramienta","Monto","Fecha","Cuota","Postergar pago","Estado");
 		tableTool.setEditable(true);				
 		vh.addComponent(tableTool);
 		vh.setComponentAlignment(hl, Alignment.TOP_RIGHT);
@@ -401,11 +401,9 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 					((TextField)field).setNullRepresentation("");
 				}
 				else  if( propertyId.equals("status") ){
-					field = new ComboBox();
-					field.setPropertyDataSource(container.getContainerProperty(itemId, propertyId));
-					for(LoanStatus ls : LoanStatus.values()){
-						((ComboBox)field).addItem(ls);
-					}
+					field = new TextField();
+					((TextField)field).setNullRepresentation("En deuda");
+					field.setEnabled(false);
 				}
 				else if(  propertyId.equals("dateBuy") ){
 					field = new DateField();
