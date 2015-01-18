@@ -207,7 +207,6 @@ public class WorkerFileView extends HorizontalLayout implements View {
 		VerticalLayout vh = new VerticalLayout();
 		vh.setWidth("100%");
 		vh.setSpacing(true);
-		f.addComponent(vh);
 
 		fullname.addStyleName("title-summary");
 		vh.addComponent(fullname);
@@ -223,6 +222,7 @@ public class WorkerFileView extends HorizontalLayout implements View {
 		vh.addComponent(rut);
 		vh.addComponent(job);
 		f.addComponent(image);
+		f.addComponent(vh);
 		
 		Table table = new Table();
 		table.addStyleName("table-summary");
