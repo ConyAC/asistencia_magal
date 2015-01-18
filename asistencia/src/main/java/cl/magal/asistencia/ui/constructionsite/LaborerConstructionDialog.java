@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -322,9 +323,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 				else if(  propertyId.equals("dateBuy") ){
 					field = new DateField();
 				}
-				else {
-					return null;
-				}
+				
 				((AbstractField<?>)field).setImmediate(true);
 				return field;
 			}
@@ -334,7 +333,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 
 			@Override
 			public Component generateCell(Table source, Object itemId, Object columnId) {
-				//boolean selected = selectedItemIds.contains(itemId);
+				logger.debug("fecha: "+source.getItem(itemId).getItemProperty(columnId));
 				/* When the chekboc value changes, add/remove the itemId from the selectedItemIds set */
 				final CheckBox cb = new CheckBox("");
 				cb.addValueChangeListener(new Property.ValueChangeListener() {
@@ -343,7 +342,11 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 						logger.debug("checkbox : "+ getItem().getBean());
 						boolean value = (Boolean) event.getProperty().getValue();
 						if(value){
-							;
+							Date today = new Date();
+							logger.debug("hoy: "+today);
+							//getItem().getItemProperty("tool.datePostponed");
+							//getBinder().getItemDataSource().getItemProperty("datePostponed").setValue(today);
+							
 						}
 					}
 				});
