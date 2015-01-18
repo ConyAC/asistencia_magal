@@ -21,6 +21,7 @@ import cl.magal.asistencia.ui.users.UsersView;
 import cl.magal.asistencia.ui.workerfile.WorkerFileView;
 import cl.magal.asistencia.util.Constants;
 import cl.magal.asistencia.util.SecurityHelper;
+import cl.magal.asistencia.util.SpringContextHelper;
 
 import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.Title;
@@ -30,6 +31,7 @@ import com.vaadin.server.DefaultErrorHandler;
 import com.vaadin.server.ErrorHandler;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.VaadinRequest;
+import com.vaadin.server.VaadinServlet;
 import com.vaadin.server.VaadinSession;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Alignment;
@@ -71,11 +73,19 @@ public class MagalUI extends UI implements ErrorHandler {
 	DiscoveryNavigator navigator = null ;
 	Button backBtn; 
 	Label title;
+	
+	SpringContextHelper helper;
+	
+	public Object getSpringBean(final String beanRef){
+		return helper.getBean(beanRef);
+	}
 
 	@Override
 	protected void init(final VaadinRequest request) {
 		
 		VaadinSession.getCurrent().setErrorHandler(this);
+		
+		helper = new SpringContextHelper(VaadinServlet.getCurrent().getServletContext());
 		
 		//raiz
 		root = new VerticalLayout();
