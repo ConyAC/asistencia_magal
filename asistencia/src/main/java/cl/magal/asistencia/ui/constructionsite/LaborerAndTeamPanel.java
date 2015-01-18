@@ -480,11 +480,12 @@ public class LaborerAndTeamPanel extends Panel implements View {
 								// Here we create a new StreamResource which downloads our StreamSource,
 								// which is our pdf.
 								// Set the right mime type
-								//						        resource.setMIMEType("application/pdf");
+								//resource.setMIMEType("application/pdf");
 								resource.setMIMEType("text/html");
 
 								e.setSource(resource);
 								w.setContent(e);
+								w.center();
 								w.setWidth("60%");
 								w.setHeight("60%");
 							}
@@ -647,7 +648,7 @@ public class LaborerAndTeamPanel extends Panel implements View {
 
 		//TODO estado
 		//		table.setVisibleColumns("laborer.job","laborer.firstname","laborer.laborerId"); //FIXME laborerId
-		table.setVisibleColumns("selected","activeContract.jobAndCode","laborer.fullname","activeContract.step","actions"); //FIXME laborerId
+		table.setVisibleColumns("selected","activeContract.jobCode","laborer.fullname","activeContract.step","actions"); //FIXME laborerId
 		table.setColumnHeaders("","Cod","Nombre","Etapa","Acciones");
 		table.setColumnWidth("selected", 40);
 		
