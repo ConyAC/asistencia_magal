@@ -25,6 +25,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionSystemException;
 import org.springframework.ui.velocity.VelocityEngineUtils;
 import org.tepi.filtertable.FilterTable;
+import org.vaadin.dialogs.ConfirmDialog;
 
 import cl.magal.asistencia.entities.ConstructionSite;
 import cl.magal.asistencia.entities.LaborerConstructionsite;
@@ -41,7 +42,6 @@ import cl.magal.asistencia.ui.AbstractWindowEditor.EditorSavedEvent;
 import cl.magal.asistencia.util.SecurityHelper;
 import cl.magal.asistencia.util.Utils;
 
-import com.vaadin.data.Item;
 import com.vaadin.data.Property;
 import com.vaadin.data.fieldgroup.BeanFieldGroup;
 import com.vaadin.data.fieldgroup.FieldGroup.CommitException;
@@ -407,14 +407,14 @@ public class LaborerAndTeamPanel extends Panel implements View {
 		block = new Label("Bloqueado");
 		block.addStyleName("laborer-block");
 		hl2.addComponent(block);
-		
+
 		confirmed = new Label("No Confirmado");
 		confirmed.addStyleName("laborer-confirmed");
 		hl2.addComponent(confirmed);
-		
+
 		btnPrint = new Button(null,FontAwesome.PRINT);
 		hl2.addComponent(btnPrint);
-		
+
 		hl.addComponent(hl2);
 		hl.setComponentAlignment(hl2, Alignment.TOP_RIGHT);
 
@@ -426,15 +426,15 @@ public class LaborerAndTeamPanel extends Panel implements View {
 					Notification.show("Para imprimir masivamente, primero debe seleccionar uno más trabajadores");
 					return;
 				}
-				
+
 				final ObjectProperty contracts = new ObjectProperty(false, Boolean.class);
 				final ObjectProperty vacations = new ObjectProperty(false, Boolean.class);
 				final ObjectProperty anexxeds = new ObjectProperty(false, Boolean.class);
-				
+
 				final Window w = new Window("Impresión masiva");
 				w.center();
 				w.setModal(true);
-				
+
 				w.setContent(new HorizontalLayout(){
 					{
 						setSpacing(true);
@@ -442,16 +442,16 @@ public class LaborerAndTeamPanel extends Panel implements View {
 						addComponent(new CheckBox("Contrato"){{setPropertyDataSource(contracts);}});
 						addComponent(new CheckBox("Anexos"){{setPropertyDataSource(anexxeds);}});
 						addComponent(new CheckBox("Últimas Vacaciones"){{setPropertyDataSource(vacations);}});
-						
+
 						addComponent(new Button(null,new Button.ClickListener() {
-							
+
 							@Override
 							public void buttonClick(ClickEvent event) {
-								
+
 								final Map<String, Object> input = new HashMap<String, Object>();
 								input.put("laborerConstructions", selectedItemIds);
 								input.put("tools", new DateTool());
-								
+
 								final StringBuilder sb = new StringBuilder();
 								if((Boolean) contracts.getValue()){
 									sb.append( VelocityEngineUtils.mergeTemplateIntoString(velocityEngine, "templates/temporary_work_contract_doc.vm", "UTF-8", input) );
@@ -462,7 +462,7 @@ public class LaborerAndTeamPanel extends Panel implements View {
 								if((Boolean) vacations.getValue()){
 									sb.append( VelocityEngineUtils.mergeTemplateIntoString(velocityEngine, "templates/vacation_doc.vm", "UTF-8", input) );
 								}
-								
+
 								StreamResource.StreamSource source2 = new StreamResource.StreamSource() {
 
 									public InputStream getStream() {
@@ -471,7 +471,7 @@ public class LaborerAndTeamPanel extends Panel implements View {
 									}
 								};
 								StreamResource resource = new StreamResource(source2, "Documentos Masivos.html");
-								
+
 								BrowserFrame e = new BrowserFrame();
 								e.setSizeFull();
 
@@ -490,10 +490,10 @@ public class LaborerAndTeamPanel extends Panel implements View {
 						}){ {setIcon(FontAwesome.PRINT);} } );
 					}
 				});
-				
+
 				UI.getCurrent().addWindow(w);
-				
-				
+
+
 				final Map<String, Object> input = new HashMap<String, Object>();
 				input.put("laborerConstructions", selectedItemIds);
 				input.put("tools", new DateTool());
@@ -514,7 +514,7 @@ public class LaborerAndTeamPanel extends Panel implements View {
 				window.setHeight("60%");
 				window.center();
 				window.setModal(true);
-				
+
 				BrowserFrame e = new BrowserFrame();
 				e.setSizeFull();
 
@@ -526,12 +526,12 @@ public class LaborerAndTeamPanel extends Panel implements View {
 
 				e.setSource(resource);
 				window.setContent(e);
-//				UI.getCurrent().addWindow(window);
-				
-				
-//				for(Object lc : selectedItemIds){
-//					Notification.show("Imprimiendo "+((LaborerConstructionsite) lc).getLaborer().getFullname());
-//				}
+				//				UI.getCurrent().addWindow(window);
+
+
+				//				for(Object lc : selectedItemIds){
+				//					Notification.show("Imprimiendo "+((LaborerConstructionsite) lc).getLaborer().getFullname());
+				//				}
 
 			}
 		});
@@ -539,7 +539,7 @@ public class LaborerAndTeamPanel extends Panel implements View {
 		//agrega solo si tiene los permisos //siempre se debe crear pues solo se deshabilita si no se tiene permiso
 		btnAdd = new Button(null,FontAwesome.PLUS);
 		hl2.addComponent(btnAdd);
-		
+
 		ShortcutListener enter = new ShortcutListener("Entrar",
 				KeyCode.ENTER, new int[]{ModifierKey.CTRL }) {
 			@Override
@@ -633,23 +633,23 @@ public class LaborerAndTeamPanel extends Panel implements View {
 		table.setSizeFull();
 		table.setFilterBarVisible(true);
 
-//		table.addGeneratedColumn("confirmed", new CustomTable.ColumnGenerator() {
-//
-//			@Override
-//			public Object generateCell(CustomTable source, Object itemId,Object columnId) {
-//				if((Boolean)source.getContainerProperty(itemId, columnId).getValue()){
-//					return "Si";
-//				}else
-//					return "No";
-//			}
-//		});
+		//		table.addGeneratedColumn("confirmed", new CustomTable.ColumnGenerator() {
+		//
+		//			@Override
+		//			public Object generateCell(CustomTable source, Object itemId,Object columnId) {
+		//				if((Boolean)source.getContainerProperty(itemId, columnId).getValue()){
+		//					return "Si";
+		//				}else
+		//					return "No";
+		//			}
+		//		});
 
 		//TODO estado
 		//		table.setVisibleColumns("laborer.job","laborer.firstname","laborer.laborerId"); //FIXME laborerId
 		table.setVisibleColumns("selected","activeContract.jobCode","laborer.fullname","activeContract.step","actions"); //FIXME laborerId
 		table.setColumnHeaders("","Cod","Nombre","Etapa","Acciones");
 		table.setColumnWidth("selected", 40);
-		
+
 		table.setSelectable(true);
 
 		table.addItemClickListener(new ItemClickListener() {
@@ -715,20 +715,20 @@ public class LaborerAndTeamPanel extends Panel implements View {
 
 			}
 		});
-		
+
 		table.setCellStyleGenerator(new FilterTable.CellStyleGenerator() {
 			@Override
 			public String getStyle(CustomTable source, Object itemId,
 					Object propertyId) {
 
 				if (!(Boolean) table.getItem(itemId).getItemProperty("confirmed").getValue()) {
-	                return "pending-laborer";
-	            }else if((Boolean) table.getItem(itemId).getItemProperty("block").getValue()){
-	            	return "block-laborer";
-	            }else
-	            	return "";				
-				}
-		    });
+					return "pending-laborer";
+				}else if((Boolean) table.getItem(itemId).getItemProperty("block").getValue()){
+					return "block-laborer";
+				}else
+					return "";				
+			}
+		});
 
 		table.refreshRowCache();
 		vl.addComponent(table);
@@ -790,8 +790,24 @@ public class LaborerAndTeamPanel extends Panel implements View {
 		table.addGeneratedColumn("actions", new CustomTable.ColumnGenerator() {
 
 			@Override
-			public Object generateCell(CustomTable source, Object itemId,Object columnId) {
-				return new Button(null,FontAwesome.TRASH_O);
+			public Object generateCell(CustomTable source, final Object itemId,Object columnId) {
+				BeanItem<Team> item = teamContainer.getItem(itemId);
+				final Team team = item.getBean();
+				return new Button(null,new Button.ClickListener() {
+
+					@Override
+					public void buttonClick(ClickEvent event) {
+						ConfirmDialog.show(UI.getCurrent(), "Confirmar Acción:", "¿Está seguro de eliminar la cuadrilla seleccionada?",
+								"Eliminar", "Cancelar", new ConfirmDialog.Listener() {
+							public void onClose(ConfirmDialog dialog) {
+								if (dialog.isConfirmed()) {
+									constructionSiteService.delete(team);
+									teamContainer.removeItem(itemId);
+								}
+							}
+						});		
+					}
+				}){ { setIcon(FontAwesome.TRASH_O); } };
 			}
 		});
 
@@ -799,7 +815,7 @@ public class LaborerAndTeamPanel extends Panel implements View {
 		table.setColumnHeaders("Nombre","Responsable","Fecha","Estado", "Acciones");
 		table.setSelectable(true);
 		table.addItemClickListener(new ItemClickListener() {
-			
+
 			@Override
 			public void itemClick(ItemClickEvent event) {
 				final BeanItem<Team> beanItem = (BeanItem<Team>) event.getItem();

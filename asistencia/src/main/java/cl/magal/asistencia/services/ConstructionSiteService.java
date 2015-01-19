@@ -155,4 +155,8 @@ public class ConstructionSiteService {
 		return teamRepo.findByConstructionSite(bean);
 	}
 
+	public void delete(Team team) {
+		teamRepo.delete(team);
+	}
+
 }
