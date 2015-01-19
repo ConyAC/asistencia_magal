@@ -251,6 +251,50 @@
 	 .filters-panel .v-filterselect.v-widget {
 		border-radius: 0;
 	}
+	
+	.v-table-cell-content-pending-laborer{
+		background-color: red;
+		color: white;
+	}
+
+	.laborer-block{
+	    background: gray;
+	    color: white;
+	    font-size: 12px;
+	    font-weight: bold;
+	    font-style: italic;
+	    width: 90px !important;
+	    margin-right: -11px;
+		margin-top: 17px;
+	}
+
+	.laborer-confirmed{
+	    background: red;
+	    color: white;
+	    font-size: 12px;
+	    font-weight: bold;
+	    font-style: italic;
+	    width: 90px !important;
+		margin-top: 17px;
+	}
+
+	.v-table-cell-content-block-laborer{
+		background-color: gray;
+		color: white;
+	}
+
+	.title-summary { 
+		font-weight: bold;
+		font-size: 28px;
+	}
+
+	.table-summary { 
+		margin-top: 10px;
+	}
+
+	.image-laborer-h {
+		margin-top: -16px;
+	}
 }
 
 
