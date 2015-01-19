@@ -65,6 +65,7 @@ public class UserService implements UserDetailsService {
 			perm.add(Permission.CREAR_USUARIO);
 			perm.add(Permission.DEFINIR_VARIABLE_GLOBAL);
 			perm.add(Permission.CONFIRMAR_OBREROS);
+			perm.add(Permission.BLOQUEAR_OBRERO);
 			role.setPermission(perm);	
 			repRole.save(role);
 			
