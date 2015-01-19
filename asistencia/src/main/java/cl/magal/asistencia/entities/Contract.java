@@ -86,8 +86,8 @@ public class Contract implements Serializable {
     @Column(name="jobCode")
     private Integer jobCode;
     
-    private Boolean active;
-    private Boolean finished;
+    private boolean active;
+    private boolean finished;
     
     @ManyToOne
     @JoinColumn(name="LABORER_CONSTRUCTIONSITEID")
@@ -101,10 +101,6 @@ public class Contract implements Serializable {
     
     @PrePersist
     public void prePersist(){
-    	if(finished == null )
-    		finished = false;
-    	if(active == null)
-    		active = true;
     }
 
     public Contract(Integer contractId) {
