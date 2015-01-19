@@ -49,20 +49,13 @@ public class Loan implements Serializable {
     @Column(name = "fee")
     private Integer fee;
     
-    @Convert(converter = LoanStatusConverter.class)
-    @Column(name = "status",nullable=false)
+    @Column(name = "status")
     @NotNull
-    private LoanStatus status = LoanStatus.ACTIVE;
+    private String status;
     
     @ManyToOne
 	@JoinColumn(name="LABORER_CONSTRUCTIONSITEID")
 	LaborerConstructionsite laborerConstructionSite;
-
-    @PrePersist
-    void preInsert() {
-       if(status == null)
-    	   status = LoanStatus.ACTIVE;
-    }
     
     public Loan() {
     }
@@ -107,15 +100,15 @@ public class Loan implements Serializable {
 	public void setFee(Integer fee) {
 		this.fee = fee;
 	}
-
-	public LoanStatus getStatus() {
+	
+	public String getStatus() {
 		return status;
 	}
 
-	public void setStatus(LoanStatus status) {
+	public void setStatus(String status) {
 		this.status = status;
 	}
-	
+
 	public LaborerConstructionsite getLaborerConstructionSite() {
 		return laborerConstructionSite;
 	}
