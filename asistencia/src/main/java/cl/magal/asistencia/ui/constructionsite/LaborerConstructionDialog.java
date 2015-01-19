@@ -137,7 +137,8 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 		tab.setSizeFull();
 
 		//tab de Resumen
-		tab.addTab(drawSummary(),"Resumen");
+		if(!readOnly)
+			tab.addTab(drawSummary(),"Resumen");
 		//tab de Información
 		if(!readOnly)
 			tab.addTab(new LaborerBaseInformation(getBinder(),"laborer",true),"Información");
@@ -178,7 +179,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 				image.setHeight("400");
 				addComponent(image);       
 				setComponentAlignment(image, Alignment.TOP_LEFT);
-				}catch(Exception e){ /*FIXME falla silenciosamente*/ }
+				}catch(Exception e){ logger.error("Error",e); /*FIXME falla silenciosamente*/ }
 				
 				setSpacing(true);
 				
@@ -194,14 +195,14 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 				try{
 					marital = ((MaritalStatus)getItem().getItemProperty("laborer.maritalStatus").getValue()).toString();
 				}catch(Exception e){
-					//FIXME 
+					logger.error("Error",e);
 				}
 				
 				hl.addComponent(new Label(marital));
 				hl.addComponent(new Label(getItem().getItemProperty("laborer.address")));
 				if(getItem().getItemProperty("laborer.mobileNumber") != null || getItem().getItemProperty("laborer.phone") != null)
 					hl.addComponent(new Label(getItem().getItemProperty("laborer.mobileNumber").getValue() +" - "+getItem().getItemProperty("laborer.phone").getValue()));
-				if(getItem().getItemProperty("laborer.dateAdmission").getValue() != null)
+//				if(getItem().getItemProperty("laborer.dateAdmission").getValue() != null)
 					hl.addComponent(new Label(getItem().getItemProperty("laborer.dateAdmission")));
 				
 				hl.addComponent(new Label("<hr />",ContentMode.HTML));
@@ -209,7 +210,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 				setNullRepresentation("");
 				addValidator(new BeanValidator(LaborerConstructionsite.class,"reward"));
 				//setReadOnly(readOnly);
-				setEnabled(false);
+				setEnabled(!readOnly);
 			}});
 						
 				setSpacing(true);
