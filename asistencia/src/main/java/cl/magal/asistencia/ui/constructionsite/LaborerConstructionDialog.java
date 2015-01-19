@@ -14,11 +14,13 @@ import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.tools.generic.DateTool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.ui.velocity.VelocityEngineUtils;
 
 import cl.magal.asistencia.entities.Absence;
 import cl.magal.asistencia.entities.Accident;
 import cl.magal.asistencia.entities.Annexed;
+import cl.magal.asistencia.entities.ConstructionSite;
 import cl.magal.asistencia.entities.Contract;
 import cl.magal.asistencia.entities.LaborerConstructionsite;
 import cl.magal.asistencia.entities.Loan;
@@ -29,13 +31,16 @@ import cl.magal.asistencia.entities.enums.AbsenceType;
 import cl.magal.asistencia.entities.enums.AccidentLevel;
 import cl.magal.asistencia.entities.enums.LoanStatus;
 import cl.magal.asistencia.entities.enums.MaritalStatus;
+import cl.magal.asistencia.entities.enums.Permission;
 import cl.magal.asistencia.entities.enums.ToolStatus;
+import cl.magal.asistencia.services.ConstructionSiteService;
 import cl.magal.asistencia.services.LaborerService;
 import cl.magal.asistencia.services.UserService;
 import cl.magal.asistencia.ui.AbstractWindowEditor;
 import cl.magal.asistencia.ui.OnValueChangeFieldFactory;
 import cl.magal.asistencia.ui.workerfile.vo.HistoryVO;
 import cl.magal.asistencia.util.Constants;
+import cl.magal.asistencia.util.SecurityHelper;
 import cl.magal.asistencia.util.Utils;
 
 import com.vaadin.data.Container;
@@ -187,56 +192,58 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 //				}){{setIcon(FontAwesome.PRINT); setDescription("Imprimir");}};
 //				addComponent(btnPrint);
 				
-				Button bloquear = new Button(null,FontAwesome.LOCK);					
-				bloquear.addClickListener(new Button.ClickListener() {
-					public void buttonClick(ClickEvent event) {								
-
-						LaborerConstructionsite cs = new LaborerConstructionsite();
-						BeanItem<LaborerConstructionsite> csItem = new BeanItem<LaborerConstructionsite>(cs);						
-						LaborerBlockDialog lbWindow = new LaborerBlockDialog(csItem, velocityEngine);
+				if( SecurityHelper.hastPermission(Permission.BLOQUEAR_OBRERO)){
+					Button bloquear = new Button(null,FontAwesome.LOCK);					
+					bloquear.addClickListener(new Button.ClickListener() {
+						public void buttonClick(ClickEvent event) {								
 						
-						lbWindow.setCaption("Bloquear Trabajador");
-						lbWindow.addListener(new AbstractWindowEditor.EditorSavedListener() {
-							
-							@Override
-							public void editorSaved(EditorSavedEvent event) {
-								try {
-									LaborerConstructionsite lc = (LaborerConstructionsite) getItem().getBean();
-									if(lc == null ) 
-										throw new RuntimeException("El trabajador no es válido.");
-									lc.setPersonBlock((User) VaadinSession.getCurrent().getAttribute(Constants.SESSION_USUARIO));
-									service.save(lc);
-									constructionContainer.addBean(lc);
-					    		} catch (Exception e) {
-					    			logger.error("Error al guardar la información de la obra",e);
-					    			Notification.show("Es necesario agregar todos los campos obligatorios", Type.ERROR_MESSAGE);
-					    		}
+							LaborerBlockDialog lbWindow = new LaborerBlockDialog(getItem(), service, velocityEngine);
+							lbWindow.setCaption("Bloquear Trabajador");
+							lbWindow.addListener(new AbstractWindowEditor.EditorSavedListener() {							
 								
-							}
-						});
-				        
-				        UI.getCurrent().addWindow(lbWindow);
-					}
-				});		
-				addComponent(bloquear);
+								@Override
+								public void editorSaved(EditorSavedEvent event) {
+									try {										
+										LaborerConstructionsite lc = ((BeanItem<LaborerConstructionsite>) event.getSavedItem()).getBean();
+										lc.setPersonBlock((User) VaadinSession.getCurrent().getAttribute(Constants.SESSION_USUARIO));
+										lc.setBlock(true);
+										service.save(lc);
+										constructionContainer.addBean(lc);
+						    		} catch (Exception e) {
+						    			logger.error("Error al guardar la información de la obra",e);
+						    			Notification.show("Es necesario agregar todos los campos obligatorios", Type.ERROR_MESSAGE);
+						    		}
+									
+								}
+							});
+					        
+					        UI.getCurrent().addWindow(lbWindow);
+						}
+					});		
+					bloquear.setData(constructionContainer);
+					bloquear.setDescription("Bloquear");
+					addComponent(bloquear);
+				}
 				
-				Button acceptObrero = new Button(null,FontAwesome.CHECK);					
-				acceptObrero.addClickListener(new Button.ClickListener() {
-					@Override
-					public void buttonClick(ClickEvent event) {
-						LaborerConstructionsite laborer = (LaborerConstructionsite) getItem().getBean();
-						if(laborer == null ) 
-							throw new RuntimeException("El trabajador no es válido.");
-						laborer.setConfirmed(true);
-						Notification.show("Trabajador aceptado.");
-					}
-				});		
-				addComponent(acceptObrero);
+				if( SecurityHelper.hastPermission(Permission.CONFIRMAR_OBREROS)){
+					Button acceptObrero = new Button(null,FontAwesome.CHECK);					
+					acceptObrero.addClickListener(new Button.ClickListener() {
+						@Override
+						public void buttonClick(ClickEvent event) {
+							LaborerConstructionsite laborer = (LaborerConstructionsite) getItem().getBean();
+							if(laborer == null ) 
+								throw new RuntimeException("El trabajador no es válido.");
+							laborer.setConfirmed(true);
+							service.save(laborer);
+							Notification.show("Trabajador confirmado.");
+						}
+					});		
+					acceptObrero.setDescription("Confirmar");
+					addComponent(acceptObrero);
+				}
 			}
 		},0,0,1,0);
 
-		//if(getItem().getItemProperty("laborer.photo") != null)
-			//gl.addComponent(new Label("Fecha de Admisión"));gl.addComponent(new Label(getItem().getItemProperty("laborer.photo")));
 		gl.addComponent(new Label("Trabajador"));gl.addComponent(new Label(getItem().getItemProperty("laborer.fullname")));
 		gl.addComponent(new Label("Rut"));gl.addComponent(new Label(getItem().getItemProperty("laborer.rut")));
 		gl.addComponent(new Label("Premio"));gl.addComponent(new TextField(getItem().getItemProperty("reward")){{
