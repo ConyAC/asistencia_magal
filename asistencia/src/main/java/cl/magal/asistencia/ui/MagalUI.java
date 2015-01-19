@@ -108,11 +108,12 @@ public class MagalUI extends UI implements ErrorHandler {
         
         title = new Label("<h1>Título</h1>",ContentMode.HTML);
         title.setHeight("50px");
+        title.setWidthUndefined();
         title.setStyleName("no-margin");
         
         top.addComponent(title);
         top.setComponentAlignment(title,Alignment.TOP_LEFT);
-        top.setExpandRatio(title, 1F);
+        top.setExpandRatio(title, 0.7F);
         
 		
         Panel content = new Panel();

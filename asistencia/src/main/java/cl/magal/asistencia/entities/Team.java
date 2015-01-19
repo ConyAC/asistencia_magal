@@ -11,7 +11,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 import javax.persistence.Basic;
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
@@ -65,16 +64,20 @@ public class Team implements Serializable {
     @Column(name = "date")
     @Temporal(TemporalType.TIMESTAMP)
     private Date date;
-    @Basic(optional = false)
-    @ManyToOne(cascade = CascadeType.ALL)
+
+    @ManyToOne
     @JoinColumn(name = "LABORERID")
     private Laborer leader;
+    
     @Convert(converter = StatusConverter.class)
     @Column(name = "status",nullable=false)
     @NotNull
     private Status status;//FIXME ocuparemos el mismo o otro enum para el estado de las cuadrillas?
     @Column(name = "deleted")
     private Boolean deleted;    
+    
+    @JoinColumn(name="CONSTRUCTION_SITEID")
+    ConstructionSite constructionSite;
    
     @JoinTable(name="laborer_team",
     joinColumns = { 
@@ -160,25 +163,25 @@ public class Team implements Serializable {
 		this.laborers = laborers;
 	}
 
-	@Override
-    public int hashCode() {
-        int hash = 0;
-        hash += (teamId != null ? teamId.hashCode() : 0);
-        return hash;
-    }
-
-    @Override
-    public boolean equals(Object object) {
-        // TODO: Warning - this method won't work in the case the id fields are not set
-        if (!(object instanceof Team)) {
-            return false;
-        }
-        Team other = (Team) object;
-        if ((this.teamId == null && other.teamId != null) || (this.teamId != null && !this.teamId.equals(other.teamId))) {
-            return false;
-        }
-        return true;
-    }
+//	@Override
+//    public int hashCode() {
+//        int hash = 0;
+//        hash += (teamId != null ? teamId.hashCode() : 0);
+//        return hash;
+//    }
+//
+//    @Override
+//    public boolean equals(Object object) {
+//        // TODO: Warning - this method won't work in the case the id fields are not set
+//        if (!(object instanceof Team)) {
+//            return false;
+//        }
+//        Team other = (Team) object;
+//        if ((this.teamId == null && other.teamId != null) || (this.teamId != null && !this.teamId.equals(other.teamId))) {
+//            return false;
+//        }
+//        return true;
+//    }
 
     @Override
     public String toString() {
@@ -193,5 +196,13 @@ public class Team implements Serializable {
             laborer.getTeams().add(this);
         }
     }
+
+	public ConstructionSite getConstructionSite() {
+		return constructionSite;
+	}
+
+	public void setConstructionSite(ConstructionSite construcionSite) {
+		this.constructionSite = construcionSite;
+	}
     
 }
