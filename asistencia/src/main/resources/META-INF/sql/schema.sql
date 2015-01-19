@@ -215,9 +215,9 @@ CREATE TABLE IF NOT EXISTS "TOOL"
    FEE integer,
    NAME varchar(255) NOT NULL,
    PRICE integer,
-   STATUS integer NOT NULL,
+   STATUS varchar(255) NOT NULL,
    LABORER_CONSTRUCTIONSITEID bigint not null,
-   DATEPOSTPONED date
+   DATEPOSTPONED timestamp
 )
 ;
 ALTER TABLE "TOOL"
@@ -525,7 +525,7 @@ CREATE TABLE IF NOT EXISTS "LOAN"
    DATEBUY timestamp NOT NULL,
    FEE integer,
    PRICE integer,
-   STATUS integer NOT NULL,
+   STATUS varchar(255) NOT NULL,
    LABORER_CONSTRUCTIONSITEID bigint not null
 )
 ;

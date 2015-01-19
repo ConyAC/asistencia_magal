@@ -300,7 +300,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 				}
 			});	
 		}
-		
+
 		final Table tableTool = new Table("Herramientas");
 		tableTool.setPageLength(3);
 		tableTool.setWidth("100%");
@@ -333,20 +333,18 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 
 			@Override
 			public Component generateCell(Table source, Object itemId, Object columnId) {
-				logger.debug("fecha: "+source.getItem(itemId).getItemProperty(columnId));
 				/* When the chekboc value changes, add/remove the itemId from the selectedItemIds set */
 				final CheckBox cb = new CheckBox("");
 				cb.addValueChangeListener(new Property.ValueChangeListener() {
 					@Override
 					public void valueChange(Property.ValueChangeEvent event) {
-						logger.debug("checkbox : "+ getItem().getBean());
+						logger.debug("checkbox : "+ getItem().getItemProperty("laborer.photo"));
 						boolean value = (Boolean) event.getProperty().getValue();
 						if(value){
 							Date today = new Date();
-							logger.debug("hoy: "+today);
-							//getItem().getItemProperty("tool.datePostponed");
-							//getBinder().getItemDataSource().getItemProperty("datePostponed").setValue(today);
-							
+							getItem().getItemProperty("datePostponed").setValue(today);
+							//label.setValue(((Accident) item.getBean()).getTotal()+"");
+							//getBinder().getItemDataSource().getItemProperty("datePostponed").setValue(today);							
 						}
 					}
 				});
