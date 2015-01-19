@@ -145,8 +145,14 @@ public class ConstructionSiteService {
 	}
 
 	public void save(Team team) {
+		if(team.getConstructionSite() == null)
+			throw new RuntimeException("La construcción no puede ser nula.");
 		teamRepo.save(team);
 		
+	}
+
+	public List<Team> getTeamsByConstruction(ConstructionSite bean) {
+		return teamRepo.findByConstructionSite(bean);
 	}
 
 }

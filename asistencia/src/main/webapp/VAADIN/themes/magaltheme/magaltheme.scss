@@ -254,6 +254,7 @@
 }
 
 
-	.v-app.magaltheme .v-table .filters-panel input.v-textfield.v-widget {
-		height: 37px;	
+	.v-app.magaltheme .v-table .filters-panel input.v-textfield.v-widget, .v-window.magaltheme .v-table .filters-panel input.v-textfield.v-widget {
+		height: 37px !important;	
 	}
+	

@@ -10,7 +10,7 @@ import cl.magal.asistencia.entities.Team;
 
 public interface TeamRepository extends PagingAndSortingRepository<Team, Long> {
 
-//	@Query(value="SELECT t FROM Team t WHERE t.constructionsite = ?1 AND t.deleted = false ")
-//	List<Team> findByConstructionsite(ConstructionSite constructionsite);
+	@Query(value="SELECT t FROM Team t WHERE t.constructionSite = ?1 AND t.deleted = false ")
+	List<Team> findByConstructionSite(ConstructionSite bean);
 
 }

@@ -27,7 +27,6 @@ import org.springframework.ui.velocity.VelocityEngineUtils;
 import org.tepi.filtertable.FilterTable;
 
 import cl.magal.asistencia.entities.ConstructionSite;
-import cl.magal.asistencia.entities.Laborer;
 import cl.magal.asistencia.entities.LaborerConstructionsite;
 import cl.magal.asistencia.entities.Team;
 import cl.magal.asistencia.entities.User;
@@ -752,15 +751,14 @@ public class LaborerAndTeamPanel extends Panel implements View {
 			}
 		});		
 
-		FilterTable table =  new FilterTable();
+		final FilterTable table =  new FilterTable();
 		table.setContainerDataSource(teamContainer);
 		table.setSizeFull();
 		table.setFilterBarVisible(true);
 		table.addGeneratedColumn("actions", new CustomTable.ColumnGenerator() {
 
 			@Override
-			public Object generateCell(CustomTable source, Object itemId,
-					Object columnId) {
+			public Object generateCell(CustomTable source, Object itemId,Object columnId) {
 				return new Button(null,FontAwesome.TRASH_O);
 			}
 		});
@@ -768,40 +766,42 @@ public class LaborerAndTeamPanel extends Panel implements View {
 		table.setVisibleColumns("name","leader.firstname","date","status","actions");
 		table.setColumnHeaders("Nombre","Responsable","Fecha","Estado", "Acciones");
 		table.setSelectable(true);
+		table.addItemClickListener(new ItemClickListener() {
+			
+			@Override
+			public void itemClick(ItemClickEvent event) {
+				final BeanItem<Team> beanItem = (BeanItem<Team>) event.getItem();
+				AddTeamDialog userWindow = new AddTeamDialog(beanItem);
+
+				userWindow.addListener(new AbstractWindowEditor.EditorSavedListener() {
+
+					@Override
+					public void editorSaved(EditorSavedEvent event) {
+						final ConstructionSite cs = item.getBean();
+						if(cs == null){
+							Notification.show("Debe seleccionar una obra",Type.ERROR_MESSAGE);
+							return ;
+						}
+						try {
+							Team team = ((BeanItem<Team>) event.getSavedItem()).getBean();
+							constructionSiteService.save(team);				
+							teamContainer.addBean(team);
+							table.refreshRowCache();
+						} catch (Exception e) {
+							logger.error("Error al guardar la información del obrero",e);
+							Notification.show("Es necesario agregar todos los campos obligatorios", Type.ERROR_MESSAGE);
+						}
+					}
+				});
+
+				UI.getCurrent().addWindow(userWindow);	
+			}
+		});
 
 		vl.addComponent(table);
 		vl.setExpandRatio(table,1.0F);
 
 		return vl;
-	}
-
-	private String tradProperty(Object propertyId) {
-		if(propertyId.equals("rut"))
-			return "RUT";
-		else if(propertyId.equals("firstname"))
-			return "Primer Nombre";
-		else if(propertyId.equals("secondname"))
-			return "Segundo Nombre";
-		else if(propertyId.equals("lastname"))
-			return "Primer Apellido";
-		else if(propertyId.equals("secondlastname"))
-			return "Segundo Apellido";
-		else if(propertyId.equals("dateBirth"))
-			return "Fecha de Nacimiento";
-		else if(propertyId.equals("address"))
-			return "Direcciòn";
-		else if(propertyId.equals("mobileNumber"))
-			return "Teléfono móvil";
-		else if(propertyId.equals("phone"))
-			return "Teléfono fijo";
-		else if(propertyId.equals("dateAdmission"))
-			return "Fecha de Admisión";
-		else if(propertyId.equals("name"))
-			return "Nombre Cuadrilla";
-		else if(propertyId.equals("leader"))
-			return "Responsable de Cuadrilla";
-		else
-			return propertyId.toString();
 	}
 
 	public void setConstruction(BeanItem<ConstructionSite> item){
@@ -830,9 +830,9 @@ public class LaborerAndTeamPanel extends Panel implements View {
 		laborerConstructionContainer.removeAllItems();
 		laborerConstructionContainer.addAll(laborers);
 
-		//		List<Team> teams = constructionSiteService.getTeamsByConstruction(item.getBean());
-		//		teamContainer.removeAllItems();
-		//		teamContainer.addAll(teams);
+		List<Team> teams = constructionSiteService.getTeamsByConstruction(item.getBean());
+		teamContainer.removeAllItems();
+		teamContainer.addAll(teams);
 	}
 
 	protected void setEnabledDetail(boolean enable,BeanItem<ConstructionSite> item) {

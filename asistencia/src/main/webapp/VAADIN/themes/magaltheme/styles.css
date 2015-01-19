@@ -1457,8 +1457,8 @@ div.v-layout.v-horizontal.v-widget {
 	vertical-align: top;
 }
 
-.v-app.magaltheme .v-table .filters-panel input.v-textfield.v-widget {
-	height: 37px;
+.v-app.magaltheme .v-table .filters-panel input.v-textfield.v-widget, .v-window.magaltheme .v-table .filters-panel input.v-textfield.v-widget {
+	height: 37px !important;
 }
 
 .magaltheme.v-app, .magaltheme.v-app-loading {
