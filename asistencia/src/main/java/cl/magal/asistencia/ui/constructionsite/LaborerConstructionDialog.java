@@ -200,7 +200,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 				
 				hl.addComponent(new Label(marital));
 				hl.addComponent(new Label(getItem().getItemProperty("laborer.address")));
-				if(getItem().getItemProperty("laborer.mobileNumber") != null || getItem().getItemProperty("laborer.phone") != null)
+				if(getItem().getItemProperty("laborer.mobileNumber").getValue() != null || getItem().getItemProperty("laborer.phone").getValue() != null)
 					hl.addComponent(new Label(getItem().getItemProperty("laborer.mobileNumber").getValue() +" - "+getItem().getItemProperty("laborer.phone").getValue()));
 //				if(getItem().getItemProperty("laborer.dateAdmission").getValue() != null)
 					hl.addComponent(new Label(getItem().getItemProperty("laborer.dateAdmission")));
