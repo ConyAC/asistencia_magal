@@ -200,7 +200,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 				
 				hl.addComponent(new Label(marital));
 				hl.addComponent(new Label(getItem().getItemProperty("laborer.address")));
-				if(getItem().getItemProperty("laborer.mobileNumber") != null || getItem().getItemProperty("laborer.phone") != null)
+				if(getItem().getItemProperty("laborer.mobileNumber").getValue() != null || getItem().getItemProperty("laborer.phone").getValue() != null)
 					hl.addComponent(new Label(getItem().getItemProperty("laborer.mobileNumber").getValue() +" - "+getItem().getItemProperty("laborer.phone").getValue()));
 //				if(getItem().getItemProperty("laborer.dateAdmission").getValue() != null)
 					hl.addComponent(new Label(getItem().getItemProperty("laborer.dateAdmission")));
@@ -1089,6 +1089,18 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 			}
 		};
 	}
+	private void calcularUsadas(Label label, List<Vacation> vacations){
+		if(vacations == null || vacations.isEmpty() ){
+			label.setValue("0");
+		}else{
+			int total = 0;
+			for(Vacation v : vacations){
+				total += v.getTotal();
+			}
+			label.setValue(total+"");
+		}
+	}
+	
 	private Component drawVacations() {
 		return new VerticalLayout(){
 			{
@@ -1099,12 +1111,16 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 				setMargin(true);
 				setSpacing(true);
 				Table vacationTable = new Table();
+				
+				final Label totalUsadas = new Label();
+				
+				calcularUsadas(totalUsadas,vacationContainer.getItemIds());
 
 				addComponent(new GridLayout(3,2){
 					{
 						setWidth("100%");
 						addComponent(new Label("Días usados"),0,0);
-						addComponent(new Label("3"),1,0);
+						addComponent(totalUsadas,1,0);
 
 						addComponent(new Label("Días disponibles"),0,1);
 						addComponent(new Label("4"),1,1);
@@ -1116,6 +1132,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 								public void buttonClick(ClickEvent event) {
 									Vacation vacation = new Vacation();
 									vacationContainer.addBean(vacation);
+									calcularUsadas(totalUsadas,vacationContainer.getItemIds());
 
 								}
 							}){{setIcon(FontAwesome.PLUS);}},2,0);
@@ -1136,6 +1153,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 						Property.ValueChangeListener listener = new Property.ValueChangeListener() {
 							@Override
 							public void valueChange(Property.ValueChangeEvent event) {
+								calcularUsadas(totalUsadas,vacationContainer.getItemIds());
 								label.setValue(((Vacation) item.getBean()).getTotal()+"");
 							}
 						};
