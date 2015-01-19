@@ -167,6 +167,13 @@ public class LaborerConstructionsite implements Serializable {
         }
     }
 	
+	public void removeTool(Tool tool) {
+        if (getTool().contains(tool)) {
+        	getTool().remove(tool);
+        	tool.setLaborerConstructionSite(null);
+        }
+    }
+	
 	public List<Absence> getAbsences() {
 		return absences;
 	}

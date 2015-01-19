@@ -62,21 +62,21 @@ public class Tool implements Serializable {
     @Column(name = "dateBuy")
     @Temporal(TemporalType.TIMESTAMP)
     private Date dateBuy;
+    @Max(value=6)
     @Column(name = "fee")
     private Integer fee;
-    @Convert(converter = ToolStatusConverter.class)
-    @Column(name = "status",nullable=false)
-    @NotNull
-    private ToolStatus status = ToolStatus.EN_DEUDA;
+    @Column(name = "status")
+    private String status;
     @ManyToOne
 	@JoinColumn(name="LABORER_CONSTRUCTIONSITEID")
 	LaborerConstructionsite laborerConstructionSite;
-
-    @PrePersist
-    void preInsert() {
-       if(status == null)
-    	   status = ToolStatus.EN_DEUDA;
-    }
+    
+    //Pagos postergados
+    @Column(name="datePostponed")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date datePostponed;    
+    @Column(name = "postponed")
+    private boolean postponed;
     
     public Tool() {
     }
@@ -130,15 +130,15 @@ public class Tool implements Serializable {
 	public void setFee(Integer fee) {
 		this.fee = fee;
 	}
-
-	public ToolStatus getStatus() {
+	
+	public String getStatus() {
 		return status;
 	}
 
-	public void setStatus(ToolStatus status) {
+	public void setStatus(String status) {
 		this.status = status;
-	}	
-	
+	}
+
 	public LaborerConstructionsite getLaborerConstructionSite() {
 		return laborerConstructionSite;
 	}
@@ -168,7 +168,23 @@ public class Tool implements Serializable {
 //        return true;
 //    }
 
-    @Override
+    public Date getDatePostponed() {
+		return datePostponed;
+	}
+
+	public void setDatePostponed(Date datePostponed) {
+		this.datePostponed = datePostponed;
+	}
+
+	public boolean isPostponed() {
+		return postponed;
+	}
+
+	public void setPostponed(boolean postponed) {
+		this.postponed = postponed;
+	}
+
+	@Override
     public String toString() {
         return "jpa.magal.entities.Tool[ toolId=" + toolId + " ]";
     }
