@@ -67,6 +67,7 @@ import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.CustomTable;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.Panel;
