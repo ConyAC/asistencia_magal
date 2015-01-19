@@ -1,0 +1,70 @@
+<?xml version='1.0'?>
+<html>
+	 <head>
+		<meta charset="UTF-8">
+		<style>
+	
+	@media all {
+	.page-break	{ display: none; }
+	.print-hidden	{  }
+	}
+	
+	@media print {
+		.page-break	{ display: block; page-break-before: always; }
+		.print-hidden	{ display: none; }
+	}
+	
+	</style>
+	</head>
+	<body>
+	
+	<div class="print-hidden" style="text-align:center;">
+			<input type="button" onclick="javascript:print()" value="Imprimir" /> <br /><br />
+		</div>
+	
+#foreach( $laborerConstruction in $laborerConstructions )
+
+		<br />		
+	
+		<div style="margin:1px;text-align:center;left;line-height: 0.2;">
+		    <h2>DECLARACION Y ACUSO DE RECIBO</h2>
+		</div>
+		
+		<br />
+		
+		<p style="text-align:justify;">Bajo mi firma declaro haber recibido el Reglamento Interno de Orden, Higiene y Seguridad de la Empresa:</p>
+		<br /><br />
+		<p style="text-align:justify;"><hr /></p>
+		<p style="text-align:justify;">del cual me comprometo a tomar conocimiento en su totalidad, no pudiendo alegar desconocimiento de su texto a contar de esta fecha.</p>
+    	<br /><br />
+    	<table cellpadding="0" cellspacing="0" border="0" style="width:100%;margin:10px">
+    	<tr>
+            <th>
+            NOMBRE DEL TRABAJADOR : ${laborerConstruction.laborer.fullname}
+            </th>
+        </tr>
+        <tr>
+            <th>
+            CED. IDENTIDAD : ${laborerConstruction.laborer.rut}
+            </th>
+        </tr>
+        <tr>
+            <th>
+            FECHA : $tools.format('dd MM yyyy', $tools.date)
+            </th>
+        </tr>
+        <tr>
+            <th>
+            	<br /><br /><br />
+	            <hr style="width:500px" />
+	            FIRMA DEL TRABAJADOR
+	            </th>
+            <th>
+        </tr>
+
+		</table>
+		<div class="page-break"></div>
+#end
+	</body>
+</html>
+

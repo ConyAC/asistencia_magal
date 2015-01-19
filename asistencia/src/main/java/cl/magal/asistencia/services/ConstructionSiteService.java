@@ -18,7 +18,6 @@ import cl.magal.asistencia.entities.Laborer;
 import cl.magal.asistencia.entities.LaborerConstructionsite;
 import cl.magal.asistencia.entities.Team;
 import cl.magal.asistencia.entities.User;
-import cl.magal.asistencia.entities.enums.Status;
 import cl.magal.asistencia.repositories.ConstructionSiteRepository;
 import cl.magal.asistencia.repositories.LaborerConstructionsiteRepository;
 import cl.magal.asistencia.repositories.LaborerRepository;
@@ -61,6 +60,10 @@ public class ConstructionSiteService {
 			cs.setLaborers(lbs);
 		}
 		return cs;
+	}
+	
+	public List<ConstructionSite> findAllConstructionSite() {
+		return constructionSiterepo.findAllNotDeteled();
 	}
 
 	public Page<ConstructionSite> findAllConstructionSite(Pageable page) {

@@ -1,13 +1,13 @@
 package cl.magal.asistencia.ui.constructionsite;
 
+
 import org.apache.velocity.app.VelocityEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import cl.magal.asistencia.entities.ConstructionSite;
 import cl.magal.asistencia.entities.LaborerConstructionsite;
 import cl.magal.asistencia.entities.User;
-import cl.magal.asistencia.services.ConstructionSiteService;
+import cl.magal.asistencia.services.LaborerService;
 import cl.magal.asistencia.ui.AbstractWindowEditor;
 import cl.magal.asistencia.util.Constants;
 
@@ -31,17 +31,16 @@ public class LaborerBlockDialog extends AbstractWindowEditor {
 	
 	transient Logger logger = LoggerFactory.getLogger(LaborerBlockDialog.class);
 
-	ConstructionSite constructionSite;	
-	ConstructionSiteService service;
-	
+	LaborerService lab;
 	private VelocityEngine velocityEngine;
 
-	public LaborerBlockDialog(BeanItem<LaborerConstructionsite> item,  VelocityEngine velocityEngine){
+	public LaborerBlockDialog(BeanItem<?> item, LaborerService lab, VelocityEngine velocityEngine){
 		super(item);
 
 		this.velocityEngine = velocityEngine;
-		this.service = service;
-		setWidth("70%");
+		this.lab = lab;
+		setWidth("50%");
+		setHeight("50%");
 		
 		init();
 	}
@@ -71,11 +70,13 @@ public class LaborerBlockDialog extends AbstractWindowEditor {
 		for (Object propertyId : new String[]{"comment"}) {
         	if(propertyId.equals("constructionsiteId") || propertyId.equals("deleted"))
         		;        
-        	else if(  propertyId.equals("comment")){
+        	else if(propertyId.equals("comment")){
 				TextArea comment = new TextArea("Comentario");
+				comment.setNullRepresentation("");
 				comment.setWidth("500");
 				comment.setHeight("100");
 				vl.addComponent(comment);
+				bind(comment, "comment"); 
 				vl.setComponentAlignment(comment, Alignment.MIDDLE_LEFT);
 			}else{        		
         		String t = tradProperty(propertyId);

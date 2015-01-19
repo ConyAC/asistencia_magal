@@ -12,7 +12,11 @@ public interface LaborerConstructionsiteRepository extends
 		PagingAndSortingRepository<LaborerConstructionsite, Long> {
 
 	List<LaborerConstructionsite> findByConstructionsite(ConstructionSite constructionsite);
+	
 	LaborerConstructionsite findByConstructionsiteAndLaborer(ConstructionSite constructionsite, Laborer laborer);
+	
 	List<LaborerConstructionsite> findByLaborer(Laborer laborer);
+	
+	LaborerConstructionsite findFirstByLaborerOrderByContractsStartDateDesc(Laborer laborer);
 
 }

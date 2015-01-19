@@ -40,7 +40,6 @@ import cl.magal.asistencia.entities.enums.ToolStatus;
     @NamedQuery(name = "Tool.findByToolId", query = "SELECT t FROM Tool t WHERE t.toolId = :toolId"),
     @NamedQuery(name = "Tool.findByName", query = "SELECT t FROM Tool t WHERE t.name = :name"),
     @NamedQuery(name = "Tool.findByPrice", query = "SELECT t FROM Tool t WHERE t.price = :price"),
-    @NamedQuery(name = "Tool.findByDatePostponed", query = "SELECT t FROM Tool t WHERE t.datePostponed = :datePostponed"),
     @NamedQuery(name = "Tool.findByDateBuy", query = "SELECT t FROM Tool t WHERE t.dateBuy = :dateBuy"),
     @NamedQuery(name = "Tool.findByFee", query = "SELECT t FROM Tool t WHERE t.fee = :fee")})
 public class Tool implements Serializable {
@@ -72,9 +71,12 @@ public class Tool implements Serializable {
 	@JoinColumn(name="LABORER_CONSTRUCTIONSITEID")
 	LaborerConstructionsite laborerConstructionSite;
     
+    //Pagos postergados
     @Column(name="datePostponed")
     @Temporal(TemporalType.TIMESTAMP)
-    private Date datePostponed;
+    private Date datePostponed;    
+    @Column(name = "postponed")
+    private boolean postponed;
     
     public Tool() {
     }
@@ -172,6 +174,14 @@ public class Tool implements Serializable {
 
 	public void setDatePostponed(Date datePostponed) {
 		this.datePostponed = datePostponed;
+	}
+
+	public boolean isPostponed() {
+		return postponed;
+	}
+
+	public void setPostponed(boolean postponed) {
+		this.postponed = postponed;
 	}
 
 	@Override

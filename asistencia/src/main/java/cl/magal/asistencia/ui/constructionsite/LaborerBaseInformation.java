@@ -4,6 +4,9 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import cl.magal.asistencia.entities.Laborer;
 import cl.magal.asistencia.entities.enums.Afp;
 import cl.magal.asistencia.entities.enums.MaritalStatus;
@@ -13,6 +16,7 @@ import com.vaadin.data.util.BeanItem;
 import com.vaadin.data.util.NestedMethodProperty;
 import com.vaadin.data.validator.BeanValidator;
 import com.vaadin.server.FileResource;
+import com.vaadin.server.VaadinService;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Embedded;
@@ -33,10 +37,10 @@ public class LaborerBaseInformation extends VerticalLayout {
 	 * 
 	 */
 	private static final long serialVersionUID = 453082527742097304L;
+	transient Logger logger = LoggerFactory.getLogger(LaborerBaseInformation.class);
 	
 	String prefix = "";
 	boolean viewElement;
-	
 	/**
 	 * BINDER
 	 */
@@ -70,8 +74,7 @@ public class LaborerBaseInformation extends VerticalLayout {
 
 		// Loop through the properties, build fields for them and add the fields
 		// to this UI
-		for (Object propertyId : new String[]{"rut","firstname","secondname","lastname", "secondlastname", "dateBirth", "address", "mobileNumber", "phone", "dateAdmission", //"job",
-				"afp", "maritalStatus", "provenance"}) {
+		for (Object propertyId : new String[]{"rut","firstname","secondname","lastname", "secondlastname", "dateBirth", "address", "mobileNumber", "phone", "dateAdmission", "afp", "maritalStatus", "provenance"}) {
 			if(propertyId.equals("laborerId") || propertyId.equals("constructionSites") || propertyId.equals("contractId") || propertyId.equals("teamId"))
 				;
 			else if(propertyId.equals("afp")){
@@ -100,7 +103,7 @@ public class LaborerBaseInformation extends VerticalLayout {
 				}
 				detalleObrero.addComponent(msField);
 				bind(msField, prefix+"maritalStatus");   
-				detalleObrero.setComponentAlignment(msField, Alignment.MIDDLE_CENTER);
+				detalleObrero.setComponentAlignment(msField, Alignment.MIDDLE_CENTER);		
 			}else{        		
 				String t = tradProperty(propertyId);
 				Field<?> field = buildAndBind(t, prefix+propertyId);
@@ -142,8 +145,11 @@ public class LaborerBaseInformation extends VerticalLayout {
 			        // Create upload stream
 			        FileOutputStream fos = null; // Output stream to write to
 			        try {
+			        	//añadimos el nombre de la imagen a la base
+			        	getBinder().getItemDataSource().getItemProperty(prefix+"photo").setValue(filename);
+			        	String basepath = VaadinService.getCurrent().getBaseDirectory().getAbsolutePath();
 			            // Open the file for writing.
-			            file = new File("C:\\Users\\Constanza\\temp" + filename);
+			            file = new File(basepath + "/WEB-INF/images/" + filename);
 			            fos = new FileOutputStream(file);
 			        } catch (final java.io.FileNotFoundException e) {
 			        	new Notification("No es posible acceder al archivo", e.getMessage());

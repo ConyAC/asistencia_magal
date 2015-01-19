@@ -4,8 +4,8 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,15 +27,15 @@ import cl.magal.asistencia.entities.User;
 import cl.magal.asistencia.entities.Vacation;
 import cl.magal.asistencia.entities.enums.AbsenceType;
 import cl.magal.asistencia.entities.enums.AccidentLevel;
-import cl.magal.asistencia.entities.enums.LoanStatus;
 import cl.magal.asistencia.entities.enums.MaritalStatus;
-import cl.magal.asistencia.entities.enums.ToolStatus;
+import cl.magal.asistencia.entities.enums.Permission;
 import cl.magal.asistencia.services.LaborerService;
 import cl.magal.asistencia.services.UserService;
 import cl.magal.asistencia.ui.AbstractWindowEditor;
 import cl.magal.asistencia.ui.OnValueChangeFieldFactory;
 import cl.magal.asistencia.ui.workerfile.vo.HistoryVO;
 import cl.magal.asistencia.util.Constants;
+import cl.magal.asistencia.util.SecurityHelper;
 import cl.magal.asistencia.util.Utils;
 
 import com.vaadin.data.Container;
@@ -43,7 +43,7 @@ import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeNotifier;
 import com.vaadin.data.util.BeanItem;
 import com.vaadin.data.util.BeanItemContainer;
-import com.vaadin.data.util.ObjectProperty;
+import com.vaadin.data.validator.BeanValidator;
 import com.vaadin.server.FileResource;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.StreamResource;
@@ -58,7 +58,6 @@ import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Component;
-import com.vaadin.ui.CustomTable;
 import com.vaadin.ui.DateField;
 import com.vaadin.ui.DefaultFieldFactory;
 import com.vaadin.ui.Embedded;
@@ -68,6 +67,7 @@ import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Notification.Type;
+import com.vaadin.ui.OptionGroup;
 import com.vaadin.ui.TabSheet;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.TextField;
@@ -91,6 +91,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 	transient UserService serviceUser;
 	transient LaborerService service;
 	transient private VelocityEngine velocityEngine;
+	LaborerConstructionsite laborerConstructionSite;
 
 	boolean readOnly = false;
 
@@ -200,69 +201,82 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 					hl.addComponent(new Label(getItem().getItemProperty("laborer.mobileNumber").getValue() +" - "+getItem().getItemProperty("laborer.phone").getValue()));
 				if(getItem().getItemProperty("laborer.dateAdmission").getValue() != null)
 					hl.addComponent(new Label(getItem().getItemProperty("laborer.dateAdmission")));
+				
+				hl.addComponent(new Label("<hr />",ContentMode.HTML));
+				hl.addComponent(new TextField("Premio: ",getItem().getItemProperty("reward")){{
+				setNullRepresentation("");
+				addValidator(new BeanValidator(LaborerConstructionsite.class,"reward"));
+				//setReadOnly(readOnly);
+				setEnabled(false);
+			}});
 						
 				setSpacing(true);
-					
-				Button btnPrint = new Button(null,new Button.ClickListener() {
-
-					@Override
-					public void buttonClick(ClickEvent event) {
-						Notification.show("Imprimiendo");
-					}
-				}){{setIcon(FontAwesome.PRINT); setDescription("Imprimir");}};
-				addComponent(btnPrint);
+//				POR AHORA OCULTAR ESTE BOTON HASTA QUE SE DEFINA BIEN QUE HARA Y SI VA
+//				Button btnPrint = new Button(null,new Button.ClickListener() {
+//
+//					@Override
+//					public void buttonClick(ClickEvent event) {
+//						Notification.show("Imprimiendo");
+//					}
+//				}){{setIcon(FontAwesome.PRINT); setDescription("Imprimir");}};
+//				addComponent(btnPrint);
 				
-				Button bloquear = new Button(null,FontAwesome.LOCK);					
-				bloquear.addClickListener(new Button.ClickListener() {
-					public void buttonClick(ClickEvent event) {								
-
-						LaborerConstructionsite cs = new LaborerConstructionsite();
-						BeanItem<LaborerConstructionsite> csItem = new BeanItem<LaborerConstructionsite>(cs);						
-						LaborerBlockDialog lbWindow = new LaborerBlockDialog(csItem, velocityEngine);
+				if( SecurityHelper.hastPermission(Permission.BLOQUEAR_OBRERO)){
+					Button bloquear = new Button(null,FontAwesome.LOCK);					
+					bloquear.addClickListener(new Button.ClickListener() {
+						public void buttonClick(ClickEvent event) {								
 						
-						lbWindow.setCaption("Bloquear Trabajador");
-						lbWindow.addListener(new AbstractWindowEditor.EditorSavedListener() {
-							
-							@Override
-							public void editorSaved(EditorSavedEvent event) {
-								try {
-									LaborerConstructionsite lc = (LaborerConstructionsite) getItem().getBean();
-									if(lc == null ) 
-										throw new RuntimeException("El trabajador no es válido.");
-									lc.setPersonBlock((User) VaadinSession.getCurrent().getAttribute(Constants.SESSION_USUARIO));
-									service.save(lc);
-									constructionContainer.addBean(lc);
-					    		} catch (Exception e) {
-					    			logger.error("Error al guardar la información de la obra",e);
-					    			Notification.show("Es necesario agregar todos los campos obligatorios", Type.ERROR_MESSAGE);
-					    		}
+							LaborerBlockDialog lbWindow = new LaborerBlockDialog(getItem(), service, velocityEngine);
+							lbWindow.setCaption("Bloquear Trabajador");
+							lbWindow.addListener(new AbstractWindowEditor.EditorSavedListener() {							
 								
-							}
-						});
-				        
-				        UI.getCurrent().addWindow(lbWindow);
-					}
-				});		
-				addComponent(bloquear);
+								@Override
+								public void editorSaved(EditorSavedEvent event) {
+									try {										
+										LaborerConstructionsite lc = ((BeanItem<LaborerConstructionsite>) event.getSavedItem()).getBean();
+										lc.setPersonBlock((User) VaadinSession.getCurrent().getAttribute(Constants.SESSION_USUARIO));
+										lc.setBlock(true);
+										service.save(lc);
+										constructionContainer.addBean(lc);
+						    		} catch (Exception e) {
+						    			logger.error("Error al guardar la información de la obra",e);
+						    			Notification.show("Es necesario agregar todos los campos obligatorios", Type.ERROR_MESSAGE);
+						    		}
+									
+								}
+							});
+					        
+					        UI.getCurrent().addWindow(lbWindow);
+						}
+					});		
+					bloquear.setData(constructionContainer);
+					bloquear.setDescription("Bloquear");
+					addComponent(bloquear);
+				}
 				
-				Button acceptObrero = new Button(null,FontAwesome.CHECK);					
-				acceptObrero.addClickListener(new Button.ClickListener() {
-					@Override
-					public void buttonClick(ClickEvent event) {
-						LaborerConstructionsite laborer = (LaborerConstructionsite) getItem().getBean();
-						if(laborer == null ) 
-							throw new RuntimeException("El trabajador no es válido.");
-						laborer.setConfirmed(true);
-						Notification.show("Trabajador aceptado.");
-					}
-				});		
-				addComponent(acceptObrero);
+				if( SecurityHelper.hastPermission(Permission.CONFIRMAR_OBREROS)){
+					Button acceptObrero = new Button(null,FontAwesome.CHECK);					
+					acceptObrero.addClickListener(new Button.ClickListener() {
+						@Override
+						public void buttonClick(ClickEvent event) {
+							LaborerConstructionsite laborer = (LaborerConstructionsite) getItem().getBean();
+							if(laborer == null ) 
+								throw new RuntimeException("El trabajador no es válido.");
+							laborer.setConfirmed(true);
+							service.save(laborer);
+							Notification.show("Trabajador confirmado.");
+						}
+					});		
+					acceptObrero.setDescription("Confirmar");
+					addComponent(acceptObrero);
+				}
 			}
 		},0,0,1,0);
 		
 		return gl;
 	}
 	
+	BeanItemContainer<Tool> beanItemTool;
 	protected VerticalLayout drawPyH() {
 
 		VerticalLayout vl = new VerticalLayout();
@@ -279,7 +293,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 		hl.setSpacing(true);		
 		vh.addComponent(hl);
 
-		final BeanItemContainer<Tool> beanItemTool = new BeanItemContainer<Tool>(Tool.class);
+		beanItemTool = new BeanItemContainer<Tool>(Tool.class);
 		List<Tool> tools = (List<Tool>)getItem().getItemProperty("tool").getValue();
 		beanItemTool.addAll(tools);
 
@@ -295,6 +309,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 					LaborerConstructionsite laborer = (LaborerConstructionsite) getItem().getBean();
 					if(laborer == null ) throw new RuntimeException("El trabajador no es válido.");
 					Tool tool = new Tool();
+					tool.setStatus("En deuda"); //FIXME por mientras
 					laborer.addTool(tool);
 					beanItemTool.addBean(tool);
 				}
@@ -317,7 +332,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 				}
 				else  if( propertyId.equals("status") ){
 					field = new TextField();
-					((TextField)field).setNullRepresentation("En deuda");
+					((TextField)field).setValue("En deuda");
 					field.setEnabled(false);
 				}
 				else if(  propertyId.equals("dateBuy") ){
@@ -338,13 +353,9 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 				cb.addValueChangeListener(new Property.ValueChangeListener() {
 					@Override
 					public void valueChange(Property.ValueChangeEvent event) {
-						logger.debug("checkbox : "+ getItem().getItemProperty("laborer.photo"));
 						boolean value = (Boolean) event.getProperty().getValue();
 						if(value){
-							Date today = new Date();
-							getItem().getItemProperty("datePostponed").setValue(today);
-							//label.setValue(((Accident) item.getBean()).getTotal()+"");
-							//getBinder().getItemDataSource().getItemProperty("datePostponed").setValue(today);							
+							;
 						}
 					}
 				});
@@ -352,8 +363,23 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 			}
 		});
 		
-		tableTool.setVisibleColumns("name","price","dateBuy","fee","selected","status");
-		tableTool.setColumnHeaders("Herramienta","Monto","Fecha","Cuota","Postergar pago","Estado");
+		tableTool.addGeneratedColumn("eliminar", new Table.ColumnGenerator() {
+			
+			@Override
+			public Object generateCell(Table source, final Object itemId, Object columnId) {
+				return new Button(null,new Button.ClickListener() {
+					
+					@Override
+					public void buttonClick(ClickEvent event) {
+						//laborerConstructionSite.removeTool(tool);
+						tableTool.removeItem(itemId);
+					}
+				}){ {setIcon(FontAwesome.TRASH_O);} };
+			}
+		});
+		
+		tableTool.setVisibleColumns("name","price","dateBuy","fee","selected","status", "eliminar");
+		tableTool.setColumnHeaders("Herramienta","Monto","Fecha","Cuota","Postergar pago","Estado", "Acciones");
 		tableTool.setEditable(true);				
 		vh.addComponent(tableTool);
 		vh.setComponentAlignment(hl, Alignment.TOP_RIGHT);
@@ -493,12 +519,17 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 
 				//				Button btnEdit = new Button(null,FontAwesome.PENCIL);
 				if(!readOnly){
+					
+					final HorizontalLayout hl = this;
+					
 					final Button btnChangeJob = new Button(null,FontAwesome.CHILD);
+					final Button btnFinishContract = new Button(null,FontAwesome.TIMES);
 					final Button btnSettlement = new Button(null,FontAwesome.FILE_TEXT);
 
-					btnSettlement.setDescription("Finiquitar");
 					//				btnEdit.setDescription("Editar");
 					btnChangeJob.setDescription("Cambiar Oficio");
+					btnFinishContract.setDescription("Término de Contrato");
+					btnSettlement.setDescription("Cálcular Finiquito");
 
 					//				btnEdit.addClickListener(new Button.ClickListener() {
 					//
@@ -526,7 +557,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 										setContractGl(laborer.getActiveContract());
 										beanContainerAnnexeds.removeAllItems();
 										
-										replaceComponent(btnChangeJob,btnSettlement);
+										hl.replaceComponent(btnChangeJob,btnFinishContract);
 									} catch (Exception e) {
 										logger.error("Error al guardar la información del obrero",e);
 										Notification.show("Es necesario agregar todos los campos obligatorios", Type.ERROR_MESSAGE);
@@ -538,7 +569,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 						}
 					});
 
-					btnSettlement.addClickListener(new Button.ClickListener() {
+					btnFinishContract.addClickListener(new Button.ClickListener() {
 
 						@Override
 						public void buttonClick(ClickEvent event) {
@@ -547,79 +578,111 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 							w.center();
 							w.setModal(true);
 							
-							final ObjectProperty carta1 = new ObjectProperty(false, Boolean.class);
-							final ObjectProperty carta2 = new ObjectProperty(false, Boolean.class);
-							final ObjectProperty carta3 = new ObjectProperty(false, Boolean.class);
-							
-							w.setContent(new HorizontalLayout(){
+							w.setContent(new VerticalLayout(){
 								{
+									
 									setSpacing(true);
 									setMargin(true);
-									addComponent(new CheckBox("Contrato"){{setPropertyDataSource(carta1);}});
-									addComponent(new CheckBox("Anexos"){{setPropertyDataSource(carta3);}});
-									addComponent(new CheckBox("Últimas Vacaciones"){{setPropertyDataSource(carta2);}});
+									final OptionGroup og = new OptionGroup("Tipo de Término",
+											Arrays.asList("Voluntaria",
+													"Término de Contrato",
+													"Ausencia Reiterada"));
+									addComponent(og);
 									
-									addComponent(new Button(null,new Button.ClickListener() {
-										
-										@Override
-										public void buttonClick(ClickEvent event) {
-											
-											final Map<String, Object> input = new HashMap<String, Object>();
-											input.put("laborerConstructions", new LaborerConstructionsite[] {(LaborerConstructionsite)getItem().getBean()});
-											input.put("tools", new DateTool());
-											
-											final StringBuilder sb = new StringBuilder();
-											if((Boolean) carta1.getValue()){
-												sb.append( VelocityEngineUtils.mergeTemplateIntoString(velocityEngine, "templates/temporary_work_contract_doc.vm", "UTF-8", input) );
-											}
-											if((Boolean) carta3.getValue()){
-												sb.append( VelocityEngineUtils.mergeTemplateIntoString(velocityEngine, "templates/annex_contract_doc.vm", "UTF-8", input) );
-											}
-											if((Boolean) carta2.getValue()){
-												sb.append( VelocityEngineUtils.mergeTemplateIntoString(velocityEngine, "templates/vacation_doc.vm", "UTF-8", input) );
-											}
-											
-											StreamResource.StreamSource source2 = new StreamResource.StreamSource() {
+									addComponent(new HorizontalLayout(){
+										{
+											// boton aceptar
+											addComponent(new Button("Aceptar",new Button.ClickListener() {
+												
+												@Override
+												public void buttonClick(ClickEvent event) {
+													
+													if( og.getValue() == null ){
+														Notification.show("Debe seleccionar una causa de término.",Type.WARNING_MESSAGE);
+														return;
+													}
+													
+													final Map<String, Object> input = new HashMap<String, Object>();
+													input.put("laborerConstructions", new LaborerConstructionsite[] {(LaborerConstructionsite)getItem().getBean()});
+													input.put("tools", new DateTool());
+													
+													final StringBuilder sb = new StringBuilder();
+													if(((String) og.getValue()).compareTo("Voluntaria") == 0){
+														sb.append( VelocityEngineUtils.mergeTemplateIntoString(velocityEngine, "templates/voluntary_resignation_letter.vm", "UTF-8", input) );
+													}else
+														if(((String) og.getValue()).compareTo("Término de Contrato") == 0){
+														sb.append( VelocityEngineUtils.mergeTemplateIntoString(velocityEngine, "templates/dismissal_letter_for_completion_of_work.vm", "UTF-8", input) );
+													}else
+														if(((String) og.getValue()).compareTo("Ausencia Reiterada") == 0){
+														sb.append( VelocityEngineUtils.mergeTemplateIntoString(velocityEngine, "templates/dismissal_letter_for_absence.vm", "UTF-8", input) );
+													}
+													
+													StreamResource.StreamSource source2 = new StreamResource.StreamSource() {
 
-												public InputStream getStream() {
-													//throw new UnsupportedOperationException("Not supported yet.");
-													return new ByteArrayInputStream(sb.toString().getBytes());
+														public InputStream getStream() {
+															//throw new UnsupportedOperationException("Not supported yet.");
+															return new ByteArrayInputStream(sb.toString().getBytes());
+														}
+													};
+													StreamResource resource = new StreamResource(source2, (String) og.getValue());
+													
+													BrowserFrame e = new BrowserFrame();
+													e.setSizeFull();
+
+													// Here we create a new StreamResource which downloads our StreamSource,
+													// which is our pdf.
+													// Set the right mime type
+													//						        resource.setMIMEType("application/pdf");
+													resource.setMIMEType("text/html");
+
+													e.setSource(resource);
+													w.setContent(e);
+													w.center();
+													w.setWidth("60%");
+													w.setHeight("60%");
+													
+													activeContract.setFinished(true);
+													//se asegura de marcar inactivos todos los contratos
+													hl.replaceComponent(btnFinishContract,btnSettlement );
 												}
-											};
-											StreamResource resource = new StreamResource(source2, "Documentos Masivos.html");
+											}){ {setIcon(FontAwesome.CHECK_CIRCLE_O);} } );
 											
-											BrowserFrame e = new BrowserFrame();
-											e.setSizeFull();
-
-											// Here we create a new StreamResource which downloads our StreamSource,
-											// which is our pdf.
-											// Set the right mime type
-											//						        resource.setMIMEType("application/pdf");
-											resource.setMIMEType("text/html");
-
-											e.setSource(resource);
-											w.setContent(e);
-											w.setWidth("60%");
-											w.setHeight("60%");
+											// boton aceptar
+											addComponent(new Button("Cancelar",new Button.ClickListener() {
+												
+												@Override
+												public void buttonClick(ClickEvent event) {
+													w.close();
+												}
+											}){{addStyleName("link");}});
 										}
-									}){ {setIcon(FontAwesome.PRINT);} } );
+									});
 								}
 							});
 							
 							UI.getCurrent().addWindow(w);
-							
+						}
+					});
+					
+					btnSettlement.addClickListener(new Button.ClickListener() {
+
+						@Override
+						public void buttonClick(ClickEvent event) {
+
 							//TODO calcular finiquito
 							//setea un finiquito
 							activeContract.setSettlement(100000);
 							//se asegura de marcar inactivos todos los contratos
-							replaceComponent(btnSettlement, btnChangeJob);
+							hl.replaceComponent(btnSettlement, btnChangeJob);
 						}
 					});
 
-					if(activeContract.getSettlement() == null ){
-						addComponent(btnSettlement);
-					}else{
+					if(activeContract == null ){
 						addComponent(btnChangeJob);
+					}else if(!activeContract.isFinished()){
+						addComponent(btnFinishContract);
+					}else if(activeContract.getSettlement() == null ){
+						addComponent(btnSettlement);
 					}
 				}
 			}
@@ -1098,11 +1161,20 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 
 	@Override
 	protected boolean preCommit() {
+		LaborerConstructionsite laborer = (LaborerConstructionsite) getItem().getBean();
+
 		for(Vacation vacation : vacationContainer.getItemIds()){
-			LaborerConstructionsite laborer = (LaborerConstructionsite) getItem().getBean();
 			laborer.addVacation(vacation);
+			laborer.getVacations().clear();
 		}
 		getItem().getItemProperty("vacations").setValue(vacationContainer.getItemIds());
+		
+		for(Tool t : beanItemTool.getItemIds()){
+			laborer.addTool(t);
+			laborer.getTool().clear();
+		}
+		getItem().getItemProperty("tool").setValue(beanItemTool.getItemIds());
+		
 		return super.preCommit();
 	}
 

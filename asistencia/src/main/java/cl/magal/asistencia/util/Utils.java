@@ -1,6 +1,7 @@
 package cl.magal.asistencia.util;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
@@ -10,6 +11,8 @@ import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import cl.magal.asistencia.entities.Laborer;
 
 import com.vaadin.ui.TextField;
 
@@ -47,6 +50,16 @@ public class Utils {
 	}
 	public static boolean NotNullOrEmpty(String etapa) {
 		return etapa != null && etapa.length() != 0;
+	}
+	public static boolean contains(List<Laborer> laborers, Long long1) {
+		if( laborers == null)
+			return false;
+		for(Laborer laborer :laborers ){
+			if(laborer.getLaborerId() == long1 ){
+				return true;
+			}
+		}
+		return false;
 	}
 	
 }

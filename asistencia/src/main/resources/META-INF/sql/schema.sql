@@ -215,9 +215,10 @@ CREATE TABLE IF NOT EXISTS "TOOL"
    FEE integer,
    NAME varchar(255) NOT NULL,
    PRICE integer,
-   STATUS varchar(255) NOT NULL,
+   STATUS varchar(255),
    LABORER_CONSTRUCTIONSITEID bigint not null,
-   DATEPOSTPONED timestamp
+   DATEPOSTPONED timestamp,
+   POSTPONED boolean
 )
 ;
 ALTER TABLE "TOOL"
@@ -462,7 +463,8 @@ CREATE UNIQUE INDEX IF NOT EXISTS PK_FACONFIG ON "FAMILY_ALLOWANCE_CONFIGURATION
 CREATE TABLE IF NOT EXISTS "CONTRACT"
 (
 	CONTRACTID IDENTITY PRIMARY KEY NOT NULL,
-	ACTIVE smallint,
+	ACTIVE smallint default 0 ,
+	FINISHED smallint default 0,
 	contractDescription TEXT, 
     JOB integer not null,
     JOBCODE integer not null,
