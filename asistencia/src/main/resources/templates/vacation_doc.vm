@@ -43,7 +43,7 @@
 						</tr>
 						<tr>
 							<td>
-								<p>${laborerConstruction.constructionsite.name}</p>
+								<p><b>${laborerConstruction.constructionsite.name}</b></p>
 							</td>
 							<td>
 								<xsl:value-of select="VacationData/day" />
@@ -68,7 +68,7 @@
 					trabajador:
 					<br />
 					<br />
-					DON ${laborerConstruction.laborer.fullname} RUT: ${laborerConstruction.laborer.rut}
+					DON <b>${laborerConstruction.laborer.fullname}</b> RUT: <b>${laborerConstruction.laborer.rut}</b> ROL: <b>${laborerConstruction.activeContract.jobCode}</b>
 				</td>
 			</tr>
 			<tr>

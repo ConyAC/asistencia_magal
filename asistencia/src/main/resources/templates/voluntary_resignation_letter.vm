@@ -29,7 +29,7 @@
 		<br />		
 		
 		<div style="text-align:right;line-height: 0.2;">
-		    Santiago, $tools.format('dd', $tools.date) de $tools.format('MMM yyyy', $tools.date)
+		    Santiago, <b>$tools.format('dd', $tools.date) de $tools.format('MMM yyyy', $tools.date)</b>
 		</div>
 		
 		<br />
@@ -57,12 +57,12 @@
         </tr>
         <tr>
             <th>
-            Nombre : ${laborerConstruction.laborer.fullname}
+            Nombre : <b>${laborerConstruction.laborer.fullname}</b>
             </th>
         </tr>
         <tr>
             <th>
-            Rut : ${laborerConstruction.laborer.rut}
+            Rut : <b>${laborerConstruction.laborer.rut}</b>
             </th>
         </tr>
      </table>
@@ -70,12 +70,12 @@
      <table cellpadding="0" cellspacing="0" border="0" style="text-align:leftt;margin:10px">
         <tr>
             <th>
-            Obra : ${laborerConstruction.constructionsite.name}
+            Obra : <b>${laborerConstruction.constructionsite.name}</b>
             </th>
 		</tr>
         <tr>
             <th>
-            Rol	: ${laborerConstruction.activeContract.job} 
+            Rol	: <b>${laborerConstruction.activeContract.job}</b>
             </th>
         </tr>
 	</table>
