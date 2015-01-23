@@ -787,6 +787,7 @@ public class LaborerAndTeamPanel extends Panel implements View {
 		table.setContainerDataSource(teamContainer);
 		table.setSizeFull();
 		table.setFilterBarVisible(true);
+		
 		table.addGeneratedColumn("actions", new CustomTable.ColumnGenerator() {
 
 			@Override

@@ -29,13 +29,13 @@
 		
 		<div style="text-align:left;line-height: 0.2;">
 		    <h1>MAGAL S.A.</h1>
-		    OBRA:<p>$laborerConstruction.constructionsite.name</p>
-		    <p>$laborerConstruction.constructionsite.address</p>
+		    OBRA:<p><b>$laborerConstruction.constructionsite.name</b></p>
+		    <p><b>$laborerConstruction.constructionsite.address</b></p>
 		</div>
 		
 		<br />
 		
-		<h2 style="text-align:right;">ROL ${laborerConstruction.activeContract.job}</h2>
+		<h2 style="text-align:right;">ROL <b>${laborerConstruction.activeContract.jobCode}</b></h2>
 		
 		<br />
 	
@@ -47,7 +47,7 @@
 		
 		<br />
 		
-		<p style="text-align:justify;">En Santiago, a $tools.format('dd MM yyyy', $tools.date), entre Constructora e Inmobiliaria Magal S.A. Rut 89.651.600-0, representada por Don Cristian Marinovich Pacey y Don ${laborerConstruction.laborer.fullname}, Trabajador de la misma se conviene, de conformidad con el articulo N&deg; 32 inciso primero de la Ley 19.759 del C&oacute;digo del Trabajo, trabajar a contar de esta fecha, en jornada extraordinaria para antender necesidades o situaciones temporales en la Empresa que no tengan el car&aacute;cter de permanentes. Los d&iacute;as y la duraci&oacute;n de estas jornadas dentro de los m&aacute;ximos legales establecidos, ser&aacute; autorizada y fijada por el jefe de obras, seg&uacute;n sean dichas necesidades o situaciones temporales.
+		<p style="text-align:justify;">En Santiago, a <b>$tools.format('dd MMMM yyyy', $tools.date)</b>, entre Constructora e Inmobiliaria Magal S.A. Rut 89.651.600-0, representada por Don Cristian Marinovich Pacey y Don <b>${laborerConstruction.laborer.fullname}</b>, Trabajador de la misma se conviene, de conformidad con el articulo N&deg; 32 inciso primero de la Ley 19.759 del C&oacute;digo del Trabajo, trabajar a contar de esta fecha, en jornada extraordinaria para antender necesidades o situaciones temporales en la Empresa que no tengan el car&aacute;cter de permanentes. Los d&iacute;as y la duraci&oacute;n de estas jornadas dentro de los m&aacute;ximos legales establecidos, ser&aacute; autorizada y fijada por el jefe de obras, seg&uacute;n sean dichas necesidades o situaciones temporales.
 </p>
     <br /><br /><br /><br />
     <br /><br /><br /><br />

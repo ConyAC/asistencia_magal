@@ -6,12 +6,15 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.tools.generic.DateTool;
+import org.joda.time.DateTime;
+import org.joda.time.Days;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ui.velocity.VelocityEngineUtils;
@@ -30,7 +33,6 @@ import cl.magal.asistencia.entities.enums.AbsenceType;
 import cl.magal.asistencia.entities.enums.AccidentLevel;
 import cl.magal.asistencia.entities.enums.MaritalStatus;
 import cl.magal.asistencia.entities.enums.Permission;
-import cl.magal.asistencia.entities.enums.ToolStatus;
 import cl.magal.asistencia.services.LaborerService;
 import cl.magal.asistencia.services.UserService;
 import cl.magal.asistencia.ui.AbstractWindowEditor;
@@ -169,16 +171,20 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 		gl.addComponent( new HorizontalLayout(){
 			{
 				try{
-				// Find the application directory
-				String basepath = VaadinService.getCurrent().getBaseDirectory().getAbsolutePath();
-				// Image as a file resource
-				FileResource resource = new FileResource(new File(basepath + "/WEB-INF/images/" + getItem().getItemProperty("laborer.photo").getValue()));
-
-				Embedded image = new Embedded("", resource);
-				image.setWidth("350");
-				image.setHeight("400");
-				addComponent(image);       
-				setComponentAlignment(image, Alignment.TOP_LEFT);
+					
+					String photoFileName = (String) getItem().getItemProperty("laborer.photo").getValue();
+					if(photoFileName != null && !photoFileName.trim().isEmpty() ){
+						// Find the application directory
+						String basepath = VaadinService.getCurrent().getBaseDirectory().getAbsolutePath();
+						// Image as a file resource
+						FileResource resource = new FileResource(new File(basepath + "/WEB-INF/images/" + getItem().getItemProperty("laborer.photo").getValue()));
+		
+						Embedded image = new Embedded("", resource);
+						image.setWidth("350");
+						image.setHeight("400");
+						addComponent(image);       
+						setComponentAlignment(image, Alignment.TOP_LEFT);
+					}
 				}catch(Exception e){ logger.error("Error",e); /*FIXME falla silenciosamente*/ }
 				
 				setSpacing(true);
@@ -488,12 +494,20 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 						final Map<String, Object> input = new HashMap<String, Object>();
 						input.put("laborerConstructions", new LaborerConstructionsite[] {(LaborerConstructionsite)getItem().getBean()});
 						input.put("tools", new DateTool());
-						final String body = VelocityEngineUtils.mergeTemplateIntoString(velocityEngine, "templates/temporary_work_contract_doc.vm", "UTF-8", input);
 
+						final StringBuilder sb = new StringBuilder();
+						
+						// contrato
+						sb.append( VelocityEngineUtils.mergeTemplateIntoString(velocityEngine, "templates/temporary_work_contract_doc.vm", "UTF-8", input));
+						// pacto horas extras
+						sb.append( VelocityEngineUtils.mergeTemplateIntoString(velocityEngine, "templates/covenant_overtime.vm", "UTF-8", input) );
+						// acuse recibo
+						sb.append( VelocityEngineUtils.mergeTemplateIntoString(velocityEngine, "templates/acknowledgment_of_receipt.vm", "UTF-8", input) );
+						
 						StreamResource.StreamSource source2 = new StreamResource.StreamSource() {
 
 							public InputStream getStream() {
-								return new ByteArrayInputStream(body.getBytes());
+								return new ByteArrayInputStream(sb.toString().getBytes());
 							}
 						};
 						StreamResource resource = new StreamResource(source2, "Contrato"+((LaborerConstructionsite)getItem().getBean()).getJobCode()+".html");
@@ -1089,16 +1103,23 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 			}
 		};
 	}
-	private void calcularUsadas(Label label, List<Vacation> vacations){
+	private int calcularUsadas(List<Vacation> vacations){
 		if(vacations == null || vacations.isEmpty() ){
-			label.setValue("0");
+			return 0;
 		}else{
 			int total = 0;
 			for(Vacation v : vacations){
 				total += v.getTotal();
 			}
-			label.setValue(total+"");
+			return total;
 		}
+	}
+	
+	private int calcularDisponibles(Contract contract,List<Vacation> vacations) {
+		//calcula las vacaciones totales
+		Date startDate = contract.getStartDate();
+		int totalDays = Days.daysBetween(new DateTime(startDate), new DateTime(new Date())).getDays()/30;
+		return (int) (( totalDays*1.25 ) - calcularUsadas(vacations));
 	}
 	
 	private Component drawVacations() {
@@ -1113,8 +1134,11 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 				Table vacationTable = new Table();
 				
 				final Label totalUsadas = new Label();
+				final Label totalDisponibles = new Label();
 				
-				calcularUsadas(totalUsadas,vacationContainer.getItemIds());
+				totalUsadas.setValue( calcularUsadas(vacationContainer.getItemIds()) +"");
+				final Contract activeContract = ((LaborerConstructionsite) getItem().getBean()).getActiveContract();
+				totalDisponibles.setValue(calcularDisponibles(activeContract,vacationContainer.getItemIds()) +"");
 
 				addComponent(new GridLayout(3,2){
 					{
@@ -1123,7 +1147,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 						addComponent(totalUsadas,1,0);
 
 						addComponent(new Label("Días disponibles"),0,1);
-						addComponent(new Label("4"),1,1);
+						addComponent(totalDisponibles,1,1);
 
 						if(!readOnly)
 							addComponent(new Button(null,new Button.ClickListener() {
@@ -1132,7 +1156,8 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 								public void buttonClick(ClickEvent event) {
 									Vacation vacation = new Vacation();
 									vacationContainer.addBean(vacation);
-									calcularUsadas(totalUsadas,vacationContainer.getItemIds());
+									totalUsadas.setValue( calcularUsadas(vacationContainer.getItemIds()) +"");
+									totalDisponibles.setValue(calcularDisponibles(activeContract,vacationContainer.getItemIds()) +"");
 
 								}
 							}){{setIcon(FontAwesome.PLUS);}},2,0);
@@ -1153,7 +1178,8 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 						Property.ValueChangeListener listener = new Property.ValueChangeListener() {
 							@Override
 							public void valueChange(Property.ValueChangeEvent event) {
-								calcularUsadas(totalUsadas,vacationContainer.getItemIds());
+								totalUsadas.setValue( calcularUsadas(vacationContainer.getItemIds()) +"");
+								totalDisponibles.setValue(calcularDisponibles(activeContract,vacationContainer.getItemIds()) +"");
 								label.setValue(((Vacation) item.getBean()).getTotal()+"");
 							}
 						};
