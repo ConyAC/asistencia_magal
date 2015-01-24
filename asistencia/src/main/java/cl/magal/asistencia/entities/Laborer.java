@@ -41,6 +41,7 @@ import cl.magal.asistencia.entities.enums.Afp;
 import cl.magal.asistencia.entities.enums.Isapre;
 import cl.magal.asistencia.entities.enums.MaritalStatus;
 import cl.magal.asistencia.entities.enums.Nationality;
+import cl.magal.asistencia.entities.validator.AgeMax;
 import cl.magal.asistencia.entities.validator.RutDigit;
 
 /**
@@ -96,6 +97,7 @@ public class Laborer implements Serializable {
     @Pattern(regexp="^([0-9])+\\-([kK0-9])+$",message="El rut '%s' no es válido.")
     @RutDigit(message="El rut '%s' no es válido.")
     private String rut;
+    @AgeMax(message="El trabajador es menor de 20 años")
     @Column(name = "dateBirth")
     @Temporal(TemporalType.TIMESTAMP)
     private Date dateBirth;
