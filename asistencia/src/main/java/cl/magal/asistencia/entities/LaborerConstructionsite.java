@@ -18,6 +18,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
@@ -105,6 +106,9 @@ public class LaborerConstructionsite implements Serializable {
     @OneToMany(mappedBy="laborerConstructionSite",fetch=FetchType.EAGER,cascade = { CascadeType.PERSIST, CascadeType.MERGE },orphanRemoval=true )
     List<Loan> loan = new ArrayList<Loan>();
    
+    @ManyToMany(mappedBy="laborerConstructionsites",cascade = { CascadeType.PERSIST, CascadeType.MERGE })
+    List<Team> teams = new ArrayList<Team>();
+    
     /**
      * Define la etapa para la cual está contratado el trabajador actual
      */
@@ -349,6 +353,23 @@ public class LaborerConstructionsite implements Serializable {
         	loan.setLaborerConstructionSite(this);
         }
 	}
+	
+	public List<Team> getTeams() {
+		return teams;
+	}
+
+	public void setTeams(List<Team> teams) {
+		this.teams = teams;
+	}
+	
+	public void addTeam(Team team) {
+        if (!getTeams().contains(team)) {
+        	getTeams().add(team);
+        }
+        if (!team.getLaborerConstructionsites().contains(this)) {
+        	team.getLaborerConstructionsites().add(this);
+        }
+    }
 	
 	/**
 	 * 

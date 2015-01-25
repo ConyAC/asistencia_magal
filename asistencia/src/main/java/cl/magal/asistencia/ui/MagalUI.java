@@ -78,6 +78,8 @@ public class MagalUI extends UI implements ErrorHandler {
 	transient SpringContextHelper helper;
 	
 	public Object getSpringBean(final String beanRef){
+		if(helper == null )
+			helper = new SpringContextHelper(VaadinServlet.getCurrent().getServletContext());
 		return helper.getBean(beanRef);
 	}
 
@@ -85,8 +87,6 @@ public class MagalUI extends UI implements ErrorHandler {
 	protected void init(final VaadinRequest request) {
 		
 		VaadinSession.getCurrent().setErrorHandler(this);
-		
-		helper = new SpringContextHelper(VaadinServlet.getCurrent().getServletContext());
 		
 		Locale.setDefault(new Locale("es", "CL"));
 		
