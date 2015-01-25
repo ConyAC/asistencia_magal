@@ -15,6 +15,7 @@ import org.tepi.filtertable.FilterTable;
 import org.vaadin.dialogs.ConfirmDialog;
 
 import ru.xpoft.vaadin.VaadinView;
+import cl.magal.asistencia.entities.ConstructionCompany;
 import cl.magal.asistencia.entities.ConstructionSite;
 import cl.magal.asistencia.entities.User;
 import cl.magal.asistencia.entities.enums.Permission;
@@ -63,6 +64,7 @@ public class ConstructionSitesView extends BaseView implements View {
 	BeanFieldGroup<ConstructionSite> bfg = new BeanFieldGroup<ConstructionSite>(ConstructionSite.class);
 	BeanItemContainer<ConstructionSite> constructionContainer = new BeanItemContainer<ConstructionSite>(ConstructionSite.class);
 	BeanItemContainer<User> itemUser = new BeanItemContainer<User>(User.class);
+	BeanItemContainer<ConstructionCompany> itemConstructionCompany = new BeanItemContainer<ConstructionCompany>(ConstructionCompany.class);
 	FilterTable table;
 	VerticalLayout detalleLayout;
 
@@ -138,9 +140,13 @@ public class ConstructionSitesView extends BaseView implements View {
 					itemUser.removeAllItems();
 					itemUser.addAll(users);
 					
+					List<ConstructionCompany> constructionCompany = service.findAllConstructionCompany();
+					itemConstructionCompany.removeAllItems();
+					itemConstructionCompany.addAll(constructionCompany);
+					
 					ConstructionSite cs = new ConstructionSite();
 					BeanItem<ConstructionSite> csItem = new BeanItem<ConstructionSite>(cs);
-					ConstructionSiteDialog csWindow = new ConstructionSiteDialog(csItem, itemUser, service);
+					ConstructionSiteDialog csWindow = new ConstructionSiteDialog(csItem, itemUser, itemConstructionCompany, service);
 					csWindow.setCaption("Crear Obra");
 					csWindow.addListener(new AbstractWindowEditor.EditorSavedListener() {
 						
@@ -194,8 +200,12 @@ public class ConstructionSitesView extends BaseView implements View {
 							itemUser.removeAllItems();
 							itemUser.addAll(users);
 							
+							List<ConstructionCompany> constructionCompany = service.findAllConstructionCompany();
+							itemConstructionCompany.removeAllItems();
+							itemConstructionCompany.addAll(constructionCompany);
+							
 							BeanItem<ConstructionSite> csItem = constructionContainer.getItem(itemId);
-							ConstructionSiteDialog csWindow = new ConstructionSiteDialog(csItem, itemUser, service);
+							ConstructionSiteDialog csWindow = new ConstructionSiteDialog(csItem, itemUser, itemConstructionCompany, service);
 							csWindow.setCaption("Editar Obra");
 							csWindow.addListener(new AbstractWindowEditor.EditorSavedListener() {
 							

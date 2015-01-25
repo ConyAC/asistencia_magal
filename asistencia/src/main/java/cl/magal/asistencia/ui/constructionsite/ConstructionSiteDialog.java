@@ -5,6 +5,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import cl.magal.asistencia.entities.ConstructionCompany;
 import cl.magal.asistencia.entities.ConstructionSite;
 import cl.magal.asistencia.entities.User;
 import cl.magal.asistencia.entities.enums.Status;
@@ -43,19 +44,21 @@ public class ConstructionSiteDialog extends AbstractWindowEditor {
 	transient Logger logger = LoggerFactory.getLogger(ConstructionSiteDialog.class);
 
 	BeanItemContainer<User> userContainer;
+	BeanItemContainer<ConstructionCompany> constructioncompanyContainer;
 	ConstructionSite constructionSite;
 	User user;
-	
+
 	UserService userService;
 	ConstructionSiteService service;
 
-	public ConstructionSiteDialog(BeanItem<ConstructionSite> item, BeanItemContainer<User> user, ConstructionSiteService service ){
+	public ConstructionSiteDialog(BeanItem<ConstructionSite> item, BeanItemContainer<User> user, BeanItemContainer<ConstructionCompany> constructionCompany, ConstructionSiteService service ){
 		super(item);
 		if(service == null )
 			throw new RuntimeException("Error al crear el dialgo, el servicio de obras no puede ser nulo.");
 
 		userContainer = user;
 		this.service = service;
+		constructioncompanyContainer = constructionCompany;
 		setWidth("70%");
 
 		init();
@@ -117,6 +120,12 @@ public class ConstructionSiteDialog extends AbstractWindowEditor {
 		nombre.setItemCaptionPropertyId("fullname");
 		fl.addComponent(nombre);
 		bind(nombre, "personInCharge"); 
+		
+		final ComboBox constructora = new ComboBox("Constructora", constructioncompanyContainer);
+		constructora.setItemCaptionMode(ItemCaptionMode.PROPERTY);
+		constructora.setItemCaptionPropertyId("name");
+		fl.addComponent(constructora);
+		bind(constructora, "constructionCompany"); 
 		
 		// lista de etapas de obra
 		VerticalLayout vl = new VerticalLayout();

@@ -30,6 +30,7 @@
 	    <class>cl.magal.asistencia.entities.Vacation</class>
 	    <class>cl.magal.asistencia.entities.Loan</class>
 	    <class>cl.magal.asistencia.entities.WageConfigurations</class>
+	    <class>cl.magal.asistencia.entities.ConstructionCompany</class>
 	    <class>cl.magal.asistencia.entities.converter.AbsenceTypeConverter</class>
 	    <class>cl.magal.asistencia.entities.converter.AccidentLevelConverter</class>
 	    <class>cl.magal.asistencia.entities.converter.AfpConverter</class>

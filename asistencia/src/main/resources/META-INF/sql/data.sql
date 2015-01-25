@@ -199,8 +199,8 @@ MERGE INTO LABORER (LABORERID,ADDRESS,AFP,COMMUNE,CONTRACTID,DATEADMISSION,DATEB
 
 --Construction SITE
 
-MERGE INTO CONSTRUCTION_SITE (CONSTRUCTION_SITEID,ADDRESS,CODE,DELETED,NAME,STATUS,PERSONINCHARGEID) VALUES (1,'Av. Las Condes 8798','2332443',0,'Carolina Rabat 4 Etapa B',1,null);
-MERGE INTO CONSTRUCTION_SITE (CONSTRUCTION_SITEID,ADDRESS,CODE,DELETED,NAME,STATUS,PERSONINCHARGEID) VALUES (2,'Av. Pajaritos 9934','565643',0,'Edificio Jardines de Olivares',1,null);
+MERGE INTO CONSTRUCTION_SITE (CONSTRUCTION_SITEID,ADDRESS,CODE,DELETED,NAME,STATUS,PERSONINCHARGEID,CONSTRUCTIONCOMPANYID) VALUES (1,'Av. Las Condes 8798','2332443',0,'Carolina Rabat 4 Etapa B',1,null,null);
+MERGE INTO CONSTRUCTION_SITE (CONSTRUCTION_SITEID,ADDRESS,CODE,DELETED,NAME,STATUS,PERSONINCHARGEID,CONSTRUCTIONCOMPANYID) VALUES (2,'Av. Pajaritos 9934','565643',0,'Edificio Jardines de Olivares',1,null,null);
 
 -- agrega los trabajadores a la obra Carolina Rabat 4 Etapa B
 
@@ -279,3 +279,8 @@ MERGE into family_allowance_configurations(family_allowance_configurationsId,fro
 MERGE into family_allowance_configurations(family_allowance_configurationsId,fromr,to,amount) values(7,19801.96,0,495049);
 MERGE into family_allowance_configurations(family_allowance_configurationsId,fromr,to,amount) values(8,1000000.64,0,25000000);
 
+
+-- Construction Company
+
+MERGE INTO CONSTRUCTIONCOMPANY (CONSTRUCTIONCOMPANYID,ADDRESS,COMMUNE,RUT,NAME) VALUES (1,'Av. Las Condes 8798','Las condes','80.800.800.777-8','Constructora 1');
+MERGE INTO CONSTRUCTIONCOMPANY (CONSTRUCTIONCOMPANYID,ADDRESS,COMMUNE,RUT,NAME) VALUES (2,'Av. Pajaritos 9934','Maipú','90.345.567-8','Constructora 2');

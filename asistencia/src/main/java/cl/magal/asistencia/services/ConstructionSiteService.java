@@ -13,11 +13,13 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import cl.magal.asistencia.entities.ConstructionCompany;
 import cl.magal.asistencia.entities.ConstructionSite;
 import cl.magal.asistencia.entities.Laborer;
 import cl.magal.asistencia.entities.LaborerConstructionsite;
 import cl.magal.asistencia.entities.Team;
 import cl.magal.asistencia.entities.User;
+import cl.magal.asistencia.repositories.ConstructionCompanyRepository;
 import cl.magal.asistencia.repositories.ConstructionSiteRepository;
 import cl.magal.asistencia.repositories.LaborerConstructionsiteRepository;
 import cl.magal.asistencia.repositories.LaborerRepository;
@@ -39,6 +41,8 @@ public class ConstructionSiteService {
 	TeamRepository teamRepo;
 	@Autowired
 	UserRepository userRepo;
+	@Autowired
+	ConstructionCompanyRepository constructionCompanyRepo;
 	
 	@PostConstruct
 	public void init(){
@@ -157,6 +161,10 @@ public class ConstructionSiteService {
 
 	public void delete(Team team) {
 		teamRepo.delete(team);
+	}
+	
+	public List<ConstructionCompany> findAllConstructionCompany() {
+		return (List<ConstructionCompany>) constructionCompanyRepo.findAll();
 	}
 
 }
