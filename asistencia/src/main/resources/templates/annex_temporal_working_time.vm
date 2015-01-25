@@ -24,20 +24,24 @@
 	
 #foreach( $laborerConstruction in $laborerConstructions )
 
-		<br />		
-		<h2 style="text-align:right;">ROL ${laborerConstruction.activeContract.jobCode}</h2>
 		<br />
+		<h3 style="margin:1px;text-align:center;text-decoration: underline;">ANEXO CONTRATO.</h3>	
+		<br />
+		<br />	
 		<div style="margin:1px;text-align:center;left;line-height: 0.2;">
-		    <h2>ANEXO CONTRATO DE TRABAJO</h2>
-			Desde <b>$tools.format('dd', $tools.date) de $tools.format('MMMM yyyy', $tools.date)</b>
+		    <h3>MODIFICACION TEMPORAL HORARIO TRABAJO</h3><br /><br />
+			Entre <b>$tools.format('dd', ${fromdate}) de $tools.format('MMMM yyyy', ${fromdate}) y $tools.format('dd', ${todate}) de $tools.format('MMMM yyyy', ${todate})</b> 
 		</div>
 		<br />
-		<p style="text-align:justify;">El presente anexo de modificaci&oacute;n  de Horario de Trabajo,  tiene por  objeto cumplir con lo dispuesto en la Ordenanza de los Procesos Constructivos  Capitulo  IV Articulo 9 de la Ilustre Municipalidad de Vitacura, relativo a trabajos con Ruidos Molestos.</p>
-		<h2 style="text-align:left;">Lunes a Viernes : </h2> 
-		<h2 style="text-align:left;">Ma&ntilde;ana 8:30 a 13:00 hrs.</h2>
-		<h2 style="text-align:left;">Tarde 13:30 a 18:00 Hrs.</h2>
+		<p style="text-align:justify;">El presente anexo de modificaci&oacute;n temporal de Horario de Trabajo, tiene por objeto <b>${objetive}</b>, que no se trabajaran, seg&uacute;n acuerdo entre el empleador y trabajador para beneficio de este &uacute;ltimo <b>${benefit}</b></p>
+		<p style="text-align:left;"><b>Lunes a Jueves : </b></p> 
+		<p style="text-align:left;"><b>Ma&ntilde;ana ${morning} hrs.</b></p>
+		<p style="text-align:left;"><b>Tarde ${afternoon} Hrs.</b></p>
+		<p style="text-align:left;"><b>Viernes : </b></p> 
+		<p style="text-align:left;"><b>Ma&ntilde;ana ${morning} hrs.</b></p>
+		<p style="text-align:left;"><b>Tarde ${afternoon} Hrs.</b></p>
 	    <br /><br />
-	    <span style="text-align:left;"><b>${laborerConstruction.constructionsite.constructionCompany.name}</b></span><br />
+	     <span style="text-align:left;"><b>${laborerConstruction.constructionsite.constructionCompany.name}</b></span><br />
 	    <span style="text-align:left;"><b>${laborerConstruction.constructionsite.constructionCompany.rut}</b></span><br />
 	    <span style="text-align:left;"><b>${laborerConstruction.constructionsite.constructionCompany.address}, ${laborerConstruction.constructionsite.constructionCompany.commune}</b></span><br />
 	    <span style="text-align:left;">Obra: <b>${laborerConstruction.constructionsite.name}</b></span>
@@ -54,4 +58,3 @@
 #end
 	</body>
 </html>
-

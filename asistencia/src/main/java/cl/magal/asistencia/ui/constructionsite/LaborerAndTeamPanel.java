@@ -2,7 +2,7 @@ package cl.magal.asistencia.ui.constructionsite;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -43,6 +43,7 @@ import cl.magal.asistencia.util.SecurityHelper;
 import cl.magal.asistencia.util.Utils;
 
 import com.vaadin.data.Property;
+import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.fieldgroup.BeanFieldGroup;
 import com.vaadin.data.fieldgroup.FieldGroup.CommitException;
 import com.vaadin.data.util.BeanItem;
@@ -65,15 +66,16 @@ import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.CustomTable;
+import com.vaadin.ui.DateField;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
+import com.vaadin.ui.OptionGroup;
 import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.TabSheet;
 import com.vaadin.ui.TextField;
-import com.vaadin.ui.TwinColSelect;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
@@ -104,7 +106,7 @@ public class LaborerAndTeamPanel extends Panel implements View {
 	/** LAYOUTS **/
 	VerticalLayout detalleLayout;
 	HorizontalLayout detailLayout;
-	private TwinColSelect tcsLaborer;
+	//	private TwinColSelect tcsLaborer;
 
 	/** SERVICES **/
 	@Autowired
@@ -138,6 +140,7 @@ public class LaborerAndTeamPanel extends Panel implements View {
 
 
 	public LaborerAndTeamPanel() {
+
 		teamContainer.addNestedContainerProperty("leader.firstname");
 		laborerConstructionContainer.addNestedContainerBean("laborer");
 		laborerConstructionContainer.addNestedContainerBean("activeContract");
@@ -165,31 +168,6 @@ public class LaborerAndTeamPanel extends Panel implements View {
 	@PostConstruct
 	public void init(){
 
-	}
-
-	protected VerticalLayout drawContructionDetail() {
-		detalleLayout = new VerticalLayout(); 
-		detalleLayout.setSizeFull();
-		detalleLayout.setSpacing(true);
-
-		//creando la parte de arriba
-		detailLayout = drawTopDetails();
-		detalleLayout.addComponent(detailLayout);
-		detalleLayout.setExpandRatio(detailLayout, 0.3F);
-
-		//crea el tab con trabajadores y cuadrillas
-		TabSheet tab = new TabSheet();
-		tab.setSizeFull();
-
-		detalleLayout.addComponent(tab);
-		detalleLayout.setExpandRatio(tab, 0.7F);
-		//tab de trabajadores
-		tab.addTab(drawLaborer(),"Trabajadores");
-
-		//tab de cuadrillas
-		tab.addTab(drawCuadrillas(),"Cuadrillas");
-
-		return detalleLayout;
 	}
 
 	protected HorizontalLayout drawTopDetails() {
@@ -298,75 +276,6 @@ public class LaborerAndTeamPanel extends Panel implements View {
 		return hl;
 	}
 
-	protected VerticalLayout drawCuadrillas() {
-		VerticalLayout vl = new VerticalLayout();
-		vl.setSizeFull();
-		vl.setSpacing(true);
-		vl.setMargin(true);
-
-		Button btnAdd = new Button(null,FontAwesome.PLUS);
-		vl.addComponent(btnAdd);
-		vl.setComponentAlignment(btnAdd, Alignment.TOP_RIGHT);
-
-		btnAdd.addClickListener(new Button.ClickListener() {
-
-			@Override
-			public void buttonClick(ClickEvent event) {
-				ConstructionSite cs = item.getBean();
-				if(cs == null){
-					Notification.show("Debe seleccionar una obra",Type.ERROR_MESSAGE);
-					return;
-				}
-
-				Team team = new Team();
-				team.setName("Cuadrilla 1");
-				team.setDate(new Date());
-				team.setStatus(Status.ACTIVE);
-				team.setLeader(laborerConstructionContainer.firstItemId().getLaborer());
-				constructionSiteService.addTeamToConstructionSite(team,cs);
-
-				teamContainer.addBean(team);
-
-			}
-		});
-
-		FilterTable table =  new FilterTable(){
-
-			@Override
-			protected String formatPropertyValue(Object rowId, Object colId,
-					Property<?> property) {
-				Object v = property.getValue();
-				if (v instanceof Date) {
-					Date dateValue = (Date) v;
-					SimpleDateFormat sdf = new SimpleDateFormat("dd MMM yyyy");
-					return sdf.format(dateValue);
-				}
-				return super.formatPropertyValue(rowId, colId, property);
-			}
-		};
-
-		table.setContainerDataSource(teamContainer);
-		table.setSizeFull();
-		table.setFilterBarVisible(true);
-		table.setVisibleColumns("name","leader.firstname","date","status");
-		table.setColumnHeaders("Nombre","Responsable","Fecha","Estado");
-
-		table.setSelectable(true);
-
-		vl.addComponent(table);
-		vl.setExpandRatio(table,1.0F);
-
-		return vl;
-	}
-
-	protected VerticalLayout test1() {
-		return null;
-	}
-
-	protected VerticalLayout test2() {
-		return null;
-	}
-
 	/**
 	 * Lista de trabajadores seleccionados
 	 */
@@ -379,9 +288,12 @@ public class LaborerAndTeamPanel extends Panel implements View {
 		vl.setMargin(true);
 		vl.setSizeFull();
 
+		HorizontalLayout roothl = new HorizontalLayout();
+		roothl.setWidth("100%");
+		vl.addComponent(roothl);
+
 		//boton para agregar trabajadores e imprimir
 		HorizontalLayout hl = new HorizontalLayout();
-		hl.setWidth("100%");
 		hl.setSpacing(true);
 
 		asistenciaBtn = new Button("Asistencia",FontAwesome.CHECK);
@@ -389,7 +301,6 @@ public class LaborerAndTeamPanel extends Panel implements View {
 
 			@Override
 			public void buttonClick(ClickEvent event) {
-				//				switchPanels();
 				asistenciaBtn.setEnabled(true);
 			}
 		});
@@ -397,148 +308,13 @@ public class LaborerAndTeamPanel extends Panel implements View {
 
 		asistenciaBtn.setWidth("200px");
 		hl.addComponent(asistenciaBtn);
-		hl.setComponentAlignment(asistenciaBtn, Alignment.TOP_LEFT);
-
-		vl.addComponent(hl);
-
-		HorizontalLayout hl2 = new HorizontalLayout();
-		hl2.setSpacing(true);
-
-		block = new Label("Bloqueado");
-		block.addStyleName("laborer-block");
-		hl2.addComponent(block);
-
-		confirmed = new Label("No Confirmado");
-		confirmed.addStyleName("laborer-confirmed");
-		hl2.addComponent(confirmed);
-
-		btnPrint = new Button(null,FontAwesome.PRINT);
-		hl2.addComponent(btnPrint);
-
-		hl.addComponent(hl2);
-		hl.setComponentAlignment(hl2, Alignment.TOP_RIGHT);
-
-		btnPrint.addClickListener(new Button.ClickListener() {
-
-			@Override
-			public void buttonClick(ClickEvent event) {
-				if(selectedItemIds.isEmpty()){
-					Notification.show("Para imprimir masivamente, primero debe seleccionar uno más trabajadores");
-					return;
-				}
-
-				final ObjectProperty contracts = new ObjectProperty(false, Boolean.class);
-				final ObjectProperty vacations = new ObjectProperty(false, Boolean.class);
-				final ObjectProperty anexxeds = new ObjectProperty(false, Boolean.class);
-
-				final Window w = new Window("Impresión masiva");
-				w.center();
-				w.setModal(true);
-
-				w.setContent(new HorizontalLayout(){
-					{
-						setSpacing(true);
-						setMargin(true);
-						addComponent(new CheckBox("Contrato"){{setPropertyDataSource(contracts);}});
-						addComponent(new CheckBox("Anexos"){{setPropertyDataSource(anexxeds);}});
-						addComponent(new CheckBox("Últimas Vacaciones"){{setPropertyDataSource(vacations);}});
-
-						addComponent(new Button(null,new Button.ClickListener() {
-
-							@Override
-							public void buttonClick(ClickEvent event) {
-
-								final Map<String, Object> input = new HashMap<String, Object>();
-								input.put("laborerConstructions", selectedItemIds);
-								input.put("tools", new DateTool());
-
-								final StringBuilder sb = new StringBuilder();
-								if((Boolean) contracts.getValue()){
-									sb.append( VelocityEngineUtils.mergeTemplateIntoString(velocityEngine, "templates/temporary_work_contract_doc.vm", "UTF-8", input) );
-								}
-								if((Boolean) anexxeds.getValue()){
-									sb.append( VelocityEngineUtils.mergeTemplateIntoString(velocityEngine, "templates/annex_contract_doc.vm", "UTF-8", input) );
-								}
-								if((Boolean) vacations.getValue()){
-									sb.append( VelocityEngineUtils.mergeTemplateIntoString(velocityEngine, "templates/vacation_doc.vm", "UTF-8", input) );
-								}
-
-								StreamResource.StreamSource source2 = new StreamResource.StreamSource() {
-
-									public InputStream getStream() {
-										//throw new UnsupportedOperationException("Not supported yet.");
-										return new ByteArrayInputStream(sb.toString().getBytes());
-									}
-								};
-								StreamResource resource = new StreamResource(source2, "Documentos Masivos.html");
-
-								BrowserFrame e = new BrowserFrame();
-								e.setSizeFull();
-
-								// Here we create a new StreamResource which downloads our StreamSource,
-								// which is our pdf.
-								// Set the right mime type
-								//resource.setMIMEType("application/pdf");
-								resource.setMIMEType("text/html");
-
-								e.setSource(resource);
-								w.setContent(e);
-								w.center();
-								w.setWidth("60%");
-								w.setHeight("60%");
-							}
-						}){ {setIcon(FontAwesome.PRINT);} } );
-					}
-				});
-
-				UI.getCurrent().addWindow(w);
-
-
-				final Map<String, Object> input = new HashMap<String, Object>();
-				input.put("laborerConstructions", selectedItemIds);
-				input.put("tools", new DateTool());
-				final String body = VelocityEngineUtils.mergeTemplateIntoString(velocityEngine, "templates/annex_contract_doc.vm", "UTF-8", input);
-
-				StreamResource.StreamSource source2 = new StreamResource.StreamSource() {
-
-					public InputStream getStream() {
-						//throw new UnsupportedOperationException("Not supported yet.");
-						return new ByteArrayInputStream(body.getBytes());
-					}
-				};
-				StreamResource resource = new StreamResource(source2, "Contratos Masivos.html");
-
-				Window window = new Window();
-				window.setResizable(true);
-				window.setWidth("60%");
-				window.setHeight("60%");
-				window.center();
-				window.setModal(true);
-
-				BrowserFrame e = new BrowserFrame();
-				e.setSizeFull();
-
-				// Here we create a new StreamResource which downloads our StreamSource,
-				// which is our pdf.
-				// Set the right mime type
-				//						        resource.setMIMEType("application/pdf");
-				resource.setMIMEType("text/html");
-
-				e.setSource(resource);
-				window.setContent(e);
-				//				UI.getCurrent().addWindow(window);
-
-
-				//				for(Object lc : selectedItemIds){
-				//					Notification.show("Imprimiendo "+((LaborerConstructionsite) lc).getLaborer().getFullname());
-				//				}
-
-			}
-		});
+		//		hl.setComponentAlignment(asistenciaBtn, Alignment.TOP_LEFT);
 
 		//agrega solo si tiene los permisos //siempre se debe crear pues solo se deshabilita si no se tiene permiso
-		btnAdd = new Button(null,FontAwesome.PLUS);
-		hl2.addComponent(btnAdd);
+		btnAdd = new Button("Agregar Trabajador",FontAwesome.PLUS);
+		btnAdd.setWidth("200px");
+		hl.addComponent(btnAdd);
+		//		hl.setComponentAlignment(btnAdd, Alignment.TOP_LEFT);
 
 		ShortcutListener enter = new ShortcutListener("Entrar",
 				KeyCode.ENTER, new int[]{ModifierKey.CTRL }) {
@@ -546,7 +322,6 @@ public class LaborerAndTeamPanel extends Panel implements View {
 			public void handleAction(Object sender, Object target) {
 				btnAdd.click();
 			}
-
 		};
 
 		btnAdd.addClickListener(new Button.ClickListener() {
@@ -586,6 +361,334 @@ public class LaborerAndTeamPanel extends Panel implements View {
 		});
 
 		btnAdd.addShortcutListener(enter);
+
+		roothl.addComponent(hl);
+		roothl.setComponentAlignment(hl, Alignment.TOP_LEFT);
+
+		HorizontalLayout hl2 = new HorizontalLayout();
+		hl2.setSpacing(true);
+
+		block = new Label("Bloqueado");
+		block.addStyleName("laborer-block");
+		hl2.addComponent(block);
+
+		confirmed = new Label("No Confirmado");
+		confirmed.addStyleName("laborer-confirmed");
+		hl2.addComponent(confirmed);
+
+		btnPrint = new Button(null,FontAwesome.PRINT);
+		hl2.addComponent(btnPrint);
+
+		roothl.addComponent(hl2);
+		roothl.setComponentAlignment(hl2, Alignment.TOP_RIGHT);
+
+		btnPrint.addClickListener(new Button.ClickListener() {
+
+			@Override
+			public void buttonClick(ClickEvent event) {
+				if(selectedItemIds.isEmpty()){
+					Notification.show("Para imprimir masivamente, primero debe seleccionar uno más trabajadores");
+					return;
+				}
+
+				//				final ObjectProperty contracts = new ObjectProperty(false, Boolean.class);
+				final ObjectProperty vacations = new ObjectProperty(false, Boolean.class);
+				final ObjectProperty anexxeds = new ObjectProperty(false, Boolean.class);
+
+				final Window w = new Window("Impresión masiva");
+				w.center();
+				w.setModal(true);
+
+				w.setContent(new HorizontalLayout(){
+					{
+						setSpacing(true);
+						setMargin(true);
+						//						addComponent(new CheckBox("Contrato"){{setPropertyDataSource(contracts);}});
+//						addComponent(new CheckBox("Anexos"){{setPropertyDataSource(anexxeds);}});
+						addComponent(new CheckBox("Últimas Vacaciones"){{setPropertyDataSource(vacations);}});
+
+						addComponent(new Button(null,new Button.ClickListener() {
+
+							@Override
+							public void buttonClick(ClickEvent event) {
+
+								final Map<String, Object> input = new HashMap<String, Object>();
+								input.put("laborerConstructions", selectedItemIds);
+								input.put("tools", new DateTool());
+
+								final StringBuilder sb = new StringBuilder();
+								//								if((Boolean) contracts.getValue()){
+								//									sb.append( VelocityEngineUtils.mergeTemplateIntoString(velocityEngine, "templates/temporary_work_contract_doc.vm", "UTF-8", input) );
+								//								}
+//								if((Boolean) anexxeds.getValue()){
+//									sb.append( VelocityEngineUtils.mergeTemplateIntoString(velocityEngine, "templates/annex_contract_doc.vm", "UTF-8", input) );
+//								}
+								if((Boolean) vacations.getValue()){
+									sb.append( VelocityEngineUtils.mergeTemplateIntoString(velocityEngine, "templates/vacation_doc.vm", "UTF-8", input) );
+								}
+
+								StreamResource.StreamSource source2 = new StreamResource.StreamSource() {
+
+									public InputStream getStream() {
+										//throw new UnsupportedOperationException("Not supported yet.");
+										return new ByteArrayInputStream(sb.toString().getBytes());
+									}
+								};
+								StreamResource resource = new StreamResource(source2, "Documentos Masivos.html");
+
+								BrowserFrame e = new BrowserFrame();
+								e.setSizeFull();
+
+								// Here we create a new StreamResource which downloads our StreamSource,
+								// which is our pdf.
+								// Set the right mime type
+								//resource.setMIMEType("application/pdf");
+								resource.setMIMEType("text/html");
+
+								e.setSource(resource);
+								w.setContent(e);
+								w.center();
+								w.setWidth("60%");
+								w.setHeight("60%");
+							}
+						}){ {setIcon(FontAwesome.PRINT);} } );
+					}
+				});
+
+				UI.getCurrent().addWindow(w);
+
+			}
+		});
+
+		Button btnAnnexedsGenerator = new Button(null,FontAwesome.TASKS);
+		hl2.addComponent(btnAnnexedsGenerator);
+
+		btnAnnexedsGenerator.addClickListener(new Button.ClickListener() {
+
+			@Override
+			public void buttonClick(ClickEvent event) {
+				if(selectedItemIds.isEmpty()){
+					Notification.show("Para generar anexos masivos, primero debe seleccionar uno más trabajadores");
+					return;
+				}
+				//permite imprimir la carta de renuncia
+				final Window w = new Window("Anexos");
+				w.center();
+				w.setModal(true);
+
+				w.setContent(new VerticalLayout(){
+					{
+
+						setSpacing(true);
+						setMargin(true);
+						final String option1 = "Cambio horario",
+								option2 = "Cambio temporal horario",
+								option3 = "Cambio Ingreso mínimo",
+								option4 = "Cambio clausura de contrato"; 
+
+						final OptionGroup og = new OptionGroup("Tipo de anexo",
+								Arrays.asList(option1,option2,option3,option4));
+
+						//Cambio de horario
+						final DateField fromdate = new DateField("Fecha inicio Vigencia : ");
+						fromdate.setValue(new Date());
+						fromdate.setRequired(true);
+						final DateField todate = new DateField("Fecha fin Vigencia : ");
+						todate.setValue(new Date());
+						todate.setRequired(true);
+						final TextField objetive = new TextField("Objetivo : ");
+						objetive.setRequired(true);
+						final TextField benefit = new TextField("Beneficio de trabajador : ");
+						benefit.setRequired(true);
+						final TextField disposed = new TextField("Dispuesto por : ");
+						disposed.setRequired(true);
+						final TextField relatingto = new TextField("Relativo a : ");
+						relatingto.setRequired(true);
+						final TextField morning = new TextField("Horario Mañana : ");
+						morning.setRequired(true);
+						final TextField afternoon = new TextField("Horario Tarde : ");
+						afternoon.setRequired(true);
+						final TextField oldmininc = new TextField("Sueldo mínimo antiguo : ");
+						oldmininc.setRequired(true);
+						final TextField newmininc = new TextField("Sueldo mínimo nuevo : ");
+						newmininc.setRequired(true);
+						
+						final TextField closing = new TextField("N° Clausura : ");
+						closing.setRequired(true);
+						final CheckBox updateOrChange = new CheckBox("Es Modificación");
+						final TextField wheresaid = new TextField("Donde dice : ");
+						wheresaid.setRequired(true);
+						final TextField mustsaid = new TextField("Debe decir : ");
+						mustsaid.setRequired(true);
+						
+						addComponent(new HorizontalLayout(){
+							{
+								addComponent(og);
+
+								//muestra las propiedades necesarias en cada caso
+								final FormLayout fl = new FormLayout();
+								fl.setCaption("Campos Anexo");
+								addComponent(fl);
+
+								og.addValueChangeListener(new Property.ValueChangeListener() {
+
+									@Override
+									public void valueChange(ValueChangeEvent event) {
+										fl.removeAllComponents();
+										String option = (String) event.getProperty().getValue();
+										if( option == null ){
+											return;
+										}
+										if(option1.compareTo(option) == 0 )
+										{
+											fl.addComponent(fromdate);
+											fl.addComponent(disposed);
+											fl.addComponent(relatingto);
+											fl.addComponent(morning);
+											fl.addComponent(afternoon);
+										}else if(option2.compareTo(option) == 0){
+											fl.addComponent(fromdate);
+											fl.addComponent(todate);
+											fl.addComponent(objetive);
+											fl.addComponent(benefit);
+											fl.addComponent(morning);
+											fl.addComponent(afternoon);
+
+										}else if(option3.compareTo(option) == 0){
+											fl.addComponent(fromdate);
+											fl.addComponent(oldmininc);
+											fl.addComponent(newmininc);
+
+										}else if(option4.compareTo(option) == 0){
+											fl.addComponent(fromdate);
+											fl.addComponent(updateOrChange);
+											fl.addComponent(closing);
+											fl.addComponent(wheresaid);
+											fl.addComponent(mustsaid);
+										}
+										w.center();
+
+									}
+								});
+							}
+						});
+
+						addComponent(new HorizontalLayout(){
+							{
+								// boton aceptar
+								addComponent(new Button("Aceptar",new Button.ClickListener() {
+
+									@Override
+									public void buttonClick(ClickEvent event) {
+
+										if( og.getValue() == null ){
+											Notification.show("Debe seleccionar una causa de término.",Type.WARNING_MESSAGE);
+											return;
+										}
+
+										final Map<String, Object> input = new HashMap<String, Object>();
+										input.put("laborerConstructions", selectedItemIds);
+										input.put("tools", new DateTool());
+
+										final StringBuilder sb = new StringBuilder();
+										if(((String) og.getValue()).compareTo(option1) == 0){
+											if(!fromdate.isValid() || !disposed.isValid() || 
+													!relatingto.isValid() || !morning.isValid() || 
+													!afternoon.isValid()){
+												Notification.show("Todos los campos deben ser llenados para generar el anexo.",Type.HUMANIZED_MESSAGE);
+												return;
+											}
+											input.put("fromdate",fromdate.getValue());
+											input.put("disposed",disposed.getValue());
+											input.put("relatingto",relatingto.getValue());
+											input.put("morning",morning.getValue());
+											input.put("afternoon",afternoon.getValue());
+											sb.append( VelocityEngineUtils.mergeTemplateIntoString(velocityEngine, "templates/annex_working_time.vm", "UTF-8", input) );
+										}else if(((String) og.getValue()).compareTo(option2) == 0){
+											
+											if(!fromdate.isValid() || !todate.isValid() || !objetive.isValid() || 
+													!benefit.isValid() || !morning.isValid() || 
+													!afternoon.isValid()){
+												Notification.show("Todos los campos deben ser llenados para generar el anexo.",Type.HUMANIZED_MESSAGE);
+												return;
+											}
+											input.put("fromdate",fromdate.getValue());
+											input.put("todate",todate.getValue());
+											input.put("objetive",objetive.getValue());
+											input.put("benefit",benefit.getValue());
+											input.put("morning",morning.getValue());
+											input.put("afternoon",afternoon.getValue());
+											
+											sb.append( VelocityEngineUtils.mergeTemplateIntoString(velocityEngine, "templates/annex_temporal_working_time.vm", "UTF-8", input) );
+										}else if(((String) og.getValue()).compareTo(option3) == 0){
+											if(!fromdate.isValid() || !oldmininc.isValid() || 
+													!newmininc.isValid()){
+												Notification.show("Todos los campos deben ser llenados para generar el anexo.",Type.HUMANIZED_MESSAGE);
+												return;
+											}
+											input.put("fromdate",fromdate.getValue());
+											input.put("oldmininc",oldmininc.getValue());
+											input.put("newmininc",newmininc.getValue());
+											
+											sb.append( VelocityEngineUtils.mergeTemplateIntoString(velocityEngine, "templates/annex_minimum_income.vm", "UTF-8", input) );
+										}else if(((String) og.getValue()).compareTo(option4) == 0){
+											if(!fromdate.isValid() || !closing.isValid() || !wheresaid.isValid() || 
+													!mustsaid.isValid() ){
+												Notification.show("Todos los campos deben ser llenados para generar el anexo.",Type.HUMANIZED_MESSAGE);
+												return;
+											}
+											input.put("fromdate",fromdate.getValue());
+											input.put("closing",closing.getValue());
+											input.put("argument1",wheresaid.getValue());
+											input.put("argument2",mustsaid.getValue());
+											input.put("modify",updateOrChange.getValue());
+											sb.append( VelocityEngineUtils.mergeTemplateIntoString(velocityEngine, "templates/annex_closing.vm", "UTF-8", input) );
+										}
+
+										StreamResource.StreamSource source2 = new StreamResource.StreamSource() {
+
+											public InputStream getStream() {
+												//throw new UnsupportedOperationException("Not supported yet.");
+												return new ByteArrayInputStream(sb.toString().getBytes());
+											}
+										};
+										StreamResource resource = new StreamResource(source2, (String) og.getValue());
+
+										BrowserFrame e = new BrowserFrame();
+										e.setSizeFull();
+
+										// Here we create a new StreamResource which downloads our StreamSource,
+										// which is our pdf.
+										// Set the right mime type
+										//						        resource.setMIMEType("application/pdf");
+										resource.setMIMEType("text/html");
+
+										e.setSource(resource);
+										w.setContent(e);
+										w.center();
+										w.setWidth("60%");
+										w.setHeight("60%");
+
+									}
+								}){ {setIcon(FontAwesome.CHECK_CIRCLE_O);} } );
+
+								// boton aceptar
+								addComponent(new Button("Cancelar",new Button.ClickListener() {
+
+									@Override
+									public void buttonClick(ClickEvent event) {
+										w.close();
+									}
+								}){{addStyleName("link");}});
+							}
+						});
+					}
+				});
+
+				UI.getCurrent().addWindow(w);
+
+			}
+		});
 
 		final FilterTable table =  new FilterTable();
 
@@ -730,7 +833,6 @@ public class LaborerAndTeamPanel extends Panel implements View {
 			}
 		});
 
-		table.refreshRowCache();
 		vl.addComponent(table);
 		vl.setExpandRatio(table,1.0F);
 
@@ -743,10 +845,10 @@ public class LaborerAndTeamPanel extends Panel implements View {
 		vl.setMargin(true);
 		vl.setSizeFull();
 
-		Button btnAdd = new Button(null,FontAwesome.PLUS);
-		vl.addComponent(btnAdd);
-		vl.setComponentAlignment(btnAdd, Alignment.TOP_RIGHT);
-		btnAdd.addClickListener(new Button.ClickListener() {
+		Button btnAddTeam = new Button(null,FontAwesome.PLUS);
+		vl.addComponent(btnAddTeam);
+		vl.setComponentAlignment(btnAddTeam, Alignment.TOP_RIGHT);
+		btnAddTeam.addClickListener(new Button.ClickListener() {
 
 			@Override
 			public void buttonClick(ClickEvent event) {
@@ -787,7 +889,7 @@ public class LaborerAndTeamPanel extends Panel implements View {
 		table.setContainerDataSource(teamContainer);
 		table.setSizeFull();
 		table.setFilterBarVisible(true);
-		
+
 		table.addGeneratedColumn("actions", new CustomTable.ColumnGenerator() {
 
 			@Override

@@ -45,6 +45,7 @@ import cl.magal.asistencia.util.Utils;
 
 import com.vaadin.data.Container;
 import com.vaadin.data.Property;
+import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeNotifier;
 import com.vaadin.data.util.BeanItem;
 import com.vaadin.data.util.BeanItemContainer;
@@ -92,7 +93,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 	BeanItemContainer<HistoryVO> historyContainer = new BeanItemContainer<HistoryVO>(HistoryVO.class);
 	BeanItemContainer<LaborerConstructionsite> constructionContainer = new BeanItemContainer<LaborerConstructionsite>(LaborerConstructionsite.class);
 	BeanItemContainer<User> itemUser = new BeanItemContainer<User>(User.class);
-	
+
 	transient UserService serviceUser;
 	transient LaborerService service;
 	transient private VelocityEngine velocityEngine;
@@ -144,7 +145,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 			tab.addTab(drawSummary(),"Resumen");
 		//tab de Información
 		if(!readOnly)
-			tab.addTab(new LaborerBaseInformation(getBinder(),"laborer",true),"Información");
+			tab.addTab(drawInformation(),"Información");
 		//tab de vacaciones
 		tab.addTab(drawVacations(),"Vacaciones");
 		//tab de perstamos y herramientas
@@ -162,24 +163,87 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 		return tab;
 	}
 
+	private Component drawInformation() {
+		VerticalLayout vl = new VerticalLayout();
+
+		vl.addComponent(new Label("<h2>Información por Obra:</h2>",ContentMode.HTML));
+
+		vl.addComponent( new VerticalLayout(){
+			{
+				setSpacing(true);
+				//				setMargin(true);
+				setWidth("100%");
+
+				addComponent(new GridLayout(4,2){
+					{
+						setSpacing(true);
+						setMargin(true);
+						setWidth("100%");
+						addComponent(new TextField("Premio: ",getItem().getItemProperty("reward")){{
+							setNullRepresentation("");
+							addValidator(new BeanValidator(LaborerConstructionsite.class,"reward"));
+							setEnabled(!readOnly);
+						}});
+
+						final DateField startDate = new DateField("Fecha Inicial",getItem().getItemProperty("rewardStartDate"));
+						final DateField endDate = new DateField("Fecha Final",getItem().getItemProperty("rewardEndDate"));
+					
+						
+
+						CheckBox checkbox = new CheckBox("Usar Fechas Contrato",getItem().getItemProperty("useDefaultDates"));
+						startDate.setVisible(!checkbox.getValue());
+						endDate.setVisible(!checkbox.getValue());
+						checkbox.addValueChangeListener(new Property.ValueChangeListener() {
+
+							@Override
+							public void valueChange(ValueChangeEvent event) {
+								boolean ischecked = (Boolean) event.getProperty().getValue();
+								startDate.setVisible(!ischecked);
+								endDate.setVisible(!ischecked);
+								if(ischecked){
+									startDate.setValue(null);
+									endDate.setValue(null);
+								}
+							}
+						});						
+						addComponent(checkbox);
+						setComponentAlignment(checkbox, Alignment.BOTTOM_LEFT);
+						addComponent(startDate);
+						addComponent(endDate);
+
+						addComponent(new TextField("Jornal Promedio: ",getItem().getItemProperty("activeContract.valueTreatment")){{
+							setNullRepresentation("");
+							addValidator(new BeanValidator(Contract.class,"valueTreatment"));
+							setEnabled(!readOnly);
+						}});
+					}
+				});
+			}
+		});
+
+		vl.addComponent(new Label("<h2>Información por Trabajador:</h2>",ContentMode.HTML));
+		vl.addComponent(new LaborerBaseInformation(getBinder(),"laborer",true));
+		return vl;
+	}
+
 	protected Component drawSummary() {	
-		
+
 		GridLayout gl = new GridLayout(3,10);
 		gl.setSpacing(true);
 		gl.setMargin(true);
 		gl.setWidth("100%");
-			
+
 		gl.addComponent( new HorizontalLayout(){
 			{
 				try{
-					
+
 					String photoFileName = (String) getItem().getItemProperty("laborer.photo").getValue();
 					if(photoFileName != null && !photoFileName.trim().isEmpty() ){
 						// Find the application directory
 						String basepath = VaadinService.getCurrent().getBaseDirectory().getAbsolutePath();
 						// Image as a file resource
 						FileResource resource = new FileResource(new File(basepath + "/WEB-INF/images/" + getItem().getItemProperty("laborer.photo").getValue()));
-		
+
 						Embedded image = new Embedded("", resource);
 						image.setWidth("350");
 						image.setHeight("400");
@@ -187,59 +251,59 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 						setComponentAlignment(image, Alignment.TOP_LEFT);
 					}
 				}catch(Exception e){ logger.error("Error",e); /*FIXME falla silenciosamente*/ }
-				
+
 				setSpacing(true);
-				
-				VerticalLayout hl = new VerticalLayout();
-				addComponent(hl);
-				setComponentAlignment(hl, Alignment.MIDDLE_CENTER);
+
+				GridLayout gl = new GridLayout(2,10);
+				addComponent(gl);
+				setComponentAlignment(gl, Alignment.MIDDLE_CENTER);
 				//gl.setComponentAlignment(hl, Alignment.MIDDLE_CENTER);
-				
-				hl.addComponent(new Label(getItem().getItemProperty("laborer.fullname")));
-				hl.addComponent(new Label(getItem().getItemProperty("laborer.rut")));
-				hl.addComponent(new Label(getItem().getItemProperty("laborer.dateBirth")));
+
+				gl.addComponent(new Label("Código Oficio :   "));gl.addComponent(new Label(getItem().getItemProperty("activeContract.jobCode")));
+				gl.addComponent(new Label("Nombre :   "));gl.addComponent(new Label(getItem().getItemProperty("laborer.fullname")));
+				gl.addComponent(new Label("Rut :   "));gl.addComponent(new Label(getItem().getItemProperty("laborer.rut")));
+				gl.addComponent(new Label("Fecha Nacimiento :   "));gl.addComponent(new Label(getItem().getItemProperty("laborer.dateBirth")));
 				String marital = MaritalStatus.CASADO.toString();
 				try{
 					marital = ((MaritalStatus)getItem().getItemProperty("laborer.maritalStatus").getValue()).toString();
 				}catch(Exception e){
 					logger.error("Error",e);
 				}
+
+				gl.addComponent(new Label("Estado Civil : "));gl.addComponent(new Label(marital));
+				gl.addComponent(new Label("Dirección : "));gl.addComponent(new Label(getItem().getItemProperty("laborer.address")));
 				
-				hl.addComponent(new Label(marital));
-				hl.addComponent(new Label(getItem().getItemProperty("laborer.address")));
-				if(getItem().getItemProperty("laborer.mobileNumber").getValue() != null || getItem().getItemProperty("laborer.phone").getValue() != null)
-					hl.addComponent(new Label(getItem().getItemProperty("laborer.mobileNumber").getValue() +" - "+getItem().getItemProperty("laborer.phone").getValue()));
-//				if(getItem().getItemProperty("laborer.dateAdmission").getValue() != null)
-					hl.addComponent(new Label(getItem().getItemProperty("laborer.dateAdmission")));
+				if(getItem().getItemProperty("laborer.mobileNumber").getValue() != null || getItem().getItemProperty("laborer.phone").getValue() != null){
+					gl.addComponent(new Label("Teléfonos : "));
+					gl.addComponent(new Label(getItem().getItemProperty("laborer.mobileNumber").getValue() +" - "+getItem().getItemProperty("laborer.phone").getValue()));
+				}
 				
-				hl.addComponent(new Label("<hr />",ContentMode.HTML));
-				hl.addComponent(new TextField("Premio: ",getItem().getItemProperty("reward")){{
-				setNullRepresentation("");
-				addValidator(new BeanValidator(LaborerConstructionsite.class,"reward"));
-				//setReadOnly(readOnly);
-				setEnabled(!readOnly);
-			}});
-						
+				if(getItem().getItemProperty("activeContract.startDate").getValue() != null){
+					gl.addComponent(new Label("Fecha Ingreso : "));
+					gl.addComponent(new Label(getItem().getItemProperty("activeContract.startDate")));
+				}
+
+				//				hl.addComponent(new Label("<hr />",ContentMode.HTML));
 				setSpacing(true);
-//				POR AHORA OCULTAR ESTE BOTON HASTA QUE SE DEFINA BIEN QUE HARA Y SI VA
-//				Button btnPrint = new Button(null,new Button.ClickListener() {
-//
-//					@Override
-//					public void buttonClick(ClickEvent event) {
-//						Notification.show("Imprimiendo");
-//					}
-//				}){{setIcon(FontAwesome.PRINT); setDescription("Imprimir");}};
-//				addComponent(btnPrint);
-				
+				//				POR AHORA OCULTAR ESTE BOTON HASTA QUE SE DEFINA BIEN QUE HARA Y SI VA
+				//				Button btnPrint = new Button(null,new Button.ClickListener() {
+				//
+				//					@Override
+				//					public void buttonClick(ClickEvent event) {
+				//						Notification.show("Imprimiendo");
+				//					}
+				//				}){{setIcon(FontAwesome.PRINT); setDescription("Imprimir");}};
+				//				addComponent(btnPrint);
+
 				if( SecurityHelper.hastPermission(Permission.BLOQUEAR_OBRERO)){
 					Button bloquear = new Button(null,FontAwesome.LOCK);					
 					bloquear.addClickListener(new Button.ClickListener() {
 						public void buttonClick(ClickEvent event) {								
-						
+
 							LaborerBlockDialog lbWindow = new LaborerBlockDialog(getItem(), service, velocityEngine);
 							lbWindow.setCaption("Bloquear Trabajador");
 							lbWindow.addListener(new AbstractWindowEditor.EditorSavedListener() {							
-								
+
 								@Override
 								public void editorSaved(EditorSavedEvent event) {
 									try {										
@@ -248,22 +312,22 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 										lc.setBlock(true);
 										service.save(lc);
 										constructionContainer.addBean(lc);
-						    		} catch (Exception e) {
-						    			logger.error("Error al guardar la información de la obra",e);
-						    			Notification.show("Es necesario agregar todos los campos obligatorios", Type.ERROR_MESSAGE);
-						    		}
-									
+									} catch (Exception e) {
+										logger.error("Error al guardar la información de la obra",e);
+										Notification.show("Es necesario agregar todos los campos obligatorios", Type.ERROR_MESSAGE);
+									}
+
 								}
 							});
-					        
-					        UI.getCurrent().addWindow(lbWindow);
+
+							UI.getCurrent().addWindow(lbWindow);
 						}
 					});		
 					bloquear.setData(constructionContainer);
 					bloquear.setDescription("Bloquear");
 					addComponent(bloquear);
 				}
-				
+
 				if( SecurityHelper.hastPermission(Permission.CONFIRMAR_OBREROS)){
 					Button acceptObrero = new Button(null,FontAwesome.CHECK);					
 					acceptObrero.addClickListener(new Button.ClickListener() {
@@ -282,10 +346,10 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 				}
 			}
 		},0,0,1,0);
-		
+
 		return gl;
 	}
-	
+
 	BeanItemContainer<Tool> beanItemTool;
 	protected VerticalLayout drawPyH() {
 
@@ -310,12 +374,12 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 		if(!readOnly){
 			btnAddH = new Button(null,FontAwesome.PLUS);
 			hl.addComponent(btnAddH);
-			
+
 			btnAddH.addClickListener(new Button.ClickListener() {
-	
+
 				@Override
 				public void buttonClick(ClickEvent event) {
-					
+
 					LaborerConstructionsite laborer = (LaborerConstructionsite) getItem().getBean();
 					if(laborer == null ) throw new RuntimeException("El trabajador no es válido.");
 					Tool tool = new Tool();
@@ -348,12 +412,12 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 				else if(  propertyId.equals("dateBuy") ){
 					field = new DateField();
 				}
-				
+
 				((AbstractField<?>)field).setImmediate(true);
 				return field;
 			}
 		});
-		
+
 		tableTool.addGeneratedColumn("selected", new Table.ColumnGenerator() {
 
 			@Override
@@ -372,13 +436,13 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 				return cb;
 			}
 		});
-		
+
 		tableTool.addGeneratedColumn("eliminar", new Table.ColumnGenerator() {
-			
+
 			@Override
 			public Object generateCell(Table source, final Object itemId, Object columnId) {
 				return new Button(null,new Button.ClickListener() {
-					
+
 					@Override
 					public void buttonClick(ClickEvent event) {
 						//laborerConstructionSite.removeTool(tool);
@@ -387,7 +451,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 				}){ {setIcon(FontAwesome.TRASH_O);} };
 			}
 		});
-		
+
 		tableTool.setVisibleColumns("name","price","dateBuy","fee","selected","status", "eliminar");
 		tableTool.setColumnHeaders("Herramienta","Monto","Fecha","Cuota","Postergar pago","Estado", "Acciones");
 		tableTool.setEditable(true);				
@@ -411,7 +475,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 			btnAddP = new Button(null,FontAwesome.PLUS);
 			hl2.addComponent(btnAddP);
 			btnAddP.addClickListener(new Button.ClickListener() {
-	
+
 				@Override
 				public void buttonClick(ClickEvent event) {
 					LaborerConstructionsite laborer = (LaborerConstructionsite) getItem().getBean();
@@ -422,7 +486,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 				}
 			});
 		}
-		
+
 		final Table tableLoan = new Table("Préstamos");
 		tableLoan.setPageLength(3);
 		tableLoan.setWidth("100%");
@@ -452,7 +516,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 				return field;
 			}
 		});
-		
+
 		tableLoan.setVisibleColumns("price","dateBuy", "fee", "status");
 		tableLoan.setColumnHeaders("Monto","Fecha", "Cuota", "Estado");
 		tableLoan.setEditable(true);		
@@ -477,13 +541,13 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 		final GridLayout gl = new GridLayout(3,10);
 		gl.setSpacing(true);
 		gl.setSizeFull();
-		
+
 		gl.setColumnExpandRatio(0, 0.2F);
 		gl.setColumnExpandRatio(1, 0.2F);
 		gl.setColumnExpandRatio(2, 1.0F);
-		
+
 		vl.addComponent(gl);
-		
+
 		final BeanItemContainer<Annexed> beanContainerAnnexeds = new BeanItemContainer<Annexed>(Annexed.class); 
 
 		int fila = 0, columna = 0;
@@ -496,26 +560,26 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 
 					@Override
 					public void buttonClick(ClickEvent event) {
-						
+
 						//solo puede crear otro contrato si está finalizado el anterior y calculó el finiquito
 						if(!activeContract.isFinished() || activeContract.getSettlement() != null ){
 							Notification.show("El contrato debe estár terminado y finiquitado para cambiar el rol",Type.HUMANIZED_MESSAGE);
 							return;
 						}
-						
+
 						final Map<String, Object> input = new HashMap<String, Object>();
 						input.put("laborerConstructions", new LaborerConstructionsite[] {(LaborerConstructionsite)getItem().getBean()});
 						input.put("tools", new DateTool());
 
 						final StringBuilder sb = new StringBuilder();
-						
+
 						// contrato
 						sb.append( VelocityEngineUtils.mergeTemplateIntoString(velocityEngine, "templates/temporary_work_contract_doc.vm", "UTF-8", input));
 						// pacto horas extras
 						sb.append( VelocityEngineUtils.mergeTemplateIntoString(velocityEngine, "templates/covenant_overtime.vm", "UTF-8", input) );
 						// acuse recibo
 						sb.append( VelocityEngineUtils.mergeTemplateIntoString(velocityEngine, "templates/acknowledgment_of_receipt.vm", "UTF-8", input) );
-						
+
 						StreamResource.StreamSource source2 = new StreamResource.StreamSource() {
 
 							public InputStream getStream() {
@@ -548,15 +612,15 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 
 				//				Button btnEdit = new Button(null,FontAwesome.PENCIL);
 				if(!readOnly){
-					
+
 					final HorizontalLayout hl = this;
-					
+
 					final Button btnChangeJob = new Button(null,FontAwesome.EXCHANGE);
 
 
 					//				btnEdit.setDescription("Editar");
 					btnChangeJob.setDescription("Cambiar Oficio");
-					
+
 					//				btnEdit.addClickListener(new Button.ClickListener() {
 					//
 					//					@Override
@@ -582,8 +646,8 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 										LaborerConstructionsite laborer = ((BeanItem<LaborerConstructionsite>) event.getSavedItem()).getBean();
 										setContractGl(laborer.getActiveContract());
 										beanContainerAnnexeds.removeAllItems();
-										
-//										hl.replaceComponent(btnChangeJob,btnFinishContract);
+
+										//										hl.replaceComponent(btnChangeJob,btnFinishContract);
 									} catch (Exception e) {
 										logger.error("Error al guardar la información del obrero",e);
 										Notification.show("Es necesario agregar todos los campos obligatorios", Type.ERROR_MESSAGE);
@@ -609,13 +673,13 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 		lbSettlement = new UndefinedWidthLabel();
 		lbStatus = new UndefinedWidthLabel();
 		columna = 0;
-		
+
 		gl.addComponent(new UndefinedWidthLabel("Etapa : "),columna++,fila);gl.addComponent(lbStep,columna--,fila++);
 		gl.addComponent(new UndefinedWidthLabel("Oficio : "),columna++,fila);gl.addComponent(lbJob,columna--,fila++);
 		gl.addComponent(new UndefinedWidthLabel("Código : "),columna++,fila);gl.addComponent(lbJobCode,columna--,fila++);
 		gl.addComponent(new UndefinedWidthLabel("Fecha Inicio : "),columna++,fila);gl.addComponent(lbStarting,columna--,fila++);
 		gl.addComponent(new UndefinedWidthLabel("Fecha Termino : "),columna++,fila);gl.addComponent(lbEnding,columna--,fila++);
-		
+
 		final Button btnFinishContract = new Button(null,FontAwesome.TIMES);
 		btnFinishContract.setDescription("Término de Contrato");
 		btnFinishContract.addClickListener(new Button.ClickListener() {
@@ -626,10 +690,10 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 				final Window w = new Window("Cartas de renuncias");
 				w.center();
 				w.setModal(true);
-				
+
 				w.setContent(new VerticalLayout(){
 					{
-						
+
 						setSpacing(true);
 						setMargin(true);
 						final OptionGroup og = new OptionGroup("Tipo de Término",
@@ -637,35 +701,35 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 										"Término de Contrato",
 										"Ausencia Reiterada"));
 						addComponent(og);
-						
+
 						addComponent(new HorizontalLayout(){
 							{
 								// boton aceptar
 								addComponent(new Button("Aceptar",new Button.ClickListener() {
-									
+
 									@Override
 									public void buttonClick(ClickEvent event) {
-										
+
 										if( og.getValue() == null ){
 											Notification.show("Debe seleccionar una causa de término.",Type.WARNING_MESSAGE);
 											return;
 										}
-										
+
 										final Map<String, Object> input = new HashMap<String, Object>();
 										input.put("laborerConstructions", new LaborerConstructionsite[] {(LaborerConstructionsite)getItem().getBean()});
 										input.put("tools", new DateTool());
-										
+
 										final StringBuilder sb = new StringBuilder();
 										if(((String) og.getValue()).compareTo("Voluntaria") == 0){
 											sb.append( VelocityEngineUtils.mergeTemplateIntoString(velocityEngine, "templates/voluntary_resignation_letter.vm", "UTF-8", input) );
 										}else
 											if(((String) og.getValue()).compareTo("Término de Contrato") == 0){
-											sb.append( VelocityEngineUtils.mergeTemplateIntoString(velocityEngine, "templates/dismissal_letter_for_completion_of_work.vm", "UTF-8", input) );
-										}else
-											if(((String) og.getValue()).compareTo("Ausencia Reiterada") == 0){
-											sb.append( VelocityEngineUtils.mergeTemplateIntoString(velocityEngine, "templates/dismissal_letter_for_absence.vm", "UTF-8", input) );
-										}
-										
+												sb.append( VelocityEngineUtils.mergeTemplateIntoString(velocityEngine, "templates/dismissal_letter_for_completion_of_work.vm", "UTF-8", input) );
+											}else
+												if(((String) og.getValue()).compareTo("Ausencia Reiterada") == 0){
+													sb.append( VelocityEngineUtils.mergeTemplateIntoString(velocityEngine, "templates/dismissal_letter_for_absence.vm", "UTF-8", input) );
+												}
+
 										StreamResource.StreamSource source2 = new StreamResource.StreamSource() {
 
 											public InputStream getStream() {
@@ -674,7 +738,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 											}
 										};
 										StreamResource resource = new StreamResource(source2, (String) og.getValue());
-										
+
 										BrowserFrame e = new BrowserFrame();
 										e.setSizeFull();
 
@@ -689,15 +753,15 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 										w.center();
 										w.setWidth("60%");
 										w.setHeight("60%");
-										
+
 										activeContract.setFinished(true);
 										setContractGl(activeContract);
 									}
 								}){ {setIcon(FontAwesome.CHECK_CIRCLE_O);} } );
-								
+
 								// boton aceptar
 								addComponent(new Button("Cancelar",new Button.ClickListener() {
-									
+
 									@Override
 									public void buttonClick(ClickEvent event) {
 										w.close();
@@ -707,20 +771,20 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 						});
 					}
 				});
-				
+
 				UI.getCurrent().addWindow(w);
 			}
 		});
 		gl.addComponent(new UndefinedWidthLabel("Estado : "),columna++,fila);gl.addComponent(lbStatus,columna++,fila);gl.addComponent(btnFinishContract,columna++,fila++);
 		columna = 0;
-		
+
 		final Button btnSettlement = new Button(null,FontAwesome.FILE_TEXT);
 		btnSettlement.setDescription("Cálcular Finiquito");
 		btnSettlement.addClickListener(new Button.ClickListener() {
 
 			@Override
 			public void buttonClick(ClickEvent event) {
-				
+
 				//solo puede calcular el finiquito, si el contrato no está activo
 				if(!activeContract.isFinished()){
 					Notification.show("El contrato debe estár terminado para calcular el finiquito",Type.HUMANIZED_MESSAGE);
@@ -733,7 +797,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 				setContractGl(activeContract);
 			}
 		});
-		
+
 		gl.addComponent(new UndefinedWidthLabel("Finiquito : "),columna++,fila);gl.addComponent(lbSettlement,columna++,fila);gl.addComponent(btnSettlement,columna++,fila++);
 		setContractGl(activeContract);
 
@@ -976,23 +1040,23 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 						return field;
 					}
 				});
-				
+
 				table.addGeneratedColumn("actions", new Table.ColumnGenerator() {
-					
+
 					@Override
 					public Object generateCell(Table source, final Object itemId, Object columnId) {
 						return new Button(null,new Button.ClickListener() {
-							
+
 							@Override
 							public void buttonClick(ClickEvent event) {
 								ConfirmDialog.show(UI.getCurrent(), "Confirmar Acción:", "¿Está seguro de eliminar el accidente seleccionado?",
-								        "Eliminar", "Cancelar", new ConfirmDialog.Listener() {
+										"Eliminar", "Cancelar", new ConfirmDialog.Listener() {
 
-								            public void onClose(ConfirmDialog dialog) {
-								                if (dialog.isConfirmed()) {
-								                	accidentContainer.removeItem(itemId);
-								                }
-								            }
+									public void onClose(ConfirmDialog dialog) {
+										if (dialog.isConfirmed()) {
+											accidentContainer.removeItem(itemId);
+										}
+									}
 								});
 							}
 						}){{setIcon(FontAwesome.TRASH_O);}};
@@ -1094,23 +1158,23 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 						return field;
 					}
 				});
-				
+
 				table.addGeneratedColumn("actions", new Table.ColumnGenerator() {
-					
+
 					@Override
 					public Object generateCell(Table source, final Object itemId, Object columnId) {
 						return new Button(null,new Button.ClickListener() {
-							
+
 							@Override
 							public void buttonClick(ClickEvent event) {
 								ConfirmDialog.show(UI.getCurrent(), "Confirmar Acción:", "¿Está seguro de eliminar la licencia seleccionada?",
-								        "Eliminar", "Cancelar", new ConfirmDialog.Listener() {
+										"Eliminar", "Cancelar", new ConfirmDialog.Listener() {
 
-								            public void onClose(ConfirmDialog dialog) {
-								                if (dialog.isConfirmed()) {
-								                	absenceContainer.removeItem(itemId);
-								                }
-								            }
+									public void onClose(ConfirmDialog dialog) {
+										if (dialog.isConfirmed()) {
+											absenceContainer.removeItem(itemId);
+										}
+									}
 								});
 							}
 						}){{setIcon(FontAwesome.TRASH_O);}};
@@ -1136,14 +1200,14 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 			return total;
 		}
 	}
-	
+
 	private int calcularDisponibles(Contract contract,List<Vacation> vacations) {
 		//calcula las vacaciones totales
 		Date startDate = contract.getStartDate();
 		int totalDays = Days.daysBetween(new DateTime(startDate), new DateTime(new Date())).getDays()/30;
 		return (int) (( totalDays*1.25 ) - calcularUsadas(vacations));
 	}
-	
+
 	private Component drawVacations() {
 		return new VerticalLayout(){
 			{
@@ -1154,10 +1218,10 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 				setMargin(true);
 				setSpacing(true);
 				Table vacationTable = new Table();
-				
+
 				final Label totalUsadas = new Label();
 				final Label totalDisponibles = new Label();
-				
+
 				totalUsadas.setValue( calcularUsadas(vacationContainer.getItemIds()) +"");
 				final Contract activeContract = ((LaborerConstructionsite) getItem().getBean()).getActiveContract();
 				totalDisponibles.setValue(calcularDisponibles(activeContract,vacationContainer.getItemIds()) +"");
@@ -1218,10 +1282,10 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 
 					@Override
 					public Object generateCell(Table source, final Object itemId, Object columnId) {
-						
+
 						HorizontalLayout hl = new HorizontalLayout();
 						hl.setSpacing(true);
-						
+
 						Button btnPrint = new Button(null,FontAwesome.PRINT);
 
 						btnPrint.addClickListener(new Button.ClickListener() {
@@ -1266,23 +1330,23 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 						});
 
 						hl.addComponent(btnPrint);
-						
+
 						hl.addComponent(new Button(null,new Button.ClickListener() {
-							
+
 							@Override
 							public void buttonClick(ClickEvent event) {
 								ConfirmDialog.show(UI.getCurrent(), "Confirmar Acción:", "¿Está seguro de eliminar la vacación seleccionada?",
-								        "Eliminar", "Cancelar", new ConfirmDialog.Listener() {
+										"Eliminar", "Cancelar", new ConfirmDialog.Listener() {
 
-								            public void onClose(ConfirmDialog dialog) {
-								                if (dialog.isConfirmed()) {
-								                	vacationContainer.removeItem(itemId);
-								                }
-								            }
+									public void onClose(ConfirmDialog dialog) {
+										if (dialog.isConfirmed()) {
+											vacationContainer.removeItem(itemId);
+										}
+									}
 								});
 							}
 						}){{setIcon(FontAwesome.TRASH_O);}});
-						
+
 						return hl;
 					}
 
@@ -1291,9 +1355,9 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 				vacationTable.setVisibleColumns("fromDate","toDate","total","progressive","print");
 				vacationTable.setColumnHeaders("Desde","Hasta","Total","Progresivas","Acciones");
 				vacationTable.setEditable(!readOnly);
-				
+
 				vacationTable.setColumnWidth("print", 130);
-				
+
 				addComponent(vacationTable);
 			}
 		};
@@ -1301,35 +1365,35 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 
 	@Override
 	protected boolean preCommit() {
-        LaborerConstructionsite laborer = (LaborerConstructionsite) getItem().getBean();
-        //vacaciones
-        laborer.getVacations().clear();
+		LaborerConstructionsite laborer = (LaborerConstructionsite) getItem().getBean();
+		//vacaciones
+		laborer.getVacations().clear();
 		for(Vacation vacation : vacationContainer.getItemIds()){
 			laborer.addVacation(vacation);
 		}
 		getItem().getItemProperty("vacations").setValue(laborer.getVacations()); // no se si esto es necesario
-		
+
 		//accidentes
-        laborer.getAccidents().clear();
+		laborer.getAccidents().clear();
 		for(Accident accident : accidentContainer.getItemIds()){
 			laborer.addAccident(accident);
 		}
 		getItem().getItemProperty("accidents").setValue(laborer.getAccidents()); // no se si esto es necesario
-		
+
 		//licencias
-        laborer.getAbsences().clear();
+		laborer.getAbsences().clear();
 		for(Absence absence : absenceContainer.getItemIds()){
 			laborer.addAbsence(absence);
 		}
 		getItem().getItemProperty("absences").setValue(laborer.getAbsences()); // no se si esto es necesario
-		
-		
+
+
 		laborer.getTool().clear();		
 		for(Tool t : beanItemTool.getItemIds()){
 			laborer.addTool(t);
 		}
 		getItem().getItemProperty("tool").setValue(laborer.getTool());
-		
+
 		return super.preCommit();
 	}
 

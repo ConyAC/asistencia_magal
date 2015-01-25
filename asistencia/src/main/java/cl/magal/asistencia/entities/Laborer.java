@@ -8,18 +8,15 @@ package cl.magal.asistencia.entities;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.LinkedList;
 import java.util.List;
 
 import javax.persistence.Basic;
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.ManyToMany;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
@@ -63,7 +60,6 @@ import cl.magal.asistencia.entities.validator.RutDigit;
     @NamedQuery(name = "Laborer.findByAddress", query = "SELECT l FROM Laborer l WHERE l.address = :address"),
     @NamedQuery(name = "Laborer.findByMobileNumber", query = "SELECT l FROM Laborer l WHERE l.mobileNumber = :mobileNumber"),
     @NamedQuery(name = "Laborer.findByPhone", query = "SELECT l FROM Laborer l WHERE l.phone = :phone"),
-    @NamedQuery(name = "Laborer.findByDateAdmission", query = "SELECT l FROM Laborer l WHERE l.dateAdmission = :dateAdmission"),
     @NamedQuery(name = "Laborer.findByContractId", query = "SELECT l FROM Laborer l WHERE l.contractId = :contractId"),
     @NamedQuery(name = "Laborer.findByAfpId", query = "SELECT l FROM Laborer l WHERE l.afp = :afp")
     })
@@ -105,9 +101,9 @@ public class Laborer implements Serializable {
     private String mobileNumber;
     @Column(name = "phone")
     private String phone;
-    @Column(name = "dateAdmission")
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date dateAdmission;
+//    @Column(name = "dateAdmission")
+//    @Temporal(TemporalType.TIMESTAMP)
+//    private Date dateAdmission;
     @Column(name = "contractId")
     private Integer contractId;
     @Column(name="dependents")
@@ -142,24 +138,6 @@ public class Laborer implements Serializable {
     
     @OneToMany(mappedBy="laborer", orphanRemoval=true)//,fetch=FetchType.EAGER,cascade = { CascadeType.PERSIST, CascadeType.MERGE })
     List<LaborerConstructionsite> laborerConstructionSites = new ArrayList<LaborerConstructionsite>();
-    
-//    @OneToMany(mappedBy="laborer",fetch=FetchType.EAGER,cascade = { CascadeType.PERSIST, CascadeType.MERGE },orphanRemoval=true )
-//    List<Vacation> vacations = new ArrayList<Vacation>();
-//    
-//    @OneToMany(mappedBy="laborer",fetch=FetchType.EAGER,cascade = { CascadeType.PERSIST, CascadeType.MERGE },orphanRemoval=true )
-//    List<Absence> absences = new ArrayList<Absence>();
-//    
-//    @OneToMany(mappedBy="laborer",fetch=FetchType.EAGER,cascade = { CascadeType.PERSIST, CascadeType.MERGE },orphanRemoval=true )
-//    List<Accident> accidents = new ArrayList<Accident>();
-//    
-//    @OneToMany(targetEntity=Tool.class,fetch=FetchType.EAGER)
-//    List<Tool> tool;
-//    
-//    @ManyToMany(mappedBy="laborers",cascade = { CascadeType.PERSIST, CascadeType.MERGE })
-//    List<Team> teams = new LinkedList<Team>();
-    
-    @ManyToMany(mappedBy="laborers",cascade = { CascadeType.PERSIST, CascadeType.MERGE })
-    List<Team> teams = new LinkedList<Team>();
     
     @PrePersist
     public void prePersist(){
@@ -332,13 +310,13 @@ public class Laborer implements Serializable {
         this.phone = phone;
     }
 
-    public Date getDateAdmission() {
-        return dateAdmission;
-    }
-
-    public void setDateAdmission(Date dateAdmission) {
-        this.dateAdmission = dateAdmission;
-    }
+//    public Date getDateAdmission() {
+//        return dateAdmission;
+//    }
+//
+//    public void setDateAdmission(Date dateAdmission) {
+//        this.dateAdmission = dateAdmission;
+//    }
 
     public Integer getContractId() {
         return contractId;
@@ -374,23 +352,6 @@ public class Laborer implements Serializable {
         int hash = 0;
         hash += (laborerId != null ? laborerId.hashCode() : 0);
         return hash;
-    }
-	
-	public List<Team> getTeams() {
-		return teams;
-	}
-
-	public void setTeams(List<Team> teams) {
-		this.teams = teams;
-	}
-	
-	public void addTeam(Team team) {
-        if (!getTeams().contains(team)) {
-        	getTeams().add(team);
-        }
-        if (!team.getLaborers().contains(this)) {
-        	team.getLaborers().add(this);
-        }
     }
 	
     public String getProvenance() {

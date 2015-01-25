@@ -64,17 +64,17 @@ public class LaborerBaseInformation extends VerticalLayout {
 		
 	private void init(){
 		setSpacing(true);
-		setMargin(true);
+//		setMargin(true);
 		setWidth("100%");
 
 		GridLayout detalleObrero = new GridLayout(3,5);
-		detalleObrero.setMargin(true);
+//		detalleObrero.setMargin(true);
 		detalleObrero.setSpacing(true);
 		addComponent(detalleObrero);
 
 		// Loop through the properties, build fields for them and add the fields
 		// to this UI
-		for (Object propertyId : new String[]{"rut","firstname","secondname","lastname", "secondlastname", "dateBirth", "address", "mobileNumber", "phone", "dateAdmission", "afp", "maritalStatus", "provenance"}) {
+		for (Object propertyId : new String[]{"rut","firstname","secondname","lastname", "secondlastname", "dateBirth", "address", "mobileNumber", "phone", "afp", "maritalStatus", "provenance"}) {
 			if(propertyId.equals("laborerId") || propertyId.equals("constructionSites") || propertyId.equals("contractId") || propertyId.equals("teamId"))
 				;
 			else if(propertyId.equals("afp")){
@@ -198,8 +198,6 @@ public class LaborerBaseInformation extends VerticalLayout {
 			return "Teléfono móvil";
 		else if(propertyId.equals("phone"))
 			return "Teléfono fijo";
-		else if(propertyId.equals("dateAdmission"))
-			return "Fecha de Admisión";
 		else if(propertyId.equals("provenance"))
 			return "Procedencia";
 		else
