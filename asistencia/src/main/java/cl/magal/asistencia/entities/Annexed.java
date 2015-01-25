@@ -38,7 +38,6 @@ public class Annexed implements Serializable {
     private Date terminationDate;
 	
 	String step;
-	
 	String annexedDescription;
 	
 	@ManyToOne
