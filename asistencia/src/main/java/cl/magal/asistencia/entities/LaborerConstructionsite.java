@@ -7,6 +7,7 @@ package cl.magal.asistencia.entities;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import javax.persistence.Basic;
@@ -25,6 +26,8 @@ import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 import javax.validation.constraints.Digits;
 
 import cl.magal.asistencia.entities.enums.Job;
@@ -75,6 +78,16 @@ public class LaborerConstructionsite implements Serializable {
     @Column(name="reward")
     private int reward;
     
+    @Column(name="USE_DEFAULT_DATES")
+    private boolean useDefaultDates = true;
+    
+    @Temporal(TemporalType.DATE)
+    @Column(name="REWARD_STARTDATE",nullable=false)
+    Date rewardStartDate;
+    @Temporal(TemporalType.DATE)
+    @Column(name="REWARD_ENDTDATE",nullable=false)
+    Date rewardEndDate;
+    
     /**
      * Bloqueo de un obrero en determinada obra
      */
@@ -119,21 +132,28 @@ public class LaborerConstructionsite implements Serializable {
     transient Contract activeContract;
 	
     
-//    @ManyToMany(mappedBy="laborers")
-//    List<Team> teams = new ArrayList<Team>();
-    
     public LaborerConstructionsite() {
     }
+    
+	public boolean isUseDefaultDates() {
+		return useDefaultDates;
+	}
+	public void setUseDefaultDates(boolean useDefaultDates) {
+		this.useDefaultDates = useDefaultDates;
+	}
+	public Date getRewardStartDate() {
+		return rewardStartDate;
+	}
+	public void setRewardStartDate(Date rewardStartDate) {
+		this.rewardStartDate = rewardStartDate;
+	}
+	public Date getRewardEndDate() {
+		return rewardEndDate;
+	}
 
-
-//    public List<Team> getTeams() {
-//		return teams;
-//	}
-//
-//	public void setTeams(List<Team> teams) {
-//		this.teams = teams;
-//	}
-
+	public void setRewardEndDate(Date rewardEndDate) {
+		this.rewardEndDate = rewardEndDate;
+	}
 	public List<Vacation> getVacations() {
 		return vacations;
 	}

@@ -158,12 +158,13 @@ CREATE TABLE IF NOT EXISTS "LABORER_CONSTRUCTIONSITE"
    LABORERID integer NOT NULL,
    ACTIVE smallint,
    CONFIRMED smallint,
-   REWARD integer,
+   REWARD integer default 0,
+   USE_DEFAULT_DATES smallint  default 1,
+   REWARD_STARTDATE timestamp,
+   REWARD_ENDTDATE timestamp,
    BLOCK boolean,
    PERSONBLOCKID bigint,
    COMMENT varchar(255),
-   -- JOB integer not null,
-   -- JOBCODE integer not null,
    CONSTRUCTION_SITEID integer NOT NULL
 )
 ;

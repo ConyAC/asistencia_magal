@@ -26,7 +26,6 @@ import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Notification.Type;
-import com.vaadin.ui.Panel;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
 
@@ -80,7 +79,7 @@ public abstract class AbstractWindowEditor extends Window implements ClickListen
 		this.item = item;
 		binder = new BeanFieldGroup(item.getBean().getClass());
 		getBinder().setItemDataSource(item);
-		
+		setCaption("");
 		setModal(true);
 		setResizable(false);
 		center();

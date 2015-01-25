@@ -50,6 +50,7 @@ public class AddTeamDialog extends AbstractWindowEditor {
 
 	public AddTeamDialog(BeanItem<?> item) {
 		super(item);
+		setCaption("Oficio : "+getItem().getItemProperty("jobCode"));
 		init();
 	}
 	

@@ -60,7 +60,6 @@ import cl.magal.asistencia.entities.validator.RutDigit;
     @NamedQuery(name = "Laborer.findByAddress", query = "SELECT l FROM Laborer l WHERE l.address = :address"),
     @NamedQuery(name = "Laborer.findByMobileNumber", query = "SELECT l FROM Laborer l WHERE l.mobileNumber = :mobileNumber"),
     @NamedQuery(name = "Laborer.findByPhone", query = "SELECT l FROM Laborer l WHERE l.phone = :phone"),
-    @NamedQuery(name = "Laborer.findByDateAdmission", query = "SELECT l FROM Laborer l WHERE l.dateAdmission = :dateAdmission"),
     @NamedQuery(name = "Laborer.findByContractId", query = "SELECT l FROM Laborer l WHERE l.contractId = :contractId"),
     @NamedQuery(name = "Laborer.findByAfpId", query = "SELECT l FROM Laborer l WHERE l.afp = :afp")
     })
@@ -102,9 +101,9 @@ public class Laborer implements Serializable {
     private String mobileNumber;
     @Column(name = "phone")
     private String phone;
-    @Column(name = "dateAdmission")
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date dateAdmission;
+//    @Column(name = "dateAdmission")
+//    @Temporal(TemporalType.TIMESTAMP)
+//    private Date dateAdmission;
     @Column(name = "contractId")
     private Integer contractId;
     @Column(name="dependents")
@@ -311,13 +310,13 @@ public class Laborer implements Serializable {
         this.phone = phone;
     }
 
-    public Date getDateAdmission() {
-        return dateAdmission;
-    }
-
-    public void setDateAdmission(Date dateAdmission) {
-        this.dateAdmission = dateAdmission;
-    }
+//    public Date getDateAdmission() {
+//        return dateAdmission;
+//    }
+//
+//    public void setDateAdmission(Date dateAdmission) {
+//        this.dateAdmission = dateAdmission;
+//    }
 
     public Integer getContractId() {
         return contractId;
