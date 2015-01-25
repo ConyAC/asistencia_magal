@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import cl.magal.asistencia.entities.Laborer;
+import cl.magal.asistencia.entities.LaborerConstructionsite;
 import cl.magal.asistencia.entities.enums.Afp;
 import cl.magal.asistencia.entities.enums.MaritalStatus;
 
@@ -115,16 +116,22 @@ public class LaborerBaseInformation extends VerticalLayout {
 				if(propertyId.equals("firstname")){
 					field.focus();
 				}
+				
 				detalleObrero.addComponent(field);
 				detalleObrero.setComponentAlignment(field, Alignment.MIDDLE_CENTER);
 			}
 		}
 		
 		if(viewElement){
+			
 			HorizontalLayout hl = new HorizontalLayout();
 			hl.setWidth("250%");
-			hl.setSpacing(true);
+			hl.setSpacing(true);			
 			
+			Field<?> field = buildAndBind("Premio", "reward");
+			((TextField)field).setNullRepresentation("");
+			hl.addComponent(field);
+		
 			Upload upload = new Upload("Cargar fotografía", null);
 			upload.setButtonCaption("Iniciar carga");
 			
@@ -193,7 +200,7 @@ public class LaborerBaseInformation extends VerticalLayout {
 		else if(propertyId.equals("dateBirth"))
 			return "Fecha de Nacimiento";
 		else if(propertyId.equals("address"))
-			return "Direcciòn";
+			return "Dirección";
 		else if(propertyId.equals("mobileNumber"))
 			return "Teléfono móvil";
 		else if(propertyId.equals("phone"))
@@ -202,6 +209,8 @@ public class LaborerBaseInformation extends VerticalLayout {
 			return "Fecha de Admisión";
 		else if(propertyId.equals("provenance"))
 			return "Procedencia";
+		else if(propertyId.equals("reward"))
+			return "Premio";
 		else
 			return propertyId.toString();
 	}

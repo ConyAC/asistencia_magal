@@ -212,12 +212,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 					hl.addComponent(new Label(getItem().getItemProperty("laborer.dateAdmission")));
 				
 				hl.addComponent(new Label("<hr />",ContentMode.HTML));
-				hl.addComponent(new TextField("Premio: ",getItem().getItemProperty("reward")){{
-				setNullRepresentation("");
-				addValidator(new BeanValidator(LaborerConstructionsite.class,"reward"));
-				//setReadOnly(readOnly);
-				setEnabled(!readOnly);
-			}});
+				hl.addComponent(new Label("Premio: "+" "+getItem().getItemProperty("reward").getValue()));
 						
 				setSpacing(true);
 //				POR AHORA OCULTAR ESTE BOTON HASTA QUE SE DEFINA BIEN QUE HARA Y SI VA

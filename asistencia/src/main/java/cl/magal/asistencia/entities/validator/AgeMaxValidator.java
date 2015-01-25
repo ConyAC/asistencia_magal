@@ -19,7 +19,6 @@ public class AgeMaxValidator implements ConstraintValidator<AgeMax, Date> {
 	public boolean isValid(Date value, ConstraintValidatorContext context) {
 		if(value == null)
 			return false;
-		
 		if(age(value) < 20)
 			return false;
 		else
