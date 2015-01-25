@@ -2,8 +2,7 @@ package cl.magal.asistencia.ui.constructionsite;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -69,11 +68,11 @@ import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
+import com.vaadin.ui.OptionGroup;
 import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.TabSheet;
 import com.vaadin.ui.TextField;
-import com.vaadin.ui.TwinColSelect;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
@@ -104,7 +103,7 @@ public class LaborerAndTeamPanel extends Panel implements View {
 	/** LAYOUTS **/
 	VerticalLayout detalleLayout;
 	HorizontalLayout detailLayout;
-	private TwinColSelect tcsLaborer;
+//	private TwinColSelect tcsLaborer;
 
 	/** SERVICES **/
 	@Autowired
@@ -138,6 +137,7 @@ public class LaborerAndTeamPanel extends Panel implements View {
 
 
 	public LaborerAndTeamPanel() {
+		
 		teamContainer.addNestedContainerProperty("leader.firstname");
 		laborerConstructionContainer.addNestedContainerBean("laborer");
 		laborerConstructionContainer.addNestedContainerBean("activeContract");
@@ -165,31 +165,6 @@ public class LaborerAndTeamPanel extends Panel implements View {
 	@PostConstruct
 	public void init(){
 
-	}
-
-	protected VerticalLayout drawContructionDetail() {
-		detalleLayout = new VerticalLayout(); 
-		detalleLayout.setSizeFull();
-		detalleLayout.setSpacing(true);
-
-		//creando la parte de arriba
-		detailLayout = drawTopDetails();
-		detalleLayout.addComponent(detailLayout);
-		detalleLayout.setExpandRatio(detailLayout, 0.3F);
-
-		//crea el tab con trabajadores y cuadrillas
-		TabSheet tab = new TabSheet();
-		tab.setSizeFull();
-
-		detalleLayout.addComponent(tab);
-		detalleLayout.setExpandRatio(tab, 0.7F);
-		//tab de trabajadores
-		tab.addTab(drawLaborer(),"Trabajadores");
-
-		//tab de cuadrillas
-		tab.addTab(drawCuadrillas(),"Cuadrillas");
-
-		return detalleLayout;
 	}
 
 	protected HorizontalLayout drawTopDetails() {
@@ -298,75 +273,6 @@ public class LaborerAndTeamPanel extends Panel implements View {
 		return hl;
 	}
 
-	protected VerticalLayout drawCuadrillas() {
-		VerticalLayout vl = new VerticalLayout();
-		vl.setSizeFull();
-		vl.setSpacing(true);
-		vl.setMargin(true);
-
-		Button btnAdd = new Button(null,FontAwesome.PLUS);
-		vl.addComponent(btnAdd);
-		vl.setComponentAlignment(btnAdd, Alignment.TOP_RIGHT);
-
-		btnAdd.addClickListener(new Button.ClickListener() {
-
-			@Override
-			public void buttonClick(ClickEvent event) {
-				ConstructionSite cs = item.getBean();
-				if(cs == null){
-					Notification.show("Debe seleccionar una obra",Type.ERROR_MESSAGE);
-					return;
-				}
-
-				Team team = new Team();
-				team.setName("Cuadrilla 1");
-				team.setDate(new Date());
-				team.setStatus(Status.ACTIVE);
-				team.setLeader(laborerConstructionContainer.firstItemId().getLaborer());
-				constructionSiteService.addTeamToConstructionSite(team,cs);
-
-				teamContainer.addBean(team);
-
-			}
-		});
-
-		FilterTable table =  new FilterTable(){
-
-			@Override
-			protected String formatPropertyValue(Object rowId, Object colId,
-					Property<?> property) {
-				Object v = property.getValue();
-				if (v instanceof Date) {
-					Date dateValue = (Date) v;
-					SimpleDateFormat sdf = new SimpleDateFormat("dd MMM yyyy");
-					return sdf.format(dateValue);
-				}
-				return super.formatPropertyValue(rowId, colId, property);
-			}
-		};
-
-		table.setContainerDataSource(teamContainer);
-		table.setSizeFull();
-		table.setFilterBarVisible(true);
-		table.setVisibleColumns("name","leader.firstname","date","status");
-		table.setColumnHeaders("Nombre","Responsable","Fecha","Estado");
-
-		table.setSelectable(true);
-
-		vl.addComponent(table);
-		vl.setExpandRatio(table,1.0F);
-
-		return vl;
-	}
-
-	protected VerticalLayout test1() {
-		return null;
-	}
-
-	protected VerticalLayout test2() {
-		return null;
-	}
-
 	/**
 	 * Lista de trabajadores seleccionados
 	 */
@@ -378,10 +284,13 @@ public class LaborerAndTeamPanel extends Panel implements View {
 		vl.setSpacing(true);
 		vl.setMargin(true);
 		vl.setSizeFull();
+		
+		HorizontalLayout roothl = new HorizontalLayout();
+		roothl.setWidth("100%");
+		vl.addComponent(roothl);
 
 		//boton para agregar trabajadores e imprimir
 		HorizontalLayout hl = new HorizontalLayout();
-		hl.setWidth("100%");
 		hl.setSpacing(true);
 
 		asistenciaBtn = new Button("Asistencia",FontAwesome.CHECK);
@@ -389,7 +298,6 @@ public class LaborerAndTeamPanel extends Panel implements View {
 
 			@Override
 			public void buttonClick(ClickEvent event) {
-				//				switchPanels();
 				asistenciaBtn.setEnabled(true);
 			}
 		});
@@ -397,9 +305,62 @@ public class LaborerAndTeamPanel extends Panel implements View {
 
 		asistenciaBtn.setWidth("200px");
 		hl.addComponent(asistenciaBtn);
-		hl.setComponentAlignment(asistenciaBtn, Alignment.TOP_LEFT);
+//		hl.setComponentAlignment(asistenciaBtn, Alignment.TOP_LEFT);
+		
+		//agrega solo si tiene los permisos //siempre se debe crear pues solo se deshabilita si no se tiene permiso
+		btnAdd = new Button("Agregar Trabajador",FontAwesome.PLUS);
+		btnAdd.setWidth("200px");
+		hl.addComponent(btnAdd);
+//		hl.setComponentAlignment(btnAdd, Alignment.TOP_LEFT);
 
-		vl.addComponent(hl);
+		ShortcutListener enter = new ShortcutListener("Entrar",
+				KeyCode.ENTER, new int[]{ModifierKey.CTRL }) {
+			@Override
+			public void handleAction(Object sender, Object target) {
+				btnAdd.click();
+			}
+		};
+
+		btnAdd.addClickListener(new Button.ClickListener() {
+
+			@Override
+			public void buttonClick(ClickEvent event) {
+				final ConstructionSite cs = item.getBean();
+				if(cs == null){
+					Notification.show("Debe seleccionar una obra",Type.ERROR_MESSAGE);
+					return;
+				}
+
+				LaborerConstructionsite laborer = new LaborerConstructionsite();
+				laborer.setConstructionsite(item.getBean());
+
+				BeanItem<LaborerConstructionsite> laborerItem = new BeanItem<LaborerConstructionsite>(laborer);
+				AddLaborerContractDialog userWindow = new AddLaborerContractDialog(laborerItem,laborerService,true);
+
+				userWindow.addListener(new AbstractWindowEditor.EditorSavedListener() {
+
+					@Override
+					public void editorSaved(EditorSavedEvent event) {
+						try {
+							LaborerConstructionsite laborer = ((BeanItem<LaborerConstructionsite>) event.getSavedItem()).getBean();
+							laborerService.save(laborer);				
+							laborerConstructionContainer.addBean(laborer);
+						} catch (Exception e) {
+							logger.error("Error al guardar la información del obrero",e);
+							Notification.show("Es necesario agregar todos los campos obligatorios", Type.ERROR_MESSAGE);
+						}
+
+					}
+				});
+
+				UI.getCurrent().addWindow(userWindow);
+			}
+		});
+
+		btnAdd.addShortcutListener(enter);
+
+		roothl.addComponent(hl);
+		roothl.setComponentAlignment(hl, Alignment.TOP_LEFT);
 
 		HorizontalLayout hl2 = new HorizontalLayout();
 		hl2.setSpacing(true);
@@ -415,8 +376,8 @@ public class LaborerAndTeamPanel extends Panel implements View {
 		btnPrint = new Button(null,FontAwesome.PRINT);
 		hl2.addComponent(btnPrint);
 
-		hl.addComponent(hl2);
-		hl.setComponentAlignment(hl2, Alignment.TOP_RIGHT);
+		roothl.addComponent(hl2);
+		roothl.setComponentAlignment(hl2, Alignment.TOP_RIGHT);
 
 		btnPrint.addClickListener(new Button.ClickListener() {
 
@@ -427,7 +388,7 @@ public class LaborerAndTeamPanel extends Panel implements View {
 					return;
 				}
 
-				final ObjectProperty contracts = new ObjectProperty(false, Boolean.class);
+//				final ObjectProperty contracts = new ObjectProperty(false, Boolean.class);
 				final ObjectProperty vacations = new ObjectProperty(false, Boolean.class);
 				final ObjectProperty anexxeds = new ObjectProperty(false, Boolean.class);
 
@@ -439,7 +400,7 @@ public class LaborerAndTeamPanel extends Panel implements View {
 					{
 						setSpacing(true);
 						setMargin(true);
-						addComponent(new CheckBox("Contrato"){{setPropertyDataSource(contracts);}});
+//						addComponent(new CheckBox("Contrato"){{setPropertyDataSource(contracts);}});
 						addComponent(new CheckBox("Anexos"){{setPropertyDataSource(anexxeds);}});
 						addComponent(new CheckBox("Últimas Vacaciones"){{setPropertyDataSource(vacations);}});
 
@@ -453,9 +414,9 @@ public class LaborerAndTeamPanel extends Panel implements View {
 								input.put("tools", new DateTool());
 
 								final StringBuilder sb = new StringBuilder();
-								if((Boolean) contracts.getValue()){
-									sb.append( VelocityEngineUtils.mergeTemplateIntoString(velocityEngine, "templates/temporary_work_contract_doc.vm", "UTF-8", input) );
-								}
+//								if((Boolean) contracts.getValue()){
+//									sb.append( VelocityEngineUtils.mergeTemplateIntoString(velocityEngine, "templates/temporary_work_contract_doc.vm", "UTF-8", input) );
+//								}
 								if((Boolean) anexxeds.getValue()){
 									sb.append( VelocityEngineUtils.mergeTemplateIntoString(velocityEngine, "templates/annex_contract_doc.vm", "UTF-8", input) );
 								}
@@ -526,67 +487,115 @@ public class LaborerAndTeamPanel extends Panel implements View {
 
 				e.setSource(resource);
 				window.setContent(e);
-				//				UI.getCurrent().addWindow(window);
-
-
-				//				for(Object lc : selectedItemIds){
-				//					Notification.show("Imprimiendo "+((LaborerConstructionsite) lc).getLaborer().getFullname());
-				//				}
 
 			}
 		});
 
-		//agrega solo si tiene los permisos //siempre se debe crear pues solo se deshabilita si no se tiene permiso
-		btnAdd = new Button(null,FontAwesome.PLUS);
-		hl2.addComponent(btnAdd);
+		Button btnAnnexedsGenerator = new Button(null,FontAwesome.TASKS);
+		hl2.addComponent(btnAnnexedsGenerator);
 
-		ShortcutListener enter = new ShortcutListener("Entrar",
-				KeyCode.ENTER, new int[]{ModifierKey.CTRL }) {
-			@Override
-			public void handleAction(Object sender, Object target) {
-				btnAdd.click();
-			}
-
-		};
-
-		btnAdd.addClickListener(new Button.ClickListener() {
+		btnAnnexedsGenerator.addClickListener(new Button.ClickListener() {
 
 			@Override
 			public void buttonClick(ClickEvent event) {
-				final ConstructionSite cs = item.getBean();
-				if(cs == null){
-					Notification.show("Debe seleccionar una obra",Type.ERROR_MESSAGE);
+				if(selectedItemIds.isEmpty()){
+					Notification.show("Para generar anexos masivos, primero debe seleccionar uno más trabajadores");
 					return;
 				}
+				//permite imprimir la carta de renuncia
+				final Window w = new Window("Cartas de renuncias");
+				w.center();
+				w.setModal(true);
+				
+				w.setContent(new VerticalLayout(){
+					{
+						
+						setSpacing(true);
+						setMargin(true);
+						final OptionGroup og = new OptionGroup("Tipo de anexo",
+								Arrays.asList(
+										"Cambio horario",
+										"Cambio temporal horario",
+										"Cambio Ingreso mínimo",
+										"Cambio clausura de contrato"));
+						addComponent(og);
+						
+						addComponent(new HorizontalLayout(){
+							{
+								// boton aceptar
+								addComponent(new Button("Aceptar",new Button.ClickListener() {
+									
+									@Override
+									public void buttonClick(ClickEvent event) {
+										
+										if( og.getValue() == null ){
+											Notification.show("Debe seleccionar una causa de término.",Type.WARNING_MESSAGE);
+											return;
+										}
+										
+										final Map<String, Object> input = new HashMap<String, Object>();
+										input.put("laborerConstructions", selectedItemIds);
+										input.put("tools", new DateTool());
+										
+										final StringBuilder sb = new StringBuilder();
+										if(((String) og.getValue()).compareTo("Cambio horario") == 0){
+											sb.append( VelocityEngineUtils.mergeTemplateIntoString(velocityEngine, "templates/annex_working_time.vm", "UTF-8", input) );
+										}else
+											if(((String) og.getValue()).compareTo("Cambio Ingreso mínimo") == 0){
+											sb.append( VelocityEngineUtils.mergeTemplateIntoString(velocityEngine, "templates/annex_minimum_income.vm", "UTF-8", input) );
+										}else
+											if(((String) og.getValue()).compareTo("Cambio temporal horario") == 0){
+											sb.append( VelocityEngineUtils.mergeTemplateIntoString(velocityEngine, "templates/annex_temporal_working_time.vm", "UTF-8", input) );
+										}else
+											if(((String) og.getValue()).compareTo("Cambio clausura de contrato") == 0){
+											sb.append( VelocityEngineUtils.mergeTemplateIntoString(velocityEngine, "templates/annex_closing.vm", "UTF-8", input) );
+										}
+										
+										StreamResource.StreamSource source2 = new StreamResource.StreamSource() {
 
-				LaborerConstructionsite laborer = new LaborerConstructionsite();
-				laborer.setConstructionsite(item.getBean());
+											public InputStream getStream() {
+												//throw new UnsupportedOperationException("Not supported yet.");
+												return new ByteArrayInputStream(sb.toString().getBytes());
+											}
+										};
+										StreamResource resource = new StreamResource(source2, (String) og.getValue());
+										
+										BrowserFrame e = new BrowserFrame();
+										e.setSizeFull();
 
-				BeanItem<LaborerConstructionsite> laborerItem = new BeanItem<LaborerConstructionsite>(laborer);
-				AddLaborerContractDialog userWindow = new AddLaborerContractDialog(laborerItem,laborerService,true);
+										// Here we create a new StreamResource which downloads our StreamSource,
+										// which is our pdf.
+										// Set the right mime type
+										//						        resource.setMIMEType("application/pdf");
+										resource.setMIMEType("text/html");
 
-				userWindow.addListener(new AbstractWindowEditor.EditorSavedListener() {
-
-					@Override
-					public void editorSaved(EditorSavedEvent event) {
-						try {
-							LaborerConstructionsite laborer = ((BeanItem<LaborerConstructionsite>) event.getSavedItem()).getBean();
-							laborerService.save(laborer);				
-							laborerConstructionContainer.addBean(laborer);
-						} catch (Exception e) {
-							logger.error("Error al guardar la información del obrero",e);
-							Notification.show("Es necesario agregar todos los campos obligatorios", Type.ERROR_MESSAGE);
-						}
-
+										e.setSource(resource);
+										w.setContent(e);
+										w.center();
+										w.setWidth("60%");
+										w.setHeight("60%");
+										
+									}
+								}){ {setIcon(FontAwesome.CHECK_CIRCLE_O);} } );
+								
+								// boton aceptar
+								addComponent(new Button("Cancelar",new Button.ClickListener() {
+									
+									@Override
+									public void buttonClick(ClickEvent event) {
+										w.close();
+									}
+								}){{addStyleName("link");}});
+							}
+						});
 					}
 				});
+				
+				UI.getCurrent().addWindow(w);
 
-				UI.getCurrent().addWindow(userWindow);
 			}
 		});
-
-		btnAdd.addShortcutListener(enter);
-
+		
 		final FilterTable table =  new FilterTable();
 
 		table.addGeneratedColumn("actions", new CustomTable.ColumnGenerator() {
@@ -730,7 +739,6 @@ public class LaborerAndTeamPanel extends Panel implements View {
 			}
 		});
 
-		table.refreshRowCache();
 		vl.addComponent(table);
 		vl.setExpandRatio(table,1.0F);
 
@@ -743,10 +751,10 @@ public class LaborerAndTeamPanel extends Panel implements View {
 		vl.setMargin(true);
 		vl.setSizeFull();
 
-		Button btnAdd = new Button(null,FontAwesome.PLUS);
-		vl.addComponent(btnAdd);
-		vl.setComponentAlignment(btnAdd, Alignment.TOP_RIGHT);
-		btnAdd.addClickListener(new Button.ClickListener() {
+		Button btnAddTeam = new Button(null,FontAwesome.PLUS);
+		vl.addComponent(btnAddTeam);
+		vl.setComponentAlignment(btnAddTeam, Alignment.TOP_RIGHT);
+		btnAddTeam.addClickListener(new Button.ClickListener() {
 
 			@Override
 			public void buttonClick(ClickEvent event) {
