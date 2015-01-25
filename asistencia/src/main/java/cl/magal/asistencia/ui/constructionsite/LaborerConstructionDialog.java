@@ -37,6 +37,7 @@ import cl.magal.asistencia.services.LaborerService;
 import cl.magal.asistencia.services.UserService;
 import cl.magal.asistencia.ui.AbstractWindowEditor;
 import cl.magal.asistencia.ui.OnValueChangeFieldFactory;
+import cl.magal.asistencia.ui.UndefinedWidthLabel;
 import cl.magal.asistencia.ui.workerfile.vo.HistoryVO;
 import cl.magal.asistencia.util.Constants;
 import cl.magal.asistencia.util.SecurityHelper;
@@ -468,15 +469,20 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 		vl.setMargin(true);
 		vl.setWidth("100%");
 
-		final GridLayout gl = new GridLayout(2,10);
+		final GridLayout gl = new GridLayout(3,10);
 		gl.setSpacing(true);
 		gl.setSizeFull();
+		
+		gl.setColumnExpandRatio(0, 0.2F);
+		gl.setColumnExpandRatio(1, 0.2F);
+		gl.setColumnExpandRatio(2, 1.0F);
+		
 		vl.addComponent(gl);
 		
 		final BeanItemContainer<Annexed> beanContainerAnnexeds = new BeanItemContainer<Annexed>(Annexed.class); 
 
 		int fila = 0, columna = 0;
-		gl.addComponent(new Label("<h1>Contrato</h1>",ContentMode.HTML),columna++,fila);
+		gl.addComponent(new UndefinedWidthLabel("<h1>Contrato</h1>",ContentMode.HTML),columna++,fila);
 		gl.addComponent( new HorizontalLayout(){
 			{
 				setSpacing(true);
@@ -485,6 +491,12 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 
 					@Override
 					public void buttonClick(ClickEvent event) {
+						
+						//solo puede crear otro contrato si está finalizado el anterior y calculó el finiquito
+						if(!activeContract.isFinished() || activeContract.getSettlement() != null ){
+							Notification.show("El contrato debe estár terminado y finiquitado para cambiar el rol",Type.HUMANIZED_MESSAGE);
+							return;
+						}
 						
 						final Map<String, Object> input = new HashMap<String, Object>();
 						input.put("laborerConstructions", new LaborerConstructionsite[] {(LaborerConstructionsite)getItem().getBean()});
@@ -534,15 +546,12 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 					
 					final HorizontalLayout hl = this;
 					
-					final Button btnChangeJob = new Button(null,FontAwesome.CHILD);
-					final Button btnFinishContract = new Button(null,FontAwesome.TIMES);
-					final Button btnSettlement = new Button(null,FontAwesome.FILE_TEXT);
+					final Button btnChangeJob = new Button(null,FontAwesome.EXCHANGE);
+
 
 					//				btnEdit.setDescription("Editar");
 					btnChangeJob.setDescription("Cambiar Oficio");
-					btnFinishContract.setDescription("Término de Contrato");
-					btnSettlement.setDescription("Cálcular Finiquito");
-
+					
 					//				btnEdit.addClickListener(new Button.ClickListener() {
 					//
 					//					@Override
@@ -569,7 +578,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 										setContractGl(laborer.getActiveContract());
 										beanContainerAnnexeds.removeAllItems();
 										
-										hl.replaceComponent(btnChangeJob,btnFinishContract);
+//										hl.replaceComponent(btnChangeJob,btnFinishContract);
 									} catch (Exception e) {
 										logger.error("Error al guardar la información del obrero",e);
 										Notification.show("Es necesario agregar todos los campos obligatorios", Type.ERROR_MESSAGE);
@@ -581,135 +590,146 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 						}
 					});
 
-					btnFinishContract.addClickListener(new Button.ClickListener() {
 
-						@Override
-						public void buttonClick(ClickEvent event) {
-							//permite imprimir la carta de renuncia
-							final Window w = new Window("Cartas de renuncias");
-							w.center();
-							w.setModal(true);
-							
-							w.setContent(new VerticalLayout(){
-								{
-									
-									setSpacing(true);
-									setMargin(true);
-									final OptionGroup og = new OptionGroup("Tipo de Término",
-											Arrays.asList("Voluntaria",
-													"Término de Contrato",
-													"Ausencia Reiterada"));
-									addComponent(og);
-									
-									addComponent(new HorizontalLayout(){
-										{
-											// boton aceptar
-											addComponent(new Button("Aceptar",new Button.ClickListener() {
-												
-												@Override
-												public void buttonClick(ClickEvent event) {
-													
-													if( og.getValue() == null ){
-														Notification.show("Debe seleccionar una causa de término.",Type.WARNING_MESSAGE);
-														return;
-													}
-													
-													final Map<String, Object> input = new HashMap<String, Object>();
-													input.put("laborerConstructions", new LaborerConstructionsite[] {(LaborerConstructionsite)getItem().getBean()});
-													input.put("tools", new DateTool());
-													
-													final StringBuilder sb = new StringBuilder();
-													if(((String) og.getValue()).compareTo("Voluntaria") == 0){
-														sb.append( VelocityEngineUtils.mergeTemplateIntoString(velocityEngine, "templates/voluntary_resignation_letter.vm", "UTF-8", input) );
-													}else
-														if(((String) og.getValue()).compareTo("Término de Contrato") == 0){
-														sb.append( VelocityEngineUtils.mergeTemplateIntoString(velocityEngine, "templates/dismissal_letter_for_completion_of_work.vm", "UTF-8", input) );
-													}else
-														if(((String) og.getValue()).compareTo("Ausencia Reiterada") == 0){
-														sb.append( VelocityEngineUtils.mergeTemplateIntoString(velocityEngine, "templates/dismissal_letter_for_absence.vm", "UTF-8", input) );
-													}
-													
-													StreamResource.StreamSource source2 = new StreamResource.StreamSource() {
-
-														public InputStream getStream() {
-															//throw new UnsupportedOperationException("Not supported yet.");
-															return new ByteArrayInputStream(sb.toString().getBytes());
-														}
-													};
-													StreamResource resource = new StreamResource(source2, (String) og.getValue());
-													
-													BrowserFrame e = new BrowserFrame();
-													e.setSizeFull();
-
-													// Here we create a new StreamResource which downloads our StreamSource,
-													// which is our pdf.
-													// Set the right mime type
-													//						        resource.setMIMEType("application/pdf");
-													resource.setMIMEType("text/html");
-
-													e.setSource(resource);
-													w.setContent(e);
-													w.center();
-													w.setWidth("60%");
-													w.setHeight("60%");
-													
-													activeContract.setFinished(true);
-													//se asegura de marcar inactivos todos los contratos
-													hl.replaceComponent(btnFinishContract,btnSettlement );
-												}
-											}){ {setIcon(FontAwesome.CHECK_CIRCLE_O);} } );
-											
-											// boton aceptar
-											addComponent(new Button("Cancelar",new Button.ClickListener() {
-												
-												@Override
-												public void buttonClick(ClickEvent event) {
-													w.close();
-												}
-											}){{addStyleName("link");}});
-										}
-									});
-								}
-							});
-							
-							UI.getCurrent().addWindow(w);
-						}
-					});
-					
-					btnSettlement.addClickListener(new Button.ClickListener() {
-
-						@Override
-						public void buttonClick(ClickEvent event) {
-
-							//TODO calcular finiquito
-							//setea un finiquito
-							activeContract.setSettlement(100000);
-							//se asegura de marcar inactivos todos los contratos
-							hl.replaceComponent(btnSettlement, btnChangeJob);
-						}
-					});
-
-					if(activeContract == null ){
-						addComponent(btnChangeJob);
-					}else if(!activeContract.isFinished()){
-						addComponent(btnFinishContract);
-					}else if(activeContract.getSettlement() == null ){
-						addComponent(btnSettlement);
-					}
+					addComponent(btnChangeJob);
 				}
 			}
-		},columna--,fila++);
+		},2,fila++);
 
-		lbStep = new Label(){{ setImmediate(true);}};
-		lbJob = new Label(){{setImmediate(true);}};
-		lbJobCode = new Label(){{setImmediate(true);}};
-		lbStarting = new Label(){{setImmediate(true);}};
-		lbEnding = new Label(){{ setImmediate(true);}};
-		gl.addComponent(new Label("Etapa"),columna++,fila);gl.addComponent(lbStep,columna--,fila++);
-		gl.addComponent(new Label("Oficio"),columna++,fila);gl.addComponent(lbJob,columna--,fila++);
-		gl.addComponent(new Label("Código"),columna++,fila);gl.addComponent(lbJobCode,columna--,fila++);
-		gl.addComponent(new Label("Fecha Inicio"),columna++,fila);gl.addComponent(lbStarting,columna--,fila++);
-		gl.addComponent(new Label("Fecha Termino"),columna++,fila);gl.addComponent(lbEnding,columna--,fila++);
+		lbStep = new UndefinedWidthLabel();
+		lbJob = new UndefinedWidthLabel();
+		lbJobCode = new UndefinedWidthLabel();
+		lbStarting = new UndefinedWidthLabel();
+		lbEnding = new UndefinedWidthLabel();
+		lbSettlement = new UndefinedWidthLabel();
+		lbStatus = new UndefinedWidthLabel();
+		columna = 0;
+		
+		gl.addComponent(new UndefinedWidthLabel("Etapa : "),columna++,fila);gl.addComponent(lbStep,columna--,fila++);
+		gl.addComponent(new UndefinedWidthLabel("Oficio : "),columna++,fila);gl.addComponent(lbJob,columna--,fila++);
+		gl.addComponent(new UndefinedWidthLabel("Código : "),columna++,fila);gl.addComponent(lbJobCode,columna--,fila++);
+		gl.addComponent(new UndefinedWidthLabel("Fecha Inicio : "),columna++,fila);gl.addComponent(lbStarting,columna--,fila++);
+		gl.addComponent(new UndefinedWidthLabel("Fecha Termino : "),columna++,fila);gl.addComponent(lbEnding,columna--,fila++);
+		
+		final Button btnFinishContract = new Button(null,FontAwesome.TIMES);
+		btnFinishContract.setDescription("Término de Contrato");
+		btnFinishContract.addClickListener(new Button.ClickListener() {
+
+			@Override
+			public void buttonClick(ClickEvent event) {
+				//permite imprimir la carta de renuncia
+				final Window w = new Window("Cartas de renuncias");
+				w.center();
+				w.setModal(true);
+				
+				w.setContent(new VerticalLayout(){
+					{
+						
+						setSpacing(true);
+						setMargin(true);
+						final OptionGroup og = new OptionGroup("Tipo de Término",
+								Arrays.asList("Voluntaria",
+										"Término de Contrato",
+										"Ausencia Reiterada"));
+						addComponent(og);
+						
+						addComponent(new HorizontalLayout(){
+							{
+								// boton aceptar
+								addComponent(new Button("Aceptar",new Button.ClickListener() {
+									
+									@Override
+									public void buttonClick(ClickEvent event) {
+										
+										if( og.getValue() == null ){
+											Notification.show("Debe seleccionar una causa de término.",Type.WARNING_MESSAGE);
+											return;
+										}
+										
+										final Map<String, Object> input = new HashMap<String, Object>();
+										input.put("laborerConstructions", new LaborerConstructionsite[] {(LaborerConstructionsite)getItem().getBean()});
+										input.put("tools", new DateTool());
+										
+										final StringBuilder sb = new StringBuilder();
+										if(((String) og.getValue()).compareTo("Voluntaria") == 0){
+											sb.append( VelocityEngineUtils.mergeTemplateIntoString(velocityEngine, "templates/voluntary_resignation_letter.vm", "UTF-8", input) );
+										}else
+											if(((String) og.getValue()).compareTo("Término de Contrato") == 0){
+											sb.append( VelocityEngineUtils.mergeTemplateIntoString(velocityEngine, "templates/dismissal_letter_for_completion_of_work.vm", "UTF-8", input) );
+										}else
+											if(((String) og.getValue()).compareTo("Ausencia Reiterada") == 0){
+											sb.append( VelocityEngineUtils.mergeTemplateIntoString(velocityEngine, "templates/dismissal_letter_for_absence.vm", "UTF-8", input) );
+										}
+										
+										StreamResource.StreamSource source2 = new StreamResource.StreamSource() {
+
+											public InputStream getStream() {
+												//throw new UnsupportedOperationException("Not supported yet.");
+												return new ByteArrayInputStream(sb.toString().getBytes());
+											}
+										};
+										StreamResource resource = new StreamResource(source2, (String) og.getValue());
+										
+										BrowserFrame e = new BrowserFrame();
+										e.setSizeFull();
+
+										// Here we create a new StreamResource which downloads our StreamSource,
+										// which is our pdf.
+										// Set the right mime type
+										//						        resource.setMIMEType("application/pdf");
+										resource.setMIMEType("text/html");
+
+										e.setSource(resource);
+										w.setContent(e);
+										w.center();
+										w.setWidth("60%");
+										w.setHeight("60%");
+										
+										activeContract.setFinished(true);
+										setContractGl(activeContract);
+									}
+								}){ {setIcon(FontAwesome.CHECK_CIRCLE_O);} } );
+								
+								// boton aceptar
+								addComponent(new Button("Cancelar",new Button.ClickListener() {
+									
+									@Override
+									public void buttonClick(ClickEvent event) {
+										w.close();
+									}
+								}){{addStyleName("link");}});
+							}
+						});
+					}
+				});
+				
+				UI.getCurrent().addWindow(w);
+			}
+		});
+		gl.addComponent(new UndefinedWidthLabel("Estado : "),columna++,fila);gl.addComponent(lbStatus,columna++,fila);gl.addComponent(btnFinishContract,columna++,fila++);
+		columna = 0;
+		
+		final Button btnSettlement = new Button(null,FontAwesome.FILE_TEXT);
+		btnSettlement.setDescription("Cálcular Finiquito");
+		btnSettlement.addClickListener(new Button.ClickListener() {
+
+			@Override
+			public void buttonClick(ClickEvent event) {
+				
+				//solo puede calcular el finiquito, si el contrato no está activo
+				if(!activeContract.isFinished()){
+					Notification.show("El contrato debe estár terminado para calcular el finiquito",Type.HUMANIZED_MESSAGE);
+					return;
+				}
+
+				//TODO calcular finiquito
+				//setea un finiquito
+				activeContract.setSettlement(100000);
+				setContractGl(activeContract);
+			}
+		});
+		
+		gl.addComponent(new UndefinedWidthLabel("Finiquito : "),columna++,fila);gl.addComponent(lbSettlement,columna++,fila);gl.addComponent(btnSettlement,columna++,fila++);
 		setContractGl(activeContract);
 
 		GridLayout gl2 = new GridLayout(2,10);
@@ -818,7 +838,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 		return vl;
 	}
 
-	Label lbStep ,lbJob ,lbJobCode ,lbStarting, lbEnding;
+	Label lbJob ,lbJobCode,lbStep ,lbStarting, lbEnding,lbSettlement,lbStatus;
 	BeanItemContainer<Vacation> vacationContainer;BeanItemContainer<Absence> absenceContainer;BeanItemContainer<Accident> accidentContainer;
 
 	private void setContractGl(final Contract activeContract) {
@@ -828,6 +848,8 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 		lbJobCode.setValue(activeContract.getJobCode()+"");
 		lbStarting.setValue(Utils.date2String( activeContract.getStartDate()));
 		lbEnding.setValue(Utils.date2String( activeContract.getTerminationDate()));
+		lbStatus.setValue(!activeContract.isFinished() ? "ACTIVO" : "TERMINADO");
+		lbSettlement.setValue(activeContract.getSettlement() != null ? activeContract.getSettlement()+"":"");
 
 	}
 
@@ -1261,8 +1283,8 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 
 				});
 
-				vacationTable.setVisibleColumns("fromDate","toDate","total","print");
-				vacationTable.setColumnHeaders("Desde","Hasta","Total","Acciones");
+				vacationTable.setVisibleColumns("fromDate","toDate","total","progressive","print");
+				vacationTable.setColumnHeaders("Desde","Hasta","Total","Progresivas","Acciones");
 				vacationTable.setEditable(!readOnly);
 				
 				vacationTable.setColumnWidth("print", 130);

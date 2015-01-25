@@ -39,10 +39,20 @@ public class Vacation implements Serializable {
 	@Column(name = "to_date" )
 	Date toDate;
 	
+	int progressive;
+	
 	@ManyToOne
 	@JoinColumn(name ="LABORER_CONSTRUCTIONSITEID",updatable=false)
 	LaborerConstructionsite laborerConstructionSite;
 	
+	public int getProgressive() {
+		return progressive;
+	}
+
+	public void setProgressive(int progressive) {
+		this.progressive = progressive;
+	}
+
 	public Long getVacationId() {
 		return vacationId;
 	}
