@@ -34,10 +34,12 @@ import javax.validation.constraints.Pattern;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import cl.magal.asistencia.entities.converter.AfpConverter;
+import cl.magal.asistencia.entities.converter.BankConverter;
 import cl.magal.asistencia.entities.converter.IsapreConverter;
 import cl.magal.asistencia.entities.converter.MaritalStatusConverter;
 import cl.magal.asistencia.entities.converter.NationalityConverter;
 import cl.magal.asistencia.entities.enums.Afp;
+import cl.magal.asistencia.entities.enums.Bank;
 import cl.magal.asistencia.entities.enums.Isapre;
 import cl.magal.asistencia.entities.enums.MaritalStatus;
 import cl.magal.asistencia.entities.enums.Nationality;
@@ -97,9 +99,10 @@ public class Laborer implements Serializable {
     @Pattern(regexp="^([0-9])+\\-([kK0-9])+$",message="El rut '%s' no es válido.")
     @RutDigit(message="El rut '%s' no es válido.")
     private String rut;
-    @AgeMax(message="El trabajador es menor de 20 años")
+    @NotNull(message="La fecha de nacimiento es necesaria")
     @Column(name = "dateBirth")
     @Temporal(TemporalType.TIMESTAMP)
+    @AgeMax(message="El trabajador es menor de 18 años")
     private Date dateBirth;
     @Column(name = "address")
     private String address;
@@ -122,6 +125,8 @@ public class Laborer implements Serializable {
     private Integer wedge;
     @Column(name="provenance")
     private String provenance;
+    @Column(name="bankAccount")
+    private String bankAccount;
 
     @Column(name = "afp" , nullable = false)
     @Convert(converter = AfpConverter.class)
@@ -138,6 +143,10 @@ public class Laborer implements Serializable {
     @Convert(converter = NationalityConverter.class)
     @Column(name="nationality", nullable = false)
     private Nationality nationality;
+    
+    @Convert(converter = BankConverter.class)
+    @Column(name="bank")
+    private Bank bank;
     
     @Column(name="photo")
     private String photo;
@@ -175,7 +184,8 @@ public class Laborer implements Serializable {
     		isapre = Isapre.FONASA;
     	if(nationality == null)
     		nationality = Nationality.CHILENA;
-		
+    	if(bank == null)
+    		bank = Bank.ESTADO;		
     }
     
     public Laborer() {
@@ -402,6 +412,22 @@ public class Laborer implements Serializable {
 	public void setProvenance(String provenance) {
 		this.provenance = provenance;
 	}
+	
+	public String getBankAccount() {
+		return bankAccount;
+	}
+
+	public void setBankAccount(String bankAccount) {
+		this.bankAccount = bankAccount;
+	}
+
+	public Bank getBank() {
+		return bank;
+	}
+
+	public void setBank(Bank bank) {
+		this.bank = bank;
+	}    
 
 	@Override
     public boolean equals(Object object) {
@@ -420,7 +446,4 @@ public class Laborer implements Serializable {
     public String toString() {
         return "jpa.magal.entities.Laborer[ laborerId=" + laborerId + " ]";
     }
-
-
-    
 }

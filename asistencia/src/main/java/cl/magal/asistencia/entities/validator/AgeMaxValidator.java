@@ -19,7 +19,7 @@ public class AgeMaxValidator implements ConstraintValidator<AgeMax, Date> {
 	public boolean isValid(Date value, ConstraintValidatorContext context) {
 		if(value == null)
 			return false;
-		if(age(value) < 20)
+		if(age(value) < 18)
 			return false;
 		else
 			return true;
@@ -38,7 +38,7 @@ public class AgeMaxValidator implements ConstraintValidator<AgeMax, Date> {
         boolean isMonthSameButDayGreater = birth.get(Calendar.MONTH) == today.get(Calendar.MONTH) && birth.get(Calendar.DAY_OF_MONTH) > today.get(Calendar.DAY_OF_MONTH);     
         if (isMonthGreater || isMonthSameButDayGreater)
             age = age-1;
-        
+
         return age;
    }    
 }
