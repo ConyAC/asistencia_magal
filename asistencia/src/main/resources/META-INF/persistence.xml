@@ -13,6 +13,7 @@
 	    <class>cl.magal.asistencia.entities.AfpItem</class>
 	    <class>cl.magal.asistencia.entities.Annexed</class>
 	    <class>cl.magal.asistencia.entities.Attachment</class>
+	    <class>cl.magal.asistencia.entities.ConstructionCompany</class>
 	    <class>cl.magal.asistencia.entities.ConstructionSite</class>
 	    <class>cl.magal.asistencia.entities.Contract</class>
 	    <class>cl.magal.asistencia.entities.DateConfigurations</class>
@@ -21,6 +22,7 @@
 	    <class>cl.magal.asistencia.entities.LaborerConstructionsite</class>
 	    <class>cl.magal.asistencia.entities.LaborerHistoricTeam</class>
 	    <class>cl.magal.asistencia.entities.LaborerTool</class>
+	    <class>cl.magal.asistencia.entities.Loan</class>
 	    <class>cl.magal.asistencia.entities.Mobilization2</class>
 	    <class>cl.magal.asistencia.entities.Role</class>
 	    <class>cl.magal.asistencia.entities.TaxationConfigurations</class>
@@ -28,21 +30,20 @@
 	    <class>cl.magal.asistencia.entities.Tool</class>
 	    <class>cl.magal.asistencia.entities.User</class>
 	    <class>cl.magal.asistencia.entities.Vacation</class>
-	    <class>cl.magal.asistencia.entities.Loan</class>
 	    <class>cl.magal.asistencia.entities.WageConfigurations</class>
-	    <class>cl.magal.asistencia.entities.ConstructionCompany</class>
 	    <class>cl.magal.asistencia.entities.converter.AbsenceTypeConverter</class>
 	    <class>cl.magal.asistencia.entities.converter.AccidentLevelConverter</class>
 	    <class>cl.magal.asistencia.entities.converter.AfpConverter</class>
+	    <class>cl.magal.asistencia.entities.converter.BankConverter</class>
 	    <class>cl.magal.asistencia.entities.converter.IsapreConverter</class>
 	    <class>cl.magal.asistencia.entities.converter.JobConverter</class>
+	    <class>cl.magal.asistencia.entities.converter.LoanStatusConverter</class>
 	    <class>cl.magal.asistencia.entities.converter.MaritalStatusConverter</class>
 	    <class>cl.magal.asistencia.entities.converter.NationalityConverter</class>
 	    <class>cl.magal.asistencia.entities.converter.PermissionConverter</class>
 	    <class>cl.magal.asistencia.entities.converter.StatusConverter</class>
 	    <class>cl.magal.asistencia.entities.converter.ToolStatusConverter</class>
 	    <class>cl.magal.asistencia.entities.converter.UserStatusConverter</class>
-	    <class>cl.magal.asistencia.entities.converter.LoanStatusConverter</class>
 	    <!-- HIBERNATE PROPERTY  -->
 	    <!-- 
 	    <properties>
