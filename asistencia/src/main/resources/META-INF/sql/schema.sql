@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS "LABORER"
    COMMUNE varchar(255),
    CONTRACTID integer,
    DATEADMISSION timestamp,
-   DATEBIRTH timestamp,
+   DATEBIRTH timestamp NOT NULL,
    DEPENDENTS integer,
    FIRSTNAME varchar(255) NOT NULL,
    ISAPRE integer NOT NULL,
@@ -22,7 +22,9 @@ CREATE TABLE IF NOT EXISTS "LABORER"
    TEAMID bigint,
    TOWN varchar(255),
    WEDGE integer,
-   PROVENANCE varchar(255)
+   PROVENANCE varchar(255),
+   BANK integer,
+   BANKACCOUNT varchar(255)   
 )
 ;
 CREATE UNIQUE INDEX IF NOT EXISTS PK_LABORER ON "LABORER"(LABORERID)

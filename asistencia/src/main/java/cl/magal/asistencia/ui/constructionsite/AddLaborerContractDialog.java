@@ -106,6 +106,7 @@ public class AddLaborerContractDialog extends AbstractWindowEditor implements Ne
 		
 		cb = new ComboBox("Rut trabajador:",laborers);
 		gl.addComponent(cb);
+		cb.setInputPrompt("Ej.: 12345678-9");
 		cb.setItemCaptionMode(ItemCaptionMode.PROPERTY);
 		cb.setItemCaptionPropertyId("rut");
 		cb.setTabIndex(1);
@@ -185,7 +186,7 @@ public class AddLaborerContractDialog extends AbstractWindowEditor implements Ne
 		});
 		cb.setNewItemsAllowed(true);
 		cb.setNewItemHandler(this);
-		cb.focus();
+		//cb.focus(); para visualizar el texto de ayuda en el campo del rut
 		
 		gl.addComponent(lbNombre);
 		gl.setComponentAlignment(lbNombre, Alignment.BOTTOM_LEFT);

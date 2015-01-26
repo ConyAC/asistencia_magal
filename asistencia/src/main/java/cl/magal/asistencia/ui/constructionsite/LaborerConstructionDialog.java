@@ -282,8 +282,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 					gl.addComponent(new Label("Fecha Ingreso : "));
 					gl.addComponent(new Label(getItem().getItemProperty("activeContract.startDate")));
 				}
-
-				//				hl.addComponent(new Label("<hr />",ContentMode.HTML));
+				gl.addComponent(new Label("Premio : "));gl.addComponent(new Label(getItem().getItemProperty("reward").getValue()+""));						
 				setSpacing(true);
 				//				POR AHORA OCULTAR ESTE BOTON HASTA QUE SE DEFINA BIEN QUE HARA Y SI VA
 				//				Button btnPrint = new Button(null,new Button.ClickListener() {
@@ -541,7 +540,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 		final GridLayout gl = new GridLayout(3,10);
 		gl.setSpacing(true);
 		gl.setSizeFull();
-
+		
 		gl.setColumnExpandRatio(0, 0.2F);
 		gl.setColumnExpandRatio(1, 0.2F);
 		gl.setColumnExpandRatio(2, 1.0F);
