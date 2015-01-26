@@ -3,9 +3,6 @@ package cl.magal.asistencia.helpers;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
-
-import java.util.Date;
-
 import cl.magal.asistencia.entities.Laborer;
 import cl.magal.asistencia.entities.enums.Afp;
 import cl.magal.asistencia.entities.enums.Isapre;
@@ -31,7 +28,7 @@ public final class LaborerHelper {
 		laborer.setNationality(Nationality.CHILENA);
 		laborer.setAddress("Av. Los Alamos 3663");
 		laborer.setCommune("Puente Alto");
-		laborer.setDateAdmission(new Date());
+//		laborer.setDateAdmission(new Date());
 		//TODO estado
 		return laborer;
 	}

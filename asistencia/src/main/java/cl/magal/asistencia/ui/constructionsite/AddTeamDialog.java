@@ -45,11 +45,12 @@ public class AddTeamDialog extends AbstractWindowEditor {
 
 	transient LaborerService laborerService;
 	transient ConstructionSiteService constructionSiteService;
-	BeanItemContainer<Laborer> laborerTeamContainer;
+	BeanItemContainer<LaborerConstructionsite> laborerTeamContainer;
 	ComboBox cbLeader;
 
 	public AddTeamDialog(BeanItem<?> item) {
 		super(item);
+		setCaption("Oficio : "+getItem().getItemProperty("jobCode"));
 		init();
 	}
 	
@@ -100,8 +101,9 @@ public class AddTeamDialog extends AbstractWindowEditor {
 		
 		//Seleccionar Obreros
 		
-		List<Laborer> laborersTeam = (List<Laborer>) getItem().getItemProperty("laborers").getValue();
-		laborerTeamContainer =  new BeanItemContainer<Laborer>(Laborer.class,laborersTeam);
+		List<LaborerConstructionsite> laborersTeam = (List<LaborerConstructionsite>) getItem().getItemProperty("laborerConstructionsites").getValue();
+		laborerTeamContainer =  new BeanItemContainer<LaborerConstructionsite>(LaborerConstructionsite.class,laborersTeam);
+		laborerTeamContainer.addNestedContainerBean("laborer");
 		
 		final FilterTable laborersTeamTable =  new FilterTable();
 		laborersTeamTable.setPageLength(6);
@@ -130,12 +132,12 @@ public class AddTeamDialog extends AbstractWindowEditor {
 			public void buttonClick(ClickEvent event) {
 				try {
 					LaborerConstructionsite laborerConstructionsite = (LaborerConstructionsite) cb.getValue();
-					if(laborerTeamContainer.containsId(laborerConstructionsite.getLaborer())){
+					if(laborerTeamContainer.containsId(laborerConstructionsite)){
 						Notification.show("El trabajador ya está agregado a la cuadrilla",Type.ERROR_MESSAGE);
 						return;
 					}
 					
-					laborerTeamContainer.addBean(laborerConstructionsite.getLaborer());
+					laborerTeamContainer.addBean(laborerConstructionsite);
 				} catch (Exception e) {
 					logger.error("Error al guardar la información de la cuadrilla",e);
 					Notification.show("Es necesario agregar todos los campos obligatorios", Type.ERROR_MESSAGE);
@@ -198,8 +200,8 @@ public class AddTeamDialog extends AbstractWindowEditor {
 			}
 		});
 
-		laborersTeamTable.setVisibleColumns("fullname","my_select");
-		laborersTeamTable.setColumnHeaders("Nombre", "Eliminar");
+		laborersTeamTable.setVisibleColumns("jobCode","laborer.fullname","my_select");
+		laborersTeamTable.setColumnHeaders("Oficio","Nombre", "Eliminar");
 		laborersTeamTable.setColumnWidth("my_select", 100);
 		laborersTeamTable.setSelectable(true);
 		return new Panel(hl){{setSizeFull();}};
@@ -209,9 +211,9 @@ public class AddTeamDialog extends AbstractWindowEditor {
 	@Override
 	protected boolean preCommit() {
 		//antes de guardar recupera la información de los fields
-		List<Laborer> laborersTeam = (List<Laborer>) getItem().getItemProperty("laborers").getValue();
+		List<LaborerConstructionsite> laborersTeam = (List<LaborerConstructionsite>) getItem().getItemProperty("laborerConstructionsites").getValue();
 		laborersTeam.clear();
-		for(Laborer lab : laborerTeamContainer.getItemIds()){
+		for(LaborerConstructionsite lab : laborerTeamContainer.getItemIds()){
 			if(lab == null){
 				Notification.show("No se permiten etapas vacias",Type.ERROR_MESSAGE);
 				return false;

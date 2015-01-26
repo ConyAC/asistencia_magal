@@ -54,7 +54,9 @@
             </th>
 			<th>
             <hr style="width:200px" />
-            Constructora Magal Ltda.
+            <b>${laborerConstruction.constructionsite.constructionCompany.name}</b>
+            <b>${laborerConstruction.constructionsite.constructionCompany.rut}</b><br />
+            <b>${laborerConstruction.constructionsite.constructionCompany.address}, ${laborerConstruction.constructionsite.constructionCompany.commune}</b>
             </th>
         </tr>
         <tr>

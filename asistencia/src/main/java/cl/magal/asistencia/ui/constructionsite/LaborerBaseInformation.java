@@ -8,8 +8,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import cl.magal.asistencia.entities.Laborer;
+import cl.magal.asistencia.entities.LaborerConstructionsite;
 import cl.magal.asistencia.entities.enums.Afp;
+import cl.magal.asistencia.entities.enums.Bank;
+import cl.magal.asistencia.entities.enums.Isapre;
 import cl.magal.asistencia.entities.enums.MaritalStatus;
+import cl.magal.asistencia.entities.enums.Nationality;
 
 import com.vaadin.data.fieldgroup.BeanFieldGroup;
 import com.vaadin.data.util.BeanItem;
@@ -64,17 +68,17 @@ public class LaborerBaseInformation extends VerticalLayout {
 		
 	private void init(){
 		setSpacing(true);
-		setMargin(true);
+//		setMargin(true);
 		setWidth("100%");
 
 		GridLayout detalleObrero = new GridLayout(3,5);
-		detalleObrero.setMargin(true);
+//		detalleObrero.setMargin(true);
 		detalleObrero.setSpacing(true);
 		addComponent(detalleObrero);
 
 		// Loop through the properties, build fields for them and add the fields
 		// to this UI
-		for (Object propertyId : new String[]{"rut","firstname","secondname","lastname", "secondlastname", "dateBirth", "address", "mobileNumber", "phone", "dateAdmission", "afp", "maritalStatus", "provenance"}) {
+		for (Object propertyId : new String[]{"rut","firstname","secondname","lastname", "secondlastname", "dateBirth", "commune", "town", "address", "mobileNumber", "phone", /*"dateAdmission", */"afp", "maritalStatus", "isapre", "nationality", "provenance", "wedge", "bank", "bankAccount"}) {
 			if(propertyId.equals("laborerId") || propertyId.equals("constructionSites") || propertyId.equals("contractId") || propertyId.equals("teamId"))
 				;
 			else if(propertyId.equals("afp")){
@@ -104,6 +108,33 @@ public class LaborerBaseInformation extends VerticalLayout {
 				detalleObrero.addComponent(msField);
 				bind(msField, prefix+"maritalStatus");   
 				detalleObrero.setComponentAlignment(msField, Alignment.MIDDLE_CENTER);		
+			}else if(propertyId.equals("nationality")){
+				ComboBox nField = new ComboBox("Nacionalidad");
+				nField.setNullSelectionAllowed(false);
+				for(Nationality n : Nationality.values()){
+					nField.addItem(n);
+				}
+				detalleObrero.addComponent(nField);
+				bind(nField, prefix+"nationality");   
+				detalleObrero.setComponentAlignment(nField, Alignment.MIDDLE_CENTER);
+			}else if(propertyId.equals("isapre")){
+				ComboBox iField = new ComboBox("Isapre");
+				iField.setNullSelectionAllowed(false);
+				for(Isapre i : Isapre.values()){
+					iField.addItem(i);
+				}
+				detalleObrero.addComponent(iField);
+				bind(iField, prefix+"isapre");   
+				detalleObrero.setComponentAlignment(iField, Alignment.MIDDLE_CENTER);
+			}else if(propertyId.equals("bank")){
+				ComboBox bField = new ComboBox("Banco");
+				bField.setNullSelectionAllowed(false);
+				for(Bank b : Bank.values()){
+					bField.addItem(b);
+				}
+				detalleObrero.addComponent(bField);
+				bind(bField, prefix+"bank");   
+				detalleObrero.setComponentAlignment(bField, Alignment.MIDDLE_CENTER);
 			}else{        		
 				String t = tradProperty(propertyId);
 				Field<?> field = buildAndBind(t, prefix+propertyId);
@@ -112,19 +143,26 @@ public class LaborerBaseInformation extends VerticalLayout {
 					field.addValidator(new BeanValidator(Laborer.class, (String) propertyId));
 				}
 				
-				if(propertyId.equals("firstname")){
-					field.focus();
+				if(viewElement){
+					if(propertyId.equals("firstname") || propertyId.equals("lastname") || propertyId.equals("rut")){
+						field.setEnabled(false);
+					}
 				}
+				
 				detalleObrero.addComponent(field);
 				detalleObrero.setComponentAlignment(field, Alignment.MIDDLE_CENTER);
 			}
 		}
 		
-		if(viewElement){
+		if(viewElement){		
 			HorizontalLayout hl = new HorizontalLayout();
 			hl.setWidth("250%");
-			hl.setSpacing(true);
+			hl.setSpacing(true);	
 			
+			Field<?> field = buildAndBind("Premio", "reward");
+			((TextField)field).setNullRepresentation("");
+			detalleObrero.addComponent(field);
+		
 			Upload upload = new Upload("Cargar fotografía", null);
 			upload.setButtonCaption("Iniciar carga");
 			
@@ -193,7 +231,7 @@ public class LaborerBaseInformation extends VerticalLayout {
 		else if(propertyId.equals("dateBirth"))
 			return "Fecha de Nacimiento";
 		else if(propertyId.equals("address"))
-			return "Direcciòn";
+			return "Dirección";
 		else if(propertyId.equals("mobileNumber"))
 			return "Teléfono móvil";
 		else if(propertyId.equals("phone"))
@@ -202,6 +240,16 @@ public class LaborerBaseInformation extends VerticalLayout {
 			return "Fecha de Admisión";
 		else if(propertyId.equals("provenance"))
 			return "Procedencia";
+		else if(propertyId.equals("reward"))
+			return "Premio";
+		else if(propertyId.equals("town"))
+			return "Ciudad";
+		else if(propertyId.equals("commune"))
+			return "Comuna";
+		else if(propertyId.equals("wedge"))
+			return "Calzado";
+		else if(propertyId.equals("bankAccount"))
+			return "Cta. Banco";
 		else
 			return propertyId.toString();
 	}
