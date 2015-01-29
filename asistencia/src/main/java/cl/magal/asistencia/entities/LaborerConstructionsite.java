@@ -25,6 +25,8 @@ import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
+import javax.persistence.PrePersist;
+import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -131,6 +133,22 @@ public class LaborerConstructionsite implements Serializable {
      */
     transient Contract activeContract;
 	
+    
+    @PreUpdate
+    public void preUpdate(){
+    	defineRequired();
+    }
+    @PrePersist
+    public void prePersist(){
+    	defineRequired();
+    }
+    
+    public void defineRequired(){
+    	if(rewardEndDate == null )
+    		rewardEndDate = new Date();
+    	if(rewardStartDate == null )
+    		rewardStartDate = new Date();
+    }
     
     public LaborerConstructionsite() {
     }
