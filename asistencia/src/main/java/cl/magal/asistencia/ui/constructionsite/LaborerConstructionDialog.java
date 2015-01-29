@@ -630,7 +630,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 						public void buttonClick(ClickEvent event) {
 
 							//solo puede crear otro contrato si está finalizado el anterior y calculó el finiquito
-							if(!activeContract.isFinished() || activeContract.getSettlement() != null ){
+							if(!activeContract.isFinished() || activeContract.getSettlement() == null ){
 								Notification.show("El contrato debe estár terminado y finiquitado para cambiar el rol",Type.HUMANIZED_MESSAGE);
 								return;
 							}
