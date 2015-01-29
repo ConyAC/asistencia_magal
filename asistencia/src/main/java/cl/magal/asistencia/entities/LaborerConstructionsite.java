@@ -148,6 +148,8 @@ public class LaborerConstructionsite implements Serializable {
     		rewardEndDate = new Date();
     	if(rewardStartDate == null )
     		rewardStartDate = new Date();
+    	if(active == null)
+    		active = 1;
     }
     
     public LaborerConstructionsite() {
