@@ -33,7 +33,7 @@
 		<br />
 		<table cellpadding="0" cellspacing="0" border="0" style="width:100%;" />
 		<tr><td colspan="2" style="text-align:leftt;"><h2>SE&Ntilde;OR</h2></td></tr>
-		<tr><td><p><b>${laborerConstruction.laborer.fullname}</b>, RUN <b>${laborerConstruction.laborer.rut}</b>, ROL <b>${laborerConstruction.activeContract.jobCode}</b></p></td></tr>
+		<tr><td><p><b>${laborerConstruction.laborer.fullname}</b>, RUN <b>$numberTools.integer(${laborerConstruction.laborer.rut.split("-").get(0)})-${laborerConstruction.laborer.rut.split("-").get(1)}</b>, ROL <b>${laborerConstruction.activeContract.jobCode}</b></p></td></tr>
 		<tr><td style="text-align:leftt;text-decoration: underline; ">PRESENTE</td></tr>
 		</table>
 		<br />
@@ -54,7 +54,7 @@
 			<th>
             <hr style="width:200px" />
             <b>${laborerConstruction.constructionsite.constructionCompany.name}</b>
-            <b>${laborerConstruction.constructionsite.constructionCompany.rut}</b><br />
+            <b>$numberTools.integer(${laborerConstruction.constructionsite.constructionCompany.rut.split("-").get(0)})-${laborerConstruction.constructionsite.constructionCompany.rut.split("-").get(1)}</b><br />
             <b>${laborerConstruction.constructionsite.constructionCompany.address}, ${laborerConstruction.constructionsite.constructionCompany.commune}</b>
             </th>
         </tr>

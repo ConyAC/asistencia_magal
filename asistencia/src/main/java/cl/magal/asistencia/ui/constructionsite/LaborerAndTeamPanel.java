@@ -14,7 +14,6 @@ import javax.annotation.PostConstruct;
 import javax.validation.ConstraintViolationException;
 
 import org.apache.velocity.app.VelocityEngine;
-import org.apache.velocity.tools.generic.DateTool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,6 +40,7 @@ import cl.magal.asistencia.ui.AbstractWindowEditor;
 import cl.magal.asistencia.ui.AbstractWindowEditor.EditorSavedEvent;
 import cl.magal.asistencia.util.SecurityHelper;
 import cl.magal.asistencia.util.Utils;
+import cl.magal.asistencia.util.VelocityHelper;
 
 import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeEvent;
@@ -71,8 +71,8 @@ import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
-import com.vaadin.ui.OptionGroup;
 import com.vaadin.ui.Notification.Type;
+import com.vaadin.ui.OptionGroup;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.TabSheet;
 import com.vaadin.ui.TextField;
@@ -414,7 +414,7 @@ public class LaborerAndTeamPanel extends Panel implements View {
 
 								final Map<String, Object> input = new HashMap<String, Object>();
 								input.put("laborerConstructions", selectedItemIds);
-								input.put("tools", new DateTool());
+								VelocityHelper.addTools(input);
 
 								final StringBuilder sb = new StringBuilder();
 								//								if((Boolean) contracts.getValue()){
@@ -588,7 +588,7 @@ public class LaborerAndTeamPanel extends Panel implements View {
 
 										final Map<String, Object> input = new HashMap<String, Object>();
 										input.put("laborerConstructions", selectedItemIds);
-										input.put("tools", new DateTool());
+										VelocityHelper.addTools(input);
 
 										final StringBuilder sb = new StringBuilder();
 										if(((String) og.getValue()).compareTo(option1) == 0){
