@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.velocity.app.VelocityEngine;
-import org.apache.velocity.tools.generic.DateTool;
 import org.joda.time.DateTime;
 import org.joda.time.Days;
 import org.slf4j.Logger;
@@ -42,6 +41,7 @@ import cl.magal.asistencia.ui.workerfile.vo.HistoryVO;
 import cl.magal.asistencia.util.Constants;
 import cl.magal.asistencia.util.SecurityHelper;
 import cl.magal.asistencia.util.Utils;
+import cl.magal.asistencia.util.VelocityHelper;
 
 import com.vaadin.data.Container;
 import com.vaadin.data.Property;
@@ -76,6 +76,7 @@ import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.OptionGroup;
 import com.vaadin.ui.TabSheet;
 import com.vaadin.ui.Table;
+import com.vaadin.ui.TextArea;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
@@ -560,15 +561,9 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 					@Override
 					public void buttonClick(ClickEvent event) {
 
-						//solo puede crear otro contrato si está finalizado el anterior y calculó el finiquito
-						if(!activeContract.isFinished() || activeContract.getSettlement() != null ){
-							Notification.show("El contrato debe estár terminado y finiquitado para cambiar el rol",Type.HUMANIZED_MESSAGE);
-							return;
-						}
-
 						final Map<String, Object> input = new HashMap<String, Object>();
 						input.put("laborerConstructions", new LaborerConstructionsite[] {(LaborerConstructionsite)getItem().getBean()});
-						input.put("tools", new DateTool());
+						VelocityHelper.addTools(input);
 
 						final StringBuilder sb = new StringBuilder();
 
@@ -634,6 +629,12 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 						@Override
 						public void buttonClick(ClickEvent event) {
 
+							//solo puede crear otro contrato si está finalizado el anterior y calculó el finiquito
+							if(!activeContract.isFinished() || activeContract.getSettlement() != null ){
+								Notification.show("El contrato debe estár terminado y finiquitado para cambiar el rol",Type.HUMANIZED_MESSAGE);
+								return;
+							}
+							
 							AddLaborerContractDialog userWindow = new AddLaborerContractDialog(getItem(),service,false);
 
 							userWindow.addListener(new AbstractWindowEditor.EditorSavedListener() {
@@ -685,6 +686,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 
 			@Override
 			public void buttonClick(ClickEvent event) {
+				
 				//permite imprimir la carta de renuncia
 				final Window w = new Window("Cartas de renuncias");
 				w.center();
@@ -716,7 +718,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 
 										final Map<String, Object> input = new HashMap<String, Object>();
 										input.put("laborerConstructions", new LaborerConstructionsite[] {(LaborerConstructionsite)getItem().getBean()});
-										input.put("tools", new DateTool());
+										VelocityHelper.addTools(input);
 
 										final StringBuilder sb = new StringBuilder();
 										if(((String) og.getValue()).compareTo("Voluntaria") == 0){
@@ -865,7 +867,8 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 
 						final Map<String, Object> input = new HashMap<String, Object>();
 						input.put("laborerConstructions", new LaborerConstructionsite[] {(LaborerConstructionsite)getItem().getBean()});
-						input.put("tools", new DateTool());
+						VelocityHelper.addTools(input);
+						
 						final String body = VelocityEngineUtils.mergeTemplateIntoString(velocityEngine, "templates/annex_contract_doc.vm", "UTF-8", input);
 
 						StreamResource.StreamSource source2 = new StreamResource.StreamSource() {
@@ -1017,8 +1020,9 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 							final Object itemId,Object propertyId,com.vaadin.ui.Component uiContext) {
 						Field<?> field = null; 
 						if( propertyId.equals("description") ){
-							field = new TextField();
-							((TextField)field).setNullRepresentation("");
+							field = new TextArea();
+							field.setWidth("100%");	
+							((TextArea)field).setNullRepresentation("");
 						}
 
 						else if(  propertyId.equals("fromDate") || propertyId.equals("toDate") ){
@@ -1135,8 +1139,9 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 							final Object itemId,Object propertyId,com.vaadin.ui.Component uiContext) {
 						Field<?> field = null; 
 						if( propertyId.equals("description") ){
-							field = new TextField();
-							((TextField)field).setNullRepresentation("");
+							field = new TextArea();
+							field.setWidth("100%");	
+							((TextArea)field).setNullRepresentation("");
 						}
 
 						else if(  propertyId.equals("fromDate") || propertyId.equals("toDate") ){
@@ -1294,7 +1299,8 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 
 								final Map<String, Object> input = new HashMap<String, Object>();
 								input.put("laborerConstructions", new LaborerConstructionsite[] {(LaborerConstructionsite)getItem().getBean()});
-								input.put("tools", new DateTool());
+								VelocityHelper.addTools(input);
+								
 								final String body = VelocityEngineUtils.mergeTemplateIntoString(velocityEngine, "templates/vacation_doc.vm", "UTF-8", input);
 
 								StreamResource.StreamSource source2 = new StreamResource.StreamSource() {

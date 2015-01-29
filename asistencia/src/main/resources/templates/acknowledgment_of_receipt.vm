@@ -45,7 +45,7 @@
         </tr>
         <tr>
             <th>
-            CED. IDENTIDAD : <b>${laborerConstruction.laborer.rut}</b>
+            CED. IDENTIDAD : <b>$numberTools.integer(${laborerConstruction.laborer.rut.split("-").get(0)})-${laborerConstruction.laborer.rut.split("-").get(1)}</b>
             </th>
         </tr>
         <tr>

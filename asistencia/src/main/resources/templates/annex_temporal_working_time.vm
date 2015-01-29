@@ -42,7 +42,7 @@
 		<p style="text-align:left;"><b>Tarde ${afternoon} Hrs.</b></p>
 	    <br /><br />
 	     <span style="text-align:left;"><b>${laborerConstruction.constructionsite.constructionCompany.name}</b></span><br />
-	    <span style="text-align:left;"><b>${laborerConstruction.constructionsite.constructionCompany.rut}</b></span><br />
+	    <span style="text-align:left;"><b>$numberTools.integer(${laborerConstruction.constructionsite.constructionCompany.rut.split("-").get(0)})-${laborerConstruction.constructionsite.constructionCompany.rut.split("-").get(1)}</b></span><br />
 	    <span style="text-align:left;"><b>${laborerConstruction.constructionsite.constructionCompany.address}, ${laborerConstruction.constructionsite.constructionCompany.commune}</b></span><br />
 	    <span style="text-align:left;">Obra: <b>${laborerConstruction.constructionsite.name}</b></span>
 	    <br /><br />
