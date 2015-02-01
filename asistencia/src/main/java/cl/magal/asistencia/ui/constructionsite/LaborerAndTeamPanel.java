@@ -23,6 +23,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionSystemException;
 import org.springframework.ui.velocity.VelocityEngineUtils;
+import org.tepi.filtertable.FilterGenerator;
 import org.tepi.filtertable.FilterTable;
 import org.vaadin.dialogs.ConfirmDialog;
 
@@ -42,6 +43,7 @@ import cl.magal.asistencia.util.SecurityHelper;
 import cl.magal.asistencia.util.Utils;
 import cl.magal.asistencia.util.VelocityHelper;
 
+import com.vaadin.data.Container.Filter;
 import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.fieldgroup.BeanFieldGroup;
@@ -58,6 +60,7 @@ import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.StreamResource;
+import com.vaadin.ui.AbstractField;
 import com.vaadin.ui.AbstractSelect.ItemCaptionMode;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.BrowserFrame;
@@ -67,6 +70,7 @@ import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.CustomTable;
 import com.vaadin.ui.DateField;
+import com.vaadin.ui.Field;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
@@ -280,6 +284,7 @@ public class LaborerAndTeamPanel extends Panel implements View {
 	 * Lista de trabajadores seleccionados
 	 */
 	final Set<Object> selectedItemIds = new HashSet<Object>();
+	ComboBox cbFilterStep;
 
 	protected VerticalLayout drawLaborer() {
 
@@ -691,6 +696,45 @@ public class LaborerAndTeamPanel extends Panel implements View {
 		});
 
 		final FilterTable table =  new FilterTable();
+		
+		table.setFilterGenerator(new FilterGenerator() {
+			
+			@Override
+			public AbstractField<?> getCustomFilterComponent(Object propertyId) {
+				 if ("activeContract.step".equals(propertyId)) {
+					 cbFilterStep = new ComboBox(null);
+					 cbFilterStep.setNullSelectionAllowed(true);
+					 return cbFilterStep;
+				 }else if("actions".equals(propertyId)){
+				 }
+				return null;
+			}
+			
+			@Override
+			public Filter generateFilter(Object propertyId, Field<?> originatingField) {
+				return null;
+			}
+			
+			@Override
+			public Filter generateFilter(Object propertyId, Object value) {
+				return null;
+			}
+			
+			@Override
+			public void filterRemoved(Object propertyId) {
+			}
+			
+			@Override
+			public Filter filterGeneratorFailed(Exception reason, Object propertyId,
+					Object value) {
+				return null;
+			}
+			
+			@Override
+			public void filterAdded(Object propertyId,
+					Class<? extends Filter> filterType, Object value) {
+			}
+		});
 
 		table.addGeneratedColumn("actions", new CustomTable.ColumnGenerator() {
 
@@ -748,7 +792,6 @@ public class LaborerAndTeamPanel extends Panel implements View {
 		//		});
 
 		//TODO estado
-		//		table.setVisibleColumns("laborer.job","laborer.firstname","laborer.laborerId"); //FIXME laborerId
 		table.setVisibleColumns("selected","activeContract.jobCode","laborer.fullname","activeContract.step","actions"); //FIXME laborerId
 		table.setColumnHeaders("","Cod","Nombre","Etapa","Acciones");
 		table.setColumnWidth("selected", 40);
@@ -991,6 +1034,8 @@ public class LaborerAndTeamPanel extends Panel implements View {
 		bfg.setItemDataSource(item);
 		if(detailLayout != null)
 			detailLayout.setEnabled(enable);
-
+		cbFilterStep.removeAllItems();
+		for(String step : item.getBean().getSteps())
+			cbFilterStep.addItem(step);
 	}
 }
