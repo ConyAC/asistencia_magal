@@ -101,8 +101,8 @@ public class ConstructionSiteService {
 		return page;
 	}
 
-	public List<LaborerConstructionsite> getLaborerByConstruction(ConstructionSite cs) {
-		List<LaborerConstructionsite> laborers = labcsRepo.findByConstructionsite(cs);
+	public List<LaborerConstructionsite> getLaborerActiveByConstruction(ConstructionSite cs) {
+		List<LaborerConstructionsite> laborers = labcsRepo.findByConstructionsiteAndIsActive(cs);
 		return laborers;
 	}
 

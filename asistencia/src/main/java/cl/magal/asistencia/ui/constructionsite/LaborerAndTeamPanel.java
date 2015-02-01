@@ -744,7 +744,8 @@ public class LaborerAndTeamPanel extends Panel implements View {
 				return new Button(null,new Button.ClickListener(){
 					@Override
 					public void buttonClick(ClickEvent event) {
-						laborerService.remove(laborerConstruction.getBean());
+						laborerConstruction.getBean().setActive((short)0);
+						laborerService.save(laborerConstruction.getBean());
 						laborerConstructionContainer.removeItem(itemId);
 					}
 				}){
@@ -814,7 +815,6 @@ public class LaborerAndTeamPanel extends Panel implements View {
 						final ConstructionSite cs = item.getBean();
 						if(cs == null){
 							Notification.show("Debe seleccionar una obra",Type.ERROR_MESSAGE);
-							//							return false;
 							return ;
 						}
 						try {
@@ -822,8 +822,11 @@ public class LaborerAndTeamPanel extends Panel implements View {
 							LaborerConstructionsite laborer = beanItem.getBean();
 							logger.debug("laborer constructionsite {}, rut {} postcommit ",laborer,laborer.getLaborer().getRut());
 							laborerService.save(laborer);	
+							//si el elemento no esta activo, lo quita de la lista
+							if(laborer.getActive() == (short)0){
+								laborerConstructionContainer.removeItem(laborer);
+							}
 							table.refreshRowCache();
-							//			    			return true;
 							return;
 						} catch (TransactionSystemException e) {
 
@@ -842,7 +845,6 @@ public class LaborerAndTeamPanel extends Panel implements View {
 								Notification.show("Error al intentar guardar el trabajador", Type.ERROR_MESSAGE);
 							}
 
-							//			    			return false;
 							return;
 						}catch (Exception e){
 
@@ -851,7 +853,6 @@ public class LaborerAndTeamPanel extends Panel implements View {
 							else
 								logger.error("Error al guardar la información del obrero",e);
 							Notification.show("Ocurrió un error al intentar guardar el trabajador", Type.ERROR_MESSAGE);
-							//			    			return false;
 							return;
 						}
 					}
@@ -1020,7 +1021,7 @@ public class LaborerAndTeamPanel extends Panel implements View {
 		}
 
 		setEnabledDetail(true,item);
-		List<LaborerConstructionsite> laborers = constructionSiteService.getLaborerByConstruction(item.getBean());
+		List<LaborerConstructionsite> laborers = constructionSiteService.getLaborerActiveByConstruction(item.getBean());
 		laborerConstructionContainer.removeAllItems();
 		laborerConstructionContainer.addAll(laborers);
 

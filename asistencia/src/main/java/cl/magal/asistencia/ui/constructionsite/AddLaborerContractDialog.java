@@ -298,8 +298,6 @@ public class AddLaborerContractDialog extends AbstractWindowEditor implements Ne
 			contract.setJobCode(Integer.valueOf(lbCodJob.getValue()));
 			contract.setStep((String) cbStep.getValue());
 			contract.setActive(true);
-			((BeanItem<LaborerConstructionsite>) getItem()).getBean().refreshActiveContract();
-			((BeanItem<LaborerConstructionsite>) getItem()).getBean().addContract(contract);
 		}
 		
 		return msj == null;

@@ -22,7 +22,7 @@ public class HistoryVO implements Serializable {
 	ConstructionSite constructionSite;
 	Job job;
 	Double averageWage;
-	Double reward;
+	int reward;
 	Integer numberOfAccidents;
 	Date endingDate;
 	Date startingDate;
@@ -46,10 +46,10 @@ public class HistoryVO implements Serializable {
 	public void setAverageWage(Double averageWage) {
 		this.averageWage = averageWage;
 	}
-	public Double getReward() {
+	public int getReward() {
 		return reward;
 	}
-	public void setReward(Double reward) {
+	public void setReward(int reward) {
 		this.reward = reward;
 	}
 	public Integer getNumberOfAccidents() {

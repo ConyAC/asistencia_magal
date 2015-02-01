@@ -81,7 +81,7 @@ public class AddTeamDialog extends AbstractWindowEditor {
 		detalleCuadrilla.addComponent(tf);
 		
 //		laborersConstructionsite = laborerService.getAllLaborer(((Team)getItem().getBean()).getConstructionSite());
-		laborersConstructionsite = constructionSiteService.getLaborerByConstruction(((Team)getItem().getBean()).getConstructionSite());
+		laborersConstructionsite = constructionSiteService.getLaborerActiveByConstruction(((Team)getItem().getBean()).getConstructionSite());
 		cbLeader = new ComboBox("Responsable",new BeanItemContainer<LaborerConstructionsite>(LaborerConstructionsite.class,laborersConstructionsite));
 		cbLeader.setItemCaptionMode(ItemCaptionMode.PROPERTY);
 		cbLeader.setItemCaptionPropertyId("jobCode");

@@ -115,8 +115,8 @@ public class LaborerConstructionsite implements Serializable {
     @OneToMany(mappedBy="laborerConstructionSite",fetch=FetchType.EAGER,cascade={CascadeType.PERSIST,CascadeType.MERGE},orphanRemoval=true )
     List<Tool> tool = new ArrayList<Tool>();
     
-    @OneToMany(mappedBy="laborerConstructionSite",fetch=FetchType.LAZY,cascade={CascadeType.PERSIST,CascadeType.MERGE},orphanRemoval=true )
-    List<Contract> contracts = new ArrayList<Contract>();
+//    @OneToMany(mappedBy="laborerConstructionSite",fetch=FetchType.LAZY,cascade={CascadeType.PERSIST,CascadeType.MERGE},orphanRemoval=true )
+//    List<Contract> contracts = new ArrayList<Contract>();
     
     @OneToMany(mappedBy="laborerConstructionSite",fetch=FetchType.EAGER,cascade = { CascadeType.PERSIST, CascadeType.MERGE },orphanRemoval=true )
     List<Loan> loan = new ArrayList<Loan>();
@@ -131,7 +131,8 @@ public class LaborerConstructionsite implements Serializable {
     /**
      * define el contrato activo o el primero
      */
-    transient Contract activeContract;
+    @OneToOne(mappedBy="laborerConstructionSite")
+    Contract activeContract;
 	
     
     @PreUpdate
@@ -262,18 +263,18 @@ public class LaborerConstructionsite implements Serializable {
         }
     }
 	
-	public void addContract(Contract contract) {
-		if (!getContracts().contains(contract)) {
-			//marca todos los otros contratos inactivos
-			for(Contract c : getContracts())
-				c.setActive(false);
-			//refresca el contrato activo
-			refreshActiveContract();
-			
-			getContracts().add(contract);
-			contract.setLaborerConstructionSite(this);
-        }
-	}
+//	public void addContract(Contract contract) {
+//		if (!getContracts().contains(contract)) {
+//			//marca todos los otros contratos inactivos
+//			for(Contract c : getContracts())
+//				c.setActive(false);
+//			//refresca el contrato activo
+////			refreshActiveContract();
+//			
+//			getContracts().add(contract);
+//			contract.setLaborerConstructionSite(this);
+//        }
+//	}
 	
     public Long getId() {
 		return id;
@@ -333,36 +334,14 @@ public class LaborerConstructionsite implements Serializable {
 		this.reward = reward;
 	}
 
-
-	public List<Contract> getContracts() {
-		return contracts;
-	}
-
-
-	public void setContracts(List<Contract> contracts) {
-		this.contracts = contracts;
-	}
-	
-	public void refreshActiveContract(){
-		activeContract = null;
-	}
-	
 	public Contract getActiveContract(){
-		if(activeContract == null ){
-			// recorre los contratos buscando el activo
-			// si la lista de contratos no es vacia entonces asigna el primera
-			if(!getContracts().isEmpty()){
-				activeContract = getContracts().get(0);
-				for (int i = 0; i < getContracts().size(); i++) {
-					if(getContracts().get(i).isActive()){
-						activeContract = getContracts().get(i);
-						break;
-					}
-				}
-			}
-		}
 		return activeContract;
 	}
+	
+	public void setActiveContract(Contract contract){
+		this.activeContract = contract;
+	}
+	
 	/**
 	 * VARIABLES SOLO LECTURA PARA RESCATAR LA INFORMACION DEL CONTRACTO ACTIVO
 	 * @return
