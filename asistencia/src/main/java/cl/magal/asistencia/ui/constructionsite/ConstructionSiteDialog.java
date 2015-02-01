@@ -59,7 +59,7 @@ public class ConstructionSiteDialog extends AbstractWindowEditor {
 		userContainer = user;
 		this.service = service;
 		constructioncompanyContainer = constructionCompany;
-		setWidth("70%");
+		setWidth("85%");
 
 		init();
 	}
@@ -98,6 +98,7 @@ public class ConstructionSiteDialog extends AbstractWindowEditor {
         	else if(propertyId.equals("status")){
 			ComboBox statusField = new ComboBox("Estado");
 			statusField.setNullSelectionAllowed(false);
+			statusField.addStyleName("v-textfield-obra");
 			for(Status s : Status.values()){
 				statusField.addItem(s);
 			}
@@ -109,6 +110,7 @@ public class ConstructionSiteDialog extends AbstractWindowEditor {
         		Field field = buildAndBind(t, propertyId);
         		if(field instanceof TextField){
         			((TextField)field).setNullRepresentation("");
+        			((TextField)field).addStyleName("v-textfield-obra");
         		}
         		fl.addComponent(field);
         		fl.setComponentAlignment(field, Alignment.MIDDLE_LEFT);
@@ -118,12 +120,14 @@ public class ConstructionSiteDialog extends AbstractWindowEditor {
 		final ComboBox nombre = new ComboBox("Responsable", userContainer);
 		nombre.setItemCaptionMode(ItemCaptionMode.PROPERTY);
 		nombre.setItemCaptionPropertyId("fullname");
+		nombre.addStyleName("v-textfield-obra");
 		fl.addComponent(nombre);
 		bind(nombre, "personInCharge"); 
 		
 		final ComboBox constructora = new ComboBox("Constructora", constructioncompanyContainer);
 		constructora.setItemCaptionMode(ItemCaptionMode.PROPERTY);
 		constructora.setItemCaptionPropertyId("name");
+		constructora.addStyleName("v-textfield-obra");
 		fl.addComponent(constructora);
 		bind(constructora, "constructionCompany"); 
 		

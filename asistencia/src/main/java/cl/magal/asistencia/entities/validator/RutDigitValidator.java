@@ -15,6 +15,7 @@ public class RutDigitValidator implements ConstraintValidator<RutDigit, String> 
 		if(rut == null )
 			return false;
 		String[] rutTemp = rut.split("-");
+		System.out.println("RUT: "+rutTemp);
 		if( rutTemp == null || rutTemp.length != 2 )
 			return false;
 		

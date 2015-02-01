@@ -107,7 +107,7 @@ public class AddLaborerContractDialog extends AbstractWindowEditor implements Ne
 		
 		cb = new ComboBox("Rut trabajador:",laborers);
 		gl.addComponent(cb);
-		cb.setInputPrompt("Ej.: 12345678-9");
+		cb.setInputPrompt("Ej.: 12345678");
 		cb.setItemCaptionMode(ItemCaptionMode.PROPERTY);
 		cb.setItemCaptionPropertyId("rut");
 		cb.setTabIndex(1);

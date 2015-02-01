@@ -213,7 +213,7 @@ public class WorkerFileView extends HorizontalLayout implements View {
 		
 		String basepath = VaadinService.getCurrent().getBaseDirectory().getAbsolutePath();
 		// Image as a file resource
-		FileResource resource = new FileResource(new File(basepath + "/WEB-INF/images/1.JPG" /*+photo.getValue()*/));
+		FileResource resource = new FileResource(new File(basepath + "/WEB-INF/images/"+photo.getValue()));
 		Embedded image = new Embedded("", resource);
 		image.setWidth("100");
 		image.setHeight("100");

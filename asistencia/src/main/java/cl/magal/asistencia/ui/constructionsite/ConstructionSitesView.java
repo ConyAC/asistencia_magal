@@ -182,6 +182,7 @@ public class ConstructionSitesView extends BaseView implements View {
 		table.setContainerDataSource(constructionContainer);
 		table.setSizeFull();
 		table.setFilterBarVisible(true);
+		table.addStyleName("v-table-cell-content-cursor");
 		table.addGeneratedColumn("actions", new CustomTable.ColumnGenerator() {
 		
 			@Override
@@ -274,7 +275,7 @@ public class ConstructionSitesView extends BaseView implements View {
 
 			@Override
 			public void itemClick(ItemClickEvent event) {
-//				setConstruction((BeanItem<ConstructionSite>)event.getItem());
+//				setConstruction((BeanItem<ConstructionSite>)event.getItem());				
 				BeanItem<ConstructionSite> bean = (BeanItem<ConstructionSite>)event.getItem();
 				UI.getCurrent().getNavigator().navigateTo(ConstructionSiteView.NAME+"/"+bean.getBean().getConstructionsiteId());
 			}

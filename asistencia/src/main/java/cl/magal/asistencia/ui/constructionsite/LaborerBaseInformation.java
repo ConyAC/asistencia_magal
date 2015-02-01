@@ -154,63 +154,61 @@ public class LaborerBaseInformation extends VerticalLayout {
 			}
 		}
 		
-		if(viewElement){		
-			HorizontalLayout hl = new HorizontalLayout();
-			hl.setWidth("250%");
-			hl.setSpacing(true);	
-			
-			Field<?> field = buildAndBind("Premio", "reward");
-			((TextField)field).setNullRepresentation("");
-			detalleObrero.addComponent(field);
+		HorizontalLayout hl = new HorizontalLayout();
+		hl.setWidth("250%");
+		hl.setSpacing(true);	
 		
-			Upload upload = new Upload("Cargar fotografía", null);
-			upload.setButtonCaption("Iniciar carga");
-			
-			hl.addComponent(upload);
-			hl.setComponentAlignment(upload, Alignment.TOP_LEFT);
-					        
-			// Show uploaded file in this placeholder
-			final Embedded image = new Embedded();
-			image.setVisible(false);
-			hl.addComponent(image);
-			
-			// Implement both receiver that saves upload in a file and
-			// listener for successful upload
-			class ImageUploader implements Receiver, SucceededListener {
-			    public File file;
-			    
-			    public OutputStream receiveUpload(String filename, String mimeType) {
-			        // Create upload stream
-			        FileOutputStream fos = null; // Output stream to write to
-			        try {
-			        	//añadimos el nombre de la imagen a la base
-			        	getBinder().getItemDataSource().getItemProperty(prefix+"photo").setValue(filename);
-			        	String basepath = VaadinService.getCurrent().getBaseDirectory().getAbsolutePath();
-			            // Open the file for writing.
-			            file = new File(basepath + "/WEB-INF/images/" + filename);
-			            fos = new FileOutputStream(file);
-			        } catch (final java.io.FileNotFoundException e) {
-			        	new Notification("No es posible acceder al archivo", e.getMessage());
-			            //Notification.show("Error al guardar la imagen.");
-			            return null;
-			        }
-			        return fos; // Return the output stream to write to
-			    }
+//		Field<?> field = buildAndBind("Premio", "reward");
+//		((TextField)field).setNullRepresentation("");
+//		detalleObrero.addComponent(field);
 	
-			    public void uploadSucceeded(SucceededEvent event) {
-			        // Show the uploaded file in the image viewer
-			        image.setVisible(true);
-			        image.setHeight("100");
-			        image.setWidth("100");
-			        image.setSource(new FileResource(file));
-			    }
-			};
-			final ImageUploader uploader = new ImageUploader(); 
-			upload.setReceiver(uploader);
-			upload.addListener(uploader);
-	
-			detalleObrero.addComponent(hl);
-		}
+		Upload upload = new Upload("Cargar fotografía", null);
+		upload.setButtonCaption("Iniciar carga");
+		
+		hl.addComponent(upload);
+		hl.setComponentAlignment(upload, Alignment.TOP_LEFT);
+				        
+		// Show uploaded file in this placeholder
+		final Embedded image = new Embedded();
+		image.setVisible(false);
+		hl.addComponent(image);
+		
+		// Implement both receiver that saves upload in a file and
+		// listener for successful upload
+		class ImageUploader implements Receiver, SucceededListener {
+		    public File file;
+		    
+		    public OutputStream receiveUpload(String filename, String mimeType) {
+		        // Create upload stream
+		        FileOutputStream fos = null; // Output stream to write to
+		        try {
+		        	//añadimos el nombre de la imagen a la base
+		        	getBinder().getItemDataSource().getItemProperty(prefix+"photo").setValue(filename);
+		        	String basepath = VaadinService.getCurrent().getBaseDirectory().getAbsolutePath();
+		            // Open the file for writing.
+		            file = new File(basepath + "/WEB-INF/images/" + filename);
+		            fos = new FileOutputStream(file);
+		        } catch (final java.io.FileNotFoundException e) {
+		        	new Notification("No es posible acceder al archivo", e.getMessage());
+		            //Notification.show("Error al guardar la imagen.");
+		            return null;
+		        }
+		        return fos; // Return the output stream to write to
+		    }
+
+		    public void uploadSucceeded(SucceededEvent event) {
+		        // Show the uploaded file in the image viewer
+		        image.setVisible(true);
+		        image.setHeight("100");
+		        image.setWidth("100");
+		        image.setSource(new FileResource(file));
+		    }
+		};
+		final ImageUploader uploader = new ImageUploader(); 
+		upload.setReceiver(uploader);
+		upload.addListener(uploader);
+
+		detalleObrero.addComponent(hl);
 		detalleObrero.setWidth("100%");
 
 	}

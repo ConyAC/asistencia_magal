@@ -691,7 +691,7 @@ public class LaborerAndTeamPanel extends Panel implements View {
 		});
 
 		final FilterTable table =  new FilterTable();
-
+		table.addStyleName("v-table-cell-content-cursor");
 		table.addGeneratedColumn("actions", new CustomTable.ColumnGenerator() {
 
 			@Override
@@ -889,6 +889,7 @@ public class LaborerAndTeamPanel extends Panel implements View {
 		table.setContainerDataSource(teamContainer);
 		table.setSizeFull();
 		table.setFilterBarVisible(true);
+		table.addStyleName("v-table-cell-content-cursor");
 
 		table.addGeneratedColumn("actions", new CustomTable.ColumnGenerator() {
 

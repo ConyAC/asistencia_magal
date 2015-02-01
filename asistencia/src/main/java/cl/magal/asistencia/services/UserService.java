@@ -92,7 +92,6 @@ public class UserService implements UserDetailsService {
 			perm = new HashSet<Permission>();	
 			perm.add(Permission.CREAR_OBRA);
 			perm.add(Permission.EDITAR_OBRA);
-			perm.add(Permission.ELIMINAR_OBRA);
 			perm.add(Permission.ASIGNAR_OBRA);
 			perm.add(Permission.CREAR_USUARIO);
 			perm.add(Permission.DEFINIR_VARIABLE_GLOBAL);
