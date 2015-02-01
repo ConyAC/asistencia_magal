@@ -8,7 +8,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.velocity.app.VelocityEngine;
-import org.apache.velocity.tools.generic.DateTool;
+import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ui.velocity.VelocityEngineUtils;
@@ -42,6 +42,7 @@ import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Component;
+import com.vaadin.ui.DateField;
 import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
@@ -97,11 +98,12 @@ public class AddLaborerContractDialog extends AbstractWindowEditor implements Ne
 	
 	ComboBox cb,cbJob,cbStep;
 	TextField lbCodJob;
+	DateField dfAdmissionDate;
 	
 	@Override
 	protected Component createBody() {
 		
-		GridLayout gl = new GridLayout(3,6);
+		GridLayout gl = new GridLayout(3,10);
 		gl.setSpacing(true);
 		gl.setMargin(true);
 		
@@ -233,6 +235,12 @@ public class AddLaborerContractDialog extends AbstractWindowEditor implements Ne
 		cbStep.setRequiredError("Debe definir una etapa");
 		gl.addComponent(cbStep);
 		
+		dfAdmissionDate = new DateField("Fecha Ingreso : ");
+		dfAdmissionDate.setRequired(true);
+		dfAdmissionDate.setRequiredError("La fecha de ingreso es necesaria.");
+		dfAdmissionDate.setValue(new Date());
+		gl.addComponent(dfAdmissionDate);
+		
 		return gl;
 	}
 
@@ -249,6 +257,9 @@ public class AddLaborerContractDialog extends AbstractWindowEditor implements Ne
 		Laborer laborer = new Laborer();
 		laborer.setRut(newItemCaption);
 		laborer.setFirstname("Nuevo trabajador");
+		//por defecto el nuevo trabajador tiene al menos 18 años
+		laborer.setDateBirth( new DateTime().plusYears(-18).toDate() );
+		
 		laborers.addBean(laborer);
 		cb.select(laborer);
 	}
@@ -267,19 +278,21 @@ public class AddLaborerContractDialog extends AbstractWindowEditor implements Ne
 			msj = cbJob.getRequiredError();
 		else if( !cbStep.isValid() )
 			msj = cbStep.getRequiredError();
+		else if( !dfAdmissionDate.isValid() )
+			msj = dfAdmissionDate.getRequiredError();
 		
 		if(msj != null)
 			Notification.show(msj,Type.ERROR_MESSAGE);
 		else{ //si pasa todas las validaciones, lo agrega al item para guardar
 			if(addLaborer){
 				//dependiendo del perfil lo marca como confirmado o no
-				((BeanItem<LaborerConstructionsite>) getItem()).getBean().setConfirmed( SecurityHelper.hastPermission(Permission.CONFIRMAR_OBREROS) );
+				((BeanItem<LaborerConstructionsite>) getItem()).getBean().setConfirmed( SecurityHelper.hasPermission(Permission.CONFIRMAR_OBREROS) );
 				((BeanItem<LaborerConstructionsite>) getItem()).getBean().setLaborer(laborer);
 			}
 			
 			//crea el contrato
 			Contract contract = new Contract();
-			contract.setStartDate(new Date());
+			contract.setStartDate(dfAdmissionDate.getValue());
 			contract.setName(laborer.getFullname());
 			contract.setJob(job);
 			contract.setJobCode(Integer.valueOf(lbCodJob.getValue()));

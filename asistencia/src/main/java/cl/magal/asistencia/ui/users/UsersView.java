@@ -195,7 +195,7 @@ public class UsersView extends HorizontalLayout implements View {
 		//detalleUsuario.removeAllItems();
 		//detalleUsuario.addAll(cs);
         
-        if(SecurityHelper.hastPermission(Permission.ASIGNAR_OBRA)){
+        if(SecurityHelper.hasPermission(Permission.ASIGNAR_OBRA)){
 	        //prueba
 			tcsObras = new TwinColSelect("Asignar Obras",constructionContainer);      
 			tcsObras.setWidth("70%");

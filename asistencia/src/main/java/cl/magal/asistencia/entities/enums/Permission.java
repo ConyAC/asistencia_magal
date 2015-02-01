@@ -26,7 +26,8 @@ public enum Permission {
 	IMPRIMIR_OBREROS(22, "Imprimir Obreros"),
 	EDITAR_OBRA_NOASIGNADAS(24, "Editar Obra"), 
 	CONFIRMAR_OBREROS(25,"Confirmar Obreros"),
-	BLOQUEAR_OBRERO(26, "Bloquear Obrero"), ;
+	BLOQUEAR_OBRERO(26, "Bloquear Obrero"),
+	AGREGAR_ETAPAS_OBRA(27,"Agregar Etapas a Obra");
 
 	
 	int i;

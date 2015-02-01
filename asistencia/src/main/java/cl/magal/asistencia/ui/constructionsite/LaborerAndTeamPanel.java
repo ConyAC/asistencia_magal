@@ -193,7 +193,7 @@ public class LaborerAndTeamPanel extends Panel implements View {
 
 			vlInfo.addComponent(nameField);
 
-			if(SecurityHelper.hastPermission(Permission.EDITAR_OBRA) ){
+			if(SecurityHelper.hasPermission(Permission.EDITAR_OBRA) ){
 				//agrega un boton que hace el commit
 				editConstructionSite = new Button(null,new Button.ClickListener() {
 
@@ -964,7 +964,7 @@ public class LaborerAndTeamPanel extends Panel implements View {
 
 		this.item = item;
 
-		if( SecurityHelper.hastPermission(Permission.CREAR_OBRA) || SecurityHelper.hasConstructionSite(item.getBean())){
+		if( SecurityHelper.hasPermission(Permission.CREAR_OBRA) || SecurityHelper.hasConstructionSite(item.getBean())){
 			if( editConstructionSite != null )
 				editConstructionSite.setEnabled(true);
 			btnPrint.setEnabled(true);
