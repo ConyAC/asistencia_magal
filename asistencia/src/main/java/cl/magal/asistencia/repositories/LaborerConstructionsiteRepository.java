@@ -22,4 +22,7 @@ public interface LaborerConstructionsiteRepository extends
 	
 	LaborerConstructionsite findFirstByLaborerOrderByActiveContractStartDateDesc(Laborer laborer);
 
+	@Query(value="select lcs.constructionsite from LaborerConstructionsite lcs where lcs.laborer = ?1 and lcs.active = 1 ")
+	ConstructionSite findConstructionsiteByLaborer(Laborer laborer);
+
 }

@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.velocity.app.VelocityEngine;
@@ -25,6 +26,7 @@ import cl.magal.asistencia.entities.enums.MaritalStatus;
 import cl.magal.asistencia.entities.enums.Nationality;
 import cl.magal.asistencia.entities.enums.Permission;
 import cl.magal.asistencia.entities.validator.RutDigitValidator;
+import cl.magal.asistencia.services.ConstructionSiteService;
 import cl.magal.asistencia.services.LaborerService;
 import cl.magal.asistencia.ui.AbstractWindowEditor;
 import cl.magal.asistencia.ui.MagalUI;
@@ -70,7 +72,8 @@ public class AddLaborerContractDialog extends AbstractWindowEditor implements Ne
 	transient Logger logger = LoggerFactory.getLogger(AddLaborerContractDialog.class);
 
 	transient LaborerService laborerService;
-	BeanItemContainer<Laborer> laborers = new BeanItemContainer<Laborer>(Laborer.class);
+	transient ConstructionSiteService constructionSiteService;
+	BeanItemContainer<Laborer> laborersBC = new BeanItemContainer<Laborer>(Laborer.class);
 	boolean addLaborer = false;
 	transient private VelocityEngine velocityEngine;
 	
@@ -78,9 +81,8 @@ public class AddLaborerContractDialog extends AbstractWindowEditor implements Ne
 	TextField lbCodJob;
 	DateField dfAdmissionDate;
 	
-	protected AddLaborerContractDialog(BeanItem<?> item,LaborerService laborerService,boolean addLaborer) {
+	protected AddLaborerContractDialog(BeanItem<?> item,boolean addLaborer) {
 		super(item);
-		this.laborerService= laborerService;
 		this.addLaborer = addLaborer;
 		init();
 	}
@@ -88,14 +90,17 @@ public class AddLaborerContractDialog extends AbstractWindowEditor implements Ne
 	public void init(){
 		
 		velocityEngine = (VelocityEngine) ((MagalUI)UI.getCurrent()).getSpringBean(Constants.VELOCITY_ENGINE_BEAN);
-		
+		laborerService = (LaborerService) ((MagalUI)UI.getCurrent()).getSpringBean(Constants.LABORER_SERVICE_BEAN);
+		constructionSiteService = (ConstructionSiteService) ((MagalUI)UI.getCurrent()).getSpringBean(Constants.CONSTRUCTIONSITE_SERVICE_BEAN);
 		setWidth("50%");
 		setHeight("80%");
 		
-		if(addLaborer)
-			laborers.addAll( laborerService.getAllLaborerExceptThisConstruction(((BeanItem<LaborerConstructionsite>)getItem()).getBean().getConstructionsite()));
-		else {
-			laborers.addBean(((LaborerConstructionsite) getItem().getBean()).getLaborer());
+		if(addLaborer){
+//			List<Laborer> laborers = laborerService.getAllLaborerExceptThisConstruction(((BeanItem<LaborerConstructionsite>)getItem()).getBean().getConstructionsite());
+			List<Laborer> l = laborerService.findAllLaborer();
+			laborersBC.addAll(l);
+		}else {
+			laborersBC.addBean(((LaborerConstructionsite) getItem().getBean()).getLaborer());
 		}
 		//cambia el texto del guardar
 		if(addLaborer)
@@ -116,7 +121,7 @@ public class AddLaborerContractDialog extends AbstractWindowEditor implements Ne
 		gl.setSpacing(true);
 		gl.setMargin(true);
 		
-		cbRut = new ComboBox("Rut trabajador:",laborers);
+		cbRut = new ComboBox("Rut trabajador:",laborersBC);
 		gl.addComponent(cbRut,0,0,2,0);
 		gl.setComponentAlignment(cbRut, Alignment.MIDDLE_CENTER);
 		cbRut.setInputPrompt("Ej.: 12345678-9");
@@ -196,47 +201,6 @@ public class AddLaborerContractDialog extends AbstractWindowEditor implements Ne
 				gl.setComponentAlignment(field, Alignment.MIDDLE_CENTER);
 			}
 		}
-
-	
-//		final Label provenience = new Label("",ContentMode.HTML);
-		
-//		final Button btn = new Button(null,FontAwesome.FLOPPY_O );
-//		btn.setEnabled(addLaborer);
-//		btn.addClickListener(new Button.ClickListener() {
-//			
-//			@Override
-//			public void buttonClick(ClickEvent event) {
-//				if(cbRut.getValue() == null){
-//					Notification.show("Debe ingresar un rut para guardar y/o modificar el trabajador.",Type.ERROR_MESSAGE);
-//					return;
-//				}
-//				
-//				final Object itemId =  cbRut.getValue();
-//				logger.debug("itemIds {} ",laborers.getItemIds());
-//				final BeanItem<Laborer> beanItem= laborers.getItem( itemId );
-//				LaborerDialog dialog = new LaborerDialog(beanItem, laborerService);
-//				dialog.addListener(new EditorSavedListener() {
-//					
-//					@Override
-//					public void editorSaved(EditorSavedEvent event) {
-//						
-//						Laborer laborer = beanItem.getBean();
-//						//guarda al trabajador
-//						laborerService.saveLaborer(laborer);
-//						//refresca el item en el combobox
-//						laborers.removeAllItems();
-//						laborers.addAll( laborerService.getAllLaborerExceptThisConstruction(((BeanItem<LaborerConstructionsite>)getItem()).getBean().getConstructionsite()));
-//						if ( laborer.getLaborerId() != null )
-//							btn.setIcon(FontAwesome.PENCIL);
-//						else
-//							btn.setIcon(FontAwesome.FLOPPY_O );
-//						
-//					}
-//				});
-//				UI.getCurrent().addWindow(dialog);
-//			}
-//		});
-//		btn.setTabIndex(2);
 		
 		cbRut.addValueChangeListener(new Property.ValueChangeListener() {
 			
@@ -252,8 +216,8 @@ public class AddLaborerContractDialog extends AbstractWindowEditor implements Ne
 					if(addLaborer){
 						ConstructionSite lastConstructionSite = laborerService.getLastConstructionSite(laborer);
 						logger.debug("lastConstructionSite {}",lastConstructionSite);
-						if(lastConstructionSite != null && laborerConstructionsiteItem.getItemProperty("provenance").getValue() == null )
-							laborerConstructionsiteItem.getItemProperty("provenance").setValue(lastConstructionSite.getName());
+						if(lastConstructionSite != null && laborerConstructionsiteItem.getItemProperty("laborer.provenance").getValue() == null )
+							laborerConstructionsiteItem.getItemProperty("laborer.provenance").setValue(lastConstructionSite.getName());
 					}
 				}
 			}
@@ -365,16 +329,16 @@ public class AddLaborerContractDialog extends AbstractWindowEditor implements Ne
 		//crea
 		logger.debug("se llamo add new item con {}",newItemCaption);
 		//quita el laborer sin id, para no juntar basura
-		for(Laborer itemId : new ArrayList<Laborer>(laborers.getItemIds())){
+		for(Laborer itemId : new ArrayList<Laborer>(laborersBC.getItemIds())){
 			if(itemId.getLaborerId() == null){
-				laborers.removeItem(itemId);
+				laborersBC.removeItem(itemId);
 			}
 		}
 		Laborer laborer = new Laborer();
 		laborer.setRut(newItemCaption);
 		//por defecto el nuevo trabajador tiene al menos 18 años
 		laborer.setDateBirth( new DateTime().plusYears(-18).toDate() );
-		laborers.addBean(laborer);
+		laborersBC.addBean(laborer);
 		cbRut.select(laborer);
 	}
 	
@@ -387,20 +351,35 @@ public class AddLaborerContractDialog extends AbstractWindowEditor implements Ne
 		
 		if( !cbRut.isValid() )
 			msj = cbRut.getRequiredError();
+//		//valida que no esté en la obra actual
+//		boolean inThisConstruction = ((BeanItem<LaborerConstructionsite>) getItem()).getBean().getConstructionsite().getLaborers().contains(laborer);
+//		if(inThisConstruction){
+//			msj = "El trabajador ya pertenece a la obra";
+//		}
+		//valida que no tenga un contrato activo
+		ConstructionSite cs  = laborerService.findActiveConstructionSite(laborer);
+		if( cs != null ){
+			msj = "El trabajador ya pertenece a otra obra : "+cs.getName();
+		}
+		
 //		else if( laborer.getLaborerId() == null )
 //			msj = "Debe crear el trabajador antes de agregarlo";
 		
-		RutDigitValidator rdv = new RutDigitValidator();
-		boolean valid = rdv.isValid(((Laborer) cbRut.getValue()).getRut(), null);
-		if(!valid){
-			msj = "Rut inválido";
-			cbRut.focus();
-		}else if( !cbJob.isValid() )
-			msj = cbJob.getRequiredError();
-		else if( !cbStep.isValid() )
-			msj = cbStep.getRequiredError();
-		else if( !dfAdmissionDate.isValid() )
-			msj = dfAdmissionDate.getRequiredError();
+		if(msj == null ){
+			RutDigitValidator rdv = new RutDigitValidator();
+			boolean valid = rdv.isValid(((Laborer) cbRut.getValue()).getRut(), null);
+			if(!valid){
+				msj = "Rut inválido";
+				cbRut.focus();
+			}else if( !cbJob.isValid() )
+				msj = cbJob.getRequiredError();
+			else if( !cbStep.isValid() )
+				msj = cbStep.getRequiredError();
+			else if( !dfAdmissionDate.isValid() )
+				msj = dfAdmissionDate.getRequiredError();
+			
+		}
+		
 		
 		if(msj != null)
 			Notification.show(msj,Type.ERROR_MESSAGE);
@@ -422,7 +401,6 @@ public class AddLaborerContractDialog extends AbstractWindowEditor implements Ne
 			
 			((BeanItem<LaborerConstructionsite>) getItem()).getBean().setActiveContract(contract);
 		}
-		
 		return msj == null;
 	}
 

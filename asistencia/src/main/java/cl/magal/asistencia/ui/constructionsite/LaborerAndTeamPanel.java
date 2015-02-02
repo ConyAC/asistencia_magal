@@ -343,7 +343,7 @@ public class LaborerAndTeamPanel extends Panel implements View {
 				laborer.setConstructionsite(item.getBean());
 
 				BeanItem<LaborerConstructionsite> laborerItem = new BeanItem<LaborerConstructionsite>(laborer);
-				AddLaborerContractDialog userWindow = new AddLaborerContractDialog(laborerItem,laborerService,true);
+				AddLaborerContractDialog userWindow = new AddLaborerContractDialog(laborerItem,true);
 
 				userWindow.addListener(new AbstractWindowEditor.EditorSavedListener() {
 

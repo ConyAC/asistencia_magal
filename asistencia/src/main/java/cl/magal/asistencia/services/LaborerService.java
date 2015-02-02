@@ -183,5 +183,14 @@ public class LaborerService {
 		return laborerRepo.findByConstructionSite(cs.getConstructionsiteId());
 	}
 
+	/**
+	 * 
+	 * @param laborer
+	 * @return
+	 */
+	public ConstructionSite findActiveConstructionSite(Laborer laborer) {
+		return laborerConstructionsiteRepo.findConstructionsiteByLaborer(laborer);
+	}
+
 	
 }
