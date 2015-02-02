@@ -14,7 +14,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.TransactionSystemException;
 
 import cl.magal.asistencia.entities.ConstructionSite;
-import cl.magal.asistencia.entities.Contract;
 import cl.magal.asistencia.entities.Laborer;
 import cl.magal.asistencia.entities.LaborerConstructionsite;
 import cl.magal.asistencia.entities.enums.Job;
@@ -87,21 +86,19 @@ public class LaborerService {
 		//por cada una crea un vo
 		for(LaborerConstructionsite laborerConstructionsite : laborerConstructionsites ){
 			//por cada contrato
-			for(Contract contract : laborerConstructionsite.getContracts() ){
-				HistoryVO vo = new HistoryVO();
-				vo.setConstructionSite(laborerConstructionsite.getConstructionsite());
-				//considerar el job historico
-				vo.setJob(contract.getJob()); 
-				vo.setNumberOfAccidents(laborerConstructionsite.getAccidents().size());
-				vo.setStartingDate(contract.getStartDate());
-				vo.setEndingDate(contract.getTerminationDate());
-				vo.setActive(contract.isActive());
-				//TODO
-				vo.setReward(Double.valueOf(Utils.random(19000, 150000)));
-				vo.setAverageWage(Double.valueOf(Utils.random(9000, 15000)));
-				
-				result.add(vo);
-			}
+			HistoryVO vo = new HistoryVO();
+			vo.setConstructionSite(laborerConstructionsite.getConstructionsite());
+			//considerar el job historico
+			vo.setJob(laborerConstructionsite.getActiveContract().getJob()); 
+			vo.setNumberOfAccidents(laborerConstructionsite.getAccidents().size());
+			vo.setStartingDate(laborerConstructionsite.getActiveContract().getStartDate());
+			vo.setEndingDate(laborerConstructionsite.getActiveContract().getTerminationDate());
+			vo.setActive(laborerConstructionsite.getActiveContract().isActive());
+			//TODO
+			vo.setReward(laborerConstructionsite.getReward());
+			vo.setAverageWage(Double.valueOf(Utils.random(9000, 15000)));
+			
+			result.add(vo);
 		}
 		
 		return result;
@@ -126,7 +123,7 @@ public class LaborerService {
 		if(laborerConstructionSite == null)
 			throw new RuntimeException("La relación trabajador-obra no puede ser nula");
 		//es necesario que tenga algún contrato
-		if(laborerConstructionSite.getContracts().isEmpty())
+		if(laborerConstructionSite.getActiveContract() == null )
 			throw new RuntimeException("La relación trabajador-obra debe tener al menos un contrato asociado");
 		//guarda los contratos
 		laborerConstructionsiteRepo.save(laborerConstructionSite);		
@@ -164,7 +161,7 @@ public class LaborerService {
 	 * @return
 	 */
 	public ConstructionSite getLastConstructionSite(Laborer laborer) {
-		LaborerConstructionsite cs = laborerConstructionsiteRepo.findFirstByLaborerOrderByContractsStartDateDesc(laborer);
+		LaborerConstructionsite cs = laborerConstructionsiteRepo.findFirstByLaborerOrderByActiveContractStartDateDesc(laborer);
 		if(cs != null)
 			return cs.getConstructionsite();
 		return null;

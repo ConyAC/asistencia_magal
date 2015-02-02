@@ -8,10 +8,12 @@ import org.slf4j.LoggerFactory;
 import cl.magal.asistencia.entities.ConstructionCompany;
 import cl.magal.asistencia.entities.ConstructionSite;
 import cl.magal.asistencia.entities.User;
+import cl.magal.asistencia.entities.enums.Permission;
 import cl.magal.asistencia.entities.enums.Status;
 import cl.magal.asistencia.services.ConstructionSiteService;
 import cl.magal.asistencia.services.UserService;
 import cl.magal.asistencia.ui.AbstractWindowEditor;
+import cl.magal.asistencia.util.SecurityHelper;
 import cl.magal.asistencia.util.Utils;
 
 import com.vaadin.data.Item;
@@ -22,13 +24,13 @@ import com.vaadin.ui.AbstractSelect.ItemCaptionMode;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.Field;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Notification;
+import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.TextField;
@@ -40,7 +42,7 @@ public class ConstructionSiteDialog extends AbstractWindowEditor {
 	 * 
 	 */
 	private static final long serialVersionUID = -3983737958814451979L;
-	
+
 	transient Logger logger = LoggerFactory.getLogger(ConstructionSiteDialog.class);
 
 	BeanItemContainer<User> userContainer;
@@ -78,20 +80,22 @@ public class ConstructionSiteDialog extends AbstractWindowEditor {
 		return panel;
 	}
 	Table tableSteps;
-	
+
 	protected HorizontalLayout drawObra() {
-		
+
 		HorizontalLayout hl = new HorizontalLayout();
 		hl.setWidth("100%");
 		hl.setMargin(true);
-		
+		hl.setSpacing(true);
+
 		//datos basicos de obra
 		FormLayout fl = new FormLayout();
-		fl.setWidthUndefined();
+		fl.setEnabled(SecurityHelper.hasPermission(Permission.EDITAR_OBRA));
+		fl.setWidth("100%");
 		hl.addComponent(fl);
 		hl.setComponentAlignment(fl, Alignment.MIDDLE_CENTER);
 		fl.setSpacing(true);
-			
+
 		for (Object propertyId : new String[]{"name", "code", "address","status"}) {
         	if(propertyId.equals("constructionsiteId") || propertyId.equals("deleted"))
         		;
@@ -179,7 +183,8 @@ public class ConstructionSiteDialog extends AbstractWindowEditor {
 		vl.setComponentAlignment(btn, Alignment.MIDDLE_RIGHT);
 		vl.addComponent(tableSteps);
 		vl.setExpandRatio(tableSteps, 1.0F);
-		
+
+		tableSteps.setEnabled(SecurityHelper.hasPermission(Permission.AGREGAR_ETAPAS_OBRA));
 		tableSteps.setEditable(true);
 		
 		return hl;

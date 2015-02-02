@@ -295,7 +295,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 				//				}){{setIcon(FontAwesome.PRINT); setDescription("Imprimir");}};
 				//				addComponent(btnPrint);
 
-				if( SecurityHelper.hastPermission(Permission.BLOQUEAR_OBRERO)){
+				if( SecurityHelper.hasPermission(Permission.BLOQUEAR_OBRERO)){
 					Button bloquear = new Button(null,FontAwesome.LOCK);					
 					bloquear.addClickListener(new Button.ClickListener() {
 						public void buttonClick(ClickEvent event) {								
@@ -328,7 +328,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 					addComponent(bloquear);
 				}
 
-				if( SecurityHelper.hastPermission(Permission.CONFIRMAR_OBREROS)){
+				if( SecurityHelper.hasPermission(Permission.CONFIRMAR_OBREROS)){
 					Button acceptObrero = new Button(null,FontAwesome.CHECK);					
 					acceptObrero.addClickListener(new Button.ClickListener() {
 						@Override
@@ -605,63 +605,63 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 				addComponent(btnPrint);
 
 				//				Button btnEdit = new Button(null,FontAwesome.PENCIL);
-				if(!readOnly){
-
-					final HorizontalLayout hl = this;
-
-					final Button btnChangeJob = new Button(null,FontAwesome.EXCHANGE);
-
-
-					//				btnEdit.setDescription("Editar");
-					btnChangeJob.setDescription("Cambiar Oficio");
-
-					//				btnEdit.addClickListener(new Button.ClickListener() {
-					//
-					//					@Override
-					//					public void buttonClick(ClickEvent event) {
-					//						
-					//					}
-					//				});
-					//				addComponent(btnEdit);
-
-					btnChangeJob.addClickListener(new Button.ClickListener() {
-
-						@Override
-						public void buttonClick(ClickEvent event) {
-
-							//solo puede crear otro contrato si está finalizado el anterior y calculó el finiquito
-							if(!activeContract.isFinished() || activeContract.getSettlement() == null ){
-								Notification.show("El contrato debe estár terminado y finiquitado para cambiar el rol",Type.HUMANIZED_MESSAGE);
-								return;
-							}
-							
-							AddLaborerContractDialog userWindow = new AddLaborerContractDialog(getItem(),service,false);
-
-							userWindow.addListener(new AbstractWindowEditor.EditorSavedListener() {
-
-								@Override
-								public void editorSaved(EditorSavedEvent event) {
-									try {
-										//TODO definir si guardará o no el estado del laborer en esta etapa
-										LaborerConstructionsite laborer = ((BeanItem<LaborerConstructionsite>) event.getSavedItem()).getBean();
-										setContractGl(laborer.getActiveContract());
-										beanContainerAnnexeds.removeAllItems();
-
-										//										hl.replaceComponent(btnChangeJob,btnFinishContract);
-									} catch (Exception e) {
-										logger.error("Error al guardar la información del obrero",e);
-										Notification.show("Es necesario agregar todos los campos obligatorios", Type.ERROR_MESSAGE);
-									}
-								}
-							});
-
-							UI.getCurrent().addWindow(userWindow);
-						}
-					});
-
-
-					addComponent(btnChangeJob);
-				}
+//				if(!readOnly){
+//
+////					final HorizontalLayout hl = this;
+//
+////					final Button btnChangeJob = new Button(null,FontAwesome.EXCHANGE);
+//
+//
+//					//				btnEdit.setDescription("Editar");
+////					btnChangeJob.setDescription("Cambiar Oficio");
+//
+//					//				btnEdit.addClickListener(new Button.ClickListener() {
+//					//
+//					//					@Override
+//					//					public void buttonClick(ClickEvent event) {
+//					//						
+//					//					}
+//					//				});
+//					//				addComponent(btnEdit);
+////
+////					btnChangeJob.addClickListener(new Button.ClickListener() {
+////
+////						@Override
+////						public void buttonClick(ClickEvent event) {
+////
+////							//solo puede crear otro contrato si está finalizado el anterior y calculó el finiquito
+////							if(!activeContract.isFinished() || activeContract.getSettlement() == null ){
+////								Notification.show("El contrato debe estár terminado y finiquitado para cambiar el rol",Type.HUMANIZED_MESSAGE);
+////								return;
+////							}
+////							
+////							AddLaborerContractDialog userWindow = new AddLaborerContractDialog(getItem(),service,false);
+////
+////							userWindow.addListener(new AbstractWindowEditor.EditorSavedListener() {
+////
+////								@Override
+////								public void editorSaved(EditorSavedEvent event) {
+////									try {
+////										//TODO definir si guardará o no el estado del laborer en esta etapa
+////										LaborerConstructionsite laborer = ((BeanItem<LaborerConstructionsite>) event.getSavedItem()).getBean();
+////										setContractGl(laborer.getActiveContract());
+////										beanContainerAnnexeds.removeAllItems();
+////
+////										//										hl.replaceComponent(btnChangeJob,btnFinishContract);
+////									} catch (Exception e) {
+////										logger.error("Error al guardar la información del obrero",e);
+////										Notification.show("Es necesario agregar todos los campos obligatorios", Type.ERROR_MESSAGE);
+////									}
+////								}
+////							});
+////
+////							UI.getCurrent().addWindow(userWindow);
+////						}
+////					});
+//
+//
+////					addComponent(btnChangeJob);
+//				}
 			}
 		},2,fila++);
 
@@ -795,6 +795,9 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 				//TODO calcular finiquito
 				//setea un finiquito
 				activeContract.setSettlement(100000);
+				//deja desactivo tanto el contrato como el laborer constructionsite
+				activeContract.setActive(false);
+				((LaborerConstructionsite)getItem().getBean()).setActive((short)0);
 				setContractGl(activeContract);
 			}
 		});

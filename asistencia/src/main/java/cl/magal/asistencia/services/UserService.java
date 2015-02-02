@@ -6,8 +6,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import javax.annotation.PostConstruct;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,6 +59,7 @@ public class UserService implements UserDetailsService {
 			perm.add(Permission.CREAR_OBRA);
 			perm.add(Permission.EDITAR_OBRA);
 			perm.add(Permission.ELIMINAR_OBRA);
+			perm.add(Permission.AGREGAR_ETAPAS_OBRA);
 			perm.add(Permission.ASIGNAR_OBRA);
 			perm.add(Permission.CREAR_USUARIO);
 			perm.add(Permission.DEFINIR_VARIABLE_GLOBAL);
@@ -121,7 +120,7 @@ public class UserService implements UserDetailsService {
 			role = new Role();
 			role.setName("Administrador Obra");
 			perm = new HashSet<Permission>();	
-			perm.add(Permission.EDITAR_OBRA);
+			perm.add(Permission.AGREGAR_ETAPAS_OBRA);
 			perm.add(Permission.CONFIRMAR_OBREROS);
 			role.setPermission(perm);
 			repRole.save(role);

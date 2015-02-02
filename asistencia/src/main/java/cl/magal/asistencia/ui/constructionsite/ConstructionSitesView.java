@@ -121,7 +121,7 @@ public class ConstructionSitesView extends BaseView implements View {
 		vl.setSpacing(true);
 
 		//agrega solo si tiene los permisos
-		if( SecurityHelper.hastPermission(Permission.CREAR_OBRA,Permission.ELIMINAR_OBRA)){
+		if( SecurityHelper.hasPermission(Permission.CREAR_OBRA,Permission.ELIMINAR_OBRA)){
 		
 			//botones agrega
 			HorizontalLayout hl = new HorizontalLayout();
@@ -190,7 +190,7 @@ public class ConstructionSitesView extends BaseView implements View {
 					Object columnId) {
 				HorizontalLayout hl = new HorizontalLayout();
 				
-				if( SecurityHelper.hastPermission(Permission.EDITAR_OBRA)){
+				if( SecurityHelper.hasPermission(Permission.EDITAR_OBRA) || SecurityHelper.hasPermission(Permission.AGREGAR_ETAPAS_OBRA)){
 					//Editar datos de una obra
 					Button editarObra = new Button(null,FontAwesome.EDIT);
 					editarObra.addClickListener(new Button.ClickListener() {
@@ -233,7 +233,7 @@ public class ConstructionSitesView extends BaseView implements View {
 					hl.addComponent(editarObra);
 				}
 				
-				if( SecurityHelper.hastPermission(Permission.ELIMINAR_OBRA)){
+				if( SecurityHelper.hasPermission(Permission.ELIMINAR_OBRA)){
 					hl.setSpacing(true);
 							
 					//Marcar como eliminada una obra
