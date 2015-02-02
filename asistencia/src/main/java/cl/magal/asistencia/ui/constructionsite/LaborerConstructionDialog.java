@@ -172,51 +172,52 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 		vl.addComponent( new VerticalLayout(){
 			{
 				setSpacing(true);
-				//				setMargin(true);
 				setWidth("100%");
 
-				addComponent(new GridLayout(4,2){
+				addComponent(new GridLayout(3,2){
 					{
 						setSpacing(true);
 						setMargin(true);
 						setWidth("100%");
-						addComponent(new TextField("Premio: ",getItem().getItemProperty("reward")){{
-							setNullRepresentation("");
-							addValidator(new BeanValidator(LaborerConstructionsite.class,"reward"));
-							setEnabled(!readOnly);
-						}});
 
 						final DateField startDate = new DateField("Fecha Inicial",getItem().getItemProperty("rewardStartDate"));
 						final DateField endDate = new DateField("Fecha Final",getItem().getItemProperty("rewardEndDate"));
-					
-						
 
-						CheckBox checkbox = new CheckBox("Usar Fechas Contrato",getItem().getItemProperty("useDefaultDates"));
-						startDate.setVisible(!checkbox.getValue());
-						endDate.setVisible(!checkbox.getValue());
-						checkbox.addValueChangeListener(new Property.ValueChangeListener() {
+						VerticalLayout vl = new VerticalLayout(){
+							{
+								setSpacing(true);
+								addComponent(new TextField("Premio: ",getItem().getItemProperty("reward")){{
+									setNullRepresentation("");
+									addValidator(new BeanValidator(LaborerConstructionsite.class,"reward"));
+									setEnabled(!readOnly);
+								}});
+								CheckBox checkbox = new CheckBox("Aplicar premio según fechas de contrato",getItem().getItemProperty("useDefaultDates"));
+								startDate.setVisible(!checkbox.getValue());
+								endDate.setVisible(!checkbox.getValue());
+								checkbox.addValueChangeListener(new Property.ValueChangeListener() {
 
-							@Override
-							public void valueChange(ValueChangeEvent event) {
-								boolean ischecked = (Boolean) event.getProperty().getValue();
-								startDate.setVisible(!ischecked);
-								endDate.setVisible(!ischecked);
-								if(ischecked){
-									startDate.setValue(null);
-									endDate.setValue(null);
-								}
+									@Override
+									public void valueChange(ValueChangeEvent event) {
+										boolean ischecked = (Boolean) event.getProperty().getValue();
+										startDate.setVisible(!ischecked);
+										endDate.setVisible(!ischecked);
+										if(ischecked){
+											startDate.setValue(null);
+											endDate.setValue(null);
+										}
+									}
+								});
+								addComponent(checkbox);
+
 							}
-						});						
-						addComponent(checkbox);
-						setComponentAlignment(checkbox, Alignment.BOTTOM_LEFT);
+						};
+						addComponent( vl );
+						setComponentAlignment(vl, Alignment.MIDDLE_CENTER);
 						addComponent(startDate);
+						setComponentAlignment(startDate, Alignment.MIDDLE_CENTER);
 						addComponent(endDate);
+						setComponentAlignment(endDate, Alignment.MIDDLE_CENTER);
 
-						addComponent(new TextField("Jornal Promedio: ",getItem().getItemProperty("activeContract.valueTreatment")){{
-							setNullRepresentation("");
-							addValidator(new BeanValidator(Contract.class,"valueTreatment"));
-							setEnabled(!readOnly);
-						}});
 					}
 				});
 			}
@@ -273,12 +274,12 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 
 				gl.addComponent(new Label("Estado Civil : "));gl.addComponent(new Label(marital));
 				gl.addComponent(new Label("Dirección : "));gl.addComponent(new Label(getItem().getItemProperty("laborer.address")));
-				
+
 				if(getItem().getItemProperty("laborer.mobileNumber").getValue() != null || getItem().getItemProperty("laborer.phone").getValue() != null){
 					gl.addComponent(new Label("Teléfonos : "));
 					gl.addComponent(new Label(getItem().getItemProperty("laborer.mobileNumber").getValue() +" - "+getItem().getItemProperty("laborer.phone").getValue()));
 				}
-				
+
 				if(getItem().getItemProperty("activeContract.startDate").getValue() != null){
 					gl.addComponent(new Label("Fecha Ingreso : "));
 					gl.addComponent(new Label(getItem().getItemProperty("activeContract.startDate")));
@@ -541,7 +542,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 		final GridLayout gl = new GridLayout(3,10);
 		gl.setSpacing(true);
 		gl.setSizeFull();
-		
+
 		gl.setColumnExpandRatio(0, 0.2F);
 		gl.setColumnExpandRatio(1, 0.2F);
 		gl.setColumnExpandRatio(2, 1.0F);
@@ -605,63 +606,63 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 				addComponent(btnPrint);
 
 				//				Button btnEdit = new Button(null,FontAwesome.PENCIL);
-//				if(!readOnly){
-//
-////					final HorizontalLayout hl = this;
-//
-////					final Button btnChangeJob = new Button(null,FontAwesome.EXCHANGE);
-//
-//
-//					//				btnEdit.setDescription("Editar");
-////					btnChangeJob.setDescription("Cambiar Oficio");
-//
-//					//				btnEdit.addClickListener(new Button.ClickListener() {
-//					//
-//					//					@Override
-//					//					public void buttonClick(ClickEvent event) {
-//					//						
-//					//					}
-//					//				});
-//					//				addComponent(btnEdit);
-////
-////					btnChangeJob.addClickListener(new Button.ClickListener() {
-////
-////						@Override
-////						public void buttonClick(ClickEvent event) {
-////
-////							//solo puede crear otro contrato si está finalizado el anterior y calculó el finiquito
-////							if(!activeContract.isFinished() || activeContract.getSettlement() == null ){
-////								Notification.show("El contrato debe estár terminado y finiquitado para cambiar el rol",Type.HUMANIZED_MESSAGE);
-////								return;
-////							}
-////							
-////							AddLaborerContractDialog userWindow = new AddLaborerContractDialog(getItem(),service,false);
-////
-////							userWindow.addListener(new AbstractWindowEditor.EditorSavedListener() {
-////
-////								@Override
-////								public void editorSaved(EditorSavedEvent event) {
-////									try {
-////										//TODO definir si guardará o no el estado del laborer en esta etapa
-////										LaborerConstructionsite laborer = ((BeanItem<LaborerConstructionsite>) event.getSavedItem()).getBean();
-////										setContractGl(laborer.getActiveContract());
-////										beanContainerAnnexeds.removeAllItems();
-////
-////										//										hl.replaceComponent(btnChangeJob,btnFinishContract);
-////									} catch (Exception e) {
-////										logger.error("Error al guardar la información del obrero",e);
-////										Notification.show("Es necesario agregar todos los campos obligatorios", Type.ERROR_MESSAGE);
-////									}
-////								}
-////							});
-////
-////							UI.getCurrent().addWindow(userWindow);
-////						}
-////					});
-//
-//
-////					addComponent(btnChangeJob);
-//				}
+				//				if(!readOnly){
+				//
+				////					final HorizontalLayout hl = this;
+				//
+				////					final Button btnChangeJob = new Button(null,FontAwesome.EXCHANGE);
+				//
+				//
+				//					//				btnEdit.setDescription("Editar");
+				////					btnChangeJob.setDescription("Cambiar Oficio");
+				//
+				//					//				btnEdit.addClickListener(new Button.ClickListener() {
+				//					//
+				//					//					@Override
+				//					//					public void buttonClick(ClickEvent event) {
+				//					//						
+				//					//					}
+				//					//				});
+				//					//				addComponent(btnEdit);
+				////
+				////					btnChangeJob.addClickListener(new Button.ClickListener() {
+				////
+				////						@Override
+				////						public void buttonClick(ClickEvent event) {
+				////
+				////							//solo puede crear otro contrato si está finalizado el anterior y calculó el finiquito
+				////							if(!activeContract.isFinished() || activeContract.getSettlement() == null ){
+				////								Notification.show("El contrato debe estár terminado y finiquitado para cambiar el rol",Type.HUMANIZED_MESSAGE);
+				////								return;
+				////							}
+				////							
+				////							AddLaborerContractDialog userWindow = new AddLaborerContractDialog(getItem(),service,false);
+				////
+				////							userWindow.addListener(new AbstractWindowEditor.EditorSavedListener() {
+				////
+				////								@Override
+				////								public void editorSaved(EditorSavedEvent event) {
+				////									try {
+				////										//TODO definir si guardará o no el estado del laborer en esta etapa
+				////										LaborerConstructionsite laborer = ((BeanItem<LaborerConstructionsite>) event.getSavedItem()).getBean();
+				////										setContractGl(laborer.getActiveContract());
+				////										beanContainerAnnexeds.removeAllItems();
+				////
+				////										//										hl.replaceComponent(btnChangeJob,btnFinishContract);
+				////									} catch (Exception e) {
+				////										logger.error("Error al guardar la información del obrero",e);
+				////										Notification.show("Es necesario agregar todos los campos obligatorios", Type.ERROR_MESSAGE);
+				////									}
+				////								}
+				////							});
+				////
+				////							UI.getCurrent().addWindow(userWindow);
+				////						}
+				////					});
+				//
+				//
+				////					addComponent(btnChangeJob);
+				//				}
 			}
 		},2,fila++);
 
@@ -686,7 +687,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 
 			@Override
 			public void buttonClick(ClickEvent event) {
-				
+
 				//permite imprimir la carta de renuncia
 				final Window w = new Window("Cartas de renuncias");
 				w.center();
@@ -871,7 +872,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 						final Map<String, Object> input = new HashMap<String, Object>();
 						input.put("laborerConstructions", new LaborerConstructionsite[] {(LaborerConstructionsite)getItem().getBean()});
 						VelocityHelper.addTools(input);
-						
+
 						final String body = VelocityEngineUtils.mergeTemplateIntoString(velocityEngine, "templates/annex_contract_doc.vm", "UTF-8", input);
 
 						StreamResource.StreamSource source2 = new StreamResource.StreamSource() {
@@ -1303,7 +1304,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 								final Map<String, Object> input = new HashMap<String, Object>();
 								input.put("laborerConstructions", new LaborerConstructionsite[] {(LaborerConstructionsite)getItem().getBean()});
 								VelocityHelper.addTools(input);
-								
+
 								final String body = VelocityEngineUtils.mergeTemplateIntoString(velocityEngine, "templates/vacation_doc.vm", "UTF-8", input);
 
 								StreamResource.StreamSource source2 = new StreamResource.StreamSource() {

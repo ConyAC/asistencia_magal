@@ -3,7 +3,12 @@ package cl.magal.asistencia.entities.validator;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class RutDigitValidator implements ConstraintValidator<RutDigit, String> {
+	
+	Logger logger = LoggerFactory.getLogger(RutDigitValidator.class);
 
 	@Override
 	public void initialize(RutDigit constraintAnnotation) {
@@ -14,6 +19,7 @@ public class RutDigitValidator implements ConstraintValidator<RutDigit, String> 
 	public boolean isValid(String rut, ConstraintValidatorContext context) {
 		if(rut == null )
 			return false;
+		logger.debug("rut {} ",rut);
 		String[] rutTemp = rut.split("-");
 		if( rutTemp == null || rutTemp.length != 2 )
 			return false;

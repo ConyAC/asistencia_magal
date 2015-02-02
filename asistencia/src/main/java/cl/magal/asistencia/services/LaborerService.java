@@ -125,6 +125,18 @@ public class LaborerService {
 		//es necesario que tenga algún contrato
 		if(laborerConstructionSite.getActiveContract() == null )
 			throw new RuntimeException("La relación trabajador-obra debe tener al menos un contrato asociado");
+		// valida que el trabajador no sea nulo
+		if(laborerConstructionSite.getLaborer() == null)
+			throw new RuntimeException("El trabajador no puede ser nula");
+		
+		//si el trabajador es nuevo, lo guarda primero
+		if(laborerConstructionSite.getLaborer().getLaborerId() == null )
+			laborerRepo.save(laborerConstructionSite.getLaborer());
+		
+		//si el contrato es nuevo, lo guarda primero
+		if(laborerConstructionSite.getActiveContract().getContractId() == null )
+			contractRepo.save(laborerConstructionSite.getActiveContract());
+		
 		//guarda los contratos
 		laborerConstructionsiteRepo.save(laborerConstructionSite);		
 	}
