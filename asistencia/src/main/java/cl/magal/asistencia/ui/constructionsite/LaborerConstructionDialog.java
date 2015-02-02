@@ -25,6 +25,7 @@ import cl.magal.asistencia.entities.Annexed;
 import cl.magal.asistencia.entities.Contract;
 import cl.magal.asistencia.entities.LaborerConstructionsite;
 import cl.magal.asistencia.entities.Loan;
+import cl.magal.asistencia.entities.TaxationConfigurations;
 import cl.magal.asistencia.entities.Tool;
 import cl.magal.asistencia.entities.User;
 import cl.magal.asistencia.entities.Vacation;
@@ -421,22 +422,29 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 		tableTool.addGeneratedColumn("selected", new Table.ColumnGenerator() {
 
 			@Override
-			public Component generateCell(Table source, Object itemId, Object columnId) {
+			public Component generateCell(Table source, final Object itemId, Object columnId) {
 				/* When the chekboc value changes, add/remove the itemId from the selectedItemIds set */
 				final CheckBox cb = new CheckBox("");
 				cb.addValueChangeListener(new Property.ValueChangeListener() {
 					@Override
 					public void valueChange(Property.ValueChangeEvent event) {
 						boolean value = (Boolean) event.getProperty().getValue();
+						
+						Tool t = ((BeanItem<Tool>)beanItemTool.getItem(itemId)).getBean();
+						logger.debug("LELE: "+t.getToolId());
+						List<Tool> tools = service.findDatePostponed(t.getToolId());
+						
+						
 						if(value){
 							;
+							//service.saveToolDate(tdp);
 						}
 					}
 				});
 				return cb;
 			}
 		});
-
+		
 		tableTool.addGeneratedColumn("eliminar", new Table.ColumnGenerator() {
 
 			@Override
@@ -445,10 +453,17 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 
 					@Override
 					public void buttonClick(ClickEvent event) {
-						//laborerConstructionSite.removeTool(tool);
-						tableTool.removeItem(itemId);
+						ConfirmDialog.show(UI.getCurrent(), "Confirmar Acción:", "¿Está seguro de eliminar la herramienta seleccionada?",
+								"Eliminar", "Cancelar", new ConfirmDialog.Listener() {
+
+							public void onClose(ConfirmDialog dialog) {
+								if (dialog.isConfirmed()) {
+									beanItemTool.removeItem(itemId);
+								}
+							}
+						});
 					}
-				}){ {setIcon(FontAwesome.TRASH_O);} };
+				}){{setIcon(FontAwesome.TRASH_O);}};
 			}
 		});
 
@@ -516,9 +531,52 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 				return field;
 			}
 		});
+		
+		tableLoan.addGeneratedColumn("selected", new Table.ColumnGenerator() {
 
-		tableLoan.setVisibleColumns("price","dateBuy", "fee", "status");
-		tableLoan.setColumnHeaders("Monto","Fecha", "Cuota", "Estado");
+			@Override
+			public Component generateCell(Table source, Object itemId, Object columnId) {
+				/* When the chekboc value changes, add/remove the itemId from the selectedItemIds set */
+				final CheckBox cb = new CheckBox("");
+				cb.addValueChangeListener(new Property.ValueChangeListener() {
+					@Override
+					public void valueChange(Property.ValueChangeEvent event) {
+						boolean value = (Boolean) event.getProperty().getValue();
+						if(value){
+							;
+							//service.saveToolDate(tdp);
+						}
+					}
+				});
+				return cb;
+			}
+		});
+		
+		tableLoan.addGeneratedColumn("eliminar", new Table.ColumnGenerator() {
+
+			@Override
+			public Object generateCell(Table source, final Object itemId, Object columnId) {
+				return new Button(null,new Button.ClickListener() {
+
+					@Override
+					public void buttonClick(ClickEvent event) {
+						ConfirmDialog.show(UI.getCurrent(), "Confirmar Acción:", "¿Está seguro de eliminar el préstamo seleccionado?",
+								"Eliminar", "Cancelar", new ConfirmDialog.Listener() {
+
+							public void onClose(ConfirmDialog dialog) {
+								if (dialog.isConfirmed()) {
+									beanItemLoan.removeItem(itemId);
+								}
+							}
+						});
+					}
+				}){{setIcon(FontAwesome.TRASH_O);}};
+			}
+		});
+
+
+		tableLoan.setVisibleColumns("price","dateBuy", "fee", "selected","status", "eliminar");
+		tableLoan.setColumnHeaders("Monto","Fecha", "Cuota", "Postergar pago", "Estado", "Eliminar");
 		tableLoan.setEditable(true);		
 		vp.addComponent(tableLoan);
 		vp.setComponentAlignment(hl2, Alignment.TOP_RIGHT);

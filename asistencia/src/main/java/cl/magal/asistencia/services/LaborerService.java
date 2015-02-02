@@ -17,6 +17,7 @@ import cl.magal.asistencia.entities.ConstructionSite;
 import cl.magal.asistencia.entities.Contract;
 import cl.magal.asistencia.entities.Laborer;
 import cl.magal.asistencia.entities.LaborerConstructionsite;
+import cl.magal.asistencia.entities.Tool;
 import cl.magal.asistencia.entities.enums.Job;
 import cl.magal.asistencia.repositories.AbsenceRepositoy;
 import cl.magal.asistencia.repositories.AccidentRepository;
@@ -173,6 +174,8 @@ public class LaborerService {
 	public List<Laborer> getAllLaborer(ConstructionSite cs) {
 		return laborerRepo.findByConstructionSite(cs.getConstructionsiteId());
 	}
-
 	
+	public List<Tool> findDatePostponed(Long id) {
+		return toolRepo.findDatePostponed(id);
+	}	
 }

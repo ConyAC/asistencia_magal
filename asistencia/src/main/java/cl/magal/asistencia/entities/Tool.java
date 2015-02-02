@@ -7,11 +7,17 @@ package cl.magal.asistencia.entities;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.Set;
 
 import javax.persistence.Basic;
+import javax.persistence.CollectionTable;
 import javax.persistence.Column;
 import javax.persistence.Convert;
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -27,6 +33,7 @@ import javax.validation.constraints.Max;
 import javax.validation.constraints.NotNull;
 
 import cl.magal.asistencia.entities.converter.ToolStatusConverter;
+import cl.magal.asistencia.entities.enums.Permission;
 import cl.magal.asistencia.entities.enums.ToolStatus;
 
 /**
@@ -72,11 +79,18 @@ public class Tool implements Serializable {
 	LaborerConstructionsite laborerConstructionSite;
     
     //Pagos postergados
-    @Column(name="datePostponed")
+   /* @Column(name="datePostponed")
     @Temporal(TemporalType.TIMESTAMP)
-    private Date datePostponed;    
+    private Date datePostponed;*/    
     @Column(name = "postponed")
     private boolean postponed;
+    
+    //tabla intermedia entre role y sus permisos    
+    @ElementCollection(targetClass= Date.class,fetch=FetchType.EAGER)
+    @CollectionTable(name="dates", joinColumns = @JoinColumn(name = "toolId"))
+    @Column(name="date")
+    @Temporal(TemporalType.TIMESTAMP)
+    Set<Date> datePostponed; 
     
     public Tool() {
     }
@@ -168,20 +182,20 @@ public class Tool implements Serializable {
 //        return true;
 //    }
 
-    public Date getDatePostponed() {
-		return datePostponed;
-	}
-
-	public void setDatePostponed(Date datePostponed) {
-		this.datePostponed = datePostponed;
-	}
-
 	public boolean isPostponed() {
 		return postponed;
 	}
 
 	public void setPostponed(boolean postponed) {
 		this.postponed = postponed;
+	}
+
+	public Set<Date> getDatePostponed() {
+		return datePostponed;
+	}
+
+	public void setDatePostponed(Set<Date> datePostponed) {
+		this.datePostponed = datePostponed;
 	}
 
 	@Override
