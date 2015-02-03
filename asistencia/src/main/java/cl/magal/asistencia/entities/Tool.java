@@ -10,7 +10,6 @@ import java.util.Date;
 
 import javax.persistence.Basic;
 import javax.persistence.Column;
-import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -19,15 +18,15 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
-import javax.persistence.PrePersist;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.validation.constraints.Digits;
 import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
-import cl.magal.asistencia.entities.converter.ToolStatusConverter;
-import cl.magal.asistencia.entities.enums.ToolStatus;
+import org.hibernate.validator.constraints.NotEmpty;
 
 /**
  *
@@ -52,23 +51,39 @@ public class Tool implements Serializable {
     @Basic(optional = false)
     @Column(name = "toolId")
     private Long toolId;
+	
+	@NotNull(message="El nombre de la herramienta es necesario.")
+	@NotEmpty(message="El nombre de la herramienta es necesario.")
     @Basic(optional = false)
     @Column(name = "name")
     private String name;
+	
+    @Max(value=500000,message="El monto no puede superar los $500.000")
+    @Min(value=0, message = "El monto no puede ser negativo")
+    @NotNull(message="El monto es necesario")
+    @Digits(integer=6,fraction=0)
     @Column(name = "price")
-    @Max(value=500000)
     private Integer price;
+    
+    
     @Basic(optional = false)
+    @NotNull(message="La fecha de compra es necesaria.")
     @Column(name = "dateBuy")
     @Temporal(TemporalType.TIMESTAMP)
     private Date dateBuy;
-    @Max(value=6)
+    
+    @Max(value=6, message = "El número de cuotas no puede ser más de 6")
+    @Min(value=1, message = "El número de cuotas no puede ser negativa ni cero")
+    @Digits(integer=1,fraction=0)
+    @NotNull(message="El número de cuotas es necesario")
     @Column(name = "fee")
     private Integer fee;
-    @Column(name = "status")
+    
+    @Column(name = "status" , nullable = false )
     private String status;
+    
     @ManyToOne
-	@JoinColumn(name="LABORER_CONSTRUCTIONSITEID")
+	@JoinColumn(name="LABORER_CONSTRUCTIONSITEID",nullable = false )
 	LaborerConstructionsite laborerConstructionSite;
     
     //Pagos postergados

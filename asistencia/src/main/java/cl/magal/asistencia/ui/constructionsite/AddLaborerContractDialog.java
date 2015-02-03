@@ -181,21 +181,20 @@ public class AddLaborerContractDialog extends AbstractWindowEditor implements Ne
 					bField.addItem(b);
 				}
 				gl.addComponent(bField);
-				bind(bField, prefix+"bank");   
+				bind(bField, prefix+"bank");
 				gl.setComponentAlignment(bField, Alignment.MIDDLE_CENTER);
 			}else{        		
 				String t = tradProperty(propertyId);
 				Field<?> field = buildAndBind(t, prefix+propertyId);
 				if(field instanceof TextField){
 					((TextField)field).setNullRepresentation("");
-					field.addValidator(new BeanValidator(Laborer.class, (String) propertyId));
 				}
-				
-//				if(viewElement){
-//					if(propertyId.equals("firstname") || propertyId.equals("lastname") || propertyId.equals("rut")){
-//						field.setEnabled(false);
-//					}
-//				}
+				field.addValidator(new BeanValidator(Laborer.class, (String) propertyId));				
+				if(!addLaborer){
+					if(propertyId.equals("firstname") || propertyId.equals("lastname") || propertyId.equals("rut")){
+						field.setEnabled(false);
+					}
+				}
 				
 				gl.addComponent(field);
 				gl.setComponentAlignment(field, Alignment.MIDDLE_CENTER);

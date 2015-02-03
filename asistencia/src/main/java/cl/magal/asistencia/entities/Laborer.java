@@ -95,11 +95,13 @@ public class Laborer implements Serializable {
     @Pattern(regexp="^([0-9])+\\-([kK0-9])+$",message="El rut '%s' no es válido.")
     @RutDigit(message="El rut '%s' no es válido.")
     private String rut;
-    @NotNull(message="La fecha de nacimiento es necesaria")
+
     @Column(name = "dateBirth")
     @Temporal(TemporalType.TIMESTAMP)
     @AgeMax(message="El trabajador es menor de 18 años")
+    @NotNull(message="La fecha de nacimiento es necesaria")
     private Date dateBirth;
+    
     @Column(name = "address")
     private String address;
     @Column(name = "mobileNumber")

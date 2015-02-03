@@ -10,6 +10,10 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+
+import javax.validation.ConstraintViolation;
+import javax.validation.Validator;
 
 import org.apache.velocity.app.VelocityEngine;
 import org.joda.time.DateTime;
@@ -35,6 +39,7 @@ import cl.magal.asistencia.entities.enums.Permission;
 import cl.magal.asistencia.services.LaborerService;
 import cl.magal.asistencia.services.UserService;
 import cl.magal.asistencia.ui.AbstractWindowEditor;
+import cl.magal.asistencia.ui.MagalUI;
 import cl.magal.asistencia.ui.OnValueChangeFieldFactory;
 import cl.magal.asistencia.ui.UndefinedWidthLabel;
 import cl.magal.asistencia.ui.workerfile.vo.HistoryVO;
@@ -100,6 +105,8 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 	transient private VelocityEngine velocityEngine;
 	LaborerConstructionsite laborerConstructionSite;
 
+	private Validator validator;
+	
 	boolean readOnly = false;
 
 	public LaborerConstructionDialog(BeanItem<LaborerConstructionsite> item,LaborerService service ,VelocityEngine velocityEngine,boolean readOnly){
@@ -120,6 +127,8 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 
 		this.velocityEngine = velocityEngine;
 		this.service = service;
+		
+		this.validator = (Validator) ((MagalUI)UI.getCurrent()).getSpringBean(Constants.BEANVALIDATOR_BEAN);
 
 		getBtnGuardar().setVisible(!readOnly);
 		if(readOnly)
@@ -135,10 +144,11 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 		//		historyContainer.addContainerFilter(new Not(filter));
 	}
 
+	TabSheet tab;
 	@Override
 	protected Component createBody() {
 
-		TabSheet tab = new TabSheet();
+		tab = new TabSheet();
 		tab.setSizeFull();
 
 		//tab de Resumen
@@ -1378,6 +1388,13 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 		//vacaciones
 		laborer.getVacations().clear();
 		for(Vacation vacation : vacationContainer.getItemIds()){
+			// valida las vacaciones
+			Set<ConstraintViolation<Vacation>> constraintViolations = validator.validate(vacation);
+			if(constraintViolations.size() > 0 ){
+				Notification.show("Una vacación es inválida \""+ constraintViolations.iterator().next().getMessage()+"\"",Type.ERROR_MESSAGE);
+				tab.setSelectedTab(2);
+				return false;
+			}
 			laborer.addVacation(vacation);
 		}
 		getItem().getItemProperty("vacations").setValue(laborer.getVacations()); // no se si esto es necesario
@@ -1385,6 +1402,13 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 		//accidentes
 		laborer.getAccidents().clear();
 		for(Accident accident : accidentContainer.getItemIds()){
+			// valida los accidentes
+			Set<ConstraintViolation<Accident>> constraintViolations = validator.validate(accident);
+			if(constraintViolations.size() > 0 ){
+				Notification.show("Un accidente es inválido \""+ constraintViolations.iterator().next().getMessage()+"\"",Type.ERROR_MESSAGE);
+				tab.setSelectedTab(4);
+				return false;
+			}
 			laborer.addAccident(accident);
 		}
 		getItem().getItemProperty("accidents").setValue(laborer.getAccidents()); // no se si esto es necesario
@@ -1392,6 +1416,13 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 		//licencias
 		laborer.getAbsences().clear();
 		for(Absence absence : absenceContainer.getItemIds()){
+			// valida las licencias
+			Set<ConstraintViolation<Absence>> constraintViolations = validator.validate(absence);
+			if(constraintViolations.size() > 0 ){
+				Notification.show("Una licencia es inválida \""+ constraintViolations.iterator().next().getMessage()+"\"",Type.ERROR_MESSAGE);
+				tab.setSelectedTab(5);
+				return false;
+			}
 			laborer.addAbsence(absence);
 		}
 		getItem().getItemProperty("absences").setValue(laborer.getAbsences()); // no se si esto es necesario
@@ -1399,6 +1430,13 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 
 		laborer.getTool().clear();		
 		for(Tool t : beanItemTool.getItemIds()){
+			// valida las herramientas
+			Set<ConstraintViolation<Tool>> constraintViolations = validator.validate(t);
+			if(constraintViolations.size() > 0 ){
+				Notification.show("Una herramienta es inválida \""+ constraintViolations.iterator().next().getMessage()+"\"",Type.ERROR_MESSAGE);
+				tab.setSelectedTab(3);
+				return false;
+			}
 			laborer.addTool(t);
 		}
 		getItem().getItemProperty("tool").setValue(laborer.getTool());

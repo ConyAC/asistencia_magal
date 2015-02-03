@@ -15,7 +15,9 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.validation.constraints.NotNull;
 
+import org.hibernate.validator.constraints.NotEmpty;
 import org.joda.time.DateTime;
 import org.joda.time.Days;
 
@@ -38,21 +40,26 @@ public class Absence implements Serializable {
 	@Column(name="absenceId")
 	Long absenceId;
 	
+	@NotNull(message="La fecha inicial es necesaria.")
 	@Temporal(TemporalType.DATE)
 	@Column(name = "from_date" )
 	Date fromDate;
 	
+	@NotNull(message="La fecha final es necesaria.")
 	@Temporal(TemporalType.DATE)
 	@Column(name = "to_date" )
 	Date toDate;
 	
+	@NotEmpty(message="Debe ingresar una descripción del accidente")
+	@NotNull(message="Debe ingresar una descripción del accidente")
 	String description;
 	
 	@ManyToOne
-	@JoinColumn(name="LABORER_CONSTRUCTIONSITEID")
+	@JoinColumn(name="LABORER_CONSTRUCTIONSITEID",nullable=false)
 	LaborerConstructionsite laborerConstructionSite;
 	
 	@Column(name="absence_type")
+	@NotNull(message="Debe seleccionar un tipo de licencia")
 	@Convert(converter = AbsenceTypeConverter.class)
 	AbsenceType absenceType;
 

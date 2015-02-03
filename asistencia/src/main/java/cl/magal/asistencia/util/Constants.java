@@ -13,5 +13,6 @@ public final class Constants {
 	public static final String VELOCITY_ENGINE_BEAN = "velocityEngine";
 	public static final String LABORER_SERVICE_BEAN = "laborerService";
 	public static final String CONSTRUCTIONSITE_SERVICE_BEAN = "constructionSiteService";
+	public static final String BEANVALIDATOR_BEAN = "validator";
 
 }
