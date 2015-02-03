@@ -8,8 +8,10 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.velocity.app.VelocityEngine;
 import org.joda.time.DateTime;
@@ -431,13 +433,18 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 						boolean value = (Boolean) event.getProperty().getValue();
 						
 						Tool t = ((BeanItem<Tool>)beanItemTool.getItem(itemId)).getBean();
-						logger.debug("LELE: "+t.getToolId());
-						List<Tool> tools = service.findDatePostponed(t.getToolId());
-						
-						
-						if(value){
-							;
-							//service.saveToolDate(tdp);
+						Date today = new Date();
+						if(t.getToolId() != null){
+							List<Date> tools = service.findDatePostponed(t);
+							if (tools != null){
+								for(Date d : tools){
+									if(d.getMonth() == today.getMonth()){
+										cb.setValue(true);
+									}else{
+										cb.setValue(false);
+									}
+								}
+							}
 						}
 					}
 				});
@@ -1450,9 +1457,18 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 		}
 		getItem().getItemProperty("absences").setValue(laborer.getAbsences()); // no se si esto es necesario
 
-
 		laborer.getTool().clear();		
 		for(Tool t : beanItemTool.getItemIds()){
+			Date today = new Date();
+			if(t.getToolId() != null && t.isPostponed()){
+				List<Date> tools = service.findDatePostponed(t);
+				if(tools == null){
+					Set<Date> dp = new HashSet<Date>();	
+					dp.add(new Date());
+					t.setDatePostponed(dp);
+					service.saveDatePostponed(t);
+				}
+			}
 			laborer.addTool(t);
 		}
 		getItem().getItemProperty("tool").setValue(laborer.getTool());

@@ -12,8 +12,8 @@ import cl.magal.asistencia.entities.Tool;
 
 public interface ToolRepository extends PagingAndSortingRepository<Tool, Long> {
 
-	@Query(value="SELECT td.date FROM dates td WHERE td.toolId = :id ")
-	List<Date> findDatePostponed(@Param("id") Long toolId);
+	@Query(value="SELECT ppt.TOOL_DATE FROM PostponedPaymentTool ppt WHERE ppt.toolId = :id ", nativeQuery=true)
+	List<Date> findDatePostponed(@Param("id") Long id);
 	
 }
 

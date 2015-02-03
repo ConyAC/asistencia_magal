@@ -1,6 +1,7 @@
 package cl.magal.asistencia.services;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import javax.validation.ConstraintViolationException;
@@ -175,7 +176,11 @@ public class LaborerService {
 		return laborerRepo.findByConstructionSite(cs.getConstructionsiteId());
 	}
 	
-	public List<Tool> findDatePostponed(Long id) {
-		return toolRepo.findDatePostponed(id);
+	public List<Date> findDatePostponed(Tool tool) {
+		return toolRepo.findDatePostponed(tool);
+	}	
+	
+	public Tool saveDatePostponed(Tool tool) {
+		return toolRepo.save(tool);
 	}	
 }

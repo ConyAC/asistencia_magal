@@ -78,17 +78,14 @@ public class Tool implements Serializable {
 	@JoinColumn(name="LABORER_CONSTRUCTIONSITEID")
 	LaborerConstructionsite laborerConstructionSite;
     
-    //Pagos postergados
-   /* @Column(name="datePostponed")
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date datePostponed;*/    
+    //Pagos postergados  
     @Column(name = "postponed")
     private boolean postponed;
     
     //tabla intermedia entre role y sus permisos    
     @ElementCollection(targetClass= Date.class,fetch=FetchType.EAGER)
-    @CollectionTable(name="dates", joinColumns = @JoinColumn(name = "toolId"))
-    @Column(name="date")
+    @CollectionTable(name="postponedpaymenttool", joinColumns = @JoinColumn(name = "toolId"))
+    @Column(name="TOOL_DATE")
     @Temporal(TemporalType.TIMESTAMP)
     Set<Date> datePostponed; 
     
