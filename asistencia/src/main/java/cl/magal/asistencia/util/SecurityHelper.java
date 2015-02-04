@@ -35,7 +35,7 @@ public class SecurityHelper {
 		return false;
 	}
 
-	public static boolean hastPermission(Permission... permissions) {
+	public static boolean hasPermission(Permission... permissions) {
 		if(permissions == null)
 			return true;
 
@@ -64,7 +64,7 @@ public class SecurityHelper {
 			return true;
 		
 		if(text.equals(Constants.MENU_USERS) )
-			return hastPermission(Permission.CREAR_USUARIO);
+			return hasPermission(Permission.CREAR_USUARIO);
 		return true;
 	}
 }

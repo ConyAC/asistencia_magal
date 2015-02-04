@@ -81,7 +81,7 @@ public abstract class AbstractWindowEditor extends Window implements ClickListen
 		getBinder().setItemDataSource(item);
 		setCaption("");
 		setModal(true);
-		setResizable(false);
+		setResizable(true);
 		center();
 
 		HorizontalLayout footer = new HorizontalLayout();
@@ -167,11 +167,10 @@ public abstract class AbstractWindowEditor extends Window implements ClickListen
 	@Override
 	public void buttonClick(ClickEvent event) {
 		if (event.getButton() == btnGuardar) {
-//			if(!getBinder().isValid()){
-//				Notification.show("Falta parámetro obligatorio");
-//				getBinder().
-//				return;
-//			}
+			if(!getBinder().isValid()){
+				Notification.show("Falta parámetro obligatorio");
+				return;
+			}
 			try {
 				if(!preCommit())
 					return;
