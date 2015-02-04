@@ -531,18 +531,13 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 				BeanItem<Loan> loanBean = beanItemLoan.getItem(itemId);
                 final CheckBox lcb = new CheckBox("", loanBean.getItemProperty("postponed"));
                 lcb.setImmediate(true);
-               // if( /** contiene el mes de la fecha actual */  ){                
-                for(Loan l : beanItemLoan.getItemIds()){
-                    Date firstDayOfCurrentMonth = new DateTime().dayOfMonth().withMinimumValue().toDate();
-                    //si está marcado como pospuesto, verifica que exista la fecha, si no la tiene la agrega
-                    if(Utils.containsMonth(l.getDatePostponed(), firstDayOfCurrentMonth)){
-                    	 lcb.setValue(true);
-                    } else {
-                    	 lcb.setValue(false);
-                    }                
+                Date firstDayOfCurrentMonth = new DateTime().dayOfMonth().withMinimumValue().toDate();
+                if(  Utils.containsMonth(loanBean.getBean().getDatePostponed(), firstDayOfCurrentMonth) ){                
+                	lcb.setValue(true);
+                }else{
+                	lcb.setValue(false);
                 }
                 return lcb;
-
 			}
 		});
 		
