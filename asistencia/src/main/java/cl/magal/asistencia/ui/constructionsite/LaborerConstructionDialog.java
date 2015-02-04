@@ -351,6 +351,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 	}
 
 	BeanItemContainer<Tool> beanItemTool;
+	BeanItemContainer<Loan> beanItemLoan;
 	protected VerticalLayout drawPyH() {
 
 		VerticalLayout vl = new VerticalLayout();
@@ -422,22 +423,21 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 		tableTool.addGeneratedColumn("selected", new Table.ColumnGenerator() {
 
 			@Override
-			public Component generateCell(Table source, Object itemId, Object columnId) {
-				/* When the chekboc value changes, add/remove the itemId from the selectedItemIds set */
-				final CheckBox cb = new CheckBox("");
-				cb.addValueChangeListener(new Property.ValueChangeListener() {
-					@Override
-					public void valueChange(Property.ValueChangeEvent event) {
-						boolean value = (Boolean) event.getProperty().getValue();
-						if(value){
-							;
-						}
-					}
-				});
-				return cb;
+			public Component generateCell(Table source, final Object itemId, Object columnId) {
+				BeanItem<Tool> toolBean = beanItemTool.getItem(itemId);
+                final CheckBox tcb = new CheckBox("",toolBean.getItemProperty("postponed"));
+                tcb.setImmediate(true);
+                Date firstDayOfCurrentMonth = new DateTime().dayOfMonth().withMinimumValue().toDate();
+                if(  Utils.containsMonth(toolBean.getBean().getDatePostponed(), firstDayOfCurrentMonth) ){                
+                   	 tcb.setValue(true);
+                }else{
+                	 tcb.setValue(false);
+                }
+                return tcb;
+
 			}
 		});
-
+		
 		tableTool.addGeneratedColumn("eliminar", new Table.ColumnGenerator() {
 
 			@Override
@@ -446,10 +446,17 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 
 					@Override
 					public void buttonClick(ClickEvent event) {
-						//laborerConstructionSite.removeTool(tool);
-						tableTool.removeItem(itemId);
+						ConfirmDialog.show(UI.getCurrent(), "Confirmar Acción:", "¿Está seguro de eliminar la herramienta seleccionada?",
+								"Eliminar", "Cancelar", new ConfirmDialog.Listener() {
+
+							public void onClose(ConfirmDialog dialog) {
+								if (dialog.isConfirmed()) {
+									beanItemTool.removeItem(itemId);
+								}
+							}
+						});
 					}
-				}){ {setIcon(FontAwesome.TRASH_O);} };
+				}){{setIcon(FontAwesome.TRASH_O);}};
 			}
 		});
 
@@ -468,7 +475,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 		hl2.setSpacing(true);		
 		vp.addComponent(hl2);
 
-		final BeanItemContainer<Loan> beanItemLoan = new BeanItemContainer<Loan>(Loan.class);
+		beanItemLoan = new BeanItemContainer<Loan>(Loan.class);
 		List<Loan> loans = (List<Loan>)getItem().getItemProperty("loan").getValue();
 		beanItemLoan.addAll(loans);
 
@@ -519,9 +526,49 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 				return field;
 			}
 		});
+		
+		tableLoan.addGeneratedColumn("selected", new Table.ColumnGenerator() {
 
-		tableLoan.setVisibleColumns("price","dateBuy", "fee", "status");
-		tableLoan.setColumnHeaders("Monto","Fecha", "Cuota", "Estado");
+			@Override
+			public Component generateCell(Table source, Object itemId, Object columnId) {
+				BeanItem<Loan> loanBean = beanItemLoan.getItem(itemId);
+                final CheckBox lcb = new CheckBox("", loanBean.getItemProperty("postponed"));
+                lcb.setImmediate(true);
+                Date firstDayOfCurrentMonth = new DateTime().dayOfMonth().withMinimumValue().toDate();
+                if(  Utils.containsMonth(loanBean.getBean().getDatePostponed(), firstDayOfCurrentMonth) ){                
+                	lcb.setValue(true);
+                }else{
+                	lcb.setValue(false);
+                }
+                return lcb;
+			}
+		});
+		
+		tableLoan.addGeneratedColumn("eliminar", new Table.ColumnGenerator() {
+
+			@Override
+			public Object generateCell(Table source, final Object itemId, Object columnId) {
+				return new Button(null,new Button.ClickListener() {
+
+					@Override
+					public void buttonClick(ClickEvent event) {
+						ConfirmDialog.show(UI.getCurrent(), "Confirmar Acción:", "¿Está seguro de eliminar el préstamo seleccionado?",
+								"Eliminar", "Cancelar", new ConfirmDialog.Listener() {
+
+							public void onClose(ConfirmDialog dialog) {
+								if (dialog.isConfirmed()) {
+									beanItemLoan.removeItem(itemId);
+								}
+							}
+						});
+					}
+				}){{setIcon(FontAwesome.TRASH_O);}};
+			}
+		});
+
+
+		tableLoan.setVisibleColumns("price","dateBuy", "fee", "selected","status", "eliminar");
+		tableLoan.setColumnHeaders("Monto","Fecha", "Cuota", "Postergar pago", "Estado", "Eliminar");
 		tableLoan.setEditable(true);		
 		vp.addComponent(tableLoan);
 		vp.setComponentAlignment(hl2, Alignment.TOP_RIGHT);
@@ -1389,6 +1436,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 	@Override
 	protected boolean preCommit() {
 		LaborerConstructionsite laborer = (LaborerConstructionsite) getItem().getBean();
+		Date firstDayOfCurrentMonth;
 		//vacaciones
 		laborer.getVacations().clear();
 		for(Vacation vacation : vacationContainer.getItemIds()){
@@ -1431,7 +1479,6 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 		}
 		getItem().getItemProperty("absences").setValue(laborer.getAbsences()); // no se si esto es necesario
 
-
 		laborer.getTool().clear();		
 		for(Tool t : beanItemTool.getItemIds()){
 			// valida las herramientas
@@ -1441,10 +1488,47 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 				tab.setSelectedTab(3);
 				return false;
 			}
-			laborer.addTool(t);
-		}
+            firstDayOfCurrentMonth = new DateTime().dayOfMonth().withMinimumValue().toDate();
+            //si está marcado como pospuesto, verifica que exista la fecha, si no la tiene la agrega
+            if(t.isPostponed()){
+                if(!Utils.containsMonth(t.getDatePostponed(), firstDayOfCurrentMonth)){
+                    // agrega el primero del mes actual
+                	if(firstDayOfCurrentMonth != null)
+                		t.getDatePostponed().add(firstDayOfCurrentMonth);
+                }
+            } else {
+                // si no está pospuesto y tiene la fecha actual, la quita
+                if(Utils.containsMonth(t.getDatePostponed(), firstDayOfCurrentMonth)){
+                	if(firstDayOfCurrentMonth != null)
+                		t.getDatePostponed().remove(firstDayOfCurrentMonth);
+                }
+            }                
+        laborer.addTool(t);
+    }
 		getItem().getItemProperty("tool").setValue(laborer.getTool());
 
+		
+		laborer.getLoan().clear();		
+		for(Loan l : beanItemLoan.getItemIds()){
+            firstDayOfCurrentMonth = new DateTime().dayOfMonth().withMinimumValue().toDate();
+            //si está marcado como pospuesto, verifica que exista la fecha, si no la tiene la agrega
+            if(l.isPostponed()){
+                if(!Utils.containsMonth(l.getDatePostponed(), firstDayOfCurrentMonth)){
+                    // agrega el primero del mes actual
+                	if(firstDayOfCurrentMonth != null)
+                		l.getDatePostponed().add(firstDayOfCurrentMonth);
+                }
+            } else {
+                // si no está pospuesto y tiene la fecha actual, la quita
+                if(Utils.containsMonth(l.getDatePostponed(), firstDayOfCurrentMonth)){
+                	if(firstDayOfCurrentMonth != null)
+                		l.getDatePostponed().remove(firstDayOfCurrentMonth);
+                }
+            }                
+        laborer.addLoan(l);
+    }
+		getItem().getItemProperty("loan").setValue(laborer.getLoan());
+		
 		return super.preCommit();
 	}
 

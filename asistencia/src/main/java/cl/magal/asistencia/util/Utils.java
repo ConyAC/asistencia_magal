@@ -62,4 +62,16 @@ public class Utils {
 		return false;
 	}
 	
+	 public static boolean containsMonth(Set<Date> dates, Date date) {
+	        if(dates == null )
+	            return false;
+	        if(date == null)
+	            return false;
+	        for(Date d : dates){
+	            if(new DateTime(d).getMonthOfYear() == new DateTime(date).getMonthOfYear())
+	                return true;
+	        }
+	        return false;
+	    }
+	
 }

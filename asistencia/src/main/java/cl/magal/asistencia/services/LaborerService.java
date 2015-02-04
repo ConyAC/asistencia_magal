@@ -1,6 +1,7 @@
 package cl.magal.asistencia.services;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import javax.validation.ConstraintViolationException;
@@ -16,6 +17,7 @@ import org.springframework.transaction.TransactionSystemException;
 import cl.magal.asistencia.entities.ConstructionSite;
 import cl.magal.asistencia.entities.Laborer;
 import cl.magal.asistencia.entities.LaborerConstructionsite;
+import cl.magal.asistencia.entities.Tool;
 import cl.magal.asistencia.entities.enums.Job;
 import cl.magal.asistencia.repositories.AbsenceRepositoy;
 import cl.magal.asistencia.repositories.AccidentRepository;
@@ -191,6 +193,12 @@ public class LaborerService {
 	public ConstructionSite findActiveConstructionSite(Laborer laborer) {
 		return laborerConstructionsiteRepo.findConstructionsiteByLaborer(laborer);
 	}
-
 	
+	public List<Date> findDatePostponed(Tool tool) {
+		return toolRepo.findDatePostponed(tool.getToolId());
+	}	
+	
+	public Tool saveDatePostponed(Tool tool) {
+		return toolRepo.save(tool);
+	}	
 }

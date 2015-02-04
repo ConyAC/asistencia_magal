@@ -7,10 +7,16 @@ package cl.magal.asistencia.entities;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.Set;
 
 import javax.persistence.Basic;
+import javax.persistence.CollectionTable;
 import javax.persistence.Column;
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -86,12 +92,16 @@ public class Tool implements Serializable {
 	@JoinColumn(name="LABORER_CONSTRUCTIONSITEID",nullable = false )
 	LaborerConstructionsite laborerConstructionSite;
     
-    //Pagos postergados
-    @Column(name="datePostponed")
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date datePostponed;    
+    //Pagos postergados  
     @Column(name = "postponed")
-    private boolean postponed;
+    transient private boolean postponed;
+    
+    //tabla intermedia entre role y sus permisos    
+    @ElementCollection(targetClass= Date.class,fetch=FetchType.EAGER)
+    @CollectionTable(name="postponedpaymenttool", joinColumns = @JoinColumn(name = "toolId"))
+    @Column(name="TOOL_DATE")
+    @Temporal(TemporalType.TIMESTAMP)
+    Set<Date> datePostponed; 
     
     public Tool() {
     }
@@ -183,20 +193,20 @@ public class Tool implements Serializable {
 //        return true;
 //    }
 
-    public Date getDatePostponed() {
-		return datePostponed;
-	}
-
-	public void setDatePostponed(Date datePostponed) {
-		this.datePostponed = datePostponed;
-	}
-
 	public boolean isPostponed() {
 		return postponed;
 	}
 
 	public void setPostponed(boolean postponed) {
 		this.postponed = postponed;
+	}
+
+	public Set<Date> getDatePostponed() {
+		return datePostponed;
+	}
+
+	public void setDatePostponed(Set<Date> datePostponed) {
+		this.datePostponed = datePostponed;
 	}
 
 	@Override
