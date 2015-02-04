@@ -174,7 +174,7 @@ public class LaborerService {
 	}
 	
 	public List<Date> findDatePostponed(Tool tool) {
-		return toolRepo.findDatePostponed(tool);
+		return toolRepo.findDatePostponed(tool.getToolId());
 	}	
 	
 	public Tool saveDatePostponed(Tool tool) {

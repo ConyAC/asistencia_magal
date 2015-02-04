@@ -8,10 +8,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.apache.velocity.app.VelocityEngine;
 import org.joda.time.DateTime;
@@ -27,7 +25,6 @@ import cl.magal.asistencia.entities.Annexed;
 import cl.magal.asistencia.entities.Contract;
 import cl.magal.asistencia.entities.LaborerConstructionsite;
 import cl.magal.asistencia.entities.Loan;
-import cl.magal.asistencia.entities.TaxationConfigurations;
 import cl.magal.asistencia.entities.Tool;
 import cl.magal.asistencia.entities.User;
 import cl.magal.asistencia.entities.Vacation;
@@ -429,15 +426,11 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 				BeanItem<Tool> toolBean = beanItemTool.getItem(itemId);
                 final CheckBox tcb = new CheckBox("",toolBean.getItemProperty("postponed"));
                 tcb.setImmediate(true);
-               // if( /** contiene el mes de la fecha actual */  ){                
-                for(Tool t : beanItemTool.getItemIds()){
-                    Date firstDayOfCurrentMonth = new DateTime().dayOfMonth().withMinimumValue().toDate();
-                    //si está marcado como pospuesto, verifica que exista la fecha, si no la tiene la agrega
-                    if(Utils.containsMonth(t.getDatePostponed(), firstDayOfCurrentMonth)){
-                    	 tcb.setValue(true);
-                    } else {
-                    	 tcb.setValue(false);
-                    }                
+                Date firstDayOfCurrentMonth = new DateTime().dayOfMonth().withMinimumValue().toDate();
+                if(  Utils.containsMonth(toolBean.getBean().getDatePostponed(), firstDayOfCurrentMonth) ){                
+                   	 tcb.setValue(true);
+                }else{
+                	 tcb.setValue(false);
                 }
                 return tcb;
 
