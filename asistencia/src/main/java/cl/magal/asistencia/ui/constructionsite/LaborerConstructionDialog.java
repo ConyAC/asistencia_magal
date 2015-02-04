@@ -354,6 +354,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 	}
 
 	BeanItemContainer<Tool> beanItemTool;
+	BeanItemContainer<Loan> beanItemLoan;
 	protected VerticalLayout drawPyH() {
 
 		VerticalLayout vl = new VerticalLayout();
@@ -425,30 +426,21 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 
 			@Override
 			public Component generateCell(Table source, final Object itemId, Object columnId) {
-				/* When the chekboc value changes, add/remove the itemId from the selectedItemIds set */
-				final CheckBox cb = new CheckBox("");
-				cb.addValueChangeListener(new Property.ValueChangeListener() {
-					@Override
-					public void valueChange(Property.ValueChangeEvent event) {
-						boolean value = (Boolean) event.getProperty().getValue();
-						
-						Tool t = ((BeanItem<Tool>)beanItemTool.getItem(itemId)).getBean();
-						Date today = new Date();
-						if(t.getToolId() != null){
-							List<Date> tools = service.findDatePostponed(t);
-							if (tools != null){
-								for(Date d : tools){
-									if(d.getMonth() == today.getMonth()){
-										cb.setValue(true);
-									}else{
-										cb.setValue(false);
-									}
-								}
-							}
-						}
-					}
-				});
-				return cb;
+				BeanItem<Tool> toolBean = beanItemTool.getItem(itemId);
+                final CheckBox tcb = new CheckBox("",toolBean.getItemProperty("postponed"));
+                tcb.setImmediate(true);
+               // if( /** contiene el mes de la fecha actual */  ){                
+                for(Tool t : beanItemTool.getItemIds()){
+                    Date firstDayOfCurrentMonth = new DateTime().dayOfMonth().withMinimumValue().toDate();
+                    //si está marcado como pospuesto, verifica que exista la fecha, si no la tiene la agrega
+                    if(Utils.containsMonth(t.getDatePostponed(), firstDayOfCurrentMonth)){
+                    	 tcb.setValue(true);
+                    } else {
+                    	 tcb.setValue(false);
+                    }                
+                }
+                return tcb;
+
 			}
 		});
 		
@@ -489,7 +481,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 		hl2.setSpacing(true);		
 		vp.addComponent(hl2);
 
-		final BeanItemContainer<Loan> beanItemLoan = new BeanItemContainer<Loan>(Loan.class);
+		beanItemLoan = new BeanItemContainer<Loan>(Loan.class);
 		List<Loan> loans = (List<Loan>)getItem().getItemProperty("loan").getValue();
 		beanItemLoan.addAll(loans);
 
@@ -543,19 +535,21 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 
 			@Override
 			public Component generateCell(Table source, Object itemId, Object columnId) {
-				/* When the chekboc value changes, add/remove the itemId from the selectedItemIds set */
-				final CheckBox cb = new CheckBox("");
-				cb.addValueChangeListener(new Property.ValueChangeListener() {
-					@Override
-					public void valueChange(Property.ValueChangeEvent event) {
-						boolean value = (Boolean) event.getProperty().getValue();
-						if(value){
-							;
-							//service.saveToolDate(tdp);
-						}
-					}
-				});
-				return cb;
+				BeanItem<Loan> loanBean = beanItemLoan.getItem(itemId);
+                final CheckBox lcb = new CheckBox("", loanBean.getItemProperty("postponed"));
+                lcb.setImmediate(true);
+               // if( /** contiene el mes de la fecha actual */  ){                
+                for(Loan l : beanItemLoan.getItemIds()){
+                    Date firstDayOfCurrentMonth = new DateTime().dayOfMonth().withMinimumValue().toDate();
+                    //si está marcado como pospuesto, verifica que exista la fecha, si no la tiene la agrega
+                    if(Utils.containsMonth(l.getDatePostponed(), firstDayOfCurrentMonth)){
+                    	 lcb.setValue(true);
+                    } else {
+                    	 lcb.setValue(false);
+                    }                
+                }
+                return lcb;
+
 			}
 		});
 		
@@ -1436,6 +1430,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 	@Override
 	protected boolean preCommit() {
 		LaborerConstructionsite laborer = (LaborerConstructionsite) getItem().getBean();
+		Date firstDayOfCurrentMonth;
 		//vacaciones
 		laborer.getVacations().clear();
 		for(Vacation vacation : vacationContainer.getItemIds()){
@@ -1459,20 +1454,47 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 
 		laborer.getTool().clear();		
 		for(Tool t : beanItemTool.getItemIds()){
-			Date today = new Date();
-			if(t.getToolId() != null && t.isPostponed()){
-				List<Date> tools = service.findDatePostponed(t);
-				if(tools == null){
-					Set<Date> dp = new HashSet<Date>();	
-					dp.add(new Date());
-					t.setDatePostponed(dp);
-					service.saveDatePostponed(t);
-				}
-			}
-			laborer.addTool(t);
-		}
+            firstDayOfCurrentMonth = new DateTime().dayOfMonth().withMinimumValue().toDate();
+            //si está marcado como pospuesto, verifica que exista la fecha, si no la tiene la agrega
+            if(t.isPostponed()){
+                if(!Utils.containsMonth(t.getDatePostponed(), firstDayOfCurrentMonth)){
+                    // agrega el primero del mes actual
+                	if(firstDayOfCurrentMonth != null)
+                		t.getDatePostponed().add(firstDayOfCurrentMonth);
+                }
+            } else {
+                // si no está pospuesto y tiene la fecha actual, la quita
+                if(Utils.containsMonth(t.getDatePostponed(), firstDayOfCurrentMonth)){
+                	if(firstDayOfCurrentMonth != null)
+                		t.getDatePostponed().remove(firstDayOfCurrentMonth);
+                }
+            }                
+        laborer.addTool(t);
+    }
 		getItem().getItemProperty("tool").setValue(laborer.getTool());
 
+		
+		laborer.getLoan().clear();		
+		for(Loan l : beanItemLoan.getItemIds()){
+            firstDayOfCurrentMonth = new DateTime().dayOfMonth().withMinimumValue().toDate();
+            //si está marcado como pospuesto, verifica que exista la fecha, si no la tiene la agrega
+            if(l.isPostponed()){
+                if(!Utils.containsMonth(l.getDatePostponed(), firstDayOfCurrentMonth)){
+                    // agrega el primero del mes actual
+                	if(firstDayOfCurrentMonth != null)
+                		l.getDatePostponed().add(firstDayOfCurrentMonth);
+                }
+            } else {
+                // si no está pospuesto y tiene la fecha actual, la quita
+                if(Utils.containsMonth(l.getDatePostponed(), firstDayOfCurrentMonth)){
+                	if(firstDayOfCurrentMonth != null)
+                		l.getDatePostponed().remove(firstDayOfCurrentMonth);
+                }
+            }                
+        laborer.addLoan(l);
+    }
+		getItem().getItemProperty("loan").setValue(laborer.getLoan());
+		
 		return super.preCommit();
 	}
 

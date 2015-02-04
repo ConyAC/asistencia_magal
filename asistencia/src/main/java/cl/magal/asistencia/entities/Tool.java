@@ -80,7 +80,7 @@ public class Tool implements Serializable {
     
     //Pagos postergados  
     @Column(name = "postponed")
-    private boolean postponed;
+    transient private boolean postponed;
     
     //tabla intermedia entre role y sus permisos    
     @ElementCollection(targetClass= Date.class,fetch=FetchType.EAGER)
