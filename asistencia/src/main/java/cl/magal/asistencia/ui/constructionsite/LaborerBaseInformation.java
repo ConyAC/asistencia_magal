@@ -74,9 +74,8 @@ public class LaborerBaseInformation extends VerticalLayout {
 		detalleObrero.setSpacing(true);
 		addComponent(detalleObrero);
 		
-		
 		HorizontalLayout hl = new HorizontalLayout();
-		hl.setWidth("250%");
+//		hl.setWidth("100%");
 		hl.setSpacing(true);	
 			
 		Upload upload = new Upload("Cargar fotografía", null);
