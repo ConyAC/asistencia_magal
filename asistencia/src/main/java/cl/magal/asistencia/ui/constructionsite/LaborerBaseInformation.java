@@ -20,6 +20,7 @@ import com.vaadin.data.util.NestedMethodProperty;
 import com.vaadin.data.validator.BeanValidator;
 import com.vaadin.server.FileResource;
 import com.vaadin.server.VaadinService;
+import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.AbstractSelect;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.ComboBox;
@@ -27,6 +28,7 @@ import com.vaadin.ui.Embedded;
 import com.vaadin.ui.Field;
 import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.Upload;
@@ -70,12 +72,13 @@ public class LaborerBaseInformation extends VerticalLayout {
 		setSpacing(true);
 		setWidth("100%");
 
-		GridLayout detalleObrero = new GridLayout(3,6);
+		GridLayout detalleObrero = new GridLayout(3,7);
 		detalleObrero.setSpacing(true);
 		addComponent(detalleObrero);
 		
+		detalleObrero.addComponent(new Label("<h2>Información Personal : </h2>",ContentMode.HTML),0,0,2,0);
+		
 		HorizontalLayout hl = new HorizontalLayout();
-//		hl.setWidth("100%");
 		hl.setSpacing(true);	
 			
 		Upload upload = new Upload("Cargar fotografía", null);
@@ -124,14 +127,14 @@ public class LaborerBaseInformation extends VerticalLayout {
 		upload.setReceiver(uploader);
 		upload.addListener(uploader);
 
-		detalleObrero.addComponent(hl,0,0,2,0);
+		detalleObrero.addComponent(hl,0,1,2,1);
 		detalleObrero.setComponentAlignment(hl, Alignment.MIDDLE_CENTER);
 
 		// Loop through the properties, build fields for them and add the fields
 		// to this UI
 		for (Object propertyId : new String[]{"rut","firstname","secondname","lastname", "secondlastname", "dateBirth", "commune", "town", "address", "mobileNumber", "phone","afp", "maritalStatus", "isapre", "nationality", "provenance", "wedge", "bank", "bankAccount"}) {
 			Field<?> field = null;
-			if(propertyId.equals("laborerId") || propertyId.equals("constructionSites") || propertyId.equals("contractId") || propertyId.equals("teamId"))
+			if(propertyId.equals("laborerId") || propertyId.equals("constructionSites") || propertyId.equals("contractId") || propertyId.equals("teamId") || (propertyId.equals("rut") && !viewElement))
 				;
 			else if(propertyId.equals("afp")){
 				field = new ComboBox("AFP");
@@ -187,63 +190,63 @@ public class LaborerBaseInformation extends VerticalLayout {
 			}
 		}
 		
-		if(viewElement){		
-//			HorizontalLayout hl = new HorizontalLayout();
-//			hl.setWidth("250%");
-//			hl.setSpacing(true);	
-//			
-//			Field<?> field = buildAndBind("Premio", "reward");
-//			((TextField)field).setNullRepresentation("");
-//			detalleObrero.addComponent(field);
-//		
-//			Upload upload = new Upload("Cargar fotografía", null);
-//			upload.setButtonCaption("Iniciar carga");
-//			
-//			hl.addComponent(upload);
-//			hl.setComponentAlignment(upload, Alignment.TOP_LEFT);
-//					        
-//			// Show uploaded file in this placeholder
-//			final Embedded image = new Embedded();
-//			image.setVisible(false);
-//			hl.addComponent(image);
-//			
-//			// Implement both receiver that saves upload in a file and
-//			// listener for successful upload
-//			class ImageUploader implements Receiver, SucceededListener {
-//			    public File file;
-//			    
-//			    public OutputStream receiveUpload(String filename, String mimeType) {
-//			        // Create upload stream
-//			        FileOutputStream fos = null; // Output stream to write to
-//			        try {
-//			        	//añadimos el nombre de la imagen a la base
-//			        	getBinder().getItemDataSource().getItemProperty(prefix+"photo").setValue(filename);
-//			        	String basepath = VaadinService.getCurrent().getBaseDirectory().getAbsolutePath();
-//			            // Open the file for writing.
-//			            file = new File(basepath + "/WEB-INF/images/" + filename);
-//			            fos = new FileOutputStream(file);
-//			        } catch (final java.io.FileNotFoundException e) {
-//			        	new Notification("No es posible acceder al archivo", e.getMessage());
-//			            //Notification.show("Error al guardar la imagen.");
-//			            return null;
-//			        }
-//			        return fos; // Return the output stream to write to
-//			    }
-//	
-//			    public void uploadSucceeded(SucceededEvent event) {
-//			        // Show the uploaded file in the image viewer
-//			        image.setVisible(true);
-//			        image.setHeight("100");
-//			        image.setWidth("100");
-//			        image.setSource(new FileResource(file));
-//			    }
-//			};
-//			final ImageUploader uploader = new ImageUploader(); 
-//			upload.setReceiver(uploader);
-//			upload.addListener(uploader);
-//	
-//			detalleObrero.addComponent(hl);
-		}
+//		if(viewElement){		
+////			HorizontalLayout hl = new HorizontalLayout();
+////			hl.setWidth("250%");
+////			hl.setSpacing(true);	
+////			
+////			Field<?> field = buildAndBind("Premio", "reward");
+////			((TextField)field).setNullRepresentation("");
+////			detalleObrero.addComponent(field);
+////		
+////			Upload upload = new Upload("Cargar fotografía", null);
+////			upload.setButtonCaption("Iniciar carga");
+////			
+////			hl.addComponent(upload);
+////			hl.setComponentAlignment(upload, Alignment.TOP_LEFT);
+////					        
+////			// Show uploaded file in this placeholder
+////			final Embedded image = new Embedded();
+////			image.setVisible(false);
+////			hl.addComponent(image);
+////			
+////			// Implement both receiver that saves upload in a file and
+////			// listener for successful upload
+////			class ImageUploader implements Receiver, SucceededListener {
+////			    public File file;
+////			    
+////			    public OutputStream receiveUpload(String filename, String mimeType) {
+////			        // Create upload stream
+////			        FileOutputStream fos = null; // Output stream to write to
+////			        try {
+////			        	//añadimos el nombre de la imagen a la base
+////			        	getBinder().getItemDataSource().getItemProperty(prefix+"photo").setValue(filename);
+////			        	String basepath = VaadinService.getCurrent().getBaseDirectory().getAbsolutePath();
+////			            // Open the file for writing.
+////			            file = new File(basepath + "/WEB-INF/images/" + filename);
+////			            fos = new FileOutputStream(file);
+////			        } catch (final java.io.FileNotFoundException e) {
+////			        	new Notification("No es posible acceder al archivo", e.getMessage());
+////			            //Notification.show("Error al guardar la imagen.");
+////			            return null;
+////			        }
+////			        return fos; // Return the output stream to write to
+////			    }
+////	
+////			    public void uploadSucceeded(SucceededEvent event) {
+////			        // Show the uploaded file in the image viewer
+////			        image.setVisible(true);
+////			        image.setHeight("100");
+////			        image.setWidth("100");
+////			        image.setSource(new FileResource(file));
+////			    }
+////			};
+////			final ImageUploader uploader = new ImageUploader(); 
+////			upload.setReceiver(uploader);
+////			upload.addListener(uploader);
+////	
+////			detalleObrero.addComponent(hl);
+//		}
 		detalleObrero.setWidth("100%");
 
 	}

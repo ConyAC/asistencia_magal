@@ -131,75 +131,7 @@ public class AddLaborerContractDialog extends AbstractWindowEditor implements Ne
 		cbRut.setEnabled(addLaborer);
 		
 		gl.addComponent(new Label("<hr />",ContentMode.HTML),0,1,2,1);
-		gl.addComponent(new Label("<h2>Información Personal : </h2>",ContentMode.HTML),0,2,2,2);
-		
-		String prefix = "laborer.";
-		String[] elements = new String[]{"firstname","secondname","lastname", "secondlastname", "dateBirth", "commune", "town", "address", "mobileNumber", "phone","afp", "maritalStatus", "isapre", "nationality", "provenance", "wedge", "bank", "bankAccount"};
-		for (Object propertyId : elements ) {
-			if(propertyId.equals("laborerId") || propertyId.equals("constructionSites") || propertyId.equals("contractId") || propertyId.equals("teamId"))
-				;
-			else if(propertyId.equals("afp")){
-				ComboBox afpField = new ComboBox("AFP");
-				afpField.setNullSelectionAllowed(false);
-				for(Afp a : Afp.values()){
-					afpField.addItem(a);
-				}
-				gl.addComponent(afpField);
-				bind(afpField, prefix+"afp");   
-				gl.setComponentAlignment(afpField, Alignment.MIDDLE_CENTER);
-			}else if(propertyId.equals("maritalStatus")){
-				ComboBox msField = new ComboBox("Estado Civil");
-				msField.setNullSelectionAllowed(false);
-				for(MaritalStatus ms : MaritalStatus.values()){
-					msField.addItem(ms);
-				}
-				gl.addComponent(msField);
-				bind(msField, prefix+"maritalStatus");   
-				gl.setComponentAlignment(msField, Alignment.MIDDLE_CENTER);		
-			}else if(propertyId.equals("nationality")){
-				ComboBox nField = new ComboBox("Nacionalidad");
-				nField.setNullSelectionAllowed(false);
-				for(Nationality n : Nationality.values()){
-					nField.addItem(n);
-				}
-				gl.addComponent(nField);
-				bind(nField, prefix+"nationality");   
-				gl.setComponentAlignment(nField, Alignment.MIDDLE_CENTER);
-			}else if(propertyId.equals("isapre")){
-				ComboBox iField = new ComboBox("Isapre");
-				iField.setNullSelectionAllowed(false);
-				for(Isapre i : Isapre.values()){
-					iField.addItem(i);
-				}
-				gl.addComponent(iField);
-				bind(iField, prefix+"isapre");   
-				gl.setComponentAlignment(iField, Alignment.MIDDLE_CENTER);
-			}else if(propertyId.equals("bank")){
-				ComboBox bField = new ComboBox("Banco");
-				bField.setNullSelectionAllowed(false);
-				for(Bank b : Bank.values()){
-					bField.addItem(b);
-				}
-				gl.addComponent(bField);
-				bind(bField, prefix+"bank");
-				gl.setComponentAlignment(bField, Alignment.MIDDLE_CENTER);
-			}else{        		
-				String t = tradProperty(propertyId);
-				Field<?> field = buildAndBind(t, prefix+propertyId);
-				if(field instanceof TextField){
-					((TextField)field).setNullRepresentation("");
-				}
-				field.addValidator(new BeanValidator(Laborer.class, (String) propertyId));				
-				if(!addLaborer){
-					if(propertyId.equals("firstname") || propertyId.equals("lastname") || propertyId.equals("rut")){
-						field.setEnabled(false);
-					}
-				}
-				
-				gl.addComponent(field);
-				gl.setComponentAlignment(field, Alignment.MIDDLE_CENTER);
-			}
-		}
+		gl.addComponent(new LaborerBaseInformation(getBinder(),"laborer", false),0,2,2,2);
 		
 		cbRut.addValueChangeListener(new Property.ValueChangeListener() {
 			
@@ -226,7 +158,7 @@ public class AddLaborerContractDialog extends AbstractWindowEditor implements Ne
 		//cb.focus(); para visualizar el texto de ayuda en el campo del rut
 
 		//filas hasta aquí
-		int rows = (elements.length / 3) + 4;
+		int rows = 3;
 		
 		gl.addComponent(new Label("<hr />",ContentMode.HTML),0,rows,2,rows++);
 		gl.addComponent(new Label("<h2>Información de Obra : </h2>",ContentMode.HTML),0,rows,2,rows++);

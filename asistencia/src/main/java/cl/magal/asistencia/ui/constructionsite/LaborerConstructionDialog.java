@@ -1,5 +1,5 @@
-package cl.magal.asistencia.ui.constructionsite;
 
+package cl.magal.asistencia.ui.constructionsite;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.InputStream;
@@ -175,67 +175,56 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 	}
 
 	private Component drawInformation() {
-		VerticalLayout vl = new VerticalLayout();
+		
+		GridLayout gl  = new GridLayout(3,7);
+		gl.setWidth("100%");
+		gl.setSpacing(true);
+		
+		gl.addComponent(new Label("<h2>Información de Obra : </h2>",ContentMode.HTML),0,0,2,0);
 
-		vl.addComponent(new Label("<h2>Información por Obra:</h2>",ContentMode.HTML));
+		final DateField startDate = new DateField("Fecha Inicial",getItem().getItemProperty("rewardStartDate"));
+		final DateField endDate = new DateField("Fecha Final",getItem().getItemProperty("rewardEndDate"));
 
-		vl.addComponent( new VerticalLayout(){
+		VerticalLayout vl = new VerticalLayout(){
 			{
 				setSpacing(true);
-				setWidth("100%");
+				TextField tfReward = new TextField("Premio: ",getItem().getItemProperty("reward")){{
+					setNullRepresentation("");
+					addValidator(new BeanValidator(LaborerConstructionsite.class,"reward"));
+				}};
+				addComponent(tfReward);
+				setComponentAlignment(tfReward, Alignment.MIDDLE_CENTER);
+				CheckBox checkbox = new CheckBox("Aplicar premio según fechas de contrato",getItem().getItemProperty("useDefaultDates"));
+				startDate.setVisible(!checkbox.getValue());
+				endDate.setVisible(!checkbox.getValue());
+				checkbox.addValueChangeListener(new Property.ValueChangeListener() {
 
-				addComponent(new GridLayout(3,2){
-					{
-						setSpacing(true);
-						setMargin(true);
-						setWidth("100%");
-
-						final DateField startDate = new DateField("Fecha Inicial",getItem().getItemProperty("rewardStartDate"));
-						final DateField endDate = new DateField("Fecha Final",getItem().getItemProperty("rewardEndDate"));
-
-						VerticalLayout vl = new VerticalLayout(){
-							{
-								setSpacing(true);
-								addComponent(new TextField("Premio: ",getItem().getItemProperty("reward")){{
-									setNullRepresentation("");
-									addValidator(new BeanValidator(LaborerConstructionsite.class,"reward"));
-									setEnabled(!readOnly);
-								}});
-								CheckBox checkbox = new CheckBox("Aplicar premio según fechas de contrato",getItem().getItemProperty("useDefaultDates"));
-								startDate.setVisible(!checkbox.getValue());
-								endDate.setVisible(!checkbox.getValue());
-								checkbox.addValueChangeListener(new Property.ValueChangeListener() {
-
-									@Override
-									public void valueChange(ValueChangeEvent event) {
-										boolean ischecked = (Boolean) event.getProperty().getValue();
-										startDate.setVisible(!ischecked);
-										endDate.setVisible(!ischecked);
-										if(ischecked){
-											startDate.setValue(null);
-											endDate.setValue(null);
-										}
-									}
-								});
-								addComponent(checkbox);
-
-							}
-						};
-						addComponent( vl );
-						setComponentAlignment(vl, Alignment.MIDDLE_CENTER);
-						addComponent(startDate);
-						setComponentAlignment(startDate, Alignment.MIDDLE_CENTER);
-						addComponent(endDate);
-						setComponentAlignment(endDate, Alignment.MIDDLE_CENTER);
-
+					@Override
+					public void valueChange(ValueChangeEvent event) {
+						boolean ischecked = (Boolean) event.getProperty().getValue();
+						startDate.setVisible(!ischecked);
+						endDate.setVisible(!ischecked);
+						if(ischecked){
+							startDate.setValue(null);
+							endDate.setValue(null);
+						}
 					}
 				});
-			}
-		});
+				addComponent(checkbox);
 
-		vl.addComponent(new Label("<h2>Información por Trabajador:</h2>",ContentMode.HTML));
-		vl.addComponent(new LaborerBaseInformation(getBinder(),"laborer",true));
-		return vl;
+			}
+		};
+		
+		gl.addComponent( vl,0,1);
+		gl.setComponentAlignment(vl, Alignment.MIDDLE_CENTER);
+		gl.addComponent(startDate,1,1);
+		gl.setComponentAlignment(startDate, Alignment.TOP_CENTER);
+		gl.addComponent(endDate,2,1);
+		gl.setComponentAlignment(endDate, Alignment.TOP_CENTER);
+		
+		gl.addComponent(new LaborerBaseInformation(getBinder(),"laborer",true),0,2,2,2);
+		
+		return gl;
 	}
 
 	protected Component drawSummary() {	
@@ -385,6 +374,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 		if(!readOnly){
 			btnAddH = new Button(null,FontAwesome.PLUS);
 			hl.addComponent(btnAddH);
+			hl.setComponentAlignment(btnAddH, Alignment.MIDDLE_RIGHT);
 
 			btnAddH.addClickListener(new Button.ClickListener() {
 
@@ -485,6 +475,8 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 		if(!readOnly){
 			btnAddP = new Button(null,FontAwesome.PLUS);
 			hl2.addComponent(btnAddP);
+			hl2.setComponentAlignment(btnAddP, Alignment.MIDDLE_RIGHT);
+			
 			btnAddP.addClickListener(new Button.ClickListener() {
 
 				@Override
@@ -551,6 +543,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 
 		final GridLayout gl = new GridLayout(3,10);
 		gl.setSpacing(true);
+		gl.setWidth("100%");
 		gl.setSizeFull();
 
 		gl.setColumnExpandRatio(0, 0.2F);
@@ -566,6 +559,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 		gl.addComponent( new HorizontalLayout(){
 			{
 				setSpacing(true);
+				setWidth("100%");
 
 				Button btnPrint = new Button(null,new Button.ClickListener() {
 
@@ -614,6 +608,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 					}
 				}){{setIcon(FontAwesome.PRINT); setDescription("Imprimir");}};
 				addComponent(btnPrint);
+				setComponentAlignment(btnPrint, Alignment.MIDDLE_CENTER);
 
 				//				Button btnEdit = new Button(null,FontAwesome.PENCIL);
 				//				if(!readOnly){
@@ -831,6 +826,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 		if(!readOnly)
 			gl2.addComponent( new HorizontalLayout(){
 				{
+					setWidth("100%");
 					Button AgregarAnexo = new Button(null,new Button.ClickListener() {
 
 						@Override
@@ -859,6 +855,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 						}
 					}){{setIcon(FontAwesome.PLUS);}};
 					addComponent(AgregarAnexo);
+					setComponentAlignment(AgregarAnexo, Alignment.MIDDLE_CENTER);
 				}
 			},columna--,fila++);
 		else{ columna--;fila++;}
@@ -988,7 +985,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 							addComponent(new Label(""),0,0);
 							addComponent(new Label(""),0,1);
 
-							addComponent(new Button(null,new Button.ClickListener() {
+							Button btnAddAccident = new Button(null,new Button.ClickListener() {
 
 								@Override
 								public void buttonClick(ClickEvent event) {
@@ -999,7 +996,9 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 									accidentContainer.addBean(accident);
 
 								}
-							}){{setIcon(FontAwesome.PLUS);}},2,0);
+							}){{setIcon(FontAwesome.PLUS);}};
+							addComponent(btnAddAccident,2,0);
+							setComponentAlignment(btnAddAccident, Alignment.MIDDLE_RIGHT);
 
 						}
 					});
@@ -1108,7 +1107,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 
 							addComponent(new Label(""),0,1);
 
-							addComponent(new Button(null,new Button.ClickListener() {
+							Button btnAddLicense = new Button(null,new Button.ClickListener() {
 
 								@Override
 								public void buttonClick(ClickEvent event) {
@@ -1119,7 +1118,9 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 									absenceContainer.addBean(absence);
 
 								}
-							}){{setIcon(FontAwesome.PLUS);}},2,0);
+							}){{setIcon(FontAwesome.PLUS);}};
+							addComponent(btnAddLicense,2,0);
+							setComponentAlignment(btnAddLicense, Alignment.MIDDLE_RIGHT);
 
 						}
 					});
@@ -1253,8 +1254,8 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 						addComponent(new Label("Días disponibles"),0,1);
 						addComponent(totalDisponibles,1,1);
 
-						if(!readOnly)
-							addComponent(new Button(null,new Button.ClickListener() {
+						if(!readOnly){
+							Button addVacation = new Button(null,new Button.ClickListener() {
 
 								@Override
 								public void buttonClick(ClickEvent event) {
@@ -1264,7 +1265,10 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 									totalDisponibles.setValue(calcularDisponibles(activeContract,vacationContainer.getItemIds()) +"");
 
 								}
-							}){{setIcon(FontAwesome.PLUS);}},2,0);
+							}){{setIcon(FontAwesome.PLUS);}};
+							addComponent(addVacation,2,0);
+							setComponentAlignment(addVacation, Alignment.MIDDLE_RIGHT);
+						}
 
 					}
 				});
