@@ -1,8 +1,8 @@
 package cl.magal.asistencia.ui.workerfile;
 
 
-import java.util.ArrayList;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
@@ -238,34 +238,32 @@ public class WorkerFileView extends HorizontalLayout implements View {
 //			}
 //		});
 		
-		table.addGeneratedColumn("contracts", new Table.ColumnGenerator() {
+		table.addGeneratedColumn("activeContract", new Table.ColumnGenerator() {
 			
 			@Override
 			public Object generateCell(Table source, Object itemId, Object columnId) {
 				
-				List<Contract> contracts = (List<Contract>) source.getContainerProperty(itemId, columnId).getValue();
+				Contract contract = (Contract) source.getContainerProperty(itemId, columnId).getValue();
 				
 //				VerticalLayout vl = new VerticalLayout();
 //				vl.setSpacing(true);
 //				vl.setMargin(true);
 				
-				GridLayout vl = new GridLayout(3,contracts.size());
+				GridLayout vl = new GridLayout(3,1);
 				vl.setSpacing(true);
 //				vl.setMargin(true);
 				
 				StringBuilder sb = new StringBuilder();
-				if(contracts == null || contracts.isEmpty()){
+				if(contract == null ){
 					sb.append("Sin contratos");
 				}else{
-					for(Contract contract : contracts){
-						if(contract.isActive())
-							job.setValue(contract.getJob().toString());
-						sb.append(contract.getJob().toString()).append("(").append(contract.getJobCode()).append(") ");
-						vl.addComponent(new Label(sb.toString(),ContentMode.HTML));
-						vl.addComponent(new Label(contract.getStep(),ContentMode.HTML));
-						vl.addComponent(new Label(contract.isActive() ? "Activo" : "Inactivo",ContentMode.HTML));
-						sb.setLength(0);
-					}
+					if(contract.isActive())
+						job.setValue(contract.getJob().toString());
+					sb.append(contract.getJob().toString()).append("(").append(contract.getJobCode()).append(") ");
+					vl.addComponent(new Label(sb.toString(),ContentMode.HTML));
+					vl.addComponent(new Label(contract.getStep(),ContentMode.HTML));
+					vl.addComponent(new Label(contract.isActive() ? "Activo" : "Inactivo",ContentMode.HTML));
+					sb.setLength(0);
 				}
 				return vl;
 			}
@@ -305,7 +303,7 @@ public class WorkerFileView extends HorizontalLayout implements View {
 		});
 		table.setWidth("100%");
 		table.setHeight("250");
-		table.setVisibleColumns("constructionsite.name","averageWage","reward","numberOfAccidents","contracts","active"//,"startingDate","endingDate"
+		table.setVisibleColumns("constructionsite.name","averageWage","reward","numberOfAccidents","activeContract","active"//,"startingDate","endingDate"
 				);
 		table.setColumnHeaders("Obra","Jornal Promedio","Premio","N° Accidentes","Oficios","Estado"//,"Fecha Inicio","Fecha Termino"
 				);
