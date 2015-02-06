@@ -1510,6 +1510,13 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 		
 		laborer.getLoan().clear();		
 		for(Loan l : beanItemLoan.getItemIds()){
+			// valida los préstamos
+			Set<ConstraintViolation<Loan>> constraintViolations = validator.validate(l);
+			if(constraintViolations.size() > 0 ){
+				Notification.show("Un préstamo es inválido \""+ constraintViolations.iterator().next().getMessage()+"\"",Type.ERROR_MESSAGE);
+				tab.setSelectedTab(3);
+				return false;
+			}
             firstDayOfCurrentMonth = new DateTime().dayOfMonth().withMinimumValue().toDate();
             //si está marcado como pospuesto, verifica que exista la fecha, si no la tiene la agrega
             if(l.isPostponed()){
