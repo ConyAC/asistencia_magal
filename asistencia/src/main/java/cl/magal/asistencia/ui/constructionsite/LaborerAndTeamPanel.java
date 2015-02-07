@@ -23,6 +23,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionSystemException;
 import org.springframework.ui.velocity.VelocityEngineUtils;
+import org.tepi.filtertable.FilterGenerator;
 import org.tepi.filtertable.FilterTable;
 import org.vaadin.dialogs.ConfirmDialog;
 
@@ -42,6 +43,7 @@ import cl.magal.asistencia.util.SecurityHelper;
 import cl.magal.asistencia.util.Utils;
 import cl.magal.asistencia.util.VelocityHelper;
 
+import com.vaadin.data.Container.Filter;
 import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.fieldgroup.BeanFieldGroup;
@@ -58,6 +60,7 @@ import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.StreamResource;
+import com.vaadin.ui.AbstractField;
 import com.vaadin.ui.AbstractSelect.ItemCaptionMode;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.BrowserFrame;
@@ -67,6 +70,7 @@ import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.CustomTable;
 import com.vaadin.ui.DateField;
+import com.vaadin.ui.Field;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
@@ -193,7 +197,7 @@ public class LaborerAndTeamPanel extends Panel implements View {
 
 			vlInfo.addComponent(nameField);
 
-			if(SecurityHelper.hastPermission(Permission.EDITAR_OBRA) ){
+			if(SecurityHelper.hasPermission(Permission.EDITAR_OBRA) ){
 				//agrega un boton que hace el commit
 				editConstructionSite = new Button(null,new Button.ClickListener() {
 
@@ -280,6 +284,7 @@ public class LaborerAndTeamPanel extends Panel implements View {
 	 * Lista de trabajadores seleccionados
 	 */
 	final Set<Object> selectedItemIds = new HashSet<Object>();
+	ComboBox cbFilterStep;
 
 	protected VerticalLayout drawLaborer() {
 
@@ -338,7 +343,7 @@ public class LaborerAndTeamPanel extends Panel implements View {
 				laborer.setConstructionsite(item.getBean());
 
 				BeanItem<LaborerConstructionsite> laborerItem = new BeanItem<LaborerConstructionsite>(laborer);
-				AddLaborerContractDialog userWindow = new AddLaborerContractDialog(laborerItem,laborerService,true);
+				AddLaborerContractDialog userWindow = new AddLaborerContractDialog(laborerItem,true);
 
 				userWindow.addListener(new AbstractWindowEditor.EditorSavedListener() {
 
@@ -691,6 +696,45 @@ public class LaborerAndTeamPanel extends Panel implements View {
 		});
 
 		final FilterTable table =  new FilterTable();
+		
+		table.setFilterGenerator(new FilterGenerator() {
+			
+			@Override
+			public AbstractField<?> getCustomFilterComponent(Object propertyId) {
+				 if ("activeContract.step".equals(propertyId)) {
+					 cbFilterStep = new ComboBox(null);
+					 cbFilterStep.setNullSelectionAllowed(true);
+					 return cbFilterStep;
+				 }else if("actions".equals(propertyId)){
+				 }
+				return null;
+			}
+			
+			@Override
+			public Filter generateFilter(Object propertyId, Field<?> originatingField) {
+				return null;
+			}
+			
+			@Override
+			public Filter generateFilter(Object propertyId, Object value) {
+				return null;
+			}
+			
+			@Override
+			public void filterRemoved(Object propertyId) {
+			}
+			
+			@Override
+			public Filter filterGeneratorFailed(Exception reason, Object propertyId,
+					Object value) {
+				return null;
+			}
+			
+			@Override
+			public void filterAdded(Object propertyId,
+					Class<? extends Filter> filterType, Object value) {
+			}
+		});
 
 		table.addGeneratedColumn("actions", new CustomTable.ColumnGenerator() {
 
@@ -700,7 +744,8 @@ public class LaborerAndTeamPanel extends Panel implements View {
 				return new Button(null,new Button.ClickListener(){
 					@Override
 					public void buttonClick(ClickEvent event) {
-						laborerService.remove(laborerConstruction.getBean());
+						laborerConstruction.getBean().setActive((short)0);
+						laborerService.save(laborerConstruction.getBean());
 						laborerConstructionContainer.removeItem(itemId);
 					}
 				}){
@@ -748,7 +793,6 @@ public class LaborerAndTeamPanel extends Panel implements View {
 		//		});
 
 		//TODO estado
-		//		table.setVisibleColumns("laborer.job","laborer.firstname","laborer.laborerId"); //FIXME laborerId
 		table.setVisibleColumns("selected","activeContract.jobCode","laborer.fullname","activeContract.step","actions"); //FIXME laborerId
 		table.setColumnHeaders("","Cod","Nombre","Etapa","Acciones");
 		table.setColumnWidth("selected", 40);
@@ -771,7 +815,6 @@ public class LaborerAndTeamPanel extends Panel implements View {
 						final ConstructionSite cs = item.getBean();
 						if(cs == null){
 							Notification.show("Debe seleccionar una obra",Type.ERROR_MESSAGE);
-							//							return false;
 							return ;
 						}
 						try {
@@ -779,8 +822,11 @@ public class LaborerAndTeamPanel extends Panel implements View {
 							LaborerConstructionsite laborer = beanItem.getBean();
 							logger.debug("laborer constructionsite {}, rut {} postcommit ",laborer,laborer.getLaborer().getRut());
 							laborerService.save(laborer);	
+							//si el elemento no esta activo, lo quita de la lista
+							if(laborer.getActive() == (short)0){
+								laborerConstructionContainer.removeItem(laborer);
+							}
 							table.refreshRowCache();
-							//			    			return true;
 							return;
 						} catch (TransactionSystemException e) {
 
@@ -799,7 +845,6 @@ public class LaborerAndTeamPanel extends Panel implements View {
 								Notification.show("Error al intentar guardar el trabajador", Type.ERROR_MESSAGE);
 							}
 
-							//			    			return false;
 							return;
 						}catch (Exception e){
 
@@ -808,7 +853,6 @@ public class LaborerAndTeamPanel extends Panel implements View {
 							else
 								logger.error("Error al guardar la información del obrero",e);
 							Notification.show("Ocurrió un error al intentar guardar el trabajador", Type.ERROR_MESSAGE);
-							//			    			return false;
 							return;
 						}
 					}
@@ -964,7 +1008,7 @@ public class LaborerAndTeamPanel extends Panel implements View {
 
 		this.item = item;
 
-		if( SecurityHelper.hastPermission(Permission.CREAR_OBRA) || SecurityHelper.hasConstructionSite(item.getBean())){
+		if( SecurityHelper.hasPermission(Permission.CREAR_OBRA) || SecurityHelper.hasConstructionSite(item.getBean())){
 			if( editConstructionSite != null )
 				editConstructionSite.setEnabled(true);
 			btnPrint.setEnabled(true);
@@ -977,7 +1021,7 @@ public class LaborerAndTeamPanel extends Panel implements View {
 		}
 
 		setEnabledDetail(true,item);
-		List<LaborerConstructionsite> laborers = constructionSiteService.getLaborerByConstruction(item.getBean());
+		List<LaborerConstructionsite> laborers = constructionSiteService.getLaborerActiveByConstruction(item.getBean());
 		laborerConstructionContainer.removeAllItems();
 		laborerConstructionContainer.addAll(laborers);
 
@@ -991,6 +1035,8 @@ public class LaborerAndTeamPanel extends Panel implements View {
 		bfg.setItemDataSource(item);
 		if(detailLayout != null)
 			detailLayout.setEnabled(enable);
-
+		cbFilterStep.removeAllItems();
+		for(String step : item.getBean().getSteps())
+			cbFilterStep.addItem(step);
 	}
 }

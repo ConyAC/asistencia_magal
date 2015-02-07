@@ -151,7 +151,7 @@ public class ConfigView extends VerticalLayout implements View {
 				table.setColumnHeaders("Desde","Hasta","Monto");
 				addComponent(table);
 
-				if(!SecurityHelper.hastPermission(Permission.DEFINIR_VARIABLE_GLOBAL)){
+				if(!SecurityHelper.hasPermission(Permission.DEFINIR_VARIABLE_GLOBAL)){
 					setEnabled(false);
 				}else{
 					setEnabled(true);
@@ -198,7 +198,7 @@ public class ConfigView extends VerticalLayout implements View {
 				table.setTableFieldFactory(factory);
 				addComponent(table);
 
-				if(!SecurityHelper.hastPermission(Permission.DEFINIR_VARIABLE_GLOBAL)){
+				if(!SecurityHelper.hasPermission(Permission.DEFINIR_VARIABLE_GLOBAL)){
 					setEnabled(false);
 				}else{
 					setEnabled(true);
@@ -328,7 +328,7 @@ public class ConfigView extends VerticalLayout implements View {
 				
 				addComponent(table);
 
-				if(!SecurityHelper.hastPermission(Permission.DEFINIR_VARIABLE_GLOBAL)){
+				if(!SecurityHelper.hasPermission(Permission.DEFINIR_VARIABLE_GLOBAL)){
 					setEnabled(false);
 				}else{
 					setEnabled(true);
@@ -395,7 +395,7 @@ public class ConfigView extends VerticalLayout implements View {
 				table.setEditable(true);
 				
 				addComponent(table);
-				if(!SecurityHelper.hastPermission(Permission.DEFINIR_VARIABLE_GLOBAL)){
+				if(!SecurityHelper.hasPermission(Permission.DEFINIR_VARIABLE_GLOBAL)){
 					setEnabled(false);
 				}else{
 					setEnabled(true);
@@ -554,7 +554,7 @@ public class ConfigView extends VerticalLayout implements View {
 				};
 				addComponent(form);
 				setComponentAlignment(form, Alignment.MIDDLE_CENTER);
-				if(!SecurityHelper.hastPermission(Permission.DEFINIR_VARIABLE_GLOBAL)){
+				if(!SecurityHelper.hasPermission(Permission.DEFINIR_VARIABLE_GLOBAL)){
 					setEnabled(false);
 				}else{
 					setEnabled(true);
@@ -643,7 +643,7 @@ public class ConfigView extends VerticalLayout implements View {
 				addComponent(form);
 				setComponentAlignment(form, Alignment.MIDDLE_CENTER);
 				
-				if(!SecurityHelper.hastPermission(Permission.DEFINIR_VARIABLE_GLOBAL)){
+				if(!SecurityHelper.hasPermission(Permission.DEFINIR_VARIABLE_GLOBAL)){
 					setEnabled(false);
 				}else{
 					setEnabled(true);
@@ -744,7 +744,7 @@ public class ConfigView extends VerticalLayout implements View {
 		
 		vl.addComponent(table);
 		
-		if(!SecurityHelper.hastPermission(Permission.DEFINIR_VARIABLE_GLOBAL)){
+		if(!SecurityHelper.hasPermission(Permission.DEFINIR_VARIABLE_GLOBAL)){
 			vl.setEnabled(false);
 		}else{
 			vl.setEnabled(true);

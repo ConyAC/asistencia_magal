@@ -2,11 +2,15 @@ package cl.magal.asistencia.entities;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.Set;
 
 import javax.persistence.Basic;
+import javax.persistence.CollectionTable;
 import javax.persistence.Column;
 import javax.persistence.Convert;
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -50,12 +54,22 @@ public class Loan implements Serializable {
     private Integer fee;
     
     @Column(name = "status")
-    @NotNull
     private String status;
     
     @ManyToOne
 	@JoinColumn(name="LABORER_CONSTRUCTIONSITEID")
 	LaborerConstructionsite laborerConstructionSite;
+    
+    //Pagos postergados  
+    @Column(name = "postponed")
+    transient private boolean postponed;
+    
+    //tabla intermedia entre role y sus permisos    
+    @ElementCollection(targetClass= Date.class,fetch=FetchType.EAGER)
+    @CollectionTable(name="postponedpaymenttool", joinColumns = @JoinColumn(name = "toolId"))
+    @Column(name="TOOL_DATE")
+    @Temporal(TemporalType.TIMESTAMP)
+    Set<Date> datePostponed; 
     
     public Loan() {
     }
@@ -118,6 +132,23 @@ public class Loan implements Serializable {
 		this.laborerConstructionSite = laborerConstructionSite;
 	}
 
+    public boolean isPostponed() {
+		return postponed;
+	}
+
+	public void setPostponed(boolean postponed) {
+		this.postponed = postponed;
+	}
+
+	public Set<Date> getDatePostponed() {
+		return datePostponed;
+	}
+
+	public void setDatePostponed(Set<Date> datePostponed) {
+		this.datePostponed = datePostponed;
+	}	
+	
+	
 //	@Override
 //    public int hashCode() {
 //        int hash = 0;
@@ -138,7 +169,7 @@ public class Loan implements Serializable {
 //        return true;
 //    }
 
-    @Override
+	@Override
     public String toString() {
         return "jpa.magal.entities.Loan[ loanId=" + loanId + " ]";
     }
