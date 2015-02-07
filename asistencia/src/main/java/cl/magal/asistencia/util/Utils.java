@@ -32,7 +32,7 @@ public class Utils {
 		StringBuilder sb = new StringBuilder();
 		for(ConstraintViolation constraintViolation : constraintViolations){
 			sb.append(String.format(constraintViolation.getMessage(), constraintViolation.getInvalidValue()) ).append("\n");
-			logger.debug(" error en validar mensaje : {} valor: {} ",constraintViolation.getMessage(),constraintViolation.getInvalidValue());
+			logger.error(" error en validar el objeto {}, mensaje : {} valor: {} ",constraintViolation.getRootBean(),constraintViolation.getMessage(),constraintViolation.getInvalidValue());
 		}
 		return sb.toString();
 	}
