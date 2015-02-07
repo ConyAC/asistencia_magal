@@ -92,7 +92,7 @@ public class AddLaborerContractDialog extends AbstractWindowEditor implements Ne
 		velocityEngine = (VelocityEngine) ((MagalUI)UI.getCurrent()).getSpringBean(Constants.VELOCITY_ENGINE_BEAN);
 		laborerService = (LaborerService) ((MagalUI)UI.getCurrent()).getSpringBean(Constants.LABORER_SERVICE_BEAN);
 		constructionSiteService = (ConstructionSiteService) ((MagalUI)UI.getCurrent()).getSpringBean(Constants.CONSTRUCTIONSITE_SERVICE_BEAN);
-		setWidth("50%");
+		setWidth("70%");
 		setHeight("80%");
 		
 		if(addLaborer){
