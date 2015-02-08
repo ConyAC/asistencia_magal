@@ -2,6 +2,7 @@ package cl.magal.asistencia.entities;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Set;
 
 import javax.persistence.Basic;
@@ -22,8 +23,8 @@ import javax.persistence.TemporalType;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.NotNull;
 
-import cl.magal.asistencia.entities.converter.LoanStatusConverter;
-import cl.magal.asistencia.entities.enums.LoanStatus;
+import cl.magal.asistencia.entities.converter.LoanToolStatusConverter;
+import cl.magal.asistencia.entities.enums.LoanToolStatus;
 
 /**
  *
@@ -53,23 +54,30 @@ public class Loan implements Serializable {
     @Column(name = "fee")
     private Integer fee;
     
-    @Column(name = "status")
-    private String status;
+    @Convert(converter = LoanToolStatusConverter.class)
+    @Column(name = "status",nullable=false)
+    @NotNull
+    private LoanToolStatus status;
     
     @ManyToOne
 	@JoinColumn(name="LABORER_CONSTRUCTIONSITEID")
 	LaborerConstructionsite laborerConstructionSite;
     
     //Pagos postergados  
-    @Column(name = "postponed")
     transient private boolean postponed;
     
     //tabla intermedia entre role y sus permisos    
     @ElementCollection(targetClass= Date.class,fetch=FetchType.EAGER)
-    @CollectionTable(name="postponedpaymenttool", joinColumns = @JoinColumn(name = "toolId"))
-    @Column(name="TOOL_DATE")
+    @CollectionTable(name="postponedpaymentloan", joinColumns = @JoinColumn(name = "LOANID"))
+    @Column(name="LOAN_DATE")
     @Temporal(TemporalType.TIMESTAMP)
-    Set<Date> datePostponed; 
+    Set<Date> datePostponed = new HashSet<Date>(); 
+    
+    @PrePersist
+    public void prePersist(){
+    	if(status == null)
+    		status = LoanToolStatus.EN_DEUDA;
+    }
     
     public Loan() {
     }
@@ -115,11 +123,11 @@ public class Loan implements Serializable {
 		this.fee = fee;
 	}
 	
-	public String getStatus() {
+	public LoanToolStatus getStatus() {
 		return status;
 	}
 
-	public void setStatus(String status) {
+	public void setStatus(LoanToolStatus status) {
 		this.status = status;
 	}
 

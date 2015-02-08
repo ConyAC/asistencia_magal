@@ -320,7 +320,8 @@ public class ConstructionSitesView extends BaseView implements View {
 
 	private void reloadData(){
 		//agrega las obras TODO segun perfil TODO usar paginación
-		Page<ConstructionSite> page = service.findAllConstructionSite(new PageRequest(0, 20));
+		User user = SecurityHelper.getCredentials();
+		Page<ConstructionSite> page = service.findAllConstructionSiteOrderByUser(new PageRequest(0, 20),user);
 		constructionContainer.removeAllItems();
 		constructionContainer.addAll(page.getContent());
 	}

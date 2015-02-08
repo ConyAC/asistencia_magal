@@ -1,5 +1,6 @@
 package cl.magal.asistencia.services;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -72,6 +73,45 @@ public class ConstructionSiteService {
 
 	public Page<ConstructionSite> findAllConstructionSite(Pageable page) {
 		return constructionSiterepo.findAllNotDeteled(page);
+	}
+	
+	public List<ConstructionSite> findAllConstructionSiteOrderByUser(User user) {
+		if(user == null )
+			throw new RuntimeException("El usuario es necesario para ordenar las obras");
+		//es vez de hacer una query, hace 4 queries por simplicidad
+		List<ConstructionSite> result1 = constructionSiterepo.findActiveByUser(user);
+		List<ConstructionSite> result2 = constructionSiterepo.findActiveByNotUser(user);
+		List<ConstructionSite> result3 = constructionSiterepo.findFinalizedByUser(user);
+		List<ConstructionSite> result4 = constructionSiterepo.findFinalizedByNotUser(user);
+		
+		int total = result1.size()+result2.size()+result3.size()+result4.size();
+		List<ConstructionSite> result = new ArrayList<ConstructionSite>(total);
+		result.addAll(result1);
+		result.addAll(result2);
+		result.addAll(result3);
+		result.addAll(result4);
+		
+		return result;
+	}
+
+	public Page<ConstructionSite> findAllConstructionSiteOrderByUser(Pageable page,User user) {
+		if(user == null )
+			throw new RuntimeException("El usuario es necesario para ordenar las obras");
+		//es vez de hacer una query, hace 4 queries por simplicidad
+		List<ConstructionSite> result1 = constructionSiterepo.findActiveByUser(user);
+		List<ConstructionSite> result2 = constructionSiterepo.findActiveByNotUser(user);
+		List<ConstructionSite> result3 = constructionSiterepo.findFinalizedByUser(user);
+		List<ConstructionSite> result4 = constructionSiterepo.findFinalizedByNotUser(user);
+		
+		int total = result1.size()+result2.size()+result3.size()+result4.size();
+		List<ConstructionSite> result = new ArrayList<ConstructionSite>(total);
+		result.addAll(result1);
+		result.addAll(result2);
+		result.addAll(result3);
+		result.addAll(result4);
+		
+		return new PageImpl<ConstructionSite>(result,page,total);
+		//return constructionSiterepo.findAllNotDeteledOderByUser(page,user);
 	}
 
 	public ConstructionSite findConstructionSiteByNombre(String nombre) {

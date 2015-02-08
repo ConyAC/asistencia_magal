@@ -28,6 +28,7 @@ import javax.persistence.PrePersist;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.UniqueConstraint;
 
 import cl.magal.asistencia.entities.converter.JobConverter;
 import cl.magal.asistencia.entities.enums.Job;
@@ -37,7 +38,8 @@ import cl.magal.asistencia.entities.enums.Job;
  * @author Constanza
  */
 @Entity
-@Table(name = "contract")
+@Table(name = "contract",uniqueConstraints = {
+		@UniqueConstraint( columnNames= {"jobCode","LABORER_CONSTRUCTIONSITEID"} )} )
 @NamedQueries({
     @NamedQuery(name = "Contract.findAll", query = "SELECT c FROM Contract c"),
     @NamedQuery(name = "Contract.findByContractId", query = "SELECT c FROM Contract c WHERE c.contractId = :contractId"),
@@ -80,17 +82,17 @@ public class Contract implements Serializable {
     @Column(name = "contractDescription")
     String contractDescription;
     @Convert(converter = JobConverter.class)
-    @Column(name = "job")
+    @Column(name = "job",nullable = false)
     private Job job;
     
-    @Column(name="jobCode")
+    @Column(name="jobCode",nullable = false)
     private Integer jobCode;
     
     private boolean active;
     private boolean finished;
     
     @OneToOne
-    @JoinColumn(name="LABORER_CONSTRUCTIONSITEID")
+    @JoinColumn(name="LABORER_CONSTRUCTIONSITEID",nullable = false,unique=true )
 	LaborerConstructionsite laborerConstructionSite;
     
     @OneToMany(mappedBy="contract",fetch=FetchType.LAZY,cascade={CascadeType.PERSIST,CascadeType.MERGE},orphanRemoval=true )
@@ -175,9 +177,11 @@ public class Contract implements Serializable {
 		return laborerConstructionSite;
 	}
 
-	public void setLaborerConstructionSite(
-			LaborerConstructionsite laborerConstructionSite) {
+	public void setLaborerConstructionSite(LaborerConstructionsite laborerConstructionSite) {
 		this.laborerConstructionSite = laborerConstructionSite;
+		if(laborerConstructionSite.getActiveContract() == null ){
+			laborerConstructionSite.setActiveContract(this);
+		}
 	}
 
 	public List<Annexed> getAnnexeds() {

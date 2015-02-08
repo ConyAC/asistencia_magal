@@ -7,15 +7,15 @@ package cl.magal.asistencia.entities;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Set;
 
 import javax.persistence.Basic;
 import javax.persistence.CollectionTable;
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -24,6 +24,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.PrePersist;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -33,6 +34,9 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
 import org.hibernate.validator.constraints.NotEmpty;
+
+import cl.magal.asistencia.entities.converter.LoanToolStatusConverter;
+import cl.magal.asistencia.entities.enums.LoanToolStatus;
 
 /**
  *
@@ -85,8 +89,10 @@ public class Tool implements Serializable {
     @Column(name = "fee")
     private Integer fee;
     
-    @Column(name = "status" , nullable = false )
-    private String status;
+    @Convert(converter = LoanToolStatusConverter.class)
+    @Column(name = "status",nullable=false)
+    @NotNull
+    private LoanToolStatus status;
     
     @ManyToOne
 	@JoinColumn(name="LABORER_CONSTRUCTIONSITEID",nullable = false )
@@ -101,7 +107,13 @@ public class Tool implements Serializable {
     @CollectionTable(name="postponedpaymenttool", joinColumns = @JoinColumn(name = "toolId"))
     @Column(name="TOOL_DATE")
     @Temporal(TemporalType.TIMESTAMP)
-    Set<Date> datePostponed; 
+    Set<Date> datePostponed = new HashSet<Date>(); 
+    
+    @PrePersist
+    public void prePersist(){
+    	if(status == null)
+    		status = LoanToolStatus.EN_DEUDA;
+    }
     
     public Tool() {
     }
@@ -156,11 +168,11 @@ public class Tool implements Serializable {
 		this.fee = fee;
 	}
 	
-	public String getStatus() {
+	public LoanToolStatus getStatus() {
 		return status;
 	}
 
-	public void setStatus(String status) {
+	public void setStatus(LoanToolStatus status) {
 		this.status = status;
 	}
 

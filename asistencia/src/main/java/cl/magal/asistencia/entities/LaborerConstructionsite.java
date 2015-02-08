@@ -131,7 +131,7 @@ public class LaborerConstructionsite implements Serializable {
     /**
      * define el contrato activo o el primero
      */
-    @OneToOne(mappedBy="laborerConstructionSite")
+    @OneToOne(mappedBy="laborerConstructionSite",cascade = {CascadeType.PERSIST,CascadeType.MERGE})
     Contract activeContract;
 	
     
@@ -340,6 +340,8 @@ public class LaborerConstructionsite implements Serializable {
 	
 	public void setActiveContract(Contract contract){
 		this.activeContract = contract;
+		if(contract.getLaborerConstructionSite() == null )
+			contract.setLaborerConstructionSite(this);
 	}
 	
 	/**

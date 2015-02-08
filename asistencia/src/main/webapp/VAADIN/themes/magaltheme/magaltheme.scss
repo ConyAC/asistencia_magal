@@ -299,6 +299,11 @@
 	.v-table-header-cell {
 		font-weight : bold;
 	}
+	
+	/** remarcar contrato activo en histórico**/
+	.v-table-row-active-row {
+		background-color : springgreen !important;
+	}
 }
 
 

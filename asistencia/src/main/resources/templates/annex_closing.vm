@@ -40,7 +40,7 @@
 		    <h2>ANEXO CONTRATO DE TRABAJO</h2>
 		</div>
 		<br />
-		<p style="text-align:justify;">El presente #if (${modify})es modificado #else es actualizado #end en su clausura <b>"${closing}"</b>:</p>
+		<p style="text-align:justify;">El presente #if (${modify})es modificado #else es actualizado #end en su cl&aacute;usula <b>"${closing}"</b>:</p>
 		<p>Donde dice : <b>${argument1}</b></p>
 		<p>Debe decir : <b>${argument2}</b></p>
 		<br />

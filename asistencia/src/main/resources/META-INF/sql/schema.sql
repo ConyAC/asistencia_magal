@@ -242,7 +242,7 @@ CREATE TABLE IF NOT EXISTS "TOOL"
    FEE integer NOT NULL,
    NAME varchar(255) NOT NULL,
    PRICE integer NOT NULL,
-   STATUS varchar(255) NOT NULL,
+   STATUS integer NOT NULL default 2, -- en deuda
    LABORER_CONSTRUCTIONSITEID bigint not null
 )
 ;
@@ -264,7 +264,7 @@ CREATE TABLE IF NOT EXISTS "LOAN"
    DATEBUY timestamp NOT NULL,
    FEE integer,
    PRICE integer,
-   STATUS varchar(255),
+   STATUS integer NOT NULL default 2, -- en deuda
    LABORER_CONSTRUCTIONSITEID bigint not null
 )
 ;
@@ -530,7 +530,7 @@ CREATE TABLE IF NOT EXISTS "CONTRACT"
 	terminationDate timestamp, 
 	timeduration double, 
 	valueTreatment integer, 
-	LABORER_CONSTRUCTIONSITEID bigint
+	LABORER_CONSTRUCTIONSITEID bigint not null -- no puede ser nulo
 )
 ;
 CREATE UNIQUE INDEX IF NOT EXISTS PK_CONTRACT ON "CONTRACT"(CONTRACTID)

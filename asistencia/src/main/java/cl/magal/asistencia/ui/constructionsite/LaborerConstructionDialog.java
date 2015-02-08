@@ -34,6 +34,7 @@ import cl.magal.asistencia.entities.User;
 import cl.magal.asistencia.entities.Vacation;
 import cl.magal.asistencia.entities.enums.AbsenceType;
 import cl.magal.asistencia.entities.enums.AccidentLevel;
+import cl.magal.asistencia.entities.enums.LoanToolStatus;
 import cl.magal.asistencia.entities.enums.MaritalStatus;
 import cl.magal.asistencia.entities.enums.Permission;
 import cl.magal.asistencia.services.LaborerService;
@@ -49,6 +50,7 @@ import cl.magal.asistencia.util.Utils;
 import cl.magal.asistencia.util.VelocityHelper;
 
 import com.vaadin.data.Container;
+import com.vaadin.data.Item;
 import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeNotifier;
@@ -61,7 +63,6 @@ import com.vaadin.server.StreamResource;
 import com.vaadin.server.VaadinService;
 import com.vaadin.server.VaadinSession;
 import com.vaadin.shared.ui.label.ContentMode;
-import com.vaadin.ui.AbstractField;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.BrowserFrame;
 import com.vaadin.ui.Button;
@@ -369,6 +370,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 		vh.addComponent(hl);
 
 		beanItemTool = new BeanItemContainer<Tool>(Tool.class);
+		beanItemTool.addNestedContainerProperty("status.description");
 		List<Tool> tools = (List<Tool>)getItem().getItemProperty("tool").getValue();
 		beanItemTool.addAll(tools);
 
@@ -385,7 +387,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 					LaborerConstructionsite laborer = (LaborerConstructionsite) getItem().getBean();
 					if(laborer == null ) throw new RuntimeException("El trabajador no es válido.");
 					Tool tool = new Tool();
-					tool.setStatus("En deuda"); //FIXME por mientras
+					tool.setStatus(LoanToolStatus.EN_DEUDA);
 					laborer.addTool(tool);
 					beanItemTool.addBean(tool);
 				}
@@ -414,8 +416,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 				else if(  propertyId.equals("dateBuy") ){
 					field = new DateField();
 				}
-
-				((AbstractField<?>)field).setImmediate(true);
+				
 				return field;
 			}
 		});
@@ -460,7 +461,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 			}
 		});
 
-		tableTool.setVisibleColumns("name","price","dateBuy","fee","selected","status", "eliminar");
+		tableTool.setVisibleColumns("name","price","dateBuy","fee","selected","status.description", "eliminar");
 		tableTool.setColumnHeaders("Herramienta","Monto","Fecha","Cuota","Postergar pago","Estado", "Acciones");
 		tableTool.setEditable(true);				
 		vh.addComponent(tableTool);
@@ -476,6 +477,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 		vp.addComponent(hl2);
 
 		beanItemLoan = new BeanItemContainer<Loan>(Loan.class);
+		beanItemLoan.addNestedContainerProperty("status.description");
 		List<Loan> loans = (List<Loan>)getItem().getItemProperty("loan").getValue();
 		beanItemLoan.addAll(loans);
 
@@ -491,6 +493,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 					LaborerConstructionsite laborer = (LaborerConstructionsite) getItem().getBean();
 					if(laborer == null ) throw new RuntimeException("El trabajador no es válido.");
 					Loan loan = new Loan();
+					loan.setStatus(LoanToolStatus.EN_DEUDA);
 					laborer.addLoan(loan);
 					beanItemLoan.addBean(loan);
 				}
@@ -522,7 +525,6 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 				else {
 					return null;
 				}
-				((AbstractField<?>)field).setImmediate(true);
 				return field;
 			}
 		});
@@ -567,7 +569,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 		});
 
 
-		tableLoan.setVisibleColumns("price","dateBuy", "fee", "selected","status", "eliminar");
+		tableLoan.setVisibleColumns("price","dateBuy", "fee", "selected","status.description", "eliminar");
 		tableLoan.setColumnHeaders("Monto","Fecha", "Cuota", "Postergar pago", "Estado", "Eliminar");
 		tableLoan.setEditable(true);		
 		vp.addComponent(tableLoan);
@@ -657,64 +659,6 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 				addComponent(btnPrint);
 				setComponentAlignment(btnPrint, Alignment.MIDDLE_CENTER);
 
-				//				Button btnEdit = new Button(null,FontAwesome.PENCIL);
-				//				if(!readOnly){
-				//
-				////					final HorizontalLayout hl = this;
-				//
-				////					final Button btnChangeJob = new Button(null,FontAwesome.EXCHANGE);
-				//
-				//
-				//					//				btnEdit.setDescription("Editar");
-				////					btnChangeJob.setDescription("Cambiar Oficio");
-				//
-				//					//				btnEdit.addClickListener(new Button.ClickListener() {
-				//					//
-				//					//					@Override
-				//					//					public void buttonClick(ClickEvent event) {
-				//					//						
-				//					//					}
-				//					//				});
-				//					//				addComponent(btnEdit);
-				////
-				////					btnChangeJob.addClickListener(new Button.ClickListener() {
-				////
-				////						@Override
-				////						public void buttonClick(ClickEvent event) {
-				////
-				////							//solo puede crear otro contrato si está finalizado el anterior y calculó el finiquito
-				////							if(!activeContract.isFinished() || activeContract.getSettlement() == null ){
-				////								Notification.show("El contrato debe estár terminado y finiquitado para cambiar el rol",Type.HUMANIZED_MESSAGE);
-				////								return;
-				////							}
-				////							
-				////							AddLaborerContractDialog userWindow = new AddLaborerContractDialog(getItem(),service,false);
-				////
-				////							userWindow.addListener(new AbstractWindowEditor.EditorSavedListener() {
-				////
-				////								@Override
-				////								public void editorSaved(EditorSavedEvent event) {
-				////									try {
-				////										//TODO definir si guardará o no el estado del laborer en esta etapa
-				////										LaborerConstructionsite laborer = ((BeanItem<LaborerConstructionsite>) event.getSavedItem()).getBean();
-				////										setContractGl(laborer.getActiveContract());
-				////										beanContainerAnnexeds.removeAllItems();
-				////
-				////										//										hl.replaceComponent(btnChangeJob,btnFinishContract);
-				////									} catch (Exception e) {
-				////										logger.error("Error al guardar la información del obrero",e);
-				////										Notification.show("Es necesario agregar todos los campos obligatorios", Type.ERROR_MESSAGE);
-				////									}
-				////								}
-				////							});
-				////
-				////							UI.getCurrent().addWindow(userWindow);
-				////						}
-				////					});
-				//
-				//
-				////					addComponent(btnChangeJob);
-				//				}
 			}
 		},2,fila++);
 
@@ -808,6 +752,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 										w.setWidth("60%");
 										w.setHeight("60%");
 
+										activeContract.setTerminationDate(new Date());
 										activeContract.setFinished(true);
 										setContractGl(activeContract);
 									}
@@ -874,35 +819,35 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 			gl2.addComponent( new HorizontalLayout(){
 				{
 					setWidth("100%");
-					Button AgregarAnexo = new Button(null,new Button.ClickListener() {
-
-						@Override
-						public void buttonClick(ClickEvent event) {
-
-							AddAnnexedContractDialog userWindow = new AddAnnexedContractDialog(new BeanItem<Contract>(((LaborerConstructionsite)getItem().getBean()).getActiveContract()));
-							userWindow.addListener(new AbstractWindowEditor.EditorSavedListener() {
-
-								@Override
-								public void editorSaved(EditorSavedEvent event) {
-									try {
-										//TODO definir si guardará o no el estado del laborer en esta etapa
-										BeanItem<Contract>	newBeanItem = (BeanItem<Contract>) event.getSavedItem();
-
-										beanContainerAnnexeds.removeAllItems();
-										beanContainerAnnexeds.addAll((Collection<? extends Annexed>) newBeanItem.getItemProperty("annexeds").getValue());
-
-									} catch (Exception e) {
-										logger.error("Error al guardar la información del obrero",e);
-										Notification.show("Es necesario agregar todos los campos obligatorios", Type.ERROR_MESSAGE);
-									}
-								}
-							});
-
-							UI.getCurrent().addWindow(userWindow);
-						}
-					}){{setIcon(FontAwesome.PLUS);}};
-					addComponent(AgregarAnexo);
-					setComponentAlignment(AgregarAnexo, Alignment.MIDDLE_CENTER);
+//					Button AgregarAnexo = new Button(null,new Button.ClickListener() {
+//
+//						@Override
+//						public void buttonClick(ClickEvent event) {
+//
+//							AddAnnexedContractDialog userWindow = new AddAnnexedContractDialog(new BeanItem<Contract>(((LaborerConstructionsite)getItem().getBean()).getActiveContract()));
+//							userWindow.addListener(new AbstractWindowEditor.EditorSavedListener() {
+//
+//								@Override
+//								public void editorSaved(EditorSavedEvent event) {
+//									try {
+//										//TODO definir si guardará o no el estado del laborer en esta etapa
+//										BeanItem<Contract>	newBeanItem = (BeanItem<Contract>) event.getSavedItem();
+//
+//										beanContainerAnnexeds.removeAllItems();
+//										beanContainerAnnexeds.addAll((Collection<? extends Annexed>) newBeanItem.getItemProperty("annexeds").getValue());
+//
+//									} catch (Exception e) {
+//										logger.error("Error al guardar la información del obrero",e);
+//										Notification.show("Es necesario agregar todos los campos obligatorios", Type.ERROR_MESSAGE);
+//									}
+//								}
+//							});
+//
+//							UI.getCurrent().addWindow(userWindow);
+//						}
+//					}){{setIcon(FontAwesome.PLUS);}};
+//					addComponent(AgregarAnexo);
+//					setComponentAlignment(AgregarAnexo, Alignment.MIDDLE_CENTER);
 				}
 			},columna--,fila++);
 		else{ columna--;fila++;}
@@ -960,8 +905,10 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 			}
 		});
 
-		annexedTable.setVisibleColumns("step","startDate","terminationDate","print");
-		annexedTable.setColumnHeaders("Etapa","Fecha de inicio","Fecha de termino","Imprimir");
+		annexedTable.setVisibleColumns("step","startDate","terminationDate"//,"print"
+				);
+		annexedTable.setColumnHeaders("Etapa","Fecha de inicio","Fecha de termino"//,"Imprimir"
+				);
 
 		gl2.addComponent(annexedTable,columna++,fila,columna--,fila++);
 		return vl;
@@ -999,6 +946,19 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 					return "Sin fecha de termino";
 				else 
 					return endingDateProp.getValue();
+			}
+		});
+		table.setCellStyleGenerator(new Table.CellStyleGenerator() {
+			
+			@Override
+			public String getStyle(Table source, Object itemId, Object propertyId) {
+				if(propertyId == null ){ //estilo para la fila
+					//si es la activa, la marca
+					Item item = source.getItem(itemId);
+					boolean isActive = (Boolean) item.getItemProperty("active").getValue();
+					return isActive ? "active-row":null;
+				}
+				return null;
 			}
 		});
 
@@ -1099,7 +1059,6 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 							return null;
 						}
 
-						((AbstractField<?>)field).setImmediate(true);
 						return field;
 					}
 				});
@@ -1220,7 +1179,6 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 							return null;
 						}
 
-						((AbstractField<?>)field).setImmediate(true);
 						return field;
 					}
 				});

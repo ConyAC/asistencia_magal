@@ -18,6 +18,7 @@ public interface LaborerConstructionsiteRepository extends
 	
 	LaborerConstructionsite findByConstructionsiteAndLaborer(ConstructionSite constructionsite, Laborer laborer);
 	
+	@Query(value="select lc from LaborerConstructionsite lc where lc.laborer = ?1 order by lc.activeContract.active desc,lc.activeContract.terminationDate desc")
 	List<LaborerConstructionsite> findByLaborer(Laborer laborer);
 	
 	LaborerConstructionsite findFirstByLaborerOrderByActiveContractStartDateDesc(Laborer laborer);

@@ -7,6 +7,8 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.util.List;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -24,7 +26,7 @@ import cl.magal.asistencia.entities.User;
 import cl.magal.asistencia.entities.enums.Status;
 import cl.magal.asistencia.helpers.ConstructionSiteHelper;
 import cl.magal.asistencia.helpers.LaborerHelper;
-import cl.magal.asistencia.helpers.UserHelper;
+import cl.magal.asistencia.util.SecurityHelper;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = { "/META-INF/spring/testApplicationContext.xml" })
@@ -37,13 +39,10 @@ public class ConstructionSiteServiceTest {
 	@Autowired
 	UserService userService;
 	
-	User user;
+	User oneUser;
 	
 	@Before
 	public void before(){
-		service.clear();userService.clear();
-		user = UserHelper.newUser();
-		userService.saveUser(user);
 	}
 	
 	/**
@@ -114,7 +113,7 @@ public class ConstructionSiteServiceTest {
 	public void testSaveConstructionSiteWithPersonInCharge() {
 		
 		ConstructionSite cs = ConstructionSiteHelper.newConstrutionSite();
-		cs.setPersonInCharge(user);
+		cs.setPersonInCharge(oneUser);
 		//guardamos el elemento.
 		service.save(cs);
 		
@@ -313,5 +312,80 @@ public class ConstructionSiteServiceTest {
 		assertTrue("El objeto guardado debe contener trabajadores",!dbcs.getLaborers().isEmpty());
 		assertEquals("El objeto guardado debe contener el trabajador agregado",dbcs.getLaborers().get(1),laborer2 );
 		
+	}
+	
+	/**
+	 * Test que permite probar el orden en el que trae las obras de un usuario en particular, el orden es el siguiente
+	 * obras propias activas
+	 * obras activas
+	 * obras propias inactivas
+	 * obras inactivas
+	 * Para el test se le asignó al usuario con id 1, la obra activa con id 1 y la obra inactiva con id 3
+	 * y se crearon las obras con id 2 activa y 4 inactiva que no están asociadas al usuario
+	 * 
+	 * y luego se prueba con el usuario 2, asinandole la obra activa con id 2 y la obra inactiva con id 4
+	 * y dejando las demás sin asignar
+	 * 
+	 */
+	@Test
+	public void testConstructionSiteOrder(){
+		Long userId = 1L;
+		Long ownActiveConstructionSiteId = 1L, ownInactiveConstructionSiteId = 3L , 
+			 activeConstructionSiteId = 2L, inactiveConstructionSiteId = 4L;
+		
+		// busca al usuario
+		User user = userService.findUser(userId);
+		// verifica que no sea null
+		assertNotNull(user);
+		assertTrue(!user.getCs().isEmpty());
+		
+		//hace un fake del login
+		fakeLogin(user);
+		
+		// busca las obras
+		ConstructionSite ownInactiveConstructionSite = service.findConstructionSite(ownInactiveConstructionSiteId);
+		ConstructionSite inactiveConstructionSite = service.findConstructionSite(inactiveConstructionSiteId);
+		ConstructionSite activeConstructionSite = service.findConstructionSite(activeConstructionSiteId);
+		ConstructionSite ownActiveConstructionSite = service.findConstructionSite(ownActiveConstructionSiteId);
+		
+		//busca todas las obras
+		List<ConstructionSite> userConstrutionSites = service.findAllConstructionSiteOrderByUser(user);
+		//el usuario debe tener asociado la construccion 1 y 3
+		assertTrue(SecurityHelper.hasConstructionSite(ownActiveConstructionSite));
+		assertTrue(SecurityHelper.hasConstructionSite(ownInactiveConstructionSite));
+		//verifica el orden
+		assertEquals(ownActiveConstructionSite,userConstrutionSites.get(0));
+		assertEquals(activeConstructionSite,userConstrutionSites.get(1));
+		assertEquals(ownInactiveConstructionSite,userConstrutionSites.get(2));
+		assertEquals(inactiveConstructionSite,userConstrutionSites.get(3));
+		
+		// usuario 2
+		
+		userId = 2L;
+		
+		// busca al usuario
+		user = userService.findUser(userId);
+		// verifica que no sea null
+		assertNotNull(user);
+		assertTrue(!user.getCs().isEmpty());
+		
+		//hace un fake del login
+		fakeLogin(user);
+		
+		//busca todas las obras
+		userConstrutionSites = service.findAllConstructionSiteOrderByUser(user);
+		//el usuario debe tener asociado la construccion 2 y 4
+		assertTrue(SecurityHelper.hasConstructionSite(activeConstructionSite));
+		assertTrue(SecurityHelper.hasConstructionSite(inactiveConstructionSite));
+		
+		//verifica el orden
+		assertEquals(activeConstructionSite,userConstrutionSites.get(0));
+		assertEquals(ownActiveConstructionSite,userConstrutionSites.get(1));
+		assertEquals(inactiveConstructionSite,userConstrutionSites.get(2));
+		assertEquals(ownInactiveConstructionSite,userConstrutionSites.get(3));
+	}
+
+	private void fakeLogin(User user) {
+		SecurityHelper.setUser(user);
 	}
 }

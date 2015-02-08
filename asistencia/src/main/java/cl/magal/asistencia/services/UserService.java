@@ -49,6 +49,7 @@ public class UserService implements UserDetailsService {
 		String userName = "admin@admin.com";
 		
 		cl.magal.asistencia.entities.User usuario = rep.findByEmail(userName);
+		logger.error("usuario {} ",usuario);
 		if( usuario == null ){
 			logger.debug("usuario null");
 			

@@ -75,7 +75,7 @@
 		</tr>
         <tr>
             <th>
-            Rol	: <b>${laborerConstruction.activeContract.job}</b>
+            Rol	: <b>${laborerConstruction.activeContract.jobCode}</b>
             </th>
         </tr>
 	</table>
