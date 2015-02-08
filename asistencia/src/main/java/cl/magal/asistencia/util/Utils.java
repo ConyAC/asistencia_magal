@@ -46,6 +46,8 @@ public class Utils {
 	DateTime dt = new DateTime();
 	
 	public static String date2String(Date date){
+		if(date == null )
+			return "";
 		return DateTimeFormat.forPattern("dd/MM/yyyy").print(new DateTime(date));
 	}
 	public static boolean NotNullOrEmpty(String etapa) {
