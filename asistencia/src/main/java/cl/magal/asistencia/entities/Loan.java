@@ -22,8 +22,8 @@ import javax.persistence.TemporalType;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.NotNull;
 
-import cl.magal.asistencia.entities.converter.LoanStatusConverter;
-import cl.magal.asistencia.entities.enums.LoanStatus;
+import cl.magal.asistencia.entities.converter.LoanToolStatusConverter;
+import cl.magal.asistencia.entities.enums.LoanToolStatus;
 
 /**
  *
@@ -53,8 +53,10 @@ public class Loan implements Serializable {
     @Column(name = "fee")
     private Integer fee;
     
-    @Column(name = "status")
-    private String status;
+    @Convert(converter = LoanToolStatusConverter.class)
+    @Column(name = "status",nullable=false)
+    @NotNull
+    private LoanToolStatus status;
     
     @ManyToOne
 	@JoinColumn(name="LABORER_CONSTRUCTIONSITEID")
@@ -70,6 +72,12 @@ public class Loan implements Serializable {
     @Column(name="TOOL_DATE")
     @Temporal(TemporalType.TIMESTAMP)
     Set<Date> datePostponed; 
+    
+    @PrePersist
+    public void prePersist(){
+    	if(status == null)
+    		status = LoanToolStatus.EN_DEUDA;
+    }
     
     public Loan() {
     }
@@ -115,11 +123,11 @@ public class Loan implements Serializable {
 		this.fee = fee;
 	}
 	
-	public String getStatus() {
+	public LoanToolStatus getStatus() {
 		return status;
 	}
 
-	public void setStatus(String status) {
+	public void setStatus(LoanToolStatus status) {
 		this.status = status;
 	}
 

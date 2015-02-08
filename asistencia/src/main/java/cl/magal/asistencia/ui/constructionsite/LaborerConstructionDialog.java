@@ -34,6 +34,7 @@ import cl.magal.asistencia.entities.User;
 import cl.magal.asistencia.entities.Vacation;
 import cl.magal.asistencia.entities.enums.AbsenceType;
 import cl.magal.asistencia.entities.enums.AccidentLevel;
+import cl.magal.asistencia.entities.enums.LoanToolStatus;
 import cl.magal.asistencia.entities.enums.MaritalStatus;
 import cl.magal.asistencia.entities.enums.Permission;
 import cl.magal.asistencia.services.LaborerService;
@@ -385,7 +386,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 					LaborerConstructionsite laborer = (LaborerConstructionsite) getItem().getBean();
 					if(laborer == null ) throw new RuntimeException("El trabajador no es válido.");
 					Tool tool = new Tool();
-					tool.setStatus("En deuda"); //FIXME por mientras
+					tool.setStatus(LoanToolStatus.EN_DEUDA); //FIXME por mientras
 					laborer.addTool(tool);
 					beanItemTool.addBean(tool);
 				}

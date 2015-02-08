@@ -37,12 +37,11 @@
 	    <class>cl.magal.asistencia.entities.converter.BankConverter</class>
 	    <class>cl.magal.asistencia.entities.converter.IsapreConverter</class>
 	    <class>cl.magal.asistencia.entities.converter.JobConverter</class>
-	    <class>cl.magal.asistencia.entities.converter.LoanStatusConverter</class>
 	    <class>cl.magal.asistencia.entities.converter.MaritalStatusConverter</class>
 	    <class>cl.magal.asistencia.entities.converter.NationalityConverter</class>
 	    <class>cl.magal.asistencia.entities.converter.PermissionConverter</class>
 	    <class>cl.magal.asistencia.entities.converter.StatusConverter</class>
-	    <class>cl.magal.asistencia.entities.converter.ToolStatusConverter</class>
+	    <class>cl.magal.asistencia.entities.converter.LoanToolStatusConverter</class>
 	    <class>cl.magal.asistencia.entities.converter.UserStatusConverter</class>
 	    <!-- HIBERNATE PROPERTY  -->
 	    <!-- 
