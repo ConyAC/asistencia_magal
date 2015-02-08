@@ -489,7 +489,7 @@ public class LaborerAndTeamPanel extends Panel implements View {
 						final String option1 = "Cambio horario",
 								option2 = "Cambio temporal horario",
 								option3 = "Cambio Ingreso mínimo",
-								option4 = "Cambio clausura de contrato"; 
+								option4 = "Cambio cláusula de contrato"; 
 
 						final OptionGroup og = new OptionGroup("Tipo de anexo",
 								Arrays.asList(option1,option2,option3,option4));
@@ -518,7 +518,7 @@ public class LaborerAndTeamPanel extends Panel implements View {
 						final TextField newmininc = new TextField("Sueldo mínimo nuevo : ");
 						newmininc.setRequired(true);
 						
-						final TextField closing = new TextField("N° Clausura : ");
+						final TextField closing = new TextField("N° Cláusula : ");
 						closing.setRequired(true);
 						final CheckBox updateOrChange = new CheckBox("Es Modificación");
 						final TextField wheresaid = new TextField("Donde dice : ");

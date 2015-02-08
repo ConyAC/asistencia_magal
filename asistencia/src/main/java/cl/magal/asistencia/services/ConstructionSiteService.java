@@ -76,6 +76,8 @@ public class ConstructionSiteService {
 	}
 	
 	public List<ConstructionSite> findAllConstructionSiteOrderByUser(User user) {
+		if(user == null )
+			throw new RuntimeException("El usuario es necesario para ordenar las obras");
 		//es vez de hacer una query, hace 4 queries por simplicidad
 		List<ConstructionSite> result1 = constructionSiterepo.findActiveByUser(user);
 		List<ConstructionSite> result2 = constructionSiterepo.findActiveByNotUser(user);
@@ -93,6 +95,8 @@ public class ConstructionSiteService {
 	}
 
 	public Page<ConstructionSite> findAllConstructionSiteOrderByUser(Pageable page,User user) {
+		if(user == null )
+			throw new RuntimeException("El usuario es necesario para ordenar las obras");
 		//es vez de hacer una query, hace 4 queries por simplicidad
 		List<ConstructionSite> result1 = constructionSiterepo.findActiveByUser(user);
 		List<ConstructionSite> result2 = constructionSiterepo.findActiveByNotUser(user);
@@ -102,9 +106,9 @@ public class ConstructionSiteService {
 		int total = result1.size()+result2.size()+result3.size()+result4.size();
 		List<ConstructionSite> result = new ArrayList<ConstructionSite>(total);
 		result.addAll(result1);
-//		result.addAll(result2);
-//		result.addAll(result3);
-//		result.addAll(result4);
+		result.addAll(result2);
+		result.addAll(result3);
+		result.addAll(result4);
 		
 		return new PageImpl<ConstructionSite>(result,page,total);
 		//return constructionSiterepo.findAllNotDeteledOderByUser(page,user);
