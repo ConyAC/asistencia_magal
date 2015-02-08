@@ -67,7 +67,7 @@ public class SecurityHelper {
 	}
 
 	public static boolean hasMenu(String text) {
-		User usuario = getCredentials();
+		User usuario = getUser();
 		//si el usuario el nulo, lo rederidige al login
 		if(usuario == null ) 
 			return true;
