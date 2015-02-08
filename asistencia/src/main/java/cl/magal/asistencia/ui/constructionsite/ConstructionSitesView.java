@@ -25,6 +25,7 @@ import cl.magal.asistencia.ui.AbstractWindowEditor;
 import cl.magal.asistencia.ui.AbstractWindowEditor.EditorSavedEvent;
 import cl.magal.asistencia.ui.BaseView;
 import cl.magal.asistencia.ui.MagalUI;
+import cl.magal.asistencia.util.Constants;
 import cl.magal.asistencia.util.SecurityHelper;
 
 import com.vaadin.data.fieldgroup.BeanFieldGroup;
@@ -35,6 +36,7 @@ import com.vaadin.event.ItemClickEvent.ItemClickListener;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.FontAwesome;
+import com.vaadin.server.VaadinSession;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
@@ -320,7 +322,8 @@ public class ConstructionSitesView extends BaseView implements View {
 
 	private void reloadData(){
 		//agrega las obras TODO segun perfil TODO usar paginación
-		Page<ConstructionSite> page = service.findAllConstructionSite(new PageRequest(0, 20));
+		User user = SecurityHelper.getCredentials();
+		Page<ConstructionSite> page = service.findAllConstructionSiteOrderByUser(new PageRequest(0, 20),user);
 		constructionContainer.removeAllItems();
 		constructionContainer.addAll(page.getContent());
 	}
