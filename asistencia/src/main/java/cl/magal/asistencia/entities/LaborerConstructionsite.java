@@ -340,6 +340,8 @@ public class LaborerConstructionsite implements Serializable {
 	
 	public void setActiveContract(Contract contract){
 		this.activeContract = contract;
+		if(contract.getLaborerConstructionSite() == null )
+			contract.setLaborerConstructionSite(this);
 	}
 	
 	/**

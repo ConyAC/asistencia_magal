@@ -530,7 +530,7 @@ CREATE TABLE IF NOT EXISTS "CONTRACT"
 	terminationDate timestamp, 
 	timeduration double, 
 	valueTreatment integer, 
-	LABORER_CONSTRUCTIONSITEID bigint
+	LABORER_CONSTRUCTIONSITEID bigint not null -- no puede ser nulo
 )
 ;
 CREATE UNIQUE INDEX IF NOT EXISTS PK_CONTRACT ON "CONTRACT"(CONTRACTID)

@@ -135,12 +135,16 @@ public class LaborerService {
 		if(laborerConstructionSite.getLaborer().getLaborerId() == null )
 			laborerRepo.save(laborerConstructionSite.getLaborer());
 		
-		//si el contrato es nuevo, lo guarda primero
-		if(laborerConstructionSite.getActiveContract().getContractId() == null )
-			contractRepo.save(laborerConstructionSite.getActiveContract());
-		
 		//guarda los contratos
 		laborerConstructionsiteRepo.save(laborerConstructionSite);		
+		
+		//si el contrato es nuevo, lo guarda primero
+		if(laborerConstructionSite.getActiveContract().getContractId() == null ){
+			if(laborerConstructionSite.getActiveContract().getLaborerConstructionSite() == null )
+				laborerConstructionSite.getActiveContract().setLaborerConstructionSite(laborerConstructionSite);
+			contractRepo.save(laborerConstructionSite.getActiveContract());
+		}
+
 	}
 
 	public List<Laborer> findAllLaborer() {
