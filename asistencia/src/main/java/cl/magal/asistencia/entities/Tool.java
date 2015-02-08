@@ -7,6 +7,7 @@ package cl.magal.asistencia.entities;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Set;
 
 import javax.persistence.Basic;
@@ -106,7 +107,7 @@ public class Tool implements Serializable {
     @CollectionTable(name="postponedpaymenttool", joinColumns = @JoinColumn(name = "toolId"))
     @Column(name="TOOL_DATE")
     @Temporal(TemporalType.TIMESTAMP)
-    Set<Date> datePostponed; 
+    Set<Date> datePostponed = new HashSet<Date>(); 
     
     @PrePersist
     public void prePersist(){

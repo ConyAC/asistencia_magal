@@ -62,7 +62,6 @@ import com.vaadin.server.StreamResource;
 import com.vaadin.server.VaadinService;
 import com.vaadin.server.VaadinSession;
 import com.vaadin.shared.ui.label.ContentMode;
-import com.vaadin.ui.AbstractField;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.BrowserFrame;
 import com.vaadin.ui.Button;
@@ -370,6 +369,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 		vh.addComponent(hl);
 
 		beanItemTool = new BeanItemContainer<Tool>(Tool.class);
+		beanItemTool.addNestedContainerProperty("status.description");
 		List<Tool> tools = (List<Tool>)getItem().getItemProperty("tool").getValue();
 		beanItemTool.addAll(tools);
 
@@ -386,7 +386,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 					LaborerConstructionsite laborer = (LaborerConstructionsite) getItem().getBean();
 					if(laborer == null ) throw new RuntimeException("El trabajador no es válido.");
 					Tool tool = new Tool();
-					tool.setStatus(LoanToolStatus.EN_DEUDA); //FIXME por mientras
+					tool.setStatus(LoanToolStatus.EN_DEUDA);
 					laborer.addTool(tool);
 					beanItemTool.addBean(tool);
 				}
@@ -415,8 +415,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 				else if(  propertyId.equals("dateBuy") ){
 					field = new DateField();
 				}
-
-				((AbstractField<?>)field).setImmediate(true);
+				
 				return field;
 			}
 		});
@@ -461,7 +460,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 			}
 		});
 
-		tableTool.setVisibleColumns("name","price","dateBuy","fee","selected","status", "eliminar");
+		tableTool.setVisibleColumns("name","price","dateBuy","fee","selected","status.description", "eliminar");
 		tableTool.setColumnHeaders("Herramienta","Monto","Fecha","Cuota","Postergar pago","Estado", "Acciones");
 		tableTool.setEditable(true);				
 		vh.addComponent(tableTool);
@@ -477,6 +476,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 		vp.addComponent(hl2);
 
 		beanItemLoan = new BeanItemContainer<Loan>(Loan.class);
+		beanItemLoan.addNestedContainerProperty("status.description");
 		List<Loan> loans = (List<Loan>)getItem().getItemProperty("loan").getValue();
 		beanItemLoan.addAll(loans);
 
@@ -492,6 +492,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 					LaborerConstructionsite laborer = (LaborerConstructionsite) getItem().getBean();
 					if(laborer == null ) throw new RuntimeException("El trabajador no es válido.");
 					Loan loan = new Loan();
+					loan.setStatus(LoanToolStatus.EN_DEUDA);
 					laborer.addLoan(loan);
 					beanItemLoan.addBean(loan);
 				}
@@ -523,7 +524,6 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 				else {
 					return null;
 				}
-				((AbstractField<?>)field).setImmediate(true);
 				return field;
 			}
 		});
@@ -568,7 +568,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 		});
 
 
-		tableLoan.setVisibleColumns("price","dateBuy", "fee", "selected","status", "eliminar");
+		tableLoan.setVisibleColumns("price","dateBuy", "fee", "selected","status.description", "eliminar");
 		tableLoan.setColumnHeaders("Monto","Fecha", "Cuota", "Postergar pago", "Estado", "Eliminar");
 		tableLoan.setEditable(true);		
 		vp.addComponent(tableLoan);
@@ -1100,7 +1100,6 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 							return null;
 						}
 
-						((AbstractField<?>)field).setImmediate(true);
 						return field;
 					}
 				});
@@ -1221,7 +1220,6 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 							return null;
 						}
 
-						((AbstractField<?>)field).setImmediate(true);
 						return field;
 					}
 				});

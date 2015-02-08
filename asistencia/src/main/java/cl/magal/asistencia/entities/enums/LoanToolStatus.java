@@ -24,6 +24,12 @@ public enum LoanToolStatus {
 		throw new RuntimeException("invalid Tool Status");
 	}
 	
+	
+	
+	public String getDescription() {
+		return description;
+	}
+
 	@Override
 	public String toString(){
 		return description;

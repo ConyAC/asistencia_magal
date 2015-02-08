@@ -2,6 +2,7 @@ package cl.magal.asistencia.entities;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Set;
 
 import javax.persistence.Basic;
@@ -63,15 +64,14 @@ public class Loan implements Serializable {
 	LaborerConstructionsite laborerConstructionSite;
     
     //Pagos postergados  
-    @Column(name = "postponed")
     transient private boolean postponed;
     
     //tabla intermedia entre role y sus permisos    
     @ElementCollection(targetClass= Date.class,fetch=FetchType.EAGER)
-    @CollectionTable(name="postponedpaymenttool", joinColumns = @JoinColumn(name = "toolId"))
-    @Column(name="TOOL_DATE")
+    @CollectionTable(name="postponedpaymentloan", joinColumns = @JoinColumn(name = "LOANID"))
+    @Column(name="LOAN_DATE")
     @Temporal(TemporalType.TIMESTAMP)
-    Set<Date> datePostponed; 
+    Set<Date> datePostponed = new HashSet<Date>(); 
     
     @PrePersist
     public void prePersist(){
