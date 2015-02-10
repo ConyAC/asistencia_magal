@@ -71,7 +71,7 @@ public class Tool implements Serializable {
     @Max(value=500000,message="El monto no puede superar los $500.000")
     @Min(value=0, message = "El monto no puede ser negativo")
     @NotNull(message="El monto es necesario")
-    @Digits(integer=6,fraction=0)
+    @Digits(integer=6,fraction=0,message="El monto no puede superar los $500.000")
     @Column(name = "price")
     private Integer price;
     
@@ -84,7 +84,7 @@ public class Tool implements Serializable {
     
     @Max(value=6, message = "El número de cuotas no puede ser más de 6")
     @Min(value=1, message = "El número de cuotas no puede ser negativa ni cero")
-    @Digits(integer=1,fraction=0)
+    @Digits(integer=1,fraction=0,message="El número de cuotas no puede ser más de 6")
     @NotNull(message="El número de cuotas es necesario")
     @Column(name = "fee")
     private Integer fee;
@@ -99,7 +99,6 @@ public class Tool implements Serializable {
 	LaborerConstructionsite laborerConstructionSite;
     
     //Pagos postergados  
-    @Column(name = "postponed")
     transient private boolean postponed;
     
     //tabla intermedia entre role y sus permisos    

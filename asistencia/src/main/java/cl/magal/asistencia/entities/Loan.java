@@ -20,7 +20,9 @@ import javax.persistence.ManyToOne;
 import javax.persistence.PrePersist;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.validation.constraints.Digits;
 import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
 import cl.magal.asistencia.entities.converter.LoanToolStatusConverter;
@@ -42,6 +44,10 @@ public class Loan implements Serializable {
     @Column(name = "loanId")
     private Long loanId;
     
+	@Max(value=500000,message="El monto no puede superar los $500.000")
+    @Min(value=0, message = "El monto no puede ser negativo")
+    @NotNull(message="El monto es necesario")
+    @Digits(integer=6,fraction=0,message="El monto no puede superar los $500.000")
     @Column(name = "price")
     private Integer price;
     
@@ -50,7 +56,10 @@ public class Loan implements Serializable {
     @Temporal(TemporalType.TIMESTAMP)
     private Date dateBuy;
     
-    @Max(value=6)
+    @Max(value=6, message = "El número de cuotas no puede ser más de 6")
+    @Min(value=1, message = "El número de cuotas no puede ser negativa ni cero")
+    @Digits(integer=1,fraction=0,message="El número de cuotas no puede ser más de 6")
+    @NotNull(message="El número de cuotas es necesario")
     @Column(name = "fee")
     private Integer fee;
     

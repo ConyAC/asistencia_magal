@@ -184,7 +184,9 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 		gl.addComponent(new Label("<h2>Información de Obra : </h2>",ContentMode.HTML),0,0,2,0);
 
 		final DateField startDate = new DateField("Fecha Inicial",getItem().getItemProperty("rewardStartDate"));
+		startDate.setImmediate(true);
 		final DateField endDate = new DateField("Fecha Final",getItem().getItemProperty("rewardEndDate"));
+		endDate.setImmediate(true);
 
 		VerticalLayout vl = new VerticalLayout(){
 			{
@@ -407,16 +409,19 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 				if( propertyId.equals("name") || propertyId.equals("price") || propertyId.equals("fee")){
 					field = new TextField();
 					((TextField)field).setNullRepresentation("");
+					((TextField)field).setImmediate(true);
 				}
 				else  if( propertyId.equals("status") ){
 					field = new TextField();
 					((TextField)field).setValue("En deuda");
+					((TextField)field).setImmediate(true);
 					field.setEnabled(false);
 				}
 				else if(  propertyId.equals("dateBuy") ){
 					field = new DateField();
+					((DateField)field).setImmediate(true);
 				}
-				
+
 				return field;
 			}
 		});
@@ -1043,10 +1048,12 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 							field = new TextArea();
 							field.setWidth("100%");	
 							((TextArea)field).setNullRepresentation("");
+							((TextArea)field).setImmediate(true);
 						}
 
 						else if(  propertyId.equals("fromDate") || propertyId.equals("toDate") ){
 							field = new DateField();
+							((DateField)field).setImmediate(true);
 						}
 						else if(  propertyId.equals("accidentLevel") ){
 							field = new ComboBox();
@@ -1054,11 +1061,11 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 							for(AccidentLevel absenceType : AccidentLevel.values()){
 								((ComboBox)field).addItem(absenceType);
 							}
+							((ComboBox)field).setImmediate(true);
 
 						} else {
 							return null;
 						}
-
 						return field;
 					}
 				});
@@ -1163,10 +1170,12 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 							field = new TextArea();
 							field.setWidth("100%");	
 							((TextArea)field).setNullRepresentation("");
+							((TextArea)field).setImmediate(true);
 						}
 
 						else if(  propertyId.equals("fromDate") || propertyId.equals("toDate") ){
 							field = new DateField();
+							((DateField)field).setImmediate(true);
 						}
 						else if(  propertyId.equals("absenceType") ){
 							field = new ComboBox();
@@ -1174,6 +1183,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 							for(AbsenceType absenceType : AbsenceType.values()){
 								((ComboBox)field).addItem(absenceType);
 							}
+							((ComboBox)field).setImmediate(true);
 
 						} else {
 							return null;
