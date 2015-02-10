@@ -382,6 +382,7 @@ public class LaborerAndTeamPanel extends Panel implements View {
 		hl2.addComponent(confirmed);
 
 		btnPrint = new Button(null,FontAwesome.PRINT);
+		btnPrint.setDescription("Imprimir vacaciones masivamente");
 		hl2.addComponent(btnPrint);
 
 		roothl.addComponent(hl2);
@@ -395,36 +396,49 @@ public class LaborerAndTeamPanel extends Panel implements View {
 					Notification.show("Para imprimir masivamente, primero debe seleccionar uno más trabajadores");
 					return;
 				}
+				//verifica que alguno tenga vacaciones para imprimir
+				boolean any = false;
+				for(Object obj : selectedItemIds ){
+					LaborerConstructionsite lc = (LaborerConstructionsite)obj;
+					if(!lc.getVacations().isEmpty()){
+						any = true;
+						break;
+					}
+				}
+				if(!any){
+					Notification.show("Ninguno de los trabajadores seleccionados tiene vacaciones para imprimir");
+					return;
+				}
 
-				//				final ObjectProperty contracts = new ObjectProperty(false, Boolean.class);
-				final ObjectProperty vacations = new ObjectProperty(false, Boolean.class);
-				final ObjectProperty anexxeds = new ObjectProperty(false, Boolean.class);
+//				final ObjectProperty contracts = new ObjectProperty(false, Boolean.class);
+				final ObjectProperty vacations = new ObjectProperty(true, Boolean.class);
+//				final ObjectProperty anexxeds = new ObjectProperty(false, Boolean.class);
 
-				final Window w = new Window("Impresión masiva");
+				final Window w = new Window("Impresión de vacaciones masiva");
 				w.center();
 				w.setModal(true);
 
-				w.setContent(new HorizontalLayout(){
-					{
-						setSpacing(true);
-						setMargin(true);
-						//						addComponent(new CheckBox("Contrato"){{setPropertyDataSource(contracts);}});
-//						addComponent(new CheckBox("Anexos"){{setPropertyDataSource(anexxeds);}});
-						addComponent(new CheckBox("Últimas Vacaciones"){{setPropertyDataSource(vacations);}});
-
-						addComponent(new Button(null,new Button.ClickListener() {
-
-							@Override
-							public void buttonClick(ClickEvent event) {
+//				w.setContent(new HorizontalLayout(){
+//					{
+//						setSpacing(true);
+//						setMargin(true);
+//						//						addComponent(new CheckBox("Contrato"){{setPropertyDataSource(contracts);}});
+////						addComponent(new CheckBox("Anexos"){{setPropertyDataSource(anexxeds);}});
+//						addComponent(new CheckBox("Últimas Vacaciones"){{setPropertyDataSource(vacations);}});
+//
+//						addComponent(new Button(null,new Button.ClickListener() {
+//
+//							@Override
+//							public void buttonClick(ClickEvent event) {
 
 								final Map<String, Object> input = new HashMap<String, Object>();
 								input.put("laborerConstructions", selectedItemIds);
 								VelocityHelper.addTools(input);
 
 								final StringBuilder sb = new StringBuilder();
-								//								if((Boolean) contracts.getValue()){
-								//									sb.append( VelocityEngineUtils.mergeTemplateIntoString(velocityEngine, "templates/temporary_work_contract_doc.vm", "UTF-8", input) );
-								//								}
+//								if((Boolean) contracts.getValue()){
+//									sb.append( VelocityEngineUtils.mergeTemplateIntoString(velocityEngine, "templates/temporary_work_contract_doc.vm", "UTF-8", input) );
+//								}
 //								if((Boolean) anexxeds.getValue()){
 //									sb.append( VelocityEngineUtils.mergeTemplateIntoString(velocityEngine, "templates/annex_contract_doc.vm", "UTF-8", input) );
 //								}
@@ -435,11 +449,10 @@ public class LaborerAndTeamPanel extends Panel implements View {
 								StreamResource.StreamSource source2 = new StreamResource.StreamSource() {
 
 									public InputStream getStream() {
-										//throw new UnsupportedOperationException("Not supported yet.");
 										return new ByteArrayInputStream(sb.toString().getBytes());
 									}
 								};
-								StreamResource resource = new StreamResource(source2, "Documentos Masivos.html");
+								StreamResource resource = new StreamResource(source2, "Vacaciones Masivas.html");
 
 								BrowserFrame e = new BrowserFrame();
 								e.setSizeFull();
@@ -455,11 +468,11 @@ public class LaborerAndTeamPanel extends Panel implements View {
 								w.center();
 								w.setWidth("60%");
 								w.setHeight("60%");
-							}
-						}){ {setIcon(FontAwesome.PRINT);} } );
-					}
-				});
-
+//							}
+//						}){ {setIcon(FontAwesome.PRINT);} } );
+//					}
+//				});
+//
 				UI.getCurrent().addWindow(w);
 
 			}
