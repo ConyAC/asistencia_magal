@@ -1,6 +1,7 @@
 package cl.magal.asistencia.ui.constructionsite;
 
 import java.io.OutputStream;
+import java.util.List;
 
 import javax.annotation.PostConstruct;
 
@@ -9,9 +10,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
+import org.tepi.filtertable.FilterTable;
 
 import ru.xpoft.vaadin.VaadinView;
 import cl.magal.asistencia.entities.ConstructionSite;
+import cl.magal.asistencia.entities.Laborer;
+import cl.magal.asistencia.entities.LaborerConstructionsite;
 import cl.magal.asistencia.services.ConstructionSiteService;
 import cl.magal.asistencia.services.UserService;
 import cl.magal.asistencia.ui.BaseView;
@@ -19,6 +23,7 @@ import cl.magal.asistencia.ui.MagalUI;
 
 import com.vaadin.data.Container;
 import com.vaadin.data.util.BeanItem;
+import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.FontAwesome;
@@ -28,6 +33,7 @@ import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.ComboBox;
+import com.vaadin.ui.CustomTable;
 import com.vaadin.ui.DefaultFieldFactory;
 import com.vaadin.ui.Field;
 import com.vaadin.ui.FormLayout;
@@ -35,6 +41,7 @@ import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.InlineDateField;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
+import com.vaadin.ui.TableFieldFactory;
 import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.TabSheet;
@@ -69,6 +76,7 @@ public class ConstructionSiteView extends BaseView  implements View {
 	HorizontalLayout root;
 //	Panel panelConstruction,
 	Panel panelAttendance;
+	BeanItemContainer attendanceLaborerContainer;
 
 	public ConstructionSiteView(){
 
@@ -109,8 +117,10 @@ public class ConstructionSiteView extends BaseView  implements View {
 				setSpacing(true);
 				setMargin(true);
 
+				topAsistencia.setSizeFull();
 				addComponent(topAsistencia);
 				setExpandRatio(topAsistencia, 0.1F);
+				detalleAsistencia.setSizeFull();
 				addComponent(detalleAsistencia);
 				setExpandRatio(detalleAsistencia, 0.9F);
 			}
@@ -122,60 +132,52 @@ public class ConstructionSiteView extends BaseView  implements View {
 	private TabSheet drawAttendanceDetail() {
 		TabSheet tab = new TabSheet();
 
-		final Object[][] dummies = new Object[28][26];
-		int j = 0;
-		for(Object[] array  : dummies){
-			for (int i = 0; i < array.length; i++) {
-				if(i == 0)
-					array[0] = j + 1;
-				else if( i == 1)
-					array[1] = "Trabajador "+(j + 1);
-				else
-					array[i] = randomAttendance();
-			}
-			j++;
-		}
 
-
-		Table table1 = new Table(){
+		FilterTable table1 = new FilterTable(){
 			{
 				setSizeFull();
 				setEditable(true);
-				addContainerProperty("number", Integer.class, 0);
-				setColumnHeader("number", "#");
-				setColumnWidth("number", 30);
-				addGeneratedColumn("number", new ColumnGenerator() {
-
-					@Override
-					public Object generateCell(Table source, Object itemId, Object columnId) {
-						return source.getItem(itemId).getItemProperty(columnId).getValue();
-					}
-				});
-
-				addContainerProperty("firstname", String.class, "");
-				setColumnHeader("firstname", "Nombre");
-				setColumnWidth("firstname", 100);
-				addGeneratedColumn("firstname", new ColumnGenerator() {
-
-					@Override
-					public Object generateCell(Table source, Object itemId, Object columnId) {
-						return source.getItem(itemId).getItemProperty(columnId).getValue();
-					}
-				});
-
-				for(int i = 25; i < 55 ; i++){ 
-					addContainerProperty("day"+i, String.class, "");
-					setColumnHeader("day"+i, ((i%31)+1)+"");
-					setColumnWidth("day"+i, 50);
-				}
-
-
 			}
 		};
 		
-		for(int i = 0 ; i < 2 ; i++){
-			table1.addItem(new Object[]{0,"e3da","ddasda"});
+		Object[] visibleColumns = new Object[ (55 - 25) + 1];
+		visibleColumns[0] = "activeContract.jobCode";
+		
+		table1.addGeneratedColumn("activeContract.jobCode", new FilterTable.ColumnGenerator() {
+			
+			@Override
+			public Object generateCell(CustomTable source, Object itemId, Object columnId) {
+				return source.getContainerProperty(itemId, columnId).getValue();
+			}
+
+		});
+		table1.setColumnHeader("activeContract.jobCode", "Código");
+		table1.setColumnWidth("activeContract.jobCode", 50);
+		
+		for(int i = 25; i < 55 ; i++){
+			table1.addGeneratedColumn("day"+i, new FilterTable.ColumnGenerator() {
+				
+				@Override
+				public Object generateCell(CustomTable source, Object itemId, Object columnId) {
+//					ComboBox cb = new ComboBox(null);
+//					cb.setWidth("100%");
+//					cb.addItems(new Object[]{"X","LL","S"});
+//					cb.setValue("X");
+//					return cb;
+					Label l = new Label( randomAttendance()+"");
+					return l;
+				}
+
+			});
+			table1.setColumnHeader("day"+i, ((i%31)+1)+"");
+			table1.setColumnWidth("day"+i, 50);
+			visibleColumns[i - 24] = "day"+i; 
 		}
+		
+		attendanceLaborerContainer = new BeanItemContainer(LaborerConstructionsite.class);
+		attendanceLaborerContainer.addNestedContainerProperty("activeContract.jobCode");
+		table1.setContainerDataSource(attendanceLaborerContainer);
+		table1.setVisibleColumns(visibleColumns);
 
 //		table1.setTableFieldFactory(new ImmediateFieldFactory());
 
@@ -256,51 +258,42 @@ public class ConstructionSiteView extends BaseView  implements View {
 			{
 				setWidth("100%");
 
+//				addComponent(new HorizontalLayout(){
+//					{
+//						setSpacing(true);
+//						Button btn = new Button(null, new Button.ClickListener() {
+//
+//							@Override
+//							public void buttonClick(ClickEvent event) {	
+//								switchPanels();
+//							}
+//						} ){
+//							{
+//								setIcon(FontAwesome.ARROW_CIRCLE_LEFT);
+//							}
+//						};
+//						addComponent(btn);
+//						setComponentAlignment(btn, Alignment.MIDDLE_LEFT);
+//						Label lb = new Label("<h1>Asistencia Obra XXXX</h1>",ContentMode.HTML);
+//						addComponent(lb);
+//						setComponentAlignment(lb, Alignment.MIDDLE_LEFT);
+//					}
+//				});
+
 				addComponent(new HorizontalLayout(){
 					{
-						setSpacing(true);
-						Button btn = new Button(null, new Button.ClickListener() {
-
-							@Override
-							public void buttonClick(ClickEvent event) {	
-								switchPanels();
-							}
-						} ){
+						addComponent(new FormLayout(){
 							{
-								setIcon(FontAwesome.ARROW_CIRCLE_LEFT);
-							}
-						};
-						addComponent(btn);
-						setComponentAlignment(btn, Alignment.MIDDLE_LEFT);
-						Label lb = new Label("<h1>Asistencia Obra XXXX</h1>",ContentMode.HTML);
-						addComponent(lb);
-						setComponentAlignment(lb, Alignment.MIDDLE_LEFT);
-					}
-				});
-
-				addComponent(new VerticalLayout(){
-					{
-						setSizeFull();
-						addComponent(new HorizontalLayout(){
-							{
-								setSizeFull();
-								setSpacing(true);
-								addComponent(new FormLayout(){
+								addComponent(new InlineDateField("Mes"){
 									{
-										addComponent(new InlineDateField("Mes"){
-											{
-												setResolution(Resolution.MONTH);
-											}
-										});
+										setResolution(Resolution.MONTH);
 									}
 								});
-//								addComponent(new Button("Configuraciones",FontAwesome.GEARS));
-
 							}
 						});
+
 						addComponent(new HorizontalLayout(){
 							{
-								setSpacing(true);
 								addComponent(new Label("Última Carga Información Reloj: 11/01/2014"));
 								addComponent(new Button("Cargar",new Button.ClickListener() {
 									
@@ -312,13 +305,8 @@ public class ConstructionSiteView extends BaseView  implements View {
 										window.setModal(true);
 										window.setResizable(false);
 										
-										
-//										window.setHeight("50%");
-										
 										window.setContent(new VerticalLayout(){
 											{
-//												setSizeFull();
-//												setSpacing(true);
 												setMargin(true);
 												VerticalLayout form = new VerticalLayout(){
 													{
@@ -391,7 +379,6 @@ public class ConstructionSiteView extends BaseView  implements View {
 									}
 								}){
 									{
-										setWidth("100%");
 										setIcon(FontAwesome.UPLOAD);
 									}
 								});
@@ -423,18 +410,27 @@ public class ConstructionSiteView extends BaseView  implements View {
 		laborerAndTeamPanel.setHasAttendanceButton(true);
 		laborerAndTeamPanel.setHasConstructionDetails(false);
 		root.addComponent(laborerAndTeamPanel);
+		
+		laborerAndTeamPanel.addAttendanceClickListener(new Button.ClickListener() {
+			
+			@Override
+			public void buttonClick(ClickEvent event) {
+				switchPanels();
+			}
+		});
+		
 		((MagalUI)UI.getCurrent()).getBackButton().addClickListener(backListener);
 	}
 	
 	private void switchPanels() {
 		
-//		if(root.getComponentIndex(panelConstruction) >= 0){
-//			root.removeComponent(panelConstruction);
-//			root.addComponent(panelAttendance);
-//		}else{
-//			root.removeComponent(panelAttendance);
-//			root.addComponent(panelConstruction);
-//		}
+		if(root.getComponentIndex(laborerAndTeamPanel) >= 0){
+			root.removeComponent(laborerAndTeamPanel);
+			root.addComponent(panelAttendance);
+		}else{
+			root.removeComponent(panelAttendance);
+			root.addComponent(laborerAndTeamPanel);
+		}
 	}
 
 	@Override
@@ -468,11 +464,12 @@ public class ConstructionSiteView extends BaseView  implements View {
 		}
 		
 	}
-
+	ConstructionSite cs;
+	
 	private void reloadData(Long id){
 
 		//busca la información de la obra
-		ConstructionSite cs = service.findConstructionSite(id);
+		cs = service.findConstructionSite(id);
 		if(cs == null ){
 			showErrorParam();
 			return;
@@ -481,6 +478,9 @@ public class ConstructionSiteView extends BaseView  implements View {
 		((MagalUI)UI.getCurrent()).getTitle().setValue("<h1>"+cs.getName()+"</h1>");
 		
 		laborerAndTeamPanel.setConstruction( new BeanItem<ConstructionSite>(cs) );
+		List<LaborerConstructionsite> laborers = service.getLaborerActiveByConstruction(cs);
+		attendanceLaborerContainer.removeAllItems();
+		attendanceLaborerContainer.addAll(laborers);
 		
 	}
 	
