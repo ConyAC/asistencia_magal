@@ -1,6 +1,7 @@
 package cl.magal.asistencia.ui.constructionsite;
 
 import java.io.OutputStream;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
@@ -14,7 +15,6 @@ import org.tepi.filtertable.FilterTable;
 
 import ru.xpoft.vaadin.VaadinView;
 import cl.magal.asistencia.entities.ConstructionSite;
-import cl.magal.asistencia.entities.Laborer;
 import cl.magal.asistencia.entities.LaborerConstructionsite;
 import cl.magal.asistencia.services.ConstructionSiteService;
 import cl.magal.asistencia.services.UserService;
@@ -24,6 +24,8 @@ import cl.magal.asistencia.ui.MagalUI;
 import com.vaadin.data.Container;
 import com.vaadin.data.util.BeanItem;
 import com.vaadin.data.util.BeanItemContainer;
+import com.vaadin.event.FieldEvents.BlurEvent;
+import com.vaadin.event.LayoutEvents.LayoutClickEvent;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.FontAwesome;
@@ -33,6 +35,7 @@ import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.ComboBox;
+import com.vaadin.ui.CssLayout;
 import com.vaadin.ui.CustomTable;
 import com.vaadin.ui.DefaultFieldFactory;
 import com.vaadin.ui.Field;
@@ -41,7 +44,6 @@ import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.InlineDateField;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
-import com.vaadin.ui.TableFieldFactory;
 import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.TabSheet;
@@ -153,7 +155,7 @@ public class ConstructionSiteView extends BaseView  implements View {
 		});
 		table1.setColumnHeader("activeContract.jobCode", "Código");
 		table1.setColumnWidth("activeContract.jobCode", 50);
-		
+		table1.setBuffered(true);
 		for(int i = 25; i < 55 ; i++){
 			table1.addGeneratedColumn("day"+i, new FilterTable.ColumnGenerator() {
 				
@@ -164,8 +166,33 @@ public class ConstructionSiteView extends BaseView  implements View {
 //					cb.addItems(new Object[]{"X","LL","S"});
 //					cb.setValue("X");
 //					return cb;
-					Label l = new Label( randomAttendance()+"");
-					return l;
+					final Label lb = new Label( randomAttendance()+"");
+					final CssLayout csLy = new CssLayout(lb);
+					csLy.setSizeFull();
+					csLy.addLayoutClickListener(new com.vaadin.event.LayoutEvents.LayoutClickListener() {
+						
+						@Override
+						public void layoutClick(LayoutClickEvent event) {
+							//al recibir un click, quita el label y pone el combobox con las opciones
+							csLy.removeComponent(lb);
+							final ComboBox cb = new ComboBox(null,Arrays.asList("X","LL","P"));
+							cb.setImmediate(false);
+							cb.setValue(lb.getValue());
+							cb.setWidth("100%");
+							cb.addBlurListener(new com.vaadin.event.FieldEvents.BlurListener() {
+								
+								@Override
+								public void blur(BlurEvent event) {
+									//al perder el focus repone el label con el valor correspondientes
+									lb.setValue((String) cb.getValue());
+									csLy.removeComponent(cb);
+									csLy.addComponent(lb);
+								}
+							});
+							csLy.addComponent(cb);
+						}
+					});
+					return csLy;
 				}
 
 			});
