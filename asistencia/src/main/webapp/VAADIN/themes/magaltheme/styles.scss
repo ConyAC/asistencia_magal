@@ -11,4 +11,13 @@
   .no-margin h1{
   	margin : 0 !important;
   }
+  
+  
+  .grid-attendace .v-filterselect [class$="button"], .grid-attendace .v-filterselect [class$="button"]:before{
+  	width : 20px !important;
+  }
+  
+  .grid-attendace .v-filterselect [class*="input"]{
+  	padding : 4px 4px 4px 9px;
+  }
 }

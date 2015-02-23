@@ -1,7 +1,6 @@
 package cl.magal.asistencia.ui.constructionsite;
 
 import java.io.OutputStream;
-import java.util.Arrays;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
@@ -11,21 +10,24 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
-import org.tepi.filtertable.FilterTable;
 
 import ru.xpoft.vaadin.VaadinView;
 import cl.magal.asistencia.entities.ConstructionSite;
 import cl.magal.asistencia.entities.LaborerConstructionsite;
+import cl.magal.asistencia.entities.enums.AttendanceMark;
 import cl.magal.asistencia.services.ConstructionSiteService;
 import cl.magal.asistencia.services.UserService;
 import cl.magal.asistencia.ui.BaseView;
 import cl.magal.asistencia.ui.MagalUI;
 
-import com.vaadin.data.Container;
+import com.vaadin.data.Container.Filterable;
+import com.vaadin.data.Container.SimpleFilterable;
+import com.vaadin.data.util.AbstractBeanContainer;
 import com.vaadin.data.util.BeanItem;
 import com.vaadin.data.util.BeanItemContainer;
-import com.vaadin.event.FieldEvents.BlurEvent;
-import com.vaadin.event.LayoutEvents.LayoutClickEvent;
+import com.vaadin.data.util.filter.SimpleStringFilter;
+import com.vaadin.event.FieldEvents.TextChangeEvent;
+import com.vaadin.event.FieldEvents.TextChangeListener;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.FontAwesome;
@@ -34,12 +36,10 @@ import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.CssLayout;
-import com.vaadin.ui.CustomTable;
-import com.vaadin.ui.DefaultFieldFactory;
-import com.vaadin.ui.Field;
 import com.vaadin.ui.FormLayout;
+import com.vaadin.ui.Grid;
+import com.vaadin.ui.Grid.HeaderCell;
+import com.vaadin.ui.Grid.HeaderRow;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.InlineDateField;
 import com.vaadin.ui.Label;
@@ -48,6 +48,7 @@ import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.TabSheet;
 import com.vaadin.ui.Table;
+import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.Upload;
 import com.vaadin.ui.VerticalLayout;
@@ -130,86 +131,66 @@ public class ConstructionSiteView extends BaseView  implements View {
 
 
 	}
+	
+	Grid table1;
 
 	private TabSheet drawAttendanceDetail() {
 		TabSheet tab = new TabSheet();
 
-
-		FilterTable table1 = new FilterTable(){
-			{
-				setSizeFull();
-				setEditable(true);
-			}
-		};
+		//usando un grid en vez de un table
+//		FilterTable table1 = new FilterTable(){
+//			{
+//				setSizeFull();
+//			}
+//		};
+//		attendanceLaborerContainer = new BeanItemContainer(LaborerConstructionsite.class);
+//		attendanceLaborerContainer.addNestedContainerProperty("activeContract.jobCode");
+//		GeneratedPropertyContainer gpcontainer = new GeneratedPropertyContainer(attendanceLaborerContainer);
+		table1 = new Grid();
+		table1.setSizeFull();
 		
 		Object[] visibleColumns = new Object[ (55 - 25) + 1];
 		visibleColumns[0] = "activeContract.jobCode";
 		
-		table1.addGeneratedColumn("activeContract.jobCode", new FilterTable.ColumnGenerator() {
-			
-			@Override
-			public Object generateCell(CustomTable source, Object itemId, Object columnId) {
-				return source.getContainerProperty(itemId, columnId).getValue();
-			}
-
-		});
-		table1.setColumnHeader("activeContract.jobCode", "Código");
-		table1.setColumnWidth("activeContract.jobCode", 50);
-		table1.setBuffered(true);
+		table1.addColumn("activeContract.jobCode",Integer.class).setHeaderCaption("Código").setEditable(false);
+		table1.addStyleName("grid-attendace");
+		table1.setEditorEnabled(true);
+		table1.setFrozenColumnCount(1);
+		
 		for(int i = 25; i < 55 ; i++){
-			table1.addGeneratedColumn("day"+i, new FilterTable.ColumnGenerator() {
-				
-				@Override
-				public Object generateCell(CustomTable source, Object itemId, Object columnId) {
-//					ComboBox cb = new ComboBox(null);
-//					cb.setWidth("100%");
-//					cb.addItems(new Object[]{"X","LL","S"});
-//					cb.setValue("X");
-//					return cb;
-					final Label lb = new Label( randomAttendance()+"");
-					final CssLayout csLy = new CssLayout(lb);
-					csLy.setSizeFull();
-					csLy.addLayoutClickListener(new com.vaadin.event.LayoutEvents.LayoutClickListener() {
-						
-						@Override
-						public void layoutClick(LayoutClickEvent event) {
-							//al recibir un click, quita el label y pone el combobox con las opciones
-							csLy.removeComponent(lb);
-							final ComboBox cb = new ComboBox(null,Arrays.asList("X","LL","P"));
-							cb.setImmediate(false);
-							cb.setValue(lb.getValue());
-							cb.setWidth("100%");
-							cb.addBlurListener(new com.vaadin.event.FieldEvents.BlurListener() {
-								
-								@Override
-								public void blur(BlurEvent event) {
-									//al perder el focus repone el label con el valor correspondientes
-									lb.setValue((String) cb.getValue());
-									csLy.removeComponent(cb);
-									csLy.addComponent(lb);
-								}
-							});
-							csLy.addComponent(cb);
-						}
-					});
-					return csLy;
-				}
-
-			});
-			table1.setColumnHeader("day"+i, ((i%31)+1)+"");
-			table1.setColumnWidth("day"+i, 50);
+			
+			table1.addColumn("day"+i,AttendanceMark.class).setHeaderCaption( ((i%31)+1)+"").setSortable(false);
 			visibleColumns[i - 24] = "day"+i; 
 		}
+
+		HeaderRow filterRow = table1.appendHeaderRow();
+		for (final Object pid: table1.getContainerDataSource()
+                .getContainerPropertyIds()) {
+		final HeaderCell cell = filterRow.getCell(pid);
 		
-		attendanceLaborerContainer = new BeanItemContainer(LaborerConstructionsite.class);
-		attendanceLaborerContainer.addNestedContainerProperty("activeContract.jobCode");
-		table1.setContainerDataSource(attendanceLaborerContainer);
-		table1.setVisibleColumns(visibleColumns);
-
-//		table1.setTableFieldFactory(new ImmediateFieldFactory());
-
+		// Have an input field to use for filter
+		TextField filterField = new TextField();
+		filterField.setColumns(8);
+		
+		// Update filter When the filter input is changed
+		filterField.addTextChangeListener(new TextChangeListener() {
+			
+			@Override
+			public void textChange(TextChangeEvent event) {
+				  // Can't modify filters so need to replace
+				((SimpleFilterable) table1.getContainerDataSource()).removeContainerFilters(pid);
+				   
+				   // (Re)create the filter if necessary
+				   if (! event.getText().isEmpty())
+					   ((Filterable) table1.getContainerDataSource()).addContainerFilter(
+				           new SimpleStringFilter(pid,
+				        		   event.getText(), true, false));
+			}
+		});
+		cell.setComponent(filterField);
+		}
+		
 		tab.addTab(table1,"Asistencia");
-
 
 		tab.addTab(new Table(){
 			{
@@ -256,28 +237,8 @@ public class ConstructionSiteView extends BaseView  implements View {
 		return tab;
 	}
 
-	public class ImmediateFieldFactory extends DefaultFieldFactory {
-		public Field createField(Container container,
-				Object itemId,
-				Object propertyId,
-				com.vaadin.ui.Component uiContext) {
-			Field field = null;
-			if(propertyId.equals("number") || propertyId.equals("firstname") )
-				field = super.createField(container, itemId,
-						propertyId, uiContext);
-			else {
-				field = new ComboBox(null);
-				for(String s : new String[]{"X","LL","P","E","S","D"}){
-					((ComboBox)field).addItem(s);
-				}
-			}
-
-			return field;
-		}
-	}
-
-	private Object randomAttendance() {
-		return "X";
+	private AttendanceMark randomAttendance() {
+		return AttendanceMark.ATTEND;
 	}
 
 	private HorizontalLayout drawTopAttendance() {
@@ -506,8 +467,16 @@ public class ConstructionSiteView extends BaseView  implements View {
 		
 		laborerAndTeamPanel.setConstruction( new BeanItem<ConstructionSite>(cs) );
 		List<LaborerConstructionsite> laborers = service.getLaborerActiveByConstruction(cs);
-		attendanceLaborerContainer.removeAllItems();
-		attendanceLaborerContainer.addAll(laborers);
+		for(LaborerConstructionsite lc : laborers){
+			Object[] row = new Object[ (55  - 25) + 1 ];
+			 
+			row[0] = lc.getJobCode();
+			for(int i = 25; i < 55 ; i++){
+				row[ i - 24 ] = randomAttendance();
+			}
+			table1.addRow(row);
+		}
+		
 		
 	}
 	
