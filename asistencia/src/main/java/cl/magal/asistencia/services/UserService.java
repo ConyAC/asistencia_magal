@@ -213,18 +213,41 @@ public class UserService implements UserDetailsService {
                 ll);
 	}
 	
-	public void saveUser(cl.magal.asistencia.entities.User usuario) {
+	public void saveUser(cl.magal.asistencia.entities.User user) {
+		if(user == null) throw new RuntimeException("Usuario no debe ser nulo");
+		//nuevo usuario o edición de usuarios
+		if(user.getUserId() == null || user.getPassword() != null ){
+			savePassword(user);
+		}else{ //si es edición recupera la información anterior
+			cl.magal.asistencia.entities.User db = rep.findOne(user.getUserId());
+			user.setPassword(db.getPassword());
+		}
+		
+		//guardando usuario
+		rep.save(user);
+	}
+	
+	private void savePassword(cl.magal.asistencia.entities.User usuario) {
 		if(usuario == null) {
 			throw new RuntimeException("Usuario no debe ser nulo");
 		}
 		PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-		String password = usuario.getPassword();
-		if(password == null )
-			password = "123456";
-		String hashedPassword = passwordEncoder.encode(password);
+		String hashedPassword = passwordEncoder.encode(usuario.getPassword());
 		usuario.setPassword(hashedPassword);
-		rep.save(usuario);
 	}
+	
+//	public void saveUser(cl.magal.asistencia.entities.User usuario) {
+//		if(usuario == null) {
+//			throw new RuntimeException("Usuario no debe ser nulo");
+//		}
+//		PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+//		String password = usuario.getPassword();
+//		if(password == null )
+//			password = "123456";
+//		String hashedPassword = passwordEncoder.encode(password);
+//		usuario.setPassword(hashedPassword);
+//		rep.save(usuario);
+//	}
 	
 	public cl.magal.asistencia.entities.User findUser(Long id){
 		return rep.findOne(id);
@@ -290,35 +313,6 @@ public class UserService implements UserDetailsService {
 		return rep.findByEmail(username);
 	}
 	
-	/**
-	 * 
-	 * @param usuario
-	 */
-	private void savePassword(cl.magal.asistencia.entities.User usuario) {
-		if(usuario == null) {
-			throw new RuntimeException("Usuario no debe ser nulo");
-		}
-		PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-		String hashedPassword = passwordEncoder.encode(usuario.getPassword());
-		usuario.setPassword(hashedPassword);
-	}
-	
-	
-	/**
-	 * Permite modificar el password a un usuario ya creado
-	 * @param id
-	 * @param password
-	 */
-	public void savePassword(Long id, String password) {
-		cl.magal.asistencia.entities.User usuario = rep.findOne(id);
-		if(usuario == null) {
-			throw new RuntimeException("El usuario no existe");
-		}
-		usuario.setPassword(password);
-		savePassword(usuario);
-		rep.save(usuario);
-	}
-
 	public void saveRole(Role role) {
 		repRole.save(role);
 	}
