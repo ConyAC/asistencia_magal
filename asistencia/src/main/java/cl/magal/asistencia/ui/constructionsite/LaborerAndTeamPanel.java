@@ -754,20 +754,24 @@ public class LaborerAndTeamPanel extends Panel implements View {
 			@Override
 			public Object generateCell(CustomTable source, final Object itemId,Object columnId) {
 				final BeanItem<LaborerConstructionsite> laborerConstruction = (BeanItem<LaborerConstructionsite>) laborerConstructionContainer.getItem(itemId);
-				return new Button(null,new Button.ClickListener(){
+				return new Button(null,new Button.ClickListener() {
+
 					@Override
 					public void buttonClick(ClickEvent event) {
-						laborerConstruction.getBean().setActive((short)0);
-						laborerService.save(laborerConstruction.getBean());
-						laborerConstructionContainer.removeItem(itemId);
+						ConfirmDialog.show(UI.getCurrent(), "Confirmar Acción:", "¿Está seguro de eliminar el trabajador seleccionado?",
+								"Eliminar", "Cancelar", new ConfirmDialog.Listener() {
+							public void onClose(ConfirmDialog dialog) {
+								if (dialog.isConfirmed()) {
+									laborerConstruction.getBean().setActive((short)0);
+									laborerService.save(laborerConstruction.getBean());
+									laborerConstructionContainer.removeItem(itemId);
+								}
+							}
+						});		
 					}
-				}){
-
-					{ setIcon(FontAwesome.TRASH_O);}
-				};
+				}){ { setIcon(FontAwesome.TRASH_O); } };
 			}
 		});
-
 
 		table.addGeneratedColumn("selected", new CustomTable.ColumnGenerator() {
 

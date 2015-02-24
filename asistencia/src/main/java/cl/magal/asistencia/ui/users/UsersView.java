@@ -64,7 +64,7 @@ public class UsersView extends HorizontalLayout implements View {
 	
 	public static final String NAME = "usuarios";
 	
-	BeanItemContainer<User> container = new BeanItemContainer<User>(User.class);
+	BeanItemContainer<User> userContainer = new BeanItemContainer<User>(User.class);
 	BeanItemContainer<ConstructionSite> constructionContainer = new BeanItemContainer<ConstructionSite>(ConstructionSite.class);
 	
 	private TwinColSelect tcsObras;
@@ -111,6 +111,7 @@ public class UsersView extends HorizontalLayout implements View {
 	private VerticalLayout drawDetalleUsuario() {
 		VerticalLayout vl = new VerticalLayout();
 		vl.setMargin(true);
+		vl.setSpacing(true);
 		vl.addComponent(new Label("Seleccione un usuario para ver su información"));
 		
 		return vl;
@@ -133,7 +134,7 @@ public class UsersView extends HorizontalLayout implements View {
         fieldGroup.setItemDataSource(userItem);
 
         //agrega un boton que hace el commit
-        Button add = new Button(null,new Button.ClickListener() {
+        Button btnSave = new Button(null,new Button.ClickListener() {
 
         	@Override
         	public void buttonClick(ClickEvent event) {
@@ -143,9 +144,7 @@ public class UsersView extends HorizontalLayout implements View {
         			
         			if(tcsObras != null){
         				user.setCs(new LinkedList<ConstructionSite>((Set)tcsObras.getValue()));;
-        				
         			}
-        			//service.addConstructionSiteToUser(cs, u);
         			service.saveUser(user);
         		} catch (CommitException e) {
         			logger.error("Error al guardar la información del usuario");
@@ -157,12 +156,12 @@ public class UsersView extends HorizontalLayout implements View {
         	setIcon(FontAwesome.SAVE);
         }};
         
-        detalleUsuario.addComponent(add);
-        detalleUsuario.setComponentAlignment(add, Alignment.TOP_RIGHT);
+        detalleUsuario.addComponent(btnSave);
+        detalleUsuario.setComponentAlignment(btnSave, Alignment.TOP_RIGHT);
         
         // Loop through the properties, build fields for them and add the fields
         // to this UI
-        for (Object propertyId : fieldGroup.getUnboundPropertyIds()) {
+        for (Object propertyId : new String[]{"rut","firstname","lastname","email","status","role.name","password","password2"}) {
         	if(propertyId.equals("role")||propertyId.equals("salt")||propertyId.equals("userId")||propertyId.equals("deleted")||propertyId.equals("cs"))
         		;
         	else if(propertyId.equals("role.name")){
@@ -173,11 +172,13 @@ public class UsersView extends HorizontalLayout implements View {
         		pf.setNullRepresentation("");
         		detalleUsuario.addComponent(pf);
         		fieldGroup.bind(pf, propertyId);
+        		pf.setValue(null);
         	}else if(propertyId.equals("password2")){
         		PasswordField pf2 = new PasswordField("Confirmar Password");
         		pf2.setNullRepresentation("");
         		detalleUsuario.addComponent(pf2);
         		fieldGroup.bind(pf2, propertyId);
+        		pf2.setValue(null);
         	}else if(propertyId.equals("status")){
         		ComboBox statusField = new ComboBox("Estado");
         		statusField.setNullSelectionAllowed(false);
@@ -198,15 +199,14 @@ public class UsersView extends HorizontalLayout implements View {
         if(SecurityHelper.hasPermission(Permission.ASIGNAR_OBRA)){
 	        //prueba
 			tcsObras = new TwinColSelect("Asignar Obras",constructionContainer);      
-			tcsObras.setWidth("70%");
-			tcsObras.setHeight("70%");
+			tcsObras.setWidth("100%");
+			tcsObras.setHeightUndefined();
 			tcsObras.setNullSelectionAllowed(true);
 			tcsObras.setItemCaptionPropertyId("name");
 			tcsObras.setItemCaptionMode(ItemCaptionMode.PROPERTY);
 			tcsObras.setImmediate(true);
-			tcsObras.setRows(cs.size());
+//			tcsObras.setRows(cs.size());
 			
-			logger.debug("obras " + cs);
 			if (cs != null) {
 				HashSet<Long> preselected = new HashSet<Long>();
 				for (ConstructionSite obra : cs) {
@@ -225,8 +225,8 @@ public class UsersView extends HorizontalLayout implements View {
 
 	private FilterTable drawTablaUsuarios() {
 		usersTable =  new FilterTable();
-		container.addNestedContainerProperty("role.name");
-		usersTable.setContainerDataSource(container);
+		userContainer.addNestedContainerProperty("role.name");
+		usersTable.setContainerDataSource(userContainer);
 		usersTable.setSizeFull();
 		usersTable.setFilterBarVisible(true);
 		usersTable.setVisibleColumns("role.name","firstname");
@@ -275,7 +275,7 @@ public class UsersView extends HorizontalLayout implements View {
 				user.setStatus(UserStatus.ACTIVE);
 				user.setRut("");
 				service.saveUser(user);
-				BeanItem<User> item = container.addBean(user);
+				BeanItem<User> item = userContainer.addBean(user);
 				setUser(item);
 				
 			}
@@ -294,7 +294,7 @@ public class UsersView extends HorizontalLayout implements View {
 				}
 				//TODO dialogo de confirmación
 				service.deleteUser(user.getUserId());
-				container.removeItem(user);				
+				userContainer.removeItem(user);				
 				setUser(null);
 			}
 		});
@@ -314,15 +314,15 @@ public class UsersView extends HorizontalLayout implements View {
 	public void reloaData(){
 		Page<User> page = service.findAllUser(new PageRequest(0, 20));
 		//List<User> users = service.findAllUser();
-		container.removeAllItems();
-		container.addAll(page.getContent());
+		userContainer.removeAllItems();
+		userContainer.addAll(page.getContent());
 		
 		List<ConstructionSite> css = service.getAllObra();
         constructionContainer.removeAllItems();
         constructionContainer.addAll(css);
 		
-		setUser( container.getItem( container.firstItemId() ));
-		usersTable.select(container.firstItemId());
+		setUser( userContainer.getItem( userContainer.firstItemId() ));
+		usersTable.select(userContainer.firstItemId());
 	}
 
 }

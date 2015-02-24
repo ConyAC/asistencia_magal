@@ -225,8 +225,6 @@ public class User implements Serializable {
 	}	
 	
 	public List<ConstructionSite> getCs() {
-		if(cs == null )
-			cs = new LinkedList<ConstructionSite>();
 		return cs;
 	}
 

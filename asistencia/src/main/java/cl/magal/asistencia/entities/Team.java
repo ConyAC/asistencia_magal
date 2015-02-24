@@ -96,6 +96,8 @@ public class Team implements Serializable {
     		deleted = Boolean.FALSE;
     	if(status == null)
     		status = Status.ACTIVE;
+    	if(date == null )
+    		date = new Date();
     }
     
     public Team() {
