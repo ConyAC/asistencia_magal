@@ -84,9 +84,9 @@ public class ConstructionSite implements Serializable {
     @ManyToOne
     ConstructionCompany constructionCompany;
     
+    @NotNull
     @Convert(converter = StatusConverter.class)
     @Column(name = "status",nullable=false)
-    @NotNull
     private Status status = Status.ACTIVE;
     
     @JoinTable(name="laborer_constructionsite",
