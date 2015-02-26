@@ -102,7 +102,9 @@ public class Laborer implements Serializable {
     @NotNull(message="La fecha de nacimiento es necesaria")
     private Date dateBirth;
     
-    @Column(name = "address")
+    @NotNull(message="La dirección es necesario")
+    @NotEmpty(message="La dirección es necesario")
+    @Column(name = "address", nullable=false)
     private String address;
     @Column(name = "mobileNumber")
     private String mobileNumber;
@@ -117,7 +119,9 @@ public class Laborer implements Serializable {
     private Integer dependents;
     @Column(name="town")
     private String town;
-    @Column(name="commune")
+    @NotNull(message="La comuna es necesaria")
+    @NotEmpty(message="La comuna es necesaria")
+    @Column(name="commune", nullable=false)
     private String commune;
     @Column(name="wedge")
     private Integer wedge;
@@ -138,6 +142,7 @@ public class Laborer implements Serializable {
     @Column(name = "maritalStatus", nullable = false)
     private MaritalStatus maritalStatus;
     
+    @NotNull(message="La nacionalidad es necesaria")
     @Convert(converter = NationalityConverter.class)
     @Column(name="nationality", nullable = false)
     private Nationality nationality;
