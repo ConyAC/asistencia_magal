@@ -1,9 +1,11 @@
 package cl.magal.asistencia.ui.users;
 
-import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.PostConstruct;
@@ -16,20 +18,28 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
 import org.tepi.filtertable.FilterTable;
+import org.vaadin.dialogs.ConfirmDialog;
 
 import ru.xpoft.vaadin.VaadinView;
 import cl.magal.asistencia.entities.ConstructionSite;
+import cl.magal.asistencia.entities.Role;
 import cl.magal.asistencia.entities.User;
 import cl.magal.asistencia.entities.enums.Permission;
 import cl.magal.asistencia.entities.enums.UserStatus;
 import cl.magal.asistencia.services.UserService;
 import cl.magal.asistencia.ui.MagalUI;
 import cl.magal.asistencia.util.SecurityHelper;
+import cl.magal.asistencia.util.Utils;
 
+import com.vaadin.data.Validator.InvalidValueException;
 import com.vaadin.data.fieldgroup.BeanFieldGroup;
+import com.vaadin.data.fieldgroup.FieldGroup.CommitEvent;
 import com.vaadin.data.fieldgroup.FieldGroup.CommitException;
+import com.vaadin.data.fieldgroup.FieldGroup.CommitHandler;
+import com.vaadin.data.fieldgroup.FieldGroup.FieldGroupInvalidValueException;
 import com.vaadin.data.util.BeanItem;
 import com.vaadin.data.util.BeanItemContainer;
+import com.vaadin.data.util.converter.Converter;
 import com.vaadin.event.ItemClickEvent;
 import com.vaadin.event.ItemClickEvent.ItemClickListener;
 import com.vaadin.navigator.View;
@@ -40,8 +50,10 @@ import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.ComboBox;
+import com.vaadin.ui.Field;
+import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
+import com.vaadin.ui.HorizontalSplitPanel;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.Panel;
@@ -53,7 +65,7 @@ import com.vaadin.ui.VerticalLayout;
 @VaadinView(value=UsersView.NAME)
 @Scope("prototype")
 @Component
-public class UsersView extends HorizontalLayout implements View {
+public class UsersView extends HorizontalSplitPanel implements View {
 
 	/**
 	 * 
@@ -66,13 +78,15 @@ public class UsersView extends HorizontalLayout implements View {
 	
 	BeanItemContainer<User> userContainer = new BeanItemContainer<User>(User.class);
 	BeanItemContainer<ConstructionSite> constructionContainer = new BeanItemContainer<ConstructionSite>(ConstructionSite.class);
+	BeanItemContainer<Role> rolContainer = new BeanItemContainer<Role>(Role.class);
 	
 	private TwinColSelect tcsObras;
 	
 	@Autowired
 	UserService service;
 	
-	VerticalLayout detalleUsuario;
+	BeanFieldGroup<User> fieldGroup = new BeanFieldGroup<User>(User.class);
+	FormLayout detailLayout;
 	FilterTable usersTable;
 	
 	public UsersView(){
@@ -80,75 +94,48 @@ public class UsersView extends HorizontalLayout implements View {
 	
 	@PostConstruct
 	private void init(){
-		
-//		container.addNestedContainerProperty("role");
 
 		setSizeFull();
 		
 		//dibula la sección de las obras
-		VerticalLayout usuarios = drawUsuarios();
+		VerticalLayout usersListLayout = drawUsers();
+		addComponent(usersListLayout);
 		
-		addComponent(usuarios);
-		setExpandRatio(usuarios, 0.2F);
+		VerticalLayout usersDetailLayout = drawUserDetail();	
+		addComponent(usersDetailLayout);
 		
-		Panel panel = new Panel("");
-		detalleUsuario = drawDetalleUsuario();	
-		panel.setContent(detalleUsuario);
-		panel.setWidth("1200px");
-		panel.setHeight("620px");
-		panel.getContent().setSizeUndefined();
-		addComponent(panel);
-		setComponentAlignment(panel, Alignment.TOP_CENTER);
-		setExpandRatio(panel, 0.8F);		
-		
-		//dibuja la sección de detalles
-		//detalleUsuario = drawDetalleUsuario();
-		
-		//addComponent(detalleUsuario);
-		//setExpandRatio(detalleUsuario, 0.8F);
 	}
 	
-	private VerticalLayout drawDetalleUsuario() {
+	private VerticalLayout drawUserDetail() {
+		
 		VerticalLayout vl = new VerticalLayout();
-		vl.setMargin(true);
 		vl.setSpacing(true);
-		vl.addComponent(new Label("Seleccione un usuario para ver su información"));
+		vl.setMargin(true);
+		vl.setSizeFull();
 		
-		return vl;
-	}
-	
-	private void setUser(BeanItem<User> userItem){
-		
-		//obtiene el vertical Layout
-		detalleUsuario.removeAllComponents();
-		if(userItem == null){
-			detalleUsuario.setEnabled(false);
-			detalleUsuario.addComponent(new Label("Seleccione un usuario para ver su información"));
-			return;
-		}
-		detalleUsuario.setEnabled(true); //VER
-		
-		final BeanFieldGroup<User> fieldGroup = new BeanFieldGroup<User>(User.class);
-		// We need an item data source before we create the fields to be able to
-        // find the properties, otherwise we have to specify them by hand
-        fieldGroup.setItemDataSource(userItem);
-
         //agrega un boton que hace el commit
-        Button btnSave = new Button(null,new Button.ClickListener() {
+        Button btnSave = new Button("Guardar",new Button.ClickListener() {
 
         	@Override
         	public void buttonClick(ClickEvent event) {
         		try {
         			fieldGroup.commit();
         			User user = fieldGroup.getItemDataSource().getBean();
-        			
-        			if(tcsObras != null){
-        				user.setCs(new LinkedList<ConstructionSite>((Set)tcsObras.getValue()));;
-        			}
+        			boolean isNew = user.getUserId() == null;
         			service.saveUser(user);
+        			
+        			if(isNew){
+	        			BeanItem<User> userItem = userContainer.addBean(user);
+	        			setUser(userItem);
+        			}
+        			
+        			fieldGroup.getField("password").setValue(null);
+        			fieldGroup.getField("password2").setValue(null);
+        			Notification.show("Usuario guardado correctamente",Type.TRAY_NOTIFICATION);
         		} catch (CommitException e) {
-        			logger.error("Error al guardar la información del usuario");
-        			Notification.show("Error al guardar la información del usuario", Type.ERROR_MESSAGE);
+        			
+        			Utils.catchCommitException(e);
+        			
         		}
 
         	}
@@ -156,27 +143,42 @@ public class UsersView extends HorizontalLayout implements View {
         	setIcon(FontAwesome.SAVE);
         }};
         
-        detalleUsuario.addComponent(btnSave);
-        detalleUsuario.setComponentAlignment(btnSave, Alignment.TOP_RIGHT);
+        vl.addComponent(btnSave);
+        vl.setComponentAlignment(btnSave, Alignment.TOP_LEFT);
+		
+		detailLayout = new FormLayout();
+		detailLayout.setMargin(true);
+		detailLayout.setSpacing(true);
+		
+		Panel p = new Panel(detailLayout);
+		p.setSizeFull();
+		vl.addComponent(p);
+		vl.setExpandRatio(p, 1.0f);
         
         // Loop through the properties, build fields for them and add the fields
         // to this UI
-        for (Object propertyId : new String[]{"rut","firstname","lastname","email","status","role.name","password","password2"}) {
-        	if(propertyId.equals("role")||propertyId.equals("salt")||propertyId.equals("userId")||propertyId.equals("deleted")||propertyId.equals("cs"))
+        for (Object propertyId : new String[]{"rut","firstname","lastname","email","status","role","password","password2"}) {
+        	if(propertyId.equals("salt")||propertyId.equals("userId")||propertyId.equals("deleted")||propertyId.equals("cs"))
         		;
-        	else if(propertyId.equals("role.name")){
-        		ComboBox cb = new ComboBox("Rol",Arrays.asList("AADMO","ADMC","ADMO","SADM"));
-        		detalleUsuario.addComponent(cb);
+        	else if(propertyId.equals("role")){
+        		ComboBox cb = new ComboBox("Perfil",rolContainer);
+        		cb.setItemCaptionMode(ItemCaptionMode.PROPERTY);
+        		cb.setItemCaptionPropertyId("name");
+        		cb.setWidth("100%");
+        		fieldGroup.bind(cb, propertyId);
+        		detailLayout.addComponent(cb);
         	}else if(propertyId.equals("password")){
         		PasswordField pf = new PasswordField("Password");
         		pf.setNullRepresentation("");
-        		detalleUsuario.addComponent(pf);
+        		detailLayout.addComponent(pf);
         		fieldGroup.bind(pf, propertyId);
+        		pf.setWidth("100%");
         		pf.setValue(null);
         	}else if(propertyId.equals("password2")){
         		PasswordField pf2 = new PasswordField("Confirmar Password");
         		pf2.setNullRepresentation("");
-        		detalleUsuario.addComponent(pf2);
+        		pf2.setWidth("100%");
+        		detailLayout.addComponent(pf2);
         		fieldGroup.bind(pf2, propertyId);
         		pf2.setValue(null);
         	}else if(propertyId.equals("status")){
@@ -185,52 +187,110 @@ public class UsersView extends HorizontalLayout implements View {
         		for(UserStatus us : UserStatus.values()){
         			statusField.addItem(us);
         		}
-        		detalleUsuario.addComponent(statusField);
+        		statusField.setWidth("100%");
+        		detailLayout.addComponent(statusField);
         		fieldGroup.bind(statusField, "status");
         	}else{
-        		detalleUsuario.addComponent(fieldGroup.buildAndBind(propertyId));
+        		Field<?> field = fieldGroup.buildAndBind(tradProperty(propertyId), propertyId);
+        		field.setWidth("100%");
+        		detailLayout.addComponent(field);
         	}
         }
         
-        List<ConstructionSite> cs = service.getObraByUser(userItem.getBean());
-		//detalleUsuario.removeAllItems();
-		//detalleUsuario.addAll(cs);
-        
-        if(SecurityHelper.hasPermission(Permission.ASIGNAR_OBRA)){
-	        //prueba
-			tcsObras = new TwinColSelect("Asignar Obras",constructionContainer);      
-			tcsObras.setWidth("100%");
-			tcsObras.setHeightUndefined();
-			tcsObras.setNullSelectionAllowed(true);
-			tcsObras.setItemCaptionPropertyId("name");
-			tcsObras.setItemCaptionMode(ItemCaptionMode.PROPERTY);
-			tcsObras.setImmediate(true);
-//			tcsObras.setRows(cs.size());
+		tcsObras = new TwinColSelect("Asignar Obras",constructionContainer);      
+		tcsObras.setWidth("100%");
+		tcsObras.setNullSelectionAllowed(true);
+		tcsObras.setItemCaptionPropertyId("name");
+		tcsObras.setItemCaptionMode(ItemCaptionMode.PROPERTY);
+		tcsObras.setImmediate(true);
+		tcsObras.setConverter(new ListCsToSetConverter());
+		fieldGroup.bind(tcsObras, "cs");
+		
+		fieldGroup.addCommitHandler(new CommitHandler() {
 			
-			if (cs != null) {
-				HashSet<Long> preselected = new HashSet<Long>();
-				for (ConstructionSite obra : cs) {
-					preselected.add(obra.getConstructionsiteId());
-				}
-				tcsObras.setValue(preselected);
+			@Override
+			public void preCommit(CommitEvent commitEvent) throws CommitException {
+				
 			}
 			
-			detalleUsuario.addComponent(tcsObras);
+			@Override
+			public void postCommit(CommitEvent commitEvent) throws CommitException {
+				
+				Long id = fieldGroup.getItemDataSource().getBean().getUserId();
+				
+				//si es un nuevo usuario, valida que no exista un usuario con el mismo email
+				if( id == null ){
+					Field<?> email = fieldGroup.getField("email");
+					
+					User user = service.findUsuarioByUsername((String)email.getValue());
+					if(user != null ){
+						Map<Field<?>,InvalidValueException> map = new HashMap<Field<?>,InvalidValueException>();
+						map.put(email, new InvalidValueException("Ya existe un usuario con el mismo email."));
+						throw new FieldGroupInvalidValueException(map);
+					}
+				}
+				
+				//antes de comitear revisa que los passwords sean iguales si alguno es distinto de null
+				Field<?> pf = fieldGroup.getField("password");
+				Field<?> pf2 = fieldGroup.getField("password2");
+				
+				//	creacion debe validar que venga seteado el password y además coincida, en edicion solo deben coincidir
+				if(  id == null && pf.getValue() == null ){
+					Map<Field<?>,InvalidValueException> map = new HashMap<Field<?>,InvalidValueException>();
+					map.put(pf, new InvalidValueException("El password es requerido para crear el usuario."));
+					throw new FieldGroupInvalidValueException(map);
+				}
+				if( pf.getValue() != null || pf2.getValue() != null ){
+					if(!pf.getValue().equals(pf2.getValue())){
+						Map<Field<?>,InvalidValueException> map = new HashMap<Field<?>,InvalidValueException>();
+						map.put(pf, new InvalidValueException("Los passwords deben coincidir"));
+						throw new FieldGroupInvalidValueException(map);
+					}
+				}
+			}
+		});
+		
+		detailLayout.addComponent(tcsObras);
+		
+		return vl;
+	}
+	
+	private void setUser(BeanItem<User> userItem){
+		
+		//obtiene el vertical Layout
+		if(userItem == null){
+			detailLayout.setEnabled(false);
+			return;
+		}
+		
+        usersTable.select(userItem.getBean());
+		
+		detailLayout.setEnabled(true); //VER
+		
+		userItem.getBean().setPassword(null);
+		userItem.getBean().setPassword2(null);
+		// We need an item data source before we create the fields to be able to
+        // find the properties, otherwise we have to specify them by hand
+        fieldGroup.setItemDataSource(userItem);
+
+		if(SecurityHelper.hasPermission(Permission.ASIGNAR_OBRA)){
+			
+			tcsObras.setVisible(true);
+			
+        }else{
+        	tcsObras.setVisible(false);
         }
 		
-		
-		detalleUsuario.setWidth("100%");
-		//detalleUsuario.setComponentAlignment(tcsObras, Alignment.TOP_RIGHT);
 	}
 
 	private FilterTable drawTablaUsuarios() {
-		usersTable =  new FilterTable();
+		FilterTable usersTable =  new FilterTable();
 		userContainer.addNestedContainerProperty("role.name");
 		usersTable.setContainerDataSource(userContainer);
 		usersTable.setSizeFull();
 		usersTable.setFilterBarVisible(true);
-		usersTable.setVisibleColumns("role.name","firstname");
-		usersTable.setColumnHeaders("Perfil", "Nombre");
+		usersTable.setVisibleColumns("firstname","email","role.name");
+		usersTable.setColumnHeaders("Nombre","Email","Perfil");
 		usersTable.setSelectable(true);
 		
 		usersTable.addItemClickListener(new ItemClickListener() {
@@ -244,19 +304,20 @@ public class UsersView extends HorizontalLayout implements View {
 		return usersTable;
 	}
 
-	private VerticalLayout drawUsuarios() {
+	private VerticalLayout drawUsers() {
 		
 		VerticalLayout vl = new VerticalLayout();
+		vl.setSpacing(true);
 		vl.setMargin(true);
+		vl.setSizeFull();
 		
-		//la tabla con su buscador buscador
-		vl.addComponent(drawTablaUsuarios());
 		//botones agrega y eliminar
 		HorizontalLayout hl = new HorizontalLayout();
 		hl.setSpacing(true);
 		vl.addComponent(hl);
-		vl.setComponentAlignment(hl, Alignment.BOTTOM_CENTER );
-		Button agregaUsuario = new Button(null,FontAwesome.PLUS);
+		vl.setComponentAlignment(hl, Alignment.BOTTOM_LEFT);
+				
+		Button agregaUsuario = new Button("Agregar Usuario",FontAwesome.PLUS);
 		//agregando obras dummy
 		agregaUsuario.addClickListener(new Button.ClickListener() {
 			
@@ -274,9 +335,8 @@ public class UsersView extends HorizontalLayout implements View {
 				user.setEmail("");
 				user.setStatus(UserStatus.ACTIVE);
 				user.setRut("");
-				service.saveUser(user);
-				BeanItem<User> item = userContainer.addBean(user);
-				setUser(item);
+				
+		        fieldGroup.setItemDataSource(new BeanItem<User>(user));
 				
 			}
 		});
@@ -287,18 +347,32 @@ public class UsersView extends HorizontalLayout implements View {
 			@Override
 			public void buttonClick(ClickEvent event) {
 				//recupera el elemento seleccionado
-				User user = (User) usersTable.getValue();
+				final User user = (User) usersTable.getValue();
 				if(user == null){
 					Notification.show("Debe seleccionar un usuario para eliminarlo");
 					return;
 				}
-				//TODO dialogo de confirmación
-				service.deleteUser(user.getUserId());
-				userContainer.removeItem(user);				
-				setUser(null);
+				ConfirmDialog.show(UI.getCurrent(), "Confirmar Acción:", "¿Está seguro de eliminar el usuario seleccionado?",
+						"Eliminar", "Cancelar", new ConfirmDialog.Listener() {
+					public void onClose(ConfirmDialog dialog) {
+						if (dialog.isConfirmed()) {
+							//si el usuario es nuevo solo lo quita de la lista
+							if(user.getUserId() != null )
+								service.deleteUser(user.getUserId());
+							userContainer.removeItem(user);				
+							setUser( userContainer.getItem( userContainer.firstItemId() ));
+						}
+					}
+				});	
+				
 			}
 		});
 		hl.addComponent(borrarUsuario);
+		
+		//la tabla con su buscador buscador
+		usersTable =  drawTablaUsuarios();
+		vl.addComponent(usersTable);
+		vl.setExpandRatio(usersTable, 1.0f);
 		
 		return vl;
 	}
@@ -320,9 +394,89 @@ public class UsersView extends HorizontalLayout implements View {
 		List<ConstructionSite> css = service.getAllObra();
         constructionContainer.removeAllItems();
         constructionContainer.addAll(css);
+        
+        List<Role> roles = service.getAllRole();
+        rolContainer.removeAllItems();
+        rolContainer.addAll(roles);
 		
 		setUser( userContainer.getItem( userContainer.firstItemId() ));
-		usersTable.select(userContainer.firstItemId());
+	}
+	
+	private String tradProperty(Object propertyId) {
+		if(propertyId.equals("rut"))
+			return "RUT";
+		else if(propertyId.equals("email"))
+			return "Email";
+		else if(propertyId.equals("firstname"))
+			return "Nombres";
+		else if(propertyId.equals("secondname"))
+			return "Segundo Nombre";
+		else if(propertyId.equals("lastname"))
+			return "Apellidos";
+		else if(propertyId.equals("secondlastname"))
+			return "Segundo Apellido";
+		else if(propertyId.equals("dateBirth"))
+			return "Fecha de Nacimiento";
+		else if(propertyId.equals("address"))
+			return "Dirección";
+		else if(propertyId.equals("mobileNumber"))
+			return "Teléfono móvil";
+		else if(propertyId.equals("phone"))
+			return "Teléfono fijo";
+		else if(propertyId.equals("dateAdmission"))
+			return "Fecha de Admisión";
+		else if(propertyId.equals("provenance"))
+			return "Procedencia";
+		else if(propertyId.equals("reward"))
+			return "Premio";
+		else if(propertyId.equals("town"))
+			return "Ciudad";
+		else if(propertyId.equals("commune"))
+			return "Comuna";
+		else if(propertyId.equals("wedge"))
+			return "Calzado";
+		else if(propertyId.equals("bankAccount"))
+			return "Cta. Banco";
+		else
+			return propertyId.toString();
+	}
+	
+	public static class ListCsToSetConverter implements Converter<Object, List> {
+
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 5001359177239627061L;
+
+		@Override
+		public Class<Object> getPresentationType() {
+			return Object.class;
+		}
+
+		@Override
+		public List convertToModel(Object value,Class<? extends List> targetType, Locale locale)
+				throws com.vaadin.data.util.converter.Converter.ConversionException {
+			Set<ConstructionSite> pres = ((Set<ConstructionSite>)value);
+			List<ConstructionSite> model =  new LinkedList<ConstructionSite>();
+			for (ConstructionSite str: pres){
+				model.add( str );
+			}
+			return model;
+		}
+
+		@Override
+		public Object convertToPresentation(List value,
+				Class<? extends Object> targetType, Locale locale)throws com.vaadin.data.util.converter.Converter.ConversionException {
+			HashSet<ConstructionSite> set = new HashSet<ConstructionSite>(value.size());
+			for (ConstructionSite str: (List<ConstructionSite>)value)
+				set.add(str);
+			return set;
+		}
+
+		@Override
+		public Class<List> getModelType() {
+			return List.class;
+		}
 	}
 
 }
