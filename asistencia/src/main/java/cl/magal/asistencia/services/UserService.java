@@ -213,6 +213,7 @@ public class UserService implements UserDetailsService {
                 ll);
 	}
 	
+	@Transactional
 	public void saveUser(cl.magal.asistencia.entities.User user) {
 		if(user == null) throw new RuntimeException("Usuario no debe ser nulo");
 		//nuevo usuario o edición de usuarios
@@ -230,6 +231,10 @@ public class UserService implements UserDetailsService {
 	private void savePassword(cl.magal.asistencia.entities.User usuario) {
 		if(usuario == null) {
 			throw new RuntimeException("Usuario no debe ser nulo");
+		}
+		//las passwords deben coincidir
+		if(!usuario.getPassword().equals(usuario.getPassword2())){
+			throw new RuntimeException("Los passwords deben coincidir");
 		}
 		PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 		String hashedPassword = passwordEncoder.encode(usuario.getPassword());
@@ -350,5 +355,13 @@ public class UserService implements UserDetailsService {
 	public void clear() {
 		rep.deleteAll();
 		
+	}
+
+	/**
+	 * Devuelve una lista con todos los roles posibles
+	 * @return
+	 */
+	public List<Role> getAllRole() {
+		return (List<Role>) repRole.findAll();
 	}
 }
