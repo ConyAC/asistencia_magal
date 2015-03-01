@@ -121,7 +121,14 @@ public class UsersView extends HorizontalSplitPanel implements View {
         		try {
         			fieldGroup.commit();
         			User user = fieldGroup.getItemDataSource().getBean();
+        			boolean isNew = user.getUserId() == null;
         			service.saveUser(user);
+        			
+        			if(isNew){
+	        			BeanItem<User> userItem = userContainer.addBean(user);
+	        			setUser(userItem);
+        			}
+        			
         			fieldGroup.getField("password").setValue(null);
         			fieldGroup.getField("password2").setValue(null);
         			Notification.show("Usuario guardado correctamente",Type.TRAY_NOTIFICATION);
@@ -184,7 +191,7 @@ public class UsersView extends HorizontalSplitPanel implements View {
         		detailLayout.addComponent(statusField);
         		fieldGroup.bind(statusField, "status");
         	}else{
-        		Field<?> field = fieldGroup.buildAndBind(propertyId);
+        		Field<?> field = fieldGroup.buildAndBind(tradProperty(propertyId), propertyId);
         		field.setWidth("100%");
         		detailLayout.addComponent(field);
         	}
@@ -255,6 +262,9 @@ public class UsersView extends HorizontalSplitPanel implements View {
 			detailLayout.setEnabled(false);
 			return;
 		}
+		
+        usersTable.select(userItem.getBean());
+		
 		detailLayout.setEnabled(true); //VER
 		
 		userItem.getBean().setPassword(null);
@@ -262,7 +272,6 @@ public class UsersView extends HorizontalSplitPanel implements View {
 		// We need an item data source before we create the fields to be able to
         // find the properties, otherwise we have to specify them by hand
         fieldGroup.setItemDataSource(userItem);
-        usersTable.select(userItem);
 
 		if(SecurityHelper.hasPermission(Permission.ASIGNAR_OBRA)){
 			
@@ -326,8 +335,8 @@ public class UsersView extends HorizontalSplitPanel implements View {
 				user.setEmail("");
 				user.setStatus(UserStatus.ACTIVE);
 				user.setRut("");
-				BeanItem<User> item = userContainer.addBean(user);
-				setUser(item);
+				
+		        fieldGroup.setItemDataSource(new BeanItem<User>(user));
 				
 			}
 		});
@@ -391,6 +400,45 @@ public class UsersView extends HorizontalSplitPanel implements View {
         rolContainer.addAll(roles);
 		
 		setUser( userContainer.getItem( userContainer.firstItemId() ));
+	}
+	
+	private String tradProperty(Object propertyId) {
+		if(propertyId.equals("rut"))
+			return "RUT";
+		else if(propertyId.equals("email"))
+			return "Email";
+		else if(propertyId.equals("firstname"))
+			return "Nombres";
+		else if(propertyId.equals("secondname"))
+			return "Segundo Nombre";
+		else if(propertyId.equals("lastname"))
+			return "Apellidos";
+		else if(propertyId.equals("secondlastname"))
+			return "Segundo Apellido";
+		else if(propertyId.equals("dateBirth"))
+			return "Fecha de Nacimiento";
+		else if(propertyId.equals("address"))
+			return "Dirección";
+		else if(propertyId.equals("mobileNumber"))
+			return "Teléfono móvil";
+		else if(propertyId.equals("phone"))
+			return "Teléfono fijo";
+		else if(propertyId.equals("dateAdmission"))
+			return "Fecha de Admisión";
+		else if(propertyId.equals("provenance"))
+			return "Procedencia";
+		else if(propertyId.equals("reward"))
+			return "Premio";
+		else if(propertyId.equals("town"))
+			return "Ciudad";
+		else if(propertyId.equals("commune"))
+			return "Comuna";
+		else if(propertyId.equals("wedge"))
+			return "Calzado";
+		else if(propertyId.equals("bankAccount"))
+			return "Cta. Banco";
+		else
+			return propertyId.toString();
 	}
 	
 	public static class ListCsToSetConverter implements Converter<Object, List> {
