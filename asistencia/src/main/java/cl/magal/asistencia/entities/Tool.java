@@ -43,7 +43,7 @@ import cl.magal.asistencia.entities.enums.LoanToolStatus;
  * @author Constanza
  */
 @Entity
-@Table(name = "tool")
+@Table(name = "tools")
 @NamedQueries({
     @NamedQuery(name = "Tool.findAll", query = "SELECT t FROM Tool t"),
     @NamedQuery(name = "Tool.findByToolId", query = "SELECT t FROM Tool t WHERE t.toolId = :toolId"),

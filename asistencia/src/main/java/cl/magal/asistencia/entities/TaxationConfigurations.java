@@ -33,7 +33,7 @@ public class TaxationConfigurations implements Serializable {
 	Double from;
 	
 	@Digits(fraction = 2, integer = 12)
-	@Column(name ="to")
+	@Column(name ="tor")
 	Double to;
 	
 	@Digits(fraction = 2, integer = 12)
