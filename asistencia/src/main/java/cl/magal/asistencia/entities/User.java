@@ -22,7 +22,6 @@ import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
-import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.PrePersist;
 import javax.persistence.Table;
@@ -30,6 +29,7 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 
 import org.hibernate.validator.constraints.Email;
+import org.hibernate.validator.constraints.NotEmpty;
 
 import cl.magal.asistencia.entities.converter.UserStatusConverter;
 import cl.magal.asistencia.entities.enums.UserStatus;
@@ -60,21 +60,25 @@ public class User implements Serializable {
     private Long userId;
     @Basic(optional = false)
     @Column(name = "firstname",nullable=false)
+    @NotNull(message="El nombre es requerido.")
     private String firstname;
     @Basic(optional = false)
     @Column(name = "lastname", nullable=false)
     private String lastname;
-    @Basic(optional = false)
+    
     @Column(name = "rut", nullable=false)
     @Pattern(regexp="^([0-9])+\\-([kK0-9])+$",message="El rut no es válido.")
     @RutDigit(message="El rut no es válido.")
     @NotNull(message="El rut es obligatorio.")
+    @NotEmpty(message="El rut es obligatorio.")
     private String rut;
-    @Basic(optional = false)
+
     @Column(name = "email",nullable = false,unique = true)
-    @NotNull(message="El rut es obligatorio.")
     @Email(message="El email es inválido.")
+    @NotNull(message="El email es obligatorio.")
+    @NotEmpty(message="El email es obligatorio.")
     private String email;
+    
     @Column(name = "password")
     private String password;
     @Column(name = "salt")
@@ -84,11 +88,12 @@ public class User implements Serializable {
    
     @Convert(converter = UserStatusConverter.class)
     @Column(name = "status", nullable=false)
-    @NotNull
+    @NotNull(message="Es necesario definir el estado")
     private UserStatus status = UserStatus.ACTIVE;
     
     @OneToOne
     @JoinColumn(name="roleId")
+    @NotNull(message="Es necesario definir un perfil de usuario.")
     private Role role;
     
     @JoinTable(name="user_constructionsite",
@@ -225,8 +230,6 @@ public class User implements Serializable {
 	}	
 	
 	public List<ConstructionSite> getCs() {
-		if(cs == null )
-			cs = new LinkedList<ConstructionSite>();
 		return cs;
 	}
 
@@ -256,7 +259,7 @@ public class User implements Serializable {
 
     @Override
     public String toString() {
-        return "jpa.magal.entities.User[ userId=" + userId + " ]";
+        return "jpa.magal.entities.User[ userId=" + userId + " ,cs= "+ cs +" ]";
     }
     
     public void addCS(ConstructionSite cs) {

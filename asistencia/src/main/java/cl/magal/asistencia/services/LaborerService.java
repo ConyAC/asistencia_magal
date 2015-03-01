@@ -1,6 +1,7 @@
 package cl.magal.asistencia.services;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import javax.validation.ConstraintViolationException;
@@ -14,9 +15,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.TransactionSystemException;
 
 import cl.magal.asistencia.entities.ConstructionSite;
-import cl.magal.asistencia.entities.Contract;
 import cl.magal.asistencia.entities.Laborer;
 import cl.magal.asistencia.entities.LaborerConstructionsite;
+import cl.magal.asistencia.entities.Tool;
 import cl.magal.asistencia.entities.enums.Job;
 import cl.magal.asistencia.repositories.AbsenceRepositoy;
 import cl.magal.asistencia.repositories.AccidentRepository;
@@ -87,21 +88,19 @@ public class LaborerService {
 		//por cada una crea un vo
 		for(LaborerConstructionsite laborerConstructionsite : laborerConstructionsites ){
 			//por cada contrato
-			for(Contract contract : laborerConstructionsite.getContracts() ){
-				HistoryVO vo = new HistoryVO();
-				vo.setConstructionSite(laborerConstructionsite.getConstructionsite());
-				//considerar el job historico
-				vo.setJob(contract.getJob()); 
-				vo.setNumberOfAccidents(laborerConstructionsite.getAccidents().size());
-				vo.setStartingDate(contract.getStartDate());
-				vo.setEndingDate(contract.getTerminationDate());
-				vo.setActive(contract.isActive());
-				//TODO
-				vo.setReward(Double.valueOf(Utils.random(19000, 150000)));
-				vo.setAverageWage(Double.valueOf(Utils.random(9000, 15000)));
-				
-				result.add(vo);
-			}
+			HistoryVO vo = new HistoryVO();
+			vo.setConstructionSite(laborerConstructionsite.getConstructionsite());
+			//considerar el job historico
+			vo.setJob(laborerConstructionsite.getActiveContract().getJob()); 
+			vo.setNumberOfAccidents(laborerConstructionsite.getAccidents().size());
+			vo.setStartingDate(laborerConstructionsite.getActiveContract().getStartDate());
+			vo.setEndingDate(laborerConstructionsite.getActiveContract().getTerminationDate());
+			vo.setActive(laborerConstructionsite.getActiveContract().isActive());
+			//TODO
+			vo.setReward(laborerConstructionsite.getReward());
+			vo.setAverageWage(Double.valueOf(Utils.random(9000, 15000)));
+			
+			result.add(vo);
 		}
 		
 		return result;
@@ -126,10 +125,26 @@ public class LaborerService {
 		if(laborerConstructionSite == null)
 			throw new RuntimeException("La relación trabajador-obra no puede ser nula");
 		//es necesario que tenga algún contrato
-		if(laborerConstructionSite.getContracts().isEmpty())
+		if(laborerConstructionSite.getActiveContract() == null )
 			throw new RuntimeException("La relación trabajador-obra debe tener al menos un contrato asociado");
+		// valida que el trabajador no sea nulo
+		if(laborerConstructionSite.getLaborer() == null)
+			throw new RuntimeException("El trabajador no puede ser nula");
+		
+		//si el trabajador es nuevo, lo guarda primero
+		if(laborerConstructionSite.getLaborer().getLaborerId() == null )
+			laborerRepo.save(laborerConstructionSite.getLaborer());
+		
 		//guarda los contratos
 		laborerConstructionsiteRepo.save(laborerConstructionSite);		
+		
+		//si el contrato es nuevo, lo guarda primero
+		if(laborerConstructionSite.getActiveContract().getContractId() == null ){
+			if(laborerConstructionSite.getActiveContract().getLaborerConstructionSite() == null )
+				laborerConstructionSite.getActiveContract().setLaborerConstructionSite(laborerConstructionSite);
+			contractRepo.save(laborerConstructionSite.getActiveContract());
+		}
+
 	}
 
 	public List<Laborer> findAllLaborer() {
@@ -164,7 +179,7 @@ public class LaborerService {
 	 * @return
 	 */
 	public ConstructionSite getLastConstructionSite(Laborer laborer) {
-		LaborerConstructionsite cs = laborerConstructionsiteRepo.findFirstByLaborerOrderByContractsStartDateDesc(laborer);
+		LaborerConstructionsite cs = laborerConstructionsiteRepo.findFirstByLaborerOrderByActiveContractStartDateDesc(laborer);
 		if(cs != null)
 			return cs.getConstructionsite();
 		return null;
@@ -174,5 +189,20 @@ public class LaborerService {
 		return laborerRepo.findByConstructionSite(cs.getConstructionsiteId());
 	}
 
+	/**
+	 * 
+	 * @param laborer
+	 * @return
+	 */
+	public ConstructionSite findActiveConstructionSite(Laborer laborer) {
+		return laborerConstructionsiteRepo.findConstructionsiteByLaborer(laborer);
+	}
 	
+	public List<Date> findDatePostponed(Tool tool) {
+		return toolRepo.findDatePostponed(tool.getToolId());
+	}	
+	
+	public Tool saveDatePostponed(Tool tool) {
+		return toolRepo.save(tool);
+	}	
 }

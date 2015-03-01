@@ -1,0 +1,60 @@
+<?xml version='1.0'?>
+<html>
+	 <head>
+		<meta charset="UTF-8">
+		<style>
+	
+	@media all {
+	.page-break	{ display: none; }
+	.print-hidden	{  }
+	}
+	
+	@media print {
+		.page-break	{ display: block; page-break-before: always; }
+		.print-hidden	{ display: none; }
+	}
+	
+	</style>
+	</head>
+	<body>
+	
+	<div class="print-hidden" style="text-align:center;">
+			<input type="button" onclick="javascript:print()" value="Imprimir" /> <br /><br />
+		</div>
+	
+#foreach( $laborerConstruction in $laborerConstructions )
+
+		<br />
+		<h3 style="margin:1px;text-align:center;text-decoration: underline;">ANEXO CONTRATO.</h3>	
+		<br />
+		<br />	
+		<div style="margin:1px;text-align:center;left;line-height: 0.2;">
+		    <h3>MODIFICACION TEMPORAL HORARIO TRABAJO</h3><br /><br />
+			Entre <b>$tools.format('dd', ${fromdate}) de $tools.format('MMMM yyyy', ${fromdate}) y $tools.format('dd', ${todate}) de $tools.format('MMMM yyyy', ${todate})</b> 
+		</div>
+		<br />
+		<p style="text-align:justify;">El presente anexo de modificaci&oacute;n temporal de Horario de Trabajo, tiene por objeto <b>${objetive}</b>, que no se trabajaran, seg&uacute;n acuerdo entre el empleador y trabajador para beneficio de este &uacute;ltimo <b>${benefit}</b></p>
+		<p style="text-align:left;"><b>Lunes a Jueves : </b></p> 
+		<p style="text-align:left;"><b>Ma&ntilde;ana ${morning} hrs.</b></p>
+		<p style="text-align:left;"><b>Tarde ${afternoon} Hrs.</b></p>
+		<p style="text-align:left;"><b>Viernes : </b></p> 
+		<p style="text-align:left;"><b>Ma&ntilde;ana ${morning} hrs.</b></p>
+		<p style="text-align:left;"><b>Tarde ${afternoon} Hrs.</b></p>
+	    <br /><br />
+	     <span style="text-align:left;"><b>${laborerConstruction.constructionsite.constructionCompany.name}</b></span><br />
+	    <span style="text-align:left;"><b>$numberTools.integer(${laborerConstruction.constructionsite.constructionCompany.rut.split("-").get(0)})-${laborerConstruction.constructionsite.constructionCompany.rut.split("-").get(1)}</b></span><br />
+	    <span style="text-align:left;"><b>${laborerConstruction.constructionsite.constructionCompany.address}, ${laborerConstruction.constructionsite.constructionCompany.commune}</b></span><br />
+	    <span style="text-align:left;">Obra: <b>${laborerConstruction.constructionsite.name}</b></span>
+	    <br /><br />
+		<table cellpadding="0" cellspacing="0" border="0" style="width:100%;margin:10px">
+        <tr>
+            <td style="text-align:left;">
+            TRABAJADOR Sr: <b>${laborerConstruction.laborer.fullname}</b>, ROL <b>${laborerConstruction.activeContract.jobCode}</b>
+            </td>
+        </tr>
+		</table>
+		<p>Santiago, <b>$tools.format('dd', $tools.date) de $tools.format('MMMM', $tools.date) de $tools.format('yyyy', $tools.date)</b>.
+		<div class="page-break"></div>
+#end
+	</body>
+</html>

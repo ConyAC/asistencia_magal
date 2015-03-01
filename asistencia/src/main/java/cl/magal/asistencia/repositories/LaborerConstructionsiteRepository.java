@@ -2,6 +2,7 @@ package cl.magal.asistencia.repositories;
 
 import java.util.List;
 
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 
 import cl.magal.asistencia.entities.ConstructionSite;
@@ -11,12 +12,18 @@ import cl.magal.asistencia.entities.LaborerConstructionsite;
 public interface LaborerConstructionsiteRepository extends
 		PagingAndSortingRepository<LaborerConstructionsite, Long> {
 
-	List<LaborerConstructionsite> findByConstructionsite(ConstructionSite constructionsite);
+	
+	@Query(value="select lc from LaborerConstructionsite lc where lc.constructionsite = ?1 and lc.active != 0 ")
+	List<LaborerConstructionsite> findByConstructionsiteAndIsActive(ConstructionSite constructionsite);
 	
 	LaborerConstructionsite findByConstructionsiteAndLaborer(ConstructionSite constructionsite, Laborer laborer);
 	
+	@Query(value="select lc from LaborerConstructionsite lc where lc.laborer = ?1 order by lc.activeContract.active desc,lc.activeContract.terminationDate desc")
 	List<LaborerConstructionsite> findByLaborer(Laborer laborer);
 	
-	LaborerConstructionsite findFirstByLaborerOrderByContractsStartDateDesc(Laborer laborer);
+	LaborerConstructionsite findFirstByLaborerOrderByActiveContractStartDateDesc(Laborer laborer);
+
+	@Query(value="select lcs.constructionsite from LaborerConstructionsite lcs where lcs.laborer = ?1 and lcs.active = 1 ")
+	ConstructionSite findConstructionsiteByLaborer(Laborer laborer);
 
 }

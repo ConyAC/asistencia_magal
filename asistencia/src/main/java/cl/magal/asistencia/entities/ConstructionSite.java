@@ -80,9 +80,13 @@ public class ConstructionSite implements Serializable {
     @ManyToOne
     User personInCharge;
     
+    @JoinColumn(name="constructionCompanyId")
+    @ManyToOne
+    ConstructionCompany constructionCompany;
+    
+    @NotNull
     @Convert(converter = StatusConverter.class)
     @Column(name = "status",nullable=false)
-    @NotNull
     private Status status = Status.ACTIVE;
     
     @JoinTable(name="laborer_constructionsite",
@@ -250,6 +254,14 @@ public class ConstructionSite implements Serializable {
         return "jpa.magal.entities.ConstructionSite[ constructionsiteId=" + constructionsiteId + " ]";
     }
 
+	public ConstructionCompany getConstructionCompany() {
+		return constructionCompany;
+	}
+
+	public void setConstructionCompany(ConstructionCompany constructionCompany) {
+		this.constructionCompany = constructionCompany;
+	}
+
 //    public void addLaborer(Laborer laborer) {
 //        if (!getLaborers().contains(laborer)) {
 //        	logger.debug("agregando laborer "+laborer);
@@ -265,5 +277,4 @@ public class ConstructionSite implements Serializable {
 //        	getTeams().add(team);
 //        }
 //    }
-    
 }

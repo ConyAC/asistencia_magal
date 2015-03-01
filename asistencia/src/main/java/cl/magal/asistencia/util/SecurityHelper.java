@@ -10,9 +10,18 @@ import com.vaadin.ui.UI;
 
 public class SecurityHelper {
 	
+	static User testUser;
+	
 	private static User getUser(){
-		return (User) VaadinSession.getCurrent().getAttribute(
-				Constants.SESSION_USUARIO);
+		//solo para termino de testing
+		if(VaadinSession.getCurrent() != null )
+			return (User) VaadinSession.getCurrent().getAttribute(Constants.SESSION_USUARIO);
+		else
+			return testUser;
+	}
+	
+	public static void setUser(User user){
+		testUser = user;
 	}
 	
 	public static boolean isLogged(){
@@ -35,7 +44,7 @@ public class SecurityHelper {
 		return false;
 	}
 
-	public static boolean hastPermission(Permission... permissions) {
+	public static boolean hasPermission(Permission... permissions) {
 		if(permissions == null)
 			return true;
 
@@ -64,7 +73,16 @@ public class SecurityHelper {
 			return true;
 		
 		if(text.equals(Constants.MENU_USERS) )
-			return hastPermission(Permission.CREAR_USUARIO);
+			return hasPermission(Permission.CREAR_USUARIO);
 		return true;
+	}
+
+	public static User getCredentials() {
+		User user = getUser();
+		if(user == null ) {
+			UI.getCurrent().getNavigator().navigateTo(LoginView.NAME);
+			return null;
+		}
+		return user;
 	}
 }

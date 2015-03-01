@@ -1,8 +1,8 @@
 package cl.magal.asistencia.ui.workerfile;
 
 
-import java.util.ArrayList;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
@@ -178,6 +178,7 @@ public class WorkerFileView extends HorizontalLayout implements View {
 	private com.vaadin.ui.Component drawOverview() {
 
 		historyContainer.addNestedContainerProperty("constructionsite.name");
+		historyContainer.addNestedContainerProperty("activeContract.step");
 
 		fullname = new Label();
 		rut = new Label();
@@ -238,34 +239,29 @@ public class WorkerFileView extends HorizontalLayout implements View {
 //			}
 //		});
 		
-		table.addGeneratedColumn("contracts", new Table.ColumnGenerator() {
+		table.addGeneratedColumn("activeContractProp", new Table.ColumnGenerator() {
 			
 			@Override
 			public Object generateCell(Table source, Object itemId, Object columnId) {
 				
-				List<Contract> contracts = (List<Contract>) source.getContainerProperty(itemId, columnId).getValue();
+				Contract contract = (Contract) source.getContainerProperty(itemId, "activeContract").getValue();
 				
 //				VerticalLayout vl = new VerticalLayout();
 //				vl.setSpacing(true);
 //				vl.setMargin(true);
 				
-				GridLayout vl = new GridLayout(3,contracts.size());
+				GridLayout vl = new GridLayout(3,1);
 				vl.setSpacing(true);
 //				vl.setMargin(true);
 				
 				StringBuilder sb = new StringBuilder();
-				if(contracts == null || contracts.isEmpty()){
+				if(contract == null ){
 					sb.append("Sin contratos");
 				}else{
-					for(Contract contract : contracts){
-						if(contract.isActive())
-							job.setValue(contract.getJob().toString());
-						sb.append(contract.getJob().toString()).append("(").append(contract.getJobCode()).append(") ");
-						vl.addComponent(new Label(sb.toString(),ContentMode.HTML));
-						vl.addComponent(new Label(contract.getStep(),ContentMode.HTML));
-						vl.addComponent(new Label(contract.isActive() ? "Activo" : "Inactivo",ContentMode.HTML));
-						sb.setLength(0);
-					}
+					if(contract.isActive())
+						job.setValue(contract.getJob().toString());
+					sb.append(contract.getJob().toString()).append("(").append(contract.getJobCode()).append(") ");
+					vl.addComponent(new Label(sb.toString(),ContentMode.HTML));
 				}
 				return vl;
 			}
@@ -296,18 +292,31 @@ public class WorkerFileView extends HorizontalLayout implements View {
 		});
 
 		table.setContainerDataSource(historyContainer);
-		table.addGeneratedColumn("active", new Table.ColumnGenerator() {
+		table.addGeneratedColumn("activeProp", new Table.ColumnGenerator() {
 			
 			@Override
 			public Object generateCell(Table source, Object itemId, Object columnId) {
-				return (Short)source.getItem(itemId).getItemProperty(columnId).getValue() == 1  ? "Activo":"No activo";
+				return (Short)source.getItem(itemId).getItemProperty("active").getValue() == 1  ? "Activo":"No activo";
+			}
+		});
+		table.setCellStyleGenerator(new Table.CellStyleGenerator() {
+			
+			@Override
+			public String getStyle(Table source, Object itemId, Object propertyId) {
+				if(propertyId == null ){ //estilo para la fila
+					//si es la activa, la marca
+					Item item = source.getItem(itemId);
+					boolean isActive = (Short) item.getItemProperty("active").getValue() == 1;
+					return isActive ? "active-row":null;
+				}
+				return null;
 			}
 		});
 		table.setWidth("100%");
 		table.setHeight("250");
-		table.setVisibleColumns("constructionsite.name","averageWage","reward","numberOfAccidents","contracts","active"//,"startingDate","endingDate"
+		table.setVisibleColumns("constructionsite.name","averageWage","reward","numberOfAccidents","activeContractProp","activeContract.step","activeProp"//,"startingDate","endingDate"
 				);
-		table.setColumnHeaders("Obra","Jornal Promedio","Premio","N° Accidentes","Oficios","Estado"//,"Fecha Inicio","Fecha Termino"
+		table.setColumnHeaders("Obra","Jornal Promedio","Premio","N° Accidentes","Oficio","Etapa","Estado"//,"Fecha Inicio","Fecha Termino"
 				);
 		
 		table.addItemClickListener(new ItemClickListener() {

@@ -16,10 +16,32 @@ public interface ConstructionSiteRepository extends PagingAndSortingRepository<C
 
 	Page<ConstructionSite> findAll(Pageable page);
 	
-	@Query(value="SELECT cs FROM ConstructionSite cs WHERE cs.deleted = false ")
+	
+	@Query(value="SELECT cs FROM ConstructionSite cs WHERE cs.deleted = false ") // activos todos
 	Page<ConstructionSite> findAllNotDeteled(Pageable page);
-	@Query(value="SELECT cs FROM ConstructionSite cs WHERE cs.deleted = false ")
+	
+	@Query(value="SELECT cs FROM ConstructionSite cs WHERE cs.deleted = false ") // activos todos
 	List<ConstructionSite> findAllNotDeteled();
+	
+	@Query(value="select cs FROM User u join u.cs cs WHERE u = ?1 and cs.status = cl.magal.asistencia.entities.enums.Status.ACTIVE and cs.deleted = false " //activos usuario
+				+ "UNION "
+				+ "SELECT cs FROM ConstructionSite cs WHERE cs.status = cl.magal.asistencia.entities.enums.Status.ACTIVE and cs.deleted = false " // activos todos
+				+ "UNION "
+				+ "select cs FROM User u join u.cs cs WHERE u = ?1 and cs.status = cl.magal.asistencia.entities.enums.Status.FINALIZED and cs.deleted = false " // inactivos usuario
+				+ "UNION "
+				+ "SELECT cs FROM ConstructionSite cs WHERE cs.status = cl.magal.asistencia.entities.enums.Status.FINALIZED and cs.deleted = false " // inactivos todos
+				)
+	Page<ConstructionSite> findAllNotDeteledOderByUser(Pageable page,User user);
+	
+	@Query(value="select cs FROM User u join u.cs cs WHERE u = ?1 and cs.status = cl.magal.asistencia.entities.enums.Status.ACTIVE and cs.deleted = false " //activos usuario
+			+ "UNION "
+			+ "SELECT cs FROM ConstructionSite cs WHERE cs.status = cl.magal.asistencia.entities.enums.Status.ACTIVE and cs.deleted = false " // activos todos
+			+ "UNION "
+			+ "select cs FROM User u join u.cs cs WHERE u = ?1 and cs.status = cl.magal.asistencia.entities.enums.Status.FINALIZED and cs.deleted = false " // inactivos usuario
+			+ "UNION "
+			+ "SELECT cs FROM ConstructionSite cs WHERE cs.status = cl.magal.asistencia.entities.enums.Status.FINALIZED and cs.deleted = false " // inactivos todos
+			)
+	List<ConstructionSite> findAllNotDeteledOderByUser(User user);
 	
 	//ConstructionSite findByName(String nombre);
 	
@@ -45,5 +67,19 @@ public interface ConstructionSiteRepository extends PagingAndSortingRepository<C
 
 	@Query(value="SELECT cs FROM ConstructionSite cs WHERE :laborer MEMBER OF cs.laborers " )
 	List<ConstructionSite> findByLaborers(@Param("laborer")Laborer laborer);
+
+	@Query(value="select cs FROM User u join u.cs cs WHERE u = ?1 and cs.status = cl.magal.asistencia.entities.enums.Status.ACTIVE and cs.deleted = false ") //activos usuario
+	List<ConstructionSite> findActiveByUser(User user);
+
+	@Query(value="SELECT cs FROM ConstructionSite cs WHERE cs.status = cl.magal.asistencia.entities.enums.Status.ACTIVE and cs.deleted = false and ?1 not member of cs.users ") //activos usuario
+	List<ConstructionSite> findActiveByNotUser(User user);
+	
+	@Query(value="select cs FROM User u join u.cs cs WHERE u = ?1 and cs.status = cl.magal.asistencia.entities.enums.Status.FINALIZED and cs.deleted = false ") //activos usuario
+	List<ConstructionSite> findFinalizedByUser(User user);
+	
+	@Query(value="SELECT cs FROM ConstructionSite cs WHERE cs.status = cl.magal.asistencia.entities.enums.Status.FINALIZED and cs.deleted = false and ?1 not member of cs.users ") //activos usuario
+	List<ConstructionSite> findFinalizedByNotUser(User user);
+
+
 
 }

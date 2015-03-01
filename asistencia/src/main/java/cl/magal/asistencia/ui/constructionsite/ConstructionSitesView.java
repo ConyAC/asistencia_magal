@@ -15,6 +15,7 @@ import org.tepi.filtertable.FilterTable;
 import org.vaadin.dialogs.ConfirmDialog;
 
 import ru.xpoft.vaadin.VaadinView;
+import cl.magal.asistencia.entities.ConstructionCompany;
 import cl.magal.asistencia.entities.ConstructionSite;
 import cl.magal.asistencia.entities.User;
 import cl.magal.asistencia.entities.enums.Permission;
@@ -63,6 +64,7 @@ public class ConstructionSitesView extends BaseView implements View {
 	BeanFieldGroup<ConstructionSite> bfg = new BeanFieldGroup<ConstructionSite>(ConstructionSite.class);
 	BeanItemContainer<ConstructionSite> constructionContainer = new BeanItemContainer<ConstructionSite>(ConstructionSite.class);
 	BeanItemContainer<User> itemUser = new BeanItemContainer<User>(User.class);
+	BeanItemContainer<ConstructionCompany> itemConstructionCompany = new BeanItemContainer<ConstructionCompany>(ConstructionCompany.class);
 	FilterTable table;
 	VerticalLayout detalleLayout;
 
@@ -119,7 +121,7 @@ public class ConstructionSitesView extends BaseView implements View {
 		vl.setSpacing(true);
 
 		//agrega solo si tiene los permisos
-		if( SecurityHelper.hastPermission(Permission.CREAR_OBRA,Permission.ELIMINAR_OBRA)){
+		if( SecurityHelper.hasPermission(Permission.CREAR_OBRA,Permission.ELIMINAR_OBRA)){
 		
 			//botones agrega
 			HorizontalLayout hl = new HorizontalLayout();
@@ -138,9 +140,13 @@ public class ConstructionSitesView extends BaseView implements View {
 					itemUser.removeAllItems();
 					itemUser.addAll(users);
 					
+					List<ConstructionCompany> constructionCompany = service.findAllConstructionCompany();
+					itemConstructionCompany.removeAllItems();
+					itemConstructionCompany.addAll(constructionCompany);
+					
 					ConstructionSite cs = new ConstructionSite();
 					BeanItem<ConstructionSite> csItem = new BeanItem<ConstructionSite>(cs);
-					ConstructionSiteDialog csWindow = new ConstructionSiteDialog(csItem, itemUser, service);
+					ConstructionSiteDialog csWindow = new ConstructionSiteDialog(csItem, itemUser, itemConstructionCompany, service);
 					csWindow.setCaption("Crear Obra");
 					csWindow.addListener(new AbstractWindowEditor.EditorSavedListener() {
 						
@@ -183,7 +189,7 @@ public class ConstructionSitesView extends BaseView implements View {
 					Object columnId) {
 				HorizontalLayout hl = new HorizontalLayout();
 				
-				if( SecurityHelper.hastPermission(Permission.EDITAR_OBRA)){
+				if( SecurityHelper.hasPermission(Permission.EDITAR_OBRA) || SecurityHelper.hasPermission(Permission.AGREGAR_ETAPAS_OBRA)){
 					//Editar datos de una obra
 					Button editarObra = new Button(null,FontAwesome.EDIT);
 					editarObra.addClickListener(new Button.ClickListener() {
@@ -194,8 +200,12 @@ public class ConstructionSitesView extends BaseView implements View {
 							itemUser.removeAllItems();
 							itemUser.addAll(users);
 							
+							List<ConstructionCompany> constructionCompany = service.findAllConstructionCompany();
+							itemConstructionCompany.removeAllItems();
+							itemConstructionCompany.addAll(constructionCompany);
+							
 							BeanItem<ConstructionSite> csItem = constructionContainer.getItem(itemId);
-							ConstructionSiteDialog csWindow = new ConstructionSiteDialog(csItem, itemUser, service);
+							ConstructionSiteDialog csWindow = new ConstructionSiteDialog(csItem, itemUser, itemConstructionCompany, service);
 							csWindow.setCaption("Editar Obra");
 							csWindow.addListener(new AbstractWindowEditor.EditorSavedListener() {
 							
@@ -222,7 +232,7 @@ public class ConstructionSitesView extends BaseView implements View {
 					hl.addComponent(editarObra);
 				}
 				
-				if( SecurityHelper.hastPermission(Permission.ELIMINAR_OBRA)){
+				if( SecurityHelper.hasPermission(Permission.ELIMINAR_OBRA)){
 					hl.setSpacing(true);
 							
 					//Marcar como eliminada una obra
@@ -310,7 +320,8 @@ public class ConstructionSitesView extends BaseView implements View {
 
 	private void reloadData(){
 		//agrega las obras TODO segun perfil TODO usar paginación
-		Page<ConstructionSite> page = service.findAllConstructionSite(new PageRequest(0, 20));
+		User user = SecurityHelper.getCredentials();
+		Page<ConstructionSite> page = service.findAllConstructionSiteOrderByUser(new PageRequest(0, 20),user);
 		constructionContainer.removeAllItems();
 		constructionContainer.addAll(page.getContent());
 	}

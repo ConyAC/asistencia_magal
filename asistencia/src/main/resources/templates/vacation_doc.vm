@@ -43,7 +43,7 @@
 						</tr>
 						<tr>
 							<td>
-								<p>${laborerConstruction.constructionsite.name}</p>
+								<p><b>${laborerConstruction.constructionsite.name}</b></p>
 							</td>
 							<td>
 								<xsl:value-of select="VacationData/day" />
@@ -68,7 +68,7 @@
 					trabajador:
 					<br />
 					<br />
-					DON ${laborerConstruction.laborer.fullname} RUT: ${laborerConstruction.laborer.rut}
+					DON <b>${laborerConstruction.laborer.fullname}</b> RUT: <b>$numberTools.integer(${laborerConstruction.laborer.rut.split("-").get(0)})-${laborerConstruction.laborer.rut.split("-").get(1)}</b> ROL: <b>${laborerConstruction.activeContract.jobCode}</b>
 				</td>
 			</tr>
 			<tr>

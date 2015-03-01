@@ -1,0 +1,52 @@
+<?xml version='1.0'?>
+<html>
+	 <head>
+		<meta charset="UTF-8">
+		<style>
+	
+	@media all {
+	.page-break	{ display: none; }
+	.print-hidden	{  }
+	}
+	
+	@media print {
+		.page-break	{ display: block; page-break-before: always; }
+		.print-hidden	{ display: none; }
+	}
+	
+	</style>
+	</head>
+	<body>
+	
+	<div class="print-hidden" style="text-align:center;">
+			<input type="button" onclick="javascript:print()" value="Imprimir" /> <br /><br />
+		</div>
+	
+#foreach( $laborerConstruction in $laborerConstructions )
+
+		<br />		
+		<h2 style="text-align:left;">OBRA: <b>${laborerConstruction.constructionsite.name}</b></h2>
+		<br />
+		<div style="margin:1px;text-align:center;left;line-height: 0.2;text-decoration: underline;">
+		    <h3>ANEXO CONTRATO DE TRABAJO, Actualizaci&oacute;n Ingreso M&iacute;nimo.</h3>
+		</div>
+		<br />
+		<p style="text-align:justify;">El presente es actualizado imperativamente en la cl&aacute;usura sexta del referido contrato de trabajo donde dice : ${oldmininc}.- debe decir ${newmininc}.- para cumplir con el sueldo m&iacute;nimo legalmente publicado con $tools.format('dd', ${fromdate}) de $tools.format('MMMM', ${fromdate}) de $tools.format('yyyy', ${fromdate}).</p>
+	    <br /><br />
+	    <p style="text-align:left;"><b>Nombre Trabajador : ${laborerConstruction.laborer.fullname}</b></p>
+	    <br /><br />
+	    Firma ........................................
+	    <br /><br />
+	    <p style="text-align:left;"> 
+	    <span style="text-align:left;"><b>${laborerConstruction.constructionsite.constructionCompany.name}</b></span><br />
+	    <span style="text-align:left;"><b>$numberTools.integer(${laborerConstruction.constructionsite.constructionCompany.rut.split("-").get(0)})-${laborerConstruction.constructionsite.constructionCompany.rut.split("-").get(1)}</b></span><br />
+	    <span style="text-align:left;"><b>${laborerConstruction.constructionsite.constructionCompany.address}, ${laborerConstruction.constructionsite.constructionCompany.commune}</b></span><br /></p>
+	    <br /><br />
+	    Firma ........................................
+	    <br /><br />
+		<p>Santiago, <b>$tools.format('dd', $tools.date) de $tools.format('MMMM', $tools.date) de $tools.format('yyyy', $tools.date)</b>.
+		<div class="page-break"></div>
+#end
+	</body>
+</html>
+

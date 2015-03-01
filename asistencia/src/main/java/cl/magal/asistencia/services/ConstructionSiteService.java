@@ -1,5 +1,6 @@
 package cl.magal.asistencia.services;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -13,11 +14,13 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import cl.magal.asistencia.entities.ConstructionCompany;
 import cl.magal.asistencia.entities.ConstructionSite;
 import cl.magal.asistencia.entities.Laborer;
 import cl.magal.asistencia.entities.LaborerConstructionsite;
 import cl.magal.asistencia.entities.Team;
 import cl.magal.asistencia.entities.User;
+import cl.magal.asistencia.repositories.ConstructionCompanyRepository;
 import cl.magal.asistencia.repositories.ConstructionSiteRepository;
 import cl.magal.asistencia.repositories.LaborerConstructionsiteRepository;
 import cl.magal.asistencia.repositories.LaborerRepository;
@@ -39,6 +42,8 @@ public class ConstructionSiteService {
 	TeamRepository teamRepo;
 	@Autowired
 	UserRepository userRepo;
+	@Autowired
+	ConstructionCompanyRepository constructionCompanyRepo;
 	
 	@PostConstruct
 	public void init(){
@@ -69,6 +74,45 @@ public class ConstructionSiteService {
 	public Page<ConstructionSite> findAllConstructionSite(Pageable page) {
 		return constructionSiterepo.findAllNotDeteled(page);
 	}
+	
+	public List<ConstructionSite> findAllConstructionSiteOrderByUser(User user) {
+		if(user == null )
+			throw new RuntimeException("El usuario es necesario para ordenar las obras");
+		//es vez de hacer una query, hace 4 queries por simplicidad
+		List<ConstructionSite> result1 = constructionSiterepo.findActiveByUser(user);
+		List<ConstructionSite> result2 = constructionSiterepo.findActiveByNotUser(user);
+		List<ConstructionSite> result3 = constructionSiterepo.findFinalizedByUser(user);
+		List<ConstructionSite> result4 = constructionSiterepo.findFinalizedByNotUser(user);
+		
+		int total = result1.size()+result2.size()+result3.size()+result4.size();
+		List<ConstructionSite> result = new ArrayList<ConstructionSite>(total);
+		result.addAll(result1);
+		result.addAll(result2);
+		result.addAll(result3);
+		result.addAll(result4);
+		
+		return result;
+	}
+
+	public Page<ConstructionSite> findAllConstructionSiteOrderByUser(Pageable page,User user) {
+		if(user == null )
+			throw new RuntimeException("El usuario es necesario para ordenar las obras");
+		//es vez de hacer una query, hace 4 queries por simplicidad
+		List<ConstructionSite> result1 = constructionSiterepo.findActiveByUser(user);
+		List<ConstructionSite> result2 = constructionSiterepo.findActiveByNotUser(user);
+		List<ConstructionSite> result3 = constructionSiterepo.findFinalizedByUser(user);
+		List<ConstructionSite> result4 = constructionSiterepo.findFinalizedByNotUser(user);
+		
+		int total = result1.size()+result2.size()+result3.size()+result4.size();
+		List<ConstructionSite> result = new ArrayList<ConstructionSite>(total);
+		result.addAll(result1);
+		result.addAll(result2);
+		result.addAll(result3);
+		result.addAll(result4);
+		
+		return new PageImpl<ConstructionSite>(result,page,total);
+		//return constructionSiterepo.findAllNotDeteledOderByUser(page,user);
+	}
 
 	public ConstructionSite findConstructionSiteByNombre(String nombre) {
 		return constructionSiterepo.findByName(nombre);
@@ -97,8 +141,8 @@ public class ConstructionSiteService {
 		return page;
 	}
 
-	public List<LaborerConstructionsite> getLaborerByConstruction(ConstructionSite cs) {
-		List<LaborerConstructionsite> laborers = labcsRepo.findByConstructionsite(cs);
+	public List<LaborerConstructionsite> getLaborerActiveByConstruction(ConstructionSite cs) {
+		List<LaborerConstructionsite> laborers = labcsRepo.findByConstructionsiteAndIsActive(cs);
 		return laborers;
 	}
 
@@ -157,6 +201,10 @@ public class ConstructionSiteService {
 
 	public void delete(Team team) {
 		teamRepo.delete(team);
+	}
+	
+	public List<ConstructionCompany> findAllConstructionCompany() {
+		return (List<ConstructionCompany>) constructionCompanyRepo.findAll();
 	}
 
 }

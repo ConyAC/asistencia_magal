@@ -1,13 +1,15 @@
 package cl.magal.asistencia.entities.enums;
 
-public enum LoanStatus {
-	ACTIVE(1,"Activa"),
-	INACTIVE(2,"Inactiva");
+public enum Bank {
+
+	ESTADO(1,"Banco Estado"),
+	BBVA(2,"BBVA"),
+	SANTANDER(3,"Santander");
 	
 	int i;
 	String description;
 	
-	private LoanStatus(int i, String description) {
+	private Bank(int i, String description) {
 		this.i = i;
 		this.description = description;
 	}
@@ -16,16 +18,15 @@ public enum LoanStatus {
 		return i;
 	}
 	
-	public static LoanStatus getLoanStatus(int i){
-		for(LoanStatus e : LoanStatus.values())
+	public static Bank getBank(int i){
+		for(Bank e : Bank.values())
 			if(e.getCorrelative() == i )
 				return e;
-		throw new RuntimeException("invalid Loan Status");
+		throw new RuntimeException("Bank invalid");
 	}
-	
+
 	@Override
 	public String toString(){
 		return description;
-	}
-	
+	}	
 }

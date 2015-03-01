@@ -79,16 +79,16 @@ public class Team implements Serializable {
     @JoinColumn(name="CONSTRUCTION_SITEID")
     ConstructionSite constructionSite;
    
-    @JoinTable(name="laborer_team",
+    @JoinTable(name="laborer_constructionsite_team",
     joinColumns = { 
-    		@JoinColumn(name = "teamId", referencedColumnName = "teamId")
+    		@JoinColumn(name = "TEAMID", referencedColumnName = "TEAMID")
      }, 
      inverseJoinColumns = { 	
-            @JoinColumn(name = "laborerId", referencedColumnName = "laborerId")
+            @JoinColumn(name = "LABORER_CONSTRUCTIONSITEID", referencedColumnName = "LABORER_CONSTRUCTIONSITEID")
      }
 	)
-    @ManyToMany(targetEntity=Laborer.class,fetch=FetchType.EAGER)
-    List<Laborer> laborers = new LinkedList<Laborer>();
+    @ManyToMany(targetEntity=LaborerConstructionsite.class,fetch=FetchType.EAGER)
+    List<LaborerConstructionsite> laborerConstructionsites = new LinkedList<LaborerConstructionsite>();
     
     @PrePersist
     public void prePersist(){
@@ -96,6 +96,8 @@ public class Team implements Serializable {
     		deleted = Boolean.FALSE;
     	if(status == null)
     		status = Status.ACTIVE;
+    	if(date == null )
+    		date = new Date();
     }
     
     public Team() {
@@ -153,14 +155,13 @@ public class Team implements Serializable {
         this.deleted = deleted;
     }    
     
-    public List<Laborer> getLaborers() {
-    	if(laborers == null )
-			laborers = new LinkedList<Laborer>();
-		return laborers;
+   	public List<LaborerConstructionsite> getLaborerConstructionsites() {
+		return laborerConstructionsites;
 	}
 
-	public void setLaborers(List<Laborer> laborers) {
-		this.laborers = laborers;
+	public void setLaborerConstructionsites(
+			List<LaborerConstructionsite> laborerConstructionsites) {
+		this.laborerConstructionsites = laborerConstructionsites;
 	}
 
 //	@Override
@@ -188,12 +189,12 @@ public class Team implements Serializable {
         return "jpa.magal.entities.Team[ teamId=" + teamId + " ]";
     }
     
-    public void addLaborer(Laborer laborer) {
-        if (!getLaborers().contains(laborer)) {
-        	getLaborers().add(laborer);
+    public void addLaborerConstructionsite(LaborerConstructionsite laborerconstructionsite) {
+        if (!getLaborerConstructionsites().contains(laborerconstructionsite)) {
+        	getLaborerConstructionsites().add(laborerconstructionsite);
         }
-        if (!laborer.getTeams().contains(this)) {
-            laborer.getTeams().add(this);
+        if (!laborerconstructionsite.getTeams().contains(this)) {
+            laborerconstructionsite.getTeams().add(this);
         }
     }
 

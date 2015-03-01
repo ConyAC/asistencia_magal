@@ -26,7 +26,6 @@ import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Notification.Type;
-import com.vaadin.ui.Panel;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
 
@@ -80,9 +79,9 @@ public abstract class AbstractWindowEditor extends Window implements ClickListen
 		this.item = item;
 		binder = new BeanFieldGroup(item.getBean().getClass());
 		getBinder().setItemDataSource(item);
-		
+		setCaption("");
 		setModal(true);
-		setResizable(false);
+		setResizable(true);
 		center();
 
 		HorizontalLayout footer = new HorizontalLayout();
@@ -168,11 +167,10 @@ public abstract class AbstractWindowEditor extends Window implements ClickListen
 	@Override
 	public void buttonClick(ClickEvent event) {
 		if (event.getButton() == btnGuardar) {
-//			if(!getBinder().isValid()){
-//				Notification.show("Falta parámetro obligatorio");
-//				getBinder().
-//				return;
-//			}
+			if(!getBinder().isValid()){
+				Notification.show("Falta parámetro obligatorio");
+				return;
+			}
 			try {
 				if(!preCommit())
 					return;

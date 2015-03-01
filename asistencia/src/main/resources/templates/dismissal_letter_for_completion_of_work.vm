@@ -27,20 +27,20 @@
 		<br />		
 		
 		<div style="text-align:right;line-height: 0.2;">
-		    Santiago, $tools.format('dd', $tools.date) de $tools.format('MMM yyyy', $tools.date)
+		    Santiago, <b>$tools.format('dd', $tools.date) de $tools.format('MMM yyyy', $tools.date)</b>
 		</div>
 		
 		<br />
 		<table cellpadding="0" cellspacing="0" border="0" style="width:100%;" />
 		<tr><td colspan="2" style="text-align:leftt;"><h2>SE&Ntilde;OR</h2></td></tr>
-		<tr><td><p>${laborerConstruction.laborer.fullname}, RUN ${laborerConstruction.laborer.rut}, ROL ${laborerConstruction.activeContract.jobCode}</p></td></tr>
+		<tr><td><p><b>${laborerConstruction.laborer.fullname}</b>, RUN <b>$numberTools.integer(${laborerConstruction.laborer.rut.split("-").get(0)})-${laborerConstruction.laborer.rut.split("-").get(1)}</b>, ROL <b>${laborerConstruction.activeContract.jobCode}</b></p></td></tr>
 		<tr><td style="text-align:leftt;text-decoration: underline; ">PRESENTE</td></tr>
 		</table>
 		<br />
 		De mi consideraci&oacute;n :
 		<br />
 		<p>Por intermedio de la presente, comunico a Ud. que con fecha ..... de .......................... de 201..., se ha puesto t&eacute;rmino a su contrato de trabajo.</p>
-		<p>Causal invocada : DFL N&deg; 1 Art. 159 N&deg; 5, esto es, Conclusi&oacute;n del Trabajo o servicio que dio origen al Contrato de Trabajo, Especificamos que de acuerdo al contrato de trabajo es t&eacute;rmino de ${laborerConstruction.activeContract.step} </p>
+		<p>Causal invocada : DFL N&deg; 1 Art. 159 N&deg; 5, esto es, Conclusi&oacute;n del Trabajo o servicio que dio origen al Contrato de Trabajo, Especificamos que de acuerdo al contrato de trabajo es t&eacute;rmino de <b>${laborerConstruction.activeContract.step}</b></p>
 		<p>Las cotizaciones previsionales se encuentran canceladas, al d&iacute;a en la instituci&oacute;n previsional que corresponde.</p>
 		Saludan Atte. A Ud.
 		<br />
@@ -54,14 +54,16 @@
             </th>
 			<th>
             <hr style="width:200px" />
-            Constructora Magal Ltda.
+            <b>${laborerConstruction.constructionsite.constructionCompany.name}</b>
+            <b>$numberTools.integer(${laborerConstruction.constructionsite.constructionCompany.rut.split("-").get(0)})-${laborerConstruction.constructionsite.constructionCompany.rut.split("-").get(1)}</b><br />
+            <b>${laborerConstruction.constructionsite.constructionCompany.address}, ${laborerConstruction.constructionsite.constructionCompany.commune}</b>
             </th>
         </tr>
         <tr>
             <th>
             </th>
             <th>
-            Obra : ${laborerConstruction.constructionsite.name}
+            Obra : <b>${laborerConstruction.constructionsite.name}</b>
             </th>
             
         </tr>

@@ -7,6 +7,7 @@ package cl.magal.asistencia.entities;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import javax.persistence.Basic;
@@ -18,12 +19,17 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
+import javax.persistence.PrePersist;
+import javax.persistence.PreUpdate;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 import javax.validation.constraints.Digits;
 
 import cl.magal.asistencia.entities.enums.Job;
@@ -74,6 +80,16 @@ public class LaborerConstructionsite implements Serializable {
     @Column(name="reward")
     private int reward;
     
+    @Column(name="USE_DEFAULT_DATES")
+    private boolean useDefaultDates = true;
+    
+    @Temporal(TemporalType.DATE)
+    @Column(name="REWARD_STARTDATE",nullable=false)
+    Date rewardStartDate;
+    @Temporal(TemporalType.DATE)
+    @Column(name="REWARD_ENDTDATE",nullable=false)
+    Date rewardEndDate;
+    
     /**
      * Bloqueo de un obrero en determinada obra
      */
@@ -99,12 +115,15 @@ public class LaborerConstructionsite implements Serializable {
     @OneToMany(mappedBy="laborerConstructionSite",fetch=FetchType.EAGER,cascade={CascadeType.PERSIST,CascadeType.MERGE},orphanRemoval=true )
     List<Tool> tool = new ArrayList<Tool>();
     
-    @OneToMany(mappedBy="laborerConstructionSite",fetch=FetchType.LAZY,cascade={CascadeType.PERSIST,CascadeType.MERGE},orphanRemoval=true )
-    List<Contract> contracts = new ArrayList<Contract>();
+//    @OneToMany(mappedBy="laborerConstructionSite",fetch=FetchType.LAZY,cascade={CascadeType.PERSIST,CascadeType.MERGE},orphanRemoval=true )
+//    List<Contract> contracts = new ArrayList<Contract>();
     
     @OneToMany(mappedBy="laborerConstructionSite",fetch=FetchType.EAGER,cascade = { CascadeType.PERSIST, CascadeType.MERGE },orphanRemoval=true )
     List<Loan> loan = new ArrayList<Loan>();
    
+    @ManyToMany(mappedBy="laborerConstructionsites",cascade = { CascadeType.PERSIST, CascadeType.MERGE })
+    List<Team> teams = new ArrayList<Team>();
+    
     /**
      * Define la etapa para la cual está contratado el trabajador actual
      */
@@ -112,24 +131,50 @@ public class LaborerConstructionsite implements Serializable {
     /**
      * define el contrato activo o el primero
      */
-    transient Contract activeContract;
+    @OneToOne(mappedBy="laborerConstructionSite",cascade = {CascadeType.PERSIST,CascadeType.MERGE})
+    Contract activeContract;
 	
     
-//    @ManyToMany(mappedBy="laborers")
-//    List<Team> teams = new ArrayList<Team>();
+    @PreUpdate
+    public void preUpdate(){
+    	defineRequired();
+    }
+    @PrePersist
+    public void prePersist(){
+    	defineRequired();
+    }
+    
+    public void defineRequired(){
+    	if(rewardEndDate == null )
+    		rewardEndDate = new Date();
+    	if(rewardStartDate == null )
+    		rewardStartDate = new Date();
+    	if(active == null)
+    		active = 1;
+    }
     
     public LaborerConstructionsite() {
     }
+    
+	public boolean isUseDefaultDates() {
+		return useDefaultDates;
+	}
+	public void setUseDefaultDates(boolean useDefaultDates) {
+		this.useDefaultDates = useDefaultDates;
+	}
+	public Date getRewardStartDate() {
+		return rewardStartDate;
+	}
+	public void setRewardStartDate(Date rewardStartDate) {
+		this.rewardStartDate = rewardStartDate;
+	}
+	public Date getRewardEndDate() {
+		return rewardEndDate;
+	}
 
-
-//    public List<Team> getTeams() {
-//		return teams;
-//	}
-//
-//	public void setTeams(List<Team> teams) {
-//		this.teams = teams;
-//	}
-
+	public void setRewardEndDate(Date rewardEndDate) {
+		this.rewardEndDate = rewardEndDate;
+	}
 	public List<Vacation> getVacations() {
 		return vacations;
 	}
@@ -164,6 +209,13 @@ public class LaborerConstructionsite implements Serializable {
         if (!getTool().contains(tool)) {
         	getTool().add(tool);
         	tool.setLaborerConstructionSite(this);
+        }
+    }
+	
+	public void removeTool(Tool tool) {
+        if (getTool().contains(tool)) {
+        	getTool().remove(tool);
+        	tool.setLaborerConstructionSite(null);
         }
     }
 	
@@ -211,18 +263,18 @@ public class LaborerConstructionsite implements Serializable {
         }
     }
 	
-	public void addContract(Contract contract) {
-		if (!getContracts().contains(contract)) {
-			//marca todos los otros contratos inactivos
-			for(Contract c : getContracts())
-				c.setActive(false);
-			//refresca el contrato activo
-			refreshActiveContract();
-			
-			getContracts().add(contract);
-			contract.setLaborerConstructionSite(this);
-        }
-	}
+//	public void addContract(Contract contract) {
+//		if (!getContracts().contains(contract)) {
+//			//marca todos los otros contratos inactivos
+//			for(Contract c : getContracts())
+//				c.setActive(false);
+//			//refresca el contrato activo
+////			refreshActiveContract();
+//			
+//			getContracts().add(contract);
+//			contract.setLaborerConstructionSite(this);
+//        }
+//	}
 	
     public Long getId() {
 		return id;
@@ -282,36 +334,16 @@ public class LaborerConstructionsite implements Serializable {
 		this.reward = reward;
 	}
 
-
-	public List<Contract> getContracts() {
-		return contracts;
-	}
-
-
-	public void setContracts(List<Contract> contracts) {
-		this.contracts = contracts;
-	}
-	
-	public void refreshActiveContract(){
-		activeContract = null;
-	}
-	
 	public Contract getActiveContract(){
-		if(activeContract == null ){
-			// recorre los contratos buscando el activo
-			// si la lista de contratos no es vacia entonces asigna el primera
-			if(!getContracts().isEmpty()){
-				activeContract = getContracts().get(0);
-				for (int i = 0; i < getContracts().size(); i++) {
-					if(getContracts().get(i).isActive()){
-						activeContract = getContracts().get(i);
-						break;
-					}
-				}
-			}
-		}
 		return activeContract;
 	}
+	
+	public void setActiveContract(Contract contract){
+		this.activeContract = contract;
+		if(contract.getLaborerConstructionSite() == null )
+			contract.setLaborerConstructionSite(this);
+	}
+	
 	/**
 	 * VARIABLES SOLO LECTURA PARA RESCATAR LA INFORMACION DEL CONTRACTO ACTIVO
 	 * @return
@@ -342,6 +374,23 @@ public class LaborerConstructionsite implements Serializable {
         	loan.setLaborerConstructionSite(this);
         }
 	}
+	
+	public List<Team> getTeams() {
+		return teams;
+	}
+
+	public void setTeams(List<Team> teams) {
+		this.teams = teams;
+	}
+	
+	public void addTeam(Team team) {
+        if (!getTeams().contains(team)) {
+        	getTeams().add(team);
+        }
+        if (!team.getLaborerConstructionsites().contains(this)) {
+        	team.getLaborerConstructionsites().add(this);
+        }
+    }
 	
 	/**
 	 * 

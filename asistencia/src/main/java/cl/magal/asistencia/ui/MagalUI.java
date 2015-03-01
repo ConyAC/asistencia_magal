@@ -2,6 +2,7 @@ package cl.magal.asistencia.ui;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import javax.servlet.annotation.WebInitParam;
 import javax.servlet.annotation.WebServlet;
@@ -77,6 +78,8 @@ public class MagalUI extends UI implements ErrorHandler {
 	transient SpringContextHelper helper;
 	
 	public Object getSpringBean(final String beanRef){
+		if(helper == null )
+			helper = new SpringContextHelper(VaadinServlet.getCurrent().getServletContext());
 		return helper.getBean(beanRef);
 	}
 
@@ -85,7 +88,7 @@ public class MagalUI extends UI implements ErrorHandler {
 		
 		VaadinSession.getCurrent().setErrorHandler(this);
 		
-		helper = new SpringContextHelper(VaadinServlet.getCurrent().getServletContext());
+		Locale.setDefault(new Locale("es", "CL"));
 		
 		//raiz
 		root = new VerticalLayout();

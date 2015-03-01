@@ -20,14 +20,15 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.PrePersist;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.UniqueConstraint;
 
 import cl.magal.asistencia.entities.converter.JobConverter;
 import cl.magal.asistencia.entities.enums.Job;
@@ -37,7 +38,8 @@ import cl.magal.asistencia.entities.enums.Job;
  * @author Constanza
  */
 @Entity
-@Table(name = "contract")
+@Table(name = "contract",uniqueConstraints = {
+		@UniqueConstraint( columnNames= {"jobCode","LABORER_CONSTRUCTIONSITEID"} )} )
 @NamedQueries({
     @NamedQuery(name = "Contract.findAll", query = "SELECT c FROM Contract c"),
     @NamedQuery(name = "Contract.findByContractId", query = "SELECT c FROM Contract c WHERE c.contractId = :contractId"),
@@ -80,17 +82,17 @@ public class Contract implements Serializable {
     @Column(name = "contractDescription")
     String contractDescription;
     @Convert(converter = JobConverter.class)
-    @Column(name = "job")
+    @Column(name = "job",nullable = false)
     private Job job;
     
-    @Column(name="jobCode")
+    @Column(name="jobCode",nullable = false)
     private Integer jobCode;
     
-    private Boolean active;
-    private Boolean finished;
+    private boolean active;
+    private boolean finished;
     
-    @ManyToOne
-    @JoinColumn(name="LABORER_CONSTRUCTIONSITEID")
+    @OneToOne
+    @JoinColumn(name="LABORER_CONSTRUCTIONSITEID",nullable = false,unique=true )
 	LaborerConstructionsite laborerConstructionSite;
     
     @OneToMany(mappedBy="contract",fetch=FetchType.LAZY,cascade={CascadeType.PERSIST,CascadeType.MERGE},orphanRemoval=true )
@@ -101,10 +103,6 @@ public class Contract implements Serializable {
     
     @PrePersist
     public void prePersist(){
-    	if(finished == null )
-    		finished = false;
-    	if(active == null)
-    		active = true;
     }
 
     public Contract(Integer contractId) {
@@ -179,9 +177,11 @@ public class Contract implements Serializable {
 		return laborerConstructionSite;
 	}
 
-	public void setLaborerConstructionSite(
-			LaborerConstructionsite laborerConstructionSite) {
+	public void setLaborerConstructionSite(LaborerConstructionsite laborerConstructionSite) {
 		this.laborerConstructionSite = laborerConstructionSite;
+		if(laborerConstructionSite.getActiveContract() == null ){
+			laborerConstructionSite.setActiveContract(this);
+		}
 	}
 
 	public List<Annexed> getAnnexeds() {

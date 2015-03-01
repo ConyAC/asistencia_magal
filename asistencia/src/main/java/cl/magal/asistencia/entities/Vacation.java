@@ -13,6 +13,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.validation.constraints.NotNull;
 
 import org.joda.time.DateTime;
 import org.joda.time.Days;
@@ -31,18 +32,30 @@ public class Vacation implements Serializable {
 	@Column(name="vacationId")
 	Long vacationId;
 	
+	@NotNull(message="La fecha inicial es necesaria.")
 	@Temporal(TemporalType.DATE)
 	@Column(name = "from_date" )
 	Date fromDate;
 	
+	@NotNull(message="La fecha final es necesaria.")
 	@Temporal(TemporalType.DATE)
 	@Column(name = "to_date" )
 	Date toDate;
 	
+	int progressive;
+	
 	@ManyToOne
-	@JoinColumn(name ="LABORER_CONSTRUCTIONSITEID",updatable=false)
+	@JoinColumn(name ="LABORER_CONSTRUCTIONSITEID",updatable=false,nullable=false)
 	LaborerConstructionsite laborerConstructionSite;
 	
+	public int getProgressive() {
+		return progressive;
+	}
+
+	public void setProgressive(int progressive) {
+		this.progressive = progressive;
+	}
+
 	public Long getVacationId() {
 		return vacationId;
 	}

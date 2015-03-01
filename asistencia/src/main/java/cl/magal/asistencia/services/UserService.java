@@ -6,8 +6,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import javax.annotation.PostConstruct;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,6 +49,7 @@ public class UserService implements UserDetailsService {
 		String userName = "admin@admin.com";
 		
 		cl.magal.asistencia.entities.User usuario = rep.findByEmail(userName);
+		logger.error("usuario {} ",usuario);
 		if( usuario == null ){
 			logger.debug("usuario null");
 			
@@ -61,10 +60,12 @@ public class UserService implements UserDetailsService {
 			perm.add(Permission.CREAR_OBRA);
 			perm.add(Permission.EDITAR_OBRA);
 			perm.add(Permission.ELIMINAR_OBRA);
+			perm.add(Permission.AGREGAR_ETAPAS_OBRA);
 			perm.add(Permission.ASIGNAR_OBRA);
 			perm.add(Permission.CREAR_USUARIO);
 			perm.add(Permission.DEFINIR_VARIABLE_GLOBAL);
 			perm.add(Permission.CONFIRMAR_OBREROS);
+			perm.add(Permission.BLOQUEAR_OBRERO);
 			role.setPermission(perm);	
 			repRole.save(role);
 			
@@ -121,7 +122,7 @@ public class UserService implements UserDetailsService {
 			role = new Role();
 			role.setName("Administrador Obra");
 			perm = new HashSet<Permission>();	
-			perm.add(Permission.EDITAR_OBRA);
+			perm.add(Permission.AGREGAR_ETAPAS_OBRA);
 			perm.add(Permission.CONFIRMAR_OBREROS);
 			role.setPermission(perm);
 			repRole.save(role);
@@ -212,18 +213,46 @@ public class UserService implements UserDetailsService {
                 ll);
 	}
 	
-	public void saveUser(cl.magal.asistencia.entities.User usuario) {
+	@Transactional
+	public void saveUser(cl.magal.asistencia.entities.User user) {
+		if(user == null) throw new RuntimeException("Usuario no debe ser nulo");
+		//nuevo usuario o edición de usuarios
+		if(user.getUserId() == null || user.getPassword() != null ){
+			savePassword(user);
+		}else{ //si es edición recupera la información anterior
+			cl.magal.asistencia.entities.User db = rep.findOne(user.getUserId());
+			user.setPassword(db.getPassword());
+		}
+		
+		//guardando usuario
+		rep.save(user);
+	}
+	
+	private void savePassword(cl.magal.asistencia.entities.User usuario) {
 		if(usuario == null) {
 			throw new RuntimeException("Usuario no debe ser nulo");
 		}
+		//las passwords deben coincidir
+		if(!usuario.getPassword().equals(usuario.getPassword2())){
+			throw new RuntimeException("Los passwords deben coincidir");
+		}
 		PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-		String password = usuario.getPassword();
-		if(password == null )
-			password = "123456";
-		String hashedPassword = passwordEncoder.encode(password);
+		String hashedPassword = passwordEncoder.encode(usuario.getPassword());
 		usuario.setPassword(hashedPassword);
-		rep.save(usuario);
 	}
+	
+//	public void saveUser(cl.magal.asistencia.entities.User usuario) {
+//		if(usuario == null) {
+//			throw new RuntimeException("Usuario no debe ser nulo");
+//		}
+//		PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+//		String password = usuario.getPassword();
+//		if(password == null )
+//			password = "123456";
+//		String hashedPassword = passwordEncoder.encode(password);
+//		usuario.setPassword(hashedPassword);
+//		rep.save(usuario);
+//	}
 	
 	public cl.magal.asistencia.entities.User findUser(Long id){
 		return rep.findOne(id);
@@ -289,35 +318,6 @@ public class UserService implements UserDetailsService {
 		return rep.findByEmail(username);
 	}
 	
-	/**
-	 * 
-	 * @param usuario
-	 */
-	private void savePassword(cl.magal.asistencia.entities.User usuario) {
-		if(usuario == null) {
-			throw new RuntimeException("Usuario no debe ser nulo");
-		}
-		PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-		String hashedPassword = passwordEncoder.encode(usuario.getPassword());
-		usuario.setPassword(hashedPassword);
-	}
-	
-	
-	/**
-	 * Permite modificar el password a un usuario ya creado
-	 * @param id
-	 * @param password
-	 */
-	public void savePassword(Long id, String password) {
-		cl.magal.asistencia.entities.User usuario = rep.findOne(id);
-		if(usuario == null) {
-			throw new RuntimeException("El usuario no existe");
-		}
-		usuario.setPassword(password);
-		savePassword(usuario);
-		rep.save(usuario);
-	}
-
 	public void saveRole(Role role) {
 		repRole.save(role);
 	}
@@ -355,5 +355,13 @@ public class UserService implements UserDetailsService {
 	public void clear() {
 		rep.deleteAll();
 		
+	}
+
+	/**
+	 * Devuelve una lista con todos los roles posibles
+	 * @return
+	 */
+	public List<Role> getAllRole() {
+		return (List<Role>) repRole.findAll();
 	}
 }

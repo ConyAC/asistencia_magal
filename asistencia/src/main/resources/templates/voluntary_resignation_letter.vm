@@ -29,16 +29,16 @@
 		<br />		
 		
 		<div style="text-align:right;line-height: 0.2;">
-		    Santiago, $tools.format('dd', $tools.date) de $tools.format('MMM yyyy', $tools.date)
+		    Santiago, <b>$tools.format('dd', $tools.date) de $tools.format('MMM yyyy', $tools.date)</b>
 		</div>
 		
 		<br />
 		<table cellpadding="0" cellspacing="0" border="0" style="width:100%;" />
 		<tr><td colspan="2" style="text-align:leftt; text-decoration: underline;"><h2>SE&Ntilde;ORES</h2></td></tr>
-		<tr><td style="text-align:leftt; ">EMPRESA	:	Constructora e Inmobiliaria Magal Ltda.</td></tr>
-		<tr><td style="text-align:leftt; ">RUT 		:	89.651.600-0</td></tr>
-		<tr><td>DOMICILIO	:......................................</td></tr>
-		<tr><td>COMUNA	:	.....................................</td></tr>
+		<tr><td style="text-align:leftt; ">EMPRESA	:	<b>${laborerConstruction.constructionsite.constructionCompany.name}</b></td></tr>
+		<tr><td style="text-align:leftt; ">RUT 		:	<b>$numberTools.integer(${laborerConstruction.constructionsite.constructionCompany.rut.split("-").get(0)})-${laborerConstruction.constructionsite.constructionCompany.rut.split("-").get(1)}</b></td></tr>
+		<tr><td>DOMICILIO	:  <b>${laborerConstruction.constructionsite.constructionCompany.address}</b></td></tr>
+		<tr><td>COMUNA	:  <b>${laborerConstruction.constructionsite.constructionCompany.commune}</b></td></tr>
 		</table>
 		<br />
 		De mi consideraci&oacute;n :
@@ -57,12 +57,12 @@
         </tr>
         <tr>
             <th>
-            Nombre : ${laborerConstruction.laborer.fullname}
+            Nombre : <b>${laborerConstruction.laborer.fullname}</b>
             </th>
         </tr>
         <tr>
             <th>
-            Rut : ${laborerConstruction.laborer.rut}
+            Rut : <b>$numberTools.integer(${laborerConstruction.laborer.rut.split("-").get(0)})-${laborerConstruction.laborer.rut.split("-").get(1)}</b>
             </th>
         </tr>
      </table>
@@ -70,12 +70,12 @@
      <table cellpadding="0" cellspacing="0" border="0" style="text-align:leftt;margin:10px">
         <tr>
             <th>
-            Obra : ${laborerConstruction.constructionsite.name}
+            Obra : <b>${laborerConstruction.constructionsite.name}</b>
             </th>
 		</tr>
         <tr>
             <th>
-            Rol	: ${laborerConstruction.activeContract.job} 
+            Rol	: <b>${laborerConstruction.activeContract.jobCode}</b>
             </th>
         </tr>
 	</table>
