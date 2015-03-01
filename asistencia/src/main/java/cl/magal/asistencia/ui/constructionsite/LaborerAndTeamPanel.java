@@ -2,6 +2,7 @@ package cl.magal.asistencia.ui.constructionsite;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
@@ -31,6 +32,7 @@ import cl.magal.asistencia.entities.ConstructionSite;
 import cl.magal.asistencia.entities.LaborerConstructionsite;
 import cl.magal.asistencia.entities.Team;
 import cl.magal.asistencia.entities.User;
+import cl.magal.asistencia.entities.Vacation;
 import cl.magal.asistencia.entities.enums.Permission;
 import cl.magal.asistencia.entities.enums.Status;
 import cl.magal.asistencia.services.ConstructionSiteService;
@@ -95,7 +97,7 @@ public class LaborerAndTeamPanel extends Panel implements View {
 
 	transient Logger logger = LoggerFactory.getLogger(LaborerAndTeamPanel.class);
 
-	protected Button editConstructionSite,btnPrint,btnAdd;
+	protected Button editConstructionSite,btnPrint,btnAdd,btnLoad;
 	protected Label block, confirmed;
 
 	/** CONTAINERS **/
@@ -380,6 +382,115 @@ public class LaborerAndTeamPanel extends Panel implements View {
 		confirmed = new Label("No Confirmado");
 		confirmed.addStyleName("laborer-confirmed");
 		hl2.addComponent(confirmed);
+		
+		btnLoad = new Button(null,FontAwesome.ARROW_DOWN);
+		btnLoad.setDescription("Cargar vacaciones masivamente");
+		hl2.addComponent(btnLoad);
+
+		roothl.addComponent(hl2);
+		roothl.setComponentAlignment(hl2, Alignment.TOP_RIGHT);
+
+		final BeanItemContainer<Vacation> vacationContainer = new BeanItemContainer<Vacation>(Vacation.class);
+		btnLoad.addClickListener(new Button.ClickListener() {
+			LaborerConstructionsite lc = null;
+			
+			@Override
+			public void buttonClick(ClickEvent event) {
+				if(selectedItemIds.isEmpty()){
+					Notification.show("Para cargar vacaciones masivamente, primero debe seleccionar uno o más trabajadores.");
+					return;
+				}
+
+				final Window w = new Window("Carga masiva de vacaciones");
+				w.setWidth("40%");
+				w.setHeight("50%");
+				w.center();
+				w.setModal(true);
+
+				w.setContent(new VerticalLayout(){
+					{
+						setSpacing(true);
+						setMargin(true);		
+												
+						final DateField start = new DateField("Desde: ");
+						start.setRequired(true);
+						
+						final DateField end = new DateField("Hasta: ");
+						end.setRequired(true);
+
+						final Label total = new Label();
+						total.setCaption("Total: ");						
+						total.setValue("0");
+
+//						TODO
+//						final TextField prog = new TextField("Progresiva: ");
+//						prog.setValue("0");
+//						prog.setRequired(true);					
+						
+						addComponent(new HorizontalLayout(){
+							{								
+								final FormLayout fl = new FormLayout();
+								fl.setCaption("Ingrese los siguientes datos:");
+												
+								end.addValueChangeListener(new Property.ValueChangeListener() {
+
+									@Override
+									public void valueChange(ValueChangeEvent event) {
+										long inicio = start.getValue().getTime();
+										long fin = end.getValue().getTime();
+										final int dias = (int) ((fin - inicio) / (1000 * 60 * 60 * 24));
+										total.setValue(dias+"");
+									}									
+								});								
+								fl.addComponent(start);
+								fl.addComponent(end);
+								fl.addComponent(total);																
+								addComponent(fl);
+								setComponentAlignment(fl, Alignment.MIDDLE_CENTER);
+							}
+						});						
+						
+						addComponent(new HorizontalLayout(){
+							{
+								//Botón Aceptar
+								addComponent(new Button("Aceptar",new Button.ClickListener() {
+									@Override
+									public void buttonClick(ClickEvent event) {
+
+										if( start.getValue() == null || end.getValue() == null ){
+											Notification.show("Debe seleccionar las fechas de inicio y fin.",Type.WARNING_MESSAGE);
+											return;
+										}
+										
+										Vacation vacation = new Vacation();
+										vacation.setFromDate(start.getValue());
+										vacation.setToDate(end.getValue());
+										vacationContainer.addBean(vacation);												
+										
+										for(Object obj : selectedItemIds ){
+											lc = (LaborerConstructionsite)obj;
+											lc.addVacation(vacation);
+										}																		
+										laborerService.save(lc);
+										w.close();
+									}
+								}){ {setIcon(FontAwesome.CHECK_CIRCLE_O);} } );
+
+								//Botón Cancelar
+								addComponent(new Button("Cancelar",new Button.ClickListener() {
+									@Override
+									public void buttonClick(ClickEvent event) {
+										w.close();
+									}
+								}){{addStyleName("link");}});
+							}
+						});						
+					}
+				});
+
+				UI.getCurrent().addWindow(w);
+			}
+		});
 
 		btnPrint = new Button(null,FontAwesome.PRINT);
 		btnPrint.setDescription("Imprimir vacaciones masivamente");
