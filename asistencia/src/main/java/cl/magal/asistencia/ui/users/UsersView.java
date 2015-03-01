@@ -209,19 +209,23 @@ public class UsersView extends HorizontalSplitPanel implements View {
 			@Override
 			public void postCommit(CommitEvent commitEvent) throws CommitException {
 				
-				Field<?> email = fieldGroup.getField("email");
-				//valida que no exista un usuario con el mismo email
-				User user = service.findUsuarioByUsername((String)email.getValue());
-				if(user != null ){
-					Map<Field<?>,InvalidValueException> map = new HashMap<Field<?>,InvalidValueException>();
-					map.put(email, new InvalidValueException("Ya existe un usuario con el mismo email."));
-					throw new FieldGroupInvalidValueException(map);
+				Long id = fieldGroup.getItemDataSource().getBean().getUserId();
+				
+				//si es un nuevo usuario, valida que no exista un usuario con el mismo email
+				if( id == null ){
+					Field<?> email = fieldGroup.getField("email");
+					
+					User user = service.findUsuarioByUsername((String)email.getValue());
+					if(user != null ){
+						Map<Field<?>,InvalidValueException> map = new HashMap<Field<?>,InvalidValueException>();
+						map.put(email, new InvalidValueException("Ya existe un usuario con el mismo email."));
+						throw new FieldGroupInvalidValueException(map);
+					}
 				}
 				
 				//antes de comitear revisa que los passwords sean iguales si alguno es distinto de null
 				Field<?> pf = fieldGroup.getField("password");
 				Field<?> pf2 = fieldGroup.getField("password2");
-				Long id = fieldGroup.getItemDataSource().getBean().getUserId();
 				
 				//	creacion debe validar que venga seteado el password y además coincida, en edicion solo deben coincidir
 				if(  id == null && pf.getValue() == null ){
