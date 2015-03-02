@@ -127,7 +127,6 @@ public class LaborerAndTeamPanel extends Panel implements View {
 	 */
 	final Set<Object> selectedItemIds = new HashSet<Object>();
 	ComboBox cbFilterStep;
-
 	boolean hasConstructionDetails;
 
 	public void setHasAttendanceButton(boolean hasAttendanceButton) {
