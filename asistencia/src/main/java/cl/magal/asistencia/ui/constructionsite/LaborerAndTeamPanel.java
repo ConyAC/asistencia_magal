@@ -15,6 +15,8 @@ import javax.annotation.PostConstruct;
 import javax.validation.ConstraintViolationException;
 
 import org.apache.velocity.app.VelocityEngine;
+import org.joda.time.DateTime;
+import org.joda.time.Days;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -400,7 +402,7 @@ public class LaborerAndTeamPanel extends Panel implements View {
 					Notification.show("Para cargar vacaciones masivamente, primero debe seleccionar uno o más trabajadores.");
 					return;
 				}
-
+			
 				final Window w = new Window("Carga masiva de vacaciones");
 				w.setWidth("40%");
 				w.setHeight("50%");
@@ -469,9 +471,13 @@ public class LaborerAndTeamPanel extends Panel implements View {
 										
 										for(Object obj : selectedItemIds ){
 											lc = (LaborerConstructionsite)obj;
+											
+											if(!lc.isConfirmed())		
+												continue;
+											
 											lc.addVacation(vacation);
+											laborerService.save(lc);
 										}																		
-										laborerService.save(lc);
 										w.close();
 									}
 								}){ {setIcon(FontAwesome.CHECK_CIRCLE_O);} } );
