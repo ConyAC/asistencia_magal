@@ -100,7 +100,7 @@ public class LaborerAndTeamPanel extends Panel implements View {
 	transient Logger logger = LoggerFactory.getLogger(LaborerAndTeamPanel.class);
 
 	protected Button editConstructionSite,btnPrint,btnAdd,btnLoad;
-	protected Label block, confirmed;
+	protected Label confirmed;
 
 	/** CONTAINERS **/
 	BeanItemContainer<User> userContainer = new BeanItemContainer<User>(User.class);
@@ -377,17 +377,13 @@ public class LaborerAndTeamPanel extends Panel implements View {
 		HorizontalLayout hl2 = new HorizontalLayout();
 		hl2.setSpacing(true);
 
-		block = new Label("Bloqueado");
-		block.addStyleName("laborer-block");
-		hl2.addComponent(block);
-
 		confirmed = new Label("No Confirmado");
 		confirmed.addStyleName("laborer-confirmed");
 		hl2.addComponent(confirmed);
 		
-		btnLoad = new Button(null,FontAwesome.ARROW_DOWN);
+		btnLoad = new Button("Vacaciones Masivas",FontAwesome.ARROW_DOWN);
 		btnLoad.setDescription("Cargar vacaciones masivamente");
-		hl2.addComponent(btnLoad);
+		hl.addComponent(btnLoad);
 
 		roothl.addComponent(hl2);
 		roothl.setComponentAlignment(hl2, Alignment.TOP_RIGHT);
@@ -464,6 +460,11 @@ public class LaborerAndTeamPanel extends Panel implements View {
 											return;
 										}
 										
+										if( end.getValue().getTime() < start.getValue().getTime()){
+											Notification.show("La fecha final es menor que la fecha inicial.");
+											return;
+										}											
+										
 										Vacation vacation = new Vacation();
 										vacation.setFromDate(start.getValue());
 										vacation.setToDate(end.getValue());
@@ -479,6 +480,41 @@ public class LaborerAndTeamPanel extends Panel implements View {
 											laborerService.save(lc);
 										}																		
 										w.close();
+										
+										final ObjectProperty vacations = new ObjectProperty(true, Boolean.class);
+										final Window w = new Window("Impresión de vacaciones masiva");
+										w.center();
+										w.setModal(true);
+
+										final Map<String, Object> input = new HashMap<String, Object>();
+										input.put("laborerConstructions", selectedItemIds);
+										VelocityHelper.addTools(input);
+
+										final StringBuilder sb = new StringBuilder();//														
+										if((Boolean) vacations.getValue()){
+											sb.append( VelocityEngineUtils.mergeTemplateIntoString(velocityEngine, "templates/vacation_doc.vm", "UTF-8", input) );
+										}
+
+										StreamResource.StreamSource source2 = new StreamResource.StreamSource() {
+
+											public InputStream getStream() {
+												return new ByteArrayInputStream(sb.toString().getBytes());
+											}
+										};
+										StreamResource resource = new StreamResource(source2, "Vacaciones Masivas.html");
+
+										BrowserFrame e = new BrowserFrame();
+										e.setSizeFull();													
+										resource.setMIMEType("text/html");
+
+										e.setSource(resource);
+										w.setContent(e);
+										w.center();
+										w.setWidth("60%");
+										w.setHeight("60%");
+
+										UI.getCurrent().addWindow(w);	
+										
 									}
 								}){ {setIcon(FontAwesome.CHECK_CIRCLE_O);} } );
 
@@ -498,105 +534,8 @@ public class LaborerAndTeamPanel extends Panel implements View {
 			}
 		});
 
-		btnPrint = new Button(null,FontAwesome.PRINT);
-		btnPrint.setDescription("Imprimir vacaciones masivamente");
-		hl2.addComponent(btnPrint);
-
-		roothl.addComponent(hl2);
-		roothl.setComponentAlignment(hl2, Alignment.TOP_RIGHT);
-
-		btnPrint.addClickListener(new Button.ClickListener() {
-
-			@Override
-			public void buttonClick(ClickEvent event) {
-				if(selectedItemIds.isEmpty()){
-					Notification.show("Para imprimir masivamente, primero debe seleccionar uno más trabajadores");
-					return;
-				}
-				//verifica que alguno tenga vacaciones para imprimir
-				boolean any = false;
-				for(Object obj : selectedItemIds ){
-					LaborerConstructionsite lc = (LaborerConstructionsite)obj;
-					if(!lc.getVacations().isEmpty()){
-						any = true;
-						break;
-					}
-				}
-				if(!any){
-					Notification.show("Ninguno de los trabajadores seleccionados tiene vacaciones para imprimir");
-					return;
-				}
-
-//				final ObjectProperty contracts = new ObjectProperty(false, Boolean.class);
-				final ObjectProperty vacations = new ObjectProperty(true, Boolean.class);
-//				final ObjectProperty anexxeds = new ObjectProperty(false, Boolean.class);
-
-				final Window w = new Window("Impresión de vacaciones masiva");
-				w.center();
-				w.setModal(true);
-
-//				w.setContent(new HorizontalLayout(){
-//					{
-//						setSpacing(true);
-//						setMargin(true);
-//						//						addComponent(new CheckBox("Contrato"){{setPropertyDataSource(contracts);}});
-////						addComponent(new CheckBox("Anexos"){{setPropertyDataSource(anexxeds);}});
-//						addComponent(new CheckBox("Últimas Vacaciones"){{setPropertyDataSource(vacations);}});
-//
-//						addComponent(new Button(null,new Button.ClickListener() {
-//
-//							@Override
-//							public void buttonClick(ClickEvent event) {
-
-								final Map<String, Object> input = new HashMap<String, Object>();
-								input.put("laborerConstructions", selectedItemIds);
-								VelocityHelper.addTools(input);
-
-								final StringBuilder sb = new StringBuilder();
-//								if((Boolean) contracts.getValue()){
-//									sb.append( VelocityEngineUtils.mergeTemplateIntoString(velocityEngine, "templates/temporary_work_contract_doc.vm", "UTF-8", input) );
-//								}
-//								if((Boolean) anexxeds.getValue()){
-//									sb.append( VelocityEngineUtils.mergeTemplateIntoString(velocityEngine, "templates/annex_contract_doc.vm", "UTF-8", input) );
-//								}
-								if((Boolean) vacations.getValue()){
-									sb.append( VelocityEngineUtils.mergeTemplateIntoString(velocityEngine, "templates/vacation_doc.vm", "UTF-8", input) );
-								}
-
-								StreamResource.StreamSource source2 = new StreamResource.StreamSource() {
-
-									public InputStream getStream() {
-										return new ByteArrayInputStream(sb.toString().getBytes());
-									}
-								};
-								StreamResource resource = new StreamResource(source2, "Vacaciones Masivas.html");
-
-								BrowserFrame e = new BrowserFrame();
-								e.setSizeFull();
-
-								// Here we create a new StreamResource which downloads our StreamSource,
-								// which is our pdf.
-								// Set the right mime type
-								//resource.setMIMEType("application/pdf");
-								resource.setMIMEType("text/html");
-
-								e.setSource(resource);
-								w.setContent(e);
-								w.center();
-								w.setWidth("60%");
-								w.setHeight("60%");
-//							}
-//						}){ {setIcon(FontAwesome.PRINT);} } );
-//					}
-//				});
-//
-				UI.getCurrent().addWindow(w);
-
-			}
-		});
-
-		Button btnAnnexedsGenerator = new Button(null,FontAwesome.TASKS);
-		hl2.addComponent(btnAnnexedsGenerator);
+		Button btnAnnexedsGenerator = new Button("Generar Anexo",FontAwesome.TASKS);
+		hl.addComponent(btnAnnexedsGenerator);
 
 		btnAnnexedsGenerator.addClickListener(new Button.ClickListener() {
 
@@ -825,6 +764,103 @@ public class LaborerAndTeamPanel extends Panel implements View {
 			}
 		});
 
+		btnPrint = new Button("Imprimir",FontAwesome.PRINT);
+		btnPrint.setDescription("Imprimir vacaciones masivamente");
+		hl.addComponent(btnPrint);
+
+		roothl.addComponent(hl2);
+		roothl.setComponentAlignment(hl2, Alignment.TOP_RIGHT);
+
+		btnPrint.addClickListener(new Button.ClickListener() {
+
+			@Override
+			public void buttonClick(ClickEvent event) {
+				if(selectedItemIds.isEmpty()){
+					Notification.show("Para imprimir masivamente, primero debe seleccionar uno más trabajadores");
+					return;
+				}
+				//verifica que alguno tenga vacaciones para imprimir
+				boolean any = false;
+				for(Object obj : selectedItemIds ){
+					LaborerConstructionsite lc = (LaborerConstructionsite)obj;
+					if(!lc.getVacations().isEmpty()){
+						any = true;
+						break;
+					}
+				}
+				if(!any){
+					Notification.show("Ninguno de los trabajadores seleccionados tiene vacaciones para imprimir");
+					return;
+				}
+
+//				final ObjectProperty contracts = new ObjectProperty(false, Boolean.class);
+				final ObjectProperty vacations = new ObjectProperty(true, Boolean.class);
+//				final ObjectProperty anexxeds = new ObjectProperty(false, Boolean.class);
+
+				final Window w = new Window("Impresión de vacaciones masiva");
+				w.center();
+				w.setModal(true);
+
+//				w.setContent(new HorizontalLayout(){
+//					{
+//						setSpacing(true);
+//						setMargin(true);
+//						//						addComponent(new CheckBox("Contrato"){{setPropertyDataSource(contracts);}});
+////						addComponent(new CheckBox("Anexos"){{setPropertyDataSource(anexxeds);}});
+//						addComponent(new CheckBox("Últimas Vacaciones"){{setPropertyDataSource(vacations);}});
+//
+//						addComponent(new Button(null,new Button.ClickListener() {
+//
+//							@Override
+//							public void buttonClick(ClickEvent event) {
+
+								final Map<String, Object> input = new HashMap<String, Object>();
+								input.put("laborerConstructions", selectedItemIds);
+								VelocityHelper.addTools(input);
+
+								final StringBuilder sb = new StringBuilder();
+//								if((Boolean) contracts.getValue()){
+//									sb.append( VelocityEngineUtils.mergeTemplateIntoString(velocityEngine, "templates/temporary_work_contract_doc.vm", "UTF-8", input) );
+//								}
+//								if((Boolean) anexxeds.getValue()){
+//									sb.append( VelocityEngineUtils.mergeTemplateIntoString(velocityEngine, "templates/annex_contract_doc.vm", "UTF-8", input) );
+//								}
+								if((Boolean) vacations.getValue()){
+									sb.append( VelocityEngineUtils.mergeTemplateIntoString(velocityEngine, "templates/vacation_doc.vm", "UTF-8", input) );
+								}
+
+								StreamResource.StreamSource source2 = new StreamResource.StreamSource() {
+
+									public InputStream getStream() {
+										return new ByteArrayInputStream(sb.toString().getBytes());
+									}
+								};
+								StreamResource resource = new StreamResource(source2, "Vacaciones Masivas.html");
+
+								BrowserFrame e = new BrowserFrame();
+								e.setSizeFull();
+
+								// Here we create a new StreamResource which downloads our StreamSource,
+								// which is our pdf.
+								// Set the right mime type
+								//resource.setMIMEType("application/pdf");
+								resource.setMIMEType("text/html");
+
+								e.setSource(resource);
+								w.setContent(e);
+								w.center();
+								w.setWidth("60%");
+								w.setHeight("60%");
+//							}
+//						}){ {setIcon(FontAwesome.PRINT);} } );
+//					}
+//				});
+//
+				UI.getCurrent().addWindow(w);
+
+			}
+		});
+		
 		final FilterTable table =  new FilterTable();
 		
 		table.setFilterGenerator(new FilterGenerator() {
