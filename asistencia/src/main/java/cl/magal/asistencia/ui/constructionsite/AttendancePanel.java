@@ -16,7 +16,6 @@ import org.springframework.stereotype.Component;
 
 import cl.magal.asistencia.entities.Attendance;
 import cl.magal.asistencia.entities.ConstructionSite;
-import cl.magal.asistencia.entities.LaborerConstructionsite;
 import cl.magal.asistencia.entities.enums.AttendanceMark;
 import cl.magal.asistencia.services.ConstructionSiteService;
 import cl.magal.asistencia.services.UserService;
@@ -25,6 +24,12 @@ import com.vaadin.data.Container.Filterable;
 import com.vaadin.data.Container.SimpleFilterable;
 import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeEvent;
+import com.vaadin.data.fieldgroup.BeanFieldGroup;
+import com.vaadin.data.fieldgroup.DefaultFieldGroupFieldFactory;
+import com.vaadin.data.fieldgroup.FieldGroup.CommitEvent;
+import com.vaadin.data.fieldgroup.FieldGroup.CommitException;
+import com.vaadin.data.fieldgroup.FieldGroup.CommitHandler;
+import com.vaadin.data.util.BeanItem;
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.data.util.filter.SimpleStringFilter;
 import com.vaadin.event.FieldEvents.TextChangeEvent;
@@ -37,10 +42,13 @@ import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
+import com.vaadin.ui.ComboBox;
+import com.vaadin.ui.Field;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.Grid;
 import com.vaadin.ui.Grid.HeaderCell;
 import com.vaadin.ui.Grid.HeaderRow;
+import com.vaadin.ui.Grid.SelectionMode;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.InlineDateField;
 import com.vaadin.ui.Label;
@@ -205,7 +213,39 @@ public class AttendancePanel extends Panel implements View {
 
 		attendanceLaborerContainer.addNestedContainerProperty("laborerConstructionSite.activeContract.jobCode");
 		table1 = new Grid(attendanceLaborerContainer);
+		table1.setSelectionMode(SelectionMode.SINGLE);
 		table1.setSizeFull();
+		table1.setEditorFieldGroup(new BeanFieldGroup<Attendance>(Attendance.class));
+		table1.setEditorFieldFactory(new DefaultFieldGroupFieldFactory(){
+			@Override
+		    public <T extends Field> T createField(Class<?> type, Class<T> fieldType) {
+
+		        if (type.isAssignableFrom(AttendanceMark.class) && fieldType.isAssignableFrom(ComboBox.class)) {
+		        	ComboBox cb = new ComboBox();
+		        	for(AttendanceMark a : AttendanceMark.values()){
+		        		cb.addItem(a);
+		        	}
+		            return (T) cb;
+		        }
+
+		        return super.createField(type, fieldType);
+		    }
+		});
+		table1.getEditorFieldGroup().addCommitHandler(new CommitHandler() {
+			
+			@Override
+			public void preCommit(CommitEvent commitEvent) throws CommitException {
+				
+			}
+			
+			@Override
+			public void postCommit(CommitEvent commitEvent) throws CommitException {
+				//guarda el elmento
+				Attendance attedance = ((BeanItem<Attendance>) commitEvent.getFieldBinder().getItemDataSource()).getBean();
+				service.save(attedance);
+				attendanceLaborerContainer.sort(new Object[]{"laborerConstructionSite.activeContract.jobCode"}, new boolean[]{true});
+			}
+		});
 		
 		table1.addStyleName("grid-attendace");
 		table1.setEditorEnabled(true);
@@ -220,6 +260,7 @@ public class AttendancePanel extends Panel implements View {
 		table1.setColumnOrder("laborerConstructionSite.activeContract.jobCode","d1","d2","d3","d4","d5","d6","d7","d8","d9","d10","d11","d12","d13","d14","d15","d16"
 				,"d17","d18","d19","d20","d21","d22","d23","d24","d25","d26","d27","d28","d29","d30","d31");
 		
+		attendanceLaborerContainer.sort(new Object[]{"laborerConstructionSite.activeContract.jobCode"}, new boolean[]{true});
 		table1.getColumn("laborerConstructionSite.activeContract.jobCode").setHeaderCaption("Código").setEditable(false).setWidth(100);
 		
 		HeaderRow filterRow =  table1.appendHeaderRow();
@@ -232,10 +273,9 @@ public class AttendancePanel extends Panel implements View {
 			TextField filterField = new TextField();
 			if(pid.equals("laborerConstructionSite.activeContract.jobCode")) filterField.setWidth("100%");
 			else {
-				filterField.setWidth("30px");
-				logger.debug("pid {}",pid);
+				filterField.setWidth("50px");
 				if(table1.getColumn(pid) != null )
-					table1.getColumn(pid).setHeaderCaption(((String) pid).replace("d","")).setSortable(false).setWidth(50);
+					table1.getColumn(pid).setHeaderCaption(((String) pid).replace("d","")).setSortable(false);//.setWidth(50);
 			}
 	
 			filterField.setHeight("90%");
@@ -474,40 +514,46 @@ public class AttendancePanel extends Panel implements View {
 		
 //		UI.getCurrent().addWindow(progressDialog);
 
-		final WorkThread thread = new WorkThread();
-		thread.start();
+//		final WorkThread thread = new WorkThread();
+//		thread.start();
+		DateTime dt = getAttendanceDate();
+//		DateTime attendanceDate = dt.withDayOfMonth(dt.dayOfMonth().getMinimumValue());
+//		DateTime date2 = attendanceDate.withDayOfMonth( attendanceDate.dayOfMonth().getMaximumValue() );
+		reloadAttendance(dt);
 
 		// Enable polling and set frequency to 1 seconds
-		UI.getCurrent().setPollInterval(1000);
+//		UI.getCurrent().setPollInterval(1000);
 	}
 
-	private void reloadAttendance(DateTime initialDate, DateTime lastDate) {
+	private void reloadAttendance(DateTime dt) {
 
 		if(cs == null )
 			throw new RuntimeException("No se ha seteado la obra en la vista de asistencia.");
 
 		//cuenta la cantidad de dias entre ambas fechas
-		int days = Days.daysBetween(initialDate, lastDate).getDays() + 1;
+//		int days = Days.daysBetween(initialDate, lastDate).getDays() + 1;
 
-		logger.debug("se van a generar las filas para {} dias",days);
+//		logger.debug("se van a generar las filas para {} dias",days);
 
 		clearAttendanceTable();
 		
-		List<LaborerConstructionsite> laborers = service.getLaborerActiveByConstruction(cs);
-
-		for(LaborerConstructionsite lc : laborers){
-			Attendance row = new Attendance();
-
-			row.setAttendanceId((long) days++);
-			row.setLaborerConstructionSite( lc );
-			row.setD1( randomAttendance() );
-			row.setD2( randomAttendance() );
-			row.setD3( randomAttendance() );
-			row.setD4( randomAttendance() );
-			row.setD5( randomAttendance() );
-			
-			attendanceLaborerContainer.addBean(row);
-		}
+		List<Attendance> attendance = service.getAttendanceByConstruction(cs,dt);
+		logger.debug("lista de asistencia para el mes dado {} ",attendance);
+		attendanceLaborerContainer.addAll(attendance);
+		attendanceLaborerContainer.sort(new Object[]{"laborerConstructionSite.activeContract.jobCode"}, new boolean[]{true});
+//		for(LaborerConstructionsite lc : laborers){
+//			Attendance row = new Attendance();
+//
+//			row.setAttendanceId((long) days++);
+//			row.setLaborerConstructionSite( lc );
+//			row.setD1( randomAttendance() );
+//			row.setD2( randomAttendance() );
+//			row.setD3( randomAttendance() );
+//			row.setD4( randomAttendance() );
+//			row.setD5( randomAttendance() );
+//			
+//			attendanceLaborerContainer.addBean(row);
+//		}
 	}
 
 	// A thread to do some work
@@ -525,7 +571,7 @@ public class AttendancePanel extends Panel implements View {
 				getUI().getSession().getLockInstance().lock();
 				
 				configAttendanceColumns(attendanceDate,date2);
-				reloadAttendance(attendanceDate,date2);
+				reloadAttendance(dt);
 				getUI().getSession().getLockInstance().unlock();
 
 			}catch(Exception e){

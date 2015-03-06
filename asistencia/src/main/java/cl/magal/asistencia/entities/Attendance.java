@@ -5,6 +5,7 @@ import java.util.Date;
 
 import javax.persistence.Basic;
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -16,6 +17,7 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.validation.constraints.NotNull;
 
+import cl.magal.asistencia.entities.converter.AttendanceMarkConverter;
 import cl.magal.asistencia.entities.enums.AttendanceMark;
 
 @Entity
@@ -35,44 +37,131 @@ public class Attendance implements Serializable {
 	
 	@NotNull(message="La fecha es necesaria.")
 	@Temporal(TemporalType.DATE)
-	@Column(name = "date" )
+	@Column(name = "date" ,nullable = false )
 	Date date;
 	
 	@ManyToOne
 	@JoinColumn(name="LABORER_CONSTRUCTIONSITEID",nullable=false)
 	LaborerConstructionsite laborerConstructionSite;
 	
-	AttendanceMark d1;
-	AttendanceMark d2;
-	AttendanceMark d3;
-	AttendanceMark d4;
-	AttendanceMark d5;
-	AttendanceMark d6;
-	AttendanceMark d7;
-	AttendanceMark d8;
-	AttendanceMark d9;
-	AttendanceMark d10;
-	AttendanceMark d11;
-	AttendanceMark d12;
-	AttendanceMark d13;
-	AttendanceMark d14;
-	AttendanceMark d15;
-	AttendanceMark d16;
-	AttendanceMark d17;
-	AttendanceMark d18;
-	AttendanceMark d19;
-	AttendanceMark d20;
-	AttendanceMark d21;
-	AttendanceMark d22;
-	AttendanceMark d23;
-	AttendanceMark d24;
-	AttendanceMark d25;
-	AttendanceMark d26;
-	AttendanceMark d27;
-	AttendanceMark d28;
-	AttendanceMark d29;
-	AttendanceMark d30;
-	AttendanceMark d31;
+	@Convert(converter = AttendanceMarkConverter.class)
+	@Column(name = "d1" ,nullable = false )
+	AttendanceMark d1 = AttendanceMark.ATTEND;
+	
+	@Convert(converter = AttendanceMarkConverter.class)
+	@Column(name = "d2" ,nullable = false )
+	AttendanceMark d2 = AttendanceMark.ATTEND;
+	
+	@Convert(converter = AttendanceMarkConverter.class)
+	@Column(name = "d3" ,nullable = false )
+	AttendanceMark d3 = AttendanceMark.ATTEND;
+	
+	@Convert(converter = AttendanceMarkConverter.class)
+	@Column(name = "d4" ,nullable = false )
+	AttendanceMark d4 = AttendanceMark.ATTEND;
+	
+	@Convert(converter = AttendanceMarkConverter.class)
+	@Column(name = "d5" ,nullable = false )
+	AttendanceMark d5 = AttendanceMark.ATTEND;
+	
+	@Convert(converter = AttendanceMarkConverter.class)
+	@Column(name = "d6" ,nullable = false )
+	AttendanceMark d6 = AttendanceMark.ATTEND;
+	
+	@Convert(converter = AttendanceMarkConverter.class)
+	@Column(name = "d7" ,nullable = false )
+	AttendanceMark d7 = AttendanceMark.ATTEND;
+	
+	@Convert(converter = AttendanceMarkConverter.class)
+	@Column(name = "d8" ,nullable = false )
+	AttendanceMark d8 = AttendanceMark.ATTEND;
+	
+	@Convert(converter = AttendanceMarkConverter.class)
+	@Column(name = "d9" ,nullable = false )
+	AttendanceMark d9 = AttendanceMark.ATTEND;
+	
+	@Convert(converter = AttendanceMarkConverter.class)
+	@Column(name = "d10" ,nullable = false )
+	AttendanceMark d10 = AttendanceMark.ATTEND;
+	
+	@Convert(converter = AttendanceMarkConverter.class)
+	@Column(name = "d11" ,nullable = false )
+	AttendanceMark d11 = AttendanceMark.ATTEND;
+	
+	@Convert(converter = AttendanceMarkConverter.class)
+	@Column(name = "d12" ,nullable = false )
+	AttendanceMark d12 = AttendanceMark.ATTEND;
+	
+	@Convert(converter = AttendanceMarkConverter.class)
+	@Column(name = "d13" ,nullable = false )
+	AttendanceMark d13 = AttendanceMark.ATTEND;
+	
+	@Convert(converter = AttendanceMarkConverter.class)
+	@Column(name = "d14" ,nullable = false )
+	AttendanceMark d14 = AttendanceMark.ATTEND;
+	
+	@Convert(converter = AttendanceMarkConverter.class)
+	@Column(name = "d15" ,nullable = false )
+	AttendanceMark d15 = AttendanceMark.ATTEND;
+	
+	@Convert(converter = AttendanceMarkConverter.class)
+	@Column(name = "d16" ,nullable = false )
+	AttendanceMark d16 = AttendanceMark.ATTEND;
+	
+	@Convert(converter = AttendanceMarkConverter.class)
+	@Column(name = "d17" ,nullable = false )
+	AttendanceMark d17 = AttendanceMark.ATTEND;
+	
+	@Convert(converter = AttendanceMarkConverter.class)
+	@Column(name = "d18" ,nullable = false )
+	AttendanceMark d18 = AttendanceMark.ATTEND;
+	
+	@Convert(converter = AttendanceMarkConverter.class)
+	@Column(name = "d19" ,nullable = false )
+	AttendanceMark d19 = AttendanceMark.ATTEND;
+	
+	@Convert(converter = AttendanceMarkConverter.class)
+	@Column(name = "d20" ,nullable = false )
+	AttendanceMark d20 = AttendanceMark.ATTEND;
+	
+	@Convert(converter = AttendanceMarkConverter.class)
+	@Column(name = "d21" ,nullable = false )
+	AttendanceMark d21 = AttendanceMark.ATTEND;
+	
+	@Convert(converter = AttendanceMarkConverter.class)
+	@Column(name = "d22" ,nullable = false )
+	AttendanceMark d22 = AttendanceMark.ATTEND;
+	
+	@Convert(converter = AttendanceMarkConverter.class)
+	@Column(name = "d23" ,nullable = false )
+	AttendanceMark d23 = AttendanceMark.ATTEND;
+	
+	@Convert(converter = AttendanceMarkConverter.class)
+	@Column(name = "d24" ,nullable = false )
+	AttendanceMark d24 = AttendanceMark.ATTEND;
+	
+	@Convert(converter = AttendanceMarkConverter.class)
+	@Column(name = "d25" ,nullable = false )
+	AttendanceMark d25 = AttendanceMark.ATTEND;
+	
+	@Convert(converter = AttendanceMarkConverter.class)
+	@Column(name = "d26" ,nullable = false )
+	AttendanceMark d26 = AttendanceMark.ATTEND;
+	
+	@Convert(converter = AttendanceMarkConverter.class)
+	@Column(name = "d27" ,nullable = false )
+	AttendanceMark d27 = AttendanceMark.ATTEND;
+	
+	@Convert(converter = AttendanceMarkConverter.class)
+	@Column(name = "d28" ,nullable = false )
+	AttendanceMark d28 = AttendanceMark.ATTEND;
+	
+	@Convert(converter = AttendanceMarkConverter.class)
+	AttendanceMark d29 = AttendanceMark.ATTEND;
+	@Convert(converter = AttendanceMarkConverter.class)
+	AttendanceMark d30 = AttendanceMark.ATTEND;
+	@Convert(converter = AttendanceMarkConverter.class)
+	AttendanceMark d31 = AttendanceMark.ATTEND;
 	
 	public Long getAttendanceId() {
 		return attendanceId;
@@ -279,12 +368,15 @@ public class Attendance implements Serializable {
 	public void setD31(AttendanceMark d31) {
 		this.d31 = d31;
 	}
+	
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result
-				+ ((attendanceId == null) ? 0 : attendanceId.hashCode());
+		result = prime
+				* result
+				+ ((laborerConstructionSite == null) ? 0
+						: laborerConstructionSite.getId().hashCode());
 		return result;
 	}
 	@Override
@@ -296,12 +388,15 @@ public class Attendance implements Serializable {
 		if (getClass() != obj.getClass())
 			return false;
 		Attendance other = (Attendance) obj;
-		if (attendanceId == null) {
-			if (other.attendanceId != null)
+		if (laborerConstructionSite == null) {
+			if (other.laborerConstructionSite != null)
 				return false;
-		} else if (!attendanceId.equals(other.attendanceId))
+		} else if (!laborerConstructionSite.getId()
+				.equals(other.laborerConstructionSite.getId()))
 			return false;
 		return true;
 	}
+	
+	
 	
 }

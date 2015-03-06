@@ -35,6 +35,7 @@
 	    <class>cl.magal.asistencia.entities.converter.AbsenceTypeConverter</class>
 	    <class>cl.magal.asistencia.entities.converter.AccidentLevelConverter</class>
 	    <class>cl.magal.asistencia.entities.converter.AfpConverter</class>
+	    <class>cl.magal.asistencia.entities.converter.AttendanceMarkConverter</class>
 	    <class>cl.magal.asistencia.entities.converter.BankConverter</class>
 	    <class>cl.magal.asistencia.entities.converter.IsapreConverter</class>
 	    <class>cl.magal.asistencia.entities.converter.JobConverter</class>
@@ -57,10 +58,13 @@
 			 	        
 	        <!--
 	        <property name="eclipselink.ddl-generation" value="create-or-extend-tables"/>
+	        <property name="eclipselink.ddl-generation.output-mode" value="database"/> 
             <property name="eclipselink.logging.level" value="FINE"/>
             <property name="eclipselink.logging.level.sql" value="FINE"/>
             <property name="eclipselink.logging.parameters" value="true"/>
              -->
+            <property name="eclipselink.ddl-generation" value="create-or-extend-tables"/>
+            <property name="eclipselink.ddl-generation.output-mode" value="database"/> 
             <property name="eclipselink.logging.level" value="OFF"/>
             <property name="eclipselink.logging.level.sql" value="OFF"/>
             <property name="eclipselink.logging.parameters" value="false"/>

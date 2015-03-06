@@ -6,6 +6,7 @@ import java.util.List;
 
 import javax.annotation.PostConstruct;
 
+import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,12 +15,14 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import cl.magal.asistencia.entities.Attendance;
 import cl.magal.asistencia.entities.ConstructionCompany;
 import cl.magal.asistencia.entities.ConstructionSite;
 import cl.magal.asistencia.entities.Laborer;
 import cl.magal.asistencia.entities.LaborerConstructionsite;
 import cl.magal.asistencia.entities.Team;
 import cl.magal.asistencia.entities.User;
+import cl.magal.asistencia.repositories.AttendanceRepository;
 import cl.magal.asistencia.repositories.ConstructionCompanyRepository;
 import cl.magal.asistencia.repositories.ConstructionSiteRepository;
 import cl.magal.asistencia.repositories.LaborerConstructionsiteRepository;
@@ -44,6 +47,8 @@ public class ConstructionSiteService {
 	UserRepository userRepo;
 	@Autowired
 	ConstructionCompanyRepository constructionCompanyRepo;
+	@Autowired
+	AttendanceRepository attendanceRepo;
 	
 	@PostConstruct
 	public void init(){
@@ -206,5 +211,28 @@ public class ConstructionSiteService {
 	public List<ConstructionCompany> findAllConstructionCompany() {
 		return (List<ConstructionCompany>) constructionCompanyRepo.findAll();
 	}
+
+	public List<Attendance> getAttendanceByConstruction(ConstructionSite cs,DateTime date) {
+		//obtiene la lista de trabajadores de la obra
+		List<LaborerConstructionsite> lcs =  labcsRepo.findByConstructionsiteAndIsActive(cs);
+		List<Attendance> attendanceResult =  attendanceRepo.findByConstructionsiteAndMonth(cs,date.toDate());
+		Attendance tmp = new Attendance();
+		//verifica que exista una asistencia para cada elemento, si no existe la crea
+		for(LaborerConstructionsite lc : lcs ){
+			tmp.setLaborerConstructionSite(lc);
+			if(!attendanceResult.contains(lc)){
+				Attendance attendance = new Attendance();
+				attendance.setLaborerConstructionSite(lc);
+				attendance.setDate(date.toDate());
+				attendanceResult.add(attendance);
+			}
+		}
+		return attendanceResult;
+	}
+
+	public void save(Attendance attedance) {
+		attendanceRepo.save(attedance);
+	}
+
 
 }

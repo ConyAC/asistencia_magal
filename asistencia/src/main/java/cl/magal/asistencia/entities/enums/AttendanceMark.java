@@ -21,6 +21,17 @@ public enum AttendanceMark {
 		this.title = title;
 	}
 	
+	public int getCorrelative(){
+		return code;
+	}
+	
+	public static AttendanceMark getAttendanceMark(int i){
+		for(AttendanceMark e : AttendanceMark.values())
+			if(e.getCorrelative() == i )
+				return e;
+		throw new RuntimeException("invalid Attendance Mark");
+	}
+	
 	@Override
 	public String toString(){
 		return description;
