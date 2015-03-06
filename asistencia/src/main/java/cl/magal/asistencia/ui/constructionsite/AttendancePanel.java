@@ -119,7 +119,6 @@ public class AttendancePanel extends Panel implements View {
 			}
 		});
 
-
 	}
 
 	private void clearAttendanceTable(){
@@ -130,31 +129,35 @@ public class AttendancePanel extends Panel implements View {
 	private void configAttendanceColumns(DateTime initialDate, DateTime lastDate){
 
 		//cuenta la cantidad de dias entre ambas fechas
-		int days = Days.daysBetween(initialDate, lastDate).getDays();
-
-		logger.debug("se van a generar {} columnas",days);
-		
-		table1.addStyleName("grid-attendace");
-		table1.setEditorEnabled(true);
-		table1.setFrozenColumnCount(1);
-		if(table1.getColumn("laborerConstructionSite") != null )
-			table1.removeColumn("laborerConstructionSite");
-		if(table1.getColumn("attendanceId") != null )
-			table1.removeColumn("attendanceId");
-		if(table1.getColumn("date") != null )
-			table1.removeColumn("date");
-		
-		if(days < 30 ){
-			if(table1.getColumn("d10") != null ){
-				table1.removeColumn("d10");
-				table1.setColumnOrder("laborerConstructionSite.activeContract.jobCode","d1","d11");
-			}
-		}else{
-			if(table1.getColumn("d10") == null ){
-				table1.addColumn("d10");
-				table1.setColumnOrder("laborerConstructionSite.activeContract.jobCode","d1","d10");
+		int days = Days.daysBetween(initialDate, lastDate).getDays() + 1;
+		logger.debug("cantidad de dias {}",days);
+		//oculta las columnas que no se usarán
+		for(int i = 29 ; i <= 31 ; i++){
+			String propertyId = "d"+i;
+			//si el dia es menor o igual la cantidad de dias, lo agrega si no está
+			if( i <= days && table1.getColumn(propertyId) == null ){
+				logger.debug("agregando la columna {} ",i);
+				table1.addColumn(propertyId);//.setSortable(false).setWidth(50);
+			}else if ( i > days && table1.getColumn(propertyId) != null ){ // si no , la quita
+				logger.debug("quitando la columna {} ",i);
+				table1.removeColumn(propertyId);
+			}else{
+				logger.debug("la columna {} se deja como está",i);
 			}
 		}
+
+//		logger.debug("se van a generar {} columnas",days);
+//		
+//		table1.addStyleName("grid-attendace");
+//		table1.setEditorEnabled(true);
+//		table1.setFrozenColumnCount(1);
+//		if(table1.getColumn("laborerConstructionSite") != null )
+//			table1.removeColumn("laborerConstructionSite");
+//		if(table1.getColumn("attendanceId") != null )
+//			table1.removeColumn("attendanceId");
+//		if(table1.getColumn("date") != null )
+//			table1.removeColumn("date");
+//		
 
 		//si las columnas no están cargadas, las carga
 //		if( table1.getColumns().size() == 0 ){
@@ -178,59 +181,7 @@ public class AttendancePanel extends Panel implements View {
 //				}
 //			}
 		
-			table1.getColumn("laborerConstructionSite.activeContract.jobCode").setHeaderCaption("Código").setEditable(false).setWidth(100);
-
-			if(table1.getHeaderRowCount() <= 1 ){
-				HeaderRow filterRow =  table1.appendHeaderRow();
-			
-				for (final Object pid: table1.getContainerDataSource().getContainerPropertyIds()) {
-					
-					
-					final HeaderCell cell = filterRow.getCell(pid);
-	
-					// Have an input field to use for filter
-					TextField filterField = new TextField();
-					if(pid.equals("laborerConstructionSite.activeContract.jobCode")) filterField.setWidth("100%");
-					else {
-						filterField.setWidth("30px");
-						logger.debug("pid {}",pid);
-						if(table1.getColumn(pid) != null )
-							table1.getColumn(pid).setSortable(false).setWidth(50);
-					}
-	
-					filterField.setHeight("90%");
-	
-					// Update filter When the filter input is changed
-					filterField.addTextChangeListener(new TextChangeListener() {
-	
-						@Override
-						public void textChange(TextChangeEvent event) {
-							// Can't modify filters so need to replace
-							((SimpleFilterable) table1.getContainerDataSource()).removeContainerFilters(pid);
-	
-							// (Re)create the filter if necessary
-							if (! event.getText().isEmpty())
-								((Filterable) table1.getContainerDataSource()).addContainerFilter(
-										new SimpleStringFilter(pid,
-												event.getText(), true, false));
-						}
-					});
-					if(cell != null)
-						cell.setComponent(filterField);
-				}
-				}else{
-
-					for (final Object pid: table1.getContainerDataSource().getContainerPropertyIds()) {
-						
-						if(pid.equals("laborerConstructionSite.activeContract.jobCode"))
-							continue;
-						// Have an input field to use for filter
-						logger.debug("seteando en 50");
-						if(table1.getColumn(pid) != null )
-							table1.getColumn(pid).setSortable(false).setHeaderCaption(((String) pid).replace("d","")).setWidth(60);
-				}
-			}
-			
+//			table1.getColumn("laborerConstructionSite.activeContract.jobCode").setHeaderCas
 //		}
 //		//oculta las columnas que no se usarán
 //		for(int i = 29 ; i <= 31 ; i++){
@@ -255,6 +206,58 @@ public class AttendancePanel extends Panel implements View {
 		attendanceLaborerContainer.addNestedContainerProperty("laborerConstructionSite.activeContract.jobCode");
 		table1 = new Grid(attendanceLaborerContainer);
 		table1.setSizeFull();
+		
+		table1.addStyleName("grid-attendace");
+		table1.setEditorEnabled(true);
+		table1.setFrozenColumnCount(1);
+		if(table1.getColumn("laborerConstructionSite") != null )
+			table1.removeColumn("laborerConstructionSite");
+		if(table1.getColumn("attendanceId") != null )
+			table1.removeColumn("attendanceId");
+		if(table1.getColumn("date") != null )
+			table1.removeColumn("date");
+		
+		table1.setColumnOrder("laborerConstructionSite.activeContract.jobCode","d1","d2","d3","d4","d5","d6","d7","d8","d9","d10","d11","d12","d13","d14","d15","d16"
+				,"d17","d18","d19","d20","d21","d22","d23","d24","d25","d26","d27","d28","d29","d30","d31");
+		
+		table1.getColumn("laborerConstructionSite.activeContract.jobCode").setHeaderCaption("Código").setEditable(false).setWidth(100);
+		
+		HeaderRow filterRow =  table1.appendHeaderRow();
+		
+		for (final Object pid: table1.getContainerDataSource().getContainerPropertyIds()) {
+			
+			final HeaderCell cell = filterRow.getCell(pid);
+	
+			// Have an input field to use for filter
+			TextField filterField = new TextField();
+			if(pid.equals("laborerConstructionSite.activeContract.jobCode")) filterField.setWidth("100%");
+			else {
+				filterField.setWidth("30px");
+				logger.debug("pid {}",pid);
+				if(table1.getColumn(pid) != null )
+					table1.getColumn(pid).setHeaderCaption(((String) pid).replace("d","")).setSortable(false).setWidth(50);
+			}
+	
+			filterField.setHeight("90%");
+	
+			// Update filter When the filter input is changed
+			filterField.addTextChangeListener(new TextChangeListener() {
+	
+				@Override
+				public void textChange(TextChangeEvent event) {
+					// Can't modify filters so need to replace
+					((SimpleFilterable) table1.getContainerDataSource()).removeContainerFilters(pid);
+	
+					// (Re)create the filter if necessary
+					if (! event.getText().isEmpty())
+						((Filterable) table1.getContainerDataSource()).addContainerFilter(
+								new SimpleStringFilter(pid,
+										event.getText(), true, false));
+				}
+			});
+			if(cell != null)
+				cell.setComponent(filterField);
+		}
 
 		tab.addTab(table1,"Asistencia");
 
@@ -306,6 +309,16 @@ public class AttendancePanel extends Panel implements View {
 	private AttendanceMark randomAttendance() {
 		return AttendanceMark.ATTEND;
 	}
+	
+	Property.ValueChangeListener listener = new Property.ValueChangeListener() {
+
+		@Override
+		public void valueChange(ValueChangeEvent event) {
+			attendanceDate.removeValueChangeListener(listener);
+			populateAttendanceGrid();
+			attendanceDate.addValueChangeListener(listener);
+		}
+	};
 
 	private HorizontalLayout drawTopAttendance() {
 		return new HorizontalLayout(){
@@ -322,13 +335,7 @@ public class AttendancePanel extends Panel implements View {
 								attendanceDate.setValue(new Date());
 								attendanceDate.setImmediate(true);
 								logger.debug("creando inlinedate1");
-								attendanceDate.addValueChangeListener(new Property.ValueChangeListener() {
-
-									@Override
-									public void valueChange(ValueChangeEvent event) {
-										populateAttendanceGrid();
-									}
-								});
+								attendanceDate.addValueChangeListener(listener);
 								addComponent(attendanceDate);
 							}
 						});
@@ -464,7 +471,7 @@ public class AttendancePanel extends Panel implements View {
 	}
 
 	private void populateAttendanceGrid(){
-		clearAttendanceTable();
+		
 //		UI.getCurrent().addWindow(progressDialog);
 
 		final WorkThread thread = new WorkThread();
@@ -480,10 +487,12 @@ public class AttendancePanel extends Panel implements View {
 			throw new RuntimeException("No se ha seteado la obra en la vista de asistencia.");
 
 		//cuenta la cantidad de dias entre ambas fechas
-		int days = Days.daysBetween(initialDate, lastDate).getDays();
+		int days = Days.daysBetween(initialDate, lastDate).getDays() + 1;
 
 		logger.debug("se van a generar las filas para {} dias",days);
 
+		clearAttendanceTable();
+		
 		List<LaborerConstructionsite> laborers = service.getLaborerActiveByConstruction(cs);
 
 		for(LaborerConstructionsite lc : laborers){
@@ -509,8 +518,9 @@ public class AttendancePanel extends Panel implements View {
 
 			try{
 				//dependiendo de la fecha seleccionada llena la información de la tabla
-				DateTime attendanceDate = getAttendanceDate();
-				DateTime date2 = attendanceDate.plusMonths(1).plusDays(-1);
+				DateTime dt = getAttendanceDate();
+				DateTime attendanceDate = dt.withDayOfMonth(dt.dayOfMonth().getMinimumValue());
+				DateTime date2 = attendanceDate.withDayOfMonth( attendanceDate.dayOfMonth().getMaximumValue() );
 
 				getUI().getSession().getLockInstance().lock();
 				
