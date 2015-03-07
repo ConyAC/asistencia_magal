@@ -13,6 +13,7 @@
 	    <class>cl.magal.asistencia.entities.AfpItem</class>
 	    <class>cl.magal.asistencia.entities.Annexed</class>
 	    <class>cl.magal.asistencia.entities.Attachment</class>
+	    <class>cl.magal.asistencia.entities.Attendance</class>
 	    <class>cl.magal.asistencia.entities.ConstructionCompany</class>
 	    <class>cl.magal.asistencia.entities.ConstructionSite</class>
 	    <class>cl.magal.asistencia.entities.Contract</class>
@@ -24,6 +25,7 @@
 	    <class>cl.magal.asistencia.entities.LaborerTool</class>
 	    <class>cl.magal.asistencia.entities.Loan</class>
 	    <class>cl.magal.asistencia.entities.Mobilization2</class>
+	    <class>cl.magal.asistencia.entities.Overtime</class>
 	    <class>cl.magal.asistencia.entities.Role</class>
 	    <class>cl.magal.asistencia.entities.TaxationConfigurations</class>
 	    <class>cl.magal.asistencia.entities.Team</class>
@@ -34,14 +36,15 @@
 	    <class>cl.magal.asistencia.entities.converter.AbsenceTypeConverter</class>
 	    <class>cl.magal.asistencia.entities.converter.AccidentLevelConverter</class>
 	    <class>cl.magal.asistencia.entities.converter.AfpConverter</class>
+	    <class>cl.magal.asistencia.entities.converter.AttendanceMarkConverter</class>
 	    <class>cl.magal.asistencia.entities.converter.BankConverter</class>
 	    <class>cl.magal.asistencia.entities.converter.IsapreConverter</class>
 	    <class>cl.magal.asistencia.entities.converter.JobConverter</class>
+	    <class>cl.magal.asistencia.entities.converter.LoanToolStatusConverter</class>
 	    <class>cl.magal.asistencia.entities.converter.MaritalStatusConverter</class>
 	    <class>cl.magal.asistencia.entities.converter.NationalityConverter</class>
 	    <class>cl.magal.asistencia.entities.converter.PermissionConverter</class>
 	    <class>cl.magal.asistencia.entities.converter.StatusConverter</class>
-	    <class>cl.magal.asistencia.entities.converter.LoanToolStatusConverter</class>
 	    <class>cl.magal.asistencia.entities.converter.UserStatusConverter</class>
 	    <!-- HIBERNATE PROPERTY  -->
 	    <!-- 
@@ -56,10 +59,13 @@
 			 	        
 	        <!--
 	        <property name="eclipselink.ddl-generation" value="create-or-extend-tables"/>
+	        <property name="eclipselink.ddl-generation.output-mode" value="database"/> 
             <property name="eclipselink.logging.level" value="FINE"/>
             <property name="eclipselink.logging.level.sql" value="FINE"/>
             <property name="eclipselink.logging.parameters" value="true"/>
              -->
+            <property name="eclipselink.ddl-generation" value="create-or-extend-tables"/>
+            <property name="eclipselink.ddl-generation.output-mode" value="database"/> 
             <property name="eclipselink.logging.level" value="OFF"/>
             <property name="eclipselink.logging.level.sql" value="OFF"/>
             <property name="eclipselink.logging.parameters" value="false"/>

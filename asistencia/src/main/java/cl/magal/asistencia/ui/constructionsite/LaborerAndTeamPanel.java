@@ -36,7 +36,6 @@ import cl.magal.asistencia.entities.Team;
 import cl.magal.asistencia.entities.User;
 import cl.magal.asistencia.entities.Vacation;
 import cl.magal.asistencia.entities.enums.Permission;
-import cl.magal.asistencia.entities.enums.Status;
 import cl.magal.asistencia.services.ConstructionSiteService;
 import cl.magal.asistencia.services.LaborerService;
 import cl.magal.asistencia.services.TeamService;
@@ -51,7 +50,6 @@ import com.vaadin.data.Container.Filter;
 import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.fieldgroup.BeanFieldGroup;
-import com.vaadin.data.fieldgroup.FieldGroup.CommitException;
 import com.vaadin.data.util.BeanItem;
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.data.util.ObjectProperty;
@@ -65,11 +63,11 @@ import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.StreamResource;
 import com.vaadin.ui.AbstractField;
-import com.vaadin.ui.AbstractSelect.ItemCaptionMode;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.BrowserFrame;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
+import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.CustomTable;
@@ -112,9 +110,7 @@ public class LaborerAndTeamPanel extends Panel implements View {
 	/** FIELD GROUP **/
 	BeanFieldGroup<ConstructionSite> bfg = new BeanFieldGroup<ConstructionSite>(ConstructionSite.class);
 	/** LAYOUTS **/
-	VerticalLayout detalleLayout;
 	HorizontalLayout detailLayout;
-	//	private TwinColSelect tcsLaborer;
 
 	/** SERVICES **/
 	@Autowired
@@ -129,23 +125,25 @@ public class LaborerAndTeamPanel extends Panel implements View {
 	transient private VelocityEngine velocityEngine;
 
 	Button asistenciaBtn;
-
+	
+	/**
+	 * Lista de trabajadores seleccionados
+	 */
+	final Set<Object> selectedItemIds = new HashSet<Object>();
+	ComboBox cbFilterStep;
 	boolean hasConstructionDetails;
 
 	public void setHasAttendanceButton(boolean hasAttendanceButton) {
 		asistenciaBtn.setVisible(hasAttendanceButton); 
 	}
 
-
 	public boolean isHasConstructionDetails() {
 		return hasConstructionDetails;
 	}
 
-
 	public void setHasConstructionDetails(boolean hasConstructionDetails) {
 		this.hasConstructionDetails = hasConstructionDetails;
 	}
-
 
 	public LaborerAndTeamPanel() {
 
@@ -165,7 +163,6 @@ public class LaborerAndTeamPanel extends Panel implements View {
 		setContent(tab);
 	}
 
-
 	@Override
 	public void enter(ViewChangeEvent event) {
 		Page<User> users = userService.findAllActiveUser(new PageRequest(0, 20));
@@ -177,118 +174,6 @@ public class LaborerAndTeamPanel extends Panel implements View {
 	public void init(){
 
 	}
-
-	protected HorizontalLayout drawTopDetails() {
-
-		HorizontalLayout hl = new HorizontalLayout();
-		hl.setSizeFull();
-		hl.setSpacing(true);
-
-		hl.addComponent(new HorizontalLayout(){{
-
-			setSpacing(true);
-			setSizeFull();
-
-			FormLayout vlInfo =new FormLayout();
-			vlInfo.setSizeFull();
-			vlInfo.setSpacing(true);
-
-			final TextField nameField = new TextField("Nombre");
-			nameField.setNullRepresentation("");
-			nameField.setRequired(true);
-			nameField.setWidth("100%");
-			bfg.bind(nameField, "name");
-
-			vlInfo.addComponent(nameField);
-
-			if(SecurityHelper.hasPermission(Permission.EDITAR_OBRA) ){
-				//agrega un boton que hace el commit
-				editConstructionSite = new Button(null,new Button.ClickListener() {
-
-					@Override
-					public void buttonClick(ClickEvent event) {
-						try {
-							bfg.commit();
-							constructionSiteService.save(bfg.getItemDataSource().getBean());
-						} catch (CommitException e) {
-							logger.error("Error al guardar la información la obra",e);
-							Notification.show("Error al guardar la información del usuario", Type.ERROR_MESSAGE);
-						}
-
-					}
-				}){{
-					setIcon(FontAwesome.SAVE);
-				}};
-				addComponent(editConstructionSite);
-				setComponentAlignment(editConstructionSite, Alignment.TOP_RIGHT);
-			}
-
-			TextField addressField = new TextField("Dirección");
-			addressField.setWidth("100%");
-			addressField.setNullRepresentation("");
-			bfg.bind(addressField, "address");
-			vlInfo.addComponent(addressField);
-
-			ComboBox statusField = new ComboBox("Estado");
-			statusField.setWidth("100%");
-			//no permite nulos
-			statusField.setNullSelectionAllowed(false);
-			for(Status s : Status.values()){
-				statusField.addItem(s);
-			}
-
-			bfg.bind(statusField, "status");
-			vlInfo.addComponent(statusField);
-
-			ComboBox personInChargeField = new ComboBox("Responsable",userContainer);
-			personInChargeField.setItemCaptionMode(ItemCaptionMode.PROPERTY);
-			personInChargeField.setItemCaptionPropertyId("fullname");
-			personInChargeField.setWidth("100%");			
-			bfg.bind(personInChargeField, "personInCharge");
-
-			vlInfo.addComponent(personInChargeField);
-
-			addComponent(vlInfo);
-			setExpandRatio(vlInfo, 1.0F);
-		}});
-
-		//		hl.addComponent(new Image());
-
-		VerticalLayout vlIBotones =new VerticalLayout();
-		vlIBotones.setSpacing(true);
-		hl.addComponent(vlIBotones);
-		hl.setComponentAlignment(vlIBotones, Alignment.MIDDLE_RIGHT );
-
-		final Button asistencia = new Button("Asistencia",FontAwesome.CHECK);
-		asistencia.addClickListener(new Button.ClickListener() {
-
-			@Override
-			public void buttonClick(ClickEvent event) {
-				//				switchPanels();
-				asistencia.setEnabled(true);
-			}
-		});
-		asistencia.setDisableOnClick(true);
-
-		asistencia.setSizeFull();
-		vlIBotones.addComponent(asistencia);
-		//		Button vacaciones = new Button("Carga Masiva Vacaciones",FontAwesome.UPLOAD);
-		//		vacaciones.setSizeFull();
-		//		vlIBotones.addComponent(vacaciones);
-
-		Button configuraciones = new Button("Configuraciones Obra",FontAwesome.GEARS);
-		configuraciones.setSizeFull();
-		vlIBotones.addComponent(configuraciones);
-		vlIBotones.setWidth("300px");
-
-		return hl;
-	}
-
-	/**
-	 * Lista de trabajadores seleccionados
-	 */
-	final Set<Object> selectedItemIds = new HashSet<Object>();
-	ComboBox cbFilterStep;
 
 	protected VerticalLayout drawLaborer() {
 
@@ -1208,5 +1093,10 @@ public class LaborerAndTeamPanel extends Panel implements View {
 		cbFilterStep.removeAllItems();
 		for(String step : item.getBean().getSteps())
 			cbFilterStep.addItem(step);
+	}
+
+
+	public void addAttendanceClickListener(ClickListener listener) {
+		asistenciaBtn.addClickListener(listener);
 	}
 }
