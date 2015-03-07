@@ -626,6 +626,21 @@ public class LaborerServiceTest {
 		
 	}
 	
+	@Test
+	public void testFindSettledLaborer(){
+		//se sabe que usuario finiquitado
+		Long laborerId = 209L;
+		Long constructionsiteId = 2L;
+		Laborer expectedLaborer = service.findLaborer(laborerId);
+		
+		ConstructionSite cs = constructionService.findConstructionSite(constructionsiteId);
+		List<Laborer> laborers = service.getLaborerByConstructionsite(cs);
+		
+		assertNotNull("1", laborers );
+		assertTrue("2", !laborers.isEmpty() );
+		assertTrue("3", laborers.contains(expectedLaborer) );
+	}
+	
 	/**
 	 * METODOS UTILITARIOS
 	 */
@@ -652,5 +667,7 @@ public class LaborerServiceTest {
 		//busca al obrero 207 en la obra 1
 		return service.findLaborerOnConstructionSite(cs,laborer);
 	}
+	
+	
 	
 }

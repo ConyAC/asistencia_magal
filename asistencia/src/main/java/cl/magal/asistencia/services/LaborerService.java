@@ -185,7 +185,7 @@ public class LaborerService {
 		return null;
 	}
 
-	public List<Laborer> getAllLaborer(ConstructionSite cs) {
+	public List<Laborer> getLaborerByConstructionsite(ConstructionSite cs) {
 		return laborerRepo.findByConstructionSite(cs.getConstructionsiteId());
 	}
 

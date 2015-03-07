@@ -494,7 +494,7 @@ public class WorkerFileView extends HorizontalLayout implements View {
 			public void valueChange(ValueChangeEvent event) {
 				final List<Laborer> laborers;
 				if(cbConstructionsites.getValue() != null ){
-					laborers = service.getAllLaborer((ConstructionSite)cbConstructionsites.getValue());
+					laborers = service.getLaborerByConstructionsite((ConstructionSite)cbConstructionsites.getValue());
 				}else{
 					laborers = null;
 				}
