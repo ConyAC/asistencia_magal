@@ -7,7 +7,6 @@ import java.util.List;
 import javax.annotation.PostConstruct;
 
 import org.joda.time.DateTime;
-import org.joda.time.Days;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +15,7 @@ import org.springframework.stereotype.Component;
 
 import cl.magal.asistencia.entities.Attendance;
 import cl.magal.asistencia.entities.ConstructionSite;
+import cl.magal.asistencia.entities.Overtime;
 import cl.magal.asistencia.entities.enums.AttendanceMark;
 import cl.magal.asistencia.services.ConstructionSiteService;
 import cl.magal.asistencia.services.UserService;
@@ -82,7 +82,8 @@ public class AttendancePanel extends Panel implements View {
 	@Autowired
 	private transient UserService userService;
 
-	BeanItemContainer<Attendance> attendanceLaborerContainer = new BeanItemContainer<Attendance>(Attendance.class);
+	BeanItemContainer<Attendance> attendanceContainer = new BeanItemContainer<Attendance>(Attendance.class);
+	BeanItemContainer<Overtime> overtimeContainer = new BeanItemContainer<Overtime>(Overtime.class);
 	ConstructionSite cs;
 
 	public void setCs(ConstructionSite cs) {
@@ -100,7 +101,7 @@ public class AttendancePanel extends Panel implements View {
 
 	ProgressBar progress;
 	Label status;
-	Grid table1;
+	Grid attendanceGrid, overtimeGrid;
 	Window progressDialog;
 
 	public AttendancePanel(){
@@ -129,94 +130,94 @@ public class AttendancePanel extends Panel implements View {
 
 	}
 
-	private void clearAttendanceTable(){
-		attendanceLaborerContainer.removeAllItems();
-		//		table1.removeAllColumns();
+	private void clearGrids(){
+		attendanceContainer.removeAllItems();
+		overtimeContainer.removeAllItems();
 	}
 
-	private void configAttendanceColumns(DateTime initialDate, DateTime lastDate){
-
-		//cuenta la cantidad de dias entre ambas fechas
-		int days = Days.daysBetween(initialDate, lastDate).getDays() + 1;
-		logger.debug("cantidad de dias {}",days);
-		//oculta las columnas que no se usarán
-		for(int i = 29 ; i <= 31 ; i++){
-			String propertyId = "d"+i;
-			//si el dia es menor o igual la cantidad de dias, lo agrega si no está
-			if( i <= days && table1.getColumn(propertyId) == null ){
-				logger.debug("agregando la columna {} ",i);
-				table1.addColumn(propertyId);//.setSortable(false).setWidth(50);
-			}else if ( i > days && table1.getColumn(propertyId) != null ){ // si no , la quita
-				logger.debug("quitando la columna {} ",i);
-				table1.removeColumn(propertyId);
-			}else{
-				logger.debug("la columna {} se deja como está",i);
-			}
-		}
-
-//		logger.debug("se van a generar {} columnas",days);
-//		
-//		table1.addStyleName("grid-attendace");
-//		table1.setEditorEnabled(true);
-//		table1.setFrozenColumnCount(1);
-//		if(table1.getColumn("laborerConstructionSite") != null )
-//			table1.removeColumn("laborerConstructionSite");
-//		if(table1.getColumn("attendanceId") != null )
-//			table1.removeColumn("attendanceId");
-//		if(table1.getColumn("date") != null )
-//			table1.removeColumn("date");
-//		
-
-		//si las columnas no están cargadas, las carga
-//		if( table1.getColumns().size() == 0 ){
-
-			//crea 31 columnas y luego oculta las ultimas según sea necesario
-//			Object[] visibleColumns = new Object[ days + 1];
-//			visibleColumns[0] = "activeContract.jobCode";
+//	private void configAttendanceColumns(DateTime initialDate, DateTime lastDate){
 //
-//			if( table1.getColumn("activeContract.jobCode") == null ){
-//				table1.addColumn("activeContract.jobCode",Integer.class).setHeaderCaption("Código").setEditable(false).setWidth(100);
-//			}
-//			table1.addStyleName("grid-attendace");
-//			table1.setEditorEnabled(true);
-//			table1.setFrozenColumnCount(1);
-//
-//			for(int i = 1 ; i <= days ; i++){
-//				String propertyId = "day"+i;
-//				if( table1.getColumn(propertyId) == null ){
-//					table1.addColumn("day"+i,AttendanceMark.class).setHeaderCaption( initialDate.plusDays(i - 1).getDayOfMonth()+"" ).setSortable(false).setWidth(50);
-//					visibleColumns[i] = "day"+i; 
-//				}
-//			}
-		
-//			table1.getColumn("laborerConstructionSite.activeContract.jobCode").setHeaderCas
-//		}
+//		//cuenta la cantidad de dias entre ambas fechas
+//		int days = Days.daysBetween(initialDate, lastDate).getDays() + 1;
+//		logger.debug("cantidad de dias {}",days);
 //		//oculta las columnas que no se usarán
 //		for(int i = 29 ; i <= 31 ; i++){
-//			String propertyId = "day"+i;
+//			String propertyId = "d"+i;
 //			//si el dia es menor o igual la cantidad de dias, lo agrega si no está
-//			if( i <= days && table1.getColumn(propertyId) == null ){
+//			if( i <= days && attendanceGrid.getColumn(propertyId) == null ){
 //				logger.debug("agregando la columna {} ",i);
-//				table1.addColumn(propertyId,AttendanceMark.class).setHeaderCaption( initialDate.plusDays(i - 1).getDayOfMonth()+"" ).setSortable(false).setWidth(50);
-//			}else if ( i > days && table1.getColumn(propertyId) != null ){ // si no , la quita
+//				attendanceGrid.addColumn(propertyId);//.setSortable(false).setWidth(50);
+//			}else if ( i > days && attendanceGrid.getColumn(propertyId) != null ){ // si no , la quita
 //				logger.debug("quitando la columna {} ",i);
-//				table1.removeColumn(propertyId);
+//				attendanceGrid.removeColumn(propertyId);
 //			}else{
 //				logger.debug("la columna {} se deja como está",i);
 //			}
 //		}
-
-	}
+//
+////		logger.debug("se van a generar {} columnas",days);
+////		
+////		table1.addStyleName("grid-attendace");
+////		table1.setEditorEnabled(true);
+////		table1.setFrozenColumnCount(1);
+////		if(table1.getColumn("laborerConstructionSite") != null )
+////			table1.removeColumn("laborerConstructionSite");
+////		if(table1.getColumn("attendanceId") != null )
+////			table1.removeColumn("attendanceId");
+////		if(table1.getColumn("date") != null )
+////			table1.removeColumn("date");
+////		
+//
+//		//si las columnas no están cargadas, las carga
+////		if( table1.getColumns().size() == 0 ){
+//
+//			//crea 31 columnas y luego oculta las ultimas según sea necesario
+////			Object[] visibleColumns = new Object[ days + 1];
+////			visibleColumns[0] = "activeContract.jobCode";
+////
+////			if( table1.getColumn("activeContract.jobCode") == null ){
+////				table1.addColumn("activeContract.jobCode",Integer.class).setHeaderCaption("Código").setEditable(false).setWidth(100);
+////			}
+////			table1.addStyleName("grid-attendace");
+////			table1.setEditorEnabled(true);
+////			table1.setFrozenColumnCount(1);
+////
+////			for(int i = 1 ; i <= days ; i++){
+////				String propertyId = "day"+i;
+////				if( table1.getColumn(propertyId) == null ){
+////					table1.addColumn("day"+i,AttendanceMark.class).setHeaderCaption( initialDate.plusDays(i - 1).getDayOfMonth()+"" ).setSortable(false).setWidth(50);
+////					visibleColumns[i] = "day"+i; 
+////				}
+////			}
+//		
+////			table1.getColumn("laborerConstructionSite.activeContract.jobCode").setHeaderCas
+////		}
+////		//oculta las columnas que no se usarán
+////		for(int i = 29 ; i <= 31 ; i++){
+////			String propertyId = "day"+i;
+////			//si el dia es menor o igual la cantidad de dias, lo agrega si no está
+////			if( i <= days && table1.getColumn(propertyId) == null ){
+////				logger.debug("agregando la columna {} ",i);
+////				table1.addColumn(propertyId,AttendanceMark.class).setHeaderCaption( initialDate.plusDays(i - 1).getDayOfMonth()+"" ).setSortable(false).setWidth(50);
+////			}else if ( i > days && table1.getColumn(propertyId) != null ){ // si no , la quita
+////				logger.debug("quitando la columna {} ",i);
+////				table1.removeColumn(propertyId);
+////			}else{
+////				logger.debug("la columna {} se deja como está",i);
+////			}
+////		}
+//
+//	}
 
 	private TabSheet drawAttendanceDetail() {
 		TabSheet tab = new TabSheet();
 
-		attendanceLaborerContainer.addNestedContainerProperty("laborerConstructionSite.activeContract.jobCode");
-		table1 = new Grid(attendanceLaborerContainer);
-		table1.setSelectionMode(SelectionMode.SINGLE);
-		table1.setSizeFull();
-		table1.setEditorFieldGroup(new BeanFieldGroup<Attendance>(Attendance.class));
-		table1.setEditorFieldFactory(new DefaultFieldGroupFieldFactory(){
+		attendanceContainer.addNestedContainerProperty("laborerConstructionSite.activeContract.jobCode");
+		attendanceGrid = new Grid(attendanceContainer);
+		attendanceGrid.setSelectionMode(SelectionMode.SINGLE);
+		attendanceGrid.setSizeFull();
+		attendanceGrid.setEditorFieldGroup(new BeanFieldGroup<Attendance>(Attendance.class));
+		attendanceGrid.setEditorFieldFactory(new DefaultFieldGroupFieldFactory(){
 			@Override
 		    public <T extends Field> T createField(Class<?> type, Class<T> fieldType) {
 
@@ -231,7 +232,7 @@ public class AttendancePanel extends Panel implements View {
 		        return super.createField(type, fieldType);
 		    }
 		});
-		table1.getEditorFieldGroup().addCommitHandler(new CommitHandler() {
+		attendanceGrid.getEditorFieldGroup().addCommitHandler(new CommitHandler() {
 			
 			@Override
 			public void preCommit(CommitEvent commitEvent) throws CommitException {
@@ -243,29 +244,28 @@ public class AttendancePanel extends Panel implements View {
 				//guarda el elmento
 				Attendance attedance = ((BeanItem<Attendance>) commitEvent.getFieldBinder().getItemDataSource()).getBean();
 				service.save(attedance);
-				attendanceLaborerContainer.sort(new Object[]{"laborerConstructionSite.activeContract.jobCode"}, new boolean[]{true});
+				attendanceContainer.sort(new Object[]{"laborerConstructionSite.activeContract.jobCode"}, new boolean[]{true});
 			}
 		});
 		
-		table1.addStyleName("grid-attendace");
-		table1.setEditorEnabled(true);
-		table1.setFrozenColumnCount(1);
-		if(table1.getColumn("laborerConstructionSite") != null )
-			table1.removeColumn("laborerConstructionSite");
-		if(table1.getColumn("attendanceId") != null )
-			table1.removeColumn("attendanceId");
-		if(table1.getColumn("date") != null )
-			table1.removeColumn("date");
+		attendanceGrid.addStyleName("grid-attendace");
+		attendanceGrid.setEditorEnabled(true);
+		attendanceGrid.setFrozenColumnCount(1);
+		if(attendanceGrid.getColumn("laborerConstructionSite") != null )
+			attendanceGrid.removeColumn("laborerConstructionSite");
+		if(attendanceGrid.getColumn("attendanceId") != null )
+			attendanceGrid.removeColumn("attendanceId");
+		if(attendanceGrid.getColumn("date") != null )
+			attendanceGrid.removeColumn("date");
 		
-		table1.setColumnOrder("laborerConstructionSite.activeContract.jobCode","d1","d2","d3","d4","d5","d6","d7","d8","d9","d10","d11","d12","d13","d14","d15","d16"
+		attendanceGrid.setColumnOrder("laborerConstructionSite.activeContract.jobCode","d1","d2","d3","d4","d5","d6","d7","d8","d9","d10","d11","d12","d13","d14","d15","d16"
 				,"d17","d18","d19","d20","d21","d22","d23","d24","d25","d26","d27","d28","d29","d30","d31");
 		
-		attendanceLaborerContainer.sort(new Object[]{"laborerConstructionSite.activeContract.jobCode"}, new boolean[]{true});
-		table1.getColumn("laborerConstructionSite.activeContract.jobCode").setHeaderCaption("Código").setEditable(false).setWidth(100);
+		attendanceContainer.sort(new Object[]{"laborerConstructionSite.activeContract.jobCode"}, new boolean[]{true});
+		attendanceGrid.getColumn("laborerConstructionSite.activeContract.jobCode").setHeaderCaption("Código").setEditable(false).setWidth(100);
 		
-		HeaderRow filterRow =  table1.appendHeaderRow();
-		
-		for (final Object pid: table1.getContainerDataSource().getContainerPropertyIds()) {
+		HeaderRow filterRow =  attendanceGrid.appendHeaderRow();
+		for (final Object pid: attendanceGrid.getContainerDataSource().getContainerPropertyIds()) {
 			
 			final HeaderCell cell = filterRow.getCell(pid);
 	
@@ -274,8 +274,8 @@ public class AttendancePanel extends Panel implements View {
 			if(pid.equals("laborerConstructionSite.activeContract.jobCode")) filterField.setWidth("100%");
 			else {
 				filterField.setWidth("50px");
-				if(table1.getColumn(pid) != null )
-					table1.getColumn(pid).setHeaderCaption(((String) pid).replace("d","")).setSortable(false);//.setWidth(50);
+				if(attendanceGrid.getColumn(pid) != null )
+					attendanceGrid.getColumn(pid).setHeaderCaption(((String) pid).replace("d","")).setSortable(false);//.setWidth(50);
 			}
 	
 			filterField.setHeight("90%");
@@ -286,11 +286,11 @@ public class AttendancePanel extends Panel implements View {
 				@Override
 				public void textChange(TextChangeEvent event) {
 					// Can't modify filters so need to replace
-					((SimpleFilterable) table1.getContainerDataSource()).removeContainerFilters(pid);
+					((SimpleFilterable) attendanceGrid.getContainerDataSource()).removeContainerFilters(pid);
 	
 					// (Re)create the filter if necessary
 					if (! event.getText().isEmpty())
-						((Filterable) table1.getContainerDataSource()).addContainerFilter(
+						((Filterable) attendanceGrid.getContainerDataSource()).addContainerFilter(
 								new SimpleStringFilter(pid,
 										event.getText(), true, false));
 				}
@@ -299,42 +299,81 @@ public class AttendancePanel extends Panel implements View {
 				cell.setComponent(filterField);
 		}
 
-		tab.addTab(table1,"Asistencia");
+		tab.addTab(attendanceGrid,"Asistencia");
 
-		tab.addTab(new Table(){
-			{
-				setSizeFull();
-				setEditable(true);
-				addContainerProperty("number", Integer.class, 0);
-				setColumnHeader("number", "#");
-				setColumnWidth("number", 30);
-				addGeneratedColumn("number", new ColumnGenerator() {
-
-					@Override
-					public Object generateCell(Table source, Object itemId, Object columnId) {
-						return source.getItem(itemId).getItemProperty(columnId).getValue();
-					}
-				});
-
-				addContainerProperty("firstname", String.class, "");
-				setColumnHeader("firstname", "Nombre");
-				setColumnWidth("firstname", 100);
-				addGeneratedColumn("firstname", new ColumnGenerator() {
-
-					@Override
-					public Object generateCell(Table source, Object itemId, Object columnId) {
-						return source.getItem(itemId).getItemProperty(columnId).getValue();
-					}
-				});
-
-				for(int i = 25; i < 55 ; i++){ 
-					addContainerProperty("day"+i, String.class, "");
-					setColumnHeader("day"+i, ((i%31)+1)+"");
-					setColumnWidth("day"+i, 50);
-				}
-
+		overtimeContainer.addNestedContainerProperty("laborerConstructionSite.activeContract.jobCode");
+		overtimeGrid = new Grid(overtimeContainer);
+		overtimeGrid.setSelectionMode(SelectionMode.SINGLE);
+		overtimeGrid.setSizeFull();
+		overtimeGrid.setEditorFieldGroup(new BeanFieldGroup<Overtime>(Overtime.class));
+		overtimeGrid.getEditorFieldGroup().addCommitHandler(new CommitHandler() {
+			
+			@Override
+			public void preCommit(CommitEvent commitEvent) throws CommitException {
+				
 			}
-		},"Horas Extras");
+			
+			@Override
+			public void postCommit(CommitEvent commitEvent) throws CommitException {
+				//guarda el elmento
+				Overtime attedance = ((BeanItem<Overtime>) commitEvent.getFieldBinder().getItemDataSource()).getBean();
+				service.save(attedance);
+				overtimeContainer.sort(new Object[]{"laborerConstructionSite.activeContract.jobCode"}, new boolean[]{true});
+			}
+		});
+		
+		overtimeGrid.addStyleName("grid-attendace");
+		overtimeGrid.setEditorEnabled(true);
+		overtimeGrid.setFrozenColumnCount(1);
+		if(overtimeGrid.getColumn("laborerConstructionSite") != null )
+			overtimeGrid.removeColumn("laborerConstructionSite");
+		if(overtimeGrid.getColumn("attendanceId") != null )
+			overtimeGrid.removeColumn("attendanceId");
+		if(overtimeGrid.getColumn("date") != null )
+			overtimeGrid.removeColumn("date");
+		
+		overtimeGrid.setColumnOrder("laborerConstructionSite.activeContract.jobCode","d1","d2","d3","d4","d5","d6","d7","d8","d9","d10","d11","d12","d13","d14","d15","d16"
+				,"d17","d18","d19","d20","d21","d22","d23","d24","d25","d26","d27","d28","d29","d30","d31");
+		
+		overtimeContainer.sort(new Object[]{"laborerConstructionSite.activeContract.jobCode"}, new boolean[]{true});
+		overtimeGrid.getColumn("laborerConstructionSite.activeContract.jobCode").setHeaderCaption("Código").setEditable(false).setWidth(100);
+		
+		filterRow =  overtimeGrid.appendHeaderRow();
+		for (final Object pid: overtimeGrid.getContainerDataSource().getContainerPropertyIds()) {
+			
+			final HeaderCell cell = filterRow.getCell(pid);
+	
+			// Have an input field to use for filter
+			TextField filterField = new TextField();
+			if(pid.equals("laborerConstructionSite.activeContract.jobCode")) filterField.setWidth("100%");
+			else {
+				filterField.setWidth("50px");
+				if(overtimeGrid.getColumn(pid) != null )
+					overtimeGrid.getColumn(pid).setHeaderCaption(((String) pid).replace("d","")).setSortable(false);//.setWidth(50);
+			}
+	
+			filterField.setHeight("90%");
+	
+			// Update filter When the filter input is changed
+			filterField.addTextChangeListener(new TextChangeListener() {
+	
+				@Override
+				public void textChange(TextChangeEvent event) {
+					// Can't modify filters so need to replace
+					((SimpleFilterable) overtimeGrid.getContainerDataSource()).removeContainerFilters(pid);
+	
+					// (Re)create the filter if necessary
+					if (! event.getText().isEmpty())
+						((Filterable) overtimeGrid.getContainerDataSource()).addContainerFilter(
+								new SimpleStringFilter(pid,
+										event.getText(), true, false));
+				}
+			});
+			if(cell != null)
+				cell.setComponent(filterField);
+		}
+
+		tab.addTab(overtimeGrid,"Horas Extras");
 
 		tab.addTab(new Table(){
 			{
@@ -519,13 +558,13 @@ public class AttendancePanel extends Panel implements View {
 		DateTime dt = getAttendanceDate();
 //		DateTime attendanceDate = dt.withDayOfMonth(dt.dayOfMonth().getMinimumValue());
 //		DateTime date2 = attendanceDate.withDayOfMonth( attendanceDate.dayOfMonth().getMaximumValue() );
-		reloadAttendance(dt);
+		reloadMonth(dt);
 
 		// Enable polling and set frequency to 1 seconds
 //		UI.getCurrent().setPollInterval(1000);
 	}
 
-	private void reloadAttendance(DateTime dt) {
+	private void reloadMonth(DateTime dt) {
 
 		if(cs == null )
 			throw new RuntimeException("No se ha seteado la obra en la vista de asistencia.");
@@ -535,12 +574,16 @@ public class AttendancePanel extends Panel implements View {
 
 //		logger.debug("se van a generar las filas para {} dias",days);
 
-		clearAttendanceTable();
+		clearGrids();
+		
+		List<Overtime> overtime = service.getOvertimeByConstruction(cs,dt);
+		overtimeContainer.addAll(overtime);
+		overtimeContainer.sort(new Object[]{"laborerConstructionSite.activeContract.jobCode"}, new boolean[]{true});
 		
 		List<Attendance> attendance = service.getAttendanceByConstruction(cs,dt);
-		logger.debug("lista de asistencia para el mes dado {} ",attendance);
-		attendanceLaborerContainer.addAll(attendance);
-		attendanceLaborerContainer.sort(new Object[]{"laborerConstructionSite.activeContract.jobCode"}, new boolean[]{true});
+		attendanceContainer.addAll(attendance);
+		attendanceContainer.sort(new Object[]{"laborerConstructionSite.activeContract.jobCode"}, new boolean[]{true});
+		
 //		for(LaborerConstructionsite lc : laborers){
 //			Attendance row = new Attendance();
 //
@@ -570,8 +613,8 @@ public class AttendancePanel extends Panel implements View {
 
 				getUI().getSession().getLockInstance().lock();
 				
-				configAttendanceColumns(attendanceDate,date2);
-				reloadAttendance(dt);
+//				configAttendanceColumns(attendanceDate,date2);
+				reloadMonth(dt);
 				getUI().getSession().getLockInstance().unlock();
 
 			}catch(Exception e){

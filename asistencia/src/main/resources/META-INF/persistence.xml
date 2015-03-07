@@ -25,6 +25,7 @@
 	    <class>cl.magal.asistencia.entities.LaborerTool</class>
 	    <class>cl.magal.asistencia.entities.Loan</class>
 	    <class>cl.magal.asistencia.entities.Mobilization2</class>
+	    <class>cl.magal.asistencia.entities.Overtime</class>
 	    <class>cl.magal.asistencia.entities.Role</class>
 	    <class>cl.magal.asistencia.entities.TaxationConfigurations</class>
 	    <class>cl.magal.asistencia.entities.Team</class>

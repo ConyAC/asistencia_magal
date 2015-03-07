@@ -20,6 +20,7 @@ import cl.magal.asistencia.entities.ConstructionCompany;
 import cl.magal.asistencia.entities.ConstructionSite;
 import cl.magal.asistencia.entities.Laborer;
 import cl.magal.asistencia.entities.LaborerConstructionsite;
+import cl.magal.asistencia.entities.Overtime;
 import cl.magal.asistencia.entities.Team;
 import cl.magal.asistencia.entities.User;
 import cl.magal.asistencia.repositories.AttendanceRepository;
@@ -27,6 +28,7 @@ import cl.magal.asistencia.repositories.ConstructionCompanyRepository;
 import cl.magal.asistencia.repositories.ConstructionSiteRepository;
 import cl.magal.asistencia.repositories.LaborerConstructionsiteRepository;
 import cl.magal.asistencia.repositories.LaborerRepository;
+import cl.magal.asistencia.repositories.OvertimeRepository;
 import cl.magal.asistencia.repositories.TeamRepository;
 import cl.magal.asistencia.repositories.UserRepository;
 
@@ -49,6 +51,8 @@ public class ConstructionSiteService {
 	ConstructionCompanyRepository constructionCompanyRepo;
 	@Autowired
 	AttendanceRepository attendanceRepo;
+	@Autowired
+	OvertimeRepository overtimeRepo;
 	
 	@PostConstruct
 	public void init(){
@@ -220,7 +224,7 @@ public class ConstructionSiteService {
 		//verifica que exista una asistencia para cada elemento, si no existe la crea
 		for(LaborerConstructionsite lc : lcs ){
 			tmp.setLaborerConstructionSite(lc);
-			if(!attendanceResult.contains(lc)){
+			if(!attendanceResult.contains(tmp)){
 				Attendance attendance = new Attendance();
 				attendance.setLaborerConstructionSite(lc);
 				attendance.setDate(date.toDate());
@@ -232,6 +236,28 @@ public class ConstructionSiteService {
 
 	public void save(Attendance attedance) {
 		attendanceRepo.save(attedance);
+	}
+
+	public List<Overtime> getOvertimeByConstruction(ConstructionSite cs,DateTime date) {
+		//obtiene la lista de trabajadores de la obra
+		List<LaborerConstructionsite> lcs =  labcsRepo.findByConstructionsiteAndIsActive(cs);
+		List<Overtime> overtimeResult =  overtimeRepo.findByConstructionsiteAndMonth(cs,date.toDate());
+		Overtime tmp = new Overtime();
+		//verifica que exista una asistencia para cada elemento, si no existe la crea
+		for(LaborerConstructionsite lc : lcs ){
+			tmp.setLaborerConstructionSite(lc);
+			if(!overtimeResult.contains(tmp)){
+				Overtime overtime = new Overtime();
+				overtime.setLaborerConstructionSite(lc);
+				overtime.setDate(date.toDate());
+				overtimeResult.add(overtime);
+			}
+		}
+		return overtimeResult;
+	}
+
+	public void save(Overtime overtime) {
+		overtimeRepo.save(overtime);
 	}
 
 
