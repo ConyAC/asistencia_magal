@@ -275,7 +275,7 @@ public class LaborerAndTeamPanel extends Panel implements View {
 
 		final BeanItemContainer<Vacation> vacationContainer = new BeanItemContainer<Vacation>(Vacation.class);
 		btnLoad.addClickListener(new Button.ClickListener() {
-			LaborerConstructionsite lc = null;
+			LaborerConstructionsite lc = null;			
 			
 			@Override
 			public void buttonClick(ClickEvent event) {
@@ -284,6 +284,20 @@ public class LaborerAndTeamPanel extends Panel implements View {
 					return;
 				}
 			
+				boolean any = false;
+				for(Object obj : selectedItemIds ){
+					lc = (LaborerConstructionsite)obj;
+					if(lc.isConfirmed()){
+						any = true;
+						break;
+					}
+				}
+											
+				if(!any){
+					Notification.show("Ninguno de los trabajadores seleccionados se encuentra confirmado en la obra.");
+					return;
+				}
+				
 				final Window w = new Window("Carga masiva de vacaciones");
 				w.setWidth("40%");
 				w.setHeight("50%");
@@ -354,12 +368,13 @@ public class LaborerAndTeamPanel extends Panel implements View {
 										vacation.setFromDate(start.getValue());
 										vacation.setToDate(end.getValue());
 										vacationContainer.addBean(vacation);												
-										
+
+									
 										for(Object obj : selectedItemIds ){
 											lc = (LaborerConstructionsite)obj;
 											
-											if(!lc.isConfirmed())		
-												continue;
+											if(!lc.isConfirmed())												
+												continue;										
 											
 											lc.addVacation(vacation);
 											laborerService.save(lc);
