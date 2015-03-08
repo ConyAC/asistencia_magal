@@ -12,11 +12,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
+import org.vaadin.dialogs.ConfirmDialog;
 
 import cl.magal.asistencia.entities.Attendance;
 import cl.magal.asistencia.entities.Confirmations;
 import cl.magal.asistencia.entities.ConstructionSite;
 import cl.magal.asistencia.entities.Overtime;
+import cl.magal.asistencia.entities.Salary;
 import cl.magal.asistencia.entities.enums.AttendanceMark;
 import cl.magal.asistencia.entities.enums.Permission;
 import cl.magal.asistencia.services.ConstructionSiteService;
@@ -91,6 +93,7 @@ public class AttendancePanel extends Panel implements View {
 	/** CONTAINERS **/
 	BeanItemContainer<Attendance> attendanceContainer = new BeanItemContainer<Attendance>(Attendance.class);
 	BeanItemContainer<Overtime> overtimeContainer = new BeanItemContainer<Overtime>(Overtime.class);
+	BeanItemContainer<Salary> salaryContainer = new BeanItemContainer<Salary>(Salary.class);
 	BeanItemContainer<AbsenceVO> absenceContainer = new BeanItemContainer<AbsenceVO>(AbsenceVO.class);
 
 	/** COMPONENTES **/
@@ -182,6 +185,7 @@ public class AttendancePanel extends Panel implements View {
 		attendanceContainer.removeAllItems();
 		overtimeContainer.removeAllItems();
 		absenceContainer.removeAllItems();
+		salaryContainer.removeAllItems();
 	}
 
 	private TabSheet drawAttendanceDetail() {
@@ -423,8 +427,58 @@ public class AttendancePanel extends Panel implements View {
 
 		tab.addTab(confirmTable,"Confirmar Licencias y Accidentes");
 
-		Table salaryTable = new Table();
-		tab.addTab(salaryTable,"Cálculos");
+		
+		salaryContainer.addNestedContainerProperty("laborerConstructionSite.activeContract.jobCode");
+		VerticalLayout vl = new VerticalLayout(){
+			{
+				setSpacing(true);
+				
+				Button btn = new Button("Generar Sueldo y Anticipo",FontAwesome.GEARS);
+				btn.addClickListener(new Button.ClickListener() {
+					
+					@Override
+					public void buttonClick(ClickEvent event) {
+						
+						//se pide confirmación, pues este proceso reemplazará lo que exista en base de datos para la fecha
+						ConfirmDialog.show(UI.getCurrent(), "Confirmar Acción:", "El siguiente proceso reemplazará la información de sueldo que se tenga guardada. ¿Está seguro de que desea continuar con el proceso?",
+								"Continuar", "Cancelar", new ConfirmDialog.Listener() {
+							public void onClose(ConfirmDialog dialog) {
+								if (dialog.isConfirmed()) {
+									
+									try{
+										//comienza el procesamiento de los sueldos y se guarda el resultado en base de datos
+										// recupera los resultados  este procesamiento puede tardar un tiempo
+										List<Salary> salaries = service.calculateSalaries(cs,getAttendanceDate());
+										//limpia
+										salaryContainer.removeAllItems();
+										salaryContainer.addAll(salaries);
+									}catch(Exception e){
+										logger.error("Error al calcular los sueldos",e);
+										Notification.show("Error al calcular los sueldos, el código de error es "+e.getMessage(),Type.ERROR_MESSAGE);
+									}
+								}
+							}
+						});
+
+					}
+				});
+				addComponent(btn);
+				setComponentAlignment(btn, Alignment.TOP_RIGHT);
+				Table salaryTable = new Table();
+				salaryTable.setWidth("100%");
+				salaryTable.setContainerDataSource(salaryContainer);
+				
+				salaryTable.setVisibleColumns("laborerConstructionSite.activeContract.jobCode","suple","salary");
+				salaryTable.setColumnHeaders("Oficio","Anticipo","Sueldo");
+				
+				
+				addComponent(salaryTable);
+				setExpandRatio(salaryTable, 1.0f);
+			}
+		};
+		vl.setSizeFull();
+		
+		tab.addTab(vl,"Cálculos");
 
 		return tab;
 	}
@@ -691,6 +745,12 @@ public class AttendancePanel extends Panel implements View {
 		absenceContainer.removeAllItems();
 		absenceContainer.addAll(absences);
 		absenceContainer.sort(new String[]{"laborerConstructionsite.activeContract.jobCode"},new boolean[]{ true });
+		
+		List<Salary> salaries = service.getSalariesByConstructionAndMonth(cs,dt);
+		//limpia
+		salaryContainer.removeAllItems();
+		salaryContainer.addAll(salaries);
+		salaryContainer.sort(new String[]{"laborerConstructionsite.activeContract.jobCode"},new boolean[]{ true });
 	}
 	/**
 	 * Según la fecha y la obra, verifica cual es el estado de confirmación de cada una

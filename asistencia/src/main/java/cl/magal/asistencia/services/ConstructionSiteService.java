@@ -14,6 +14,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import cl.magal.asistencia.entities.Accident;
 import cl.magal.asistencia.entities.Attendance;
@@ -24,6 +25,7 @@ import cl.magal.asistencia.entities.Laborer;
 import cl.magal.asistencia.entities.LaborerConstructionsite;
 import cl.magal.asistencia.entities.License;
 import cl.magal.asistencia.entities.Overtime;
+import cl.magal.asistencia.entities.Salary;
 import cl.magal.asistencia.entities.Team;
 import cl.magal.asistencia.entities.User;
 import cl.magal.asistencia.entities.Vacation;
@@ -37,6 +39,7 @@ import cl.magal.asistencia.repositories.LaborerConstructionsiteRepository;
 import cl.magal.asistencia.repositories.LaborerRepository;
 import cl.magal.asistencia.repositories.LicenseRepositoy;
 import cl.magal.asistencia.repositories.OvertimeRepository;
+import cl.magal.asistencia.repositories.SalaryRepository;
 import cl.magal.asistencia.repositories.TeamRepository;
 import cl.magal.asistencia.repositories.UserRepository;
 import cl.magal.asistencia.repositories.VacationRepository;
@@ -71,6 +74,8 @@ public class ConstructionSiteService {
 	AccidentRepository accidentRepo;
 	@Autowired
 	LicenseRepositoy licenseRepo;
+	@Autowired
+	SalaryRepository salaryRepo;
 	
 	@PostConstruct
 	public void init(){
@@ -398,6 +403,48 @@ public class ConstructionSiteService {
 		default:
 			break;
 		}
+	}
+
+	/**
+	 * 
+	 * @param cs
+	 * @param date
+	 * @return
+	 */
+	@Transactional
+	public List<Salary> calculateSalaries(ConstructionSite cs,DateTime date) {
+		//elimina los salarios del mes anteriores
+		salaryRepo.deleteAllInMonth(cs,date.toDate());
+		
+		//obtiene la lista de trabajadores de la obra
+		List<LaborerConstructionsite> lcs =  labcsRepo.findByConstructionsiteAndIsActive(cs);
+		List<Salary> salaries = new ArrayList<Salary>(lcs.size());
+		//verifica que exista una asistencia para cada elemento, si no existe la crea
+		for(LaborerConstructionsite lc : lcs ){
+			//TODO CALCULAR AQUI
+			Salary salary = new Salary();
+			salary.setLaborerConstructionSite(lc);
+			salary.setSalary(0);
+			salary.setSuple(0);
+			salary.setDate(date.toDate());
+			salaries.add(salary);
+			
+		}
+		
+		salaryRepo.save(salaries);
+		
+		return salaries;
+	}
+
+	/**
+	 * 
+	 * @param cs
+	 * @param dt
+	 * @return
+	 */
+	public List<Salary> getSalariesByConstructionAndMonth(ConstructionSite cs,DateTime dt) {
+		List<Salary> salaries = salaryRepo.findByConstructionsiteAndMonth(cs,dt.toDate());
+		return salaries;
 	}
 
 }
