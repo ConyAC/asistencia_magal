@@ -13,5 +13,10 @@ public enum AbsenceType {
 		this.code = code;
 		this.description = description;
 	}
+	
+	@Override
+	public String toString(){
+		return description;
+	}
 
 }

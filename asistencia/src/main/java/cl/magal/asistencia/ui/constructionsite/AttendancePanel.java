@@ -91,7 +91,7 @@ public class AttendancePanel extends Panel implements View {
 	/** CONTAINERS **/
 	BeanItemContainer<Attendance> attendanceContainer = new BeanItemContainer<Attendance>(Attendance.class);
 	BeanItemContainer<Overtime> overtimeContainer = new BeanItemContainer<Overtime>(Overtime.class);
-	BeanItemContainer<AbsenceVO> confirmContainer = new BeanItemContainer<AbsenceVO>(AbsenceVO.class);
+	BeanItemContainer<AbsenceVO> absenceContainer = new BeanItemContainer<AbsenceVO>(AbsenceVO.class);
 
 	/** COMPONENTES **/
 	ProgressBar progress;
@@ -181,7 +181,7 @@ public class AttendancePanel extends Panel implements View {
 	private void clearGrids(){
 		attendanceContainer.removeAllItems();
 		overtimeContainer.removeAllItems();
-		confirmContainer.removeAllItems();
+		absenceContainer.removeAllItems();
 	}
 
 	private TabSheet drawAttendanceDetail() {
@@ -237,7 +237,7 @@ public class AttendancePanel extends Panel implements View {
 				,"d17","d18","d19","d20","d21","d22","d23","d24","d25","d26","d27","d28","d29","d30","d31");
 
 		attendanceContainer.sort(new Object[]{"laborerConstructionSite.activeContract.jobCode"}, new boolean[]{true});
-		attendanceGrid.getColumn("laborerConstructionSite.activeContract.jobCode").setHeaderCaption("Código").setEditable(false).setWidth(100);
+		attendanceGrid.getColumn("laborerConstructionSite.activeContract.jobCode").setHeaderCaption("Oficio").setEditable(false).setWidth(100);
 
 		HeaderRow filterRow =  attendanceGrid.appendHeaderRow();
 		for (final Object pid: attendanceGrid.getContainerDataSource().getContainerPropertyIds()) {
@@ -311,7 +311,7 @@ public class AttendancePanel extends Panel implements View {
 				,"d17","d18","d19","d20","d21","d22","d23","d24","d25","d26","d27","d28","d29","d30","d31");
 
 		overtimeContainer.sort(new Object[]{"laborerConstructionSite.activeContract.jobCode"}, new boolean[]{true});
-		overtimeGrid.getColumn("laborerConstructionSite.activeContract.jobCode").setHeaderCaption("Código").setEditable(false).setWidth(100);
+		overtimeGrid.getColumn("laborerConstructionSite.activeContract.jobCode").setHeaderCaption("Oficio").setEditable(false).setWidth(100);
 
 		filterRow =  overtimeGrid.appendHeaderRow();
 		for (final Object pid: overtimeGrid.getContainerDataSource().getContainerPropertyIds()) {
@@ -350,10 +350,76 @@ public class AttendancePanel extends Panel implements View {
 
 		tab.addTab(overtimeGrid,"Horas Extras");
 
+		absenceContainer.addNestedContainerProperty("laborerConstructionsite.activeContract.jobCode");
 		Table confirmTable = new Table();
-		confirmTable.setContainerDataSource(confirmContainer);
+		confirmTable.setContainerDataSource(absenceContainer);
 		confirmTable.setSizeFull();
 		confirmTable.setEditable(true);
+		
+		confirmTable.addGeneratedColumn("laborerConstructionsite.activeContract.jobCode", new Table.ColumnGenerator() {
+			@Override
+			public Object generateCell(Table source, Object itemId, Object columnId) {
+				
+				return source.getContainerProperty(itemId, columnId).getValue();
+			}
+		});
+		
+		confirmTable.addGeneratedColumn("type", new Table.ColumnGenerator() {
+			@Override
+			public Object generateCell(Table source, Object itemId, Object columnId) {
+				
+				return source.getContainerProperty(itemId, columnId).getValue();
+			}
+		});
+		
+		confirmTable.addGeneratedColumn("description", new Table.ColumnGenerator() {
+			@Override
+			public Object generateCell(Table source, Object itemId, Object columnId) {
+				
+				return source.getContainerProperty(itemId, columnId).getValue();
+			}
+		});
+		
+		confirmTable.addGeneratedColumn("confirm", new Table.ColumnGenerator() {
+			
+			@Override
+			public Object generateCell(Table source, Object itemId, Object columnId) {
+				
+				final AbsenceVO absence = ((BeanItem<AbsenceVO>) source.getItem(itemId)).getBean(); 
+				final Button btn = new Button();
+				
+				toogleButtonState(btn, absence);
+				
+				btn.addClickListener(new Button.ClickListener() {
+					
+					@Override
+					public void buttonClick(ClickEvent event) {
+						absence.setConfirmed(!absence.isConfirmed());
+						toogleButtonState(btn,absence);
+						service.confirmAbsence(absence);
+					}
+				});
+				
+				return btn;
+			}
+
+			private void toogleButtonState(Button btn, AbsenceVO absence) {
+				if(!absence.isConfirmed()){
+					btn.removeStyleName(Constants.STYLE_CLASS_RED_COLOR);
+					btn.addStyleName(Constants.STYLE_CLASS_GREEN_COLOR);
+					btn.setCaption( "Confirmar" );
+					btn.setIcon(FontAwesome.CHECK_CIRCLE_O);
+				}else{
+					btn.removeStyleName(Constants.STYLE_CLASS_GREEN_COLOR);
+					btn.addStyleName(Constants.STYLE_CLASS_RED_COLOR);
+					btn.setCaption( "Cancelar Confirmación" );
+					btn.setIcon(FontAwesome.TIMES_CIRCLE_O);
+				}
+			}
+		});
+		
+		confirmTable.setVisibleColumns("laborerConstructionsite.activeContract.jobCode","type","description","fromDate","toDate","confirm");
+		confirmTable.setColumnHeaders("Oficio","Tipo","Descripción","Fecha inicio","Fecha Fin","Acción");
 
 		tab.addTab(confirmTable,"Confirmar Licencias y Accidentes");
 
@@ -620,7 +686,11 @@ public class AttendancePanel extends Panel implements View {
 		List<Attendance> attendance = service.getAttendanceByConstruction(cs,dt);
 		attendanceContainer.addAll(attendance);
 		attendanceContainer.sort(new Object[]{"laborerConstructionSite.activeContract.jobCode"}, new boolean[]{true});
-
+		
+		List<AbsenceVO> absences = service.getAbsencesByConstructionAndMonth(cs,dt);
+		absenceContainer.removeAllItems();
+		absenceContainer.addAll(absences);
+		absenceContainer.sort(new String[]{"laborerConstructionsite.activeContract.jobCode"},new boolean[]{ true });
 	}
 	/**
 	 * Según la fecha y la obra, verifica cual es el estado de confirmación de cada una
