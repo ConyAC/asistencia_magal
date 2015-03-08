@@ -28,7 +28,7 @@ import cl.magal.asistencia.repositories.LaborerRepository;
 import cl.magal.asistencia.repositories.LoanRepository;
 import cl.magal.asistencia.repositories.ToolRepository;
 import cl.magal.asistencia.repositories.VacationRepository;
-import cl.magal.asistencia.ui.workerfile.vo.HistoryVO;
+import cl.magal.asistencia.ui.vo.HistoryVO;
 import cl.magal.asistencia.util.Utils;
 
 @Service

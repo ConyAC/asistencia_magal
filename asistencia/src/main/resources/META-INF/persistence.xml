@@ -5,7 +5,7 @@
 	    <provider>org.hibernate.ejb.HibernatePersistence</provider>
 	     -->
 	     <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider> 
-	    <class>cl.magal.asistencia.entities.Absence</class>
+	    <class>cl.magal.asistencia.entities.License</class>
 	    <class>cl.magal.asistencia.entities.Accident</class>
 	    <class>cl.magal.asistencia.entities.AdvancePaymentConfigurations</class>
 	    <class>cl.magal.asistencia.entities.AdvancePaymentItem</class>
@@ -14,6 +14,7 @@
 	    <class>cl.magal.asistencia.entities.Annexed</class>
 	    <class>cl.magal.asistencia.entities.Attachment</class>
 	    <class>cl.magal.asistencia.entities.Attendance</class>
+	    <class>cl.magal.asistencia.entities.Confirmations</class>
 	    <class>cl.magal.asistencia.entities.ConstructionCompany</class>
 	    <class>cl.magal.asistencia.entities.ConstructionSite</class>
 	    <class>cl.magal.asistencia.entities.Contract</class>
@@ -33,7 +34,7 @@
 	    <class>cl.magal.asistencia.entities.User</class>
 	    <class>cl.magal.asistencia.entities.Vacation</class>
 	    <class>cl.magal.asistencia.entities.WageConfigurations</class>
-	    <class>cl.magal.asistencia.entities.converter.AbsenceTypeConverter</class>
+	    <class>cl.magal.asistencia.entities.converter.LicenseTypeConverter</class>
 	    <class>cl.magal.asistencia.entities.converter.AccidentLevelConverter</class>
 	    <class>cl.magal.asistencia.entities.converter.AfpConverter</class>
 	    <class>cl.magal.asistencia.entities.converter.AttendanceMarkConverter</class>

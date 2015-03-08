@@ -23,17 +23,17 @@ import org.slf4j.LoggerFactory;
 import org.springframework.ui.velocity.VelocityEngineUtils;
 import org.vaadin.dialogs.ConfirmDialog;
 
-import cl.magal.asistencia.entities.Absence;
 import cl.magal.asistencia.entities.Accident;
 import cl.magal.asistencia.entities.Annexed;
 import cl.magal.asistencia.entities.Contract;
 import cl.magal.asistencia.entities.LaborerConstructionsite;
+import cl.magal.asistencia.entities.License;
 import cl.magal.asistencia.entities.Loan;
 import cl.magal.asistencia.entities.Tool;
 import cl.magal.asistencia.entities.User;
 import cl.magal.asistencia.entities.Vacation;
-import cl.magal.asistencia.entities.enums.AbsenceType;
 import cl.magal.asistencia.entities.enums.AccidentLevel;
+import cl.magal.asistencia.entities.enums.LicenseType;
 import cl.magal.asistencia.entities.enums.LoanToolStatus;
 import cl.magal.asistencia.entities.enums.MaritalStatus;
 import cl.magal.asistencia.entities.enums.Permission;
@@ -43,7 +43,7 @@ import cl.magal.asistencia.ui.AbstractWindowEditor;
 import cl.magal.asistencia.ui.MagalUI;
 import cl.magal.asistencia.ui.OnValueChangeFieldFactory;
 import cl.magal.asistencia.ui.UndefinedWidthLabel;
-import cl.magal.asistencia.ui.workerfile.vo.HistoryVO;
+import cl.magal.asistencia.ui.vo.HistoryVO;
 import cl.magal.asistencia.util.Constants;
 import cl.magal.asistencia.util.SecurityHelper;
 import cl.magal.asistencia.util.Utils;
@@ -920,7 +920,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 	}
 
 	Label lbJob ,lbJobCode,lbStep ,lbStarting, lbEnding,lbSettlement,lbStatus;
-	BeanItemContainer<Vacation> vacationContainer;BeanItemContainer<Absence> absenceContainer;BeanItemContainer<Accident> accidentContainer;
+	BeanItemContainer<Vacation> vacationContainer;BeanItemContainer<License> absenceContainer;BeanItemContainer<Accident> accidentContainer;
 
 	private void setContractGl(final Contract activeContract) {
 
@@ -1105,8 +1105,8 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 		return new VerticalLayout(){
 			{
 
-				absenceContainer = new BeanItemContainer<Absence>(Absence.class);
-				absenceContainer.addAll((Collection<? extends Absence>) getItem().getItemProperty("absences").getValue());
+				absenceContainer = new BeanItemContainer<License>(License.class);
+				absenceContainer.addAll((Collection<? extends License>) getItem().getItemProperty("absences").getValue());
 
 				setMargin(true);
 				setSpacing(true);
@@ -1126,7 +1126,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 								public void buttonClick(ClickEvent event) {
 									LaborerConstructionsite laborer = (LaborerConstructionsite) getItem().getBean();
 									if(laborer == null ) throw new RuntimeException("El trabajador no es válido.");
-									Absence absence = new Absence();
+									License absence = new License();
 									laborer.addAbsence(absence);
 									absenceContainer.addBean(absence);
 
@@ -1151,7 +1151,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 						Property.ValueChangeListener listener = new Property.ValueChangeListener() {
 							@Override
 							public void valueChange(Property.ValueChangeEvent event) {
-								label.setValue(((Absence) item.getBean()).getTotal()+"");
+								label.setValue(((License) item.getBean()).getTotal()+"");
 							}
 						};
 						for (String pid: new String[]{"fromDate", "toDate"})
@@ -1177,10 +1177,10 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 							field = new DateField();
 							((DateField)field).setImmediate(true);
 						}
-						else if(  propertyId.equals("absenceType") ){
+						else if(  propertyId.equals("licenseType") ){
 							field = new ComboBox();
 							field.setPropertyDataSource(container.getContainerProperty(itemId, propertyId));
-							for(AbsenceType absenceType : AbsenceType.values()){
+							for(LicenseType absenceType : LicenseType.values()){
 								((ComboBox)field).addItem(absenceType);
 							}
 							((ComboBox)field).setImmediate(true);
@@ -1215,7 +1215,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 					}
 				});
 
-				table.setVisibleColumns("absenceType","description","fromDate","toDate","total","actions");
+				table.setVisibleColumns("licenseType","description","fromDate","toDate","total","actions");
 				table.setColumnHeaders("Tipo","Descripción","Desde","Hasta","Total","Eliminar");
 				table.setColumnWidth("actions", 100);
 				table.setEditable(!readOnly);				
@@ -1435,9 +1435,9 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 
 		//licencias
 		laborer.getAbsences().clear();
-		for(Absence absence : absenceContainer.getItemIds()){
+		for(License absence : absenceContainer.getItemIds()){
 			// valida las licencias
-			Set<ConstraintViolation<Absence>> constraintViolations = validator.validate(absence);
+			Set<ConstraintViolation<License>> constraintViolations = validator.validate(absence);
 			if(constraintViolations.size() > 0 ){
 				Notification.show("Una licencia es inválida \""+ constraintViolations.iterator().next().getMessage()+"\"",Type.ERROR_MESSAGE);
 				tab.setSelectedTab(5);

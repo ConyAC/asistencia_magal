@@ -14,5 +14,9 @@ public final class Constants {
 	public static final String LABORER_SERVICE_BEAN = "laborerService";
 	public static final String CONSTRUCTIONSITE_SERVICE_BEAN = "constructionSiteService";
 	public static final String BEANVALIDATOR_BEAN = "validator";
+	
+	/** CLASES DE ESTILO CONOCIDAS **/
+	public static final String STYLE_CLASS_GREEN_COLOR = "green-color";
+	public static final String STYLE_CLASS_RED_COLOR = "red-color";
 
 }

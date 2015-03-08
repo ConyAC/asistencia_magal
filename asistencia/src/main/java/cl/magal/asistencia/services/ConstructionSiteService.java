@@ -16,6 +16,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import cl.magal.asistencia.entities.Attendance;
+import cl.magal.asistencia.entities.Confirmations;
 import cl.magal.asistencia.entities.ConstructionCompany;
 import cl.magal.asistencia.entities.ConstructionSite;
 import cl.magal.asistencia.entities.Laborer;
@@ -24,6 +25,7 @@ import cl.magal.asistencia.entities.Overtime;
 import cl.magal.asistencia.entities.Team;
 import cl.magal.asistencia.entities.User;
 import cl.magal.asistencia.repositories.AttendanceRepository;
+import cl.magal.asistencia.repositories.ConfirmationsRepository;
 import cl.magal.asistencia.repositories.ConstructionCompanyRepository;
 import cl.magal.asistencia.repositories.ConstructionSiteRepository;
 import cl.magal.asistencia.repositories.LaborerConstructionsiteRepository;
@@ -53,6 +55,8 @@ public class ConstructionSiteService {
 	AttendanceRepository attendanceRepo;
 	@Autowired
 	OvertimeRepository overtimeRepo;
+	@Autowired
+	ConfirmationsRepository confirmationsRepo; 
 	
 	@PostConstruct
 	public void init(){
@@ -169,10 +173,7 @@ public class ConstructionSiteService {
 	public void addTeamToConstructionSite(Team team, ConstructionSite cs) {
 		
 		ConstructionSite dbcs = constructionSiterepo.findOne(cs.getConstructionsiteId());		
-		logger.debug("dbcs "+dbcs);
 		teamRepo.save(team);
-//		dbcs.addTeam(team);	
-//		logger.debug("dbcs team "+dbcs.getTeams());
 	}
 
 //	public List<Team> getTeamsByConstruction(ConstructionSite cs) {
@@ -216,6 +217,12 @@ public class ConstructionSiteService {
 		return (List<ConstructionCompany>) constructionCompanyRepo.findAll();
 	}
 
+	/**
+	 * 
+	 * @param cs
+	 * @param date
+	 * @return
+	 */
 	public List<Attendance> getAttendanceByConstruction(ConstructionSite cs,DateTime date) {
 		//obtiene la lista de trabajadores de la obra
 		List<LaborerConstructionsite> lcs =  labcsRepo.findByConstructionsiteAndIsActive(cs);
@@ -234,10 +241,20 @@ public class ConstructionSiteService {
 		return attendanceResult;
 	}
 
+	/**
+	 * 
+	 * @param attedance
+	 */
 	public void save(Attendance attedance) {
 		attendanceRepo.save(attedance);
 	}
 
+	/**
+	 * 
+	 * @param cs
+	 * @param date
+	 * @return
+	 */
 	public List<Overtime> getOvertimeByConstruction(ConstructionSite cs,DateTime date) {
 		//obtiene la lista de trabajadores de la obra
 		List<LaborerConstructionsite> lcs =  labcsRepo.findByConstructionsiteAndIsActive(cs);
@@ -256,9 +273,36 @@ public class ConstructionSiteService {
 		return overtimeResult;
 	}
 
+	/**
+	 * 
+	 * @param overtime
+	 */
 	public void save(Overtime overtime) {
 		overtimeRepo.save(overtime);
 	}
 
+	/**
+	 * Obtiene las confirmaciones de un mes en particular
+	 * @param cs
+	 * @param dt
+	 * @return
+	 */
+	public Confirmations getConfirmationsByConstructionsiteAndMonth(ConstructionSite cs, DateTime dt) {
+		Confirmations result = confirmationsRepo.findByConstructionsiteAndMonth(cs,dt.toDate());
+		if(result == null ){
+			result = new Confirmations();
+			result.setConstructionsite(cs);
+			result.setDate(dt.toDate());
+		}
+		return result;
+	}
+
+	/**
+	 * Permite guardar un objeto de confirmación
+	 * @param confirmations
+	 */
+	public void save(Confirmations confirmations) {
+		confirmationsRepo.save(confirmations);
+	}
 
 }
