@@ -39,7 +39,7 @@ public class UserServiceTest {
 	Logger logger = LoggerFactory.getLogger(ConstructionSiteServiceTest.class);
 	
 	@Autowired
-	UserService service;
+	UserServiceImpl service;
 	@Autowired
 	ConstructionSiteService constructionSiteService;
 	

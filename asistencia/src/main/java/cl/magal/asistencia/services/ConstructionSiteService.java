@@ -14,23 +14,36 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import cl.magal.asistencia.entities.Accident;
 import cl.magal.asistencia.entities.Attendance;
+import cl.magal.asistencia.entities.Confirmations;
 import cl.magal.asistencia.entities.ConstructionCompany;
 import cl.magal.asistencia.entities.ConstructionSite;
 import cl.magal.asistencia.entities.Laborer;
 import cl.magal.asistencia.entities.LaborerConstructionsite;
+import cl.magal.asistencia.entities.License;
 import cl.magal.asistencia.entities.Overtime;
+import cl.magal.asistencia.entities.Salary;
 import cl.magal.asistencia.entities.Team;
 import cl.magal.asistencia.entities.User;
+import cl.magal.asistencia.entities.Vacation;
+import cl.magal.asistencia.entities.enums.AbsenceType;
+import cl.magal.asistencia.repositories.AccidentRepository;
 import cl.magal.asistencia.repositories.AttendanceRepository;
+import cl.magal.asistencia.repositories.ConfirmationsRepository;
 import cl.magal.asistencia.repositories.ConstructionCompanyRepository;
 import cl.magal.asistencia.repositories.ConstructionSiteRepository;
 import cl.magal.asistencia.repositories.LaborerConstructionsiteRepository;
 import cl.magal.asistencia.repositories.LaborerRepository;
+import cl.magal.asistencia.repositories.LicenseRepositoy;
 import cl.magal.asistencia.repositories.OvertimeRepository;
+import cl.magal.asistencia.repositories.SalaryRepository;
 import cl.magal.asistencia.repositories.TeamRepository;
 import cl.magal.asistencia.repositories.UserRepository;
+import cl.magal.asistencia.repositories.VacationRepository;
+import cl.magal.asistencia.ui.vo.AbsenceVO;
 
 @Service
 public class ConstructionSiteService {
@@ -53,6 +66,16 @@ public class ConstructionSiteService {
 	AttendanceRepository attendanceRepo;
 	@Autowired
 	OvertimeRepository overtimeRepo;
+	@Autowired
+	ConfirmationsRepository confirmationsRepo; 
+	@Autowired
+	VacationRepository vacationRepo;
+	@Autowired
+	AccidentRepository accidentRepo;
+	@Autowired
+	LicenseRepositoy licenseRepo;
+	@Autowired
+	SalaryRepository salaryRepo;
 	
 	@PostConstruct
 	public void init(){
@@ -169,10 +192,7 @@ public class ConstructionSiteService {
 	public void addTeamToConstructionSite(Team team, ConstructionSite cs) {
 		
 		ConstructionSite dbcs = constructionSiterepo.findOne(cs.getConstructionsiteId());		
-		logger.debug("dbcs "+dbcs);
 		teamRepo.save(team);
-//		dbcs.addTeam(team);	
-//		logger.debug("dbcs team "+dbcs.getTeams());
 	}
 
 //	public List<Team> getTeamsByConstruction(ConstructionSite cs) {
@@ -216,6 +236,12 @@ public class ConstructionSiteService {
 		return (List<ConstructionCompany>) constructionCompanyRepo.findAll();
 	}
 
+	/**
+	 * 
+	 * @param cs
+	 * @param date
+	 * @return
+	 */
 	public List<Attendance> getAttendanceByConstruction(ConstructionSite cs,DateTime date) {
 		//obtiene la lista de trabajadores de la obra
 		List<LaborerConstructionsite> lcs =  labcsRepo.findByConstructionsiteAndIsActive(cs);
@@ -234,10 +260,20 @@ public class ConstructionSiteService {
 		return attendanceResult;
 	}
 
+	/**
+	 * 
+	 * @param attedance
+	 */
 	public void save(Attendance attedance) {
 		attendanceRepo.save(attedance);
 	}
 
+	/**
+	 * 
+	 * @param cs
+	 * @param date
+	 * @return
+	 */
 	public List<Overtime> getOvertimeByConstruction(ConstructionSite cs,DateTime date) {
 		//obtiene la lista de trabajadores de la obra
 		List<LaborerConstructionsite> lcs =  labcsRepo.findByConstructionsiteAndIsActive(cs);
@@ -256,9 +292,159 @@ public class ConstructionSiteService {
 		return overtimeResult;
 	}
 
+	/**
+	 * 
+	 * @param overtime
+	 */
 	public void save(Overtime overtime) {
 		overtimeRepo.save(overtime);
 	}
 
+	/**
+	 * Obtiene las confirmaciones de un mes en particular
+	 * @param cs
+	 * @param dt
+	 * @return
+	 */
+	public Confirmations getConfirmationsByConstructionsiteAndMonth(ConstructionSite cs, DateTime dt) {
+		Confirmations result = confirmationsRepo.findByConstructionsiteAndMonth(cs,dt.toDate());
+		if(result == null ){
+			result = new Confirmations();
+			result.setConstructionsite(cs);
+			result.setDate(dt.toDate());
+		}
+		return result;
+	}
+
+	/**
+	 * Permite guardar un objeto de confirmación
+	 * @param confirmations
+	 */
+	public void save(Confirmations confirmations) {
+		confirmationsRepo.save(confirmations);
+	}
+
+	public List<AbsenceVO> getAbsencesByConstructionAndMonth(ConstructionSite cs, DateTime dt) {
+		
+		//busca todas las vacaciones de la obra en el mes dado
+		List<Vacation> vacations = vacationRepo.findByConstructionsiteAndMonth(cs,dt.toDate());
+		List<Accident> accidents = accidentRepo.findByConstructionsiteAndMonth(cs,dt.toDate());
+		List<License> licenses	= licenseRepo.findByConstructionsiteAndMonth(cs,dt.toDate());
+		
+		List<AbsenceVO> result = new ArrayList<AbsenceVO>(vacations.size()+accidents.size()+licenses.size());
+		
+		for(Vacation vacation : vacations ){
+			AbsenceVO vo = new AbsenceVO();
+			vo.setType(AbsenceType.VACACION);
+			vo.setLaborerConstructionsite(vacation.getLaborerConstructionSite());
+			vo.setAbsenceId(vacation.getVacationId());
+			vo.setConfirmed(vacation.isConfirmed());
+			vo.setDescription("");
+			vo.setFromDate(vacation.getFromDate());
+			vo.setToDate(vacation.getToDate());
+			result.add(vo);
+		}
+		
+		for(Accident accident : accidents ){
+			AbsenceVO vo = new AbsenceVO();
+			vo.setType(AbsenceType.ACCIDENTE);
+			vo.setLaborerConstructionsite(accident.getLaborerConstructionSite());
+			vo.setConfirmed(accident.isConfirmed());
+			vo.setAbsenceId(accident.getAccidentId());
+			vo.setDescription(accident.getDescription());
+			vo.setFromDate(accident.getFromDate());
+			vo.setToDate(accident.getToDate());
+			result.add(vo);
+		}
+		
+		for(License license : licenses ){
+			AbsenceVO vo = new AbsenceVO();
+			vo.setType(AbsenceType.LICENCIA);
+			vo.setLaborerConstructionsite(license.getLaborerConstructionSite());
+			vo.setConfirmed(license.isConfirmed());
+			vo.setAbsenceId(license.getLicenseId());
+			vo.setDescription(license.getDescription());
+			vo.setFromDate(license.getFromDate());
+			vo.setToDate(license.getToDate());
+			result.add(vo);
+		}
+		
+		return result;
+	}
+
+	/**
+	 * confirma la ausencia ya sea enfermandad , accidente o licencia
+	 * @param absence
+	 * @param isConfirmed
+	 */
+	public void confirmAbsence(AbsenceVO absence) {
+		switch(absence.getType()){
+		case ACCIDENTE:
+			Accident accident = accidentRepo.findOne(absence.getAbsenceId());
+			accident.setConfirmed(absence.isConfirmed());
+			accident.setToDate(absence.getToDate());
+			accident.setFromDate(absence.getFromDate());
+			accidentRepo.save(accident);
+			break;
+		case LICENCIA:
+			License license = licenseRepo.findOne(absence.getAbsenceId());
+			license.setConfirmed(absence.isConfirmed());
+			license.setToDate(absence.getToDate());
+			license.setFromDate(absence.getFromDate());
+			licenseRepo.save(license);
+			break;
+		case VACACION:
+			Vacation vacation = vacationRepo.findOne(absence.getAbsenceId());
+			vacation.setConfirmed(absence.isConfirmed());
+			vacation.setToDate(absence.getToDate());
+			vacation.setFromDate(absence.getFromDate());
+			vacationRepo.save(vacation);
+			break;
+		default:
+			break;
+		}
+	}
+
+	/**
+	 * 
+	 * @param cs
+	 * @param date
+	 * @return
+	 */
+	@Transactional
+	public List<Salary> calculateSalaries(ConstructionSite cs,DateTime date) {
+		//elimina los salarios del mes anteriores
+		salaryRepo.deleteAllInMonth(cs,date.toDate());
+		
+		//obtiene la lista de trabajadores de la obra
+		List<LaborerConstructionsite> lcs =  labcsRepo.findByConstructionsiteAndIsActive(cs);
+		List<Salary> salaries = new ArrayList<Salary>(lcs.size());
+		//verifica que exista una asistencia para cada elemento, si no existe la crea
+		for(LaborerConstructionsite lc : lcs ){
+			//TODO CALCULAR AQUI
+			Salary salary = new Salary();
+			salary.setLaborerConstructionSite(lc);
+			salary.setSalary(0);
+			salary.setSuple(0);
+			salary.setDate(date.toDate());
+			salaries.add(salary);
+			
+		}
+		
+		salaryRepo.save(salaries);
+		
+		return salaries;
+	}
+
+	/**
+	 * 
+	 * @param cs
+	 * @param dt
+	 * @return
+	 */
+	public List<Salary> getSalariesByConstructionAndMonth(ConstructionSite cs,DateTime dt) {
+		List<Salary> salaries = salaryRepo.findByConstructionsiteAndMonth(cs,dt.toDate());
+		return salaries;
+	}
 
 }

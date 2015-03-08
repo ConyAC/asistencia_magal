@@ -19,7 +19,7 @@ import cl.magal.asistencia.entities.Laborer;
 import cl.magal.asistencia.entities.LaborerConstructionsite;
 import cl.magal.asistencia.entities.Tool;
 import cl.magal.asistencia.entities.enums.Job;
-import cl.magal.asistencia.repositories.AbsenceRepositoy;
+import cl.magal.asistencia.repositories.LicenseRepositoy;
 import cl.magal.asistencia.repositories.AccidentRepository;
 import cl.magal.asistencia.repositories.ConstructionSiteRepository;
 import cl.magal.asistencia.repositories.ContractRepository;
@@ -28,7 +28,7 @@ import cl.magal.asistencia.repositories.LaborerRepository;
 import cl.magal.asistencia.repositories.LoanRepository;
 import cl.magal.asistencia.repositories.ToolRepository;
 import cl.magal.asistencia.repositories.VacationRepository;
-import cl.magal.asistencia.ui.workerfile.vo.HistoryVO;
+import cl.magal.asistencia.ui.vo.HistoryVO;
 import cl.magal.asistencia.util.Utils;
 
 @Service
@@ -43,7 +43,7 @@ public class LaborerService {
 	@Autowired
 	ConstructionSiteRepository constructionSiteRepo;
 	@Autowired
-	AbsenceRepositoy absenceRepo;
+	LicenseRepositoy absenceRepo;
 	@Autowired
 	VacationRepository vacationRepo;
 	@Autowired

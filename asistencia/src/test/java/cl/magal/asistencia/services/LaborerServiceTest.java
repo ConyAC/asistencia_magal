@@ -21,16 +21,16 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import cl.magal.asistencia.entities.Absence;
 import cl.magal.asistencia.entities.Accident;
 import cl.magal.asistencia.entities.ConstructionSite;
 import cl.magal.asistencia.entities.Contract;
 import cl.magal.asistencia.entities.Laborer;
 import cl.magal.asistencia.entities.LaborerConstructionsite;
+import cl.magal.asistencia.entities.License;
 import cl.magal.asistencia.entities.Vacation;
-import cl.magal.asistencia.entities.enums.AbsenceType;
 import cl.magal.asistencia.entities.enums.AccidentLevel;
 import cl.magal.asistencia.entities.enums.Job;
+import cl.magal.asistencia.entities.enums.LicenseType;
 import cl.magal.asistencia.entities.validator.RutDigitValidator;
 import cl.magal.asistencia.helpers.LaborerHelper;
 
@@ -459,8 +459,8 @@ public class LaborerServiceTest {
 		logger.debug("laborerConstructionsite {} ",laborerConstructionsite.getId());
 		DateTime dt = new DateTime();
 		
-		Absence absence = new Absence();
-		absence.setAbsenceType(AbsenceType.MEDICAL_LEAVE);
+		License absence = new License();
+		absence.setLicenseType(LicenseType.MEDICAL_LEAVE);
 		absence.setFromDate(dt.toDate());
 		absence.setToDate(dt.plusDays(5).toDate());
 
@@ -472,7 +472,7 @@ public class LaborerServiceTest {
 		
 		assertNotNull("El obrero en la obra no puede ser nulo", dbu);
 		assertTrue("La lista de ausencias no puede ser vacia",!dbu.getAbsences().isEmpty());
-		assertTrue("La lista de ausencias debe ser del tipo MEDICAL_LEAVE",dbu.getAbsences().get(0).getAbsenceType() == AbsenceType.MEDICAL_LEAVE);
+		assertTrue("La lista de ausencias debe ser del tipo MEDICAL_LEAVE",dbu.getAbsences().get(0).getLicenseType() == LicenseType.MEDICAL_LEAVE);
 		
 	}
 	

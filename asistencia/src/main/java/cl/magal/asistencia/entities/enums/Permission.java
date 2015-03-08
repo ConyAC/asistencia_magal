@@ -27,7 +27,10 @@ public enum Permission {
 	EDITAR_OBRA_NOASIGNADAS(24, "Editar Obra"), 
 	CONFIRMAR_OBREROS(25,"Confirmar Obreros"),
 	BLOQUEAR_OBRERO(26, "Bloquear Obrero"),
-	AGREGAR_ETAPAS_OBRA(27,"Agregar Etapas a Obra");
+	AGREGAR_ETAPAS_OBRA(27,"Agregar Etapas a Obra"),
+	CONFIRMAR_ASISTENCIA_OBRA(27,"Confirmar Asistencia en Obra"),
+	CONFIRMAR_ASISTENCIA_CENTRAL(28,"Confirmar Asistencia en Obra"),
+	GENERAR_SUELDOS_SOFTLAND(29,"Generar sueldos");
 
 	
 	int i;

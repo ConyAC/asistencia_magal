@@ -63,6 +63,8 @@ public class Accident implements Serializable {
 	AccidentLevel accidentLevel;
 	
 	boolean wasNegligence;
+	
+	boolean confirmed;
 
 	public Long getAccidentId() {
 		return accidentId;
@@ -123,6 +125,14 @@ public class Accident implements Serializable {
 	
 	public int getTotal(){
 		return Days.daysBetween(new DateTime(fromDate), new DateTime(toDate)).getDays();
-	}	
+	}
 
+	public boolean isConfirmed() {
+		return confirmed;
+	}
+
+	public void setConfirmed(boolean confirmed) {
+		this.confirmed = confirmed;
+	}	
+	
 }

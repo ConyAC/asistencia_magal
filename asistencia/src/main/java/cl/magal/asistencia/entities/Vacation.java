@@ -48,6 +48,8 @@ public class Vacation implements Serializable {
 	@JoinColumn(name ="LABORER_CONSTRUCTIONSITEID",updatable=false,nullable=false)
 	LaborerConstructionsite laborerConstructionSite;
 	
+	boolean confirmed = false;
+	
 	public int getProgressive() {
 		return progressive;
 	}
@@ -92,6 +94,13 @@ public class Vacation implements Serializable {
 	public int getTotal(){
 		return Days.daysBetween(new DateTime(fromDate), new DateTime(toDate)).getDays();
 	}
-	
+
+	public boolean isConfirmed() {
+		return confirmed;
+	}
+
+	public void setConfirmed(boolean confirmed) {
+		this.confirmed = confirmed;
+	}
 
 }

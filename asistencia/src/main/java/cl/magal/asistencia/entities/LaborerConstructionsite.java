@@ -107,7 +107,7 @@ public class LaborerConstructionsite implements Serializable {
     List<Vacation> vacations = new ArrayList<Vacation>();
     
     @OneToMany(mappedBy="laborerConstructionSite",fetch=FetchType.LAZY,cascade={CascadeType.PERSIST,CascadeType.MERGE},orphanRemoval=true )
-    List<Absence> absences = new ArrayList<Absence>();
+    List<License> absences = new ArrayList<License>();
     
     @OneToMany(mappedBy="laborerConstructionSite",fetch=FetchType.LAZY,cascade={CascadeType.PERSIST,CascadeType.MERGE},orphanRemoval=true )
     List<Accident> accidents = new ArrayList<Accident>();
@@ -216,22 +216,22 @@ public class LaborerConstructionsite implements Serializable {
         }
     }
 	
-	public List<Absence> getAbsences() {
+	public List<License> getAbsences() {
 		return absences;
 	}
 
-	public void setAbsences(List<Absence> absences) {
+	public void setAbsences(List<License> absences) {
 		this.absences = absences;
 	}
 	
-	public void addAbsence(Absence absence) {
+	public void addAbsence(License absence) {
         if (!getAbsences().contains(absence)) {
         	getAbsences().add(absence);
         	absence.setLaborerConstructionSite(this);
         }
     }
 	
-	public void removeAbsence(Absence absence) {
+	public void removeAbsence(License absence) {
         if (getAbsences().contains(absence)) {
         	getAbsences().remove(absence);
         	absence.setLaborerConstructionSite(null);

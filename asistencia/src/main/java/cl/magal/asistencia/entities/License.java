@@ -21,12 +21,12 @@ import org.hibernate.validator.constraints.NotEmpty;
 import org.joda.time.DateTime;
 import org.joda.time.Days;
 
-import cl.magal.asistencia.entities.converter.AbsenceTypeConverter;
-import cl.magal.asistencia.entities.enums.AbsenceType;
+import cl.magal.asistencia.entities.converter.LicenseTypeConverter;
+import cl.magal.asistencia.entities.enums.LicenseType;
 
 @Entity
-@Table(name="absence")
-public class Absence implements Serializable {
+@Table(name="license")
+public class License implements Serializable {
 
 	
 	/**
@@ -37,8 +37,8 @@ public class Absence implements Serializable {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
-	@Column(name="absenceId")
-	Long absenceId;
+	@Column(name="licenseId")
+	Long licenseId;
 	
 	@NotNull(message="La fecha inicial es necesaria.")
 	@Temporal(TemporalType.DATE)
@@ -60,15 +60,17 @@ public class Absence implements Serializable {
 	
 	@Column(name="absence_type")
 	@NotNull(message="Debe seleccionar un tipo de licencia")
-	@Convert(converter = AbsenceTypeConverter.class)
-	AbsenceType absenceType;
+	@Convert(converter = LicenseTypeConverter.class)
+	LicenseType licenseType;
+	
+	boolean confirmed;
 
-	public Long getAbsenceId() {
-		return absenceId;
+	public Long getLicenseId() {
+		return licenseId;
 	}
 
-	public void setAbsenceId(Long absencesId) {
-		this.absenceId = absencesId;
+	public void setLicenseId(Long absencesId) {
+		this.licenseId = absencesId;
 	}
 
 	public Date getFromDate() {
@@ -95,14 +97,14 @@ public class Absence implements Serializable {
 		this.description = description;
 	}
 
-	public AbsenceType getAbsenceType() {
-		return absenceType;
+	public LicenseType getLicenseType() {
+		return licenseType;
 	}
 
-	public void setAbsenceType(AbsenceType absencesType) {
-		this.absenceType = absencesType;
+	public void setLicenseType(LicenseType licenseType) {
+		this.licenseType = licenseType;
 	}
-	
+
 	public int getTotal(){
 		return Days.daysBetween(new DateTime(fromDate), new DateTime(toDate)).getDays();
 	}
@@ -115,5 +117,13 @@ public class Absence implements Serializable {
 			LaborerConstructionsite laborerConstructionSite) {
 		this.laborerConstructionSite = laborerConstructionSite;
 	}
-		
+
+	public boolean isConfirmed() {
+		return confirmed;
+	}
+
+	public void setConfirmed(boolean confirmed) {
+		this.confirmed = confirmed;
+	}
+	
 }

@@ -298,6 +298,14 @@
 	.v-grid-header th {
 		text-align : center !important;
 	}
+	
+	.v-button.green-color .v-icon{
+		color : green;
+	}
+	
+	.v-button.red-color .v-icon{
+		color : red;
+	}
 }
 
 
