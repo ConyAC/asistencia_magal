@@ -314,23 +314,22 @@ public class MagalUI extends UI implements ErrorHandler {
 	
 	public static ErrorMessage getErrorMessageForException(Throwable t) {
 
+		ConstraintViolationException validationException = getCauseOfType(t, ConstraintViolationException.class);
+	    if (validationException != null) {
+	    	for(ConstraintViolation<?> c : validationException.getConstraintViolations())
+	    		logger.error("Error al validar {}.{} = {} \n{}",c.getRootBeanClass(),c.getPropertyPath(),c.getInvalidValue(),c.getMessage());
+	        return new UserError(validationException.getMessage(),AbstractErrorMessage.ContentMode.TEXT, ErrorMessage.ErrorLevel.ERROR);
+	    }
 	    PersistenceException persistenceException = getCauseOfType(t, PersistenceException.class);
 	    if (persistenceException != null) {
-	    	logger.error("Error al ingresar al usuario.",persistenceException);
-	            return new UserError(persistenceException.getLocalizedMessage(), AbstractErrorMessage.ContentMode.TEXT, ErrorMessage.ErrorLevel.ERROR);
+	    	logger.error("PersistenceException.",persistenceException);
+	        return new UserError(persistenceException.getLocalizedMessage(), AbstractErrorMessage.ContentMode.TEXT, ErrorMessage.ErrorLevel.ERROR);
 	    }
 	    FieldGroup.CommitException commitException = getCauseOfType(t, FieldGroup.CommitException.class);
 	    if (commitException != null) {
 	    	logger.error("Error al ingresar al usuario.",commitException);
 	        return new UserError(commitException.getMessage(),AbstractErrorMessage.ContentMode.TEXT, ErrorMessage.ErrorLevel.ERROR);
 	    }	  
-	    
-	    ConstraintViolationException validationException = getCauseOfType(t, ConstraintViolationException.class);
-	    if (validationException != null) {
-	    	for(ConstraintViolation<?> c : validationException.getConstraintViolations())
-	    		logger.error("Error al validar {}.{} = {} \n{}",c.getRootBeanClass(),c.getPropertyPath(),c.getInvalidValue(),c.getMessage());
-	        return new UserError(validationException.getMessage(),AbstractErrorMessage.ContentMode.TEXT, ErrorMessage.ErrorLevel.ERROR);
-	    }
 	    
 	    return new UserError("Error interno, tome una captura de pantalla con el error y contáctese con el administrador del sistema.",AbstractErrorMessage.ContentMode.TEXT, ErrorMessage.ErrorLevel.ERROR);
 	}
