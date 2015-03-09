@@ -29,6 +29,11 @@ import cl.magal.asistencia.entities.enums.UserStatus;
 import cl.magal.asistencia.repositories.ConstructionSiteRepository;
 import cl.magal.asistencia.repositories.RoleRepository;
 import cl.magal.asistencia.repositories.UserRepository;
+import cl.magal.asistencia.ui.MagalUI;
+
+import com.vaadin.server.ErrorMessage;
+import com.vaadin.ui.Notification;
+import com.vaadin.ui.Notification.Type;
 
 @Service(value="userService")
 @Transactional(readOnly=true)
@@ -190,6 +195,10 @@ public class UserServiceImpl implements UserDetailsService, UserService {
 		try{
 			entityUser = rep.findByEmail(userName);
 		}catch(Exception e){
+			ErrorMessage errorMessage = MagalUI.getErrorMessageForException(e);
+	        if (errorMessage != null) {
+	            Notification.show("Error Inesperado", errorMessage.getFormattedHtmlMessage(), Type.WARNING_MESSAGE);
+	        }
 			logger.error("Error al ingresar al usuario.",e);
 		}
 		
