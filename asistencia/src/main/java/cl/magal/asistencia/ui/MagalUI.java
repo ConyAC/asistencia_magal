@@ -181,6 +181,7 @@ public class MagalUI extends UI implements ErrorHandler {
 	            return;
 	        }
 	    }
+	    logger.error("Error sin abstractComponent",event.getThrowable());
 		DefaultErrorHandler.doDefault(event);
 	}
 	

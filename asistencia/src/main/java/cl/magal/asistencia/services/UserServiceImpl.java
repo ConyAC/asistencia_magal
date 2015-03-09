@@ -185,8 +185,14 @@ public class UserServiceImpl implements UserDetailsService, UserService {
 		//SOLO PARA TESTING CREA USUARIOS SI NO EXISTEN
 		init();
 		
+		cl.magal.asistencia.entities.User entityUser = null;
 		//recupera el usuario desde base de datos
-		cl.magal.asistencia.entities.User entityUser = rep.findByEmail(userName);
+		try{
+			entityUser = rep.findByEmail(userName);
+		}catch(Exception e){
+			logger.error("Error al ingresar al usuario.",e);
+		}
+		
 		if( entityUser == null ){
 			logger.debug("usuario con  userName "+userName+" no encontrado");
 			throw new UsernameNotFoundException("Usuario o password incorrectas");
