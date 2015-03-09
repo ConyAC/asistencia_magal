@@ -322,15 +322,15 @@ public class MagalUI extends UI implements ErrorHandler {
 	    }
 	    PersistenceException persistenceException = getCauseOfType(t, PersistenceException.class);
 	    if (persistenceException != null) {
-	    	logger.error("PersistenceException.",persistenceException);
+	    	logger.error("Error al persistir.",persistenceException);
 	        return new UserError(persistenceException.getLocalizedMessage(), AbstractErrorMessage.ContentMode.TEXT, ErrorMessage.ErrorLevel.ERROR);
 	    }
 	    FieldGroup.CommitException commitException = getCauseOfType(t, FieldGroup.CommitException.class);
 	    if (commitException != null) {
-	    	logger.error("Error al ingresar al usuario.",commitException);
+	    	logger.error("Error al comitear.",commitException);
 	        return new UserError(commitException.getMessage(),AbstractErrorMessage.ContentMode.TEXT, ErrorMessage.ErrorLevel.ERROR);
 	    }	  
-	    
+	    logger.error("Error al comitear.",t);
 	    return new UserError("Error interno, tome una captura de pantalla con el error y contáctese con el administrador del sistema.",AbstractErrorMessage.ContentMode.TEXT, ErrorMessage.ErrorLevel.ERROR);
 	}
 
