@@ -4,8 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+import javax.persistence.PersistenceException;
 import javax.servlet.annotation.WebInitParam;
 import javax.servlet.annotation.WebServlet;
+import javax.validation.ConstraintViolationException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,14 +29,20 @@ import cl.magal.asistencia.util.SpringContextHelper;
 import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.Title;
 import com.vaadin.annotations.VaadinServletConfiguration;
+import com.vaadin.data.fieldgroup.FieldGroup;
 import com.vaadin.navigator.ViewChangeListener;
+import com.vaadin.server.AbstractErrorMessage;
 import com.vaadin.server.DefaultErrorHandler;
 import com.vaadin.server.ErrorHandler;
+import com.vaadin.server.ErrorMessage;
 import com.vaadin.server.FontAwesome;
+import com.vaadin.server.Page;
+import com.vaadin.server.UserError;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinServlet;
 import com.vaadin.server.VaadinSession;
 import com.vaadin.shared.ui.label.ContentMode;
+import com.vaadin.ui.AbstractComponent;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickListener;
@@ -44,6 +52,8 @@ import com.vaadin.ui.Label;
 import com.vaadin.ui.MenuBar;
 import com.vaadin.ui.MenuBar.Command;
 import com.vaadin.ui.MenuBar.MenuItem;
+import com.vaadin.ui.Notification;
+import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
@@ -161,6 +171,16 @@ public class MagalUI extends UI implements ErrorHandler {
 	}
 
 	public void error(com.vaadin.server.ErrorEvent event) {
+	    // Finds the original source of the error/exception
+	    AbstractComponent component = DefaultErrorHandler.findAbstractComponent(event);
+	    if (component != null) {
+	        ErrorMessage errorMessage = getErrorMessageForException(event.getThrowable());
+	        if (errorMessage != null) {
+	            component.setComponentError(errorMessage);
+	            new Notification(null, errorMessage.getFormattedHtmlMessage(), Type.WARNING_MESSAGE, true).show(Page.getCurrent());
+	            return;
+	        }
+	    }
 		DefaultErrorHandler.doDefault(event);
 	}
 	
@@ -288,6 +308,37 @@ public class MagalUI extends UI implements ErrorHandler {
 	
 	public void setTitleVisible(boolean visible){
 		title.setVisible(visible);
+	}
+	
+	private ErrorMessage getErrorMessageForException(Throwable t) {
+
+		logger.error("Error no controlada ",t);
+	    PersistenceException persistenceException = getCauseOfType(t, PersistenceException.class);
+	    if (persistenceException != null) {
+	            return new UserError(persistenceException.getLocalizedMessage(), AbstractErrorMessage.ContentMode.TEXT, ErrorMessage.ErrorLevel.ERROR);
+	    }
+	    FieldGroup.CommitException commitException = getCauseOfType(t, FieldGroup.CommitException.class);
+	    if (commitException != null) {
+	        return new UserError(commitException.getMessage(),AbstractErrorMessage.ContentMode.TEXT, ErrorMessage.ErrorLevel.ERROR);
+	    }	  
+	    
+	    ConstraintViolationException validationException = getCauseOfType(t, ConstraintViolationException.class);
+	    if (validationException != null) {
+	        return new UserError(validationException.getMessage(),AbstractErrorMessage.ContentMode.TEXT, ErrorMessage.ErrorLevel.ERROR);
+	    }
+	    
+	    return new UserError("Error interno, tome una captura de pantalla con el error y contáctese con el administrador del sistema.",AbstractErrorMessage.ContentMode.TEXT, ErrorMessage.ErrorLevel.ERROR);
+	}
+
+	private static <T extends Throwable> T getCauseOfType(Throwable th, Class<T> type) {
+	    while (th != null) {
+	        if (type.isAssignableFrom(th.getClass())) {
+	            return (T) th;
+	        } else {
+	            th = th.getCause();
+	        }
+	    }
+	    return null;
 	}
 	
 }
