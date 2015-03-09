@@ -7,6 +7,7 @@ import java.util.Locale;
 import javax.persistence.PersistenceException;
 import javax.servlet.annotation.WebInitParam;
 import javax.servlet.annotation.WebServlet;
+import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 
 import org.slf4j.Logger;
@@ -65,7 +66,7 @@ import com.vaadin.ui.VerticalLayout;
 @Theme("magaltheme")
 public class MagalUI extends UI implements ErrorHandler {
 	
-	private transient Logger logger = LoggerFactory.getLogger(MagalUI.class);
+	private transient static Logger logger = LoggerFactory.getLogger(MagalUI.class);
 
 	@WebServlet(value = "/*", asyncSupported = true, 
 			initParams = { 
@@ -311,27 +312,30 @@ public class MagalUI extends UI implements ErrorHandler {
 		title.setVisible(visible);
 	}
 	
-	private ErrorMessage getErrorMessageForException(Throwable t) {
+	public static ErrorMessage getErrorMessageForException(Throwable t) {
 
-		logger.error("Error no controlada ",t);
 	    PersistenceException persistenceException = getCauseOfType(t, PersistenceException.class);
 	    if (persistenceException != null) {
+	    	logger.error("Error al ingresar al usuario.",persistenceException);
 	            return new UserError(persistenceException.getLocalizedMessage(), AbstractErrorMessage.ContentMode.TEXT, ErrorMessage.ErrorLevel.ERROR);
 	    }
 	    FieldGroup.CommitException commitException = getCauseOfType(t, FieldGroup.CommitException.class);
 	    if (commitException != null) {
+	    	logger.error("Error al ingresar al usuario.",commitException);
 	        return new UserError(commitException.getMessage(),AbstractErrorMessage.ContentMode.TEXT, ErrorMessage.ErrorLevel.ERROR);
 	    }	  
 	    
 	    ConstraintViolationException validationException = getCauseOfType(t, ConstraintViolationException.class);
 	    if (validationException != null) {
+	    	for(ConstraintViolation<?> c : validationException.getConstraintViolations())
+	    		logger.error("Error al validar {}.{} = {} \n{}",c.getRootBeanClass(),c.getPropertyPath(),c.getInvalidValue(),c.getMessage());
 	        return new UserError(validationException.getMessage(),AbstractErrorMessage.ContentMode.TEXT, ErrorMessage.ErrorLevel.ERROR);
 	    }
 	    
 	    return new UserError("Error interno, tome una captura de pantalla con el error y contáctese con el administrador del sistema.",AbstractErrorMessage.ContentMode.TEXT, ErrorMessage.ErrorLevel.ERROR);
 	}
 
-	private static <T extends Throwable> T getCauseOfType(Throwable th, Class<T> type) {
+	public static <T extends Throwable> T getCauseOfType(Throwable th, Class<T> type) {
 	    while (th != null) {
 	        if (type.isAssignableFrom(th.getClass())) {
 	            return (T) th;
