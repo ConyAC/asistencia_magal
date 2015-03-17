@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ui.velocity.VelocityEngineUtils;
 
+import cl.magal.asistencia.entities.AdvancePaymentItem;
 import cl.magal.asistencia.entities.ConstructionSite;
 import cl.magal.asistencia.entities.Contract;
 import cl.magal.asistencia.entities.Laborer;
@@ -173,8 +174,18 @@ public class AddLaborerContractDialog extends AbstractWindowEditor implements Ne
 		// codigo por asignar
 		lbCodJob = new TextField("Código Asignado a Trabajador");
 		lbCodJob.setReadOnly(true);
-		gl.addComponent(lbCodJob,1,rows++);
+		gl.addComponent(lbCodJob,1,rows);
 		gl.setComponentAlignment(lbCodJob, Alignment.MIDDLE_CENTER);	
+		
+		// codigo por asignar
+		ComboBox cbSupleCode = new ComboBox("Código Suple");
+		cbSupleCode.setRequired(true);
+		gl.addComponent(cbSupleCode,2,rows++);
+		gl.setComponentAlignment(cbSupleCode, Alignment.MIDDLE_CENTER);
+		Map<Integer, AdvancePaymentItem> paymentTable = constructionSiteService.getSupleTableByCs(((BeanItem<LaborerConstructionsite>) getItem()).getBean().getConstructionsite());
+		for(Integer key : paymentTable.keySet()){
+			cbSupleCode.addItem(key);
+		}
 		
 		//cada vez que cambia el job, calcula el siguiente codigo
 		cbJob.addValueChangeListener(new Property.ValueChangeListener() {

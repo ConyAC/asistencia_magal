@@ -2,7 +2,10 @@ package cl.magal.asistencia.services;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.PostConstruct;
 
@@ -17,10 +20,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import cl.magal.asistencia.entities.Accident;
+import cl.magal.asistencia.entities.AdvancePaymentConfigurations;
+import cl.magal.asistencia.entities.AdvancePaymentItem;
 import cl.magal.asistencia.entities.Attendance;
 import cl.magal.asistencia.entities.Confirmations;
 import cl.magal.asistencia.entities.ConstructionCompany;
 import cl.magal.asistencia.entities.ConstructionSite;
+import cl.magal.asistencia.entities.DateConfigurations;
 import cl.magal.asistencia.entities.Laborer;
 import cl.magal.asistencia.entities.LaborerConstructionsite;
 import cl.magal.asistencia.entities.License;
@@ -31,10 +37,12 @@ import cl.magal.asistencia.entities.User;
 import cl.magal.asistencia.entities.Vacation;
 import cl.magal.asistencia.entities.enums.AbsenceType;
 import cl.magal.asistencia.repositories.AccidentRepository;
+import cl.magal.asistencia.repositories.AdvancePaymentRepository;
 import cl.magal.asistencia.repositories.AttendanceRepository;
 import cl.magal.asistencia.repositories.ConfirmationsRepository;
 import cl.magal.asistencia.repositories.ConstructionCompanyRepository;
 import cl.magal.asistencia.repositories.ConstructionSiteRepository;
+import cl.magal.asistencia.repositories.DateConfigurationsRepository;
 import cl.magal.asistencia.repositories.LaborerConstructionsiteRepository;
 import cl.magal.asistencia.repositories.LaborerRepository;
 import cl.magal.asistencia.repositories.LicenseRepositoy;
@@ -76,6 +84,10 @@ public class ConstructionSiteService {
 	LicenseRepositoy licenseRepo;
 	@Autowired
 	SalaryRepository salaryRepo;
+	@Autowired
+	AdvancePaymentRepository advancePaymentRepo;
+	@Autowired
+	DateConfigurationsRepository dateConfigurationsRepo;
 	
 	@PostConstruct
 	public void init(){
@@ -419,13 +431,24 @@ public class ConstructionSiteService {
 		//obtiene la lista de trabajadores de la obra
 		List<LaborerConstructionsite> lcs =  labcsRepo.findByConstructionsiteAndIsActive(cs);
 		List<Salary> salaries = new ArrayList<Salary>(lcs.size());
+		
+		//obtiene los parametros requeridos
+		// tabla de suple de la obra
+		Map<Integer,AdvancePaymentItem> supleTable = getSupleTableByCs(cs);
+		Double failDiscount = getFailDiscount(cs);
+		Double permissionDiscount = getPermissionDiscount(cs);
+		//fechas 
+		DateConfigurations dateConfiguration = getByCsAndMonth(cs,date);
+		Date assistanceClose = dateConfiguration.getAssistance();
+		Date supleClose = dateConfiguration.getAdvance();
+		
 		//verifica que exista una asistencia para cada elemento, si no existe la crea
 		for(LaborerConstructionsite lc : lcs ){
-			//TODO CALCULAR AQUI
+			//TODO CALCULAR AQUI 
 			Salary salary = new Salary();
 			salary.setLaborerConstructionSite(lc);
 			salary.setSalary(0);
-			salary.setSuple(0);
+			salary.setSuple(supleTable.get(lc.getSupleCode()).getSupleTotalAmount().intValue());
 			salary.setDate(date.toDate());
 			salaries.add(salary);
 			
@@ -434,6 +457,32 @@ public class ConstructionSiteService {
 		salaryRepo.save(salaries);
 		
 		return salaries;
+	}
+	
+	public DateConfigurations getByCsAndMonth(ConstructionSite cs,DateTime date) {
+		return dateConfigurationsRepo.findByDate(date.toDate());
+	}
+
+	public Double getPermissionDiscount(ConstructionSite cs) {
+		List<AdvancePaymentConfigurations> config = (List<AdvancePaymentConfigurations>) advancePaymentRepo.findAll();
+		return config.get(0).getPermissionDiscount();
+	}
+
+	public Double getFailDiscount(ConstructionSite cs) {
+		List<AdvancePaymentConfigurations> config = (List<AdvancePaymentConfigurations>) advancePaymentRepo.findAll();
+		return config.get(0).getFailureDiscount();
+	}
+
+	public Map<Integer, AdvancePaymentItem> getSupleTableByCs(ConstructionSite cs) {
+		List<AdvancePaymentConfigurations> config = (List<AdvancePaymentConfigurations>) advancePaymentRepo.findAll();
+		
+		Map<Integer,AdvancePaymentItem> map = new HashMap<Integer,AdvancePaymentItem>();
+		for(AdvancePaymentItem advancePaymentItem : config.get(0).getAdvancePaymentTable() ){
+			map.put(advancePaymentItem.getSupleCode(), advancePaymentItem);
+		}
+		
+		return map;
+		
 	}
 
 	/**

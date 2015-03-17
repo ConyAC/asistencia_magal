@@ -130,6 +130,9 @@ public class LaborerConstructionsite implements Serializable {
      */
     @OneToOne(mappedBy="laborerConstructionSite",cascade = {CascadeType.PERSIST,CascadeType.MERGE})
     Contract activeContract;
+    
+    @Column(name = "suple_code")
+  	Integer supleCode = 1;
 	
     
     @PreUpdate
@@ -150,7 +153,13 @@ public class LaborerConstructionsite implements Serializable {
     		active = 1;
     }
     
-    public LaborerConstructionsite() {
+    public Integer getSupleCode() {
+		return supleCode;
+	}
+	public void setSupleCode(Integer supleCode) {
+		this.supleCode = supleCode;
+	}
+	public LaborerConstructionsite() {
     }
     
 	public boolean isUseDefaultDates() {
