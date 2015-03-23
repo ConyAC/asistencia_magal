@@ -3,6 +3,7 @@ package cl.magal.asistencia.entities;
 import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.Basic;
 import javax.persistence.CollectionTable;
@@ -46,6 +47,16 @@ public class AdvancePaymentConfigurations implements Serializable {
 	        joinColumns=@JoinColumn(name="advance_payment_configurationsId")
 	  )
 	List<AdvancePaymentItem> advancePaymentTable = new LinkedList<AdvancePaymentItem>();
+	
+	transient Map<Integer, AdvancePaymentItem> mapTable;
+	
+	public Map<Integer, AdvancePaymentItem> getMapTable() {
+		return mapTable;
+	}
+
+	public void setMapTable(Map<Integer, AdvancePaymentItem> mapTable) {
+		this.mapTable = mapTable;
+	}
 
 	public Long getAdvancePaymentConfigurationsId() {
 		return AdvancePaymentConfigurationsId;

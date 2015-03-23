@@ -454,7 +454,10 @@ public class AttendancePanel extends Panel implements View {
 										salaryContainer.addAll(salaries);
 									}catch(Exception e){
 										logger.error("Error al calcular los sueldos",e);
-										Notification.show("Error al calcular los sueldos, el código de error es "+e.getMessage(),Type.ERROR_MESSAGE);
+										String mensaje = "Error al calcular los sueldos.";
+										if( e.getMessage() != null )
+											mensaje = e.getMessage();
+										Notification.show(mensaje,Type.ERROR_MESSAGE);
 									}
 								}
 							}

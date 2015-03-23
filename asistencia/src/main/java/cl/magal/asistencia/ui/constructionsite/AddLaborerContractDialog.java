@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ui.velocity.VelocityEngineUtils;
 
+import cl.magal.asistencia.entities.AdvancePaymentConfigurations;
 import cl.magal.asistencia.entities.AdvancePaymentItem;
 import cl.magal.asistencia.entities.ConstructionSite;
 import cl.magal.asistencia.entities.Contract;
@@ -182,7 +183,8 @@ public class AddLaborerContractDialog extends AbstractWindowEditor implements Ne
 		cbSupleCode.setRequired(true);
 		gl.addComponent(cbSupleCode,2,rows++);
 		gl.setComponentAlignment(cbSupleCode, Alignment.MIDDLE_CENTER);
-		Map<Integer, AdvancePaymentItem> paymentTable = constructionSiteService.getSupleTableByCs(((BeanItem<LaborerConstructionsite>) getItem()).getBean().getConstructionsite());
+		AdvancePaymentConfigurations supleConfigurations = constructionSiteService.getSupleTableByCs(((BeanItem<LaborerConstructionsite>) getItem()).getBean().getConstructionsite());
+		Map<Integer, AdvancePaymentItem> paymentTable = supleConfigurations.getMapTable();
 		for(Integer key : paymentTable.keySet()){
 			cbSupleCode.addItem(key);
 		}

@@ -1,7 +1,10 @@
 package cl.magal.asistencia.entities;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 
 import javax.persistence.Basic;
 import javax.persistence.Column;
@@ -162,6 +165,27 @@ public class Attendance implements Serializable {
 	AttendanceMark d30 = AttendanceMark.ATTEND;
 	@Convert(converter = AttendanceMarkConverter.class)
 	AttendanceMark d31 = AttendanceMark.ATTEND;
+	
+	public List<AttendanceMark> getMarksAsList() {
+		ArrayList<AttendanceMark> tmp = new ArrayList<AttendanceMark>();
+		tmp.add(d1);tmp.add(d2);
+		tmp.add(d3);tmp.add(d4);
+		tmp.add(d5);tmp.add(d6);
+		tmp.add(d7);tmp.add(d8);
+		tmp.add(d9);tmp.add(d10);
+		tmp.add(d11);tmp.add(d12);
+		tmp.add(d13);tmp.add(d14);
+		tmp.add(d15);tmp.add(d16);
+		tmp.add(d17);tmp.add(d18);
+		tmp.add(d19);tmp.add(d20);
+		tmp.add(d21);tmp.add(d22);
+		tmp.add(d23);tmp.add(d24);
+		tmp.add(d25);tmp.add(d26);
+		tmp.add(d27);tmp.add(d28);
+		tmp.add(d29);tmp.add(d30);tmp.add(d31);
+		
+		return Collections.unmodifiableList(tmp);
+	}
 	
 	public Long getAttendanceId() {
 		return attendanceId;
@@ -396,7 +420,11 @@ public class Attendance implements Serializable {
 			return false;
 		return true;
 	}
-	
-	
+
+	@Override
+	public String toString() {
+		return "Attendance [attendanceId=" + attendanceId + ", date=" + date
+				+ ", laborerConstructionSite=" + laborerConstructionSite + "]";
+	}
 	
 }

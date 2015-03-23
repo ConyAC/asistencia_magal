@@ -9,6 +9,7 @@ import java.util.Map;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.commons.lang.ArrayUtils;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,15 +28,18 @@ import cl.magal.asistencia.entities.Confirmations;
 import cl.magal.asistencia.entities.ConstructionCompany;
 import cl.magal.asistencia.entities.ConstructionSite;
 import cl.magal.asistencia.entities.DateConfigurations;
+import cl.magal.asistencia.entities.FamilyAllowanceConfigurations;
 import cl.magal.asistencia.entities.Laborer;
 import cl.magal.asistencia.entities.LaborerConstructionsite;
 import cl.magal.asistencia.entities.License;
 import cl.magal.asistencia.entities.Overtime;
 import cl.magal.asistencia.entities.Salary;
+import cl.magal.asistencia.entities.TaxationConfigurations;
 import cl.magal.asistencia.entities.Team;
 import cl.magal.asistencia.entities.User;
 import cl.magal.asistencia.entities.Vacation;
 import cl.magal.asistencia.entities.enums.AbsenceType;
+import cl.magal.asistencia.entities.enums.AttendanceMark;
 import cl.magal.asistencia.repositories.AccidentRepository;
 import cl.magal.asistencia.repositories.AdvancePaymentRepository;
 import cl.magal.asistencia.repositories.AttendanceRepository;
@@ -43,11 +47,13 @@ import cl.magal.asistencia.repositories.ConfirmationsRepository;
 import cl.magal.asistencia.repositories.ConstructionCompanyRepository;
 import cl.magal.asistencia.repositories.ConstructionSiteRepository;
 import cl.magal.asistencia.repositories.DateConfigurationsRepository;
+import cl.magal.asistencia.repositories.FamilyAllowanceRepository;
 import cl.magal.asistencia.repositories.LaborerConstructionsiteRepository;
 import cl.magal.asistencia.repositories.LaborerRepository;
 import cl.magal.asistencia.repositories.LicenseRepositoy;
 import cl.magal.asistencia.repositories.OvertimeRepository;
 import cl.magal.asistencia.repositories.SalaryRepository;
+import cl.magal.asistencia.repositories.TaxationRepository;
 import cl.magal.asistencia.repositories.TeamRepository;
 import cl.magal.asistencia.repositories.UserRepository;
 import cl.magal.asistencia.repositories.VacationRepository;
@@ -88,6 +94,10 @@ public class ConstructionSiteService {
 	AdvancePaymentRepository advancePaymentRepo;
 	@Autowired
 	DateConfigurationsRepository dateConfigurationsRepo;
+	@Autowired
+	TaxationRepository taxationRepo;
+	@Autowired
+	FamilyAllowanceRepository famillyRepo;
 	
 	@PostConstruct
 	public void init(){
@@ -246,6 +256,44 @@ public class ConstructionSiteService {
 	
 	public List<ConstructionCompany> findAllConstructionCompany() {
 		return (List<ConstructionCompany>) constructionCompanyRepo.findAll();
+	}
+	
+	/**
+	 * 
+	 * @param cs
+	 * @param date
+	 * @return
+	 */
+	public Map<Integer,Attendance> getAttendanceMapByConstruction(ConstructionSite cs,DateTime date) {
+		//obtiene la lista de trabajadores de la obra
+		List<LaborerConstructionsite> lcs =  labcsRepo.findByConstructionsiteAndIsActive(cs);
+		logger.debug("trabajadores activos {} ",lcs);
+		logger.debug("date {} ",date);
+		
+		List<Attendance> attendanceResultList =  attendanceRepo.findByConstructionsiteAndMonth(cs,date.toDate());
+		logger.debug("attendanceResultList.getmarks {} ",attendanceResultList.get(0).getMarksAsList());
+		Attendance tmp = new Attendance();
+		
+		Map<Integer,Attendance> attendanceResult = new HashMap<Integer,Attendance>();
+		//verifica que exista una asistencia para cada elemento, si no existe la crea
+		for(LaborerConstructionsite lc : lcs ){
+			tmp.setLaborerConstructionSite(lc);
+			// busca si está
+			int index = attendanceResultList.indexOf(tmp);
+			if( index >= 0 ){
+				Attendance attendance = attendanceResultList.remove(index);
+				attendance.setLaborerConstructionSite(lc);
+				attendance.setDate(date.toDate());
+				attendanceResult.put(lc.getJobCode(),attendance);
+			}else{
+				Attendance attendance = new Attendance();
+				attendance.setLaborerConstructionSite(lc);
+				attendance.setDate(date.toDate());
+				attendanceResult.put(lc.getJobCode(),attendance);
+			}
+
+		}
+		return attendanceResult;
 	}
 
 	/**
@@ -434,21 +482,31 @@ public class ConstructionSiteService {
 		
 		//obtiene los parametros requeridos
 		// tabla de suple de la obra
-		Map<Integer,AdvancePaymentItem> supleTable = getSupleTableByCs(cs);
+		AdvancePaymentConfigurations supleTable = getSupleTableByCs(cs);
+		if(supleTable == null )
+			throw new RuntimeException("Aún no se define la tabla de suples. Ésta es necesaria para cálcular el sueldo.");
 		Double failDiscount = getFailDiscount(cs);
 		Double permissionDiscount = getPermissionDiscount(cs);
 		//fechas 
 		DateConfigurations dateConfiguration = getByCsAndMonth(cs,date);
+		if(dateConfiguration == null )
+			throw new RuntimeException("Aún no se definen las fechas de cierre de anticipo y cierre de asistencia. Ambas son necesarias para cálcular el sueldo.");
 		Date assistanceClose = dateConfiguration.getAssistance();
 		Date supleClose = dateConfiguration.getAdvance();
 		
+		//busca la asistencia del mes 
+		Map<Integer,Attendance> attendance = getAttendanceMapByConstruction(cs, date);
+		
 		//verifica que exista una asistencia para cada elemento, si no existe la crea
 		for(LaborerConstructionsite lc : lcs ){
+			Integer supleCode = lc.getSupleCode();
+			if(supleCode == null )
+				continue; //TODO notificar que el usuario tanto, no tenia suple (o parar la ejecución)
 			//TODO CALCULAR AQUI 
 			Salary salary = new Salary();
 			salary.setLaborerConstructionSite(lc);
 			salary.setSalary(0);
-			salary.setSuple(supleTable.get(lc.getSupleCode()).getSupleTotalAmount().intValue());
+			salary.setSuple(calculateSuple(supleCode,supleTable,supleClose,attendance.get(lc.getJobCode())));
 			salary.setDate(date.toDate());
 			salaries.add(salary);
 			
@@ -459,7 +517,41 @@ public class ConstructionSiteService {
 		return salaries;
 	}
 	
+	public Double calculateSuple(Integer supleCode,AdvancePaymentConfigurations supleTable, Date supleCloseDate,Attendance attendance){
+		
+		Map<Integer,AdvancePaymentItem> supleItemTable = supleTable.getMapTable();
+		//primero obtiene el monto de anticipo que le corresponde por tabla
+		Double maxAmount = supleItemTable.get(supleCode).getSupleTotalAmount();
+		//obtiene el día en que se cierra el suple
+		Integer supleCloseDay = new DateTime(supleCloseDate).dayOfMonth().get();
+		//luego descuenta por cada X S V D LL 
+		Integer countNotAttendance = countMarks(supleCloseDay,attendance,AttendanceMark.SATURDAY,AttendanceMark.ATTEND,AttendanceMark.VACATION,AttendanceMark.SUNDAY,AttendanceMark.RAIN);
+		logger.debug("(supleCloseDay {} - countNotAttendance {} ) * supleTable.getFailureDiscount() ",supleCloseDay,countNotAttendance,supleTable.getFailureDiscount());
+		Integer firstDiscount = (int) ((supleCloseDay - countNotAttendance)*supleTable.getFailureDiscount());
+		logger.debug("first discount {}",firstDiscount);		
+		Integer countFails = countMarks(supleCloseDay,attendance,AttendanceMark.FAIL);
+		Integer secondDiscount = (int) (countFails*supleTable.getPermissionDiscount());
+		logger.debug("second discount {}",secondDiscount);
+		return maxAmount -firstDiscount -secondDiscount;
+	}
+	
+	private Integer countMarks(Integer supleCloseDay,Attendance attendance, AttendanceMark ... marks) {
+		if(attendance == null )
+			throw new RuntimeException("El objeto de asistencia no puede ser nulo.");
+		
+		int i = 0,count = 0;
+		for(AttendanceMark mark : attendance.getMarksAsList()){
+			if(i >= supleCloseDay)
+				break;
+			if(ArrayUtils.contains(marks, mark))
+				count++;
+			i++;
+		}
+		return count;
+	}
+
 	public DateConfigurations getByCsAndMonth(ConstructionSite cs,DateTime date) {
+		logger.debug("buscando configuraciones de la fecha {}",date.toDate());
 		return dateConfigurationsRepo.findByDate(date.toDate());
 	}
 
@@ -473,15 +565,17 @@ public class ConstructionSiteService {
 		return config.get(0).getFailureDiscount();
 	}
 
-	public Map<Integer, AdvancePaymentItem> getSupleTableByCs(ConstructionSite cs) {
+	public AdvancePaymentConfigurations getSupleTableByCs(ConstructionSite cs) {
 		List<AdvancePaymentConfigurations> config = (List<AdvancePaymentConfigurations>) advancePaymentRepo.findAll();
+		AdvancePaymentConfigurations table = config.get(0);
 		
 		Map<Integer,AdvancePaymentItem> map = new HashMap<Integer,AdvancePaymentItem>();
-		for(AdvancePaymentItem advancePaymentItem : config.get(0).getAdvancePaymentTable() ){
+		for(AdvancePaymentItem advancePaymentItem : table.getAdvancePaymentTable() ){
 			map.put(advancePaymentItem.getSupleCode(), advancePaymentItem);
 		}
+		table.setMapTable(map);
 		
-		return map;
+		return table;
 		
 	}
 
@@ -494,6 +588,257 @@ public class ConstructionSiteService {
 	public List<Salary> getSalariesByConstructionAndMonth(ConstructionSite cs,DateTime dt) {
 		List<Salary> salaries = salaryRepo.findByConstructionsiteAndMonth(cs,dt.toDate());
 		return salaries;
+	}
+
+	public int calculateSalary(int suple , int tool , int loan,Attendance attendance) {
+		return (int) (calculateAfecto()+calculateSobreAfecto()+calculateTNoAfecto() - calculateTDesc(suple,tool,loan));
+	}
+
+	private int calculateSobreAfecto() {
+		return 0;
+	}
+
+	private int calculateAfecto() {
+		return 136521;
+	}
+
+	/**
+	 * DONE
+	 * @return
+	 */
+	private double calculateTNoAfecto() {
+		return calculateAsigFamiliar() + calculateColacion() + calculateMov() + calculateMov2();
+	}
+
+	/**
+	 * DONE
+	 * @return
+	 */
+	private double calculateMov2() {
+		return calculateCol()*getMov2()+ getBonoCargoLoc2();
+	}
+
+	/**
+	 * TODO Calcula según las asistencias, lluvias, sabados y vacaciones
+	 * =CONTAR.SI(D32:AK32;"X")+CONTAR.SI(D32:AK32;"ll")-C32-CONTAR.SI(DN32:DX32;"S")-CONTAR.SI(DN32:DX32;"V")
+	 * @return
+	 */
+	private int calculateCol() {
+		return 7;
+	}
+
+	/**
+	 * TODO cofiguración global de mov 2
+	 * @return
+	 */
+	private int getMov2() {
+		return 1000;
+	}
+
+	/**
+	 * TODO
+	 * @return
+	 */
+	private int getBonoCargoLoc2() {
+		return 0;
+	}
+
+	/**
+	 * DONE
+	 * @return
+	 */
+	private int calculateMov() {
+		return getMov() * calculateCol();
+	}
+
+	/**
+	 * configuración global de la obra
+	 * @return
+	 */
+	private int getMov() {
+		return 220;
+	}
+
+	/**
+	 * DONE
+	 * @return
+	 */
+	private int calculateColacion() {
+		return getColacion() * calculateCol();
+	}
+
+	/**
+	 * TODO 
+	 * configuración global de colación
+	 * @return
+	 */
+	private int getColacion() {
+		return 31;
+	}
+
+	/**
+	 * DONE
+	 * @return
+	 */
+	private double calculateAsigFamiliar() {
+		
+		//obtiene la tabla de impuestos
+		List<FamilyAllowanceConfigurations> famillyTable = (List<FamilyAllowanceConfigurations>) famillyRepo.findAll();
+		//busca en que rango está el calculo del impuesto
+		Double result = 0D;
+		double factor = calculateAfecto() / calculateDiaTrab();
+		for( FamilyAllowanceConfigurations tax : famillyTable 	){
+			if( tax.getFrom() >= factor && tax.getTo() <= factor ){
+				result = tax.getAmount();
+				break;
+			}
+		}
+		return result * getCargas();
+	}
+
+	/**
+	 * TODO 
+	 * calcular los dias trabajados del obrero en el mes
+	 * =CONTAR.SI(D32:AI32;"X")+CONTAR.SI(D32:AI32;"V")-C32
+	 * @return
+	 */
+	private int calculateDiaTrab() {
+		return 7;
+	}
+
+	/**
+	 * TODO obtiene las cargas del trabajador
+	 * @return
+	 */
+	private double getCargas() {
+		return 0;
+	}
+
+	/**
+	 * DONE
+	 * @return
+	 */
+	private double calculateTDesc(int suple , int tool , int loan) {
+		return calculateDescImposiciones() + calculateImpuesto() + suple - tool - loan;
+	}
+
+	/**
+	 * DONE
+	 * @return
+	 */
+	private double calculateImpuesto() {
+		return calculateTTribut()*calculateImpuesto2Cat()-calculateADescontar();
+	}
+
+	/**
+	 * DONE
+	 * @return
+	 */
+	private double calculateTTribut() {
+		return calculateAfecto()+calculateSobreAfecto() - calculateDescImposiciones();
+	}
+
+	/**
+	 * DONE
+	 * @return
+	 */
+	private Double calculateImpuesto2Cat() {
+		//obtiene la tabla de impuestos
+		List<TaxationConfigurations> taxTable = (List<TaxationConfigurations>) taxationRepo.findAll();
+		//busca en que rango está el calculo del impuesto
+		Double result = 0D;
+		double tTribut = calculateTTribut();
+		for( TaxationConfigurations tax : taxTable 	){
+			if( tax.getFrom() >= tTribut && tax.getTo() <= tTribut ){
+				result = tax.getFactor();
+				break;
+			}
+		}
+		return result;
+	}
+
+	/**
+	 * DONE
+	 * @return
+	 */
+	private Double calculateADescontar() {
+		//obtiene la tabla de impuestos
+		List<TaxationConfigurations> taxTable = (List<TaxationConfigurations>) taxationRepo.findAll();
+		//busca en que rango está el calculo del impuesto
+		Double result = 0D;
+		double tTribut = calculateTTribut();
+		for( TaxationConfigurations tax : taxTable 	){
+			if( tax.getFrom() >= tTribut && tax.getTo() <= tTribut ){
+				result = tax.getReduction();
+				break;
+			}
+		}
+		return result;
+	}
+
+	/**
+	 * DONE
+	 * @return
+	 */
+	private double calculateDescImposiciones() {
+		return calculate7Salud() + calculateAdicionalSalud() + calculateAFP();
+	}
+
+	/**
+	 * DONE
+	 * @return
+	 */
+	private double calculateAFP() {
+		return calculateAfecto() * calculateAFPPorcentaje();
+	}
+
+	/**
+	 * TODO Busca el % de la afp asociado al trabajador, si éste no es pensionado. 
+	 * @return
+	 */
+	private double calculateAFPPorcentaje() {
+		return 0.1127;
+	}
+
+	/**
+	 * DONE
+	 * @return
+	 */
+	private double calculateAdicionalSalud() {
+		double result = calculateMontoCtoUF() * getUFMes() - calculate7Salud();
+		return result > 0 ? result : 0 ;
+	}
+
+	/**
+	 * TODO Monto Cto UF ???
+	 * @return
+	 */
+	private double calculateMontoCtoUF() {
+		return 0D;
+	}
+
+	/**
+	 * TODO obtener el monto de la uf del mes
+	 * @return
+	 */
+	private double getUFMes() {
+		return 24023.61D;
+	}
+
+	/**
+	 * DONE
+	 * @return
+	 */
+	private double calculate7Salud() {
+		return getPorcentajeSalud()*calculateAfecto();
+	}
+	
+	/**
+	 * TODO
+	 * Dato mes % de salud 
+	 */
+	private double getPorcentajeSalud(){
+		return 0.07D;
 	}
 
 }
