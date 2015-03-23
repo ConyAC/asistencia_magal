@@ -594,12 +594,262 @@ public class ConstructionSiteService {
 		return (int) (calculateAfecto()+calculateSobreAfecto()+calculateTNoAfecto() - calculateTDesc(suple,tool,loan));
 	}
 
-	private int calculateSobreAfecto() {
+	/**
+	 * DONE
+	 * Calcula el sobre afecto, si éste último fue mayor al maximo imponible 
+	 * @return
+	 */
+	private double calculateSobreAfecto() {
+		double afecto = calculateAfecto();
+		double maxImponible = getMaxImponible();
+		if( maxImponible == afecto )
+			return 0;
+		else{
+			double sum = calculateVTrato() + calculateValorSabado() + calculateVSCorrd() + calculateSobreTiempo() + calculateDescHoras() + calculateBonifImpo() + calculateGLegal();
+			return sum - afecto;
+		}
+	}
+
+	/**
+	 * DONE
+	 * @return
+	 */
+	private double calculateAfecto() {
+		double maxImponible = getMaxImponible();
+		double sum = calculateVTrato() + calculateValorSabado() + calculateVSCorrd() + calculateSobreTiempo() + calculateDescHoras() + calculateBonifImpo() + calculateGLegal();
+		return sum > maxImponible ? maxImponible : sum ;
+	}
+	/**
+	 * DONE
+	 * @return
+	 */
+	private double calculateGLegal() {
+		return getGratificacionLegalMes() * calculateDiaTrab();
+	}
+	
+	/**
+	 * DONE
+	 * @return
+	 */
+	private double getGratificacionLegalMes() {
+		return (4.75*getSueldoMinimo()/12)/getDiasHabilesMes();
+	}
+
+	/**
+	 * TODO calcular los dias habiles del mes en calculo
+	 * @return
+	 */
+	private double getDiasHabilesMes() {
+		return 23;
+	}
+
+	/**
+	 * DONE
+	 * @return
+	 */
+	private double calculateBonifImpo() {
+		return calculateBonoBencina() + getBonoImponibleEspecial() + calculateLLuvia() + calculateLLuviaMesAnterior() + calculateAjusteAsistenciaMesAnterior();
+	}
+
+	/**
+	 * TODO
+	 * @return
+	 */
+	private int calculateAjusteAsistenciaMesAnterior() {
+		int sumAsistenciaAjustadaMesAnterior = 0; // TODO calcular asistencia mes anterior
+		return sumAsistenciaAjustadaMesAnterior * getJPromedio();
+	}
+
+	/**
+	 * TODO
+	 * =DL32*$DF$7
+	 * @return
+	 */
+	private int calculateLLuviaMesAnterior() {
+		int sumLLuviaAjuste = 0; //TODO sumar lluvias ajustadas
+		return sumLLuviaAjuste * getJornalBaseMes();
+	}
+
+	/**
+	 * TODO
+	 * =CONTAR.SI(D32:AI32;"LL")*$DF$7*1,2
+	 * @return
+	 */
+	private int calculateLLuvia() {
+		int sumLluvia = 0; // TODO sumar lluvias desde la asistencia
+		return sumLluvia * getJornalBaseMes();
+	}
+
+	/**
+	 * TODO revisar FIXME
+	 * @return
+	 */
+	private int getJornalBaseMes() {
+		return getSueldoMinimo() / 30; //FIXME usar siempre 30?
+	}
+
+	/**
+	 * TODO obtener configuración global
+	 * @return
+	 */
+	private int getSueldoMinimo() {
+		return 210000;
+	}
+
+	/**
+	 * 
+	 * TODO registrar bono imponible especial
+	 * @return
+	 */
+	private int getBonoImponibleEspecial() {
 		return 0;
 	}
 
-	private int calculateAfecto() {
-		return 136521;
+	/**
+	 * DONE
+	 * =(64+$DC$7/8)*DD32
+	 * @return
+	 */
+	private double calculateBonoBencina() {
+		return (64 + getBencinaMes() / 8 )*getKM();
+	}
+	
+	/**
+	 * TODO Crear ingresador de bencina 
+	 * @return
+	 */
+	private double getBencinaMes() {
+		return 895.0D;
+	}
+
+	/**
+	 * TODO obtener los km
+	 * @return
+	 */
+	private int getKM() {
+		return 0;
+	}
+
+	/**
+	 * TODO 
+	 * - ( =AS32/7,5*AU32+C32*0,2*AS32 )
+	 * @return
+	 */
+	private double calculateDescHoras() {
+		return -1 * (getJPromedio() / 7.5 * getHorasDesc() + calculateDiasNoConsideradosMesAnterior() * 0.2 * getJPromedio() );
+	}
+	
+	/**
+	 * TODO calcular los días no considerados del mes anterior 
+	 * @return
+	 */
+	private double calculateDiasNoConsideradosMesAnterior() {
+		return 0;
+	}
+
+	/**
+	 * TODO considerar el ingreso de horas por descuento
+	 * @return
+	 */
+	private double getHorasDesc() {
+		return 0;
+	}
+
+	/**
+	 * DONE 
+	 * =AS32/7,5*1,5*(CZ32-DA32)
+	 * @return
+	 */
+	private double calculateSobreTiempo() {
+		return getJPromedio()/7.5*1.5*(calculateHorasSobrtpo() - getHorasSobreTiempo() );
+	}
+
+	/**
+	 * TODO por definir
+	 * @return
+	 */
+	private int getHorasSobreTiempo() {
+		return 0;
+	}
+
+	/**
+	 * TODO debe considerar la suma de las horas por sobre tiempo
+	 * @return
+	 */
+	private int calculateHorasSobrtpo() {
+		return 0;
+	}
+
+	/**
+	 * DONE 
+	 * @return
+	 */
+	private double calculateVSCorrd() {
+		return ( calculateVTrato() + calculateValorSabado() + calculateSobreTiempo() )/ calculateDPD() * calculateSep();
+	}
+
+	/**
+	 * TODO
+	 * @return
+	 */
+	private double calculateSep() {
+		return 2;
+	}
+
+	/**
+	 * TODO
+	 * @return
+	 */
+	private double calculateDPD() {
+		return 11;
+	}
+
+	/**
+	 * DONE
+	 * @return
+	 */
+	private double calculateValorSabado() {
+		return ( calculateVTrato() +  calculateDescHoras() ) / calculateDPS() * calculateSab();
+	}
+
+	/**
+	 * TODO
+	 * @return
+	 */
+	private int calculateDPS() {
+		return 9;
+	}
+
+	/**
+	 * TODO
+	 * @return
+	 */
+	private int calculateSab() {
+		return 2;
+	}
+
+	/**
+	 * DONE
+	 * @return
+	 */
+	private double calculateVTrato() {
+		return getJPromedio()*calculateDiaTrab();
+	}
+
+	/**
+	 * TODO obtener jornal promedio
+	 * @return
+	 */
+	private int getJPromedio() {
+		return 11000;
+	}
+
+	/**
+	 * DONE
+	 * @return
+	 */
+	private double getMaxImponible() {
+		return 70.3*getUFMes();
 	}
 
 	/**
