@@ -449,6 +449,7 @@ public class AttendancePanel extends Panel implements View {
 										//comienza el procesamiento de los sueldos y se guarda el resultado en base de datos
 										// recupera los resultados  este procesamiento puede tardar un tiempo
 										List<Salary> salaries = service.calculateSalaries(cs,getAttendanceDate());
+										logger.debug("sueldos calculados {} ",salaries);
 										//limpia
 										salaryContainer.removeAllItems();
 										salaryContainer.addAll(salaries);

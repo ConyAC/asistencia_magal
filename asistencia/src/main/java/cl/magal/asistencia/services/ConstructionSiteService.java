@@ -505,8 +505,8 @@ public class ConstructionSiteService {
 			//TODO CALCULAR AQUI 
 			Salary salary = new Salary();
 			salary.setLaborerConstructionSite(lc);
-			salary.setSalary(0);
 			salary.setSuple(calculateSuple(supleCode,supleTable,supleClose,attendance.get(lc.getJobCode())));
+			salary.setSalary(calculateSalary((int) salary.getSuple(), 0, 0, attendance.get(lc.getJobCode())));
 			salary.setDate(date.toDate());
 			salaries.add(salary);
 			
