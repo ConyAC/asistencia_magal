@@ -26,6 +26,7 @@ import cl.magal.asistencia.entities.AdvancePaymentConfigurations;
 import cl.magal.asistencia.entities.Attendance;
 import cl.magal.asistencia.entities.ConstructionSite;
 import cl.magal.asistencia.entities.Laborer;
+import cl.magal.asistencia.entities.Overtime;
 import cl.magal.asistencia.entities.User;
 import cl.magal.asistencia.entities.enums.Status;
 import cl.magal.asistencia.helpers.ConstructionSiteHelper;
@@ -443,18 +444,20 @@ public class ConstructionSiteServiceTest {
 		
 		int tool = 0, loan = 0; 
 		//se usa una asistencia conocida
-		int expectedSalay = 45336;
+//		int expectedSalay = 45336;
+		int expectedSalay = 288176;
 		DateTime monthDate = DateTime.parse("2014-07-01");
 		DateTime closingSupleDate = DateTime.parse("2014-07-11");
 		//busca una asistencia completa
 		
 		ConstructionSite cs = service.findConstructionSite(constructionId);
 		Map<Integer,Attendance> attendanceJuly = service.getAttendanceMapByConstruction(cs, monthDate);
+		Map<Integer,Overtime> overtimeJuly = service.getOvertimeMapByConstruction(cs, monthDate);
 		//se obtiene su tabla de suple
 		AdvancePaymentConfigurations supleTable = service.getSupleTableByCs(cs);
 		Double suple = service.calculateSuple(supleCode,supleTable,closingSupleDate.toDate(),attendanceJuly.get(100));
 		//se obtiene la fecha de cierre del mes
-		int salary = service.calculateSalary(suple.intValue(),tool,loan,attendanceJuly.get(100));
+		int salary = service.calculateSalary(suple.intValue(),tool,loan,attendanceJuly.get(100),overtimeJuly.get(100));
 		//el suple es conocido
 		assertEquals(expectedSalay,salary,1d);
 	}
