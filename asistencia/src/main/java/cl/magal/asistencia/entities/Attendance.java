@@ -48,7 +48,7 @@ public class Attendance implements Serializable {
 	LaborerConstructionsite laborerConstructionSite;
 	
 	@Column(name="jornal")
-	Integer jornalPromedio;
+	Integer jornalPromedio = 0;
 	
 	@Convert(converter = AttendanceMarkConverter.class)
 	@Column(name = "d1" ,nullable = false )
@@ -191,7 +191,7 @@ public class Attendance implements Serializable {
 	}
 	
 	public Integer getJornalPromedio() {
-		return jornalPromedio;
+		return jornalPromedio == null ? 0 : jornalPromedio;
 	}
 
 	public void setJornalPromedio(Integer jornalPromedio) {
