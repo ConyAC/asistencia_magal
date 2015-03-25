@@ -614,6 +614,7 @@ CREATE INDEX IF NOT EXISTS FK_INDX_POSTPONEDPAYMENTLOAN ON "postponedpaymentloan
 CREATE TABLE IF NOT EXISTS ATTENDANCE
 (
    ATTENDANCEID bigint PRIMARY KEY NOT NULL,
+   jornal integer,
    D1 integer,
    D10 integer,
    D11 integer,
