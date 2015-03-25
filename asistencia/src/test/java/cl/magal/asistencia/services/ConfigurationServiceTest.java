@@ -163,7 +163,6 @@ public class ConfigurationServiceTest {
 	public void testAddAdvancePaymentItem(){
 		
 		Integer supleCode = 1;
-		Double totalAmount = 105000D;
 		Double normalAmount = 105000D;
 		Double increaseAmount = 105000D;
 		
@@ -171,7 +170,6 @@ public class ConfigurationServiceTest {
 		
 		AdvancePaymentItem advancePaymentItem = new AdvancePaymentItem();
 		advancePaymentItem.setSupleCode(supleCode);
-		advancePaymentItem.setSupleTotalAmount(totalAmount);
 		advancePaymentItem.setSupleNormalAmount(normalAmount);
 		advancePaymentItem.setSupleIncreaseAmount(increaseAmount);
 		
@@ -195,7 +193,6 @@ public class ConfigurationServiceTest {
 	public void testAddAdvancePaymentItemOnExisting(){
 		
 		Integer supleCode = 1;
-		Double totalAmount = 105000D;
 		Double normalAmount = 105000D;
 		Double increaseAmount = 105000D;
 		
@@ -210,7 +207,6 @@ public class ConfigurationServiceTest {
 		
 		AdvancePaymentItem advancePaymentItem = new AdvancePaymentItem();
 		advancePaymentItem.setSupleCode(supleCode);
-		advancePaymentItem.setSupleTotalAmount(totalAmount);
 		advancePaymentItem.setSupleNormalAmount(normalAmount);
 		advancePaymentItem.setSupleIncreaseAmount(increaseAmount);
 		
@@ -229,7 +225,6 @@ public class ConfigurationServiceTest {
 	public void testSupleCodeUnique(){
 		
 		Integer supleCode = 1;
-		Double totalAmount = 105000D;
 		Double normalAmount = 105000D;
 		Double increaseAmount = 105000D;
 		
@@ -248,7 +243,6 @@ public class ConfigurationServiceTest {
 		
 		AdvancePaymentItem advancePaymentItem = new AdvancePaymentItem();
 		advancePaymentItem.setSupleCode(supleCode);
-		advancePaymentItem.setSupleTotalAmount(totalAmount);
 		advancePaymentItem.setSupleNormalAmount(normalAmount);
 		advancePaymentItem.setSupleIncreaseAmount(increaseAmount);
 		
@@ -256,7 +250,6 @@ public class ConfigurationServiceTest {
 		
 		AdvancePaymentItem advancePaymentItem2 = new AdvancePaymentItem();
 		advancePaymentItem2.setSupleCode(supleCode);
-		advancePaymentItem2.setSupleTotalAmount(totalAmount2);
 		advancePaymentItem2.setSupleNormalAmount(normalAmount2);
 		advancePaymentItem2.setSupleIncreaseAmount(increaseAmount2);
 		
@@ -280,7 +273,6 @@ public class ConfigurationServiceTest {
 	public void testAddVariousAdvancePaymentItemOnExisting(){
 		
 		Integer supleCode = 1;
-		Double totalAmount = 105000D;
 		Double normalAmount = 105000D;
 		Double increaseAmount = 105000D;
 		
@@ -295,7 +287,6 @@ public class ConfigurationServiceTest {
 		
 		AdvancePaymentItem advancePaymentItem = new AdvancePaymentItem();
 		advancePaymentItem.setSupleCode(supleCode);
-		advancePaymentItem.setSupleTotalAmount(totalAmount);
 		advancePaymentItem.setSupleNormalAmount(normalAmount);
 		advancePaymentItem.setSupleIncreaseAmount(increaseAmount);
 		
@@ -303,7 +294,6 @@ public class ConfigurationServiceTest {
 		
 		AdvancePaymentItem advancePaymentItem2 = new AdvancePaymentItem();
 		advancePaymentItem2.setSupleCode(supleCode);
-		advancePaymentItem2.setSupleTotalAmount(totalAmount);
 		advancePaymentItem2.setSupleNormalAmount(normalAmount);
 		advancePaymentItem2.setSupleIncreaseAmount(increaseAmount);
 		

@@ -449,12 +449,16 @@ public class AttendancePanel extends Panel implements View {
 										//comienza el procesamiento de los sueldos y se guarda el resultado en base de datos
 										// recupera los resultados  este procesamiento puede tardar un tiempo
 										List<Salary> salaries = service.calculateSalaries(cs,getAttendanceDate());
+										logger.debug("sueldos calculados {} ",salaries);
 										//limpia
 										salaryContainer.removeAllItems();
 										salaryContainer.addAll(salaries);
 									}catch(Exception e){
 										logger.error("Error al calcular los sueldos",e);
-										Notification.show("Error al calcular los sueldos, el código de error es "+e.getMessage(),Type.ERROR_MESSAGE);
+										String mensaje = "Error al calcular los sueldos.";
+										if( e.getMessage() != null )
+											mensaje = e.getMessage();
+										Notification.show(mensaje,Type.ERROR_MESSAGE);
 									}
 								}
 							}

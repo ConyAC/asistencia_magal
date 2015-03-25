@@ -177,7 +177,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 
 	private Component drawInformation() {
 		
-		GridLayout gl  = new GridLayout(3,7);
+		GridLayout gl  = new GridLayout(3,8);
 		gl.setWidth("100%");
 		gl.setSpacing(true);
 		
@@ -187,6 +187,9 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 		startDate.setImmediate(true);
 		final DateField endDate = new DateField("Fecha Final",getItem().getItemProperty("rewardEndDate"));
 		endDate.setImmediate(true);
+		
+		TextField tfSuple = new TextField("Código Suple", getItem().getItemProperty("supleCode"));
+		tfSuple.setNullRepresentation("");
 
 		VerticalLayout vl = new VerticalLayout(){
 			{
@@ -224,8 +227,10 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 		gl.setComponentAlignment(startDate, Alignment.TOP_CENTER);
 		gl.addComponent(endDate,2,1);
 		gl.setComponentAlignment(endDate, Alignment.TOP_CENTER);
+		gl.addComponent(tfSuple,0,2);
+		gl.setComponentAlignment(tfSuple, Alignment.TOP_CENTER);
 		
-		gl.addComponent(new LaborerBaseInformation(getBinder(),"laborer",true),0,2,2,2);
+		gl.addComponent(new LaborerBaseInformation(getBinder(),"laborer",true),0,3,2,3);
 		
 		return gl;
 	}

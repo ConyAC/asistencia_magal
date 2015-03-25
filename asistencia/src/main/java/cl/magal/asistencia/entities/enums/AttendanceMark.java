@@ -10,7 +10,8 @@ public enum AttendanceMark {
 	RAIN(6,"LL","Lluvia"),
 	SICK(7,"E","Enfermo"),
 	FAIL(8,"F","Falla"),
-	FILLER(9,"R","Relleno");
+	FILLER(9,"R","Relleno"), 
+	VACATION(10,"V","Vacación");
 	
 	Integer code;
 	String description;

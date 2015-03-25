@@ -40,8 +40,8 @@ public class Salary implements Serializable {
 	@Column(name = "date" ,nullable = false )
 	Date date;
 	
-	int suple;
-	int salary;
+	double suple;
+	double salary;
 	
 	
 	public Long getSalaryId() {
@@ -57,16 +57,16 @@ public class Salary implements Serializable {
 			LaborerConstructionsite laborerConstructionSite) {
 		this.laborerConstructionSite = laborerConstructionSite;
 	}
-	public int getSuple() {
+	public double getSuple() {
 		return suple;
 	}
-	public void setSuple(int suple) {
+	public void setSuple(double suple) {
 		this.suple = suple;
 	}
-	public int getSalary() {
+	public double getSalary() {
 		return salary;
 	}
-	public void setSalary(int salary) {
+	public void setSalary(double salary) {
 		this.salary = salary;
 	}
 	public Date getDate() {

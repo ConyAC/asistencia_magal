@@ -26,10 +26,6 @@ public class AdvancePaymentItem implements Serializable{
 	Integer supleCode;
 	
 	@Digits(fraction = 0, integer = 6)
-	@Column(name="suple_total_amount")
-	Double supleTotalAmount;
-	
-	@Digits(fraction = 0, integer = 6)
 	@Column(name="suple_normal_amount")
 	Double supleNormalAmount;
 	
@@ -46,11 +42,7 @@ public class AdvancePaymentItem implements Serializable{
 	}
 
 	public Double getSupleTotalAmount() {
-		return supleTotalAmount;
-	}
-
-	public void setSupleTotalAmount(Double supleTotalAmount) {
-		this.supleTotalAmount = supleTotalAmount;
+		return getSupleNormalAmount()+getSupleIncreaseAmount();
 	}
 
 	public Double getSupleNormalAmount() {
@@ -72,7 +64,6 @@ public class AdvancePaymentItem implements Serializable{
 	@Override
 	public String toString() {
 		return "AdvancePaymentItem [supleCode=" + supleCode
-				+ ", supleTotalAmount=" + supleTotalAmount
 				+ ", supleNormalAmount=" + supleNormalAmount
 				+ ", supleAdvanceAmount=" + supleIncreaseAmount + "]";
 	}
