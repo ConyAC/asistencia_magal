@@ -56,6 +56,7 @@ import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.InlineDateField;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
+import com.vaadin.ui.Panel;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.TabSheet;
@@ -232,107 +233,119 @@ public class ConfigView extends VerticalLayout implements View {
 		
 		return new VerticalLayout(){
 			{
+				
 				setMargin(true);
 				setSpacing(true);
+				
+				final ComboBox nombre = new ComboBox("Obra",constructionContainer);
+				nombre.setItemCaptionMode(ItemCaptionMode.PROPERTY);
+				nombre.setItemCaptionPropertyId("name");
+				addComponent(nombre);
+				
+				addComponent(new Panel(new VerticalLayout(){
+					{
+						setMargin(true);
+						addComponent(new FormLayout(){
+							{
+								Field permissionDiscount = fg.buildAndBind("Descuento por Permiso", "permissionDiscount");
+								((TextField)permissionDiscount).setNullRepresentation("");
+								permissionDiscount.addValueChangeListener(listener);
+								
+								Field failureDiscount = fg.buildAndBind("Descuento por Falla", "failureDiscount");
+								((TextField)failureDiscount).setNullRepresentation("");
+								failureDiscount.addValueChangeListener(listener);
+								
+								addComponent(permissionDiscount);
+								addComponent(failureDiscount);
+							}
+						});
+						
+						
+						final BeanItemContainer<AdvancePaymentItem> container = new BeanItemContainer<AdvancePaymentItem>(AdvancePaymentItem.class,advancepayment.getAdvancePaymentTable());
+						
+						HorizontalLayout hl = new HorizontalLayout(){
+							{
+								setSpacing(true);
+								final TextField supleCode = new TextField("Código Suple");
+								addComponent(new FormLayout(supleCode));
+								Button add = new Button(null,new Button.ClickListener() {
+									
+									@Override
+									public void buttonClick(ClickEvent event) {
+										try{
+											
+											AdvancePaymentItem advancePaymentItem = new AdvancePaymentItem();
+											advancePaymentItem.setSupleCode(Integer.valueOf(supleCode.getValue()));
+											//TODO hacer dialogo para crear y validar nuevo item
+											advancepayment.addAdvancePaymentItem(advancePaymentItem);
+											confService.save(advancepayment);
+											
+											container.addBean(advancePaymentItem);
+										}catch(Exception e){
+											Notification.show("Error al agregar el nuevo suple",Type.ERROR_MESSAGE);
+											logger.error("Error al agregar el nuevo suple",e);
+										}
+									}
+							}){
+									{
+										setIcon(FontAwesome.PLUS);
+									}
+								};
+								addComponent(add);
+								setComponentAlignment(add, Alignment.MIDDLE_CENTER);
+							}
+						};
+						addComponent(hl);
 
-				addComponent(new FormLayout(){
-					{
-						Field permissionDiscount = fg.buildAndBind("Descuento por Permiso", "permissionDiscount");
-						((TextField)permissionDiscount).setNullRepresentation("");
-						permissionDiscount.addValueChangeListener(listener);
+						final Table table = new Table("Tabla Anticipo"){
+							{
+								setSizeFull();
+								setPageLength(5);
+							}
+
+						};
 						
-						Field failureDiscount = fg.buildAndBind("Descuento por Falla", "failureDiscount");
-						((TextField)failureDiscount).setNullRepresentation("");
-						failureDiscount.addValueChangeListener(listener);
+						table.setContainerDataSource(container);
 						
-						addComponent(permissionDiscount);
-						addComponent(failureDiscount);
-					}
-				});
-				
-				
-				final BeanItemContainer<AdvancePaymentItem> container = new BeanItemContainer<AdvancePaymentItem>(AdvancePaymentItem.class,advancepayment.getAdvancePaymentTable());
-				
-				HorizontalLayout hl = new HorizontalLayout(){
-					{
-						setSpacing(true);
-						final TextField supleCode = new TextField("Código Suple");
-						addComponent(supleCode);
-						Button add = new Button(null,new Button.ClickListener() {
+						table.addGeneratedColumn("eliminar", new Table.ColumnGenerator() {
 							
 							@Override
-							public void buttonClick(ClickEvent event) {
-								try{
-									
-									AdvancePaymentItem advancePaymentItem = new AdvancePaymentItem();
-									advancePaymentItem.setSupleCode(Integer.valueOf(supleCode.getValue()));
-									//TODO hacer dialogo para crear y validar nuevo item
-									advancepayment.addAdvancePaymentItem(advancePaymentItem);
-									confService.save(advancepayment);
-									
-									container.addBean(advancePaymentItem);
-								}catch(Exception e){
-									Notification.show("Error al agregar el nuevo suple",Type.ERROR_MESSAGE);
-									logger.error("Error al agregar el nuevo suple",e);
-								}
+							public Object generateCell(Table source,final Object itemId, Object columnId) {
+								return new Button(null,new Button.ClickListener() {
+									final AdvancePaymentItem advancePaymentItem = container.getItem(itemId).getBean();
+									@Override
+									public void buttonClick(ClickEvent event) {
+										
+										try{
+											advancepayment.removeAdvancePaymentItem(advancePaymentItem);
+											confService.save(advancepayment);
+											container.removeItem(itemId);
+										}catch(Exception e){
+											Notification.show("Error al quitar elemento",Type.ERROR_MESSAGE);
+											logger.error("Error al quitar una mobilización 2",e);
+										}
+									}
+								}){
+									{setIcon(FontAwesome.TRASH_O);}
+								};
 							}
-					}){
-							{
-								setIcon(FontAwesome.PLUS);
-							}
-						};
-						addComponent(add);
-						setComponentAlignment(add, Alignment.BOTTOM_LEFT);
-					}
-				};
-				hl.setWidth("100%");
-				addComponent(hl);
+						});
+						
+						table.setVisibleColumns("supleCode","supleTotalAmount","supleNormalAmount","supleIncreaseAmount","eliminar");
+						table.setColumnHeaders("Código Suple","Monto Suple","Normal","Aumento Anticipo","Eliminar");
+						table.setEditable(true);
+						
+						addComponent(table);
 
-				final Table table = new Table("Tabla Anticipo"){
-					{
-						setSizeFull();
-						setPageLength(5);
+						if(!SecurityHelper.hasPermission(Permission.DEFINIR_VARIABLE_GLOBAL)){
+							setEnabled(false);
+						}else{
+							setEnabled(true);
+						}
 					}
-
-				};
+				}));
 				
-				table.setContainerDataSource(container);
 				
-				table.addGeneratedColumn("eliminar", new Table.ColumnGenerator() {
-					
-					@Override
-					public Object generateCell(Table source,final Object itemId, Object columnId) {
-						return new Button(null,new Button.ClickListener() {
-							final AdvancePaymentItem advancePaymentItem = container.getItem(itemId).getBean();
-							@Override
-							public void buttonClick(ClickEvent event) {
-								
-								try{
-									advancepayment.removeAdvancePaymentItem(advancePaymentItem);
-									confService.save(advancepayment);
-									container.removeItem(itemId);
-								}catch(Exception e){
-									Notification.show("Error al quitar elemento",Type.ERROR_MESSAGE);
-									logger.error("Error al quitar una mobilización 2",e);
-								}
-							}
-						}){
-							{setIcon(FontAwesome.TRASH_O);}
-						};
-					}
-				});
-				
-				table.setVisibleColumns("supleCode","supleTotalAmount","supleNormalAmount","supleIncreaseAmount","eliminar");
-				table.setColumnHeaders("Código Suple","Monto Suple","Normal","Aumento Anticipo","Eliminar");
-				table.setEditable(true);
-				
-				addComponent(table);
-
-				if(!SecurityHelper.hasPermission(Permission.DEFINIR_VARIABLE_GLOBAL)){
-					setEnabled(false);
-				}else{
-					setEnabled(true);
-				}
 			}
 		};
 	}
@@ -623,7 +636,7 @@ public class ConfigView extends VerticalLayout implements View {
 								
 								advance.setRangeStart(null);advance.setRangeEnd(null);
 								assistance.setRangeEnd(null);assistance.setRangeStart(null);
-								beginDeal.setRangeEnd(null);beginDeal.setRangeStart(null);
+//								beginDeal.setRangeEnd(null);beginDeal.setRangeStart(null);
 								finishDeal.setRangeEnd(null);finishDeal.setRangeStart(null);
 								
 								fg.setItemDataSource(new BeanItem<DateConfigurations>(config));
@@ -634,7 +647,7 @@ public class ConfigView extends VerticalLayout implements View {
 								Date startDate = new DateTime(current).withDayOfMonth(1).toDate();
 								advance.setRangeStart(startDate);advance.setRangeEnd(endDate);
 								assistance.setRangeEnd(endDate);assistance.setRangeStart(startDate);
-								beginDeal.setRangeEnd(endDate);beginDeal.setRangeStart(startDate);
+//								beginDeal.setRangeEnd(endDate);beginDeal.setRangeStart(startDate);
 								finishDeal.setRangeEnd(endDate);finishDeal.setRangeStart(startDate);
 							}
 						});
