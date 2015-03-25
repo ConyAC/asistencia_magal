@@ -271,7 +271,8 @@ public class ConstructionSiteService {
 		logger.debug("date {} ",date);
 
 		List<Attendance> attendanceResultList =  attendanceRepo.findByConstructionsiteAndMonth(cs,date.toDate());
-		logger.debug("attendanceResultList.getmarks {} ",attendanceResultList.get(0).getMarksAsList());
+		if(!attendanceResultList.isEmpty())
+			logger.debug("attendanceResultList.getmarks {} ",attendanceResultList.get(0).getMarksAsList());
 		Attendance tmp = new Attendance();
 
 		Map<Integer,Attendance> attendanceResult = new HashMap<Integer,Attendance>();
