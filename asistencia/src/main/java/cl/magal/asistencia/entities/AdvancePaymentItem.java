@@ -46,7 +46,7 @@ public class AdvancePaymentItem implements Serializable{
 	}
 
 	public Double getSupleNormalAmount() {
-		return supleNormalAmount;
+		return supleNormalAmount == null ? 0 : supleNormalAmount;
 	}
 
 	public void setSupleNormalAmount(Double supleNormalAmount) {
@@ -54,7 +54,7 @@ public class AdvancePaymentItem implements Serializable{
 	}
 
 	public Double getSupleIncreaseAmount() {
-		return supleIncreaseAmount;
+		return supleIncreaseAmount == null ? 0 : supleIncreaseAmount;
 	}
 
 	public void setSupleIncreaseAmount(Double supleAdvanceAmount) {
