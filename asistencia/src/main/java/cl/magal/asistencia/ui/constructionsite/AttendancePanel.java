@@ -17,6 +17,7 @@ import org.vaadin.dialogs.ConfirmDialog;
 import cl.magal.asistencia.entities.Attendance;
 import cl.magal.asistencia.entities.Confirmations;
 import cl.magal.asistencia.entities.ConstructionSite;
+import cl.magal.asistencia.entities.ExtraParams;
 import cl.magal.asistencia.entities.Overtime;
 import cl.magal.asistencia.entities.Salary;
 import cl.magal.asistencia.entities.enums.AttendanceMark;
@@ -91,6 +92,7 @@ public class AttendancePanel extends Panel implements View {
 	private transient UserService userService;
 
 	/** CONTAINERS **/
+	BeanItemContainer<ExtraParams> extraParamContainer = new BeanItemContainer<ExtraParams>(ExtraParams.class);
 	BeanItemContainer<Attendance> attendanceContainer = new BeanItemContainer<Attendance>(Attendance.class);
 	BeanItemContainer<Overtime> overtimeContainer = new BeanItemContainer<Overtime>(Overtime.class);
 	BeanItemContainer<Salary> salaryContainer = new BeanItemContainer<Salary>(Salary.class);
@@ -191,6 +193,244 @@ public class AttendancePanel extends Panel implements View {
 	private TabSheet drawAttendanceDetail() {
 		TabSheet tab = new TabSheet();
 
+		Grid attendanceGrid = drawAttendanceGrid();
+
+		tab.addTab(attendanceGrid,"Asistencia");
+
+		Grid overtimeGrid = drawOvertimeGrid();
+		
+		tab.addTab(overtimeGrid,"Horas Extras");
+		
+		Grid extraParamsTable = drawExtraParamsTable();
+		
+		tab.addTab(extraParamsTable,"Otros");
+
+		Table confirmTable = drawAbsenceConfirmTable();
+
+		tab.addTab(confirmTable,"Confirmar Licencias y Accidentes");
+		
+		VerticalLayout vl = drawSalaryLayout();
+		
+		tab.addTab(vl,"Cálculos");
+
+		return tab;
+	}
+
+	private Grid drawExtraParamsTable() {
+		return null;
+	}
+
+	private VerticalLayout drawSalaryLayout() {
+		salaryContainer.addNestedContainerProperty("laborerConstructionSite.activeContract.jobCode");
+		VerticalLayout vl = new VerticalLayout(){
+			{
+				setSpacing(true);
+				
+				Button btn = new Button("Generar Sueldo y Anticipo",FontAwesome.GEARS);
+				btn.addClickListener(new Button.ClickListener() {
+					
+					@Override
+					public void buttonClick(ClickEvent event) {
+						
+						//se pide confirmación, pues este proceso reemplazará lo que exista en base de datos para la fecha
+						ConfirmDialog.show(UI.getCurrent(), "Confirmar Acción:", "El siguiente proceso reemplazará la información de sueldo que se tenga guardada. ¿Está seguro de que desea continuar con el proceso?",
+								"Continuar", "Cancelar", new ConfirmDialog.Listener() {
+							public void onClose(ConfirmDialog dialog) {
+								if (dialog.isConfirmed()) {
+									
+									try{
+										//comienza el procesamiento de los sueldos y se guarda el resultado en base de datos
+										// recupera los resultados  este procesamiento puede tardar un tiempo
+										List<Salary> salaries = service.calculateSalaries(cs,getAttendanceDate());
+										logger.debug("sueldos calculados {} ",salaries);
+										//limpia
+										salaryContainer.removeAllItems();
+										salaryContainer.addAll(salaries);
+									}catch(Exception e){
+										logger.error("Error al calcular los sueldos",e);
+										String mensaje = "Error al calcular los sueldos.";
+										if( e.getMessage() != null )
+											mensaje = e.getMessage();
+										Notification.show(mensaje,Type.ERROR_MESSAGE);
+									}
+								}
+							}
+						});
+
+					}
+				});
+				addComponent(btn);
+				setComponentAlignment(btn, Alignment.TOP_RIGHT);
+				Table salaryTable = new Table();
+				salaryTable.setWidth("100%");
+				salaryTable.setContainerDataSource(salaryContainer);
+				
+				salaryTable.setVisibleColumns("laborerConstructionSite.activeContract.jobCode","suple","salary");
+				salaryTable.setColumnHeaders("Oficio","Anticipo","Sueldo");
+				
+				
+				addComponent(salaryTable);
+				setExpandRatio(salaryTable, 1.0f);
+			}
+		};
+		vl.setSizeFull();
+		return vl;
+	}
+
+	private Table drawAbsenceConfirmTable() {
+		
+		absenceContainer.addNestedContainerProperty("laborerConstructionsite.activeContract.jobCode");
+		Table confirmTable = new Table();
+		confirmTable.setContainerDataSource(absenceContainer);
+		confirmTable.setSizeFull();
+		confirmTable.setEditable(true);
+		
+		confirmTable.addGeneratedColumn("laborerConstructionsite.activeContract.jobCode", new Table.ColumnGenerator() {
+			@Override
+			public Object generateCell(Table source, Object itemId, Object columnId) {
+				
+				return source.getContainerProperty(itemId, columnId).getValue();
+			}
+		});
+		
+		confirmTable.addGeneratedColumn("type", new Table.ColumnGenerator() {
+			@Override
+			public Object generateCell(Table source, Object itemId, Object columnId) {
+				
+				return source.getContainerProperty(itemId, columnId).getValue();
+			}
+		});
+		
+		confirmTable.addGeneratedColumn("description", new Table.ColumnGenerator() {
+			@Override
+			public Object generateCell(Table source, Object itemId, Object columnId) {
+				
+				return source.getContainerProperty(itemId, columnId).getValue();
+			}
+		});
+		
+		confirmTable.addGeneratedColumn("confirm", new Table.ColumnGenerator() {
+			
+			@Override
+			public Object generateCell(Table source, Object itemId, Object columnId) {
+				
+				final AbsenceVO absence = ((BeanItem<AbsenceVO>) source.getItem(itemId)).getBean(); 
+				final Button btn = new Button();
+				
+				toogleButtonState(btn, absence);
+				
+				btn.addClickListener(new Button.ClickListener() {
+					
+					@Override
+					public void buttonClick(ClickEvent event) {
+						absence.setConfirmed(!absence.isConfirmed());
+						toogleButtonState(btn,absence);
+						service.confirmAbsence(absence);
+					}
+				});
+				
+				return btn;
+			}
+
+			private void toogleButtonState(Button btn, AbsenceVO absence) {
+				if(!absence.isConfirmed()){
+					btn.removeStyleName(Constants.STYLE_CLASS_RED_COLOR);
+					btn.addStyleName(Constants.STYLE_CLASS_GREEN_COLOR);
+					btn.setCaption( "Confirmar" );
+					btn.setIcon(FontAwesome.CHECK_CIRCLE_O);
+				}else{
+					btn.removeStyleName(Constants.STYLE_CLASS_GREEN_COLOR);
+					btn.addStyleName(Constants.STYLE_CLASS_RED_COLOR);
+					btn.setCaption( "Cancelar Confirmación" );
+					btn.setIcon(FontAwesome.TIMES_CIRCLE_O);
+				}
+			}
+		});
+		
+		confirmTable.setVisibleColumns("laborerConstructionsite.activeContract.jobCode","type","description","fromDate","toDate","confirm");
+		confirmTable.setColumnHeaders("Oficio","Tipo","Descripción","Fecha inicio","Fecha Fin","Acción");
+		return confirmTable;
+	}
+
+	private Grid drawOvertimeGrid() {
+		
+		overtimeContainer.addNestedContainerProperty("laborerConstructionSite.activeContract.jobCode");
+		overtimeGrid = new Grid(overtimeContainer);
+		overtimeGrid.setSelectionMode(SelectionMode.SINGLE);
+		overtimeGrid.setSizeFull();
+		overtimeGrid.setEditorFieldGroup(new BeanFieldGroup<Overtime>(Overtime.class));
+		overtimeGrid.getEditorFieldGroup().addCommitHandler(new CommitHandler() {
+
+			@Override
+			public void preCommit(CommitEvent commitEvent) throws CommitException {
+
+			}
+
+			@Override
+			public void postCommit(CommitEvent commitEvent) throws CommitException {
+				//guarda el elmento
+				Overtime attedance = ((BeanItem<Overtime>) commitEvent.getFieldBinder().getItemDataSource()).getBean();
+				service.save(attedance);
+				overtimeContainer.sort(new Object[]{"laborerConstructionSite.activeContract.jobCode"}, new boolean[]{true});
+			}
+		});
+
+		overtimeGrid.addStyleName("grid-attendace");
+		overtimeGrid.setEditorEnabled(true);
+		overtimeGrid.setFrozenColumnCount(1);
+		if(overtimeGrid.getColumn("laborerConstructionSite") != null )
+			overtimeGrid.removeColumn("laborerConstructionSite");
+		if(overtimeGrid.getColumn("attendanceId") != null )
+			overtimeGrid.removeColumn("attendanceId");
+		if(overtimeGrid.getColumn("date") != null )
+			overtimeGrid.removeColumn("date");
+
+		overtimeGrid.setColumnOrder("laborerConstructionSite.activeContract.jobCode","d1","d2","d3","d4","d5","d6","d7","d8","d9","d10","d11","d12","d13","d14","d15","d16"
+				,"d17","d18","d19","d20","d21","d22","d23","d24","d25","d26","d27","d28","d29","d30","d31");
+
+		overtimeContainer.sort(new Object[]{"laborerConstructionSite.activeContract.jobCode"}, new boolean[]{true});
+		overtimeGrid.getColumn("laborerConstructionSite.activeContract.jobCode").setHeaderCaption("Oficio").setEditable(false).setWidth(100);
+
+		HeaderRow filterRow =  overtimeGrid.appendHeaderRow();
+		for (final Object pid: overtimeGrid.getContainerDataSource().getContainerPropertyIds()) {
+
+			final HeaderCell cell = filterRow.getCell(pid);
+
+			// Have an input field to use for filter
+			TextField filterField = new TextField();
+			if(pid.equals("laborerConstructionSite.activeContract.jobCode")) filterField.setWidth("100%");
+			else {
+				filterField.setWidth("50px");
+				if(overtimeGrid.getColumn(pid) != null )
+					overtimeGrid.getColumn(pid).setHeaderCaption(((String) pid).replace("d","")).setSortable(false);//.setWidth(50);
+			}
+
+			filterField.setHeight("90%");
+
+			// Update filter When the filter input is changed
+			filterField.addTextChangeListener(new TextChangeListener() {
+
+				@Override
+				public void textChange(TextChangeEvent event) {
+					// Can't modify filters so need to replace
+					((SimpleFilterable) overtimeGrid.getContainerDataSource()).removeContainerFilters(pid);
+
+					// (Re)create the filter if necessary
+					if (! event.getText().isEmpty())
+						((Filterable) overtimeGrid.getContainerDataSource()).addContainerFilter(
+								new SimpleStringFilter(pid,
+										event.getText(), true, false));
+				}
+			});
+			if(cell != null)
+				cell.setComponent(filterField);
+		}
+
+		return overtimeGrid;
+	}
+
+	private Grid drawAttendanceGrid() {
+		
 		attendanceContainer.addNestedContainerProperty("laborerConstructionSite.activeContract.jobCode");
 		attendanceGrid = new Grid(attendanceContainer);
 		attendanceGrid.setSelectionMode(SelectionMode.SINGLE);
@@ -277,214 +517,7 @@ public class AttendancePanel extends Panel implements View {
 			if(cell != null)
 				cell.setComponent(filterField);
 		}
-
-		tab.addTab(attendanceGrid,"Asistencia");
-
-		overtimeContainer.addNestedContainerProperty("laborerConstructionSite.activeContract.jobCode");
-		overtimeGrid = new Grid(overtimeContainer);
-		overtimeGrid.setSelectionMode(SelectionMode.SINGLE);
-		overtimeGrid.setSizeFull();
-		overtimeGrid.setEditorFieldGroup(new BeanFieldGroup<Overtime>(Overtime.class));
-		overtimeGrid.getEditorFieldGroup().addCommitHandler(new CommitHandler() {
-
-			@Override
-			public void preCommit(CommitEvent commitEvent) throws CommitException {
-
-			}
-
-			@Override
-			public void postCommit(CommitEvent commitEvent) throws CommitException {
-				//guarda el elmento
-				Overtime attedance = ((BeanItem<Overtime>) commitEvent.getFieldBinder().getItemDataSource()).getBean();
-				service.save(attedance);
-				overtimeContainer.sort(new Object[]{"laborerConstructionSite.activeContract.jobCode"}, new boolean[]{true});
-			}
-		});
-
-		overtimeGrid.addStyleName("grid-attendace");
-		overtimeGrid.setEditorEnabled(true);
-		overtimeGrid.setFrozenColumnCount(1);
-		if(overtimeGrid.getColumn("laborerConstructionSite") != null )
-			overtimeGrid.removeColumn("laborerConstructionSite");
-		if(overtimeGrid.getColumn("attendanceId") != null )
-			overtimeGrid.removeColumn("attendanceId");
-		if(overtimeGrid.getColumn("date") != null )
-			overtimeGrid.removeColumn("date");
-
-		overtimeGrid.setColumnOrder("laborerConstructionSite.activeContract.jobCode","d1","d2","d3","d4","d5","d6","d7","d8","d9","d10","d11","d12","d13","d14","d15","d16"
-				,"d17","d18","d19","d20","d21","d22","d23","d24","d25","d26","d27","d28","d29","d30","d31");
-
-		overtimeContainer.sort(new Object[]{"laborerConstructionSite.activeContract.jobCode"}, new boolean[]{true});
-		overtimeGrid.getColumn("laborerConstructionSite.activeContract.jobCode").setHeaderCaption("Oficio").setEditable(false).setWidth(100);
-
-		filterRow =  overtimeGrid.appendHeaderRow();
-		for (final Object pid: overtimeGrid.getContainerDataSource().getContainerPropertyIds()) {
-
-			final HeaderCell cell = filterRow.getCell(pid);
-
-			// Have an input field to use for filter
-			TextField filterField = new TextField();
-			if(pid.equals("laborerConstructionSite.activeContract.jobCode")) filterField.setWidth("100%");
-			else {
-				filterField.setWidth("50px");
-				if(overtimeGrid.getColumn(pid) != null )
-					overtimeGrid.getColumn(pid).setHeaderCaption(((String) pid).replace("d","")).setSortable(false);//.setWidth(50);
-			}
-
-			filterField.setHeight("90%");
-
-			// Update filter When the filter input is changed
-			filterField.addTextChangeListener(new TextChangeListener() {
-
-				@Override
-				public void textChange(TextChangeEvent event) {
-					// Can't modify filters so need to replace
-					((SimpleFilterable) overtimeGrid.getContainerDataSource()).removeContainerFilters(pid);
-
-					// (Re)create the filter if necessary
-					if (! event.getText().isEmpty())
-						((Filterable) overtimeGrid.getContainerDataSource()).addContainerFilter(
-								new SimpleStringFilter(pid,
-										event.getText(), true, false));
-				}
-			});
-			if(cell != null)
-				cell.setComponent(filterField);
-		}
-
-		tab.addTab(overtimeGrid,"Horas Extras");
-
-		absenceContainer.addNestedContainerProperty("laborerConstructionsite.activeContract.jobCode");
-		Table confirmTable = new Table();
-		confirmTable.setContainerDataSource(absenceContainer);
-		confirmTable.setSizeFull();
-		confirmTable.setEditable(true);
-		
-		confirmTable.addGeneratedColumn("laborerConstructionsite.activeContract.jobCode", new Table.ColumnGenerator() {
-			@Override
-			public Object generateCell(Table source, Object itemId, Object columnId) {
-				
-				return source.getContainerProperty(itemId, columnId).getValue();
-			}
-		});
-		
-		confirmTable.addGeneratedColumn("type", new Table.ColumnGenerator() {
-			@Override
-			public Object generateCell(Table source, Object itemId, Object columnId) {
-				
-				return source.getContainerProperty(itemId, columnId).getValue();
-			}
-		});
-		
-		confirmTable.addGeneratedColumn("description", new Table.ColumnGenerator() {
-			@Override
-			public Object generateCell(Table source, Object itemId, Object columnId) {
-				
-				return source.getContainerProperty(itemId, columnId).getValue();
-			}
-		});
-		
-		confirmTable.addGeneratedColumn("confirm", new Table.ColumnGenerator() {
-			
-			@Override
-			public Object generateCell(Table source, Object itemId, Object columnId) {
-				
-				final AbsenceVO absence = ((BeanItem<AbsenceVO>) source.getItem(itemId)).getBean(); 
-				final Button btn = new Button();
-				
-				toogleButtonState(btn, absence);
-				
-				btn.addClickListener(new Button.ClickListener() {
-					
-					@Override
-					public void buttonClick(ClickEvent event) {
-						absence.setConfirmed(!absence.isConfirmed());
-						toogleButtonState(btn,absence);
-						service.confirmAbsence(absence);
-					}
-				});
-				
-				return btn;
-			}
-
-			private void toogleButtonState(Button btn, AbsenceVO absence) {
-				if(!absence.isConfirmed()){
-					btn.removeStyleName(Constants.STYLE_CLASS_RED_COLOR);
-					btn.addStyleName(Constants.STYLE_CLASS_GREEN_COLOR);
-					btn.setCaption( "Confirmar" );
-					btn.setIcon(FontAwesome.CHECK_CIRCLE_O);
-				}else{
-					btn.removeStyleName(Constants.STYLE_CLASS_GREEN_COLOR);
-					btn.addStyleName(Constants.STYLE_CLASS_RED_COLOR);
-					btn.setCaption( "Cancelar Confirmación" );
-					btn.setIcon(FontAwesome.TIMES_CIRCLE_O);
-				}
-			}
-		});
-		
-		confirmTable.setVisibleColumns("laborerConstructionsite.activeContract.jobCode","type","description","fromDate","toDate","confirm");
-		confirmTable.setColumnHeaders("Oficio","Tipo","Descripción","Fecha inicio","Fecha Fin","Acción");
-
-		tab.addTab(confirmTable,"Confirmar Licencias y Accidentes");
-
-		
-		salaryContainer.addNestedContainerProperty("laborerConstructionSite.activeContract.jobCode");
-		VerticalLayout vl = new VerticalLayout(){
-			{
-				setSpacing(true);
-				
-				Button btn = new Button("Generar Sueldo y Anticipo",FontAwesome.GEARS);
-				btn.addClickListener(new Button.ClickListener() {
-					
-					@Override
-					public void buttonClick(ClickEvent event) {
-						
-						//se pide confirmación, pues este proceso reemplazará lo que exista en base de datos para la fecha
-						ConfirmDialog.show(UI.getCurrent(), "Confirmar Acción:", "El siguiente proceso reemplazará la información de sueldo que se tenga guardada. ¿Está seguro de que desea continuar con el proceso?",
-								"Continuar", "Cancelar", new ConfirmDialog.Listener() {
-							public void onClose(ConfirmDialog dialog) {
-								if (dialog.isConfirmed()) {
-									
-									try{
-										//comienza el procesamiento de los sueldos y se guarda el resultado en base de datos
-										// recupera los resultados  este procesamiento puede tardar un tiempo
-										List<Salary> salaries = service.calculateSalaries(cs,getAttendanceDate());
-										logger.debug("sueldos calculados {} ",salaries);
-										//limpia
-										salaryContainer.removeAllItems();
-										salaryContainer.addAll(salaries);
-									}catch(Exception e){
-										logger.error("Error al calcular los sueldos",e);
-										String mensaje = "Error al calcular los sueldos.";
-										if( e.getMessage() != null )
-											mensaje = e.getMessage();
-										Notification.show(mensaje,Type.ERROR_MESSAGE);
-									}
-								}
-							}
-						});
-
-					}
-				});
-				addComponent(btn);
-				setComponentAlignment(btn, Alignment.TOP_RIGHT);
-				Table salaryTable = new Table();
-				salaryTable.setWidth("100%");
-				salaryTable.setContainerDataSource(salaryContainer);
-				
-				salaryTable.setVisibleColumns("laborerConstructionSite.activeContract.jobCode","suple","salary");
-				salaryTable.setColumnHeaders("Oficio","Anticipo","Sueldo");
-				
-				
-				addComponent(salaryTable);
-				setExpandRatio(salaryTable, 1.0f);
-			}
-		};
-		vl.setSizeFull();
-		
-		tab.addTab(vl,"Cálculos");
-
-		return tab;
+		return attendanceGrid;
 	}
 
 	Property.ValueChangeListener listener = new Property.ValueChangeListener() {

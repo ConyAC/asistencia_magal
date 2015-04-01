@@ -18,6 +18,7 @@
 	    <class>cl.magal.asistencia.entities.ConstructionSite</class>
 	    <class>cl.magal.asistencia.entities.Contract</class>
 	    <class>cl.magal.asistencia.entities.DateConfigurations</class>
+	    <class>cl.magal.asistencia.entities.ExtraParams</class>
 	    <class>cl.magal.asistencia.entities.FamilyAllowanceConfigurations</class>
 	    <class>cl.magal.asistencia.entities.Laborer</class>
 	    <class>cl.magal.asistencia.entities.LaborerConstructionsite</class>
