@@ -30,6 +30,7 @@ import cl.magal.asistencia.util.SecurityHelper;
 
 import com.vaadin.data.Container.Filterable;
 import com.vaadin.data.Container.SimpleFilterable;
+import com.vaadin.data.Item;
 import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.fieldgroup.BeanFieldGroup;
@@ -39,6 +40,8 @@ import com.vaadin.data.fieldgroup.FieldGroup.CommitException;
 import com.vaadin.data.fieldgroup.FieldGroup.CommitHandler;
 import com.vaadin.data.util.BeanItem;
 import com.vaadin.data.util.BeanItemContainer;
+import com.vaadin.data.util.GeneratedPropertyContainer;
+import com.vaadin.data.util.PropertyValueGenerator;
 import com.vaadin.data.util.filter.SimpleStringFilter;
 import com.vaadin.event.FieldEvents.TextChangeEvent;
 import com.vaadin.event.FieldEvents.TextChangeListener;
@@ -101,7 +104,7 @@ public class AttendancePanel extends Panel implements View {
 	/** COMPONENTES **/
 	ProgressBar progress;
 	Label status;
-	Grid attendanceGrid, overtimeGrid;
+	Grid attendanceGrid, overtimeGrid,extraGrid;
 	Window progressDialog;
 	InlineDateField attendanceDate;
 	Button btnExportSoftland,btnConstructionSiteConfirm,btnCentralConfirm;
@@ -188,6 +191,7 @@ public class AttendancePanel extends Panel implements View {
 		overtimeContainer.removeAllItems();
 		absenceContainer.removeAllItems();
 		salaryContainer.removeAllItems();
+		extraParamContainer.removeAllItems();
 	}
 
 	private TabSheet drawAttendanceDetail() {
@@ -201,9 +205,9 @@ public class AttendancePanel extends Panel implements View {
 		
 		tab.addTab(overtimeGrid,"Horas Extras");
 		
-		Grid extraParamsTable = drawExtraParamsTable();
+		Grid extraParamsTable = drawExtraParamsGrid();
 		
-		tab.addTab(extraParamsTable,"Otros");
+		tab.addTab(extraParamsTable,"Parámetros Extra");
 
 		Table confirmTable = drawAbsenceConfirmTable();
 
@@ -216,8 +220,128 @@ public class AttendancePanel extends Panel implements View {
 		return tab;
 	}
 
-	private Grid drawExtraParamsTable() {
-		return null;
+	private Grid drawExtraParamsGrid() {
+		
+		extraParamContainer.addNestedContainerProperty("laborerConstructionSite.activeContract.jobCode");
+		
+		GeneratedPropertyContainer gpcontainer =
+			    new GeneratedPropertyContainer(extraParamContainer);
+		
+		gpcontainer.addGeneratedProperty("jobCode",new PropertyValueGenerator<Integer>() {
+			    @Override
+			    public Integer getValue(Item item, Object itemId,Object propertyId) {
+			        int born = (Integer)item.getItemProperty("laborerConstructionSite.activeContract.jobCode").getValue();
+			        return born;
+			    }
+
+			    @Override
+			    public Class<Integer> getType() {
+			        return Integer.class;
+			    }
+			});
+		
+		extraGrid = new Grid(extraParamContainer);
+		extraGrid.setSelectionMode(SelectionMode.SINGLE);
+		extraGrid.setSizeFull();
+		extraGrid.setEditorFieldGroup(new BeanFieldGroup<ExtraParams>(ExtraParams.class));
+		extraGrid.getEditorFieldGroup().addCommitHandler(new CommitHandler() {
+
+			@Override
+			public void preCommit(CommitEvent commitEvent) throws CommitException {
+
+			}
+
+			@Override
+			public void postCommit(CommitEvent commitEvent) throws CommitException {
+				//guarda el elmento
+				ExtraParams attedance = ((BeanItem<ExtraParams>) commitEvent.getFieldBinder().getItemDataSource()).getBean();
+				service.save(attedance);
+				extraParamContainer.sort(new Object[]{"laborerConstructionSite.activeContract.jobCode"}, new boolean[]{true});
+			}
+		});
+
+		extraGrid.addStyleName("grid-attendace");
+		extraGrid.setEditorEnabled(true);
+		extraGrid.setFrozenColumnCount(1);
+		if(extraGrid.getColumn("laborerConstructionSite") != null )
+			extraGrid.removeColumn("laborerConstructionSite");
+		if(extraGrid.getColumn("attendanceId") != null )
+			extraGrid.removeColumn("attendanceId");
+		if(extraGrid.getColumn("date") != null )
+			extraGrid.removeColumn("date");
+		if(extraGrid.getColumn("id") != null )
+			extraGrid.removeColumn("id");
+		
+		extraGrid.setColumnOrder("laborerConstructionSite.activeContract.jobCode","bondMov2","km","specialBond","overtimeHours");
+
+		extraParamContainer.sort(new Object[]{"laborerConstructionSite.activeContract.jobCode"}, new boolean[]{true});
+		extraGrid.getColumn("laborerConstructionSite.activeContract.jobCode").setHeaderCaption("Oficio").setEditable(false).setWidth(100);
+		extraGrid.getColumn("bondMov2").setHeaderCaption("Bono Cargo a Locomocion 2 (No Imponible)");
+		extraGrid.getColumn("km").setHeaderCaption("Km");
+		extraGrid.getColumn("specialBond").setHeaderCaption("Bono Imponible Especial");
+		extraGrid.getColumn("overtimeHours").setHeaderCaption("Horas Sobretiempo");
+		
+		createHeaders(extraGrid);
+		return extraGrid;
+	}
+
+	private void createHeaders(final Grid grid) {
+		HeaderRow filterRow =  grid.appendHeaderRow();
+		for (final Object pid: grid.getContainerDataSource().getContainerPropertyIds()) {
+
+			final HeaderCell cell = filterRow.getCell(pid);
+
+			if(pid.equals("laborerConstructionSite.activeContract.jobCode")){
+				// Have an input field to use for filter
+				TextField filterField = new TextField();
+				filterField.setWidth("100%");
+				filterField.setHeight("90%");
+
+				// Update filter When the filter input is changed
+				filterField.addTextChangeListener(new TextChangeListener() {
+
+					@Override
+					public void textChange(TextChangeEvent event) {
+						// Can't modify filters so need to replace
+						((SimpleFilterable) grid.getContainerDataSource()).removeContainerFilters(pid);
+
+						// (Re)create the filter if necessary
+						if (! event.getText().isEmpty())
+							((Filterable) grid.getContainerDataSource()).addContainerFilter(
+									new SimpleStringFilter(pid,
+											event.getText(), true, false));
+					}
+				});
+				if(cell != null)
+					cell.setComponent(filterField);
+			}else {
+				Label label = new Label();
+				if(grid.getColumn(pid) != null )
+					grid.getColumn(pid).setSortable(false);//.setWidth(50);
+				//calculo de la semana
+				//si la propiedad comienza con d (dia) o dmp (dia mes pasado), entonces muestra el dia de la semana correspondiente
+				DateTime dt = getAttendanceDate();
+				if(((String) pid).startsWith("dmp")){
+					//calcula el numero del mes
+					int monthDay = Integer.parseInt(((String) pid).replace("dmp","")); 
+					label.setValue( dt.withDayOfMonth(monthDay).dayOfWeek().getAsShortText() );
+					
+					grid.getColumn(pid).setHeaderCaption(((String) pid).replace("d","")).setSortable(false);//.setWidth(50);
+				}else if(((String) pid).startsWith("d")){
+					try{
+					int monthDay = Integer.parseInt(((String) pid).replace("d",""));
+					label.setValue( dt.minusMonths(1).withDayOfMonth(monthDay).dayOfWeek().getAsShortText() );
+					
+					grid.getColumn(pid).setHeaderCaption(((String) pid).replace("d","")).setSortable(false);//.setWidth(50);
+					}catch(Exception e){ // si falla la conversión a número lo ignora
+						
+					}
+				}
+				
+				if(cell != null)
+					cell.setComponent(label);
+			}
+		}
 	}
 
 	private VerticalLayout drawSalaryLayout() {
@@ -384,47 +508,18 @@ public class AttendancePanel extends Panel implements View {
 			overtimeGrid.removeColumn("attendanceId");
 		if(overtimeGrid.getColumn("date") != null )
 			overtimeGrid.removeColumn("date");
+		if(overtimeGrid.getColumn("overtimeAsList") != null )
+			overtimeGrid.removeColumn("overtimeAsList");
+		if(overtimeGrid.getColumn("overtimeId") != null )
+			overtimeGrid.removeColumn("overtimeId");
 
 		overtimeGrid.setColumnOrder("laborerConstructionSite.activeContract.jobCode","d1","d2","d3","d4","d5","d6","d7","d8","d9","d10","d11","d12","d13","d14","d15","d16"
 				,"d17","d18","d19","d20","d21","d22","d23","d24","d25","d26","d27","d28","d29","d30","d31");
 
 		overtimeContainer.sort(new Object[]{"laborerConstructionSite.activeContract.jobCode"}, new boolean[]{true});
-		overtimeGrid.getColumn("laborerConstructionSite.activeContract.jobCode").setHeaderCaption("Oficio").setEditable(false).setWidth(100);
+		overtimeGrid.getColumn("laborerConstructionSite.activeContract.jobCode").setHeaderCaption("Oficio").setEditorField(new TextField(){{setReadOnly(true);}}).setWidth(100);
 
-		HeaderRow filterRow =  overtimeGrid.appendHeaderRow();
-		for (final Object pid: overtimeGrid.getContainerDataSource().getContainerPropertyIds()) {
-
-			final HeaderCell cell = filterRow.getCell(pid);
-
-			// Have an input field to use for filter
-			TextField filterField = new TextField();
-			if(pid.equals("laborerConstructionSite.activeContract.jobCode")) filterField.setWidth("100%");
-			else {
-				filterField.setWidth("50px");
-				if(overtimeGrid.getColumn(pid) != null )
-					overtimeGrid.getColumn(pid).setHeaderCaption(((String) pid).replace("d","")).setSortable(false);//.setWidth(50);
-			}
-
-			filterField.setHeight("90%");
-
-			// Update filter When the filter input is changed
-			filterField.addTextChangeListener(new TextChangeListener() {
-
-				@Override
-				public void textChange(TextChangeEvent event) {
-					// Can't modify filters so need to replace
-					((SimpleFilterable) overtimeGrid.getContainerDataSource()).removeContainerFilters(pid);
-
-					// (Re)create the filter if necessary
-					if (! event.getText().isEmpty())
-						((Filterable) overtimeGrid.getContainerDataSource()).addContainerFilter(
-								new SimpleStringFilter(pid,
-										event.getText(), true, false));
-				}
-			});
-			if(cell != null)
-				cell.setComponent(filterField);
-		}
+		createHeaders(overtimeGrid);
 
 		return overtimeGrid;
 	}
@@ -447,7 +542,6 @@ public class AttendancePanel extends Panel implements View {
 					}
 					return (T) cb;
 				}
-
 				return super.createField(type, fieldType);
 			}
 		});
@@ -476,47 +570,17 @@ public class AttendancePanel extends Panel implements View {
 			attendanceGrid.removeColumn("attendanceId");
 		if(attendanceGrid.getColumn("date") != null )
 			attendanceGrid.removeColumn("date");
+		if(attendanceGrid.getColumn("marksAsList") != null )
+			attendanceGrid.removeColumn("marksAsList");
 
 		attendanceGrid.setColumnOrder("laborerConstructionSite.activeContract.jobCode","jornalPromedio","d1","d2","d3","d4","d5","d6","d7","d8","d9","d10","d11","d12","d13","d14","d15","d16"
 				,"d17","d18","d19","d20","d21","d22","d23","d24","d25","d26","d27","d28","d29","d30","d31");
 
 		attendanceContainer.sort(new Object[]{"laborerConstructionSite.activeContract.jobCode"}, new boolean[]{true});
-		attendanceGrid.getColumn("laborerConstructionSite.activeContract.jobCode").setHeaderCaption("Oficio").setEditable(false).setWidth(100);
+		attendanceGrid.getColumn("laborerConstructionSite.activeContract.jobCode").setHeaderCaption("Oficio").setEditorField(new TextField(){{setReadOnly(true);}}).setWidth(100);
 
-		HeaderRow filterRow =  attendanceGrid.appendHeaderRow();
-		for (final Object pid: attendanceGrid.getContainerDataSource().getContainerPropertyIds()) {
-
-			final HeaderCell cell = filterRow.getCell(pid);
-
-			// Have an input field to use for filter
-			TextField filterField = new TextField();
-			if(pid.equals("laborerConstructionSite.activeContract.jobCode")) filterField.setWidth("100%");
-			else {
-				filterField.setWidth("50px");
-				if(attendanceGrid.getColumn(pid) != null )
-					attendanceGrid.getColumn(pid).setHeaderCaption(((String) pid).replace("d","")).setSortable(false);//.setWidth(50);
-			}
-
-			filterField.setHeight("90%");
-
-			// Update filter When the filter input is changed
-			filterField.addTextChangeListener(new TextChangeListener() {
-
-				@Override
-				public void textChange(TextChangeEvent event) {
-					// Can't modify filters so need to replace
-					((SimpleFilterable) attendanceGrid.getContainerDataSource()).removeContainerFilters(pid);
-
-					// (Re)create the filter if necessary
-					if (! event.getText().isEmpty())
-						((Filterable) attendanceGrid.getContainerDataSource()).addContainerFilter(
-								new SimpleStringFilter(pid,
-										event.getText(), true, false));
-				}
-			});
-			if(cell != null)
-				cell.setComponent(filterField);
-		}
+		createHeaders(attendanceGrid);
+		
 		return attendanceGrid;
 	}
 
@@ -779,15 +843,17 @@ public class AttendancePanel extends Panel implements View {
 		attendanceContainer.sort(new Object[]{"laborerConstructionSite.activeContract.jobCode"}, new boolean[]{true});
 		
 		List<AbsenceVO> absences = service.getAbsencesByConstructionAndMonth(cs,dt);
-		absenceContainer.removeAllItems();
 		absenceContainer.addAll(absences);
 		absenceContainer.sort(new String[]{"laborerConstructionsite.activeContract.jobCode"},new boolean[]{ true });
 		
 		List<Salary> salaries = service.getSalariesByConstructionAndMonth(cs,dt);
-		//limpia
-		salaryContainer.removeAllItems();
 		salaryContainer.addAll(salaries);
 		salaryContainer.sort(new String[]{"laborerConstructionsite.activeContract.jobCode"},new boolean[]{ true });
+		
+		List<ExtraParams> params = service.getExtraParamsByConstructionAndMonth(cs,dt);
+		//limpia
+		extraParamContainer.addAll(params);
+		extraParamContainer.sort(new String[]{"laborerConstructionsite.activeContract.jobCode"},new boolean[]{ true });
 	}
 	/**
 	 * Según la fecha y la obra, verifica cual es el estado de confirmación de cada una

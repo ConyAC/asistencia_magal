@@ -28,6 +28,7 @@ import cl.magal.asistencia.entities.Confirmations;
 import cl.magal.asistencia.entities.ConstructionCompany;
 import cl.magal.asistencia.entities.ConstructionSite;
 import cl.magal.asistencia.entities.DateConfigurations;
+import cl.magal.asistencia.entities.ExtraParams;
 import cl.magal.asistencia.entities.FamilyAllowanceConfigurations;
 import cl.magal.asistencia.entities.Laborer;
 import cl.magal.asistencia.entities.LaborerConstructionsite;
@@ -47,6 +48,7 @@ import cl.magal.asistencia.repositories.ConfirmationsRepository;
 import cl.magal.asistencia.repositories.ConstructionCompanyRepository;
 import cl.magal.asistencia.repositories.ConstructionSiteRepository;
 import cl.magal.asistencia.repositories.DateConfigurationsRepository;
+import cl.magal.asistencia.repositories.ExtraParamsRepository;
 import cl.magal.asistencia.repositories.FamilyAllowanceRepository;
 import cl.magal.asistencia.repositories.LaborerConstructionsiteRepository;
 import cl.magal.asistencia.repositories.LaborerRepository;
@@ -98,6 +100,8 @@ public class ConstructionSiteService {
 	TaxationRepository taxationRepo;
 	@Autowired
 	FamilyAllowanceRepository famillyRepo;
+	@Autowired
+	ExtraParamsRepository extraParamsRepo;
 
 	@PostConstruct
 	public void init(){
@@ -496,6 +500,37 @@ public class ConstructionSiteService {
 		default:
 			break;
 		}
+	}
+	/**
+	 * permite guardar un objeto de parametros extras
+	 * @param extraParams
+	 */
+	public void save(ExtraParams extraParams) {
+		extraParamsRepo.save(extraParams);
+	}
+	
+	/**
+	 * 
+	 * @param cs
+	 * @param dt
+	 * @return
+	 */
+	public List<ExtraParams> getExtraParamsByConstructionAndMonth(ConstructionSite cs, DateTime date) {
+		//obtiene la lista de trabajadores de la obra
+		List<LaborerConstructionsite> lcs =  labcsRepo.findByConstructionsiteAndIsActive(cs);
+		List<ExtraParams> overtimeResult =  extraParamsRepo.findByConstructionsiteAndMonth(cs,date.toDate());
+		ExtraParams tmp = new ExtraParams();
+		//verifica que exista una asistencia para cada elemento, si no existe la crea
+		for(LaborerConstructionsite lc : lcs ){
+			tmp.setLaborerConstructionSite(lc);
+			if(!overtimeResult.contains(tmp)){
+				ExtraParams overtime = new ExtraParams();
+				overtime.setLaborerConstructionSite(lc);
+				overtime.setDate(date.toDate());
+				overtimeResult.add(overtime);
+			}
+		}
+		return overtimeResult;
 	}
 
 	/**
@@ -1169,5 +1204,6 @@ public class ConstructionSiteService {
 	private double getPorcentajeSalud(){
 		return 0.07D;
 	}
+
 
 }

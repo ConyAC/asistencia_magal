@@ -41,16 +41,16 @@ public class ExtraParams implements Serializable {
 	LaborerConstructionsite laborerConstructionSite;
 	
 	@Column(name="mov2_bond")
-	Integer bond_mov2;
+	Integer bondMov2 = 0;
 
 	@Column(name="km")
-	Integer km;
+	Integer km = 0;
 	
 	@Column(name="special_bond")
-	Integer special_bond;
+	Integer specialBond = 0;
 	
 	@Column(name="overtime_hours")
-	Integer overtime_hours;
+	Integer overtimeHours = 0;
 
 	public Long getId() {
 		return id;
@@ -77,14 +77,6 @@ public class ExtraParams implements Serializable {
 		this.laborerConstructionSite = laborerConstructionSite;
 	}
 
-	public Integer getBond_mov2() {
-		return bond_mov2;
-	}
-
-	public void setBond_mov2(Integer bond_mov2) {
-		this.bond_mov2 = bond_mov2;
-	}
-
 	public Integer getKm() {
 		return km;
 	}
@@ -93,28 +85,56 @@ public class ExtraParams implements Serializable {
 		this.km = km;
 	}
 
-	public Integer getSpecial_bond() {
-		return special_bond;
+	public Integer getBondMov2() {
+		return bondMov2;
 	}
 
-	public void setSpecial_bond(Integer special_bond) {
-		this.special_bond = special_bond;
+	public void setBondMov2(Integer bondMov2) {
+		this.bondMov2 = bondMov2;
 	}
 
-	public Integer getOvertime_hours() {
-		return overtime_hours;
+	public Integer getSpecialBond() {
+		return specialBond;
 	}
 
-	public void setOvertime_hours(Integer overtime_hours) {
-		this.overtime_hours = overtime_hours;
+	public void setSpecialBond(Integer specialBond) {
+		this.specialBond = specialBond;
 	}
 
+	public Integer getOvertimeHours() {
+		return overtimeHours;
+	}
+
+	public void setOvertimeHours(Integer overtimeHours) {
+		this.overtimeHours = overtimeHours;
+	}
+	
 	@Override
-	public String toString() {
-		return "ExtraParams [id=" + id + ", date=" + date
-				+ ", laborerConstructionSite=" + laborerConstructionSite
-				+ ", bond_mov2=" + bond_mov2 + ", km=" + km + ", special_bond="
-				+ special_bond + ", overtime_hours=" + overtime_hours + "]";
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime
+				* result
+				+ ((laborerConstructionSite == null) ? 0
+						: laborerConstructionSite.hashCode());
+		return result;
+	}
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		ExtraParams other = (ExtraParams) obj;
+		if (laborerConstructionSite == null) {
+			if (other.laborerConstructionSite != null)
+				return false;
+		} else if (!laborerConstructionSite.getId()
+				.equals(other.laborerConstructionSite.getId()))
+			return false;
+		return true;
 	}
 	
 }
