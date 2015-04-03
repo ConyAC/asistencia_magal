@@ -17,6 +17,7 @@ import org.vaadin.dialogs.ConfirmDialog;
 import cl.magal.asistencia.entities.Attendance;
 import cl.magal.asistencia.entities.Confirmations;
 import cl.magal.asistencia.entities.ConstructionSite;
+import cl.magal.asistencia.entities.DateConfigurations;
 import cl.magal.asistencia.entities.ExtraParams;
 import cl.magal.asistencia.entities.Overtime;
 import cl.magal.asistencia.entities.Salary;
@@ -57,6 +58,7 @@ import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Field;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.Grid;
+import com.vaadin.ui.Grid.CellReference;
 import com.vaadin.ui.Grid.HeaderCell;
 import com.vaadin.ui.Grid.HeaderRow;
 import com.vaadin.ui.Grid.SelectionMode;
@@ -129,9 +131,44 @@ public class AttendancePanel extends Panel implements View {
 		}
 		return new DateTime(attendanceDate.getValue());
 	}
+	/**
+	 * obtiene la fecha de cierre del mes seleccionado
+	 * @return
+	 */
+	private DateTime getClosingDate(){
+		DateTime dt = getAttendanceDate();
+		DateConfigurations dateConfig = service.getDateConfigurationByCsAndMonth(cs,dt);
+		//si no se ha seteado la fecha, elije el último día del mes 
+		if(dateConfig.getAssistance() == null ){
+			dateConfig.setAssistance(dt.withDayOfMonth(dt.dayOfMonth().getMaximumValue()).toDate());
+		}
+		return new DateTime(dateConfig.getAssistance());
+	}
+	
+	/**
+	 * obtiene la fecha de cierre del mes anterior
+	 * @return
+	 */
+	private DateTime getPastMonthClosingDate(){
+		DateTime dt = getAttendanceDate();
+		DateConfigurations dateConfig = service.getDateConfigurationByCsAndMonth(cs,dt.minusMonths(1));
+		
+		if( dateConfig.getAssistance() == null ){
+			
+			dateConfig.setAssistance(dt.minusMonths(1).withDayOfMonth(dt.minusMonths(1).dayOfMonth().getMaximumValue()).toDate());
+		}
+		return new DateTime(dateConfig.getAssistance());
+	}
 
 	public AttendancePanel(){
 
+		
+
+	}
+
+	@PostConstruct
+	private void init(){
+		
 		setSizeFull();
 
 		//crea la parte superior de la interfaz de asistencia
@@ -153,11 +190,6 @@ public class AttendancePanel extends Panel implements View {
 				setExpandRatio(detalleAsistencia, 0.9F);
 			}
 		});
-
-	}
-
-	@PostConstruct
-	private void init(){
 
 		progressDialog = new Window();
 		progressDialog.setModal(true);
@@ -287,6 +319,8 @@ public class AttendancePanel extends Panel implements View {
 
 	private void createHeaders(final Grid grid) {
 		HeaderRow filterRow =  grid.appendHeaderRow();
+		//si la propiedad comienza con d (dia) o dmp (dia mes pasado), entonces muestra el dia de la semana correspondiente
+		final DateTime dt = getAttendanceDate();
 		for (final Object pid: grid.getContainerDataSource().getContainerPropertyIds()) {
 
 			final HeaderCell cell = filterRow.getCell(pid);
@@ -319,28 +353,55 @@ public class AttendancePanel extends Panel implements View {
 				if(grid.getColumn(pid) != null )
 					grid.getColumn(pid).setSortable(false);//.setWidth(50);
 				//calculo de la semana
-				//si la propiedad comienza con d (dia) o dmp (dia mes pasado), entonces muestra el dia de la semana correspondiente
-				DateTime dt = getAttendanceDate();
-				if(((String) pid).startsWith("dmp")){
+				if(((String) pid).startsWith("dmp") || ((String) pid).startsWith("dma")  ){
 					//calcula el numero del mes
-					int monthDay = Integer.parseInt(((String) pid).replace("dmp","")); 
-					label.setValue( dt.withDayOfMonth(monthDay).dayOfWeek().getAsShortText() );
-					
-					grid.getColumn(pid).setHeaderCaption(((String) pid).replace("d","")).setSortable(false);//.setWidth(50);
-				}else if(((String) pid).startsWith("d")){
-					try{
-					int monthDay = Integer.parseInt(((String) pid).replace("d",""));
-					label.setValue( dt.minusMonths(1).withDayOfMonth(monthDay).dayOfWeek().getAsShortText() );
-					
-					grid.getColumn(pid).setHeaderCaption(((String) pid).replace("d","")).setSortable(false);//.setWidth(50);
-					}catch(Exception e){ // si falla la conversión a número lo ignora
+					int monthDay = Integer.parseInt(((String) pid).replace("dmp","").replace("dma",""));
+					DateTime dt2 = dt;
+					if ( ((String) pid).startsWith("dmp") )
+						dt2 = dt2.minusMonths(1);
+					//el número de mes no es un número válido de mes o si es un día a la fecha de cierre del mes pasado, oculta la columna
+					if(monthDay > dt2.dayOfMonth().getMaximumValue() || 
+					   ( ((String) pid).startsWith("dmp") && monthDay <= getPastMonthClosingDate().getDayOfMonth())){
+						grid.removeColumn(pid);
+					}else{ //solo lo setea si el número es mayor a la cantidad de dias del mes
+						label.setValue( dt2.withDayOfMonth(monthDay).dayOfWeek().getAsShortText() );
+						grid.getColumn(pid).setHeaderCaption(((String) pid).replace("dmp","").replace("dma","")).setSortable(false);
 						
 					}
+					
 				}
 				
 				if(cell != null)
 					cell.setComponent(label);
 			}
+			
+			grid.setCellStyleGenerator(new Grid.CellStyleGenerator() {
+				
+				@Override
+				public String getStyle(CellReference cellReference) {
+					String pid = (String) cellReference.getPropertyId();
+					if( pid.startsWith("dmp") || pid.startsWith("dma") ){
+						//calcula el numero del mes
+						int monthDay = Integer.parseInt(((String) pid).replace("dmp","").replace("dma",""));
+						DateTime dt2 = dt;
+						if ( pid.startsWith("dmp") )
+							dt2 = dt2.minusMonths(1);
+						if(monthDay <= dt2.dayOfMonth().getMaximumValue()){
+							//si es el dia actual
+							if(dt2.withDayOfMonth(monthDay).toString("dd/MM/yyyy").equals(DateTime.now().toString("dd/MM/yyyy")))
+								return "grid-today";
+							//	si es mes pasado
+							else if(pid.startsWith("dmp")){
+								return "grid-pastmonth";
+							}else{
+								//si es este mes
+								return "grid-actualmonth";
+							}
+						}
+					}
+					return null;
+				}
+			});
 		}
 	}
 
@@ -481,7 +542,9 @@ public class AttendancePanel extends Panel implements View {
 		overtimeContainer.addNestedContainerProperty("laborerConstructionSite.activeContract.jobCode");
 		overtimeGrid = new Grid(overtimeContainer);
 		overtimeGrid.setSelectionMode(SelectionMode.SINGLE);
-		overtimeGrid.setSizeFull();
+//		overtimeGrid.setSizeFull();
+		overtimeGrid.setHeight("100%");
+		overtimeGrid.setWidth("100%");
 		overtimeGrid.setEditorFieldGroup(new BeanFieldGroup<Overtime>(Overtime.class));
 		overtimeGrid.getEditorFieldGroup().addCommitHandler(new CommitHandler() {
 
@@ -513,8 +576,11 @@ public class AttendancePanel extends Panel implements View {
 		if(overtimeGrid.getColumn("overtimeId") != null )
 			overtimeGrid.removeColumn("overtimeId");
 
-		overtimeGrid.setColumnOrder("laborerConstructionSite.activeContract.jobCode","d1","d2","d3","d4","d5","d6","d7","d8","d9","d10","d11","d12","d13","d14","d15","d16"
-				,"d17","d18","d19","d20","d21","d22","d23","d24","d25","d26","d27","d28","d29","d30","d31");
+		overtimeGrid.setColumnOrder("laborerConstructionSite.activeContract.jobCode",
+				"dmp1","dmp2","dmp3","dmp4","dmp5","dmp6","dmp7","dmp8","dmp9","dmp10","dmp11","dmp12","dmp13","dmp14","dmp15","dmp16"
+				,"dmp17","dmp18","dmp19","dmp20","dmp21","dmp22","dmp23","dmp24","dmp25","dmp26","dmp27","dmp28","dmp29","dmp30","dmp31",
+				"dma1","dma2","dma3","dma4","dma5","dma6","dma7","dma8","dma9","dma10","dma11","dma12","dma13","dma14","dma15","dma16"
+				,"dma17","dma18","dma19","dma20","dma21","dma22","dma23","dma24","dma25","dma26","dma27","dma28","dma29","dma30","dma31");
 
 		overtimeContainer.sort(new Object[]{"laborerConstructionSite.activeContract.jobCode"}, new boolean[]{true});
 		overtimeGrid.getColumn("laborerConstructionSite.activeContract.jobCode").setHeaderCaption("Oficio").setEditorField(new TextField(){{setReadOnly(true);}}).setWidth(100);
@@ -573,8 +639,11 @@ public class AttendancePanel extends Panel implements View {
 		if(attendanceGrid.getColumn("marksAsList") != null )
 			attendanceGrid.removeColumn("marksAsList");
 
-		attendanceGrid.setColumnOrder("laborerConstructionSite.activeContract.jobCode","jornalPromedio","d1","d2","d3","d4","d5","d6","d7","d8","d9","d10","d11","d12","d13","d14","d15","d16"
-				,"d17","d18","d19","d20","d21","d22","d23","d24","d25","d26","d27","d28","d29","d30","d31");
+		attendanceGrid.setColumnOrder("laborerConstructionSite.activeContract.jobCode","jornalPromedio"
+				,"dmp1","dmp2","dmp3","dmp4","dmp5","dmp6","dmp7","dmp8","dmp9","dmp10","dmp11","dmp12","dmp13","dmp14","dmp15","dmp16"
+				,"dmp17","dmp18","dmp19","dmp20","dmp21","dmp22","dmp23","dmp24","dmp25","dmp26","dmp27","dmp28","dmp29","dmp30","dmp31",
+				"dma1","dma2","dma3","dma4","dma5","dma6","dma7","dma8","dma9","dma10","dma11","dma12","dma13","dma14","dma15","dma16"
+				,"dma17","dma18","dma19","dma20","dma21","dma22","dma23","dma24","dma25","dma26","dma27","dma28","dma29","dma30","dma31");
 
 		attendanceContainer.sort(new Object[]{"laborerConstructionSite.activeContract.jobCode"}, new boolean[]{true});
 		attendanceGrid.getColumn("laborerConstructionSite.activeContract.jobCode").setHeaderCaption("Oficio").setEditorField(new TextField(){{setReadOnly(true);}}).setWidth(100);

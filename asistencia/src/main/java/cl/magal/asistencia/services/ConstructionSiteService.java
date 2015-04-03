@@ -556,7 +556,7 @@ public class ConstructionSiteService {
 		Double failDiscount = getFailDiscount(cs);
 		Double permissionDiscount = getPermissionDiscount(cs);
 		//fechas 
-		DateConfigurations dateConfiguration = getByCsAndMonth(cs,date);
+		DateConfigurations dateConfiguration = getDateConfigurationByCsAndMonth(cs,date);
 		if(dateConfiguration == null )
 			throw new RuntimeException("Aún no se definen las fechas de cierre de anticipo y cierre de asistencia. Ambas son necesarias para cálcular el sueldo.");
 		Date assistanceClose = dateConfiguration.getAssistance();
@@ -627,9 +627,14 @@ public class ConstructionSiteService {
 		return count;
 	}
 
-	public DateConfigurations getByCsAndMonth(ConstructionSite cs,DateTime date) {
+	public DateConfigurations getDateConfigurationByCsAndMonth(ConstructionSite cs,DateTime date) {
 		logger.debug("buscando configuraciones de la fecha {}",date.toDate());
-		return dateConfigurationsRepo.findByDate(date.toDate());
+		DateConfigurations dateConfig = dateConfigurationsRepo.findByDate(date.toDate());
+		//si no se ha seteado la fecha, elije el último día del mes anterior
+		if( dateConfig == null ){
+			dateConfig = new DateConfigurations();
+		}
+		return dateConfig;
 	}
 
 	public Double getPermissionDiscount(ConstructionSite cs) {
