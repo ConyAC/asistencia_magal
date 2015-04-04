@@ -212,6 +212,27 @@ public class Overtime implements Serializable {
 		return Collections.unmodifiableList(tmp);
 	}
 	
+	public List<Integer> getLastMonthOvertimeAsList() {
+		ArrayList<Integer> tmp = new ArrayList<Integer>();
+		tmp.add(dmp1);tmp.add(dmp2);
+		tmp.add(dmp3);tmp.add(dmp4);
+		tmp.add(dmp5);tmp.add(dmp6);
+		tmp.add(dmp7);tmp.add(dmp8);
+		tmp.add(dmp9);tmp.add(dmp10);
+		tmp.add(dmp11);tmp.add(dmp12);
+		tmp.add(dmp13);tmp.add(dmp14);
+		tmp.add(dmp15);tmp.add(dmp16);
+		tmp.add(dmp17);tmp.add(dmp18);
+		tmp.add(dmp19);tmp.add(dmp20);
+		tmp.add(dmp21);tmp.add(dmp22);
+		tmp.add(dmp23);tmp.add(dmp24);
+		tmp.add(dmp25);tmp.add(dmp26);
+		tmp.add(dmp27);tmp.add(dmp28);
+		tmp.add(dmp29);tmp.add(dmp30);tmp.add(dmp31);
+		
+		return Collections.unmodifiableList(tmp);
+	}
+	
 	public Long getOvertimeId() {
 		return overtimeId;
 	}

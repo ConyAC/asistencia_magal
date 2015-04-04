@@ -275,7 +275,8 @@ public class ConstructionSiteService {
 		logger.debug("date {} ",date);
 
 		List<Attendance> attendanceResultList =  attendanceRepo.findByConstructionsiteAndMonth(cs,date.toDate());
-		logger.debug("attendanceResultList.getmarks {} ",attendanceResultList.get(0).getMarksAsList());
+		if(!attendanceResultList.isEmpty())
+			logger.debug("attendanceResultList.getmarks {} ",attendanceResultList.get(0).getMarksAsList());
 		Attendance tmp = new Attendance();
 
 		Map<Integer,Attendance> attendanceResult = new HashMap<Integer,Attendance>();
@@ -559,11 +560,13 @@ public class ConstructionSiteService {
 		DateConfigurations dateConfiguration = getDateConfigurationByCsAndMonth(cs,date);
 		if(dateConfiguration == null )
 			throw new RuntimeException("Aún no se definen las fechas de cierre de anticipo y cierre de asistencia. Ambas son necesarias para cálcular el sueldo.");
-		Date assistanceClose = dateConfiguration.getAssistance();
+		DateTime assistanceClose = new DateTime(dateConfiguration.getAssistance());
 		Date supleClose = dateConfiguration.getAdvance();
 
 		//busca la asistencia del mes 
 		Map<Integer,Attendance> attendance = getAttendanceMapByConstruction(cs, date);
+		//busca la asistencia del mes anterior 
+		Map<Integer,Attendance> lastMonthAttendance = getAttendanceMapByConstruction(cs, date.minusMonths(1));
 		//busca las sobre horas
 		Map<Integer,Overtime> overtimes = getOvertimeMapByConstruction(cs, date);
 
@@ -576,7 +579,7 @@ public class ConstructionSiteService {
 			Salary salary = new Salary();
 			salary.setLaborerConstructionSite(lc);
 			salary.setSuple(calculateSuple(supleCode,supleTable,supleClose,attendance.get(lc.getJobCode())));
-			salary.setSalary(calculateSalary((int) salary.getSuple(), 0, 0, attendance.get(lc.getJobCode()),overtimes.get(lc.getJobCode())));
+			salary.setSalary(calculateSalary(assistanceClose,(int) salary.getSuple(), 0, 0, attendance.get(lc.getJobCode()),lastMonthAttendance.get(lc.getJobCode()),overtimes.get(lc.getJobCode())));
 			salary.setDate(date.toDate());
 			salaries.add(salary);
 
@@ -672,16 +675,20 @@ public class ConstructionSiteService {
 		return salaries;
 	}
 
-	public int calculateSalary(int suple , int tool , int loan,Attendance attendance,Overtime overtime) {
+	public int calculateSalary(DateTime closingDateLastMonth, int suple , int tool , int loan,Attendance attendance,Attendance lastMonthAttendance,Overtime overtime) {
 
 		Date date = attendance.getDate();
 		
 		int diasHabiles = getDiasHabilesMes(date);
 		
-		double afecto  =calculateAfecto(diasHabiles,attendance,overtime);
-		double sobreAfecto = calculateSobreAfecto(afecto,diasHabiles,attendance,overtime);
-		double tNoAfecto = calculateTNoAfecto(afecto,diasHabiles,attendance);
+		double afecto  =calculateAfecto(closingDateLastMonth,diasHabiles,attendance,lastMonthAttendance,overtime);
+		logger.debug("afecto {}",afecto);
+		double sobreAfecto = calculateSobreAfecto(closingDateLastMonth,afecto,diasHabiles,attendance,lastMonthAttendance,overtime);
+		logger.debug("sobreAfecto {}",sobreAfecto);
+		double tNoAfecto = calculateTNoAfecto(closingDateLastMonth,afecto,diasHabiles,attendance,lastMonthAttendance);
+		logger.debug("tNoAfecto {}",tNoAfecto);
 		double tDesc = calculateTDesc(afecto,sobreAfecto,suple,tool,loan);
+		logger.debug("tDesc {}",tDesc);
 
 		return (int) (afecto+sobreAfecto+ tNoAfecto - tDesc);
 	}
@@ -691,12 +698,13 @@ public class ConstructionSiteService {
 	 * Calcula el sobre afecto, si éste último fue mayor al maximo imponible 
 	 * @return
 	 */
-	private double calculateSobreAfecto(double afecto,int diasHabiles,Attendance attendance,Overtime overtime) {
+	private double calculateSobreAfecto(DateTime closingDateLastMonth,double afecto,int diasHabiles,Attendance attendance,Attendance lastMonthAttendance,Overtime overtime) {
 		double maxImponible = getMaxImponible();
 		if( maxImponible == afecto )
 			return 0;
 		else{
-			double sum = calculateVTrato(attendance) + calculateValorSabado(attendance) + calculateVSCorrd(attendance,overtime) + calculateSobreTiempo(overtime) + calculateDescHoras() + calculateBonifImpo(attendance) + calculateGLegal(diasHabiles,attendance);
+			double sum = calculateVTrato(closingDateLastMonth,attendance,lastMonthAttendance) + calculateValorSabado(closingDateLastMonth,attendance,lastMonthAttendance) + calculateVSCorrd(closingDateLastMonth,attendance,lastMonthAttendance,overtime) + calculateSobreTiempo(overtime) + calculateDescHoras(closingDateLastMonth,attendance,lastMonthAttendance) 
+					+ calculateBonifImpo(closingDateLastMonth,attendance,lastMonthAttendance) + calculateGLegal(closingDateLastMonth,diasHabiles,attendance,lastMonthAttendance);
 			return sum - afecto;
 		}
 	}
@@ -705,17 +713,18 @@ public class ConstructionSiteService {
 	 * DONE
 	 * @return
 	 */
-	private double calculateAfecto(int diasHabiles,Attendance attendance,Overtime overtime) {
+	private double calculateAfecto(DateTime closingDateLastMonth, int diasHabiles,Attendance attendance,Attendance lastMonthAttendance,Overtime overtime) {
 		double maxImponible = getMaxImponible();
-		double sum = calculateVTrato(attendance) + calculateValorSabado(attendance) + calculateVSCorrd(attendance,overtime) + calculateSobreTiempo(overtime) + calculateDescHoras() + calculateBonifImpo(attendance) + calculateGLegal(diasHabiles,attendance);
+		double sum = calculateVTrato(closingDateLastMonth,attendance,lastMonthAttendance) + calculateValorSabado(closingDateLastMonth,attendance,lastMonthAttendance) + calculateVSCorrd(closingDateLastMonth,attendance,lastMonthAttendance,overtime) + calculateSobreTiempo(overtime) + 
+				calculateDescHoras(closingDateLastMonth,attendance,lastMonthAttendance) + calculateBonifImpo(closingDateLastMonth,attendance,lastMonthAttendance) + calculateGLegal(closingDateLastMonth,diasHabiles,attendance,lastMonthAttendance);
 		return sum > maxImponible ? maxImponible : sum ;
 	}
 	/**
 	 * DONE
 	 * @return
 	 */
-	private double calculateGLegal(int diasHabilesMes,Attendance attendance) {
-		return getGratificacionLegalMes(diasHabilesMes) * calculateDiaTrab(attendance);
+	private double calculateGLegal(DateTime closingDateLastMonth,int diasHabilesMes,Attendance attendance,Attendance lastMonthAttendance) {
+		return getGratificacionLegalMes(diasHabilesMes) * calculateDiaTrab(closingDateLastMonth,attendance,lastMonthAttendance);
 	}
 
 	/**
@@ -749,26 +758,68 @@ public class ConstructionSiteService {
 	 * DONE
 	 * @return
 	 */
-	private double calculateBonifImpo(Attendance attendance) {
-		return calculateBonoBencina() + getBonoImponibleEspecial() + calculateLLuvia(attendance) + calculateLLuviaMesAnterior() + calculateAjusteAsistenciaMesAnterior();
+	private double calculateBonifImpo(DateTime closingDate,Attendance attendance,Attendance lastMonthAttendance) {
+		return calculateBonoBencina() + getBonoImponibleEspecial() + calculateLLuvia(attendance) + calculateLLuviaMesAnterior(closingDate,attendance,lastMonthAttendance) + calculateAjusteAsistenciaMesAnterior(closingDate,attendance,lastMonthAttendance);
 	}
 
 	/**
-	 * TODO
+	 * DONE
 	 * @return
 	 */
-	private int calculateAjusteAsistenciaMesAnterior() {
-		int sumAsistenciaAjustadaMesAnterior = 0; // TODO calcular asistencia mes anterior
+	private int calculateAjusteAsistenciaMesAnterior(DateTime closingDate,Attendance attendance,Attendance lastMonthAttendance) {
+		//TODO validar que sean meses consecutivos
+		//desde la fecha de cierre del mes anterior, verifica si hay diferencias en la asistencia en cuanto 
+		int sumAsistenciaAjustadaMesAnterior = countDiffMarksFromDate(closingDate,attendance,lastMonthAttendance,AttendanceMark.ATTEND); 
 		return sumAsistenciaAjustadaMesAnterior * getJPromedio();
 	}
 
 	/**
-	 * TODO
+	 * DONE
+	 * @param closingDate
+	 * @param attendance
+	 * @param lastMonthAttendance
+	 * @param marks
+	 * @return
+	 */
+	private int countDiffMarksFromDate(DateTime closingDate,Attendance attendance, Attendance lastMonthAttendance, AttendanceMark ... marks) {
+		return countDiffMarksFromDay(closingDate.getDayOfMonth(),closingDate.dayOfMonth().getMaximumValue(),attendance,lastMonthAttendance);
+	}
+
+	/**
+	 * DONE
+	 * @param lastClosingDate
+	 * @param attendance
+	 * @param lastMonthAttendance
+	 * @param marks
+	 * @return
+	 */
+	private int countDiffMarksFromDay(Integer lastClosingDate,int maxDays, Attendance attendance,Attendance lastMonthAttendance, AttendanceMark ... marks) {
+		if(attendance == null || lastMonthAttendance == null )
+			throw new RuntimeException("Los objeto de asistencia no pueden ser nulo.");
+
+		List<AttendanceMark> lastRealMarks = attendance.getLastMarksAsList();
+		List<AttendanceMark> projectionsMarks = attendance.getMarksAsList();
+		int count = 0;
+		for(int i = lastClosingDate != null ? lastClosingDate : 0 ; i <= maxDays ; i ++){
+			//si son distintos, lo contabiliza
+			if(lastRealMarks.get(i) != projectionsMarks.get(i)){
+				//lo cuenta solo si está dentro del grupo a contabilizar
+				AttendanceMark mark = lastRealMarks.get(i);
+				if(ArrayUtils.contains(marks, mark))
+					count++;
+			}
+		}
+		return count;
+	}
+
+	/**
+	 * DONE
 	 * =DL32*$DF$7
 	 * @return
 	 */
-	private int calculateLLuviaMesAnterior() {
-		int sumLLuviaAjuste = 0; //TODO sumar lluvias ajustadas
+	private int calculateLLuviaMesAnterior(DateTime closingDate,Attendance attendance, Attendance lastMonthAttendance) {
+		int sumLLuviaAjuste = countDiffMarksFromDate(closingDate,attendance,lastMonthAttendance,AttendanceMark.RAIN);
+		logger.debug("sumLLuviaAjuste {} ",sumLLuviaAjuste);
 		return sumLLuviaAjuste * getJornalBaseMes();
 	}
 
@@ -782,11 +833,11 @@ public class ConstructionSiteService {
 	}
 
 	/**
-	 * TODO revisar FIXME
+	 * DONE
 	 * @return
 	 */
 	private int getJornalBaseMes() {
-		return getSueldoMinimo() / 30; //FIXME usar siempre 30?
+		return getSueldoMinimo() / 30;
 	}
 
 	/**
@@ -835,16 +886,19 @@ public class ConstructionSiteService {
 	 * DONE
 	 * @return
 	 */
-	private double calculateDescHoras() {
-		return -1 * (getJPromedio() / 7.5 * getHorasDesc() + calculateDiasNoConsideradosMesAnterior() * 0.2 * getJPromedio() );
+	private double calculateDescHoras(DateTime closingDateLastMonth,Attendance attendance,Attendance lastMonthAttendance) {
+		return -1 * (getJPromedio() / 7.5 * getHorasDesc() + calculateDiasNoConsideradosMesAnterior(closingDateLastMonth,attendance,lastMonthAttendance) * 0.2 * getJPromedio() );
 	}
 
 	/**
-	 * TODO calcular los días no considerados del mes anterior 
+	 * DONE calcula los días no considerados del mes anterior 
 	 * @return
 	 */
-	private double calculateDiasNoConsideradosMesAnterior() {
-		return 0;
+	private int calculateDiasNoConsideradosMesAnterior(DateTime closingDateLastMonth,Attendance attendance,Attendance lastMonthAttendance) {
+		int sumAsistenciaAjustadaMesAnterior = countDiffMarksFromDate(closingDateLastMonth,attendance,lastMonthAttendance,
+				AttendanceMark.RAIN,AttendanceMark.FAIL,AttendanceMark.SICK,AttendanceMark.PERMISSION,AttendanceMark.ACCIDENT);
+		logger.debug("sumAsistenciaAjustadaMesAnterior {}",sumAsistenciaAjustadaMesAnterior);
+		return sumAsistenciaAjustadaMesAnterior;
 	}
 
 	/**
@@ -881,6 +935,9 @@ public class ConstructionSiteService {
 		for(Integer i : overtime.getOvertimeAsList()){
 			count += i;
 		}
+		for(Integer i : overtime.getLastMonthOvertimeAsList()){
+			count += i;
+		}
 		return count;
 	}
 
@@ -888,8 +945,8 @@ public class ConstructionSiteService {
 	 * DONE 
 	 * @return
 	 */
-	private double calculateVSCorrd(Attendance attendance,Overtime overtime) {
-		return ( calculateVTrato(attendance) + calculateValorSabado(attendance) + calculateSobreTiempo(overtime) )/ calculateDPD(attendance) * calculateSep(attendance);
+	private double calculateVSCorrd(DateTime closingDateLastMonth,Attendance attendance,Attendance lastMonthAttendance,Overtime overtime) {
+		return ( calculateVTrato(closingDateLastMonth,attendance,lastMonthAttendance) + calculateValorSabado(closingDateLastMonth,attendance,lastMonthAttendance) + calculateSobreTiempo(overtime) )/ calculateDPD(attendance) * calculateSep(attendance);
 	}
 
 	/**
@@ -897,46 +954,41 @@ public class ConstructionSiteService {
 	 * @return
 	 */
 	private double calculateSep(Attendance attendance) {
-//		return 2;
 		return countMarks(null,attendance,AttendanceMark.SUNDAY); 
-	}
-
-	/**
-	 * TODO
-	 * (DONE)
-	 * @return
-	 */
-	private double calculateDPD(Attendance attendance) {
-//		return 11;
-		return countMarks(null,attendance,AttendanceMark.ATTEND,AttendanceMark.SATURDAY,AttendanceMark.RAIN,AttendanceMark.PERMISSION,AttendanceMark.FILLER,AttendanceMark.FAIL);
 	}
 
 	/**
 	 * DONE
 	 * @return
 	 */
-	private double calculateValorSabado(Attendance attendance) {
-		return ( calculateVTrato(attendance) +  calculateDescHoras() ) / calculateDPS(attendance) * calculateSab(attendance);
+	private double calculateDPD(Attendance attendance) {
+		return countMarks(null,attendance,AttendanceMark.ATTEND,AttendanceMark.SATURDAY,AttendanceMark.RAIN,AttendanceMark.PERMISSION,
+				AttendanceMark.FILLER,AttendanceMark.FAIL);
 	}
 
 	/**
-	 * TODO
-	 * (DONE)
+	 * DONE
+	 * @return
+	 */
+	private double calculateValorSabado(DateTime closingDateLastMonth,Attendance attendance,Attendance lastMonthAttendance) {
+		return ( calculateVTrato(closingDateLastMonth,attendance,lastMonthAttendance) +  calculateDescHoras(closingDateLastMonth,attendance,lastMonthAttendance) ) / calculateDPS(attendance) * calculateSab(attendance);
+	}
+
+	/**
+	 * DONE
 	 * =CONTAR.SI($D32:$AI32;"X")+CONTAR.SI($D32:$AI32;"LL")+CONTAR.SI($D32:$AK32;"P")+CONTAR.SI($D32:$AI32;"R")+CONTAR.SI($D32:$AI32;"F")+CONTAR.SI($D32:$AI32;"V")
 	 * @return
 	 */
 	private int calculateDPS(Attendance attendance) {
-//		return 9;
-		return countMarks(null,attendance,AttendanceMark.ATTEND,AttendanceMark.RAIN,AttendanceMark.PERMISSION,AttendanceMark.FILLER,AttendanceMark.FAIL,AttendanceMark.VACATION);
+		return countMarks(null,attendance,AttendanceMark.ATTEND,AttendanceMark.RAIN,AttendanceMark.PERMISSION,
+				AttendanceMark.FILLER,AttendanceMark.FAIL,AttendanceMark.VACATION);
 	}
 
 	/**
-	 * TODO
-	 * (DONE)
+	 * DONE
 	 * @return
 	 */
 	private int calculateSab(Attendance attendance) {
-//		return 2;
 		return countMarks(null,attendance,AttendanceMark.SATURDAY);
 	}
 
@@ -944,8 +996,8 @@ public class ConstructionSiteService {
 	 * DONE
 	 * @return
 	 */
-	private double calculateVTrato(Attendance attendance) {
-		return getJPromedio()*calculateDiaTrab(attendance);
+	private double calculateVTrato(DateTime closingDateLastMonth,Attendance attendance,Attendance lastMonthAttendance) {
+		return getJPromedio()*calculateDiaTrab(closingDateLastMonth,attendance,lastMonthAttendance);
 	}
 
 	/**
@@ -968,30 +1020,39 @@ public class ConstructionSiteService {
 	 * DONE
 	 * @return
 	 */
-	private double calculateTNoAfecto(double afecto,int diasHabiles,Attendance attendance) {
-		return calculateAsigFamiliar(afecto,attendance) + calculateColacion(attendance) + calculateMov(attendance) + calculateMov2(attendance);
+	private double calculateTNoAfecto(DateTime closingDateLastMonth,double afecto,int diasHabiles,Attendance attendance,Attendance lastMonthAttendance) {
+		double asigFam = calculateAsigFamiliar(closingDateLastMonth,afecto,attendance,lastMonthAttendance); 
+		logger.debug("asigFam {}",asigFam);
+		double colacion = calculateColacion(closingDateLastMonth,attendance,lastMonthAttendance);
+		logger.debug("colacion {}",asigFam);
+		double mov = calculateMov(closingDateLastMonth,attendance,lastMonthAttendance); 
+		logger.debug("mov {}",mov);
+		double mov2 = calculateMov2(closingDateLastMonth, attendance, lastMonthAttendance); 
+		logger.debug("mov2 {}",mov2);
+		return  asigFam + colacion + mov + mov2;
 	}
 
 	/**
 	 * DONE
 	 * @return
 	 */
-	private double calculateMov2(Attendance attendance) {
-		return calculateCol(attendance)*getMov2()+ getBonoCargoLoc2();
+	private double calculateMov2(DateTime closingDateLastMonth,Attendance attendance,Attendance lastMonthAttendance) {
+		return calculateCol(closingDateLastMonth,attendance,lastMonthAttendance)*getMov2()+ getBonoCargoLoc2();
 	}
 
 	/**
-	 * TODO Calcula según las asistencias, lluvias, sabados y vacaciones
-	 * (DONE)
+	 * DONE
 	 * =CONTAR.SI(D32:AK32;"X")+CONTAR.SI(D32:AK32;"ll")-C32-CONTAR.SI(DN32:DX32;"S")-CONTAR.SI(DN32:DX32;"V")
 	 * @return
 	 */
-	private double calculateCol(Attendance attendance) {
-//		return 7;
+	private double calculateCol(DateTime closingDateLastMonth,Attendance attendance,Attendance lastMonthAttendance) {
 		int sum1 = countMarks(null,attendance,AttendanceMark.ATTEND,AttendanceMark.RAIN);
-		int sum2 = countMarks(null,attendance,AttendanceMark.SATURDAY,AttendanceMark.VACATION);
+		logger.debug("sum1 {}",sum1);
+		int sumAsistenciaAjustadaMesAnterior = calculateDiasNoConsideradosMesAnterior(closingDateLastMonth,attendance,lastMonthAttendance);
+		int sum2 = countDiffMarksFromDate(closingDateLastMonth,attendance,lastMonthAttendance,AttendanceMark.SATURDAY,AttendanceMark.VACATION);
+		logger.debug("sum2 {}",sum2);
 		
-		return sum1 - calculateDiasNoConsideradosMesAnterior() - sum2;
+		return sum1 - sumAsistenciaAjustadaMesAnterior - sum2;
 	}
 
 	/**
@@ -1003,7 +1064,7 @@ public class ConstructionSiteService {
 	}
 
 	/**
-	 * TODO
+	 * TODO ingreso
 	 * @return
 	 */
 	private int getBonoCargoLoc2() {
@@ -1014,8 +1075,8 @@ public class ConstructionSiteService {
 	 * DONE
 	 * @return
 	 */
-	private double calculateMov(Attendance attendance) {
-		return getMov() * calculateCol(attendance);
+	private double calculateMov(DateTime closingDateLastMonth,Attendance attendance,Attendance lastMonthAttendance) {
+		return getMov() * calculateCol(closingDateLastMonth,attendance,lastMonthAttendance);
 	}
 
 	/**
@@ -1031,8 +1092,8 @@ public class ConstructionSiteService {
 	 * DONE
 	 * @return
 	 */
-	private double calculateColacion(Attendance attendance) {
-		return getColacion() * calculateCol(attendance);
+	private double calculateColacion(DateTime closingDateLastMonth,Attendance attendance,Attendance lastMonthAttendance) {
+		return getColacion() * calculateCol(closingDateLastMonth,attendance,lastMonthAttendance);
 	}
 
 	/**
@@ -1048,13 +1109,13 @@ public class ConstructionSiteService {
 	 * DONE
 	 * @return
 	 */
-	private double calculateAsigFamiliar(double afecto,Attendance attendance) {
+	private double calculateAsigFamiliar(DateTime closingDateLastMonth,double afecto,Attendance attendance,Attendance lastMonthAttendance) {
 
 		//obtiene la tabla de impuestos
 		List<FamilyAllowanceConfigurations> famillyTable = (List<FamilyAllowanceConfigurations>) famillyRepo.findAll();
 		//busca en que rango está el calculo del impuesto
 		Double result = 0D;
-		double factor = afecto / calculateDiaTrab(attendance);
+		double factor = afecto / calculateDiaTrab(closingDateLastMonth,attendance,lastMonthAttendance);
 		for( FamilyAllowanceConfigurations tax : famillyTable 	){
 			if( tax.getFrom() >= factor && tax.getTo() <= factor ){
 				result = tax.getAmount();
@@ -1065,15 +1126,17 @@ public class ConstructionSiteService {
 	}
 
 	/**
-	 * TODO 
-	 * (DONE)
+	 * DONE
 	 * calcular los dias trabajados del obrero en el mes
 	 * =CONTAR.SI(D32:AI32;"X")+CONTAR.SI(D32:AI32;"V")-C32
 	 * @return
 	 */
-	private double calculateDiaTrab(Attendance attendance) {
-//		return 7;
-		return countMarks(null,attendance,AttendanceMark.ATTEND,AttendanceMark.VACATION) - calculateDiasNoConsideradosMesAnterior();
+	private double calculateDiaTrab(DateTime closingDateLastMonth,Attendance attendance,Attendance lastMonthAttendance) {
+		int diasTrabMesActual = countMarks(null,attendance,AttendanceMark.ATTEND,AttendanceMark.VACATION);
+		logger.debug("diasTrabMesActual {}",diasTrabMesActual);
+		int sumAsistenciaAjustadaMesAnterior = calculateDiasNoConsideradosMesAnterior(closingDateLastMonth,attendance,lastMonthAttendance);
+		
+		return diasTrabMesActual - sumAsistenciaAjustadaMesAnterior;
 	}
 
 	/**
@@ -1204,7 +1267,7 @@ public class ConstructionSiteService {
 
 	/**
 	 * TODO
-	 * Dato mes % de salud 
+	 * Dato global % de salud 
 	 */
 	private double getPorcentajeSalud(){
 		return 0.07D;

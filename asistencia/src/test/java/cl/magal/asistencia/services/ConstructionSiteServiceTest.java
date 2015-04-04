@@ -448,16 +448,18 @@ public class ConstructionSiteServiceTest {
 		int expectedSalay = 288176;
 		DateTime monthDate = DateTime.parse("2014-07-01");
 		DateTime closingSupleDate = DateTime.parse("2014-07-11");
+		DateTime closingDateLastMonth = DateTime.parse("2014-06-20");
 		//busca una asistencia completa
 		
 		ConstructionSite cs = service.findConstructionSite(constructionId);
 		Map<Integer,Attendance> attendanceJuly = service.getAttendanceMapByConstruction(cs, monthDate);
+		Map<Integer,Attendance> attendanceJune = service.getAttendanceMapByConstruction(cs, monthDate.minusMonths(1));
 		Map<Integer,Overtime> overtimeJuly = service.getOvertimeMapByConstruction(cs, monthDate);
 		//se obtiene su tabla de suple
 		AdvancePaymentConfigurations supleTable = service.getSupleTableByCs(cs);
 		Double suple = service.calculateSuple(supleCode,supleTable,closingSupleDate.toDate(),attendanceJuly.get(100));
 		//se obtiene la fecha de cierre del mes
-		int salary = service.calculateSalary(suple.intValue(),tool,loan,attendanceJuly.get(100),overtimeJuly.get(100));
+		int salary = service.calculateSalary(closingDateLastMonth,suple.intValue(),tool,loan,attendanceJuly.get(100),attendanceJune.get(100),overtimeJuly.get(100));
 		//el suple es conocido
 		assertEquals(expectedSalay,salary,1d);
 	}
