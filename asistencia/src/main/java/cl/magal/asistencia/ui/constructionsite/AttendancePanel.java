@@ -23,6 +23,7 @@ import cl.magal.asistencia.entities.Overtime;
 import cl.magal.asistencia.entities.Salary;
 import cl.magal.asistencia.entities.enums.AttendanceMark;
 import cl.magal.asistencia.entities.enums.Permission;
+import cl.magal.asistencia.services.ConfigurationService;
 import cl.magal.asistencia.services.ConstructionSiteService;
 import cl.magal.asistencia.services.UserService;
 import cl.magal.asistencia.ui.vo.AbsenceVO;
@@ -94,6 +95,8 @@ public class AttendancePanel extends Panel implements View {
 	@Autowired
 	private transient ConstructionSiteService service;
 	@Autowired
+	private transient ConfigurationService configurationService;
+	@Autowired
 	private transient UserService userService;
 
 	/** CONTAINERS **/
@@ -137,7 +140,7 @@ public class AttendancePanel extends Panel implements View {
 	 */
 	private DateTime getClosingDate(){
 		DateTime dt = getAttendanceDate();
-		DateConfigurations dateConfig = service.getDateConfigurationByCsAndMonth(cs,dt);
+		DateConfigurations dateConfig = configurationService.getDateConfigurationByCsAndMonth(cs,dt);
 		//si no se ha seteado la fecha, elije el último día del mes 
 		if(dateConfig.getAssistance() == null ){
 			dateConfig.setAssistance(dt.withDayOfMonth(dt.dayOfMonth().getMaximumValue()).toDate());
@@ -151,7 +154,7 @@ public class AttendancePanel extends Panel implements View {
 	 */
 	private DateTime getPastMonthClosingDate(){
 		DateTime dt = getAttendanceDate();
-		DateConfigurations dateConfig = service.getDateConfigurationByCsAndMonth(cs,dt.minusMonths(1));
+		DateConfigurations dateConfig = configurationService.getDateConfigurationByCsAndMonth(cs,dt.minusMonths(1));
 		
 		if( dateConfig.getAssistance() == null ){
 			

@@ -12,6 +12,7 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.validation.constraints.Digits;
 
 @Entity
 @Table(name = "date_configurations")
@@ -47,6 +48,18 @@ public class DateConfigurations implements Serializable {
 	@Column(name="finish_deal")
 	@Temporal(TemporalType.DATE)
 	Date finishDeal;
+	
+	@Digits(fraction = 0, integer = 6)
+	@Column(name ="benzine")
+	Double benzine;
+	
+	@Digits(fraction = 0, integer = 6)
+	@Column(name ="oil")
+	Double oil;
+	
+	@Digits(fraction = 0, integer = 6)
+	@Column(name ="uf")
+	Double uf;
 
 	public Long getDateConfigurationsId() {
 		return dateConfigurationsId;
@@ -94,6 +107,30 @@ public class DateConfigurations implements Serializable {
 
 	public void setDate(Date date) {
 		this.date = date;
+	}
+	
+	public Double getBenzine() {
+		return benzine;
+	}
+
+	public void setBenzine(Double benzine) {
+		this.benzine = benzine;
+	}
+
+	public Double getOil() {
+		return oil;
+	}
+
+	public void setOil(Double oil) {
+		this.oil = oil;
+	}
+
+	public Double getUf() {
+		return uf;
+	}
+
+	public void setUf(Double uf) {
+		this.uf = uf;
 	}
 
 	@Override

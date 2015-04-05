@@ -402,7 +402,7 @@ public class ConstructionSiteServiceTest {
 		DateTime closingSupleDate = DateTime.parse("2014-07-11");
 		ConstructionSite cs = service.findConstructionSite(constructionId);
 		//busca una asistencia completa
-		Map<Integer,Attendance> attendanceJuly = service.getAttendanceMapByConstruction(cs, monthDate);
+		Map<Integer,Attendance> attendanceJuly = service.getAttendanceMapByConstructionAndMonth(cs, monthDate);
 		//se obtiene su tabla de suple
 		AdvancePaymentConfigurations supleTable = service.getSupleTableByCs(cs);
 		//se obtiene la fecha de cierre del mes
@@ -425,7 +425,7 @@ public class ConstructionSiteServiceTest {
 		//busca una asistencia completa
 		
 		ConstructionSite cs = service.findConstructionSite(constructionId);
-		Map<Integer,Attendance> attendanceJuly = service.getAttendanceMapByConstruction(cs, monthDate);
+		Map<Integer,Attendance> attendanceJuly = service.getAttendanceMapByConstructionAndMonth(cs, monthDate);
 		//se obtiene su tabla de suple
 		AdvancePaymentConfigurations supleTable = service.getSupleTableByCs(cs);
 		//se obtiene la fecha de cierre del mes
@@ -452,9 +452,9 @@ public class ConstructionSiteServiceTest {
 		//busca una asistencia completa
 		
 		ConstructionSite cs = service.findConstructionSite(constructionId);
-		Map<Integer,Attendance> attendanceJuly = service.getAttendanceMapByConstruction(cs, monthDate);
-		Map<Integer,Attendance> attendanceJune = service.getAttendanceMapByConstruction(cs, monthDate.minusMonths(1));
-		Map<Integer,Overtime> overtimeJuly = service.getOvertimeMapByConstruction(cs, monthDate);
+		Map<Integer,Attendance> attendanceJuly = service.getAttendanceMapByConstructionAndMonth(cs, monthDate);
+		Map<Integer,Attendance> attendanceJune = service.getAttendanceMapByConstructionAndMonth(cs, monthDate.minusMonths(1));
+		Map<Integer,Overtime> overtimeJuly = service.getOvertimeMapByConstructionAndMonth(cs, monthDate);
 		//se obtiene su tabla de suple
 		AdvancePaymentConfigurations supleTable = service.getSupleTableByCs(cs);
 		Double suple = service.calculateSuple(supleCode,supleTable,closingSupleDate.toDate(),attendanceJuly.get(100));

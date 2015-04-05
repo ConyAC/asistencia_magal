@@ -1,15 +1,20 @@
 package cl.magal.asistencia.services;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import cl.magal.asistencia.entities.AdvancePaymentConfigurations;
+import cl.magal.asistencia.entities.AdvancePaymentItem;
 import cl.magal.asistencia.entities.AfpAndInsuranceConfigurations;
+import cl.magal.asistencia.entities.ConstructionSite;
 import cl.magal.asistencia.entities.DateConfigurations;
 import cl.magal.asistencia.entities.FamilyAllowanceConfigurations;
 import cl.magal.asistencia.entities.TaxationConfigurations;
@@ -27,7 +32,7 @@ public class ConfigurationService {
 	Logger logger = LoggerFactory.getLogger(ConfigurationService.class);
 
 	@Autowired
-	DateConfigurationsRepository repo;
+	DateConfigurationsRepository dateConfigurationsRepo;
 	@Autowired
 	WageConfigurationsRepository wageconfigRepo;
 	@Autowired
@@ -38,14 +43,7 @@ public class ConfigurationService {
 	TaxationRepository taxationRepo;
 	@Autowired
 	FamilyAllowanceRepository familyAllowanceRepo;
-	
-	public DateConfigurations findDateConfigurationsByDate(Date value) {
-		return repo.findByDate(value);
-	}
 
-	public void save(DateConfigurations bean) {
-		repo.save(bean);
-	}
 
 	public WageConfigurations findWageConfigurations() {
 		List<WageConfigurations> configurations = (List<WageConfigurations>)wageconfigRepo.findAll();
@@ -94,6 +92,48 @@ public class ConfigurationService {
 
 	public List<FamilyAllowanceConfigurations> findFamylyAllowanceConfigurations() {
 		return (List<FamilyAllowanceConfigurations>) familyAllowanceRepo.findAll();
+	}
+	
+	public DateConfigurations findDateConfigurationsByDate(Date value) {
+		return dateConfigurationsRepo.findByDate(value);
+	}
+
+	public DateConfigurations getDateConfigurationByCsAndMonth(ConstructionSite cs,DateTime date) {
+		logger.debug("buscando configuraciones de la fecha {}",date.toDate());
+		DateConfigurations dateConfig = dateConfigurationsRepo.findByDate(date.toDate());
+		//si no se ha seteado la fecha, elije el último día del mes anterior
+		if( dateConfig == null ){
+			dateConfig = new DateConfigurations();
+		}
+		return dateConfig;
+	}
+	
+	public void save(DateConfigurations bean) {
+		dateConfigurationsRepo.save(bean);
+	}
+
+	public Double getPermissionDiscount(ConstructionSite cs) {
+		List<AdvancePaymentConfigurations> config = (List<AdvancePaymentConfigurations>) advancePaymentRepo.findAll();
+		return config.get(0).getPermissionDiscount();
+	}
+
+	public Double getFailDiscount(ConstructionSite cs) {
+		List<AdvancePaymentConfigurations> config = (List<AdvancePaymentConfigurations>) advancePaymentRepo.findAll();
+		return config.get(0).getFailureDiscount();
+	}
+
+	public AdvancePaymentConfigurations getSupleTableByCs(ConstructionSite cs) {
+		List<AdvancePaymentConfigurations> config = (List<AdvancePaymentConfigurations>) advancePaymentRepo.findAll();
+		AdvancePaymentConfigurations table = config.get(0);
+
+		Map<Integer,AdvancePaymentItem> map = new HashMap<Integer,AdvancePaymentItem>();
+		for(AdvancePaymentItem advancePaymentItem : table.getAdvancePaymentTable() ){
+			map.put(advancePaymentItem.getSupleCode(), advancePaymentItem);
+		}
+		table.setMapTable(map);
+
+		return table;
+
 	}
 
 }

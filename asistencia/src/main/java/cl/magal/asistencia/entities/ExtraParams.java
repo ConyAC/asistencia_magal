@@ -51,6 +51,9 @@ public class ExtraParams implements Serializable {
 	
 	@Column(name="overtime_hours")
 	Integer overtimeHours = 0;
+	
+	@Column(name="desc_hours")
+	Integer descHours = 0;
 
 	public Long getId() {
 		return id;
@@ -109,6 +112,14 @@ public class ExtraParams implements Serializable {
 		this.overtimeHours = overtimeHours;
 	}
 	
+	public Integer getDescHours() {
+		return descHours;
+	}
+
+	public void setDescHours(Integer descHours) {
+		this.descHours = descHours;
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
