@@ -49,7 +49,7 @@ public class DateConfigurations implements Serializable {
 	@Temporal(TemporalType.DATE)
 	Date finishDeal;
 	
-	@Digits(fraction = 0, integer = 6)
+	@Digits(fraction = 2, integer = 6)
 	@Column(name ="benzine")
 	Double benzine;
 	
@@ -57,7 +57,7 @@ public class DateConfigurations implements Serializable {
 	@Column(name ="oil")
 	Double oil;
 	
-	@Digits(fraction = 0, integer = 6)
+	@Digits(fraction = 2, integer = 6)
 	@Column(name ="uf")
 	Double uf;
 

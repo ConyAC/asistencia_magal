@@ -225,6 +225,7 @@ public class ConfigView extends VerticalLayout implements View {
 					AdvancePaymentConfigurations bean = ((BeanItem<AdvancePaymentConfigurations>)fg.getItemDataSource()).getBean();
 					confService.save(bean);
 				} catch (Exception e) {
+					logger.error("Error al guardar las propiedades de suple",e);
 					Notification.show("Error al guardar");
 				}
 			}
@@ -367,6 +368,7 @@ public class ConfigView extends VerticalLayout implements View {
 					AfpAndInsuranceConfigurations bean = ((BeanItem<AfpAndInsuranceConfigurations>)fg.getItemDataSource()).getBean();
 					confService.save(bean);
 				} catch (Exception e) {
+					logger.error("Error al guardar las propiedades de afp",e);
 					Notification.show("Error al guardar");
 				}
 			}
@@ -450,6 +452,7 @@ public class ConfigView extends VerticalLayout implements View {
 									WageConfigurations bean = ((BeanItem<WageConfigurations>)fg.getItemDataSource()).getBean();
 									confService.save(bean);
 								} catch (Exception e) {
+									logger.error("Error al guardar las propiedades de sueldo",e);
 									Notification.show("Error al guardar");
 								}
 							}
@@ -601,6 +604,7 @@ public class ConfigView extends VerticalLayout implements View {
 									DateConfigurations bean = ((BeanItem<DateConfigurations>)fg.getItemDataSource()).getBean();
 									confService.save(bean);
 								} catch (Exception e) {
+									logger.error("Error al guardar las propiedades de fecha ",e);
 									Notification.show("Error al guardar");
 								}
 							}
@@ -619,6 +623,21 @@ public class ConfigView extends VerticalLayout implements View {
 						final DateField finishDeal = (DateField) fg.buildAndBind("Fecha Fin Trato", "finishDeal");
 						finishDeal.addValueChangeListener(listener);
 						addComponent(finishDeal);
+						
+						Field oil = fg.buildAndBind("Petroleo", "oil");
+						((TextField)oil).setNullRepresentation("");
+						oil.addValueChangeListener(listener);
+						addComponent(oil);
+						
+						Field benzine = fg.buildAndBind("Bencina", "benzine");
+						((TextField)benzine).setNullRepresentation("");
+						benzine.addValueChangeListener(listener);
+						addComponent(benzine);
+
+						Field uf = fg.buildAndBind("UF Mes", "uf");
+						((TextField)uf).setNullRepresentation("");
+						uf.addValueChangeListener(listener);
+						addComponent(uf);
 						
 						mes.addValueChangeListener(new Property.ValueChangeListener() {
 							
