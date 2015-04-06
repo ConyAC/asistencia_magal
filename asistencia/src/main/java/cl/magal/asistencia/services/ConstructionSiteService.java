@@ -529,7 +529,7 @@ public class ConstructionSiteService {
 	}
 	
 
-	private Map<Integer, ExtraParams> getExtraParamsMapByConstructionAndMonth(ConstructionSite cs, DateTime date) {
+	public Map<Integer, ExtraParams> getExtraParamsMapByConstructionAndMonth(ConstructionSite cs, DateTime date) {
 		//obtiene la lista de trabajadores de la obra
 		List<LaborerConstructionsite> lcs =  labcsRepo.findByConstructionsiteAndIsActive(cs);
 		List<ExtraParams> extraParamsList =  extraParamsRepo.findByConstructionsiteAndMonth(cs,date.toDate());
@@ -682,7 +682,7 @@ public class ConstructionSiteService {
 			List<FamilyAllowanceConfigurations> famillyTable,
 			List<TaxationConfigurations> taxTable) {
 
-		SalaryCalculator sc = new SalaryCalculator(closingDateLastMonth, loan, loan, loan, lastMonthAttendance, lastMonthAttendance, overtime,extraParams,wageConfiguration, dateConfigurations, famillyTable, taxTable);
+		SalaryCalculator sc = new SalaryCalculator(closingDateLastMonth, suple, tool, loan, attendance, lastMonthAttendance, overtime,extraParams,wageConfiguration, dateConfigurations, famillyTable, taxTable);
 		return (int) sc.calculateSalary();
 		
 		

@@ -42,33 +42,37 @@ public class SalaryCalculator {
 	 */
 	Double afecto;
 	Double getAfecto(){
-		if(afecto == null )
+		if(afecto == null ) {
 			afecto = calculateAfecto(closingDateLastMonth,getDiasHabiles(),attendance,lastMonthAttendance,overtime,getJornalBaseMes());
-		logger.debug("afecto {}",afecto);
+			logger.debug("afecto {}",afecto);
+		}
 		return afecto;
 	}
 		
 	Double sobreAfecto;
 	Double getSobreAfecto(){
-		if(sobreAfecto == null )
+		if(sobreAfecto == null ){
 			sobreAfecto = calculateSobreAfecto(closingDateLastMonth,getAfecto(),getDiasHabiles(),attendance,lastMonthAttendance,overtime,getJornalBaseMes());
-		logger.debug("sobreAfecto {}",sobreAfecto);
+			logger.debug("sobreAfecto {}",sobreAfecto);
+		}
 		return sobreAfecto;
 	}
 	
 	Double tNoAfecto;
 	Double getTNoAfecto(){
-		if(tNoAfecto == null )
+		if(tNoAfecto == null ){
 			tNoAfecto = calculateTNoAfecto(closingDateLastMonth,getAfecto(),getDiasHabiles(),attendance,lastMonthAttendance);
-		logger.debug("tNoAfecto {}",tNoAfecto);
+			logger.debug("tNoAfecto {}",tNoAfecto);
+		}
 		return tNoAfecto;
 	}
 
 	Double tDesc;
 	Double getTDesc(){
-		if ( tDesc == null ) 
+		if ( tDesc == null ) {
 			tDesc= calculateTDesc(getAfecto(),getSobreAfecto(),suple,tool,loan);
-		logger.debug("tDesc {}",tDesc);
+			logger.debug("tDesc {}",tDesc);
+		}
 		return tDesc;
 	}
 	
@@ -187,8 +191,9 @@ public class SalaryCalculator {
 	 * @return
 	 */
 	private int calculateDiasHabilesMes(Date date) {
-		DateTime firstDayOfMonth = new DateTime(date).withDayOfMonth(1);
-		DateTime lastDayOfMonth = new DateTime(date).withDayOfMonth(new DateTime(date).dayOfMonth().getMaximumValue());
+		DateTime dt = new DateTime(date);
+		DateTime firstDayOfMonth = dt.withDayOfMonth(1);
+		DateTime lastDayOfMonth = dt.withDayOfMonth(dt.dayOfMonth().getMaximumValue());
 		int days = 0;
 		//cuenta los dias habiles
 		while(!firstDayOfMonth.equals(lastDayOfMonth.plusDays(1))){
@@ -414,7 +419,7 @@ public class SalaryCalculator {
 		double asigFam = calculateAsigFamiliar(closingDateLastMonth,afecto,attendance,lastMonthAttendance); 
 		logger.debug("asigFam {}",asigFam);
 		double colacion = calculateColacion(closingDateLastMonth,attendance,lastMonthAttendance);
-		logger.debug("colacion {}",asigFam);
+		logger.debug("colacion {}",colacion);
 		double mov = calculateMov(closingDateLastMonth,attendance,lastMonthAttendance); 
 		logger.debug("mov {}",mov);
 		double mov2 = calculateMov2(closingDateLastMonth, attendance, lastMonthAttendance); 
@@ -477,7 +482,9 @@ public class SalaryCalculator {
 				break;
 			}
 		}
-		return result * getCargas();
+		int cargas = getCargas();
+		logger.debug("result {} , carga {} ",result , cargas);
+		return result * cargas;
 	}
 
 	/**
@@ -498,8 +505,8 @@ public class SalaryCalculator {
 	 * TODO obtiene las cargas del trabajador
 	 * @return
 	 */
-	private double getCargas() {
-		return attendance.getLaborerConstructionSite().getLaborer().getWedge();
+	private int getCargas() {
+		return attendance.getLaborerConstructionSite().getLaborer().getDependents();
 	}
 
 	/**
@@ -507,7 +514,12 @@ public class SalaryCalculator {
 	 * @return
 	 */
 	private double calculateTDesc(double afecto,double sobreAfecto,double suple , double tool , double loan) {
-		return calculateDescImposiciones(afecto) + calculateImpuesto(afecto,sobreAfecto) + suple - tool - loan;
+		double descImposiciones = calculateDescImposiciones(afecto);
+		logger.debug("descImposiciones {}",descImposiciones);
+		double impuesto = calculateImpuesto(afecto,sobreAfecto);
+		logger.debug("impuesto {}",impuesto);
+		logger.debug("suple {}, tool {}, loan {}",suple,tool,loan);
+		return descImposiciones + impuesto + suple - tool - loan;
 	}
 
 	/**
