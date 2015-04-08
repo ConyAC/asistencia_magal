@@ -823,8 +823,11 @@ public class AttendancePanel extends Panel implements View {
 											toogleButtonState(btnConstructionSiteConfirm, confirmations.isConstructionSiteCheck());
 											btnCentralConfirm.setEnabled(confirmations.isConstructionSiteCheck());
 											//si tiene confirmación de obra y no tiene permisos de confirmar central o si tiene ambos checheados, bloqueda la interfaz
-											enableAttendance(!((confirmations.isConstructionSiteCheck() && !SecurityHelper.hasPermission(Permission.CONFIRMAR_ASISTENCIA_CENTRAL)) || 
-														(confirmations.isConstructionSiteCheck() && confirmations.isCentralCheck())));
+											enableAttendance(!(
+														(confirmations.isConstructionSiteCheck() && !SecurityHelper.hasPermission(Permission.CONFIRMAR_ASISTENCIA_CENTRAL)) || 
+														(confirmations.isConstructionSiteCheck() && confirmations.isCentralCheck())||
+														(!confirmations.isConstructionSiteCheck() && !SecurityHelper.hasPermission(Permission.CONFIRMAR_ASISTENCIA_OBRA))
+														));
 											
 											if( !confirmations.isConstructionSiteCheck() && !SecurityHelper.hasPermission(Permission.CONFIRMAR_ASISTENCIA_OBRA)){
 												btnConstructionSiteConfirm.setVisible(false);
@@ -848,12 +851,23 @@ public class AttendancePanel extends Panel implements View {
 
 							@Override
 							public void buttonClick(ClickEvent event) {
-								Confirmations confirmations = getConfirmations();
-								confirmations.setCentralCheck(!confirmations.isCentralCheck());
-								service.save(confirmations);
-								toogleButtonState(btnCentralConfirm, confirmations.isCentralCheck());
-								//actualiza el estado del boton exportar
-								btnExportSoftland.setEnabled(confirmations.isCentralCheck());
+								final Confirmations confirmations = getConfirmations();
+								ConfirmDialog.show(UI.getCurrent(), "Confirmar Acción:", 
+										confirmations.isCentralCheck() ? 
+												"¿Está seguro de cancelar la confirmación de asistencia? Esto desbloqueará la edición en la central de la asistencia del mes.":
+												"¿Está seguro de confirmar la asistencia? Esto bloqueará la edición en la central de la asistencia del mes.",
+										"Continuar", "Cancelar", new ConfirmDialog.Listener() {
+									public void onClose(ConfirmDialog dialog) {
+										if (dialog.isConfirmed()) {
+											confirmations.setCentralCheck(!confirmations.isCentralCheck());
+											service.save(confirmations);
+											toogleButtonState(btnCentralConfirm, confirmations.isCentralCheck());
+											//actualiza el estado del boton exportar
+											btnExportSoftland.setEnabled(confirmations.isCentralCheck());
+											configureInterface();
+										}
+									}
+								});
 							}
 						});
 
@@ -902,17 +916,21 @@ public class AttendancePanel extends Panel implements View {
 		if(confirmations.isConstructionSiteCheck()){
 			//se asegura que lo vea
 			btnConstructionSiteConfirm.setVisible(true);
-			btnConstructionSiteConfirm.setEnabled(SecurityHelper.hasPermission(Permission.CONFIRMAR_ASISTENCIA_CENTRAL));
+			btnConstructionSiteConfirm.setEnabled( !confirmations.isCentralCheck() && SecurityHelper.hasPermission(Permission.CONFIRMAR_ASISTENCIA_CENTRAL));
 		}else{
 			btnConstructionSiteConfirm.setEnabled(true);
 		}
-		//si tiene confirmación de obra y no tiene permisos de confirmar central o si tiene ambos checheados, bloqueda la interfaz
-		enableAttendance(!((confirmations.isConstructionSiteCheck() && !SecurityHelper.hasPermission(Permission.CONFIRMAR_ASISTENCIA_CENTRAL)) || 
-					(confirmations.isConstructionSiteCheck() && confirmations.isCentralCheck())));
+		//deshabilita si tiene confirmación de obra y no tiene permisos de confirmar central, si tiene ambos checheados, bloqueda la interfaz o si no tiene confirmacion de obra y no tiene permiso de obra 
+		enableAttendance(!(
+							(confirmations.isConstructionSiteCheck() && !SecurityHelper.hasPermission(Permission.CONFIRMAR_ASISTENCIA_CENTRAL)) || 
+							(confirmations.isConstructionSiteCheck() && confirmations.isCentralCheck()) ||
+							(!confirmations.isConstructionSiteCheck() && !SecurityHelper.hasPermission(Permission.CONFIRMAR_ASISTENCIA_OBRA))
+						));
 
 		btnCentralConfirm.setVisible(SecurityHelper.hasPermission(Permission.CONFIRMAR_ASISTENCIA_CENTRAL));
 		toogleButtonState(btnCentralConfirm,confirmations.isCentralCheck());
-		btnCentralConfirm.setEnabled(confirmations.isConstructionSiteCheck());
+		btnCentralConfirm.setEnabled( (confirmations.isConstructionSiteCheck() && !confirmations.isCentralCheck()) ||
+				                      (confirmations.isConstructionSiteCheck() && confirmations.isCentralCheck() && SecurityHelper.hasPermission(Permission.DESBLOQUEDAR_ASISTENCIA) ));
 	}
 
 	private void toogleButtonState(Button btn, boolean confirmations ){

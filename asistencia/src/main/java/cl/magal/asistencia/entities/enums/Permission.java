@@ -30,8 +30,8 @@ public enum Permission {
 	AGREGAR_ETAPAS_OBRA(27,"Agregar Etapas a Obra"),
 	CONFIRMAR_ASISTENCIA_OBRA(27,"Confirmar Asistencia en Obra"),
 	CONFIRMAR_ASISTENCIA_CENTRAL(28,"Confirmar Asistencia desde Central"),
-	GENERAR_SUELDOS_SOFTLAND(29,"Generar Sueldos en Formato Softland");
-
+	GENERAR_SUELDOS_SOFTLAND(29,"Generar Sueldos en Formato Softland"), 
+	DESBLOQUEDAR_ASISTENCIA(30,"Desbloquear asistencia/sueldo mes");
 	
 	int i;
 	String description;
