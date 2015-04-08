@@ -223,7 +223,7 @@ WHERE NOT EXISTS (select 1 FROM CONTRACT WHERE LABORER_CONSTRUCTIONSITEID = LC.L
 
 -- configuraciones
 -- sueldo
-MERGE INTO wage_configurations values (1,200000,50000,30000);
+MERGE INTO wage_configurations(wage_configurationsId,collation,minimum_wage,mobilization) values (1,31,210000,220);
 
 -- anticipos
 MERGE INTO advance_payment_configurations values (1,15000,10000);
@@ -276,14 +276,10 @@ KEY(taxation_configurationsId) values(8,6012750.01,100000000000,11.54,1229406.95
 
 
 -- asignación familiar
-MERGE into family_allowance_configurations(family_allowance_configurationsId,fromr,to,amount) values(1,0,7744,0);
-MERGE into family_allowance_configurations(family_allowance_configurationsId,fromr,to,amount) values(2,8100.64,7744,202516);
-MERGE into family_allowance_configurations(family_allowance_configurationsId,fromr,to,amount) values(3,8100.68,5221,202517);
-MERGE into family_allowance_configurations(family_allowance_configurationsId,fromr,to,amount) values(4,12696.28,5221,317407);
-MERGE into family_allowance_configurations(family_allowance_configurationsId,fromr,to,amount) values(5,12696.32,4650,317408);
-MERGE into family_allowance_configurations(family_allowance_configurationsId,fromr,to,amount) values(6,19801.92,4650,495048);
-MERGE into family_allowance_configurations(family_allowance_configurationsId,fromr,to,amount) values(7,19801.96,0,495049);
-MERGE into family_allowance_configurations(family_allowance_configurationsId,fromr,to,amount) values(8,1000000.64,0,25000000);
+MERGE INTO FAMILY_ALLOWANCE_CONFIGURATIONS (FAMILY_ALLOWANCE_CONFIGURATIONSID,AMOUNT,FROMR,TO) VALUES (1,7744.0,0.0,8100.64);
+MERGE INTO FAMILY_ALLOWANCE_CONFIGURATIONS (FAMILY_ALLOWANCE_CONFIGURATIONSID,AMOUNT,FROMR,TO) VALUES (2,5221.0,8100.68,12696.28);
+MERGE INTO FAMILY_ALLOWANCE_CONFIGURATIONS (FAMILY_ALLOWANCE_CONFIGURATIONSID,AMOUNT,FROMR,TO) VALUES (3,4650.0,12696.32,19801.92);
+MERGE INTO FAMILY_ALLOWANCE_CONFIGURATIONS (FAMILY_ALLOWANCE_CONFIGURATIONSID,AMOUNT,FROMR,TO) VALUES (4,0.0,19801.96,1000000.64);
 
 
 

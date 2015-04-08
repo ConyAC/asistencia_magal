@@ -136,4 +136,8 @@ public class ConfigurationService {
 
 	}
 
+	public void delete(FamilyAllowanceConfigurations family) {
+		familyAllowanceRepo.delete(family);
+	}
+
 }

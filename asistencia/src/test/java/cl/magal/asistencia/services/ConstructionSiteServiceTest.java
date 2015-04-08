@@ -481,6 +481,44 @@ public class ConstructionSiteServiceTest {
 		assertEquals(expectedSalay,salary,1d);
 	}
 	
+	@Test
+	public void testCalculateSalary3(){
+		//se usa una construcción de la cual se save el resultado
+		Long constructionId = 1L;
+		//se usa un codigo de suple conocido
+		Integer supleCode = 1;
+		Integer lcCode  = 1;
+		
+		int tool = 0, loan = 0; 
+		//se usa una asistencia conocida
+//		int expectedSalay = 45336;
+		int expectedSalay = 284404;
+		DateTime monthDate = DateTime.parse("2015-04-08");
+		DateTime closingSupleDate = DateTime.parse("2015-04-22");
+		DateTime closingDateLastMonth = DateTime.parse("2015-03-23");
+		
+		List<TaxationConfigurations> taxTable = configurationService.findTaxationConfigurations();
+		List<FamilyAllowanceConfigurations> famillyTable = configurationService.findFamylyAllowanceConfigurations();
+		WageConfigurations wageConfiguration = configurationService.findWageConfigurations();
+		
+		//busca una asistencia completa
+		ConstructionSite cs = csService.findConstructionSite(constructionId);
+		
+		DateConfigurations dateConfiguration = configurationService.getDateConfigurationByCsAndMonth(cs,monthDate);
+		Map<Integer,Attendance> attendanceJuly = csService.getAttendanceMapByConstructionAndMonth(cs, monthDate);
+		Map<Integer,Attendance> attendanceJune = csService.getAttendanceMapByConstructionAndMonth(cs, monthDate.minusMonths(1));
+		Map<Integer,Overtime> overtimeJuly = csService.getOvertimeMapByConstructionAndMonth(cs, monthDate);
+		//busca la asistencia del mes anterior 
+		Map<Integer,ExtraParams> extraParams = csService.getExtraParamsMapByConstructionAndMonth(cs,monthDate);
+		//se obtiene su tabla de suple
+		AdvancePaymentConfigurations supleTable = configurationService.getSupleTableByCs(cs);
+		Double suple = csService.calculateSuple(supleCode,supleTable,closingSupleDate.toDate(),attendanceJuly.get(lcCode));
+		//se obtiene la fecha de cierre del mes
+		int salary = csService.calculateSalary(closingDateLastMonth,suple.intValue(),tool,loan,attendanceJuly.get(lcCode)
+				,attendanceJune.get(lcCode),overtimeJuly.get(lcCode), extraParams.get(lcCode), wageConfiguration, dateConfiguration, famillyTable, taxTable);
+		//el suple es conocido
+		assertEquals(expectedSalay,salary,1d);
+	}
 
 	private void fakeLogin(User user) {
 		SecurityHelper.setUser(user);

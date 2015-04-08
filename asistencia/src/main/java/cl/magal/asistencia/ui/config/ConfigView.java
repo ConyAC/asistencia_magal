@@ -13,6 +13,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
+import org.vaadin.dialogs.ConfirmDialog;
 
 import ru.xpoft.vaadin.VaadinView;
 import cl.magal.asistencia.entities.AdvancePaymentConfigurations;
@@ -134,6 +135,42 @@ public class ConfigView extends VerticalLayout implements View {
 					}
 				};
 				table.setEditable(true);
+
+				table.addGeneratedColumn("delete", new Table.ColumnGenerator() {
+
+					@Override
+					public Object generateCell(Table source, final Object itemId, Object columnId) {
+
+						return new Button(null,new Button.ClickListener() {
+
+							@Override
+							public void buttonClick(ClickEvent event) {
+
+								ConfirmDialog.show(UI.getCurrent(), "Confirmar Acción:", "¿Está seguro de eliminar el item de asignación familiar?",
+										"Continuar", "Cancelar", new ConfirmDialog.Listener() {
+									public void onClose(ConfirmDialog dialog) {
+										if (dialog.isConfirmed()) {
+
+											try{
+												FamilyAllowanceConfigurations family = ((BeanItem<FamilyAllowanceConfigurations>)container.getItem(itemId)).getBean();
+												confService.delete(family);
+												container.removeItem(itemId);
+											}catch(Exception e){
+												logger.error("Error al eliminar la asignación",e);
+												String mensaje = "Error al eliminar la asignación";
+												Notification.show(mensaje,Type.ERROR_MESSAGE);
+											}
+										}
+									}
+								});
+							}
+						}){
+							{
+								setIcon(FontAwesome.TRASH_O);
+							}
+						};
+					}
+				});
 				
 				OnValueChangeListener listener = new OnValueChangeListener(){
 
@@ -148,8 +185,8 @@ public class ConfigView extends VerticalLayout implements View {
 				factory.addListener(listener);
 				table.setTableFieldFactory(factory);
 				table.setContainerDataSource(container);
-				table.setVisibleColumns("from","to","amount");
-				table.setColumnHeaders("Desde","Hasta","Monto");
+				table.setVisibleColumns("from","to","amount","delete");
+				table.setColumnHeaders("Desde","Hasta","Monto","Quitar");
 				addComponent(table);
 
 				if(!SecurityHelper.hasPermission(Permission.DEFINIR_VARIABLE_GLOBAL)){
