@@ -112,7 +112,8 @@ public class AttendancePanel extends Panel implements View {
 	Grid attendanceGrid, overtimeGrid,extraGrid;
 	Window progressDialog;
 	InlineDateField attendanceDate;
-	Button btnExportSoftland,btnConstructionSiteConfirm,btnCentralConfirm;
+	Button btnExportSoftland,btnConstructionSiteConfirm,btnCentralConfirm,btnGenerateSalary;
+	Table confirmTable;
 
 	/** ATRIBUTOS **/
 	Confirmations confirmations;
@@ -164,8 +165,6 @@ public class AttendancePanel extends Panel implements View {
 	}
 
 	public AttendancePanel(){
-
-		
 
 	}
 
@@ -253,6 +252,14 @@ public class AttendancePanel extends Panel implements View {
 		tab.addTab(vl,"Cálculos");
 
 		return tab;
+	}
+	
+	private void enableAttendance(boolean state) {
+		attendanceGrid.setEnabled(state);
+		overtimeGrid.setEnabled(state);
+		extraGrid.setEnabled(state);
+		confirmTable.setEnabled(state);
+		btnGenerateSalary.setEnabled(state);
 	}
 
 	private Grid drawExtraParamsGrid() {
@@ -382,6 +389,10 @@ public class AttendancePanel extends Panel implements View {
 				
 				@Override
 				public String getStyle(CellReference cellReference) {
+					String post = "";
+					if( (cellReference.getValue() instanceof AttendanceMark && !AttendanceMark.ATTEND.equals(cellReference.getValue())) ||
+						(cellReference.getValue() instanceof Integer && 0 != (Integer)cellReference.getValue()))
+							post = " red-color";
 					String pid = (String) cellReference.getPropertyId();
 					if( pid.startsWith("dmp") || pid.startsWith("dma") ){
 						//calcula el numero del mes
@@ -392,13 +403,13 @@ public class AttendancePanel extends Panel implements View {
 						if(monthDay <= dt2.dayOfMonth().getMaximumValue()){
 							//si es el dia actual
 							if(dt2.withDayOfMonth(monthDay).toString("dd/MM/yyyy").equals(DateTime.now().toString("dd/MM/yyyy")))
-								return "grid-today";
+								return "grid-today"+post;
 							//	si es mes pasado
 							else if(pid.startsWith("dmp")){
-								return "grid-pastmonth";
+								return "grid-pastmonth"+post;
 							}else{
 								//si es este mes
-								return "grid-actualmonth";
+								return "grid-actualmonth"+post;
 							}
 						}
 					}
@@ -414,8 +425,9 @@ public class AttendancePanel extends Panel implements View {
 			{
 				setSpacing(true);
 				
-				Button btn = new Button("Generar Sueldo y Anticipo",FontAwesome.GEARS);
-				btn.addClickListener(new Button.ClickListener() {
+				btnGenerateSalary = new Button("Generar Sueldo y Anticipo",FontAwesome.GEARS);
+				btnGenerateSalary.setDisableOnClick(true);
+				btnGenerateSalary.addClickListener(new Button.ClickListener() {
 					
 					@Override
 					public void buttonClick(ClickEvent event) {
@@ -444,11 +456,11 @@ public class AttendancePanel extends Panel implements View {
 								}
 							}
 						});
-
+						btnGenerateSalary.setEnabled(true);
 					}
 				});
-				addComponent(btn);
-				setComponentAlignment(btn, Alignment.TOP_RIGHT);
+				addComponent(btnGenerateSalary);
+				setComponentAlignment(btnGenerateSalary, Alignment.TOP_RIGHT);
 				Table salaryTable = new Table();
 				salaryTable.setWidth("100%");
 				salaryTable.setContainerDataSource(salaryContainer);
@@ -468,7 +480,7 @@ public class AttendancePanel extends Panel implements View {
 	private Table drawAbsenceConfirmTable() {
 		
 		absenceContainer.addNestedContainerProperty("laborerConstructionsite.activeContract.jobCode");
-		Table confirmTable = new Table();
+		confirmTable = new Table();
 		confirmTable.setContainerDataSource(absenceContainer);
 		confirmTable.setSizeFull();
 		confirmTable.setEditable(true);
@@ -578,6 +590,8 @@ public class AttendancePanel extends Panel implements View {
 			overtimeGrid.removeColumn("overtimeAsList");
 		if(overtimeGrid.getColumn("overtimeId") != null )
 			overtimeGrid.removeColumn("overtimeId");
+		if(overtimeGrid.getColumn("lastMonthOvertimeAsList") != null )
+			overtimeGrid.removeColumn("lastMonthOvertimeAsList");
 
 		overtimeGrid.setColumnOrder("laborerConstructionSite.activeContract.jobCode",
 				"dmp1","dmp2","dmp3","dmp4","dmp5","dmp6","dmp7","dmp8","dmp9","dmp10","dmp11","dmp12","dmp13","dmp14","dmp15","dmp16"
@@ -641,6 +655,8 @@ public class AttendancePanel extends Panel implements View {
 			attendanceGrid.removeColumn("date");
 		if(attendanceGrid.getColumn("marksAsList") != null )
 			attendanceGrid.removeColumn("marksAsList");
+		if(attendanceGrid.getColumn("lastMarksAsList") != null )
+			attendanceGrid.removeColumn("lastMarksAsList");
 
 		attendanceGrid.setColumnOrder("laborerConstructionSite.activeContract.jobCode","jornalPromedio"
 				,"dmp1","dmp2","dmp3","dmp4","dmp5","dmp6","dmp7","dmp8","dmp9","dmp10","dmp11","dmp12","dmp13","dmp14","dmp15","dmp16"
@@ -785,21 +801,47 @@ public class AttendancePanel extends Panel implements View {
 
 						setSpacing(true);
 
-						btnConstructionSiteConfirm = new Button("Confirmación Obra",FontAwesome.CHECK);					
+						btnConstructionSiteConfirm = new Button("Confirmación Obra",FontAwesome.CHECK);
+						btnConstructionSiteConfirm.setDisableOnClick(true);
 						addComponent(btnConstructionSiteConfirm);
 						setComponentAlignment(btnConstructionSiteConfirm, Alignment.TOP_RIGHT);
 						btnConstructionSiteConfirm.addClickListener(new Button.ClickListener() {
 
 							@Override
 							public void buttonClick(ClickEvent event) {
-								Confirmations confirmations = getConfirmations();
-								confirmations.setConstructionSiteCheck(!confirmations.isConstructionSiteCheck());
-								service.save(confirmations);
-								toogleButtonState(btnConstructionSiteConfirm, confirmations.isConstructionSiteCheck());
+								//mensaje depende del estado
+								final Confirmations confirmations = getConfirmations();
+								ConfirmDialog.show(UI.getCurrent(), "Confirmar Acción:", 
+										confirmations.isConstructionSiteCheck() ? 
+												"¿Está seguro de cancelar la confirmación de asistencia? Esto desbloqueará la edición en obra de la asistencia del mes.":
+												"¿Está seguro de confirmar la asistencia? Esto bloqueará la edición en obra de la asistencia del mes.",
+										"Continuar", "Cancelar", new ConfirmDialog.Listener() {
+									public void onClose(ConfirmDialog dialog) {
+										if (dialog.isConfirmed()) {
+											confirmations.setConstructionSiteCheck(!confirmations.isConstructionSiteCheck());
+											service.save(confirmations);
+											toogleButtonState(btnConstructionSiteConfirm, confirmations.isConstructionSiteCheck());
+											btnCentralConfirm.setEnabled(confirmations.isConstructionSiteCheck());
+											//si tiene confirmación de obra y no tiene permisos de confirmar central o si tiene ambos checheados, bloqueda la interfaz
+											enableAttendance(!((confirmations.isConstructionSiteCheck() && !SecurityHelper.hasPermission(Permission.CONFIRMAR_ASISTENCIA_CENTRAL)) || 
+														(confirmations.isConstructionSiteCheck() && confirmations.isCentralCheck())));
+											
+											if( !confirmations.isConstructionSiteCheck() && !SecurityHelper.hasPermission(Permission.CONFIRMAR_ASISTENCIA_OBRA)){
+												btnConstructionSiteConfirm.setVisible(false);
+											}else if( !confirmations.isConstructionSiteCheck() && SecurityHelper.hasPermission(Permission.CONFIRMAR_ASISTENCIA_CENTRAL)){
+												btnConstructionSiteConfirm.setVisible(true);
+												btnConstructionSiteConfirm.setEnabled(true);
+											}
+										}
+									}
+
+								});
+								
 							}
 						});
 
 						btnCentralConfirm = new Button("Confirmación Central",FontAwesome.CHECK);
+						btnCentralConfirm.setDisableOnClick(true);
 						addComponent(btnCentralConfirm);
 						setComponentAlignment(btnCentralConfirm, Alignment.TOP_RIGHT);
 						btnCentralConfirm.addClickListener(new Button.ClickListener() {
@@ -816,6 +858,7 @@ public class AttendancePanel extends Panel implements View {
 						});
 
 						btnExportSoftland = new Button("Exportar a Softland",FontAwesome.FILE_EXCEL_O);
+						btnExportSoftland.setDisableOnClick(true);
 						addComponent(btnExportSoftland);
 						setComponentAlignment(btnExportSoftland, Alignment.TOP_RIGHT);
 
@@ -855,9 +898,21 @@ public class AttendancePanel extends Panel implements View {
 
 		btnConstructionSiteConfirm.setVisible(SecurityHelper.hasPermission(Permission.CONFIRMAR_ASISTENCIA_OBRA));
 		toogleButtonState(btnConstructionSiteConfirm,confirmations.isConstructionSiteCheck());
+		//si está confirmado, lo habilita solo si tiene permiso para confirmar asistencia central
+		if(confirmations.isConstructionSiteCheck()){
+			//se asegura que lo vea
+			btnConstructionSiteConfirm.setVisible(true);
+			btnConstructionSiteConfirm.setEnabled(SecurityHelper.hasPermission(Permission.CONFIRMAR_ASISTENCIA_CENTRAL));
+		}else{
+			btnConstructionSiteConfirm.setEnabled(true);
+		}
+		//si tiene confirmación de obra y no tiene permisos de confirmar central o si tiene ambos checheados, bloqueda la interfaz
+		enableAttendance(!((confirmations.isConstructionSiteCheck() && !SecurityHelper.hasPermission(Permission.CONFIRMAR_ASISTENCIA_CENTRAL)) || 
+					(confirmations.isConstructionSiteCheck() && confirmations.isCentralCheck())));
 
 		btnCentralConfirm.setVisible(SecurityHelper.hasPermission(Permission.CONFIRMAR_ASISTENCIA_CENTRAL));
 		toogleButtonState(btnCentralConfirm,confirmations.isCentralCheck());
+		btnCentralConfirm.setEnabled(confirmations.isConstructionSiteCheck());
 	}
 
 	private void toogleButtonState(Button btn, boolean confirmations ){
@@ -865,14 +920,14 @@ public class AttendancePanel extends Panel implements View {
 
 			btn.removeStyleName(Constants.STYLE_CLASS_GREEN_COLOR);
 			btn.addStyleName(Constants.STYLE_CLASS_RED_COLOR);
-			btn.setCaption("Cancelar Confirmación Obra");
+			btn.setCaption(btn.getCaption().indexOf("Cancelar ") >= 0 ? btn.getCaption() : "Cancelar " + btn.getCaption());
 			btn.setIcon(FontAwesome.TIMES);
 
 		}else{
 
 			btn.removeStyleName(Constants.STYLE_CLASS_RED_COLOR);
 			btn.addStyleName(Constants.STYLE_CLASS_GREEN_COLOR);
-			btn.setCaption("Confirmación Obra");
+			btn.setCaption(btn.getCaption().indexOf("Cancelar ") >= 0 ? btn.getCaption().replace("Cancelar ", ""): btn.getCaption() );
 			btn.setIcon(FontAwesome.CHECK);
 		}
 	}
@@ -889,6 +944,8 @@ public class AttendancePanel extends Panel implements View {
 		reloadMonthGridData(dt);
 
 		reloadMonthAttendanceData(dt);
+		
+		configureInterface();
 
 		// Enable polling and set frequency to 1 seconds
 		//		UI.getCurrent().setPollInterval(1000);
