@@ -809,3 +809,25 @@ CREATE TABLE IF NOT EXISTS salary (
   KEY fk_salary_laborer_constructionsiteId (laborer_constructionsiteId),
   CONSTRAINT fk_salary_laborer_constructionsiteId FOREIGN KEY (laborer_constructionsiteId) REFERENCES laborer_constructionsite (laborer_constructionsiteId)
 );
+
+CREATE TABLE IF NOT EXISTS extra_params
+(
+   extra_paramsId bigint PRIMARY KEY NOT NULL,
+   mov2_bond integer,
+   date date NOT NULL,
+   desc_hours integer,
+   km integer,
+   overtime_hours integer,
+   special_bond integer,
+   laborer_constructionsiteId bigint NOT NULL
+)
+;
+ALTER TABLE extra_params
+ADD CONSTRAINT FK_EXTRA_PARAMS_LABORER_CONSTRUCTIONSITEID
+FOREIGN KEY (laborer_constructionsiteId)
+REFERENCES laborer_constructionsite(laborer_constructionsiteId)
+;
+CREATE INDEX FK_EXTRA_PARAMS_LABORER_CONSTRUCTIONSITEID_INDEX_7 ON extra_params(laborer_constructionsiteId)
+;
+CREATE UNIQUE INDEX PRIMARY_KEY_7 ON extra_params(extra_paramsId)
+;
