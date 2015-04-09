@@ -30,7 +30,7 @@ public class AfpAndInsuranceConfigurations implements Serializable {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
     @Column(name = "afp_and_insuranceId")
-	Long afpAndInsuranceId;
+	Long id;
 	
 	@Digits(fraction=2,integer=3,message="Solo es posible definir más de 2 decimales")
 	@Column(name="sis")
@@ -43,12 +43,12 @@ public class AfpAndInsuranceConfigurations implements Serializable {
 	  )
 	List<AfpItem> afpTable = new LinkedList<AfpItem>();
 
-	public Long getAfpAndInsuranceId() {
-		return afpAndInsuranceId;
+	public Long getId() {
+		return id;
 	}
 
-	public void setAfpAndInsuranceId(Long afpAndInsuranceId) {
-		this.afpAndInsuranceId = afpAndInsuranceId;
+	public void setId(Long afpAndInsuranceId) {
+		this.id = afpAndInsuranceId;
 	}
 
 	public Double getSis() {
@@ -85,8 +85,8 @@ public class AfpAndInsuranceConfigurations implements Serializable {
 	@Override
 	public String toString() {
 		return "AfpAndInsurance ["
-				+ (afpAndInsuranceId != null ? "afpAndInsuranceId="
-						+ afpAndInsuranceId + ", " : "")
+				+ (id != null ? "afpAndInsuranceId="
+						+ id + ", " : "")
 				+ (sis != null ? "sis=" + sis + ", " : "")
 				+ (afpTable != null ? "afpTable=" + afpTable : "") + "]";
 	}

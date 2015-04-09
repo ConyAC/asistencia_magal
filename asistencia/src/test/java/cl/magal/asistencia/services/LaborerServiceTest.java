@@ -261,7 +261,7 @@ public class LaborerServiceTest {
 			Laborer laborer = (Laborer) iterator.next();
 			if(!rdv.isValid(laborer.getRut(), null)){
 				String split = laborer.getRut().split("-")[0];
-				logger.debug("id {} , {} {}",laborer.getLaborerId(),laborer.getRut(),rdv.Digito(Integer.valueOf(split)));
+				logger.debug("id {} , {} {}",laborer.getId(),laborer.getRut(),rdv.Digito(Integer.valueOf(split)));
 			}
 		}
 	}
@@ -276,7 +276,7 @@ public class LaborerServiceTest {
 		
 		assertNotNull("La lista de laborer no puede ser nula",laborers);
 		assertTrue("La lista de laborer no puede ser vacia",!laborers.isEmpty());
-		assertEquals("el laborer no es el esperado",laborerIdToFind,laborers.get(0).getLaborerId());
+		assertEquals("el laborer no es el esperado",laborerIdToFind,laborers.get(0).getId());
 	}
 	
 	/**
@@ -374,7 +374,7 @@ public class LaborerServiceTest {
 		
 		lc.addAccident(accident);
 		service.save(lc);
-		logger.debug("accidente 1 {} ",accident.getAccidentId());
+		logger.debug("accidente 1 {} ",accident.getId());
 		
 		LaborerConstructionsite dbu = getLaborerConstructionsiteExisting();
 		
@@ -530,7 +530,7 @@ public class LaborerServiceTest {
 		Laborer saved = service.saveLaborer(l);
 		LaborerHelper.verify(saved);
 		
-		Laborer dbu = service.findLaborer(l.getLaborerId());
+		Laborer dbu = service.findLaborer(l.getId());
 		
 		LaborerHelper.verify(dbu);		
 		LaborerHelper.verify(l,dbu);		
@@ -547,7 +547,7 @@ public class LaborerServiceTest {
 
 		service.saveLaborer(l);	
 		
-		Laborer dbu = service.findLaborer(l.getLaborerId());
+		Laborer dbu = service.findLaborer(l.getId());
 		
 		assertEquals("El rut debe ser el mismo",goodRut,dbu.getRut());
 	}
@@ -601,7 +601,7 @@ public class LaborerServiceTest {
 
 		dbl.setMobileNumber(newMobileNumer);	
 		service.saveLaborer(dbl);
-		dbl = service.findLaborer(dbl.getLaborerId());
+		dbl = service.findLaborer(dbl.getId());
 		
 		assertNotNull("El obrero no puede ser nulo", dbl);
 		assertEquals("El obrero no tiene el celular que se definió", newMobileNumer,  dbl.getMobileNumber() );
@@ -652,7 +652,7 @@ public class LaborerServiceTest {
 		Long laborerId = 208L;
 		ConstructionSite cs = constructionService.findConstructionSite(constructionSiteId);
 		Laborer laborer = new Laborer();
-		laborer.setLaborerId(laborerId);
+		laborer.setId(laborerId);
 		//busca al obrero 207 en la obra 1
 		return service.findLaborerOnConstructionSite(cs,laborer);
 	}
@@ -663,7 +663,7 @@ public class LaborerServiceTest {
 		Long laborerId = 207L;
 		ConstructionSite cs = constructionService.findConstructionSite(constructionSiteId);
 		Laborer laborer = new Laborer();
-		laborer.setLaborerId(laborerId);
+		laborer.setId(laborerId);
 		//busca al obrero 207 en la obra 1
 		return service.findLaborerOnConstructionSite(cs,laborer);
 	}

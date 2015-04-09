@@ -27,7 +27,7 @@ public class DateConfigurations implements Serializable {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
     @Column(name = "date_configurationsId")
-	Long dateConfigurationsId;
+	Long id;
 	
 	@Column(name="date")
 	@Temporal(TemporalType.DATE)
@@ -62,11 +62,11 @@ public class DateConfigurations implements Serializable {
 	Double uf;
 
 	public Long getDateConfigurationsId() {
-		return dateConfigurationsId;
+		return id;
 	}
 
 	public void setDateConfigurationsId(Long dateConfigurationsId) {
-		this.dateConfigurationsId = dateConfigurationsId;
+		this.id = dateConfigurationsId;
 	}
 	
 	public Date getAdvance() {
@@ -139,7 +139,7 @@ public class DateConfigurations implements Serializable {
 		int result = 1;
 		result = prime
 				* result
-				+ ((dateConfigurationsId == null) ? 0 : dateConfigurationsId
+				+ ((id == null) ? 0 : id
 						.hashCode());
 		return result;
 	}
@@ -153,10 +153,10 @@ public class DateConfigurations implements Serializable {
 		if (getClass() != obj.getClass())
 			return false;
 		DateConfigurations other = (DateConfigurations) obj;
-		if (dateConfigurationsId == null) {
-			if (other.dateConfigurationsId != null)
+		if (id == null) {
+			if (other.id != null)
 				return false;
-		} else if (!dateConfigurationsId.equals(other.dateConfigurationsId))
+		} else if (!id.equals(other.id))
 			return false;
 		return true;
 	}

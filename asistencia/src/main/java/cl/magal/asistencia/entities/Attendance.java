@@ -36,7 +36,7 @@ public class Attendance implements Serializable {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
 	@Column(name="attendanceId")
-	Long attendanceId;
+	Long id;
 	
 	@NotNull(message="La fecha es necesaria.")
 	@Temporal(TemporalType.DATE)
@@ -44,101 +44,132 @@ public class Attendance implements Serializable {
 	Date date;
 	
 	@ManyToOne
-	@JoinColumn(name="LABORER_CONSTRUCTIONSITEID",nullable=false)
+	@JoinColumn(name="laborer_constructionsiteId",nullable=false)
 	LaborerConstructionsite laborerConstructionSite;
 	
 	@Column(name="jornal")
 	Integer jornalPromedio = 0;
 	
 	@Convert(converter = AttendanceMarkConverter.class)
+	@Column(name="dmp1")
 	AttendanceMark dmp1 = AttendanceMark.ATTEND;
 	
 	@Convert(converter = AttendanceMarkConverter.class)
+	@Column(name="dmp2")
 	AttendanceMark dmp2 = AttendanceMark.ATTEND;
 	
 	@Convert(converter = AttendanceMarkConverter.class)
+	@Column(name="dmp3")
 	AttendanceMark dmp3 = AttendanceMark.ATTEND;
 	
 	@Convert(converter = AttendanceMarkConverter.class)
+	@Column(name="dmp4")
 	AttendanceMark dmp4 = AttendanceMark.ATTEND;
 	
 	@Convert(converter = AttendanceMarkConverter.class)
+	@Column(name="dmp5")
 	AttendanceMark dmp5 = AttendanceMark.ATTEND;
 	
 	@Convert(converter = AttendanceMarkConverter.class)
+	@Column(name="dmp6")
 	AttendanceMark dmp6 = AttendanceMark.ATTEND;
 	
 	@Convert(converter = AttendanceMarkConverter.class)
+	@Column(name="dmp7")
 	AttendanceMark dmp7 = AttendanceMark.ATTEND;
 	
 	@Convert(converter = AttendanceMarkConverter.class)
+	@Column(name="dmp8")
 	AttendanceMark dmp8 = AttendanceMark.ATTEND;
 	
 	@Convert(converter = AttendanceMarkConverter.class)
+	@Column(name="dmp9")
 	AttendanceMark dmp9 = AttendanceMark.ATTEND;
 	
 	@Convert(converter = AttendanceMarkConverter.class)
+	@Column(name="dmp10")
 	AttendanceMark dmp10 = AttendanceMark.ATTEND;
 	
 	@Convert(converter = AttendanceMarkConverter.class)
+	@Column(name="dmp11")
 	AttendanceMark dmp11 = AttendanceMark.ATTEND;
 	
 	@Convert(converter = AttendanceMarkConverter.class)
+	@Column(name="dmp12")
 	AttendanceMark dmp12 = AttendanceMark.ATTEND;
 	
 	@Convert(converter = AttendanceMarkConverter.class)
+	@Column(name="dmp13")
 	AttendanceMark dmp13 = AttendanceMark.ATTEND;
 	
 	@Convert(converter = AttendanceMarkConverter.class)
+	@Column(name="dmp14")
 	AttendanceMark dmp14 = AttendanceMark.ATTEND;
 	
 	@Convert(converter = AttendanceMarkConverter.class)
+	@Column(name="dmp15")
 	AttendanceMark dmp15 = AttendanceMark.ATTEND;
 	
 	@Convert(converter = AttendanceMarkConverter.class)
+	@Column(name="dmp16")
 	AttendanceMark dmp16 = AttendanceMark.ATTEND;
 	
 	@Convert(converter = AttendanceMarkConverter.class)
+	@Column(name="dmp17")
 	AttendanceMark dmp17 = AttendanceMark.ATTEND;
 	
 	@Convert(converter = AttendanceMarkConverter.class)
+	@Column(name="dmp18")
 	AttendanceMark dmp18 = AttendanceMark.ATTEND;
 	
 	@Convert(converter = AttendanceMarkConverter.class)
+	@Column(name="dmp19")
 	AttendanceMark dmp19 = AttendanceMark.ATTEND;
 	
 	@Convert(converter = AttendanceMarkConverter.class)
+	@Column(name="dmp20")
 	AttendanceMark dmp20 = AttendanceMark.ATTEND;
 	
 	@Convert(converter = AttendanceMarkConverter.class)
+	@Column(name="dmp21")
 	AttendanceMark dmp21 = AttendanceMark.ATTEND;
 	
 	@Convert(converter = AttendanceMarkConverter.class)
+	@Column(name="dmp22")
 	AttendanceMark dmp22 = AttendanceMark.ATTEND;
 	
 	@Convert(converter = AttendanceMarkConverter.class)
+	@Column(name="dmp23")
 	AttendanceMark dmp23 = AttendanceMark.ATTEND;
 	
 	@Convert(converter = AttendanceMarkConverter.class)
+	@Column(name="dmp24")
 	AttendanceMark dmp24 = AttendanceMark.ATTEND;
 	
 	@Convert(converter = AttendanceMarkConverter.class)
+	@Column(name="dmp25")
 	AttendanceMark dmp25 = AttendanceMark.ATTEND;
 	
 	@Convert(converter = AttendanceMarkConverter.class)
+	@Column(name="dmp26")
 	AttendanceMark dmp26 = AttendanceMark.ATTEND;
 	
 	@Convert(converter = AttendanceMarkConverter.class)
+	@Column(name="dmp27")
 	AttendanceMark dmp27 = AttendanceMark.ATTEND;
 	
 	@Convert(converter = AttendanceMarkConverter.class)
+	@Column(name="dmp28")
 	AttendanceMark dmp28 = AttendanceMark.ATTEND;
 	
 	@Convert(converter = AttendanceMarkConverter.class)
+	@Column(name="dmp29")
 	AttendanceMark dmp29 = AttendanceMark.ATTEND;
 	@Convert(converter = AttendanceMarkConverter.class)
+	@Column(name="dmp30")
 	AttendanceMark dmp30 = AttendanceMark.ATTEND;
 	@Convert(converter = AttendanceMarkConverter.class)
+	@Column(name="dmp31")
 	AttendanceMark dmp31 = AttendanceMark.ATTEND;
 	
 	@Convert(converter = AttendanceMarkConverter.class)
@@ -254,10 +285,13 @@ public class Attendance implements Serializable {
 	AttendanceMark dma28 = AttendanceMark.ATTEND;
 	
 	@Convert(converter = AttendanceMarkConverter.class)
+	@Column(name="dma29")
 	AttendanceMark dma29 = AttendanceMark.ATTEND;
 	@Convert(converter = AttendanceMarkConverter.class)
+	@Column(name="dma30")
 	AttendanceMark dma30 = AttendanceMark.ATTEND;
 	@Convert(converter = AttendanceMarkConverter.class)
+	@Column(name="dma31")
 	AttendanceMark dma31 = AttendanceMark.ATTEND;
 	
 	public List<AttendanceMark> getMarksAsList() {
@@ -310,11 +344,11 @@ public class Attendance implements Serializable {
 		this.jornalPromedio = jornalPromedio;
 	}
 
-	public Long getAttendanceId() {
-		return attendanceId;
+	public Long getId() {
+		return id;
 	}
-	public void setAttendanceId(Long attendanceId) {
-		this.attendanceId = attendanceId;
+	public void setId(Long attendanceId) {
+		this.id = attendanceId;
 	}
 	public Date getDate() {
 		return date;
@@ -856,7 +890,7 @@ public class Attendance implements Serializable {
 
 	@Override
 	public String toString() {
-		return "Attendance [attendanceId=" + attendanceId + ", date=" + date
+		return "Attendance [attendanceId=" + id + ", date=" + date
 				+ ", laborerConstructionSite=" + laborerConstructionSite + "]";
 	}
 	

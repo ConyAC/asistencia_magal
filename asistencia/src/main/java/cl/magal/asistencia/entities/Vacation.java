@@ -30,7 +30,7 @@ public class Vacation implements Serializable {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name="vacationId")
-	Long vacationId;
+	Long id;
 	
 	@NotNull(message="La fecha inicial es necesaria.")
 	@Temporal(TemporalType.DATE)
@@ -42,12 +42,14 @@ public class Vacation implements Serializable {
 	@Column(name = "to_date" )
 	Date toDate;
 	
+	@Column(name = "progressive" )
 	int progressive;
 	
 	@ManyToOne
-	@JoinColumn(name ="LABORER_CONSTRUCTIONSITEID",updatable=false,nullable=false)
+	@JoinColumn(name ="laborer_constructionsiteId",updatable=false,nullable=false)
 	LaborerConstructionsite laborerConstructionSite;
 	
+	@Column(name = "confirmed" )
 	boolean confirmed = false;
 	
 	public int getProgressive() {
@@ -58,12 +60,12 @@ public class Vacation implements Serializable {
 		this.progressive = progressive;
 	}
 
-	public Long getVacationId() {
-		return vacationId;
+	public Long getId() {
+		return id;
 	}
 
-	public void setVacationId(Long vacationId) {
-		this.vacationId = vacationId;
+	public void setId(Long vacationId) {
+		this.id = vacationId;
 	}
 
 	public Date getFromDate() {

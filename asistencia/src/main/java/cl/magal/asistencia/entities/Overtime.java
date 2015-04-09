@@ -32,7 +32,7 @@ public class Overtime implements Serializable {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
 	@Column(name="overtimeId")
-	Long overtimeId;
+	Long id;
 	
 	@NotNull(message="La fecha es necesaria.")
 	@Temporal(TemporalType.DATE)
@@ -40,67 +40,70 @@ public class Overtime implements Serializable {
 	Date date;
 	
 	@ManyToOne
-	@JoinColumn(name="LABORER_CONSTRUCTIONSITEID",nullable=false)
+	@JoinColumn(name="laborer_constructionsiteId",nullable=false)
 	LaborerConstructionsite laborerConstructionSite;
 	
+	@Column(name = "dmp1")
 	Integer dmp1 = 0;
-	
+	@Column(name = "dmp2")
 	Integer dmp2 = 0;
-	
+	@Column(name = "dmp3")
 	Integer dmp3 = 0;
-	
+	@Column(name = "dmp4")
 	Integer dmp4 = 0;
-	
+	@Column(name = "dmp5")
 	Integer dmp5 = 0;
-	
+	@Column(name = "dmp6")
 	Integer dmp6 = 0;
-	
+	@Column(name = "dmp7")
 	Integer dmp7 = 0;
-	
+	@Column(name = "dmp8")
 	Integer dmp8 = 0;
-	
+	@Column(name = "dmp9")
 	Integer dmp9 = 0;
-	
+	@Column(name = "dmp10")
 	Integer dmp10 = 0;
-	
+	@Column(name = "dmp11")
 	Integer dmp11 = 0;
-	
+	@Column(name = "dmp12")
 	Integer dmp12 = 0;
-	
+	@Column(name = "dmp13")
 	Integer dmp13 = 0;
-	
+	@Column(name = "dmp14")
 	Integer dmp14 = 0;
-	
+	@Column(name = "dmp15")
 	Integer dmp15 = 0;
-	
+	@Column(name = "dmp16")
 	Integer dmp16 = 0;
-	
+	@Column(name = "dmp17")
 	Integer dmp17 = 0;
-	
+	@Column(name = "dmp18")
 	Integer dmp18 = 0;
-	
+	@Column(name = "dmp19")
 	Integer dmp19 = 0;
-	
+	@Column(name = "dmp20")
 	Integer dmp20 = 0;
-	
+	@Column(name = "dmp21")
 	Integer dmp21 = 0;
-	
+	@Column(name = "dmp22")
 	Integer dmp22 = 0;
-	
+	@Column(name = "dmp23")
 	Integer dmp23 = 0;
-	
+	@Column(name = "dmp24")
 	Integer dmp24 = 0;
-	
+	@Column(name = "dmp25")
 	Integer dmp25 = 0;
-	
+	@Column(name = "dmp26")
 	Integer dmp26 = 0;
-	
+	@Column(name = "dmp27")
 	Integer dmp27 = 0;
-	
+	@Column(name = "dmp28")
 	Integer dmp28 = 0;
-	
+	@Column(name = "dmp29")
 	Integer dmp29 = 0;
+	@Column(name = "dmp30")
 	Integer dmp30 = 0;
+	@Column(name = "dmp31")
 	Integer dmp31 = 0;
 	
 	@Column(name = "dma1" ,nullable = false )
@@ -187,8 +190,11 @@ public class Overtime implements Serializable {
 	@Column(name = "dma28" ,nullable = false )
 	Integer dma28 = 0;
 	
+	@Column(name = "dma29")
 	Integer dma29 = 0;
+	@Column(name = "dma30")
 	Integer dma30 = 0;
+	@Column(name = "dma31")
 	Integer dma31 = 0;
 	
 	public List<Integer> getOvertimeAsList() {
@@ -233,11 +239,11 @@ public class Overtime implements Serializable {
 		return Collections.unmodifiableList(tmp);
 	}
 	
-	public Long getOvertimeId() {
-		return overtimeId;
+	public Long getId() {
+		return id;
 	}
-	public void setOvertimeId(Long overtimeId) {
-		this.overtimeId = overtimeId;
+	public void setId(Long overtimeId) {
+		this.id = overtimeId;
 	}
 	public Date getDate() {
 		return date;

@@ -248,7 +248,7 @@ public class ConstructionSitesView extends BaseView implements View {
 							                if (dialog.isConfirmed()) {
 							                    // Confirmed to continue
 							                	ConstructionSite cs = (ConstructionSite) itemId;
-												service.deleteCS(cs.getConstructionsiteId());
+												service.deleteCS(cs.getId());
 												constructionContainer.removeItem(cs);		
 							                } else {
 							                    // User did not confirm
@@ -276,7 +276,7 @@ public class ConstructionSitesView extends BaseView implements View {
 			public void itemClick(ItemClickEvent event) {
 //				setConstruction((BeanItem<ConstructionSite>)event.getItem());
 				BeanItem<ConstructionSite> bean = (BeanItem<ConstructionSite>)event.getItem();
-				UI.getCurrent().getNavigator().navigateTo(ConstructionSiteView.NAME+"/"+bean.getBean().getConstructionsiteId());
+				UI.getCurrent().getNavigator().navigateTo(ConstructionSiteView.NAME+"/"+bean.getBean().getId());
 			}
 		});
 		return table;

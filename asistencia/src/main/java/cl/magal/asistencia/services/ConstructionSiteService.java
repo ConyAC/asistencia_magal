@@ -200,7 +200,7 @@ public class ConstructionSiteService {
 
 	public void addLaborerToConstructionSite(Laborer laborer, ConstructionSite cs) {
 
-		ConstructionSite dbcs = constructionSiterepo.findOne(cs.getConstructionsiteId());
+		ConstructionSite dbcs = constructionSiterepo.findOne(cs.getId());
 		logger.debug("laborer "+laborer );
 		//		laborer.addConstructionSite(dbcs);
 		labRepo.save(laborer); //FIXME
@@ -211,7 +211,7 @@ public class ConstructionSiteService {
 
 	public void addTeamToConstructionSite(Team team, ConstructionSite cs) {
 
-		ConstructionSite dbcs = constructionSiterepo.findOne(cs.getConstructionsiteId());		
+		ConstructionSite dbcs = constructionSiterepo.findOne(cs.getId());		
 		teamRepo.save(team);
 	}
 
@@ -429,7 +429,7 @@ public class ConstructionSiteService {
 			AbsenceVO vo = new AbsenceVO();
 			vo.setType(AbsenceType.VACACION);
 			vo.setLaborerConstructionsite(vacation.getLaborerConstructionSite());
-			vo.setAbsenceId(vacation.getVacationId());
+			vo.setAbsenceId(vacation.getId());
 			vo.setConfirmed(vacation.isConfirmed());
 			vo.setDescription("");
 			vo.setFromDate(vacation.getFromDate());
@@ -442,7 +442,7 @@ public class ConstructionSiteService {
 			vo.setType(AbsenceType.ACCIDENTE);
 			vo.setLaborerConstructionsite(accident.getLaborerConstructionSite());
 			vo.setConfirmed(accident.isConfirmed());
-			vo.setAbsenceId(accident.getAccidentId());
+			vo.setAbsenceId(accident.getId());
 			vo.setDescription(accident.getDescription());
 			vo.setFromDate(accident.getFromDate());
 			vo.setToDate(accident.getToDate());
@@ -454,7 +454,7 @@ public class ConstructionSiteService {
 			vo.setType(AbsenceType.LICENCIA);
 			vo.setLaborerConstructionsite(license.getLaborerConstructionSite());
 			vo.setConfirmed(license.isConfirmed());
-			vo.setAbsenceId(license.getLicenseId());
+			vo.setAbsenceId(license.getId());
 			vo.setDescription(license.getDescription());
 			vo.setFromDate(license.getFromDate());
 			vo.setToDate(license.getToDate());

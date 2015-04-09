@@ -46,7 +46,7 @@ import cl.magal.asistencia.entities.enums.LoanToolStatus;
 @Table(name = "tool")
 @NamedQueries({
     @NamedQuery(name = "Tool.findAll", query = "SELECT t FROM Tool t"),
-    @NamedQuery(name = "Tool.findByToolId", query = "SELECT t FROM Tool t WHERE t.toolId = :toolId"),
+    @NamedQuery(name = "Tool.findByToolId", query = "SELECT t FROM Tool t WHERE t.id = :toolId"),
     @NamedQuery(name = "Tool.findByName", query = "SELECT t FROM Tool t WHERE t.name = :name"),
     @NamedQuery(name = "Tool.findByPrice", query = "SELECT t FROM Tool t WHERE t.price = :price"),
     @NamedQuery(name = "Tool.findByDateBuy", query = "SELECT t FROM Tool t WHERE t.dateBuy = :dateBuy"),
@@ -60,7 +60,7 @@ public class Tool implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
     @Column(name = "toolId")
-    private Long toolId;
+    private Long id;
 	
 	@NotNull(message="El nombre de la herramienta es necesario.")
 	@NotEmpty(message="El nombre de la herramienta es necesario.")
@@ -78,7 +78,7 @@ public class Tool implements Serializable {
     
     @Basic(optional = false)
     @NotNull(message="La fecha de compra es necesaria.")
-    @Column(name = "dateBuy")
+    @Column(name = "date_buy")
     @Temporal(TemporalType.TIMESTAMP)
     private Date dateBuy;
     
@@ -95,7 +95,7 @@ public class Tool implements Serializable {
     private LoanToolStatus status;
     
     @ManyToOne
-	@JoinColumn(name="LABORER_CONSTRUCTIONSITEID",nullable = false )
+	@JoinColumn(name="laborer_constructionsiteId",nullable = false )
 	LaborerConstructionsite laborerConstructionSite;
     
     //Pagos postergados  
@@ -104,7 +104,7 @@ public class Tool implements Serializable {
     //tabla intermedia entre role y sus permisos    
     @ElementCollection(targetClass= Date.class,fetch=FetchType.EAGER)
     @CollectionTable(name="postponedpaymenttool", joinColumns = @JoinColumn(name = "toolId"))
-    @Column(name="TOOL_DATE")
+    @Column(name="tool_date")
     @Temporal(TemporalType.TIMESTAMP)
     Set<Date> datePostponed = new HashSet<Date>(); 
     
@@ -118,21 +118,21 @@ public class Tool implements Serializable {
     }
 
     public Tool(Long toolId) {
-        this.toolId = toolId;
+        this.id = toolId;
     }
 
     public Tool(Long toolId, String name, Date dateBuy) {
-        this.toolId = toolId;
+        this.id = toolId;
         this.name = name;
         this.dateBuy = dateBuy;
     }
     
-    public Long getToolId() {
-		return toolId;
+    public Long getId() {
+		return id;
 	}
 
-	public void setToolId(Long toolId) {
-		this.toolId = toolId;
+	public void setId(Long toolId) {
+		this.id = toolId;
 	}
 
 	public String getName() {
@@ -222,7 +222,7 @@ public class Tool implements Serializable {
 
 	@Override
     public String toString() {
-        return "jpa.magal.entities.Tool[ toolId=" + toolId + " ]";
+        return "jpa.magal.entities.Tool[ toolId=" + id + " ]";
     }
     
 }

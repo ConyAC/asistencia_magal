@@ -27,7 +27,7 @@ public final class ConstructionSiteHelper {
 	public static void verify(ConstructionSite cs) {
 		
 		assertNotNull("El cs no puede ser nulo.",cs);
-		assertNotNull("El id de cs no puede ser nulo.",cs.getConstructionsiteId());
+		assertNotNull("El id de cs no puede ser nulo.",cs.getId());
 		assertNotNull("El nombre no puede ser nulo.",cs.getName());
 		//verificar que el tipo del estado sea del tipo enum Status
 		assertTrue("El tipo de estado debe ser enum", cs.getStatus().getClass() == Status.class);
@@ -39,7 +39,7 @@ public final class ConstructionSiteHelper {
 		assertNotNull("El cs no puede ser nulo.",cs);
 		assertNotNull("El bdcs no puede ser nulo.",bdcs);
 		
-		assertSame("El id deben ser el mismo.",cs.getConstructionsiteId(),bdcs.getConstructionsiteId());
+		assertSame("El id deben ser el mismo.",cs.getId(),bdcs.getId());
 		assertEquals("El nombre debe ser el mismo.",cs.getName(),bdcs.getName());
 		//verificar que el tipo del estado sea del tipo enum Status
 		assertSame("El tipo de estado debe ser el mismo", cs.getStatus().getClass() , bdcs.getStatus().getClass());

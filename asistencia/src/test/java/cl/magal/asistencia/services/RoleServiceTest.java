@@ -45,7 +45,7 @@ public class RoleServiceTest {
 		service.saveRole(r);
 		RoleHelper.verify(r);
 		
-		Role dbr = service.findRole(r.getRoleId());
+		Role dbr = service.findRole(r.getId());
 		
 		assertNotNull("El rol no puede ser nulo", dbr);		
 		assertEquals("El nombre del rol debe ser igual a ", "ADM", dbr.getName());
@@ -62,13 +62,13 @@ public class RoleServiceTest {
 		service.saveRole(r);
 		RoleHelper.verify(r);
 		
-		Role dbr = service.findRole(r.getRoleId());		
+		Role dbr = service.findRole(r.getId());		
 		RoleHelper.verify(r);
 		
 		r.setName("Adm_Central_1");
 		service.saveRole(r);
 		
-		dbr = service.findRole(r.getRoleId());
+		dbr = service.findRole(r.getId());
 		assertEquals("El nombre del rol debe ser igual a ", r.getName(), dbr.getName());
 		
 	}	
@@ -80,13 +80,13 @@ public class RoleServiceTest {
 	public void testDeleteRole() {	
 		
 		Role r = RoleHelper.newRole();
-		r.setRoleId(null);//se setea explicitamente null para que sea uno nuevo
+		r.setId(null);//se setea explicitamente null para que sea uno nuevo
 		service.saveRole(r);
-		assertTrue("El id no puede ser nulo.", r.getRoleId() != null );
+		assertTrue("El id no puede ser nulo.", r.getId() != null );
 		
-		service.deleteRole(r.getRoleId());
+		service.deleteRole(r.getId());
 		
-		Role dbr = service.findRole(r.getRoleId());		
+		Role dbr = service.findRole(r.getId());		
 
 		assertNull("El rol debe ser nulo luego de la eliminacion", dbr );
 		

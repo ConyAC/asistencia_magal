@@ -38,7 +38,7 @@ public class Confirmations implements Serializable {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
 	@Column(name="confirmationsId")
-	Long confirmationsId;
+	Long id;
 	
 	/**
 	 * Permite identificar el mes asociado a la confirmación
@@ -49,16 +49,19 @@ public class Confirmations implements Serializable {
 	Date date;
 	
     @ManyToOne
-    @JoinColumn(name = "CONSTRUCTION_SITEID",updatable=false,nullable=false)
+    @JoinColumn(name = "constructionsiteId",updatable=false,nullable=false)
     private ConstructionSite constructionsite;
 	
+    @Column(name="constructionsite_check")
 	boolean constructionSiteCheck = false;
+    @Column(name="central_check")
 	boolean centralCheck = false;
-	public Long getConfirmationsId() {
-		return confirmationsId;
+    
+	public Long getId() {
+		return id;
 	}
-	public void setConfirmationsId(Long confirmationsId) {
-		this.confirmationsId = confirmationsId;
+	public void setId(Long confirmationsId) {
+		this.id = confirmationsId;
 	}
 	public Date getDate() {
 		return date;

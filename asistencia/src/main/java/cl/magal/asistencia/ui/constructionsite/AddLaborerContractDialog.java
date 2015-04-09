@@ -271,7 +271,7 @@ public class AddLaborerContractDialog extends AbstractWindowEditor implements Ne
 		logger.debug("se llamo add new item con {}",newItemCaption);
 		//quita el laborer sin id, para no juntar basura
 		for(Laborer itemId : new ArrayList<Laborer>(laborersBC.getItemIds())){
-			if(itemId.getLaborerId() == null){
+			if(itemId.getId() == null){
 				laborersBC.removeItem(itemId);
 			}
 		}

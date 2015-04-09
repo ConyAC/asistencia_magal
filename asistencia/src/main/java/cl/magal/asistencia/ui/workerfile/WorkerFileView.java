@@ -296,7 +296,8 @@ public class WorkerFileView extends HorizontalLayout implements View {
 			
 			@Override
 			public Object generateCell(Table source, Object itemId, Object columnId) {
-				return (Short)source.getItem(itemId).getItemProperty("active").getValue() == 1  ? "Activo":"No activo";
+				Property<Short> p = source.getItem(itemId).getItemProperty("active");
+				return p != null && (Short)p.getValue() == 1  ? "Activo":"No activo";
 			}
 		});
 		table.setCellStyleGenerator(new Table.CellStyleGenerator() {
@@ -519,7 +520,7 @@ public class WorkerFileView extends HorizontalLayout implements View {
 						public boolean passesFilter(Object itemId, Item item)
 								throws UnsupportedOperationException {
 							//si la lista de trabajadores es nula, no filtra
-							return item != null && Utils.contains(laborers,((Long) item.getItemProperty("laborerId").getValue()));
+							return item != null && Utils.contains(laborers,((Long) item.getItemProperty("id").getValue()));
 						}
 						@Override
 						public boolean appliesToProperty(Object propertyId) {

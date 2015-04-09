@@ -50,7 +50,7 @@ public class AddTeamDialog extends AbstractWindowEditor {
 
 	public AddTeamDialog(BeanItem<?> item) {
 		super(item);
-		setCaption(item.getItemProperty("teamId").getValue() == null ? "Crear cuadrilla":"Editar cuadrillas");
+		setCaption(item.getItemProperty("id").getValue() == null ? "Crear cuadrilla":"Editar cuadrillas");
 		init();
 	}
 	
@@ -91,7 +91,7 @@ public class AddTeamDialog extends AbstractWindowEditor {
 		if(leader != null)
 			for(Object itemId : cbLeader.getItemIds()){
 				LaborerConstructionsite lc = ((LaborerConstructionsite)itemId);
-				if(lc.getLaborer().getLaborerId() == leader.getLaborerId() ){
+				if(lc.getLaborer().getId() == leader.getId() ){
 					cbLeader.setValue(lc);
 					break;
 				}

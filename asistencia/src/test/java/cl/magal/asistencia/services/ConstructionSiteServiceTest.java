@@ -110,7 +110,7 @@ public class ConstructionSiteServiceTest {
 		ConstructionSiteHelper.verify(cs);
 		
 		//recuperamos el elemento de la base
-		ConstructionSite bdcs = csService.findConstructionSite(cs.getConstructionsiteId());
+		ConstructionSite bdcs = csService.findConstructionSite(cs.getId());
 		
 		ConstructionSiteHelper.verify(bdcs);
 		
@@ -134,7 +134,7 @@ public class ConstructionSiteServiceTest {
 		assertNotNull("La persona a cargo no puede ser nula, si ésta fue seteada",cs.getPersonInCharge());
 		
 		//recuperamos el elemento de la base
-		ConstructionSite bdcs = csService.findConstructionSite(cs.getConstructionsiteId());
+		ConstructionSite bdcs = csService.findConstructionSite(cs.getId());
 		
 		ConstructionSiteHelper.verify(bdcs);
 		
@@ -172,9 +172,9 @@ public class ConstructionSiteServiceTest {
 		
 		csService.save(cs);
 		
-		assertTrue("El id no puede ser nulo.",cs.getConstructionsiteId() != null );
+		assertTrue("El id no puede ser nulo.",cs.getId() != null );
 		
-		ConstructionSite dbcs = csService.findConstructionSite(cs.getConstructionsiteId());
+		ConstructionSite dbcs = csService.findConstructionSite(cs.getId());
 		
 		assertNotNull("La obra no puede ser nula", dbcs);
 		
@@ -192,9 +192,9 @@ public class ConstructionSiteServiceTest {
 		cs.setDeleted(null);
 		csService.save(cs);
 		
-		assertTrue("El id no puede ser nulo.", cs.getConstructionsiteId() != null );
+		assertTrue("El id no puede ser nulo.", cs.getId() != null );
 		
-		ConstructionSite dbcs = csService.findConstructionSite(cs.getConstructionsiteId());
+		ConstructionSite dbcs = csService.findConstructionSite(cs.getId());
 		
 		assertNotNull("La obra no puede ser nula", dbcs);
 		assertNotNull("La obra no debe estar eliminada", dbcs.getDeleted());
@@ -213,7 +213,7 @@ public class ConstructionSiteServiceTest {
 		
 		ConstructionSiteHelper.verify(cs);
 		
-		ConstructionSite dbcs = csService.findConstructionSite(cs.getConstructionsiteId());
+		ConstructionSite dbcs = csService.findConstructionSite(cs.getId());
 		
 		ConstructionSiteHelper.verify(dbcs);
 		ConstructionSiteHelper.verify(cs,dbcs);
@@ -221,7 +221,7 @@ public class ConstructionSiteServiceTest {
 		cs.setAddress("cambio");	
 		csService.save(cs);
 		
-		dbcs = csService.findConstructionSite(cs.getConstructionsiteId());		
+		dbcs = csService.findConstructionSite(cs.getId());		
 		ConstructionSiteHelper.verify(cs,dbcs); 	
 				
 	}
@@ -238,14 +238,14 @@ public class ConstructionSiteServiceTest {
 		
 		ConstructionSiteHelper.verify(cs);
 		//intenta encontrarlo
-		ConstructionSite dbcs = csService.findConstructionSite(cs.getConstructionsiteId());
+		ConstructionSite dbcs = csService.findConstructionSite(cs.getId());
 		
 		ConstructionSiteHelper.verify(dbcs);
 		ConstructionSiteHelper.verify(cs,dbcs);
 		
-		csService.deleteCS(cs.getConstructionsiteId());
+		csService.deleteCS(cs.getId());
 		
-		dbcs = csService.findConstructionSite(cs.getConstructionsiteId());
+		dbcs = csService.findConstructionSite(cs.getId());
 		
 		assertNull("La obra debe ser nula", dbcs);
 		
@@ -273,7 +273,7 @@ public class ConstructionSiteServiceTest {
 		ConstructionSiteHelper.verify(cs);
 		
 		//elimina la 3°
-		csService.deleteCS(cs.getConstructionsiteId());
+		csService.deleteCS(cs.getId());
 		
 		//si se buscan todas, debe retornar solo las dos primeras
 		Page<ConstructionSite> page = csService.findAllConstructionSite(new PageRequest(0, 10));
@@ -299,7 +299,7 @@ public class ConstructionSiteServiceTest {
 		//verifica que el trabajador tiene un id válido
 		LaborerHelper.verify(laborer1);
 		
-		ConstructionSite dbcs = csService.findConstructionSite(cs.getConstructionsiteId());
+		ConstructionSite dbcs = csService.findConstructionSite(cs.getId());
 		
 		//verifica que al recuperar la obra, se obtenga el trabajador guardado
 		assertNotNull("El objeto guardado no puede ser nulo",dbcs);
@@ -314,10 +314,10 @@ public class ConstructionSiteServiceTest {
 		//verifica que el trabajador tiene un id válido
 		LaborerHelper.verify(laborer2);
 		
-		dbcs = csService.findConstructionSite(cs.getConstructionsiteId());
+		dbcs = csService.findConstructionSite(cs.getId());
 		
 		//los ids de los laborer no pueden ser iguales
-		assertNotEquals("los ids de los laborer no pueden ser iguales",laborer2.getLaborerId(),laborer1.getLaborerId());
+		assertNotEquals("los ids de los laborer no pueden ser iguales",laborer2.getId(),laborer1.getId());
 		
 		//verifica que al recuperar la obra, se obtenga el trabajador guardado
 		assertNotNull("El objeto guardado no puede ser nulo",dbcs);

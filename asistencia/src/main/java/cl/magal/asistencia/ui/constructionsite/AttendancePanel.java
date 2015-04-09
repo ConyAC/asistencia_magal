@@ -307,8 +307,6 @@ public class AttendancePanel extends Panel implements View {
 		extraGrid.setFrozenColumnCount(1);
 		if(extraGrid.getColumn("laborerConstructionSite") != null )
 			extraGrid.removeColumn("laborerConstructionSite");
-		if(extraGrid.getColumn("attendanceId") != null )
-			extraGrid.removeColumn("attendanceId");
 		if(extraGrid.getColumn("date") != null )
 			extraGrid.removeColumn("date");
 		if(extraGrid.getColumn("id") != null )
@@ -582,14 +580,12 @@ public class AttendancePanel extends Panel implements View {
 		overtimeGrid.setFrozenColumnCount(1);
 		if(overtimeGrid.getColumn("laborerConstructionSite") != null )
 			overtimeGrid.removeColumn("laborerConstructionSite");
-		if(overtimeGrid.getColumn("attendanceId") != null )
-			overtimeGrid.removeColumn("attendanceId");
 		if(overtimeGrid.getColumn("date") != null )
 			overtimeGrid.removeColumn("date");
 		if(overtimeGrid.getColumn("overtimeAsList") != null )
 			overtimeGrid.removeColumn("overtimeAsList");
-		if(overtimeGrid.getColumn("overtimeId") != null )
-			overtimeGrid.removeColumn("overtimeId");
+		if(overtimeGrid.getColumn("id") != null )
+			overtimeGrid.removeColumn("id");
 		if(overtimeGrid.getColumn("lastMonthOvertimeAsList") != null )
 			overtimeGrid.removeColumn("lastMonthOvertimeAsList");
 
@@ -649,8 +645,8 @@ public class AttendancePanel extends Panel implements View {
 		attendanceGrid.setFrozenColumnCount(1);
 		if(attendanceGrid.getColumn("laborerConstructionSite") != null )
 			attendanceGrid.removeColumn("laborerConstructionSite");
-		if(attendanceGrid.getColumn("attendanceId") != null )
-			attendanceGrid.removeColumn("attendanceId");
+		if(attendanceGrid.getColumn("id") != null )
+			attendanceGrid.removeColumn("id");
 		if(attendanceGrid.getColumn("date") != null )
 			attendanceGrid.removeColumn("date");
 		if(attendanceGrid.getColumn("marksAsList") != null )

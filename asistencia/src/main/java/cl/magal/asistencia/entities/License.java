@@ -38,7 +38,7 @@ public class License implements Serializable {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
 	@Column(name="licenseId")
-	Long licenseId;
+	Long id;
 	
 	@NotNull(message="La fecha inicial es necesaria.")
 	@Temporal(TemporalType.DATE)
@@ -52,10 +52,11 @@ public class License implements Serializable {
 	
 	@NotEmpty(message="Debe ingresar una descripción del accidente")
 	@NotNull(message="Debe ingresar una descripción del accidente")
+	@Column(name = "description" )
 	String description;
 	
 	@ManyToOne
-	@JoinColumn(name="LABORER_CONSTRUCTIONSITEID",nullable=false)
+	@JoinColumn(name="laborer_constructionsiteId",nullable=false)
 	LaborerConstructionsite laborerConstructionSite;
 	
 	@Column(name="absence_type")
@@ -63,14 +64,15 @@ public class License implements Serializable {
 	@Convert(converter = LicenseTypeConverter.class)
 	LicenseType licenseType;
 	
+	@Column(name = "confirmed" )
 	boolean confirmed;
 
-	public Long getLicenseId() {
-		return licenseId;
+	public Long getId() {
+		return id;
 	}
 
-	public void setLicenseId(Long absencesId) {
-		this.licenseId = absencesId;
+	public void setId(Long absencesId) {
+		this.id = absencesId;
 	}
 
 	public Date getFromDate() {

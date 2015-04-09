@@ -28,7 +28,7 @@ public class ExtraParams implements Serializable {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
-	@Column(name="extra_params_id")
+	@Column(name="extra_paramsId")
 	Long id;
 	
 	@NotNull(message="La fecha es necesaria.")
@@ -37,7 +37,7 @@ public class ExtraParams implements Serializable {
 	Date date;
 	
 	@ManyToOne
-	@JoinColumn(name="laborer_constructionsite_id",nullable=false)
+	@JoinColumn(name="laborer_constructionsiteId",nullable=false)
 	LaborerConstructionsite laborerConstructionSite;
 	
 	@Column(name="mov2_bond")

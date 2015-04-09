@@ -146,7 +146,7 @@ public class UsersView extends VerticalLayout implements View {
         		try {
         			roleFieldGroup.commit();
         			Role role = roleFieldGroup.getItemDataSource().getBean();
-        			boolean isNew = role.getRoleId() == null;
+        			boolean isNew = role.getId() == null;
         			service.saveRole(role);
         			
         			if(isNew){
@@ -259,8 +259,8 @@ public class UsersView extends VerticalLayout implements View {
 					public void onClose(ConfirmDialog dialog) {
 						if (dialog.isConfirmed()) {
 							//si el usuario es nuevo solo lo quita de la lista
-							if(role.getRoleId() != null )
-								service.deleteUser(role.getRoleId());
+							if(role.getId() != null )
+								service.deleteUser(role.getId());
 							rolesContainer.removeItem(role);				
 							setRole( rolesContainer.getItem( rolesContainer.firstItemId() ));
 						}
@@ -294,7 +294,7 @@ public class UsersView extends VerticalLayout implements View {
         		try {
         			fieldGroup.commit();
         			User user = fieldGroup.getItemDataSource().getBean();
-        			boolean isNew = user.getUserId() == null;
+        			boolean isNew = user.getId() == null;
         			service.saveUser(user);
         			
         			if(isNew){
@@ -389,7 +389,7 @@ public class UsersView extends VerticalLayout implements View {
 			@Override
 			public void postCommit(CommitEvent commitEvent) throws CommitException {
 				
-				Long id = fieldGroup.getItemDataSource().getBean().getUserId();
+				Long id = fieldGroup.getItemDataSource().getBean().getId();
 				
 				//si es un nuevo usuario, valida que no exista un usuario con el mismo email
 				if( id == null ){
@@ -576,8 +576,8 @@ public class UsersView extends VerticalLayout implements View {
 					public void onClose(ConfirmDialog dialog) {
 						if (dialog.isConfirmed()) {
 							//si el usuario es nuevo solo lo quita de la lista
-							if(user.getUserId() != null )
-								service.deleteUser(user.getUserId());
+							if(user.getId() != null )
+								service.deleteUser(user.getId());
 							userContainer.removeItem(user);				
 							setUser( userContainer.getItem( userContainer.firstItemId() ));
 						}

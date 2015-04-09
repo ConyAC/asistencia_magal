@@ -39,10 +39,10 @@ import cl.magal.asistencia.entities.enums.Job;
  */
 @Entity
 @Table(name = "contract",uniqueConstraints = {
-		@UniqueConstraint( columnNames= {"jobCode","LABORER_CONSTRUCTIONSITEID"} )} )
+		@UniqueConstraint( columnNames= {"job_code","laborer_constructionsiteId"} )} )
 @NamedQueries({
     @NamedQuery(name = "Contract.findAll", query = "SELECT c FROM Contract c"),
-    @NamedQuery(name = "Contract.findByContractId", query = "SELECT c FROM Contract c WHERE c.contractId = :contractId"),
+    @NamedQuery(name = "Contract.findByContractId", query = "SELECT c FROM Contract c WHERE c.id = :contractId"),
     @NamedQuery(name = "Contract.findByName", query = "SELECT c FROM Contract c WHERE c.name = :name"),
     @NamedQuery(name = "Contract.findByTimeduration", query = "SELECT c FROM Contract c WHERE c.timeduration = :timeduration"),
     @NamedQuery(name = "Contract.findByStartDate", query = "SELECT c FROM Contract c WHERE c.startDate = :startDate"),
@@ -57,42 +57,54 @@ public class Contract implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
     @Column(name = "contractId")
-    private Integer contractId;
+    private Integer id;
+	
     @Basic(optional = false)
     @Column(name = "name")
     private String name;
+    
     @Basic(optional = false)
     @Column(name = "timeduration")
     private int timeduration;
+    
     @Basic(optional = false)
-    @Column(name = "startDate")
+    @Column(name = "startdate")
     @Temporal(TemporalType.TIMESTAMP)
     private Date startDate;
+    
     @Basic(optional = false)
-    @Column(name = "terminationDate")
+    @Column(name = "terminationdate")
     @Temporal(TemporalType.TIMESTAMP)
     private Date terminationDate;
+    
     @Basic(optional = false)
-    @Column(name = "valueTreatment")
+    @Column(name = "value_treatment")
     private int valueTreatment;
+    
     @Column(name = "step")
     private String step;
+    
     @Column(name = "settlement")
     private Integer settlement;
-    @Column(name = "contractDescription")
+    
+    @Column(name = "contract_description")
     String contractDescription;
+    
     @Convert(converter = JobConverter.class)
     @Column(name = "job",nullable = false)
     private Job job;
     
-    @Column(name="jobCode",nullable = false)
+    @Column(name="job_code",nullable = false)
     private Integer jobCode;
     
+    @Column(name = "active")
     private boolean active;
+    
+    @Column(name = "finished")
     private boolean finished;
     
     @OneToOne
-    @JoinColumn(name="LABORER_CONSTRUCTIONSITEID",nullable = false,unique=true )
+    @JoinColumn(name="laborer_constructionsiteId",nullable = false,unique=true )
 	LaborerConstructionsite laborerConstructionSite;
     
     @OneToMany(mappedBy="contract",fetch=FetchType.LAZY,cascade={CascadeType.PERSIST,CascadeType.MERGE},orphanRemoval=true )
@@ -106,11 +118,11 @@ public class Contract implements Serializable {
     }
 
     public Contract(Integer contractId) {
-        this.contractId = contractId;
+        this.id = contractId;
     }
 
     public Contract(Integer contractId, String name, int timeduration, Date startDate, Date terminationDate, int valueTreatment) {
-        this.contractId = contractId;
+        this.id = contractId;
         this.name = name;
         this.timeduration = timeduration;
         this.startDate = startDate;
@@ -118,12 +130,12 @@ public class Contract implements Serializable {
         this.valueTreatment = valueTreatment;
     }
 
-    public Integer getContractId() {
-        return contractId;
+    public Integer getId() {
+        return id;
     }
 
-    public void setContractId(Integer contractId) {
-        this.contractId = contractId;
+    public void setId(Integer contractId) {
+        this.id = contractId;
     }
 
     public String getName() {
@@ -253,11 +265,11 @@ public class Contract implements Serializable {
 	
 	@Override
     public String toString() {
-        return "jpa.magal.entities.Contract[ contractId=" + contractId + " ]";
+        return "jpa.magal.entities.Contract[ contractId=" + id + " ]";
     }
 
 	public String dump() {
-		return "Contract [contractId=" + contractId + ", name=" + name
+		return "Contract [contractId=" + id + ", name=" + name
 				+ ", timeduration=" + timeduration + ", startDate=" + startDate
 				+ ", terminationDate=" + terminationDate + ", valueTreatment="
 				+ valueTreatment + ", step=" + step + ", settlement="

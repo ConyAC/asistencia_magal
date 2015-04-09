@@ -42,14 +42,14 @@ public class TeamService {
 	}
 	
 	public void addLaborerToTeam(Laborer laborer, Team t) {		
-		Team dbt = rep.findOne(t.getTeamId());
+		Team dbt = rep.findOne(t.getId());
 //		laborer.setTeamId(t.getTeamId());
 		labRepo.save(laborer);
 		rep.save(dbt);
 	}
 	
 	public List<Laborer> getLaborerByTeam(Team t) {
-		List<Laborer> l = labRepo.findByTeam(t.getTeamId());
+		List<Laborer> l = labRepo.findByTeam(t.getId());
 		return l;
 	}
 }

@@ -38,7 +38,7 @@ public final class UserHelper {
 	public static void verify(User u,boolean ignoreStatus) {
 		
 		assertNotNull("El usuario no puede ser nulo.", u);
-		assertNotNull("El id de usuario no puede ser nulo.", u.getUserId());
+		assertNotNull("El id de usuario no puede ser nulo.", u.getId());
 		assertNotNull("El nombre no puede ser nulo.", u.getFirstname());
 		assertNotNull("El apellido no puede ser nulo.", u.getLastname());
 		assertNotNull("El rut no puede ser nulo.", u.getRut());
@@ -52,7 +52,7 @@ public final class UserHelper {
 		verify(u);
 		verify(bdu);
 		
-		assertSame("Los ids deben ser iguales.", u.getUserId(), bdu.getUserId());
+		assertSame("Los ids deben ser iguales.", u.getId(), bdu.getId());
 		assertEquals("El rut debe ser el mismo.", u.getRut(), bdu.getRut());
 		//verificar que el tipo del estado sea del tipo enum Status
 		assertSame("El tipo de estado debe ser el mismo", u.getStatus().getClass() , bdu.getStatus().getClass());

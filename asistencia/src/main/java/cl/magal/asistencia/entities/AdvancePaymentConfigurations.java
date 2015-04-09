@@ -31,7 +31,7 @@ public class AdvancePaymentConfigurations implements Serializable {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
     @Column(name = "advance_payment_configurationsId")
-	Long AdvancePaymentConfigurationsId;
+	Long id;
 	
 	@Digits(fraction = 0, integer = 6)
 	@Column(name ="permission_discount")
@@ -58,13 +58,13 @@ public class AdvancePaymentConfigurations implements Serializable {
 		this.mapTable = mapTable;
 	}
 
-	public Long getAdvancePaymentConfigurationsId() {
-		return AdvancePaymentConfigurationsId;
+	public Long getId() {
+		return id;
 	}
 
-	public void setAdvancePaymentConfigurationsId(
+	public void setId(
 			Long advancePaymentConfigurationsId) {
-		AdvancePaymentConfigurationsId = advancePaymentConfigurationsId;
+		id = advancePaymentConfigurationsId;
 	}
 
 	public Double getPermissionDiscount() {
@@ -94,8 +94,8 @@ public class AdvancePaymentConfigurations implements Serializable {
 	@Override
 	public String toString() {
 		return "AdvancePaymentConfigurations ["
-				+ (AdvancePaymentConfigurationsId != null ? "AdvancePaymentConfigurationsId="
-						+ AdvancePaymentConfigurationsId + ", "
+				+ (id != null ? "AdvancePaymentConfigurationsId="
+						+ id + ", "
 						: "")
 				+ (permissionDiscount != null ? "permissionDiscount="
 						+ permissionDiscount + ", " : "")

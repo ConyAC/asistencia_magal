@@ -56,7 +56,7 @@ public class LaborerConstructionsite implements Serializable {
 	@Id
     @Basic(optional = false)
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name="LABORER_CONSTRUCTIONSITEID")
+	@Column(name="laborer_constructionsiteId")
 	Long id;
 	
     @ManyToOne
@@ -64,7 +64,7 @@ public class LaborerConstructionsite implements Serializable {
     private Laborer laborer;
     
     @ManyToOne
-    @JoinColumn(name = "CONSTRUCTION_SITEID",updatable=false,nullable=false)
+    @JoinColumn(name = "constructionsiteId",updatable=false,nullable=false)
     private ConstructionSite constructionsite;
     
     @Column(name = "active")
@@ -80,14 +80,15 @@ public class LaborerConstructionsite implements Serializable {
     @Column(name="reward")
     private int reward;
     
-    @Column(name="USE_DEFAULT_DATES")
+    @Column(name="use_default_dates")
     private boolean useDefaultDates = true;
     
     @Temporal(TemporalType.DATE)
-    @Column(name="REWARD_STARTDATE",nullable=false)
+    @Column(name="reward_startdate")
     Date rewardStartDate;
+    
     @Temporal(TemporalType.DATE)
-    @Column(name="REWARD_ENDTDATE",nullable=false)
+    @Column(name="reward_enddate")
     Date rewardEndDate;
     
     /**
@@ -96,7 +97,7 @@ public class LaborerConstructionsite implements Serializable {
     @Column(name = "block")
     private boolean block;
     
-    @JoinColumn(name="personBlockId")
+    @JoinColumn(name="person_blockId")
     @OneToOne
     User personBlock;
     
@@ -435,7 +436,7 @@ public class LaborerConstructionsite implements Serializable {
 
 	@Override
     public String toString() {
-        return "jpa.magal.entities.LaborerConstructionsite[ laborerId=" + (laborer != null ? laborer.getLaborerId() : "laborer nulo") + " ]";
+        return "jpa.magal.entities.LaborerConstructionsite[ laborerId=" + (laborer != null ? laborer.getId() : "laborer nulo") + " ]";
     }
     
 }

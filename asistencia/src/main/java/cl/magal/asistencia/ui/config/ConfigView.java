@@ -787,21 +787,19 @@ public class ConfigView extends VerticalLayout implements View {
 					
 					@Override
 					public void buttonClick(ClickEvent event) {
-						
-						table.addItem(new Object[]{nombre.getValue(),fecha, new Button(null,new Button.ClickListener() {
+						final DateField df = new DateField();
+						df.setValue(fecha.getValue());
+						Button btn = new Button(null,FontAwesome.TRASH_O);
+						final Object itemId = table.addItem(new Object[]{nombre.getValue(),df, btn }, fecha.getValue());
+						btn.addClickListener(new Button.ClickListener() {
 							
 							@Override
 							public void buttonClick(ClickEvent event) {
-								table.removeItem(fecha.getValue());
+								table.removeItem(itemId);
 							}
-						}){
-							{
-								setIcon(FontAwesome.TRASH_O);
-							}
-						}}, fecha.getValue());
-						}
+						});
 					}
-				 ){
+				}){
 					{
 						setIcon(FontAwesome.PLUS);
 					}
