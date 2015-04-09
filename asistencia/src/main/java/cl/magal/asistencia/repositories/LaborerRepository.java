@@ -19,7 +19,7 @@ public interface LaborerRepository extends PagingAndSortingRepository<Laborer, L
 	Integer findRawJobLaborer(@Param("id") Long id);
 
 //	@Query(value="SELECT l.* FROM laborer l left join laborer_constructionsite lc on lc.laborerId = l.laborerId WHERE lc.construction_siteId = :id " , nativeQuery=true)
-	@Query(value="SELECT lc.laborer FROM LaborerConstructionsite lc WHERE lc.constructionsite.constructionsiteId = :id ")
+	@Query(value="SELECT lc.laborer FROM LaborerConstructionsite lc WHERE lc.constructionsite.id = :id ")
 	List<Laborer> findByConstructionSite(@Param("id")Long csId);
 	
 	@Query(value="SELECT l.* FROM laborer l WHERE l.teamId = :id " , nativeQuery=true)

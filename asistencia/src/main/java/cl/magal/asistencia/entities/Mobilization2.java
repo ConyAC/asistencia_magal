@@ -9,7 +9,7 @@ import javax.persistence.Table;
 import javax.validation.constraints.Digits;
 
 @Embeddable
-@Table(name="Mobilization2")
+@Table(name="mobilization2")
 public class Mobilization2 implements Serializable {
 	
 	/**
@@ -17,7 +17,7 @@ public class Mobilization2 implements Serializable {
 	 */
 	private static final long serialVersionUID = 8278432240240965377L;
 
-	@JoinColumn(name="LINKED_CONSTRUCTION_SITEID")
+	@JoinColumn(name="linked_constructionsiteId")
 	ConstructionSite constructionSite;
 	
 	@Digits(fraction = 0, integer = 6)

@@ -63,7 +63,7 @@ public class Utils {
 		if( laborers == null)
 			return false;
 		for(Laborer laborer :laborers ){
-			if(laborer.getLaborerId() == long1 ){
+			if(laborer.getId() == long1 ){
 				return true;
 			}
 		}

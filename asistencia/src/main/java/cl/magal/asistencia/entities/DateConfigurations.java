@@ -12,6 +12,7 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.validation.constraints.Digits;
 
 @Entity
 @Table(name = "date_configurations")
@@ -26,7 +27,7 @@ public class DateConfigurations implements Serializable {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
     @Column(name = "date_configurationsId")
-	Long dateConfigurationsId;
+	Long id;
 	
 	@Column(name="date")
 	@Temporal(TemporalType.DATE)
@@ -47,13 +48,25 @@ public class DateConfigurations implements Serializable {
 	@Column(name="finish_deal")
 	@Temporal(TemporalType.DATE)
 	Date finishDeal;
+	
+	@Digits(fraction = 2, integer = 6)
+	@Column(name ="benzine")
+	Double benzine;
+	
+	@Digits(fraction = 0, integer = 6)
+	@Column(name ="oil")
+	Double oil;
+	
+	@Digits(fraction = 2, integer = 6)
+	@Column(name ="uf")
+	Double uf;
 
 	public Long getDateConfigurationsId() {
-		return dateConfigurationsId;
+		return id;
 	}
 
 	public void setDateConfigurationsId(Long dateConfigurationsId) {
-		this.dateConfigurationsId = dateConfigurationsId;
+		this.id = dateConfigurationsId;
 	}
 	
 	public Date getAdvance() {
@@ -95,6 +108,30 @@ public class DateConfigurations implements Serializable {
 	public void setDate(Date date) {
 		this.date = date;
 	}
+	
+	public Double getBenzine() {
+		return benzine;
+	}
+
+	public void setBenzine(Double benzine) {
+		this.benzine = benzine;
+	}
+
+	public Double getOil() {
+		return oil;
+	}
+
+	public void setOil(Double oil) {
+		this.oil = oil;
+	}
+
+	public Double getUf() {
+		return uf;
+	}
+
+	public void setUf(Double uf) {
+		this.uf = uf;
+	}
 
 	@Override
 	public int hashCode() {
@@ -102,7 +139,7 @@ public class DateConfigurations implements Serializable {
 		int result = 1;
 		result = prime
 				* result
-				+ ((dateConfigurationsId == null) ? 0 : dateConfigurationsId
+				+ ((id == null) ? 0 : id
 						.hashCode());
 		return result;
 	}
@@ -116,10 +153,10 @@ public class DateConfigurations implements Serializable {
 		if (getClass() != obj.getClass())
 			return false;
 		DateConfigurations other = (DateConfigurations) obj;
-		if (dateConfigurationsId == null) {
-			if (other.dateConfigurationsId != null)
+		if (id == null) {
+			if (other.id != null)
 				return false;
-		} else if (!dateConfigurationsId.equals(other.dateConfigurationsId))
+		} else if (!id.equals(other.id))
 			return false;
 		return true;
 	}

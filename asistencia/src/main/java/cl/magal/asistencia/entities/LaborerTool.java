@@ -26,7 +26,7 @@ import javax.persistence.Table;
     @NamedQuery(name = "LaborerTool.findByToolId", query = "SELECT l FROM LaborerTool l WHERE l.toolId = :toolId")})
 public class LaborerTool implements Serializable {
     private static final long serialVersionUID = 1L;
-    @Id
+    @Id // FIXME deberia considerar otro id unico
     @Basic(optional = false)
     @Column(name = "laborerId")
     private Integer laborerId;

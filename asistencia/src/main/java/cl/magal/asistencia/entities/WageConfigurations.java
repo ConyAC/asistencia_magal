@@ -28,7 +28,7 @@ public class WageConfigurations implements Serializable{
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "wage_configurationsId")
-	Long wageConfigurationsId;
+	Long id;
 	
 	@Digits(fraction = 0, integer = 6)
 	@Column(name ="minimum_wage")
@@ -44,17 +44,17 @@ public class WageConfigurations implements Serializable{
 	
 	@ElementCollection(targetClass=Mobilization2.class)
 	@CollectionTable(
-	        name="Mobilization2",
-	        joinColumns=@JoinColumn(name="WAGE_CONFIGURATIONSID")
+	        name="mobilization2",
+	        joinColumns=@JoinColumn(name="wage_configurationsId")
 	  )
 	List<Mobilization2> mobilizations2 = new LinkedList<Mobilization2>();
 	
 	public Long getWageConfigurationsId() {
-		return wageConfigurationsId;
+		return id;
 	}
 
 	public void setWageConfigurationsId(Long wageConfigurationsId) {
-		this.wageConfigurationsId = wageConfigurationsId;
+		this.id = wageConfigurationsId;
 	}
 
 	public Double getMinimumWage() {
@@ -112,7 +112,7 @@ public class WageConfigurations implements Serializable{
 		int result = 1;
 		result = prime
 				* result
-				+ ((wageConfigurationsId == null) ? 0 : wageConfigurationsId
+				+ ((id == null) ? 0 : id
 						.hashCode());
 		return result;
 	}
@@ -126,10 +126,10 @@ public class WageConfigurations implements Serializable{
 		if (getClass() != obj.getClass())
 			return false;
 		WageConfigurations other = (WageConfigurations) obj;
-		if (wageConfigurationsId == null) {
-			if (other.wageConfigurationsId != null)
+		if (id == null) {
+			if (other.id != null)
 				return false;
-		} else if (!wageConfigurationsId.equals(other.wageConfigurationsId))
+		} else if (!id.equals(other.id))
 			return false;
 		return true;
 	}
@@ -137,7 +137,7 @@ public class WageConfigurations implements Serializable{
 	@Override
 	public String toString() {
 		return "WageConfigurations [wageConfigurationsId="
-				+ wageConfigurationsId + ", minimumWage=" + minimumWage
+				+ id + ", minimumWage=" + minimumWage
 				+ ", collation=" + collation + ", mobilization=" + mobilization
 				+ ", mobilizations2=" + mobilizations2 + "]";
 	}

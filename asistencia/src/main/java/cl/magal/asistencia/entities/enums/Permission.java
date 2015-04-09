@@ -24,14 +24,14 @@ public enum Permission {
 	VISUALIZAR_CARGA_MASIVA_VACACIONES(20, "Visualizar Carga Masiva"),
 	EDITAR_ASISTENCIA(21, "Editar Asistencia"),
 	IMPRIMIR_OBREROS(22, "Imprimir Obreros"),
-	EDITAR_OBRA_NOASIGNADAS(24, "Editar Obra"), 
+	EDITAR_OBRA_NOASIGNADAS(24, "Editar Obra No Asignada"), 
 	CONFIRMAR_OBREROS(25,"Confirmar Obreros"),
 	BLOQUEAR_OBRERO(26, "Bloquear Obrero"),
 	AGREGAR_ETAPAS_OBRA(27,"Agregar Etapas a Obra"),
 	CONFIRMAR_ASISTENCIA_OBRA(27,"Confirmar Asistencia en Obra"),
-	CONFIRMAR_ASISTENCIA_CENTRAL(28,"Confirmar Asistencia en Obra"),
-	GENERAR_SUELDOS_SOFTLAND(29,"Generar sueldos");
-
+	CONFIRMAR_ASISTENCIA_CENTRAL(28,"Confirmar Asistencia desde Central"),
+	GENERAR_SUELDOS_SOFTLAND(29,"Generar Sueldos en Formato Softland"), 
+	DESBLOQUEDAR_ASISTENCIA(30,"Desbloquear asistencia/sueldo mes");
 	
 	int i;
 	String description;

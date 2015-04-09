@@ -46,6 +46,7 @@ import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.ui.AbstractSelect.ItemCaptionMode;
+import com.vaadin.ui.AbstractTextField;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
@@ -58,6 +59,8 @@ import com.vaadin.ui.Notification;
 import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.PasswordField;
+import com.vaadin.ui.TabSheet;
+import com.vaadin.ui.TextArea;
 import com.vaadin.ui.TwinColSelect;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
@@ -65,7 +68,7 @@ import com.vaadin.ui.VerticalLayout;
 @VaadinView(value=UsersView.NAME)
 @Scope("prototype")
 @Component
-public class UsersView extends HorizontalSplitPanel implements View {
+public class UsersView extends VerticalLayout implements View {
 
 	/**
 	 * 
@@ -77,35 +80,205 @@ public class UsersView extends HorizontalSplitPanel implements View {
 	public static final String NAME = "usuarios";
 	
 	BeanItemContainer<User> userContainer = new BeanItemContainer<User>(User.class);
+	BeanItemContainer<Role> rolesContainer = new BeanItemContainer<Role>(Role.class);
 	BeanItemContainer<ConstructionSite> constructionContainer = new BeanItemContainer<ConstructionSite>(ConstructionSite.class);
 	BeanItemContainer<Role> rolContainer = new BeanItemContainer<Role>(Role.class);
 	
-	private TwinColSelect tcsObras;
+	private TwinColSelect tcsObras,tcsPermissions;
 	
 	@Autowired
 	UserService service;
 	
 	BeanFieldGroup<User> fieldGroup = new BeanFieldGroup<User>(User.class);
-	FormLayout detailLayout;
-	FilterTable usersTable;
+	BeanFieldGroup<Role> roleFieldGroup = new BeanFieldGroup<Role>(Role.class);
+	FormLayout detailLayout,roleDetailLayout;
+	FilterTable usersTable,rolesTable;
 	
 	public UsersView(){
 	}
 	
 	@PostConstruct
 	private void init(){
-
+		
 		setSizeFull();
+		
+		TabSheet tab = new TabSheet();
+		tab.setSizeFull();
+		addComponent(tab);
+		
+		// panel de usuarios
+		HorizontalSplitPanel hsp = new HorizontalSplitPanel();
+		hsp.setSizeFull();
+		tab.addTab(hsp,"Usuarios");
 		
 		//dibula la sección de las obras
 		VerticalLayout usersListLayout = drawUsers();
-		addComponent(usersListLayout);
+		hsp.addComponent(usersListLayout);
 		
 		VerticalLayout usersDetailLayout = drawUserDetail();	
-		addComponent(usersDetailLayout);
+		hsp.addComponent(usersDetailLayout);
+		
+		//panel de roles
+		hsp = new HorizontalSplitPanel();
+		hsp.setSizeFull();
+		tab.addTab(hsp,"Perfiles");
+		
+		//dibula la sección de las obras
+		VerticalLayout roleListLayout = drawRoles();
+		hsp.addComponent(roleListLayout);
+		
+		VerticalLayout roleDetailLayout = drawRoleDetail();	
+		hsp.addComponent(roleDetailLayout);
 		
 	}
 	
+	private VerticalLayout drawRoleDetail() {
+		VerticalLayout vl = new VerticalLayout();
+		vl.setSpacing(true);
+		vl.setMargin(true);
+		vl.setSizeFull();
+		
+        //agrega un boton que hace el commit
+        Button btnSave = new Button("Guardar",new Button.ClickListener() {
+
+        	@Override
+        	public void buttonClick(ClickEvent event) {
+        		try {
+        			roleFieldGroup.commit();
+        			Role role = roleFieldGroup.getItemDataSource().getBean();
+        			boolean isNew = role.getId() == null;
+        			service.saveRole(role);
+        			
+        			if(isNew){
+	        			BeanItem<Role> userItem = rolesContainer.addBean(role);
+	        			setRole(userItem);
+        			}
+        			
+        			Notification.show("Role guardado correctamente",Type.TRAY_NOTIFICATION);
+        		} catch (CommitException e) {
+        			
+        			Utils.catchCommitException(e);
+        			
+        		}
+
+        	}
+        }){{
+        	setIcon(FontAwesome.SAVE);
+        }};
+        
+        vl.addComponent(btnSave);
+        vl.setComponentAlignment(btnSave, Alignment.TOP_LEFT);
+		
+		roleDetailLayout = new FormLayout();
+		roleDetailLayout.setMargin(true);
+		roleDetailLayout.setSpacing(true);
+		
+		Panel p = new Panel(roleDetailLayout);
+		p.setSizeFull();
+		vl.addComponent(p);
+		vl.setExpandRatio(p, 1.0f);
+        
+        // Loop through the properties, build fields for them and add the fields
+        // to this UI
+        for (Object propertyId : new String[]{"name","description"}) {
+        	if(propertyId.equals("salt")||propertyId.equals("roleId")||propertyId.equals("deleted")||propertyId.equals("cs")){
+        		;
+        	} else if(propertyId.equals("description")){
+        		TextArea txArea = new TextArea("Descripción");
+        		txArea.setWidth("100%");
+        		txArea.setNullRepresentation("");
+        		roleFieldGroup.bind(txArea, propertyId);
+        		roleDetailLayout.addComponent(txArea);
+        	}else{
+        		Field<?> field = roleFieldGroup.buildAndBind(tradProperty(propertyId), propertyId);
+        		field.setWidth("100%");
+        		if(field instanceof AbstractTextField)
+        			((AbstractTextField) field).setNullRepresentation("");
+        		roleDetailLayout.addComponent(field);
+        	}
+        }
+        
+        tcsPermissions = new TwinColSelect("Asignar Permisos");
+        for(Permission per : Permission.values())
+        	tcsPermissions.addItem(per);
+        tcsPermissions.setWidth("100%");
+        tcsPermissions.setNullSelectionAllowed(true);
+        tcsPermissions.setImmediate(true);
+		roleFieldGroup.bind(tcsPermissions, "permission");
+		
+		roleDetailLayout.addComponent(tcsPermissions);
+		
+		return vl;
+	}
+
+	private VerticalLayout drawRoles() {
+		VerticalLayout vl = new VerticalLayout();
+		vl.setSpacing(true);
+		vl.setMargin(true);
+		vl.setSizeFull();
+		
+		//botones agrega y eliminar
+		HorizontalLayout hl = new HorizontalLayout();
+		hl.setSpacing(true);
+		vl.addComponent(hl);
+		vl.setComponentAlignment(hl, Alignment.BOTTOM_LEFT);
+				
+		Button btnAddRole = new Button("Agregar Perfil",FontAwesome.PLUS);
+		//agregando obras dummy
+		btnAddRole.addClickListener(new Button.ClickListener() {
+			
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = 3844920778615955739L;
+
+			@Override
+			public void buttonClick(ClickEvent event) {
+				
+				Role role = new Role();
+				role.setName("Nuevo Perfil");
+				
+		        roleFieldGroup.setItemDataSource(new BeanItem<Role>(role));
+				
+			}
+		});
+		hl.addComponent(btnAddRole);
+		Button btnDeleteRole = new Button(null,FontAwesome.TRASH_O);
+		btnDeleteRole.addClickListener(new Button.ClickListener() {
+			
+			@Override
+			public void buttonClick(ClickEvent event) {
+				//recupera el elemento seleccionado
+				final Role role = (Role) rolesTable.getValue();
+				if(role == null){
+					Notification.show("Debe seleccionar un perfil para eliminarlo");
+					return;
+				}
+				ConfirmDialog.show(UI.getCurrent(), "Confirmar Acción:", "¿Está seguro de eliminar el perfil seleccionado?",
+						"Eliminar", "Cancelar", new ConfirmDialog.Listener() {
+					public void onClose(ConfirmDialog dialog) {
+						if (dialog.isConfirmed()) {
+							//si el usuario es nuevo solo lo quita de la lista
+							if(role.getId() != null )
+								service.deleteUser(role.getId());
+							rolesContainer.removeItem(role);				
+							setRole( rolesContainer.getItem( rolesContainer.firstItemId() ));
+						}
+					}
+				});	
+				
+			}
+		});
+		hl.addComponent(btnDeleteRole);
+		
+		//la tabla con su buscador buscador
+		rolesTable =  drawTableRoles();
+		vl.addComponent(rolesTable);
+		vl.setExpandRatio(rolesTable, 1.0f);
+		
+		return vl;
+	}
+
 	private VerticalLayout drawUserDetail() {
 		
 		VerticalLayout vl = new VerticalLayout();
@@ -121,7 +294,7 @@ public class UsersView extends HorizontalSplitPanel implements View {
         		try {
         			fieldGroup.commit();
         			User user = fieldGroup.getItemDataSource().getBean();
-        			boolean isNew = user.getUserId() == null;
+        			boolean isNew = user.getId() == null;
         			service.saveUser(user);
         			
         			if(isNew){
@@ -216,7 +389,7 @@ public class UsersView extends HorizontalSplitPanel implements View {
 			@Override
 			public void postCommit(CommitEvent commitEvent) throws CommitException {
 				
-				Long id = fieldGroup.getItemDataSource().getBean().getUserId();
+				Long id = fieldGroup.getItemDataSource().getBean().getId();
 				
 				//si es un nuevo usuario, valida que no exista un usuario con el mismo email
 				if( id == null ){
@@ -282,8 +455,54 @@ public class UsersView extends HorizontalSplitPanel implements View {
         }
 		
 	}
+	
+	private void setRole(BeanItem<Role> roleItem){
+		
+		//obtiene el vertical Layout
+		if(roleItem == null){
+			roleDetailLayout.setEnabled(false);
+			return;
+		}
+		
+        rolesTable.select(roleItem.getBean());
+		
+        roleDetailLayout.setEnabled(true); //VER
+		
+		// We need an item data source before we create the fields to be able to
+        // find the properties, otherwise we have to specify them by hand
+        roleFieldGroup.setItemDataSource(roleItem);
 
-	private FilterTable drawTablaUsuarios() {
+		if(SecurityHelper.hasPermission(Permission.ASIGNAR_OBRA)){
+			
+			tcsObras.setVisible(true);
+			
+        }else{
+        	tcsObras.setVisible(false);
+        }
+		
+	}
+	
+	private FilterTable drawTableRoles() {
+		FilterTable rolesTable =  new FilterTable();
+		rolesTable.setContainerDataSource(rolesContainer);
+		rolesTable.setSizeFull();
+		rolesTable.setFilterBarVisible(true);
+		rolesTable.setVisibleColumns("name","description");
+		rolesTable.setColumnHeaders("Nombre","Descripción");
+		rolesTable.setSelectable(true);
+		
+		rolesTable.addItemClickListener(new ItemClickListener() {
+			
+			@Override
+			public void itemClick(ItemClickEvent event) {
+				setRole((BeanItem<Role>)event.getItem());
+			}
+		});
+		
+		return rolesTable;
+	}
+
+	private FilterTable drawTableUsers() {
 		FilterTable usersTable =  new FilterTable();
 		userContainer.addNestedContainerProperty("role.name");
 		usersTable.setContainerDataSource(userContainer);
@@ -357,8 +576,8 @@ public class UsersView extends HorizontalSplitPanel implements View {
 					public void onClose(ConfirmDialog dialog) {
 						if (dialog.isConfirmed()) {
 							//si el usuario es nuevo solo lo quita de la lista
-							if(user.getUserId() != null )
-								service.deleteUser(user.getUserId());
+							if(user.getId() != null )
+								service.deleteUser(user.getId());
 							userContainer.removeItem(user);				
 							setUser( userContainer.getItem( userContainer.firstItemId() ));
 						}
@@ -370,7 +589,7 @@ public class UsersView extends HorizontalSplitPanel implements View {
 		hl.addComponent(borrarUsuario);
 		
 		//la tabla con su buscador buscador
-		usersTable =  drawTablaUsuarios();
+		usersTable =  drawTableUsers();
 		vl.addComponent(usersTable);
 		vl.setExpandRatio(usersTable, 1.0f);
 		
@@ -398,8 +617,12 @@ public class UsersView extends HorizontalSplitPanel implements View {
         List<Role> roles = service.getAllRole();
         rolContainer.removeAllItems();
         rolContainer.addAll(roles);
+        rolesContainer.removeAllItems();
+        rolesContainer.addAll(roles);
 		
 		setUser( userContainer.getItem( userContainer.firstItemId() ));
+		
+		setRole( rolesContainer.getItem( rolesContainer.firstItemId() ));
 	}
 	
 	private String tradProperty(Object propertyId) {
@@ -437,6 +660,12 @@ public class UsersView extends HorizontalSplitPanel implements View {
 			return "Calzado";
 		else if(propertyId.equals("bankAccount"))
 			return "Cta. Banco";
+		else if(propertyId.equals("dependets"))
+			return "Cargas";
+		else if(propertyId.equals("description"))
+			return "Descripción";
+		else if(propertyId.equals("name"))
+			return "Nombre";
 		else
 			return propertyId.toString();
 	}
@@ -478,5 +707,5 @@ public class UsersView extends HorizontalSplitPanel implements View {
 			return List.class;
 		}
 	}
-
+	
 }

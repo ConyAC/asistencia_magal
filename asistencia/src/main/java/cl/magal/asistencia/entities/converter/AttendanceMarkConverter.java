@@ -15,6 +15,8 @@ public class AttendanceMarkConverter implements AttributeConverter<AttendanceMar
 
 	@Override
 	public AttendanceMark convertToEntityAttribute(Integer arg0) {
+		if(arg0 == null)
+			return AttendanceMark.ATTEND;
 		return AttendanceMark.getAttendanceMark(arg0);
 	}
 }

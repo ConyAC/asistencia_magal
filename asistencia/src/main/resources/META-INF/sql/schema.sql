@@ -1,219 +1,216 @@
-CREATE TABLE IF NOT EXISTS "LABORER"
+CREATE TABLE IF NOT EXISTS "laborer"
 (
-   LABORERID IDENTITY PRIMARY KEY NOT NULL,
-   ADDRESS varchar(255),
-   AFP integer NOT NULL,
-   COMMUNE varchar(255),
-   CONTRACTID integer,
-   DATEADMISSION timestamp,
-   DATEBIRTH timestamp NOT NULL,
-   DEPENDENTS integer,
-   FIRSTNAME varchar(255) NOT NULL,
-   ISAPRE integer NOT NULL,
-   LASTNAME varchar(255) NOT NULL,
-   MARITALSTATUS integer NOT NULL,
-   MOBILENUMBER varchar(255),
-   NATIONALITY integer NOT NULL,
-   PHONE varchar(255),
-   PHOTO varchar(255),
-   RUT varchar(255) NOT NULL,
-   SECONDLASTNAME varchar(255),
-   SECONDNAME varchar(255),
-   TEAMID bigint,
-   TOWN varchar(255),
-   WEDGE integer,
-   PROVENANCE varchar(255),
-   BANK integer,
-   BANKACCOUNT varchar(255)   
+   laborerId IDENTITY PRIMARY KEY NOT NULL,
+   address varchar(255),
+   afp integer NOT NULL,
+   commune varchar(255),
+   date_birth timestamp NOT NULL,
+   dependents integer,
+   firstname varchar(255) NOT NULL,
+   isapre integer NOT NULL,
+   lastname varchar(255) NOT NULL,
+   marital_status integer NOT NULL,
+   mobile_number varchar(255),
+   nationality integer NOT NULL,
+   phone varchar(255),
+   photo varchar(255),
+   rut varchar(255) NOT NULL,
+   secondlastname varchar(255),
+   secondname varchar(255),
+   town varchar(255),
+   wedge integer,
+   provenance varchar(255),
+   bank integer,
+   bank_account varchar(255)   
 )
 ;
-CREATE UNIQUE INDEX IF NOT EXISTS PK_LABORER ON "LABORER"(LABORERID)
+CREATE UNIQUE INDEX IF NOT EXISTS PK_LABORER ON "laborer"(laborerId)
 ;
 
-CREATE UNIQUE INDEX IF NOT EXISTS UK_RUT ON "LABORER"(RUT)
+CREATE UNIQUE INDEX IF NOT EXISTS UK_RUT ON "laborer"(rut)
 ;
 
 -- ROLE 
 
-CREATE TABLE IF NOT EXISTS "ROLE"
+CREATE TABLE IF NOT EXISTS "role"
 (
-   ROLEID IDENTITY PRIMARY KEY NOT NULL,
-   DESCRIPTION varchar(255),
-   NAME varchar(255) NOT NULL
+   roleId IDENTITY PRIMARY KEY NOT NULL,
+   description varchar(255),
+   name varchar(255) NOT NULL
 )
 ;
-CREATE UNIQUE INDEX IF NOT EXISTS PK_ROLE ON "ROLE"(ROLEID)
+CREATE UNIQUE INDEX IF NOT EXISTS PK_ROLE ON "role"(roleId)
 ;
 
 
 -- permission
 
-CREATE TABLE IF NOT EXISTS "PERMISSIONS"
+CREATE TABLE IF NOT EXISTS "permissions"
 (
-   ROLEID bigint NOT NULL,
-   ROLE_PERMISSIONS varchar(255)
+   roleId bigint NOT NULL,
+   role_permissions varchar(255)
 )
 ;
-ALTER TABLE "PERMISSIONS"
+ALTER TABLE "permissions"
 ADD CONSTRAINT IF NOT EXISTS FK_PERMISSIONS
-FOREIGN KEY (ROLEID)
-REFERENCES "ROLE"(ROLEID)
+FOREIGN KEY (roleId)
+REFERENCES "role"(roleId)
 ;
-CREATE INDEX IF NOT EXISTS FK_INDX_PERMISSIONS ON "PERMISSIONS"(ROLEID)
+CREATE INDEX IF NOT EXISTS FK_INDX_PERMISSIONS ON "permissions"(roleId)
 ;
 
 
 -- USER
 
-CREATE TABLE IF NOT EXISTS "USER"
+CREATE TABLE IF NOT EXISTS "user"
 (
-   USERID IDENTITY PRIMARY KEY NOT NULL,
-   DELETED boolean,
-   EMAIL varchar(255) NOT NULL,
-   FIRSTNAME varchar(255) NOT NULL,
-   LASTNAME varchar(255) NOT NULL,
-   PASSWORD varchar(255),
-   RUT varchar(255) NOT NULL,
-   SALT varchar(255),
-   STATUS integer NOT NULL,
-   ROLEID bigint
+   userId IDENTITY PRIMARY KEY NOT NULL,
+   deleted boolean,
+   email varchar(255) NOT NULL,
+   firstname varchar(255) NOT NULL,
+   lastname varchar(255) NOT NULL,
+   password varchar(255),
+   rut varchar(255) NOT NULL,
+   salt varchar(255),
+   status integer NOT NULL,
+   roleId bigint
 )
 ;
-ALTER TABLE "USER"
+ALTER TABLE "user"
 ADD CONSTRAINT IF NOT EXISTS FK_USER_ROLE
-FOREIGN KEY (ROLEID)
-REFERENCES "ROLE"(ROLEID)
+FOREIGN KEY (roleId)
+REFERENCES "ROLE"(roleId)
 ;
-CREATE INDEX IF NOT EXISTS  FK_INDX_ROLE ON "USER"(ROLEID)
+CREATE INDEX IF NOT EXISTS  FK_INDX_ROLE ON "user"(roleId)
 ;
-CREATE UNIQUE INDEX IF NOT EXISTS UK_EMAIL ON "USER"(EMAIL)
+CREATE UNIQUE INDEX IF NOT EXISTS UK_EMAIL ON "user"(email)
 ;
-CREATE UNIQUE INDEX IF NOT EXISTS PK_USER ON "USER"(USERID)
+CREATE UNIQUE INDEX IF NOT EXISTS PK_USER ON "user"(userId)
 ;
 
 -- CONSTRUCTIONCOMPANY
-CREATE TABLE IF NOT EXISTS "CONSTRUCTIONCOMPANY"
+CREATE TABLE IF NOT EXISTS "construction_company"
 (
-   CONSTRUCTIONCOMPANYID IDENTITY PRIMARY KEY NOT NULL,
-   ADDRESS varchar(255),
-   COMMUNE varchar(255), 
-   NAME varchar(255) NOT NULL,
-   RUT varchar(255) NOT NULL
+   construction_companyId IDENTITY PRIMARY KEY NOT NULL,
+   address varchar(255),
+   commune varchar(255), 
+   name varchar(255) NOT NULL,
+   rut varchar(255) NOT NULL
 )
 ;
-CREATE UNIQUE INDEX IF NOT EXISTS PK_CONSTRUCTIONCOMPANY ON "CONSTRUCTIONCOMPANY"(CONSTRUCTIONCOMPANYID)
+CREATE UNIQUE INDEX IF NOT EXISTS PK_CONSTRUCTIONCOMPANY ON "construction_company"(construction_companyId)
 ;
 
-CREATE UNIQUE INDEX IF NOT EXISTS UK_RUT ON "CONSTRUCTIONCOMPANY"(RUT)
+CREATE UNIQUE INDEX IF NOT EXISTS UK_RUT ON "construction_company"(rut)
 ;
 
 -- CONSTRUCTION SITE
 
 
-CREATE TABLE IF NOT EXISTS "CONSTRUCTION_SITE"
+CREATE TABLE IF NOT EXISTS "construction_site"
 (
-   CONSTRUCTION_SITEID IDENTITY PRIMARY KEY NOT NULL,
-   CODE varchar(255) NOT NULL,
-   ADDRESS varchar(255),
-   DELETED boolean,
-   NAME varchar(255) NOT NULL,
-   STATUS integer NOT NULL,
-   PERSONINCHARGEID bigint,
-   CONSTRUCTIONCOMPANYID bigint
+   constructionsiteId IDENTITY PRIMARY KEY NOT NULL,
+   code varchar(255) NOT NULL,
+   address varchar(255),
+   deleted boolean,
+   name varchar(255) NOT NULL,
+   status integer NOT NULL,
+   person_in_chargeId bigint,
+   construction_companyId bigint
 )
 ;
-ALTER TABLE "CONSTRUCTION_SITE"
+ALTER TABLE "construction_site"
 ADD CONSTRAINT IF NOT EXISTS FK_CS_USER
-FOREIGN KEY (PERSONINCHARGEID)
-REFERENCES "USER"(USERID)
+FOREIGN KEY (person_in_chargeId)
+REFERENCES "user"(userId)
 ;
-ALTER TABLE "CONSTRUCTION_SITE"
+ALTER TABLE "construction_site"
 ADD CONSTRAINT IF NOT EXISTS FK_CS_CONSTRUCTIONCOMPANY
-FOREIGN KEY (CONSTRUCTIONCOMPANYID)
-REFERENCES "CONSTRUCTIONCOMPANY"(CONSTRUCTIONCOMPANYID)
+FOREIGN KEY (construction_companyId)
+REFERENCES "construction_company"(construction_companyId)
 ;
-CREATE INDEX IF NOT EXISTS  FK_INDX_CS_CC ON "CONSTRUCTION_SITE"(CONSTRUCTIONCOMPANYID)
+CREATE INDEX IF NOT EXISTS  FK_INDX_CS_CC ON "construction_site"(construction_companyId)
 ;
-CREATE INDEX IF NOT EXISTS  FK_INDX_CS ON "CONSTRUCTION_SITE"(PERSONINCHARGEID)
+CREATE INDEX IF NOT EXISTS  FK_INDX_CS ON "construction_site"(person_in_chargeId)
 ;
-CREATE UNIQUE INDEX IF NOT EXISTS PK_CS ON "CONSTRUCTION_SITE"(CONSTRUCTION_SITEID)
+CREATE UNIQUE INDEX IF NOT EXISTS PK_CS ON "construction_site"(constructionsiteId)
 ;
 
-CREATE TABLE IF NOT EXISTS "CONSTRUCTIONSITE_STEP"
+CREATE TABLE IF NOT EXISTS "constructionsite_step"
 (
-	CONSTRUCTIONSITE_CONSTRUCTION_SITEID NUMBER NOT NULL,
-	STEP varchar(255) NOT NULL
+	constructionsiteId bigint NOT NULL,
+	step varchar(255) NOT NULL
 );
 
 -- USER_CONSTRUCTIONSITE
 
-CREATE TABLE IF NOT EXISTS "USER_CONSTRUCTIONSITE"
+CREATE TABLE IF NOT EXISTS "user_constructionsite"
 (
-   CONSTRUCTION_SITEID bigint NOT NULL,
-   USERID bigint NOT NULL,
-   CONSTRAINT CONSTRAINT_5 PRIMARY KEY (CONSTRUCTION_SITEID,USERID)
+   constructionsiteId bigint NOT NULL,
+   userId bigint NOT NULL,
+   CONSTRAINT pf_user_constructionsite PRIMARY KEY (constructionsiteId,userId)
 )
 ;
-ALTER TABLE "USER_CONSTRUCTIONSITE"
+ALTER TABLE "user_constructionsite"
 ADD CONSTRAINT IF NOT EXISTS FK_USER_CONSTRUCTIONSITE_CONSTRUCTION_SITEID
-FOREIGN KEY (CONSTRUCTION_SITEID)
-REFERENCES "CONSTRUCTION_SITE"(CONSTRUCTION_SITEID)
+FOREIGN KEY (constructionsiteId)
+REFERENCES "construction_site"(constructionsiteId)
 ;
-ALTER TABLE "USER_CONSTRUCTIONSITE"
+ALTER TABLE "user_constructionsite"
 ADD CONSTRAINT IF NOT EXISTS FK_USER_CONSTRUCTIONSITE_USERID
-FOREIGN KEY (USERID)
-REFERENCES "USER"(USERID)
+FOREIGN KEY (userId)
+REFERENCES "user"(userId)
 ;
-CREATE UNIQUE INDEX IF NOT EXISTS PRIMARY_KEY_5 ON "USER_CONSTRUCTIONSITE"
+CREATE UNIQUE INDEX IF NOT EXISTS PRIMARY_KEY_5 ON "user_constructionsite"
 (
-  CONSTRUCTION_SITEID,
-  USERID
+  constructionsiteId,
+  userId
 )
 ;
-CREATE INDEX IF NOT EXISTS FK_USER_CONSTRUCTIONSITE_CONSTRUCTION_SITEID_INDEX_5 ON "USER_CONSTRUCTIONSITE"(CONSTRUCTION_SITEID)
+CREATE INDEX IF NOT EXISTS FK_USER_CONSTRUCTIONSITE_CONSTRUCTION_SITEID_INDEX_5 ON "user_constructionsite"(constructionsiteId)
 ;
-CREATE INDEX IF NOT EXISTS FK_USER_CONSTRUCTIONSITE_USERID_INDEX_5 ON "USER_CONSTRUCTIONSITE"(USERID)
+CREATE INDEX IF NOT EXISTS FK_USER_CONSTRUCTIONSITE_USERID_INDEX_5 ON "user_constructionsite"(userId)
 ;
 
 
 -- LABORER_CONSTRUCTIONSITE
 
-CREATE TABLE IF NOT EXISTS "LABORER_CONSTRUCTIONSITE"
+CREATE TABLE IF NOT EXISTS "laborer_constructionsite"
 (
-   LABORER_CONSTRUCTIONSITEID IDENTITY PRIMARY KEY NOT NULL,
-   LABORERID integer NOT NULL,
-   ACTIVE smallint,
-   CONFIRMED smallint,
-   REWARD integer default 0,
-   USE_DEFAULT_DATES smallint  default 1,
-   REWARD_STARTDATE timestamp,
-   REWARD_ENDTDATE timestamp,
-   BLOCK boolean,
-   PERSONBLOCKID bigint,
-   COMMENT varchar(255),
-   CONSTRUCTION_SITEID integer NOT NULL,
-   SUPLE_CODE integer
+   laborer_constructionsiteId IDENTITY PRIMARY KEY NOT NULL,
+   laborerId integer NOT NULL,
+   active smallint,
+   confirmed smallint,
+   reward integer default 0,
+   use_default_dates smallint  default 1,
+   reward_startdate timestamp,
+   reward_enddate timestamp,
+   block boolean,
+   person_blockId bigint,
+   comment varchar(255),
+   constructionsiteId integer NOT NULL,
+   suple_code integer
 )
 ;
-ALTER TABLE "LABORER_CONSTRUCTIONSITE"
+ALTER TABLE "laborer_constructionsite"
 ADD CONSTRAINT IF NOT EXISTS FK_LC_LABORER
-FOREIGN KEY (LABORERID)
-REFERENCES "LABORER"(LABORERID)
+FOREIGN KEY (laborerId)
+REFERENCES "laborer"(laborerId)
 ;
-CREATE INDEX IF NOT EXISTS  FK_IDX_LC_LABORER ON "LABORER_CONSTRUCTIONSITE"(LABORERID)
+CREATE INDEX IF NOT EXISTS  FK_IDX_LC_LABORER ON "laborer_constructionsite"(laborerId)
 ;
-ALTER TABLE "LABORER_CONSTRUCTIONSITE"
+ALTER TABLE "laborer_constructionsite"
 ADD CONSTRAINT IF NOT EXISTS FK_LC_CS
-FOREIGN KEY (CONSTRUCTION_SITEID)
-REFERENCES "CONSTRUCTION_SITE"(CONSTRUCTION_SITEID)
+FOREIGN KEY (constructionsiteId)
+REFERENCES "construction_site"(constructionsiteId)
 ;
-CREATE INDEX IF NOT EXISTS  FK_IDX_LC_CS ON "LABORER_CONSTRUCTIONSITE"(CONSTRUCTION_SITEID)
+CREATE INDEX IF NOT EXISTS  FK_IDX_LC_CS ON "laborer_constructionsite"(constructionsiteId)
 ;
-CREATE UNIQUE INDEX IF NOT EXISTS PK_LC ON "LABORER_CONSTRUCTIONSITE"(LABORER_CONSTRUCTIONSITEID)
+CREATE UNIQUE INDEX IF NOT EXISTS PK_LC ON "laborer_constructionsite"(laborer_constructionsiteId)
 ;
 
 -- ABSENCE
-
+/*
 CREATE TABLE IF NOT EXISTS "ABSENCE"
 (
    ABSENCEID IDENTITY PRIMARY KEY NOT NULL,
@@ -233,172 +230,173 @@ CREATE UNIQUE INDEX IF NOT EXISTS PK_ABSENCE ON "ABSENCE"(ABSENCEID)
 ;
 CREATE INDEX IF NOT EXISTS  FK_INDX_ABSENCE_LC ON "ABSENCE"(LABORER_CONSTRUCTIONSITEID)
 ;
-
+*/
 -- TOOL
 
-CREATE TABLE IF NOT EXISTS "TOOL"
+CREATE TABLE IF NOT EXISTS "tool"
 (
-   TOOLID IDENTITY PRIMARY KEY NOT NULL,
-   DATEBUY timestamp NOT NULL,
-   FEE integer NOT NULL,
-   NAME varchar(255) NOT NULL,
-   PRICE integer NOT NULL,
-   STATUS integer NOT NULL default 2, -- en deuda
-   LABORER_CONSTRUCTIONSITEID bigint not null
+   toolId IDENTITY PRIMARY KEY NOT NULL,
+   date_buy timestamp NOT NULL,
+   fee integer NOT NULL,
+   name varchar(255) NOT NULL,
+   price integer NOT NULL,
+   status integer NOT NULL default 2, -- en deuda
+   laborer_constructionsiteId bigint not null
 )
 ;
-ALTER TABLE "TOOL"
+ALTER TABLE "tool"
 ADD CONSTRAINT IF NOT EXISTS FK_TOOL_LC
-FOREIGN KEY (LABORER_CONSTRUCTIONSITEID)
-REFERENCES "LABORER_CONSTRUCTIONSITE"(LABORER_CONSTRUCTIONSITEID)
+FOREIGN KEY (laborer_constructionsiteId)
+REFERENCES "laborer_constructionsite"(laborer_constructionsiteId)
 ;
-CREATE UNIQUE INDEX IF NOT EXISTS PK_TOOL ON "TOOL"(TOOLID)
+CREATE UNIQUE INDEX IF NOT EXISTS PK_TOOL ON "tool"(toolId)
 ;
-CREATE INDEX IF NOT EXISTS  FK_INDX_TOOL_LC ON "TOOL"(LABORER_CONSTRUCTIONSITEID)
+CREATE INDEX IF NOT EXISTS  FK_INDX_TOOL_LC ON "tool"(laborer_constructionsiteId)
 ;
 
 -- LOAN
 
-CREATE TABLE IF NOT EXISTS "LOAN"
+CREATE TABLE IF NOT EXISTS "loan"
 (
-   LOANID IDENTITY PRIMARY KEY NOT NULL,
-   DATEBUY timestamp NOT NULL,
-   FEE integer,
-   PRICE integer,
-   STATUS integer NOT NULL default 2, -- en deuda
-   LABORER_CONSTRUCTIONSITEID bigint not null
+   loanId IDENTITY PRIMARY KEY NOT NULL,
+   date_buy timestamp NOT NULL,
+   fee integer,
+   price integer,
+   status integer NOT NULL default 2, -- en deuda
+   laborer_constructionsiteId bigint not null
 )
 ;
-ALTER TABLE "LOAN"
+ALTER TABLE "loan"
 ADD CONSTRAINT IF NOT EXISTS FK_LOAN_LC
-FOREIGN KEY (LABORER_CONSTRUCTIONSITEID)
-REFERENCES "LABORER_CONSTRUCTIONSITE"(LABORER_CONSTRUCTIONSITEID)
+FOREIGN KEY (laborer_constructionsiteId)
+REFERENCES "laborer_constructionsite"(laborer_constructionsiteId)
 ;
-CREATE UNIQUE INDEX IF NOT EXISTS PK_LOAN ON "LOAN"(LOANID)
+CREATE UNIQUE INDEX IF NOT EXISTS PK_LOAN ON "loan"(loanId)
 ;
-CREATE INDEX IF NOT EXISTS  FK_INDX_LOAN_LC ON "LOAN"(LABORER_CONSTRUCTIONSITEID)
+CREATE INDEX IF NOT EXISTS  FK_INDX_LOAN_LC ON "loan"(laborer_constructionsiteId)
 ;
 
 -- VACATION
 
-CREATE TABLE IF NOT EXISTS "VACATION"
+CREATE TABLE IF NOT EXISTS "vacation"
 (
-   VACATIONID IDENTITY PRIMARY KEY NOT NULL,
-   FROM_DATE date not null,
-   TO_DATE date not null,
-   PROGRESSIVE integer,
-   LABORER_CONSTRUCTIONSITEID bigint not null
+   vacationId IDENTITY PRIMARY KEY NOT NULL,
+   from_date date not null,
+   to_date date not null,
+   progressive integer,
+   laborer_constructionsiteId bigint not null
 )
 ;
-ALTER TABLE "VACATION"
+ALTER TABLE "vacation"
 ADD CONSTRAINT IF NOT EXISTS FK_VACATION_LC
-FOREIGN KEY (LABORER_CONSTRUCTIONSITEID)
-REFERENCES "LABORER_CONSTRUCTIONSITE"(LABORER_CONSTRUCTIONSITEID)
+FOREIGN KEY (laborer_constructionsiteId)
+REFERENCES "laborer_constructionsite"(laborer_constructionsiteId)
 ;
-CREATE INDEX IF NOT EXISTS  FK_INDX_VACATION_LC ON "VACATION"(LABORER_CONSTRUCTIONSITEID)
+CREATE INDEX IF NOT EXISTS  FK_INDX_VACATION_LC ON "vacation"(laborer_constructionsiteId)
 ;
-CREATE UNIQUE INDEX IF NOT EXISTS PK_VACATION ON "VACATION"(VACATIONID)
+CREATE UNIQUE INDEX IF NOT EXISTS PK_VACATION ON "vacation"(vacationId)
 ;
 
 
 -- ACCIDENTS
 
-CREATE TABLE IF NOT EXISTS "ACCIDENT"
+CREATE TABLE IF NOT EXISTS "accident"
 (
-   ACCIDENTID IDENTITY PRIMARY KEY NOT NULL,
-   ACCIDENT_LEVEL integer NOT NULL,
-   DESCRIPTION varchar(255) NOT NULL,
-   FROM_DATE date NOT NULL,
-   TO_DATE date NOT NULL,
-   WASNEGLIGENCE boolean NOT NULL,
-   LABORER_CONSTRUCTIONSITEID bigint NOT NULL
+   accidentId IDENTITY PRIMARY KEY NOT NULL,
+   accident_level integer NOT NULL,
+   description varchar(1024) NOT NULL,
+   from_date date NOT NULL,
+   to_date date NOT NULL,
+   was_negligence boolean NOT NULL,
+   confirmed boolean,
+   laborer_constructionsiteId bigint NOT NULL
 )
 ;
-ALTER TABLE "ACCIDENT"
+ALTER TABLE "accident"
 ADD CONSTRAINT IF NOT EXISTS FK_ACCIDENT_LABORER
-FOREIGN KEY (LABORER_CONSTRUCTIONSITEID)
-REFERENCES "LABORER_CONSTRUCTIONSITE"(LABORER_CONSTRUCTIONSITEID)
+FOREIGN KEY (laborer_constructionsiteId)
+REFERENCES "laborer_constructionsite"(laborer_constructionsiteId)
 ;
-CREATE INDEX IF NOT EXISTS  FK_INDX_ACCIDENT_LABORER ON "ACCIDENT"(LABORER_CONSTRUCTIONSITEID)
+CREATE INDEX IF NOT EXISTS  FK_INDX_ACCIDENT_LABORER ON "accident"(laborer_constructionsiteId)
 ;
-CREATE UNIQUE INDEX IF NOT EXISTS PK_ACCIDENT ON "ACCIDENT"(ACCIDENTID)
+CREATE UNIQUE INDEX IF NOT EXISTS PK_ACCIDENT ON "accident"(accidentId)
 ;
 
 -- WAGE_CONFIGURATIONS
 
-CREATE TABLE IF NOT EXISTS "WAGE_CONFIGURATIONS"
+CREATE TABLE IF NOT EXISTS "wage_configurations"
 (
-   WAGE_CONFIGURATIONSID bigint PRIMARY KEY NOT NULL,
-   COLLATION double,
-   MINIMUM_WAGE double,
-   MOBILIZATION double
+   wage_configurationsId bigint PRIMARY KEY NOT NULL,
+   collation double,
+   minimum_wage double,
+   mobilization double
 )
 ;
-CREATE UNIQUE INDEX IF NOT EXISTS PK_WG ON "WAGE_CONFIGURATIONS"(WAGE_CONFIGURATIONSID)
+CREATE UNIQUE INDEX IF NOT EXISTS PK_WG ON "wage_configurations"(wage_configurationsId)
 ;
 
 
 -- MOBILIZATION2
-CREATE TABLE IF NOT EXISTS "MOBILIZATION2"
+CREATE TABLE IF NOT EXISTS "mobilization2"
 (
    WAGE_CONFIGURATIONSID IDENTITY NOT NULL,
-   AMOUNT double,
-   LINKED_CONSTRUCTION_SITEID bigint
+   amount double,
+   linked_constructionsiteId bigint
 )
 ;
-ALTER TABLE "MOBILIZATION2"
+ALTER TABLE "mobilization2"
 ADD CONSTRAINT IF NOT EXISTS FK_MOBILIZATION2_CS
-FOREIGN KEY (LINKED_CONSTRUCTION_SITEID)
-REFERENCES "CONSTRUCTION_SITE"(CONSTRUCTION_SITEID)
+FOREIGN KEY (linked_constructionsiteId)
+REFERENCES "construction_site"(constructionsiteId)
 ;
-ALTER TABLE "MOBILIZATION2"
+ALTER TABLE "mobilization2"
 ADD CONSTRAINT IF NOT EXISTS FK_MOBILIZATION2_WC
-FOREIGN KEY (WAGE_CONFIGURATIONSID)
-REFERENCES "WAGE_CONFIGURATIONS"(WAGE_CONFIGURATIONSID)
+FOREIGN KEY (wage_configurationsId)
+REFERENCES "wage_configurations"(wage_configurationsId)
 ;
-CREATE INDEX IF NOT EXISTS  FK_INDX_MOB2_CS ON "MOBILIZATION2"(LINKED_CONSTRUCTION_SITEID)
+CREATE INDEX IF NOT EXISTS  FK_INDX_MOB2_CS ON "mobilization2"(linked_constructionsiteId)
 ;
-CREATE INDEX IF NOT EXISTS  FK_INDX_MOB2_WC ON "MOBILIZATION2"(WAGE_CONFIGURATIONSID)
+CREATE INDEX IF NOT EXISTS  FK_INDX_MOB2_WC ON "mobilization2"(wage_configurationsId)
 ;
 
 -- TEAM
 
-CREATE TABLE IF NOT EXISTS "TEAM"
+CREATE TABLE IF NOT EXISTS "team"
 (
-   TEAMID IDENTITY PRIMARY KEY NOT NULL,
-   DATE timestamp,
-   DELETED boolean,
-   NAME varchar(255) NOT NULL,
-   STATUS integer NOT NULL,
-   CONSTRUCTION_SITEID bigint,
-   LABORERID bigint
+   teamId IDENTITY PRIMARY KEY NOT NULL,
+   date timestamp,
+   deleted boolean,
+   name varchar(255) NOT NULL,
+   status integer NOT NULL,
+   constructionsiteId bigint,
+   leaderId bigint
 )
 ;
-ALTER TABLE "TEAM"
+ALTER TABLE "team"
 ADD CONSTRAINT IF NOT EXISTS FK_TEAM_LABORER
-FOREIGN KEY (LABORERID)
-REFERENCES "LABORER"(LABORERID)
+FOREIGN KEY (leaderId)
+REFERENCES "laborer"(laborerId)
 ;
-ALTER TABLE "TEAM"
+ALTER TABLE "team"
 ADD CONSTRAINT IF NOT EXISTS FK_TEAM_CS
-FOREIGN KEY (CONSTRUCTION_SITEID)
-REFERENCES "CONSTRUCTION_SITE"(CONSTRUCTION_SITEID)
+FOREIGN KEY (constructionsiteId)
+REFERENCES "construction_site"(constructionsiteId)
 ;
-CREATE INDEX IF NOT EXISTS  FK_INDX_TEAM_LABORER ON "TEAM"(LABORERID)
+CREATE INDEX IF NOT EXISTS  FK_INDX_TEAM_LABORER ON "team"(leaderId)
 ;
-CREATE UNIQUE INDEX IF NOT EXISTS PK_TEAM ON "TEAM"(TEAMID)
+CREATE UNIQUE INDEX IF NOT EXISTS PK_TEAM ON "team"(teamId)
 ;
-CREATE INDEX IF NOT EXISTS  FK_INDX_TEAM_CS ON "TEAM"(CONSTRUCTION_SITEID)
+CREATE INDEX IF NOT EXISTS  FK_INDX_TEAM_CS ON "team"(constructionsiteId)
 ;
 
-CREATE TABLE IF NOT EXISTS "LABORER_CONSTRUCTIONSITE_TEAM"
+CREATE TABLE IF NOT EXISTS "laborer_constructionsite_team"
 (
-	TEAMID bigint,
-	LABORER_CONSTRUCTIONSITEID bigint
+	teamId bigint,
+	laborer_constructionsiteId bigint
 )
 ;
 
-
+/*
 -- CONSTRUCTION SITE TEAM
 
 CREATE TABLE IF NOT EXISTS "CONSTRUCTION_SITE_TEAM"
@@ -421,187 +419,190 @@ CREATE INDEX IF NOT EXISTS  FK_INDX_CS_TEAM ON "CONSTRUCTION_SITE_TEAM"(CST_CSID
 ;
 CREATE UNIQUE INDEX IF NOT EXISTS UK_INDX_CS ON "CONSTRUCTION_SITE_TEAM"(TEAMS_TEAMID)
 ;
-
+*/
 
 -- ADVANCE_PAYMENT_CONFIGURATIONS
 
-CREATE TABLE IF NOT EXISTS "ADVANCE_PAYMENT_CONFIGURATIONS"
+CREATE TABLE IF NOT EXISTS "advance_payment_configurations"
 (
-   ADVANCE_PAYMENT_CONFIGURATIONSID bigint PRIMARY KEY NOT NULL,
-   FAILURE_DISCOUNT double,
-   PERMISSION_DISCOUNT double
+   advance_payment_configurationsId bigint PRIMARY KEY NOT NULL,
+   permission_discount double,
+   failure_discount double
 )
 ;
-CREATE UNIQUE INDEX IF NOT EXISTS PK_APC ON "ADVANCE_PAYMENT_CONFIGURATIONS"(ADVANCE_PAYMENT_CONFIGURATIONSID)
+CREATE UNIQUE INDEX IF NOT EXISTS PK_APC ON "advance_payment_configurations"(advance_payment_configurationsId)
 ;
 
 
 
 -- ADVANCE_PAYMENT_ITEM
 
-CREATE TABLE IF NOT EXISTS "ADVANCE_PAYMENT_ITEM"
+CREATE TABLE IF NOT EXISTS "advance_payment_item"
 (
-   SUPLE_CODE integer,
-   SUPLE_INCREASE_AMOUNT double,
-   SUPLE_NORMAL_AMOUNT double,
-   ADVANCE_PAYMENT_CONFIGURATIONSID bigint
+   suple_code integer,
+   suple_increase_amount double,
+   suple_normal_amount double,
+   advance_payment_configurationsId bigint
 )
 ;
-ALTER TABLE "ADVANCE_PAYMENT_ITEM"
+ALTER TABLE "advance_payment_item"
 ADD CONSTRAINT IF NOT EXISTS ADVANCEPAYMENTITEMADVANCE_PAYMENT_CONFIGURATIONSID
-FOREIGN KEY (ADVANCE_PAYMENT_CONFIGURATIONSID)
-REFERENCES "ADVANCE_PAYMENT_CONFIGURATIONS"(ADVANCE_PAYMENT_CONFIGURATIONSID)
+FOREIGN KEY (advance_payment_configurationsId)
+REFERENCES "advance_payment_configurations"(advance_payment_configurationsId)
 ;
-CREATE UNIQUE INDEX IF NOT EXISTS UK_INDX_SUPLE ON "ADVANCE_PAYMENT_ITEM"(SUPLE_CODE)
+CREATE UNIQUE INDEX IF NOT EXISTS UK_INDX_SUPLE ON "advance_payment_item"(suple_code)
 ;
-CREATE INDEX IF NOT EXISTS API_INDX_ID ON "ADVANCE_PAYMENT_ITEM"(ADVANCE_PAYMENT_CONFIGURATIONSID)
+CREATE INDEX IF NOT EXISTS API_INDX_ID ON "advance_payment_item"(advance_payment_configurationsId)
 ;
 
 -- AFP_AND_INSURANCE
 
-CREATE TABLE IF NOT EXISTS "AFP_AND_INSURANCE"
+CREATE TABLE IF NOT EXISTS "afp_and_insurance"
 (
-   AFP_AND_INSURANCEID bigint PRIMARY KEY NOT NULL,
-   SIS double
+   afp_and_insuranceId bigint PRIMARY KEY NOT NULL,
+   sis double
 )
 ;
-CREATE UNIQUE INDEX IF NOT EXISTS PK_AFP ON "AFP_AND_INSURANCE"(AFP_AND_INSURANCEID)
+CREATE UNIQUE INDEX IF NOT EXISTS PK_AFP ON "afp_and_insurance"(afp_and_insuranceId)
 ;
 
 -- AFP_ITEM
 
-CREATE TABLE IF NOT EXISTS "AFP_ITEM"
+CREATE TABLE IF NOT EXISTS "afp_item"
 (
-   AFP integer,
-   RATE double,
-   AFP_AND_INSURANCEID bigint
+   afp integer,
+   rate double,
+   afp_and_insuranceId bigint
 )
 ;
-ALTER TABLE "AFP_ITEM"
+ALTER TABLE "afp_item"
 ADD CONSTRAINT IF NOT EXISTS FK_ADF_ITEM_AFP_AND_INSURANCEID
-FOREIGN KEY (AFP_AND_INSURANCEID)
-REFERENCES "AFP_AND_INSURANCE"(AFP_AND_INSURANCEID)
+FOREIGN KEY (afp_and_insuranceId)
+REFERENCES "afp_and_insurance"(afp_and_insuranceId)
 ;
-CREATE INDEX IF NOT EXISTS FK_AI_AAIID_INDX ON "AFP_ITEM"(AFP_AND_INSURANCEID)
+CREATE INDEX IF NOT EXISTS FK_AI_AAIID_INDX ON "afp_item"(afp_and_insuranceId)
 ;
 
 -- TAXATION_CONFIGURATIONS
 
-CREATE TABLE IF NOT EXISTS "TAXATION_CONFIGURATIONS"
+CREATE TABLE IF NOT EXISTS "taxation_configurations"
 (
-   TAXATION_CONFIGURATIONSID bigint PRIMARY KEY NOT NULL,
-   EXEMPT double,
-   FACTOR double,
-   FROMR double,
-   REDUCTION double,
-   TO double
+   taxation_configurationsId bigint PRIMARY KEY NOT NULL,
+   exempt double,
+   factor double,
+   fromr double,
+   reduction double,
+   tor double
 )
 ;
-CREATE UNIQUE INDEX IF NOT EXISTS PK_TAXATION_CONFIG ON "TAXATION_CONFIGURATIONS"(TAXATION_CONFIGURATIONSID)
+CREATE UNIQUE INDEX IF NOT EXISTS PK_TAXATION_CONFIG ON "taxation_configurations"(taxation_configurationsId)
 ;
 
 -- FAMILY_ALLOWANCE_CONFIGURATIONS
 
-CREATE TABLE IF NOT EXISTS "FAMILY_ALLOWANCE_CONFIGURATIONS"
+CREATE TABLE IF NOT EXISTS "family_allowance_configurations"
 (
-   FAMILY_ALLOWANCE_CONFIGURATIONSID bigint PRIMARY KEY NOT NULL,
-   AMOUNT double,
-   FROMR double,
-   TO double
+   family_allowance_configurationsId bigint PRIMARY KEY NOT NULL,
+   amount double,
+   fromr double,
+   tor double
 )
 ;
-CREATE UNIQUE INDEX IF NOT EXISTS PK_FACONFIG ON "FAMILY_ALLOWANCE_CONFIGURATIONS"(FAMILY_ALLOWANCE_CONFIGURATIONSID)
+CREATE UNIQUE INDEX IF NOT EXISTS PK_FACONFIG ON "family_allowance_configurations"(family_allowance_configurationsId)
 ;
 
 -- CONTRACT 
-CREATE TABLE IF NOT EXISTS "CONTRACT"
+CREATE TABLE IF NOT EXISTS "contract"
 (
-	CONTRACTID IDENTITY PRIMARY KEY NOT NULL,
-	ACTIVE smallint default 0 ,
-	FINISHED smallint default 0,
-	contractDescription TEXT, 
-    JOB integer not null,
-    JOBCODE integer not null,
+	contractId IDENTITY PRIMARY KEY NOT NULL,
+	active smallint default 0 ,
+	finished smallint default 0,
+	contract_description TEXT, 
+    job integer not null,
+    job_code integer not null,
 	name varchar(255) NOT NULL,
 	-- finiquito
 	settlement integer, 
-	startDate timestamp NOT NULL, 
+	startdate timestamp NOT NULL, 
 	step varchar(512) NOT NULL,
-	terminationDate timestamp, 
+	terminationdate timestamp, 
 	timeduration double, 
-	valueTreatment integer, 
-	LABORER_CONSTRUCTIONSITEID bigint not null -- no puede ser nulo
+	value_treatment integer, 
+	laborer_constructionsiteId bigint not null -- no puede ser nulo
 )
 ;
-CREATE UNIQUE INDEX IF NOT EXISTS PK_CONTRACT ON "CONTRACT"(CONTRACTID)
+CREATE UNIQUE INDEX IF NOT EXISTS PK_CONTRACT ON "contract"(contractId)
 ;
 
 -- ANNEXED
 
-CREATE TABLE IF NOT EXISTS "ANNEXED"
+CREATE TABLE IF NOT EXISTS "annexed"
 (
-   ANNEXEDID IDENTITY PRIMARY KEY NOT NULL,
-   ANNEXEDDESCRIPTION varchar(2147483647),
-   STARTDATE timestamp,
-   STEP varchar(2147483647),
-   TERMINATIONDATE timestamp,
-   CONTRACTID integer
+   annexedId IDENTITY PRIMARY KEY NOT NULL,
+   annexed_description varchar(2147483647),
+   startdate timestamp,
+   step varchar(2147483647),
+   terminationdate timestamp,
+   contractId integer
 )
 ;
-ALTER TABLE "ANNEXED"
+ALTER TABLE "annexed"
 ADD CONSTRAINT IF NOT EXISTS FK_ANNEXED_CONTRACTID
-FOREIGN KEY (CONTRACTID)
-REFERENCES "CONTRACT"(CONTRACTID)
+FOREIGN KEY (contractId)
+REFERENCES "contract"(contractId)
 ;
-CREATE UNIQUE INDEX  IF NOT EXISTS PK_ANNEXED ON "ANNEXED"(ANNEXEDID)
+CREATE UNIQUE INDEX  IF NOT EXISTS PK_ANNEXED ON "annexed"(annexedId)
 ;
-CREATE INDEX  IF NOT EXISTS FK_ANNEXED_CONTRACTID_IND ON "ANNEXED"(CONTRACTID)
+CREATE INDEX  IF NOT EXISTS FK_ANNEXED_CONTRACTID_IND ON "annexed"(contractId)
 ;
 
 
 -- DATE_CONFIGURATIONS
-CREATE TABLE IF NOT EXISTS "DATE_CONFIGURATIONS"
+CREATE TABLE IF NOT EXISTS "date_configurations"
 (
-   DATE_CONFIGURATIONSID IDENTITY PRIMARY KEY NOT NULL,
-   ADVANCE date,
-   ASSISTANCE date,
-   BEGIN_DEAL date,
-   DATE date,
-   FINISH_DEAL date
+   date_configurationsId IDENTITY PRIMARY KEY NOT NULL,
+   advance date,
+   assistance date,
+   begin_deal date,
+   date date,
+   finish_deal date,
+   benzine double,
+   oil double,
+   uf double
 )
 ;
-CREATE UNIQUE INDEX IF NOT EXISTS PK_DT ON "DATE_CONFIGURATIONS"(DATE_CONFIGURATIONSID)
+CREATE UNIQUE INDEX IF NOT EXISTS PK_DT ON "date_configurations"(date_configurationsId)
 ;
 
 
 -- dates
 CREATE TABLE IF NOT EXISTS "postponedpaymenttool"
 (
-   TOOLID bigint NOT NULL,
-   TOOL_DATE date
+   toolId bigint NOT NULL,
+   tool_date date
 )
 ;
 ALTER TABLE "postponedpaymenttool"
 ADD CONSTRAINT IF NOT EXISTS FK_POSTPONEDPAYMENTTOOL
-FOREIGN KEY (TOOLID)
-REFERENCES "TOOL"(TOOLID)
+FOREIGN KEY (toolId)
+REFERENCES "tool"(toolId)
 ;
-CREATE INDEX IF NOT EXISTS FK_INDX_POSTPONEDPAYMENTTOOL ON "postponedpaymenttool"(TOOLID)
+CREATE INDEX IF NOT EXISTS FK_INDX_POSTPONEDPAYMENTTOOL ON "postponedpaymenttool"(toolId)
 ;
 
 -- dates
 CREATE TABLE IF NOT EXISTS "postponedpaymentloan"
 (
-   LOANID bigint NOT NULL,
-   LOAN_DATE date
+   loanId bigint NOT NULL,
+   loan_date date
 )
 ;
 ALTER TABLE "postponedpaymentloan"
 ADD CONSTRAINT IF NOT EXISTS FK_POSTPONEDPAYMENTLOAN
-FOREIGN KEY (LOANID)
-REFERENCES "LOAN"(LOANID)
+FOREIGN KEY (loanId)
+REFERENCES "loan"(loanId)
 ;
-CREATE INDEX IF NOT EXISTS FK_INDX_POSTPONEDPAYMENTLOAN ON "postponedpaymentloan"(LOANID)
+CREATE INDEX IF NOT EXISTS FK_INDX_POSTPONEDPAYMENTLOAN ON "postponedpaymentloan"(loanId)
 ;
 
 -- TRIGGER
@@ -610,102 +611,163 @@ CREATE INDEX IF NOT EXISTS FK_INDX_POSTPONEDPAYMENTLOAN ON "postponedpaymentloan
 
 
 
-
-CREATE TABLE IF NOT EXISTS ATTENDANCE
+CREATE TABLE IF NOT EXISTS attendance
 (
-   ATTENDANCEID bigint PRIMARY KEY NOT NULL,
+   attendanceId bigint PRIMARY KEY NOT NULL,
    jornal integer,
-   D1 integer,
-   D10 integer,
-   D11 integer,
-   D12 integer,
-   D13 integer,
-   D14 integer,
-   D15 integer,
-   D16 integer,
-   D17 integer,
-   D18 integer,
-   D19 integer,
-   D2 integer,
-   D20 integer,
-   D21 integer,
-   D22 integer,
-   D23 integer,
-   D24 integer,
-   D25 integer,
-   D26 integer,
-   D27 integer,
-   D28 integer,
-   D29 integer,
-   D3 integer,
-   D30 integer,
-   D31 integer,
-   D4 integer,
-   D5 integer,
-   D6 integer,
-   D7 integer,
-   D8 integer,
-   D9 integer,
-   DATE date,
-   LABORER_CONSTRUCTIONSITEID bigint NOT NULL
+   dmp1 integer ,
+   dmp10 integer ,
+   dmp11 integer ,
+   dmp12 integer ,
+   dmp13 integer ,
+   dmp14 integer ,
+   dmp15 integer ,
+   dmp16 integer ,
+   dmp17 integer ,
+   dmp18 integer ,
+   dmp19 integer ,
+   dmp2 integer ,
+   dmp20 integer ,
+   dmp21 integer ,
+   dmp22 integer ,
+   dmp23 integer ,
+   dmp24 integer ,
+   dmp25 integer ,
+   dmp26 integer ,
+   dmp27 integer ,
+   dmp28 integer ,
+   dmp29 integer,
+   dmp3 integer ,
+   dmp30 integer,
+   dmp31 integer,
+   dmp4 integer ,
+   dmp5 integer ,
+   dmp6 integer ,
+   dmp7 integer ,
+   dmp8 integer ,
+   dmp9 integer ,
+   dma1 integer NOT NULL,
+   dma10 integer NOT NULL,
+   dma11 integer NOT NULL,
+   dma12 integer NOT NULL,
+   dma13 integer NOT NULL,
+   dma14 integer NOT NULL,
+   dma15 integer NOT NULL,
+   dma16 integer NOT NULL,
+   dma17 integer NOT NULL,
+   dma18 integer NOT NULL,
+   dma19 integer NOT NULL,
+   dma2 integer NOT NULL,
+   dma20 integer NOT NULL,
+   dma21 integer NOT NULL,
+   dma22 integer NOT NULL,
+   dma23 integer NOT NULL,
+   dma24 integer NOT NULL,
+   dma25 integer NOT NULL,
+   dma26 integer NOT NULL,
+   dma27 integer NOT NULL,
+   dma28 integer NOT NULL,
+   dma29 integer,
+   dma3 integer NOT NULL,
+   dma30 integer,
+   dma31 integer,
+   dma4 integer NOT NULL,
+   dma5 integer NOT NULL,
+   dma6 integer NOT NULL,
+   dma7 integer NOT NULL,
+   dma8 integer NOT NULL,
+   dma9 integer NOT NULL,
+   date date,
+   laborer_constructionsiteId bigint NOT NULL
 )
 ;
-ALTER TABLE ATTENDANCE
+ALTER TABLE attendance
 ADD CONSTRAINT IF NOT EXISTS FK_ATTENDANCE_LABORER_CONSTRUCTIONSITEID
-FOREIGN KEY (LABORER_CONSTRUCTIONSITEID)
-REFERENCES LABORER_CONSTRUCTIONSITE(LABORER_CONSTRUCTIONSITEID)
+FOREIGN KEY (laborer_constructionsiteId)
+REFERENCES laborer_constructionsite(laborer_constructionsiteId)
 ;
-CREATE UNIQUE INDEX IF NOT EXISTS  PRIMARY_KEY_8E ON ATTENDANCE(ATTENDANCEID)
+CREATE UNIQUE INDEX IF NOT EXISTS  PRIMARY_KEY_8E ON attendance(attendanceId)
 ;
-CREATE INDEX IF NOT EXISTS FK_ATTENDANCE_LABORER_CONSTRUCTIONSITEID_INDEX_8 ON ATTENDANCE(LABORER_CONSTRUCTIONSITEID)
+CREATE INDEX IF NOT EXISTS FK_ATTENDANCE_LABORER_CONSTRUCTIONSITEID_INDEX_8 ON attendance(laborer_constructionsiteId)
 ;
 
 
 
 CREATE TABLE IF NOT EXISTS overtime
 (
-   OVERTIMEID bigint PRIMARY KEY NOT NULL,
-   D1 integer NOT NULL,
-   D10 integer NOT NULL,
-   D11 integer NOT NULL,
-   D12 integer NOT NULL,
-   D13 integer NOT NULL,
-   D14 integer NOT NULL,
-   D15 integer NOT NULL,
-   D16 integer NOT NULL,
-   D17 integer NOT NULL,
-   D18 integer NOT NULL,
-   D19 integer NOT NULL,
-   D2 integer NOT NULL,
-   D20 integer NOT NULL,
-   D21 integer NOT NULL,
-   D22 integer NOT NULL,
-   D23 integer NOT NULL,
-   D24 integer NOT NULL,
-   D25 integer NOT NULL,
-   D26 integer NOT NULL,
-   D27 integer NOT NULL,
-   D28 integer NOT NULL,
-   D29 integer,
-   D3 integer NOT NULL,
-   D30 integer,
-   D31 integer,
-   D4 integer NOT NULL,
-   D5 integer NOT NULL,
-   D6 integer NOT NULL,
-   D7 integer NOT NULL,
-   D8 integer NOT NULL,
-   D9 integer NOT NULL,
-   DATE date NOT NULL,
-   LABORER_CONSTRUCTIONSITEID bigint NOT NULL
+   overtimeId bigint PRIMARY KEY NOT NULL,
+   dmp1 integer ,
+   dmp10 integer ,
+   dmp11 integer ,
+   dmp12 integer ,
+   dmp13 integer ,
+   dmp14 integer ,
+   dmp15 integer ,
+   dmp16 integer ,
+   dmp17 integer ,
+   dmp18 integer ,
+   dmp19 integer ,
+   dmp2 integer ,
+   dmp20 integer ,
+   dmp21 integer ,
+   dmp22 integer ,
+   dmp23 integer ,
+   dmp24 integer ,
+   dmp25 integer ,
+   dmp26 integer ,
+   dmp27 integer ,
+   dmp28 integer ,
+   dmp29 integer,
+   dmp3 integer ,
+   dmp30 integer,
+   dmp31 integer,
+   dmp4 integer ,
+   dmp5 integer ,
+   dmp6 integer ,
+   dmp7 integer ,
+   dmp8 integer ,
+   dmp9 integer ,
+   dma1 integer NOT NULL,
+   dma10 integer NOT NULL,
+   dma11 integer NOT NULL,
+   dma12 integer NOT NULL,
+   dma13 integer NOT NULL,
+   dma14 integer NOT NULL,
+   dma15 integer NOT NULL,
+   dma16 integer NOT NULL,
+   dma17 integer NOT NULL,
+   dma18 integer NOT NULL,
+   dma19 integer NOT NULL,
+   dma2 integer NOT NULL,
+   dma20 integer NOT NULL,
+   dma21 integer NOT NULL,
+   dma22 integer NOT NULL,
+   dma23 integer NOT NULL,
+   dma24 integer NOT NULL,
+   dma25 integer NOT NULL,
+   dma26 integer NOT NULL,
+   dma27 integer NOT NULL,
+   dma28 integer NOT NULL,
+   dma29 integer,
+   dma3 integer NOT NULL,
+   dma30 integer,
+   dma31 integer,
+   dma4 integer NOT NULL,
+   dma5 integer NOT NULL,
+   dma6 integer NOT NULL,
+   dma7 integer NOT NULL,
+   dma8 integer NOT NULL,
+   dma9 integer NOT NULL,
+   date date NOT NULL,
+   laborer_constructionsiteId bigint NOT NULL
 )
 ;
 ALTER TABLE overtime
 ADD CONSTRAINT IF NOT EXISTS FK_OVERTIME_LABORER_CONSTRUCTIONSITEID
-FOREIGN KEY (LABORER_CONSTRUCTIONSITEID)
-REFERENCES LABORER_CONSTRUCTIONSITE(LABORER_CONSTRUCTIONSITEID)
+FOREIGN KEY (laborer_constructionsiteId)
+REFERENCES laborer_constructionsite(laborer_constructionsiteId)
 ;
-CREATE UNIQUE INDEX IF NOT EXISTS PRIMARY_KEY_4E ON overtime(OVERTIMEID)
+CREATE UNIQUE INDEX IF NOT EXISTS PRIMARY_KEY_4E ON overtime(overtimeId)
 ;
-CREATE INDEX IF NOT EXISTS FK_OVERTIME_LABORER_CONSTRUCTIONSITEID_INDEX_4 ON overtime(LABORER_CONSTRUCTIONSITEID)
+CREATE INDEX IF NOT EXISTS FK_OVERTIME_LABORER_CONSTRUCTIONSITEID_INDEX_4 ON overtime(laborer_constructionsiteId)
 ;

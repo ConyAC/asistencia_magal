@@ -37,7 +37,7 @@ public class Accident implements Serializable {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
 	@Column(name="accidentId")
-	Long accidentId;
+	Long id;
 	
 	@NotNull(message="La fecha inicial es necesaria.")
 	@Temporal(TemporalType.DATE)
@@ -51,10 +51,11 @@ public class Accident implements Serializable {
 	
 	@NotEmpty(message="Debe ingresar una descripción del accidente")
 	@NotNull(message="Debe ingresar una descripción del accidente")
+	@Column(name="description")
 	String description;
 	
 	@ManyToOne
-	@JoinColumn(name="LABORER_CONSTRUCTIONSITEID",nullable = false)
+	@JoinColumn(name="laborer_constructionsiteId",nullable = false)
 	LaborerConstructionsite laborerConstructionSite;
 	
 	@Column(name="accident_level")
@@ -62,16 +63,18 @@ public class Accident implements Serializable {
 	@Convert(converter = AccidentLevelConverter.class)
 	AccidentLevel accidentLevel;
 	
+	@Column(name="was_negligence")
 	boolean wasNegligence;
 	
+	@Column(name="confirmed")
 	boolean confirmed;
 
-	public Long getAccidentId() {
-		return accidentId;
+	public Long getId() {
+		return id;
 	}
 
-	public void setAccidentId(Long accidentId) {
-		this.accidentId = accidentId;
+	public void setId(Long accidentId) {
+		this.id = accidentId;
 	}
 
 	public Date getFromDate() {

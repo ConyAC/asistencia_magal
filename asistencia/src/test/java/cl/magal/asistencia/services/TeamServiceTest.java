@@ -38,7 +38,7 @@ public class TeamServiceTest {
 		service.saveTeam(t);
 		TeamHelper.verify(t);
 		
-		Team dbt = service.findTeam(t.getTeamId());
+		Team dbt = service.findTeam(t.getId());
 		
 		TeamHelper.verify(dbt);		
 		TeamHelper.verify(t,dbt);		
@@ -54,7 +54,7 @@ public class TeamServiceTest {
 		service.saveTeam(t);
 		TeamHelper.verify(t);
 		
-		Team dbt = service.findTeam(t.getTeamId());
+		Team dbt = service.findTeam(t.getId());
 		
 		assertNotNull("La cuadrilla no puede ser nulo", dbt);		
 		assertEquals("El nombre de la cuadrilla debe der igual a ", "Cuadrilla 1", dbt.getName());
@@ -71,14 +71,14 @@ public class TeamServiceTest {
 		service.saveTeam(t);
 		TeamHelper.verify(t);
 		
-		Team dbt = service.findTeam(t.getTeamId());		
+		Team dbt = service.findTeam(t.getId());		
 		TeamHelper.verify(t);
 		TeamHelper.verify(t, dbt);
 		
 		t.setStatus(Status.FINALIZED);	
 		service.saveTeam(t);
 		
-		dbt = service.findTeam(t.getTeamId());
+		dbt = service.findTeam(t.getId());
 		TeamHelper.verify(t, dbt);	
 				
 	}
@@ -93,13 +93,13 @@ public class TeamServiceTest {
 		service.saveTeam(t);
 		TeamHelper.verify(t);
 		
-		Team dbt = service.findTeam(t.getTeamId());		
+		Team dbt = service.findTeam(t.getId());		
 		TeamHelper.verify(t);
 		TeamHelper.verify(t, dbt);
 				
-		service.deleteTeam(t.getTeamId());	
+		service.deleteTeam(t.getId());	
 		
-		dbt = service.findTeam(t.getTeamId());					
+		dbt = service.findTeam(t.getId());					
 		assertNull("La cuadrilla debe ser nula luego de la eliminación", dbt );
 		
 	}
@@ -130,7 +130,7 @@ public class TeamServiceTest {
 		
 		LaborerHelper.verify(laborer);
 		
-		Team dbt = service.findTeam(t.getTeamId());
+		Team dbt = service.findTeam(t.getId());
 		
 		//verifica que al recuperar la cuadrilla, se obtenga el trabajador guardado
 		assertNotNull("El objeto guardado no puede ser nulo", dbt);
@@ -145,10 +145,10 @@ public class TeamServiceTest {
 		//verifica que el trabajador tiene un id válido
 		LaborerHelper.verify(laborer2);
 		
-		dbt = service.findTeam(t.getTeamId());
+		dbt = service.findTeam(t.getId());
 		
 		//los ids de los laborer no pueden ser iguales
-		assertNotEquals("los ids de los obreros no pueden ser iguales", laborer2.getLaborerId(), laborer.getLaborerId());
+		assertNotEquals("los ids de los obreros no pueden ser iguales", laborer2.getId(), laborer.getId());
 		
 		//verifica que al recuperar la cuadrilla, se obtenga el trabajador guardado
 		assertNotNull("El objeto guardado no puede ser nulo", dbt);

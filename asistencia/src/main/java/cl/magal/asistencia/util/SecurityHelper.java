@@ -1,5 +1,8 @@
 package cl.magal.asistencia.util;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import cl.magal.asistencia.entities.ConstructionSite;
 import cl.magal.asistencia.entities.User;
 import cl.magal.asistencia.entities.enums.Permission;
@@ -9,6 +12,8 @@ import com.vaadin.server.VaadinSession;
 import com.vaadin.ui.UI;
 
 public class SecurityHelper {
+	
+	private transient static Logger logger = LoggerFactory.getLogger(SecurityHelper.class);
 	
 	static User testUser;
 	
@@ -25,7 +30,9 @@ public class SecurityHelper {
 	}
 	
 	public static boolean isLogged(){
-		return getUser() == null;
+		User user = getUser();
+		logger.debug("user {}",user);
+		return  user != null;
 	}
 
 	public static boolean hasConstructionSite(ConstructionSite cs){

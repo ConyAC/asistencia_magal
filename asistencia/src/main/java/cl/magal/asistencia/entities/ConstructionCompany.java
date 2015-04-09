@@ -10,6 +10,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
+import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 
 import org.hibernate.validator.constraints.NotEmpty;
@@ -20,6 +21,7 @@ import org.hibernate.validator.constraints.NotEmpty;
  */
 
 @Entity
+@Table(name="construction_company")
 public class ConstructionCompany implements Serializable {
 	
 	private static final long serialVersionUID = 3638495401206211761L;
@@ -27,8 +29,8 @@ public class ConstructionCompany implements Serializable {
 	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
-    @Column(name = "constructionCompanyId")
-    private Long constructionCompanyId;
+    @Column(name = "construction_companyId")
+    private Long id;
     
 	@Column(name="commune")
     private String commune;
@@ -49,19 +51,19 @@ public class ConstructionCompany implements Serializable {
 	 
 	@JoinTable(name="constructioncompany_constructionsite",
 		    joinColumns = { 
-		    		@JoinColumn(name = "constructionCompanyId", referencedColumnName = "constructionCompanyId")
+		    		@JoinColumn(name = "construction_companyId", referencedColumnName = "construction_companyId")
 		     }, 
 		     inverseJoinColumns = { 
-		            @JoinColumn(name = "construction_siteId", referencedColumnName = "construction_siteId")
+		            @JoinColumn(name = "constructionsiteId", referencedColumnName = "constructionsiteId")
 		     }
 			)
 	 
-    public Long getConstructionCompanyId() {
-		return constructionCompanyId;
+    public Long getId() {
+		return id;
 	}
 
-	public void setConstructionCompanyId(Long constructionCompanyId) {
-		this.constructionCompanyId = constructionCompanyId;
+	public void setId(Long constructionCompanyId) {
+		this.id = constructionCompanyId;
 	}
 
 	public String getCommune() {
@@ -99,7 +101,7 @@ public class ConstructionCompany implements Serializable {
 	@Override
     public int hashCode() {
         int hash = 0;
-        hash += (constructionCompanyId != null ? constructionCompanyId.hashCode() : 0);
+        hash += (id != null ? id.hashCode() : 0);
         return hash;
     }
 
@@ -110,7 +112,7 @@ public class ConstructionCompany implements Serializable {
             return false;
         }
         ConstructionCompany other = (ConstructionCompany) object;
-        if ((this.constructionCompanyId == null && other.constructionCompanyId != null) || (this.constructionCompanyId != null && !this.constructionCompanyId.equals(other.constructionCompanyId))) {
+        if ((this.id == null && other.id != null) || (this.id != null && !this.id.equals(other.id))) {
             return false;
         }
         return true;
@@ -118,6 +120,6 @@ public class ConstructionCompany implements Serializable {
     
 	@Override
     public String toString() {
-        return "jpa.magal.entities.ConstructionCompany[ constructionCompanyId=" + constructionCompanyId + " ]";
+        return "jpa.magal.entities.ConstructionCompany[ constructionCompanyId=" + id + " ]";
     }
 }

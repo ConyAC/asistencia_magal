@@ -13,8 +13,6 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
-import cl.magal.asistencia.entities.enums.Job;
-
 @Entity
 @Table(name="annexed")
 public class Annexed implements Serializable {
@@ -25,31 +23,32 @@ public class Annexed implements Serializable {
 	private static final long serialVersionUID = 6711988992116421430L;
 	
 	@Id
-	@Column(name="ANNEXEDID")
-	Long annexedId;
+	@Column(name="annexedId")
+	Long id;
 	
 	@Basic(optional = false)
-    @Column(name = "startDate")
+    @Column(name = "startdate")
     @Temporal(TemporalType.TIMESTAMP)
     private Date startDate;
     @Basic(optional = false)
-    @Column(name = "terminationDate")
+    @Column(name = "terminationdate")
     @Temporal(TemporalType.TIMESTAMP)
     private Date terminationDate;
-	
+    @Column(name = "step")
 	String step;
+    @Column(name = "annexed_description")
 	String annexedDescription;
 	
 	@ManyToOne
-	@JoinColumn(name="CONTRACTID")
+	@JoinColumn(name="contractId")
 	Contract contract;
 
-	public Long getAnnexedId() {
-		return annexedId;
+	public Long getId() {
+		return id;
 	}
 
-	public void setAnnexedId(Long annexedId) {
-		this.annexedId = annexedId;
+	public void setId(Long annexedId) {
+		this.id = annexedId;
 	}
 
 	public String getAnnexedDescription() {

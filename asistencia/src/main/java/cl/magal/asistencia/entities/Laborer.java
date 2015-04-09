@@ -52,7 +52,7 @@ import cl.magal.asistencia.entities.validator.RutDigit;
 	uniqueConstraints = @UniqueConstraint(columnNames = { "rut" }) )
 @NamedQueries({
     @NamedQuery(name = "Laborer.findAll", query = "SELECT l FROM Laborer l"),
-    @NamedQuery(name = "Laborer.findByLaborerId", query = "SELECT l FROM Laborer l WHERE l.laborerId = :laborerId"),
+    @NamedQuery(name = "Laborer.findByLaborerId", query = "SELECT l FROM Laborer l WHERE l.id = :laborerId"),
     @NamedQuery(name = "Laborer.findByFirstname", query = "SELECT l FROM Laborer l WHERE l.firstname = :firstname"),
     @NamedQuery(name = "Laborer.findBySecondname", query = "SELECT l FROM Laborer l WHERE l.secondname = :secondname"),
     @NamedQuery(name = "Laborer.findByLastname", query = "SELECT l FROM Laborer l WHERE l.lastname = :lastname"),
@@ -63,7 +63,6 @@ import cl.magal.asistencia.entities.validator.RutDigit;
     @NamedQuery(name = "Laborer.findByAddress", query = "SELECT l FROM Laborer l WHERE l.address = :address"),
     @NamedQuery(name = "Laborer.findByMobileNumber", query = "SELECT l FROM Laborer l WHERE l.mobileNumber = :mobileNumber"),
     @NamedQuery(name = "Laborer.findByPhone", query = "SELECT l FROM Laborer l WHERE l.phone = :phone"),
-    @NamedQuery(name = "Laborer.findByContractId", query = "SELECT l FROM Laborer l WHERE l.contractId = :contractId"),
     @NamedQuery(name = "Laborer.findByAfpId", query = "SELECT l FROM Laborer l WHERE l.afp = :afp")
     })
 public class Laborer implements Serializable {
@@ -75,20 +74,25 @@ public class Laborer implements Serializable {
 	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "laborerId")
-    private Long laborerId;
+    private Long id;
+	
     @Basic(optional = false)
     @NotNull(message="El nombre es necesario")
     @NotEmpty(message="El nombre es necesario")
     @Column(name = "firstname", nullable=false)
     private String firstname;
+    
     @Column(name = "secondname")
     private String secondname;
+    
     @NotNull(message="El apellido es necesario")
     @NotEmpty(message="El apellido es necesario")
     @Column(name = "lastname", nullable=false)
     private String lastname;
+    
     @Column(name = "secondlastname")
     private String secondlastname;
+    
     @NotNull(message="El rut es necesario")
     @NotEmpty(message="El rut es necesario")
     @Column(name = "rut", nullable=false,unique=true)
@@ -96,7 +100,7 @@ public class Laborer implements Serializable {
     @RutDigit(message="El rut '%s' no es válido.")
     private String rut;
 
-    @Column(name = "dateBirth")
+    @Column(name = "date_birth")
     @Temporal(TemporalType.TIMESTAMP)
     @AgeMax(message="El trabajador es menor de 18 años")
     @NotNull(message="La fecha de nacimiento es necesaria")
@@ -106,28 +110,37 @@ public class Laborer implements Serializable {
     @NotEmpty(message="La dirección es necesario")
     @Column(name = "address", nullable=false)
     private String address;
-    @Column(name = "mobileNumber")
+    
+    @Column(name = "mobile_number")
     private String mobileNumber;
+    
     @Column(name = "phone")
     private String phone;
+    
 //    @Column(name = "dateAdmission")
 //    @Temporal(TemporalType.TIMESTAMP)
 //    private Date dateAdmission;
-    @Column(name = "contractId")
-    private Integer contractId;
+//    @Column(name = "contractId")
+//    private Integer contractId;
+    
     @Column(name="dependents")
     private Integer dependents;
+    
     @Column(name="town")
     private String town;
+    
     @NotNull(message="La comuna es necesaria")
     @NotEmpty(message="La comuna es necesaria")
     @Column(name="commune", nullable=false)
     private String commune;
+    
     @Column(name="wedge")
     private Integer wedge;
+    
     @Column(name="provenance")
     private String provenance;
-    @Column(name="bankAccount")
+    
+    @Column(name="bank_account")
     private String bankAccount;
 
     @Column(name = "afp" , nullable = false)
@@ -139,7 +152,7 @@ public class Laborer implements Serializable {
     private Isapre isapre;
     
     @Convert(converter = MaritalStatusConverter.class)
-    @Column(name = "maritalStatus", nullable = false)
+    @Column(name = "marital_status", nullable = false)
     private MaritalStatus maritalStatus;
     
     @NotNull(message="La nacionalidad es necesaria")
@@ -177,11 +190,11 @@ public class Laborer implements Serializable {
     }
 
     public Laborer(Long laborerId) {
-        this.laborerId = laborerId;
+        this.id = laborerId;
     }
 
     public Laborer(Long laborerId, String firstname) {
-        this.laborerId = laborerId;
+        this.id = laborerId;
         this.firstname = firstname;
     }
     
@@ -241,12 +254,12 @@ public class Laborer implements Serializable {
 		this.dependents = dependents;
 	}
 
-	public Long getLaborerId() {
-        return laborerId;
+	public Long getId() {
+        return id;
     }
 
-    public void setLaborerId(Long laborerId) {
-        this.laborerId = laborerId;
+    public void setId(Long laborerId) {
+        this.id = laborerId;
     }
 
     public String getFirstname() {
@@ -336,14 +349,14 @@ public class Laborer implements Serializable {
 //    public void setDateAdmission(Date dateAdmission) {
 //        this.dateAdmission = dateAdmission;
 //    }
-
-    public Integer getContractId() {
-        return contractId;
-    }
-
-    public void setContractId(Integer contractId) {
-        this.contractId = contractId;
-    }
+//
+//    public Integer getContractId() {
+//        return contractId;
+//    }
+//
+//    public void setContractId(Integer contractId) {
+//        this.contractId = contractId;
+//    }
 
     public Afp getAfp() {
 		return afp;
@@ -369,7 +382,7 @@ public class Laborer implements Serializable {
 	@Override
     public int hashCode() {
         int hash = 0;
-        hash += (laborerId != null ? laborerId.hashCode() : 0);
+        hash += (id != null ? id.hashCode() : 0);
         return hash;
     }
 	
@@ -404,7 +417,7 @@ public class Laborer implements Serializable {
             return false;
         }
         Laborer other = (Laborer) object;
-        if ((this.laborerId == null && other.laborerId != null) || (this.laborerId != null && !this.laborerId.equals(other.laborerId))) {
+        if ((this.id == null && other.id != null) || (this.id != null && !this.id.equals(other.id))) {
             return false;
         }
         return true;
@@ -412,6 +425,6 @@ public class Laborer implements Serializable {
 
     @Override
     public String toString() {
-        return "jpa.magal.entities.Laborer[ laborerId=" + laborerId + " ]";
+        return "jpa.magal.entities.Laborer[ laborerId=" + id + " ]";
     }
 }

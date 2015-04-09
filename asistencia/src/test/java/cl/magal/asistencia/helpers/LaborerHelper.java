@@ -36,7 +36,7 @@ public final class LaborerHelper {
 	public static void verify(Laborer laborer) {
 		
 		assertNotNull("El trabajador no puede ser nulo",laborer);
-		assertNotNull("El id del trabajador no puede ser nulo",laborer.getLaborerId());
+		assertNotNull("El id del trabajador no puede ser nulo",laborer.getId());
 		assertNotNull("El nombre del trabajador no puede ser nulo",laborer.getFirstname());
 	}
 	
@@ -44,7 +44,7 @@ public final class LaborerHelper {
 		assertNotNull("El l no puede ser nulo.",l);
 		assertNotNull("El bdl no puede ser nulo.",bdl);
 		
-		assertSame("El id debe ser el mismo.",l.getLaborerId(),bdl.getLaborerId());
+		assertSame("El id debe ser el mismo.",l.getId(),bdl.getId());
 		assertEquals("El nombre debe ser el mismo.",l.getFirstname(),bdl.getFirstname());
 		
 //		//verificar tipo enum 	

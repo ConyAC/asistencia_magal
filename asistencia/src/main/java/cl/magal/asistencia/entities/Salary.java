@@ -28,27 +28,29 @@ public class Salary implements Serializable {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
 	@Column(name="salarytId")
-	Long salaryId;
+	Long id;
 	
 	@ManyToOne
-	@JoinColumn(name="LABORER_CONSTRUCTIONSITEID",nullable=false)
+	@JoinColumn(name="laborer_constructionsiteId",nullable=false)
 	LaborerConstructionsite laborerConstructionSite;
-	
 	
 	@NotNull(message="La fecha es necesaria.")
 	@Temporal(TemporalType.DATE)
 	@Column(name = "date" ,nullable = false )
 	Date date;
 	
+	@Column(name = "suple")
 	double suple;
+	
+	@Column(name = "salary")
 	double salary;
 	
 	
-	public Long getSalaryId() {
-		return salaryId;
+	public Long getId() {
+		return id;
 	}
-	public void setSalaryId(Long salaryId) {
-		this.salaryId = salaryId;
+	public void setId(Long salaryId) {
+		this.id = salaryId;
 	}
 	public LaborerConstructionsite getLaborerConstructionSite() {
 		return laborerConstructionSite;
