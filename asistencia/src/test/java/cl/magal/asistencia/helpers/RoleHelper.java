@@ -14,7 +14,7 @@ public class RoleHelper {
 	public static Role newRole() {
 		Role role = new Role();
 		role.setName("ADM");
-		role.setRoleId(1L);		
+		role.setId(1L);		
 		Set<Permission> perm = new HashSet<Permission>();	
 		perm.add(Permission.CREAR_OBRA);
 		perm.add(Permission.EDITAR_OBRA);
@@ -27,7 +27,7 @@ public class RoleHelper {
 	public static void verify(Role r) {
 		
 		assertNotNull("El rol no puede ser nulo.", r);
-		assertNotNull("El id de role no puede ser nulo.", r.getRoleId());
+		assertNotNull("El id de role no puede ser nulo.", r.getId());
 		assertNotNull("El nombre no puede ser nulo.", r.getName());
 		//verificar que el tipo del permiso sea del tipo enum Permission		
 		for(Permission p : r.getPermission()){

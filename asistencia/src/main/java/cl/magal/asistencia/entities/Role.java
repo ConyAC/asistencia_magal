@@ -6,8 +6,6 @@
 package cl.magal.asistencia.entities;
 
 import java.io.Serializable;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Set;
 
 import javax.persistence.Basic;
@@ -22,11 +20,8 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
-import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import cl.magal.asistencia.entities.enums.Permission;
@@ -39,7 +34,7 @@ import cl.magal.asistencia.entities.enums.Permission;
 @Table(name = "role")
 @NamedQueries({
     @NamedQuery(name = "Role.findAll", query = "SELECT r FROM Role r"),
-    @NamedQuery(name = "Role.findByRoleId", query = "SELECT r FROM Role r WHERE r.roleId = :roleId"),
+    @NamedQuery(name = "Role.findByRoleId", query = "SELECT r FROM Role r WHERE r.id = :roleId"),
     @NamedQuery(name = "Role.findByName", query = "SELECT r FROM Role r WHERE r.name = :name"),
     @NamedQuery(name = "Role.findByDescription", query = "SELECT r FROM Role r WHERE r.description = :description")})
 public class Role implements Serializable {
@@ -48,10 +43,12 @@ public class Role implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
     @Column(name = "roleId")
-    private Long roleId;
+    private Long id;
+    
     @Basic(optional = false)
     @Column(name = "name")
     private String name;
+    
     @Column(name = "description")
     private String description;
 
@@ -66,20 +63,20 @@ public class Role implements Serializable {
     }
 
     public Role(Long roleId) {
-        this.roleId = roleId;
+        this.id = roleId;
     }
 
     public Role(Long roleId, String name) {
-        this.roleId = roleId;
+        this.id = roleId;
         this.name = name;
     }
 
-    public Long getRoleId() {
-        return roleId;
+    public Long getId() {
+        return id;
     }
 
-    public void setRoleId(Long roleId) {
-        this.roleId = roleId;
+    public void setId(Long roleId) {
+        this.id = roleId;
     }
 
     public String getName() {
@@ -109,7 +106,7 @@ public class Role implements Serializable {
 	@Override
     public int hashCode() {
         int hash = 0;
-        hash += (roleId != null ? roleId.hashCode() : 0);
+        hash += (id != null ? id.hashCode() : 0);
         return hash;
     }
 
@@ -120,7 +117,7 @@ public class Role implements Serializable {
             return false;
         }
         Role other = (Role) object;
-        if ((this.roleId == null && other.roleId != null) || (this.roleId != null && !this.roleId.equals(other.roleId))) {
+        if ((this.id == null && other.id != null) || (this.id != null && !this.id.equals(other.id))) {
             return false;
         }
         return true;
@@ -128,7 +125,7 @@ public class Role implements Serializable {
 
     @Override
     public String toString() {
-        return "jpa.magal.entities.Role[ roleId=" + roleId + " ]";
+        return "jpa.magal.entities.Role[ roleId=" + id + " ]";
     }
     
 }

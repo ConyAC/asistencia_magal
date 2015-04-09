@@ -26,7 +26,7 @@ public class FamilyAllowanceConfigurations implements Serializable {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
     @Column(name = "family_allowance_configurationsId")
-	Long familyAllowanceConfigurationsId;
+	Long id;
 	
 	@Digits(fraction = 2, integer = 8)
 	@Column(name ="fromr")
@@ -40,13 +40,12 @@ public class FamilyAllowanceConfigurations implements Serializable {
 	@Column(name ="amount")
 	Double amount;
 
-	public Long getFamilyAllowanceConfigurationsId() {
-		return familyAllowanceConfigurationsId;
+	public Long getId() {
+		return id;
 	}
 
-	public void setFamilyAllowanceConfigurationsId(
-			Long familyAllowanceConfigurationsId) {
-		this.familyAllowanceConfigurationsId = familyAllowanceConfigurationsId;
+	public void setId(Long familyAllowanceConfigurationsId) {
+		this.id = familyAllowanceConfigurationsId;
 	}
 
 	public Double getFrom() {
@@ -79,8 +78,8 @@ public class FamilyAllowanceConfigurations implements Serializable {
 		int result = 1;
 		result = prime
 				* result
-				+ ((familyAllowanceConfigurationsId == null) ? 0
-						: familyAllowanceConfigurationsId.hashCode());
+				+ ((id == null) ? 0
+						: id.hashCode());
 		return result;
 	}
 
@@ -93,11 +92,11 @@ public class FamilyAllowanceConfigurations implements Serializable {
 		if (getClass() != obj.getClass())
 			return false;
 		FamilyAllowanceConfigurations other = (FamilyAllowanceConfigurations) obj;
-		if (familyAllowanceConfigurationsId == null) {
-			if (other.familyAllowanceConfigurationsId != null)
+		if (id == null) {
+			if (other.id != null)
 				return false;
-		} else if (!familyAllowanceConfigurationsId
-				.equals(other.familyAllowanceConfigurationsId))
+		} else if (!id
+				.equals(other.id))
 			return false;
 		return true;
 	}

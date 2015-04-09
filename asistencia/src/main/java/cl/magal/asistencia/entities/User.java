@@ -43,7 +43,7 @@ import cl.magal.asistencia.entities.validator.RutDigit;
 @Table(name = "user")
 @NamedQueries({
     @NamedQuery(name = "User.findAll", query = "SELECT u FROM User u"),
-    @NamedQuery(name = "User.findByUserId", query = "SELECT u FROM User u WHERE u.userId = :userId"),
+    @NamedQuery(name = "User.findByUserId", query = "SELECT u FROM User u WHERE u.id = :userId"),
     @NamedQuery(name = "User.findByFirstname", query = "SELECT u FROM User u WHERE u.firstname = :firstname"),
     @NamedQuery(name = "User.findByLastname", query = "SELECT u FROM User u WHERE u.lastname = :lastname"),
     @NamedQuery(name = "User.findByRut", query = "SELECT u FROM User u WHERE u.rut = :rut"),
@@ -57,11 +57,13 @@ public class User implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
     @Column(name = "userId")
-    private Long userId;
+    private Long id;
+    
     @Basic(optional = false)
     @Column(name = "firstname",nullable=false)
     @NotNull(message="El nombre es requerido.")
     private String firstname;
+    
     @Basic(optional = false)
     @Column(name = "lastname", nullable=false)
     private String lastname;
@@ -81,8 +83,10 @@ public class User implements Serializable {
     
     @Column(name = "password")
     private String password;
+    
     @Column(name = "salt")
     private String salt;
+    
     @Column(name = "deleted")
     private Boolean deleted = Boolean.FALSE;
    
@@ -101,7 +105,7 @@ public class User implements Serializable {
     		@JoinColumn(name = "userId", referencedColumnName = "userId")
      }, 
      inverseJoinColumns = { 
-            @JoinColumn(name = "construction_siteId", referencedColumnName = "construction_siteId")
+            @JoinColumn(name = "constructionsiteId", referencedColumnName = "constructionsiteId")
      }
 	)
      @ManyToMany(targetEntity=ConstructionSite.class,fetch=FetchType.EAGER)
@@ -122,11 +126,11 @@ public class User implements Serializable {
     }
 
     public User(Long userId) {
-        this.userId = userId;
+        this.id = userId;
     }
 
     public User(Long userId, String firstname, String lastname, String rut, String email, UserStatus status) {
-        this.userId = userId;
+        this.id = userId;
         this.firstname = firstname;
         this.lastname = lastname;
         this.rut = rut;
@@ -134,12 +138,12 @@ public class User implements Serializable {
         this.status = status;
     }
     
-    public Long getUserId() {
-		return userId;
+    public Long getId() {
+		return id;
 	}
 
-	public void setUserId(Long userId) {
-		this.userId = userId;
+	public void setId(Long userId) {
+		this.id = userId;
 	}
 
 	public String getFirstname() {
@@ -240,7 +244,7 @@ public class User implements Serializable {
 	@Override
     public int hashCode() {
         int hash = 0;
-        hash += (userId != null ? userId.hashCode() : 0);
+        hash += (id != null ? id.hashCode() : 0);
         return hash;
     }
 
@@ -251,7 +255,7 @@ public class User implements Serializable {
             return false;
         }
         User other = (User) object;
-        if ((this.userId == null && other.userId != null) || (this.userId != null && !this.userId.equals(other.userId))) {
+        if ((this.id == null && other.id != null) || (this.id != null && !this.id.equals(other.id))) {
             return false;
         }
         return true;
@@ -259,7 +263,7 @@ public class User implements Serializable {
 
     @Override
     public String toString() {
-        return "jpa.magal.entities.User[ userId=" + userId + " ,cs= "+ cs +" ]";
+        return "jpa.magal.entities.User[ userId=" + id + " ,cs= "+ cs +" ]";
     }
     
     public void addCS(ConstructionSite cs) {

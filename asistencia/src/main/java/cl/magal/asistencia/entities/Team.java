@@ -41,7 +41,7 @@ import cl.magal.asistencia.entities.enums.Status;
 @Table(name = "team")
 @NamedQueries({
     @NamedQuery(name = "Team.findAll", query = "SELECT t FROM Team t"),
-    @NamedQuery(name = "Team.findByTeamId", query = "SELECT t FROM Team t WHERE t.teamId = :teamId"),
+    @NamedQuery(name = "Team.findByTeamId", query = "SELECT t FROM Team t WHERE t.id = :teamId"),
     @NamedQuery(name = "Team.findByName", query = "SELECT t FROM Team t WHERE t.name = :name"),
     @NamedQuery(name = "Team.findByDate", query = "SELECT t FROM Team t WHERE t.date = :date"),
     @NamedQuery(name = "Team.findByUser", query = "SELECT t FROM Team t WHERE t.leader = :leader"),
@@ -56,35 +56,38 @@ public class Team implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
     @Column(name = "teamId")
-    private Long teamId;
+    private Long id;
+	
     @Basic(optional = false)
     @NotNull(message="El nombre es necesario")
     @Column(name = "name", nullable=false)
     private String name;
+    
     @Column(name = "date")
     @Temporal(TemporalType.TIMESTAMP)
     private Date date;
 
     @ManyToOne
-    @JoinColumn(name = "LABORERID")
+    @JoinColumn(name = "leaderId")
     private Laborer leader;
     
     @Convert(converter = StatusConverter.class)
     @Column(name = "status",nullable=false)
     @NotNull
     private Status status;//FIXME ocuparemos el mismo o otro enum para el estado de las cuadrillas?
+    
     @Column(name = "deleted")
     private Boolean deleted;    
     
-    @JoinColumn(name="CONSTRUCTION_SITEID")
+    @JoinColumn(name="constructionsiteId")
     ConstructionSite constructionSite;
    
     @JoinTable(name="laborer_constructionsite_team",
     joinColumns = { 
-    		@JoinColumn(name = "TEAMID", referencedColumnName = "TEAMID")
+    		@JoinColumn(name = "teamId", referencedColumnName = "teamId")
      }, 
      inverseJoinColumns = { 	
-            @JoinColumn(name = "LABORER_CONSTRUCTIONSITEID", referencedColumnName = "LABORER_CONSTRUCTIONSITEID")
+            @JoinColumn(name = "laborer_constructionsiteId", referencedColumnName = "laborer_constructionsiteId")
      }
 	)
     @ManyToMany(targetEntity=LaborerConstructionsite.class,fetch=FetchType.EAGER)
@@ -104,15 +107,15 @@ public class Team implements Serializable {
     }
 
     public Team(Long teamId) {
-        this.teamId = teamId;
+        this.id = teamId;
     }
 
-    public Long getTeamId() {
-		return teamId;
+    public Long getId() {
+		return id;
 	}
 
-	public void setTeamId(Long teamId) {
-		this.teamId = teamId;
+	public void setId(Long teamId) {
+		this.id = teamId;
 	}
 
 	public String getName() {
@@ -186,7 +189,7 @@ public class Team implements Serializable {
 
     @Override
     public String toString() {
-        return "jpa.magal.entities.Team[ teamId=" + teamId + " ]";
+        return "jpa.magal.entities.Team[ teamId=" + id + " ]";
     }
     
     public void addLaborerConstructionsite(LaborerConstructionsite laborerconstructionsite) {

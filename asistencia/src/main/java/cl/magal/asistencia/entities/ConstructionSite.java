@@ -46,7 +46,7 @@ import cl.magal.asistencia.entities.enums.Status;
 @Table(name = "construction_site")
 @NamedQueries({
     @NamedQuery(name = "ConstructionSite.findAll", query = "SELECT c FROM ConstructionSite c"),
-    @NamedQuery(name = "ConstructionSite.findByConstructionsiteId", query = "SELECT c FROM ConstructionSite c WHERE c.constructionsiteId = :constructionsiteId"),
+    @NamedQuery(name = "ConstructionSite.findByConstructionsiteId", query = "SELECT c FROM ConstructionSite c WHERE c.id = :constructionsiteId"),
     @NamedQuery(name = "ConstructionSite.findByAddress", query = "SELECT c FROM ConstructionSite c WHERE c.address = :address"),
     @NamedQuery(name = "ConstructionSite.findByStatus", query = "SELECT c FROM ConstructionSite c WHERE c.status = :status"),    
     @NamedQuery(name = "ConstructionSite.findByDeleted", query = "SELECT c FROM ConstructionSite c WHERE c.deleted = :deleted")})
@@ -59,28 +59,33 @@ public class ConstructionSite implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
-    @Column(name = "construction_siteId")
-    private Long constructionsiteId;
+    @Column(name = "constructionsiteId")
+    private Long id;
+    
     @NotEmpty(message="La dirección es obligatoria.")
 	@NotNull(message="La dirección es obligatoria.")
     @Column(name = "address",nullable=false)
     private String address;
+    
     @Column(name = "deleted")
     private Boolean deleted = Boolean.FALSE;
+    
     @NotEmpty(message="El código es obligatorio.")
     @NotNull(message="El código es obligatorio.")
     @Column(name = "code",nullable=false)
     String code;
+    
     @NotEmpty(message="El nombre es obligatorio.")
    	@NotNull(message="El nombre es obligatorio.")
     @Column(name = "name",nullable=false)
     String name;
     
-    @JoinColumn(name="personInChargeId")
+    
+    @JoinColumn(name="person_in_chargeId")
     @ManyToOne
     User personInCharge;
     
-    @JoinColumn(name="constructionCompanyId")
+    @JoinColumn(name="construction_companyId")
     @ManyToOne
     ConstructionCompany constructionCompany;
     
@@ -91,7 +96,7 @@ public class ConstructionSite implements Serializable {
     
     @JoinTable(name="laborer_constructionsite",
     joinColumns = { 
-    		@JoinColumn(name = "construction_siteId", referencedColumnName = "construction_siteId")
+    		@JoinColumn(name = "constructionsiteId", referencedColumnName = "constructionsiteId")
      }, 
      inverseJoinColumns = { 	
             @JoinColumn(name = "laborerId", referencedColumnName = "laborerId")
@@ -107,8 +112,9 @@ public class ConstructionSite implements Serializable {
     List<User> users;
     
     @ElementCollection(targetClass=String.class)
-	@CollectionTable(name="CONSTRUCTIONSITE_STEP")
-    @Column(name="STEP")
+	@CollectionTable(name="constructionsite_step",
+			joinColumns=@JoinColumn(name="constructionsiteId"))
+    @Column(name="step")
 	List<String> steps = new LinkedList<String>();
     
     /**
@@ -126,21 +132,21 @@ public class ConstructionSite implements Serializable {
     }
 
     public ConstructionSite(Long constructionsiteId) {
-        this.constructionsiteId = constructionsiteId;
+        this.id = constructionsiteId;
     }
 
     public ConstructionSite(Long constructionsiteId, String address, Status status) {
-        this.constructionsiteId = constructionsiteId;
+        this.id = constructionsiteId;
         this.address = address;
         this.status = status;
     }
 
-    public Long getConstructionsiteId() {
-        return constructionsiteId;
+    public Long getId() {
+        return id;
     }
 
-    public void setConstructionsiteId(Long constructionsiteId) {
-        this.constructionsiteId = constructionsiteId;
+    public void setId(Long constructionsiteId) {
+        this.id = constructionsiteId;
     }
 
     public String getAddress() {
@@ -230,7 +236,7 @@ public class ConstructionSite implements Serializable {
 	@Override
     public int hashCode() {
         int hash = 0;
-        hash += (constructionsiteId != null ? constructionsiteId.hashCode() : 0);
+        hash += (id != null ? id.hashCode() : 0);
         return hash;
     }
 
@@ -241,7 +247,7 @@ public class ConstructionSite implements Serializable {
             return false;
         }
         ConstructionSite other = (ConstructionSite) object;
-        if ((this.constructionsiteId == null && other.constructionsiteId != null) || (this.constructionsiteId != null && !this.constructionsiteId.equals(other.constructionsiteId))) {
+        if ((this.id == null && other.id != null) || (this.id != null && !this.id.equals(other.id))) {
             return false;
         }
         return true;
@@ -251,7 +257,7 @@ public class ConstructionSite implements Serializable {
 
     @Override
     public String toString() {
-        return "jpa.magal.entities.ConstructionSite[ constructionsiteId=" + constructionsiteId + " ]";
+        return "jpa.magal.entities.ConstructionSite[ constructionsiteId=" + id + " ]";
     }
 
 	public ConstructionCompany getConstructionCompany() {

@@ -70,7 +70,7 @@ public class UserServiceTest {
 		User u = UserHelper.newUser();
 		service.saveUser(u);
 		UserHelper.verify(u);				
-		User dbu = service.findUser(u.getUserId());
+		User dbu = service.findUser(u.getId());
 		UserHelper.verify(dbu);		
 		UserHelper.verify(u, dbu);				
 	}
@@ -102,7 +102,7 @@ public class UserServiceTest {
 
 		UserHelper.verify(u);
 		
-		User dbu = service.findUser(u.getUserId());		
+		User dbu = service.findUser(u.getId());		
 		
 		UserHelper.verify(dbu);
 		UserHelper.verify(u, dbu);
@@ -110,7 +110,7 @@ public class UserServiceTest {
 		u.setFirstname("Jesse");
 		service.saveUser(u);			
 		
-		dbu = service.findUser(u.getUserId());
+		dbu = service.findUser(u.getId());
 		UserHelper.verify(u, dbu);				
 	}
 	
@@ -123,9 +123,9 @@ public class UserServiceTest {
 		User u = UserHelper.newUser();
 		
 		service.saveUser(u);		
-		assertTrue("El id no puede ser nulo.", u.getUserId() != null );
+		assertTrue("El id no puede ser nulo.", u.getId() != null );
 		
-		User dbu = service.findUser(u.getUserId());		
+		User dbu = service.findUser(u.getId());		
 		assertNotNull("El ususario no puede ser nulo", dbu);
 		
 		assertEquals("El rut del usuario debe ser igual a ", "16127401-1", dbu.getRut());
@@ -142,14 +142,14 @@ public class UserServiceTest {
 		service.saveUser(u);		
 
 		UserHelper.verify(u);
-		User dbu = service.findUser(u.getUserId());
+		User dbu = service.findUser(u.getId());
 		
 		UserHelper.verify(dbu);
 		UserHelper.verify(u, dbu);
 		
-		service.deleteUser(u.getUserId());		
+		service.deleteUser(u.getId());		
 		
-		dbu = service.findUser(u.getUserId());
+		dbu = service.findUser(u.getId());
 				
 		assertNull("El usuario debe ser nulo luego de la eliminacion", dbu );
 		
@@ -168,7 +168,7 @@ public class UserServiceTest {
     	service.saveUser(u);	
     	
 		UserHelper.verify(u);
-		User dbu = service.findUser(u.getUserId());
+		User dbu = service.findUser(u.getId());
 		
 		UserHelper.verify(dbu);
 		UserHelper.verify(u, dbu);
@@ -197,10 +197,10 @@ public class UserServiceTest {
 		service.saveUser(u);
 		UserHelper.verify(u);
 		
-		User dbu = service.findUser(u.getUserId());
+		User dbu = service.findUser(u.getId());
 		UserHelper.verify(dbu);
 		
-		assertTrue("El id del role no puede ser nulo.", u.getRole().getRoleId() != null );		
+		assertTrue("El id del role no puede ser nulo.", u.getRole().getId() != null );		
 		assertEquals("Id de Rol", u.getRole(), dbu.getRole());
        
     }   
@@ -284,7 +284,7 @@ public class UserServiceTest {
 		service.saveUser(u);
 		UserHelper.verify(u,true);
 		
-		User dbu = service.findUser(u.getUserId());
+		User dbu = service.findUser(u.getId());
 		
 		UserHelper.verify(dbu,true);
 		assertNotNull("El usuario no debe estar desactivado", dbu.getStatus());
@@ -312,7 +312,7 @@ public class UserServiceTest {
 		//agrega la construction 2 
 		service.addConstructionSiteToUser(cs2, u);
 		
-		User dbu = service.findUser(u.getUserId());
+		User dbu = service.findUser(u.getId());
 		
 		//verifica que al recuperar la obra, se obtenga el trabajador guardado
 		assertNotNull("El objeto guardado no puede ser nulo",dbu);
@@ -322,10 +322,10 @@ public class UserServiceTest {
 		//agrega otro mas
 		service.addConstructionSiteToUser(cs,u);
 		
-		dbu = service.findUser(u.getUserId());
+		dbu = service.findUser(u.getId());
 		
 		//los ids de los laborer no pueden ser iguales
-		assertNotEquals("los ids de los laborer no pueden ser iguales",cs2.getConstructionsiteId(),cs.getConstructionsiteId());
+		assertNotEquals("los ids de los laborer no pueden ser iguales",cs2.getId(),cs.getId());
 		
 		//verifica que al recuperar la obra, se obtenga el trabajador guardado
 		assertNotNull("El objeto guardado no puede ser nulo",dbu);

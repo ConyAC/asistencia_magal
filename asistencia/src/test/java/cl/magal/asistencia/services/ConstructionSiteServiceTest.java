@@ -25,9 +25,14 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import cl.magal.asistencia.entities.AdvancePaymentConfigurations;
 import cl.magal.asistencia.entities.Attendance;
 import cl.magal.asistencia.entities.ConstructionSite;
+import cl.magal.asistencia.entities.DateConfigurations;
+import cl.magal.asistencia.entities.ExtraParams;
+import cl.magal.asistencia.entities.FamilyAllowanceConfigurations;
 import cl.magal.asistencia.entities.Laborer;
 import cl.magal.asistencia.entities.Overtime;
+import cl.magal.asistencia.entities.TaxationConfigurations;
 import cl.magal.asistencia.entities.User;
+import cl.magal.asistencia.entities.WageConfigurations;
 import cl.magal.asistencia.entities.enums.Status;
 import cl.magal.asistencia.helpers.ConstructionSiteHelper;
 import cl.magal.asistencia.helpers.LaborerHelper;
@@ -40,7 +45,9 @@ public class ConstructionSiteServiceTest {
 	Logger logger = LoggerFactory.getLogger(ConstructionSiteServiceTest.class);
 	
 	@Autowired
-	ConstructionSiteService service;
+	ConstructionSiteService csService;
+	@Autowired
+	ConfigurationService configurationService;
 	@Autowired
 	UserService userService;
 	
@@ -58,7 +65,7 @@ public class ConstructionSiteServiceTest {
 		ConstructionSite cs = ConstructionSiteHelper.newConstrutionSite();
 		cs.setName(null);
 		//guardamos el elemento.
-		service.save(cs);
+		csService.save(cs);
 		fail("no debe llegar aquí");
 	}
 	
@@ -70,7 +77,7 @@ public class ConstructionSiteServiceTest {
 		ConstructionSite cs = ConstructionSiteHelper.newConstrutionSite();
 		cs.setStatus(null);
 		//guardamos el elemento.
-		service.save(cs);
+		csService.save(cs);
 		
 		assertNotNull("El status no puede ser nulo",cs.getStatus());
 		assertEquals("El status por defecto debe ser activo",cs.getStatus(),Status.ACTIVE);
@@ -84,7 +91,7 @@ public class ConstructionSiteServiceTest {
 		ConstructionSite cs = ConstructionSiteHelper.newConstrutionSite();
 		cs.setAddress(null);
 		//guardamos el elemento.
-		service.save(cs);
+		csService.save(cs);
 
 	}
 
@@ -98,12 +105,12 @@ public class ConstructionSiteServiceTest {
 		ConstructionSite cs = ConstructionSiteHelper.newConstrutionSite();
 		
 		//guardamos el elemento.
-		service.save(cs);
+		csService.save(cs);
 		
 		ConstructionSiteHelper.verify(cs);
 		
 		//recuperamos el elemento de la base
-		ConstructionSite bdcs = service.findConstructionSite(cs.getConstructionsiteId());
+		ConstructionSite bdcs = csService.findConstructionSite(cs.getId());
 		
 		ConstructionSiteHelper.verify(bdcs);
 		
@@ -120,14 +127,14 @@ public class ConstructionSiteServiceTest {
 		ConstructionSite cs = ConstructionSiteHelper.newConstrutionSite();
 		cs.setPersonInCharge(oneUser);
 		//guardamos el elemento.
-		service.save(cs);
+		csService.save(cs);
 		
 		ConstructionSiteHelper.verify(cs);
 		
 		assertNotNull("La persona a cargo no puede ser nula, si ésta fue seteada",cs.getPersonInCharge());
 		
 		//recuperamos el elemento de la base
-		ConstructionSite bdcs = service.findConstructionSite(cs.getConstructionsiteId());
+		ConstructionSite bdcs = csService.findConstructionSite(cs.getId());
 		
 		ConstructionSiteHelper.verify(bdcs);
 		
@@ -163,11 +170,11 @@ public class ConstructionSiteServiceTest {
 		
 		ConstructionSite cs = ConstructionSiteHelper.newConstrutionSite();
 		
-		service.save(cs);
+		csService.save(cs);
 		
-		assertTrue("El id no puede ser nulo.",cs.getConstructionsiteId() != null );
+		assertTrue("El id no puede ser nulo.",cs.getId() != null );
 		
-		ConstructionSite dbcs = service.findConstructionSite(cs.getConstructionsiteId());
+		ConstructionSite dbcs = csService.findConstructionSite(cs.getId());
 		
 		assertNotNull("La obra no puede ser nula", dbcs);
 		
@@ -183,11 +190,11 @@ public class ConstructionSiteServiceTest {
 		
 		ConstructionSite cs = ConstructionSiteHelper.newConstrutionSite();
 		cs.setDeleted(null);
-		service.save(cs);
+		csService.save(cs);
 		
-		assertTrue("El id no puede ser nulo.", cs.getConstructionsiteId() != null );
+		assertTrue("El id no puede ser nulo.", cs.getId() != null );
 		
-		ConstructionSite dbcs = service.findConstructionSite(cs.getConstructionsiteId());
+		ConstructionSite dbcs = csService.findConstructionSite(cs.getId());
 		
 		assertNotNull("La obra no puede ser nula", dbcs);
 		assertNotNull("La obra no debe estar eliminada", dbcs.getDeleted());
@@ -202,19 +209,19 @@ public class ConstructionSiteServiceTest {
 		
 		ConstructionSite cs = ConstructionSiteHelper.newConstrutionSite();
 		
-		service.save(cs);		
+		csService.save(cs);		
 		
 		ConstructionSiteHelper.verify(cs);
 		
-		ConstructionSite dbcs = service.findConstructionSite(cs.getConstructionsiteId());
+		ConstructionSite dbcs = csService.findConstructionSite(cs.getId());
 		
 		ConstructionSiteHelper.verify(dbcs);
 		ConstructionSiteHelper.verify(cs,dbcs);
 		
 		cs.setAddress("cambio");	
-		service.save(cs);
+		csService.save(cs);
 		
-		dbcs = service.findConstructionSite(cs.getConstructionsiteId());		
+		dbcs = csService.findConstructionSite(cs.getId());		
 		ConstructionSiteHelper.verify(cs,dbcs); 	
 				
 	}
@@ -227,18 +234,18 @@ public class ConstructionSiteServiceTest {
 		
 		ConstructionSite cs = ConstructionSiteHelper.newConstrutionSite();
 		// lo guarda
-		service.save(cs);
+		csService.save(cs);
 		
 		ConstructionSiteHelper.verify(cs);
 		//intenta encontrarlo
-		ConstructionSite dbcs = service.findConstructionSite(cs.getConstructionsiteId());
+		ConstructionSite dbcs = csService.findConstructionSite(cs.getId());
 		
 		ConstructionSiteHelper.verify(dbcs);
 		ConstructionSiteHelper.verify(cs,dbcs);
 		
-		service.deleteCS(cs.getConstructionsiteId());
+		csService.deleteCS(cs.getId());
 		
-		dbcs = service.findConstructionSite(cs.getConstructionsiteId());
+		dbcs = csService.findConstructionSite(cs.getId());
 		
 		assertNull("La obra debe ser nula", dbcs);
 		
@@ -247,29 +254,29 @@ public class ConstructionSiteServiceTest {
 	@Test
 	public void testFindAllJustNotDeleted(){
 		
-		service.clear();
+		csService.clear();
 		
 		//crea 3 obras
 		ConstructionSite primera = ConstructionSiteHelper.newConstrutionSite();
 		// lo guarda
-		service.save(primera);
+		csService.save(primera);
 		ConstructionSiteHelper.verify(primera);
 		
 		ConstructionSite segunda = ConstructionSiteHelper.newConstrutionSite();
 		// lo guarda
-		service.save(segunda);
+		csService.save(segunda);
 		ConstructionSiteHelper.verify(segunda);
 		
 		ConstructionSite cs = ConstructionSiteHelper.newConstrutionSite();
 		// lo guarda
-		service.save(cs);
+		csService.save(cs);
 		ConstructionSiteHelper.verify(cs);
 		
 		//elimina la 3°
-		service.deleteCS(cs.getConstructionsiteId());
+		csService.deleteCS(cs.getId());
 		
 		//si se buscan todas, debe retornar solo las dos primeras
-		Page<ConstructionSite> page = service.findAllConstructionSite(new PageRequest(0, 10));
+		Page<ConstructionSite> page = csService.findAllConstructionSite(new PageRequest(0, 10));
 		
 		assertNotNull("La pagina no puede ser nula",page);
 		assertTrue("La pagina no puede tener más de dos elementos",page.getContent().size() == 2);
@@ -282,17 +289,17 @@ public class ConstructionSiteServiceTest {
 		//crea una obra
 		ConstructionSite cs = ConstructionSiteHelper.newConstrutionSite();
 		// lo guarda
-		service.save(cs);		
+		csService.save(cs);		
 		//verifica
 		
 		//agrega un trabajador a la obra
 		Laborer laborer1 = LaborerHelper.newLaborer();
-		service.addLaborerToConstructionSite(laborer1,cs);
+		csService.addLaborerToConstructionSite(laborer1,cs);
 		
 		//verifica que el trabajador tiene un id válido
 		LaborerHelper.verify(laborer1);
 		
-		ConstructionSite dbcs = service.findConstructionSite(cs.getConstructionsiteId());
+		ConstructionSite dbcs = csService.findConstructionSite(cs.getId());
 		
 		//verifica que al recuperar la obra, se obtenga el trabajador guardado
 		assertNotNull("El objeto guardado no puede ser nulo",dbcs);
@@ -302,15 +309,15 @@ public class ConstructionSiteServiceTest {
 		//agrega otro mas
 		//agrega un trabajador a la obra
 		Laborer laborer2 = LaborerHelper.newLaborer();
-		service.addLaborerToConstructionSite(laborer2,cs);
+		csService.addLaborerToConstructionSite(laborer2,cs);
 		
 		//verifica que el trabajador tiene un id válido
 		LaborerHelper.verify(laborer2);
 		
-		dbcs = service.findConstructionSite(cs.getConstructionsiteId());
+		dbcs = csService.findConstructionSite(cs.getId());
 		
 		//los ids de los laborer no pueden ser iguales
-		assertNotEquals("los ids de los laborer no pueden ser iguales",laborer2.getLaborerId(),laborer1.getLaborerId());
+		assertNotEquals("los ids de los laborer no pueden ser iguales",laborer2.getId(),laborer1.getId());
 		
 		//verifica que al recuperar la obra, se obtenga el trabajador guardado
 		assertNotNull("El objeto guardado no puede ser nulo",dbcs);
@@ -348,13 +355,13 @@ public class ConstructionSiteServiceTest {
 		fakeLogin(user);
 		
 		// busca las obras
-		ConstructionSite ownInactiveConstructionSite = service.findConstructionSite(ownInactiveConstructionSiteId);
-		ConstructionSite inactiveConstructionSite = service.findConstructionSite(inactiveConstructionSiteId);
-		ConstructionSite activeConstructionSite = service.findConstructionSite(activeConstructionSiteId);
-		ConstructionSite ownActiveConstructionSite = service.findConstructionSite(ownActiveConstructionSiteId);
+		ConstructionSite ownInactiveConstructionSite = csService.findConstructionSite(ownInactiveConstructionSiteId);
+		ConstructionSite inactiveConstructionSite = csService.findConstructionSite(inactiveConstructionSiteId);
+		ConstructionSite activeConstructionSite = csService.findConstructionSite(activeConstructionSiteId);
+		ConstructionSite ownActiveConstructionSite = csService.findConstructionSite(ownActiveConstructionSiteId);
 		
 		//busca todas las obras
-		List<ConstructionSite> userConstrutionSites = service.findAllConstructionSiteOrderByUser(user);
+		List<ConstructionSite> userConstrutionSites = csService.findAllConstructionSiteOrderByUser(user);
 		//el usuario debe tener asociado la construccion 1 y 3
 		assertTrue(SecurityHelper.hasConstructionSite(ownActiveConstructionSite));
 		assertTrue(SecurityHelper.hasConstructionSite(ownInactiveConstructionSite));
@@ -378,7 +385,7 @@ public class ConstructionSiteServiceTest {
 		fakeLogin(user);
 		
 		//busca todas las obras
-		userConstrutionSites = service.findAllConstructionSiteOrderByUser(user);
+		userConstrutionSites = csService.findAllConstructionSiteOrderByUser(user);
 		//el usuario debe tener asociado la construccion 2 y 4
 		assertTrue(SecurityHelper.hasConstructionSite(activeConstructionSite));
 		assertTrue(SecurityHelper.hasConstructionSite(inactiveConstructionSite));
@@ -400,13 +407,13 @@ public class ConstructionSiteServiceTest {
 		Double expectedSuple = 105000.0D;
 		DateTime monthDate = DateTime.parse("2014-07-01");
 		DateTime closingSupleDate = DateTime.parse("2014-07-11");
-		ConstructionSite cs = service.findConstructionSite(constructionId);
+		ConstructionSite cs = csService.findConstructionSite(constructionId);
 		//busca una asistencia completa
-		Map<Integer,Attendance> attendanceJuly = service.getAttendanceMapByConstruction(cs, monthDate);
+		Map<Integer,Attendance> attendanceJuly = csService.getAttendanceMapByConstructionAndMonth(cs, monthDate);
 		//se obtiene su tabla de suple
-		AdvancePaymentConfigurations supleTable = service.getSupleTableByCs(cs);
+		AdvancePaymentConfigurations supleTable = configurationService.getSupleTableByCs(cs);
 		//se obtiene la fecha de cierre del mes
-		Double suple = service.calculateSuple(supleCode,supleTable,closingSupleDate.toDate(),attendanceJuly.get(1));
+		Double suple = csService.calculateSuple(supleCode,supleTable,closingSupleDate.toDate(),attendanceJuly.get(1));
 		//el suple es conocido
 		assertEquals(expectedSuple,suple);
 		
@@ -424,12 +431,12 @@ public class ConstructionSiteServiceTest {
 		DateTime closingSupleDate = DateTime.parse("2014-07-11");
 		//busca una asistencia completa
 		
-		ConstructionSite cs = service.findConstructionSite(constructionId);
-		Map<Integer,Attendance> attendanceJuly = service.getAttendanceMapByConstruction(cs, monthDate);
+		ConstructionSite cs = csService.findConstructionSite(constructionId);
+		Map<Integer,Attendance> attendanceJuly = csService.getAttendanceMapByConstructionAndMonth(cs, monthDate);
 		//se obtiene su tabla de suple
-		AdvancePaymentConfigurations supleTable = service.getSupleTableByCs(cs);
+		AdvancePaymentConfigurations supleTable = configurationService.getSupleTableByCs(cs);
 		//se obtiene la fecha de cierre del mes
-		Double suple = service.calculateSuple(supleCode,supleTable,closingSupleDate.toDate(),attendanceJuly.get(100));
+		Double suple = csService.calculateSuple(supleCode,supleTable,closingSupleDate.toDate(),attendanceJuly.get(100));
 		//el suple es conocido
 		assertEquals(expectedSuple,suple);
 		
@@ -441,6 +448,7 @@ public class ConstructionSiteServiceTest {
 		Long constructionId = 1L;
 		//se usa un codigo de suple conocido
 		Integer supleCode = 1;
+		Integer lcCode  = 100;
 		
 		int tool = 0, loan = 0; 
 		//se usa una asistencia conocida
@@ -448,20 +456,69 @@ public class ConstructionSiteServiceTest {
 		int expectedSalay = 288176;
 		DateTime monthDate = DateTime.parse("2014-07-01");
 		DateTime closingSupleDate = DateTime.parse("2014-07-11");
-		//busca una asistencia completa
+		DateTime closingDateLastMonth = DateTime.parse("2014-06-20");
 		
-		ConstructionSite cs = service.findConstructionSite(constructionId);
-		Map<Integer,Attendance> attendanceJuly = service.getAttendanceMapByConstruction(cs, monthDate);
-		Map<Integer,Overtime> overtimeJuly = service.getOvertimeMapByConstruction(cs, monthDate);
+		List<TaxationConfigurations> taxTable = configurationService.findTaxationConfigurations();
+		List<FamilyAllowanceConfigurations> famillyTable = configurationService.findFamylyAllowanceConfigurations();
+		WageConfigurations wageConfiguration = configurationService.findWageConfigurations();
+		
+		//busca una asistencia completa
+		ConstructionSite cs = csService.findConstructionSite(constructionId);
+		
+		DateConfigurations dateConfiguration = configurationService.getDateConfigurationByCsAndMonth(cs,monthDate);
+		Map<Integer,Attendance> attendanceJuly = csService.getAttendanceMapByConstructionAndMonth(cs, monthDate);
+		Map<Integer,Attendance> attendanceJune = csService.getAttendanceMapByConstructionAndMonth(cs, monthDate.minusMonths(1));
+		Map<Integer,Overtime> overtimeJuly = csService.getOvertimeMapByConstructionAndMonth(cs, monthDate);
+		//busca la asistencia del mes anterior 
+		Map<Integer,ExtraParams> extraParams = csService.getExtraParamsMapByConstructionAndMonth(cs,monthDate);
 		//se obtiene su tabla de suple
-		AdvancePaymentConfigurations supleTable = service.getSupleTableByCs(cs);
-		Double suple = service.calculateSuple(supleCode,supleTable,closingSupleDate.toDate(),attendanceJuly.get(100));
+		AdvancePaymentConfigurations supleTable = configurationService.getSupleTableByCs(cs);
+		Double suple = csService.calculateSuple(supleCode,supleTable,closingSupleDate.toDate(),attendanceJuly.get(lcCode));
 		//se obtiene la fecha de cierre del mes
-		int salary = service.calculateSalary(suple.intValue(),tool,loan,attendanceJuly.get(100),overtimeJuly.get(100));
+		int salary = csService.calculateSalary(closingDateLastMonth,suple.intValue(),tool,loan,attendanceJuly.get(lcCode)
+				,attendanceJune.get(lcCode),overtimeJuly.get(lcCode), extraParams.get(lcCode), wageConfiguration, dateConfiguration, famillyTable, taxTable);
 		//el suple es conocido
 		assertEquals(expectedSalay,salary,1d);
 	}
 	
+	@Test
+	public void testCalculateSalary3(){
+		//se usa una construcción de la cual se save el resultado
+		Long constructionId = 1L;
+		//se usa un codigo de suple conocido
+		Integer supleCode = 1;
+		Integer lcCode  = 1;
+		
+		int tool = 0, loan = 0; 
+		//se usa una asistencia conocida
+//		int expectedSalay = 45336;
+		int expectedSalay = 284404;
+		DateTime monthDate = DateTime.parse("2015-04-08");
+		DateTime closingSupleDate = DateTime.parse("2015-04-22");
+		DateTime closingDateLastMonth = DateTime.parse("2015-03-23");
+		
+		List<TaxationConfigurations> taxTable = configurationService.findTaxationConfigurations();
+		List<FamilyAllowanceConfigurations> famillyTable = configurationService.findFamylyAllowanceConfigurations();
+		WageConfigurations wageConfiguration = configurationService.findWageConfigurations();
+		
+		//busca una asistencia completa
+		ConstructionSite cs = csService.findConstructionSite(constructionId);
+		
+		DateConfigurations dateConfiguration = configurationService.getDateConfigurationByCsAndMonth(cs,monthDate);
+		Map<Integer,Attendance> attendanceJuly = csService.getAttendanceMapByConstructionAndMonth(cs, monthDate);
+		Map<Integer,Attendance> attendanceJune = csService.getAttendanceMapByConstructionAndMonth(cs, monthDate.minusMonths(1));
+		Map<Integer,Overtime> overtimeJuly = csService.getOvertimeMapByConstructionAndMonth(cs, monthDate);
+		//busca la asistencia del mes anterior 
+		Map<Integer,ExtraParams> extraParams = csService.getExtraParamsMapByConstructionAndMonth(cs,monthDate);
+		//se obtiene su tabla de suple
+		AdvancePaymentConfigurations supleTable = configurationService.getSupleTableByCs(cs);
+		Double suple = csService.calculateSuple(supleCode,supleTable,closingSupleDate.toDate(),attendanceJuly.get(lcCode));
+		//se obtiene la fecha de cierre del mes
+		int salary = csService.calculateSalary(closingDateLastMonth,suple.intValue(),tool,loan,attendanceJuly.get(lcCode)
+				,attendanceJune.get(lcCode),overtimeJuly.get(lcCode), extraParams.get(lcCode), wageConfiguration, dateConfiguration, famillyTable, taxTable);
+		//el suple es conocido
+		assertEquals(expectedSalay,salary,1d);
+	}
 
 	private void fakeLogin(User user) {
 		SecurityHelper.setUser(user);

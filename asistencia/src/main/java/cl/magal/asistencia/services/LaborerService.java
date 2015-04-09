@@ -132,14 +132,14 @@ public class LaborerService {
 			throw new RuntimeException("El trabajador no puede ser nula");
 		
 		//si el trabajador es nuevo, lo guarda primero
-		if(laborerConstructionSite.getLaborer().getLaborerId() == null )
+		if(laborerConstructionSite.getLaborer().getId() == null )
 			laborerRepo.save(laborerConstructionSite.getLaborer());
 		
 		//guarda los contratos
 		laborerConstructionsiteRepo.save(laborerConstructionSite);		
 		
 		//si el contrato es nuevo, lo guarda primero
-		if(laborerConstructionSite.getActiveContract().getContractId() == null ){
+		if(laborerConstructionSite.getActiveContract().getId() == null ){
 			if(laborerConstructionSite.getActiveContract().getLaborerConstructionSite() == null )
 				laborerConstructionSite.getActiveContract().setLaborerConstructionSite(laborerConstructionSite);
 			contractRepo.save(laborerConstructionSite.getActiveContract());
@@ -186,7 +186,7 @@ public class LaborerService {
 	}
 
 	public List<Laborer> getLaborerByConstructionsite(ConstructionSite cs) {
-		return laborerRepo.findByConstructionSite(cs.getConstructionsiteId());
+		return laborerRepo.findByConstructionSite(cs.getId());
 	}
 
 	/**
@@ -199,7 +199,7 @@ public class LaborerService {
 	}
 	
 	public List<Date> findDatePostponed(Tool tool) {
-		return toolRepo.findDatePostponed(tool.getToolId());
+		return toolRepo.findDatePostponed(tool.getId());
 	}	
 	
 	public Tool saveDatePostponed(Tool tool) {

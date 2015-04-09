@@ -9,7 +9,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 
-import cl.magal.asistencia.entities.ConstructionSite;
 import cl.magal.asistencia.entities.User;
 
 public interface UserRepository extends PagingAndSortingRepository<User, Long> {

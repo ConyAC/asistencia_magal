@@ -203,7 +203,7 @@ public class ConfigurationServiceTest {
 		AdvancePaymentConfigurations dbAdvancePaymentConfiguration = service.findAdvancePaymentConfigurations();
 		AdvancePaymentConfigurationsHelper.verify(dbAdvancePaymentConfiguration);
 		
-		assertEquals("Las configuraciones de anticipo deben ser iguales",dbAdvancePaymentConfiguration.getAdvancePaymentConfigurationsId(),advancePaymentConfiguration.getAdvancePaymentConfigurationsId());
+		assertEquals("Las configuraciones de anticipo deben ser iguales",dbAdvancePaymentConfiguration.getId(),advancePaymentConfiguration.getId());
 		
 		AdvancePaymentItem advancePaymentItem = new AdvancePaymentItem();
 		advancePaymentItem.setSupleCode(supleCode);
@@ -239,7 +239,7 @@ public class ConfigurationServiceTest {
 		AdvancePaymentConfigurations dbAdvancePaymentConfiguration = service.findAdvancePaymentConfigurations();
 		AdvancePaymentConfigurationsHelper.verify(dbAdvancePaymentConfiguration);
 		
-		assertEquals("Las configuraciones de anticipo deben ser iguales",dbAdvancePaymentConfiguration.getAdvancePaymentConfigurationsId(),advancePaymentConfiguration.getAdvancePaymentConfigurationsId());
+		assertEquals("Las configuraciones de anticipo deben ser iguales",dbAdvancePaymentConfiguration.getId(),advancePaymentConfiguration.getId());
 		
 		AdvancePaymentItem advancePaymentItem = new AdvancePaymentItem();
 		advancePaymentItem.setSupleCode(supleCode);
@@ -283,7 +283,7 @@ public class ConfigurationServiceTest {
 		AdvancePaymentConfigurations dbAdvancePaymentConfiguration = service.findAdvancePaymentConfigurations();
 		AdvancePaymentConfigurationsHelper.verify(dbAdvancePaymentConfiguration);
 		
-		assertEquals("Las configuraciones de anticipo deben ser iguales",dbAdvancePaymentConfiguration.getAdvancePaymentConfigurationsId(),advancePaymentConfiguration.getAdvancePaymentConfigurationsId());
+		assertEquals("Las configuraciones de anticipo deben ser iguales",dbAdvancePaymentConfiguration.getId(),advancePaymentConfiguration.getId());
 		
 		AdvancePaymentItem advancePaymentItem = new AdvancePaymentItem();
 		advancePaymentItem.setSupleCode(supleCode);
@@ -367,7 +367,7 @@ public class ConfigurationServiceTest {
 		AfpAndInsuranceConfigurations dbafpAndInsuranceConfiguration = service.findAfpAndInsuranceConfiguration();
 		AfpAndInsuranceConfigurationsHelper.verify(dbafpAndInsuranceConfiguration);
 		
-		assertEquals("Las configuraciones de anticipo deben ser iguales",dbafpAndInsuranceConfiguration.getAfpAndInsuranceId(),afpAndInsuranceConfiguration.getAfpAndInsuranceId());
+		assertEquals("Las configuraciones de anticipo deben ser iguales",dbafpAndInsuranceConfiguration.getId(),afpAndInsuranceConfiguration.getId());
 		
 		AfpItem afpItem = new AfpItem();
 		afpItem.setAfp(afp);

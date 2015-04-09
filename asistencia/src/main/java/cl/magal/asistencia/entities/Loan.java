@@ -18,6 +18,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.PrePersist;
+import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.validation.constraints.Digits;
@@ -34,6 +35,7 @@ import cl.magal.asistencia.entities.enums.LoanToolStatus;
  */
 
 @Entity
+@Table(name="loan")
 public class Loan implements Serializable {
 
 	private static final long serialVersionUID = -3248499145869291527L;
@@ -42,7 +44,7 @@ public class Loan implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
     @Column(name = "loanId")
-    private Long loanId;
+    private Long id;
     
 	@Max(value=500000,message="El monto no puede superar los $500.000")
     @Min(value=0, message = "El monto no puede ser negativo")
@@ -52,7 +54,7 @@ public class Loan implements Serializable {
     private Integer price;
     
     @Basic(optional = false)
-    @Column(name = "dateBuy")
+    @Column(name = "date_buy")
     @Temporal(TemporalType.TIMESTAMP)
     private Date dateBuy;
     
@@ -69,7 +71,7 @@ public class Loan implements Serializable {
     private LoanToolStatus status;
     
     @ManyToOne
-	@JoinColumn(name="LABORER_CONSTRUCTIONSITEID")
+	@JoinColumn(name="laborer_constructionsiteId")
 	LaborerConstructionsite laborerConstructionSite;
     
     //Pagos postergados  
@@ -77,8 +79,8 @@ public class Loan implements Serializable {
     
     //tabla intermedia entre role y sus permisos    
     @ElementCollection(targetClass= Date.class,fetch=FetchType.EAGER)
-    @CollectionTable(name="postponedpaymentloan", joinColumns = @JoinColumn(name = "LOANID"))
-    @Column(name="LOAN_DATE")
+    @CollectionTable(name="postponedpaymentloan", joinColumns = @JoinColumn(name = "loanId"))
+    @Column(name="loan_date")
     @Temporal(TemporalType.TIMESTAMP)
     Set<Date> datePostponed = new HashSet<Date>(); 
     
@@ -92,20 +94,20 @@ public class Loan implements Serializable {
     }
 
     public Loan(Long loanId) {
-        this.loanId = loanId;
+        this.id = loanId;
     }
 
     public Loan(Long loanId, String name, Date dateBuy) {
-        this.loanId = loanId;
+        this.id = loanId;
         this.dateBuy = dateBuy;
     }
     
-    public Long getLoanId() {
-		return loanId;
+    public Long getId() {
+		return id;
 	}
 
-	public void setLoanId(Long loanId) {
-		this.loanId = loanId;
+	public void setId(Long loanId) {
+		this.id = loanId;
 	}
 
 	public Integer getPrice() {
@@ -188,7 +190,7 @@ public class Loan implements Serializable {
 
 	@Override
     public String toString() {
-        return "jpa.magal.entities.Loan[ loanId=" + loanId + " ]";
+        return "jpa.magal.entities.Loan[ loanId=" + id + " ]";
     }
     
 }

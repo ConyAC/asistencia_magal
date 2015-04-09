@@ -23,6 +23,7 @@ import cl.magal.asistencia.entities.LaborerConstructionsite;
 import cl.magal.asistencia.entities.enums.Job;
 import cl.magal.asistencia.entities.enums.Permission;
 import cl.magal.asistencia.entities.validator.RutDigitValidator;
+import cl.magal.asistencia.services.ConfigurationService;
 import cl.magal.asistencia.services.ConstructionSiteService;
 import cl.magal.asistencia.services.LaborerService;
 import cl.magal.asistencia.ui.AbstractWindowEditor;
@@ -69,6 +70,7 @@ public class AddLaborerContractDialog extends AbstractWindowEditor implements Ne
 
 	transient LaborerService laborerService;
 	transient ConstructionSiteService constructionSiteService;
+	transient ConfigurationService configurationService;
 	BeanItemContainer<Laborer> laborersBC = new BeanItemContainer<Laborer>(Laborer.class);
 	boolean addLaborer = false;
 	transient private VelocityEngine velocityEngine;
@@ -88,6 +90,7 @@ public class AddLaborerContractDialog extends AbstractWindowEditor implements Ne
 		velocityEngine = (VelocityEngine) ((MagalUI)UI.getCurrent()).getSpringBean(Constants.VELOCITY_ENGINE_BEAN);
 		laborerService = (LaborerService) ((MagalUI)UI.getCurrent()).getSpringBean(Constants.LABORER_SERVICE_BEAN);
 		constructionSiteService = (ConstructionSiteService) ((MagalUI)UI.getCurrent()).getSpringBean(Constants.CONSTRUCTIONSITE_SERVICE_BEAN);
+		configurationService= (ConfigurationService) ((MagalUI)UI.getCurrent()).getSpringBean(Constants.CONFIGURATION_SERVICE_BEAN);
 		setWidth("70%");
 		setHeight("80%");
 		
@@ -183,7 +186,7 @@ public class AddLaborerContractDialog extends AbstractWindowEditor implements Ne
 		cbSupleCode.setRequired(true);
 		gl.addComponent(cbSupleCode,2,rows++);
 		gl.setComponentAlignment(cbSupleCode, Alignment.MIDDLE_CENTER);
-		AdvancePaymentConfigurations supleConfigurations = constructionSiteService.getSupleTableByCs(((BeanItem<LaborerConstructionsite>) getItem()).getBean().getConstructionsite());
+		AdvancePaymentConfigurations supleConfigurations = configurationService.getSupleTableByCs(((BeanItem<LaborerConstructionsite>) getItem()).getBean().getConstructionsite());
 		Map<Integer, AdvancePaymentItem> paymentTable = supleConfigurations.getMapTable();
 		for(Integer key : paymentTable.keySet()){
 			cbSupleCode.addItem(key);
@@ -268,7 +271,7 @@ public class AddLaborerContractDialog extends AbstractWindowEditor implements Ne
 		logger.debug("se llamo add new item con {}",newItemCaption);
 		//quita el laborer sin id, para no juntar basura
 		for(Laborer itemId : new ArrayList<Laborer>(laborersBC.getItemIds())){
-			if(itemId.getLaborerId() == null){
+			if(itemId.getId() == null){
 				laborersBC.removeItem(itemId);
 			}
 		}

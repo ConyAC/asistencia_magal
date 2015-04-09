@@ -13,6 +13,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
+import org.vaadin.dialogs.ConfirmDialog;
 
 import ru.xpoft.vaadin.VaadinView;
 import cl.magal.asistencia.entities.AdvancePaymentConfigurations;
@@ -56,12 +57,12 @@ import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.InlineDateField;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
-import com.vaadin.ui.Panel;
-import com.vaadin.ui.UI;
 import com.vaadin.ui.Notification.Type;
+import com.vaadin.ui.Panel;
 import com.vaadin.ui.TabSheet;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.TextField;
+import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 
 @VaadinView(value=ConfigView.NAME)
@@ -134,6 +135,42 @@ public class ConfigView extends VerticalLayout implements View {
 					}
 				};
 				table.setEditable(true);
+
+				table.addGeneratedColumn("delete", new Table.ColumnGenerator() {
+
+					@Override
+					public Object generateCell(Table source, final Object itemId, Object columnId) {
+
+						return new Button(null,new Button.ClickListener() {
+
+							@Override
+							public void buttonClick(ClickEvent event) {
+
+								ConfirmDialog.show(UI.getCurrent(), "Confirmar Acción:", "¿Está seguro de eliminar el item de asignación familiar?",
+										"Continuar", "Cancelar", new ConfirmDialog.Listener() {
+									public void onClose(ConfirmDialog dialog) {
+										if (dialog.isConfirmed()) {
+
+											try{
+												FamilyAllowanceConfigurations family = ((BeanItem<FamilyAllowanceConfigurations>)container.getItem(itemId)).getBean();
+												confService.delete(family);
+												container.removeItem(itemId);
+											}catch(Exception e){
+												logger.error("Error al eliminar la asignación",e);
+												String mensaje = "Error al eliminar la asignación";
+												Notification.show(mensaje,Type.ERROR_MESSAGE);
+											}
+										}
+									}
+								});
+							}
+						}){
+							{
+								setIcon(FontAwesome.TRASH_O);
+							}
+						};
+					}
+				});
 				
 				OnValueChangeListener listener = new OnValueChangeListener(){
 
@@ -148,8 +185,8 @@ public class ConfigView extends VerticalLayout implements View {
 				factory.addListener(listener);
 				table.setTableFieldFactory(factory);
 				table.setContainerDataSource(container);
-				table.setVisibleColumns("from","to","amount");
-				table.setColumnHeaders("Desde","Hasta","Monto");
+				table.setVisibleColumns("from","to","amount","delete");
+				table.setColumnHeaders("Desde","Hasta","Monto","Quitar");
 				addComponent(table);
 
 				if(!SecurityHelper.hasPermission(Permission.DEFINIR_VARIABLE_GLOBAL)){
@@ -225,6 +262,7 @@ public class ConfigView extends VerticalLayout implements View {
 					AdvancePaymentConfigurations bean = ((BeanItem<AdvancePaymentConfigurations>)fg.getItemDataSource()).getBean();
 					confService.save(bean);
 				} catch (Exception e) {
+					logger.error("Error al guardar las propiedades de suple",e);
 					Notification.show("Error al guardar");
 				}
 			}
@@ -367,6 +405,7 @@ public class ConfigView extends VerticalLayout implements View {
 					AfpAndInsuranceConfigurations bean = ((BeanItem<AfpAndInsuranceConfigurations>)fg.getItemDataSource()).getBean();
 					confService.save(bean);
 				} catch (Exception e) {
+					logger.error("Error al guardar las propiedades de afp",e);
 					Notification.show("Error al guardar");
 				}
 			}
@@ -450,6 +489,7 @@ public class ConfigView extends VerticalLayout implements View {
 									WageConfigurations bean = ((BeanItem<WageConfigurations>)fg.getItemDataSource()).getBean();
 									confService.save(bean);
 								} catch (Exception e) {
+									logger.error("Error al guardar las propiedades de sueldo",e);
 									Notification.show("Error al guardar");
 								}
 							}
@@ -601,6 +641,7 @@ public class ConfigView extends VerticalLayout implements View {
 									DateConfigurations bean = ((BeanItem<DateConfigurations>)fg.getItemDataSource()).getBean();
 									confService.save(bean);
 								} catch (Exception e) {
+									logger.error("Error al guardar las propiedades de fecha ",e);
 									Notification.show("Error al guardar");
 								}
 							}
@@ -619,6 +660,21 @@ public class ConfigView extends VerticalLayout implements View {
 						final DateField finishDeal = (DateField) fg.buildAndBind("Fecha Fin Trato", "finishDeal");
 						finishDeal.addValueChangeListener(listener);
 						addComponent(finishDeal);
+						
+						Field oil = fg.buildAndBind("Petroleo", "oil");
+						((TextField)oil).setNullRepresentation("");
+						oil.addValueChangeListener(listener);
+						addComponent(oil);
+						
+						Field benzine = fg.buildAndBind("Bencina", "benzine");
+						((TextField)benzine).setNullRepresentation("");
+						benzine.addValueChangeListener(listener);
+						addComponent(benzine);
+
+						Field uf = fg.buildAndBind("UF Mes", "uf");
+						((TextField)uf).setNullRepresentation("");
+						uf.addValueChangeListener(listener);
+						addComponent(uf);
 						
 						mes.addValueChangeListener(new Property.ValueChangeListener() {
 							
@@ -731,21 +787,19 @@ public class ConfigView extends VerticalLayout implements View {
 					
 					@Override
 					public void buttonClick(ClickEvent event) {
-						
-						table.addItem(new Object[]{nombre.getValue(),fecha, new Button(null,new Button.ClickListener() {
+						final DateField df = new DateField();
+						df.setValue(fecha.getValue());
+						Button btn = new Button(null,FontAwesome.TRASH_O);
+						final Object itemId = table.addItem(new Object[]{nombre.getValue(),df, btn }, fecha.getValue());
+						btn.addClickListener(new Button.ClickListener() {
 							
 							@Override
 							public void buttonClick(ClickEvent event) {
-								table.removeItem(fecha.getValue());
+								table.removeItem(itemId);
 							}
-						}){
-							{
-								setIcon(FontAwesome.TRASH_O);
-							}
-						}}, fecha.getValue());
-						}
+						});
 					}
-				 ){
+				}){
 					{
 						setIcon(FontAwesome.PLUS);
 					}

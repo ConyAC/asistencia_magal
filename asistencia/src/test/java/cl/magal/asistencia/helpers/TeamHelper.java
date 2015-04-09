@@ -28,7 +28,7 @@ public final class TeamHelper {
 	public static void verify(Team team) {
 		
 		assertNotNull("La cuadrilla no puede ser nulo", team);
-		assertNotNull("El id de la cuadrilla no puede ser nulo", team.getTeamId());
+		assertNotNull("El id de la cuadrilla no puede ser nulo", team.getId());
 		assertNotNull("El nombre de la cuadrilla no puede ser nulo", team.getName());
 	}
 	
@@ -36,7 +36,7 @@ public final class TeamHelper {
 		assertNotNull("El t no puede ser nulo.", t);
 		assertNotNull("El bdt no puede ser nulo.", bdt);
 		
-		assertSame("El id debe ser el mismo.", t.getTeamId(), bdt.getTeamId());
+		assertSame("El id debe ser el mismo.", t.getId(), bdt.getId());
 		assertEquals("El nombre debe ser el mismo.", t.getName(), bdt.getName());
 		
 		//verificar tipo enum 	

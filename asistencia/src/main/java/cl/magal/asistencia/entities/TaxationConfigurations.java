@@ -26,7 +26,7 @@ public class TaxationConfigurations implements Serializable {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
     @Column(name = "taxation_configurationsId")
-	Long taxationConfigurationsId;
+	Long id;
 	
 	@Digits(fraction = 2, integer = 12)
 	@Column(name ="fromr")
@@ -48,12 +48,12 @@ public class TaxationConfigurations implements Serializable {
 	@Column(name ="exempt")
 	Double exempt;
 
-	public Long getTaxationConfigurationsId() {
-		return taxationConfigurationsId;
+	public Long getId() {
+		return id;
 	}
 
-	public void setTaxationConfigurationsId(Long taxationConfigurationsId) {
-		this.taxationConfigurationsId = taxationConfigurationsId;
+	public void setId(Long taxationConfigurationsId) {
+		this.id = taxationConfigurationsId;
 	}
 
 	public Double getFrom() {
@@ -102,8 +102,8 @@ public class TaxationConfigurations implements Serializable {
 		int result = 1;
 		result = prime
 				* result
-				+ ((taxationConfigurationsId == null) ? 0
-						: taxationConfigurationsId.hashCode());
+				+ ((id == null) ? 0
+						: id.hashCode());
 		return result;
 	}
 
@@ -116,11 +116,11 @@ public class TaxationConfigurations implements Serializable {
 		if (getClass() != obj.getClass())
 			return false;
 		TaxationConfigurations other = (TaxationConfigurations) obj;
-		if (taxationConfigurationsId == null) {
-			if (other.taxationConfigurationsId != null)
+		if (id == null) {
+			if (other.id != null)
 				return false;
-		} else if (!taxationConfigurationsId
-				.equals(other.taxationConfigurationsId))
+		} else if (!id
+				.equals(other.id))
 			return false;
 		return true;
 	}

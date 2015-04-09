@@ -145,8 +145,7 @@ public class LoginView extends VerticalLayout implements View {
 		                        // Remove the previous error message
 		                        loginPanel.removeComponent(loginPanel.getComponent(2));
 		                    }
-		                   
-						 ((MagalUI)UI.getCurrent()).setTopVisible(true);
+		                    ((MagalUI)UI.getCurrent()).setTopVisible(true);
 		                    UI.getCurrent().getNavigator().navigateTo(ConstructionSitesView.NAME);
 		                    
 					} catch (Exception e) {
