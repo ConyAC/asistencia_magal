@@ -41,6 +41,7 @@ import cl.magal.asistencia.entities.enums.LoanToolStatus;
 /**
  *
  * @author Constanza
+ *  se cambia el nombre de tabla desde "tool" a "tools", dado que "tool" da problemas en mysql
  */
 @Entity
 @Table(name = "tools")

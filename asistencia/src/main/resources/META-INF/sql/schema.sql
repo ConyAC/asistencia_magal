@@ -232,8 +232,8 @@ CREATE INDEX IF NOT EXISTS  FK_INDX_ABSENCE_LC ON "ABSENCE"(LABORER_CONSTRUCTION
 ;
 */
 -- TOOL
-
-CREATE TABLE IF NOT EXISTS "tool"
+-- se cambia el nombre a tools, dado que tool da problemas en mysql
+CREATE TABLE IF NOT EXISTS "tools"
 (
    toolId IDENTITY PRIMARY KEY NOT NULL,
    date_buy timestamp NOT NULL,
@@ -244,14 +244,14 @@ CREATE TABLE IF NOT EXISTS "tool"
    laborer_constructionsiteId bigint not null
 )
 ;
-ALTER TABLE "tool"
+ALTER TABLE "tools"
 ADD CONSTRAINT IF NOT EXISTS FK_TOOL_LC
 FOREIGN KEY (laborer_constructionsiteId)
 REFERENCES "laborer_constructionsite"(laborer_constructionsiteId)
 ;
-CREATE UNIQUE INDEX IF NOT EXISTS PK_TOOL ON "tool"(toolId)
+CREATE UNIQUE INDEX IF NOT EXISTS PK_TOOL ON "tools"(toolId)
 ;
-CREATE INDEX IF NOT EXISTS  FK_INDX_TOOL_LC ON "tool"(laborer_constructionsiteId)
+CREATE INDEX IF NOT EXISTS  FK_INDX_TOOL_LC ON "tools"(laborer_constructionsiteId)
 ;
 
 -- LOAN
@@ -284,7 +284,8 @@ CREATE TABLE IF NOT EXISTS "vacation"
    from_date date not null,
    to_date date not null,
    progressive integer,
-   laborer_constructionsiteId bigint not null
+   laborer_constructionsiteId bigint not null,
+   confirmed boolean
 )
 ;
 ALTER TABLE "vacation"
@@ -339,7 +340,7 @@ CREATE UNIQUE INDEX IF NOT EXISTS PK_WG ON "wage_configurations"(wage_configurat
 -- MOBILIZATION2
 CREATE TABLE IF NOT EXISTS "mobilization2"
 (
-   WAGE_CONFIGURATIONSID IDENTITY NOT NULL,
+   wage_configurationsId IDENTITY NOT NULL,
    amount double,
    linked_constructionsiteId bigint
 )
@@ -498,7 +499,7 @@ CREATE TABLE IF NOT EXISTS "taxation_configurations"
 CREATE UNIQUE INDEX IF NOT EXISTS PK_TAXATION_CONFIG ON "taxation_configurations"(taxation_configurationsId)
 ;
 
--- FAMILY_ALLOWANCE_CONFIGURATIONS
+-- 	_ALLOWANCE_CONFIGURATIONS
 
 CREATE TABLE IF NOT EXISTS "family_allowance_configurations"
 (
@@ -585,7 +586,7 @@ CREATE TABLE IF NOT EXISTS "postponedpaymenttool"
 ALTER TABLE "postponedpaymenttool"
 ADD CONSTRAINT IF NOT EXISTS FK_POSTPONEDPAYMENTTOOL
 FOREIGN KEY (toolId)
-REFERENCES "tool"(toolId)
+REFERENCES "tools"(toolId)
 ;
 CREATE INDEX IF NOT EXISTS FK_INDX_POSTPONEDPAYMENTTOOL ON "postponedpaymenttool"(toolId)
 ;
@@ -607,7 +608,7 @@ CREATE INDEX IF NOT EXISTS FK_INDX_POSTPONEDPAYMENTLOAN ON "postponedpaymentloan
 
 -- TRIGGER
 -- CREATE TRIGGER DEFAULT_DATE_REWARD BEFORE INSERT ON laborer_constructionsite
--- FOR EACH ROW SET NEW.REWARD_ENDTDATE = IFNULL(NEW.REWARD_ENDTDATE, NOW()), NEW.REWARD_STARTDATE = IFNULL(NEW.REWARD_STARTDATE, NOW());
+-- FOR EACH ROW SET NEW.reward_enddate = IFNULL(NEW.reward_enddate, NOW()), NEW.reward_startdate = IFNULL(NEW.reward_startdate, NOW());
 
 
 
@@ -771,3 +772,40 @@ CREATE UNIQUE INDEX IF NOT EXISTS PRIMARY_KEY_4E ON overtime(overtimeId)
 ;
 CREATE INDEX IF NOT EXISTS FK_OVERTIME_LABORER_CONSTRUCTIONSITEID_INDEX_4 ON overtime(laborer_constructionsiteId)
 ;
+
+
+CREATE TABLE IF NOT EXISTS confirmations 
+(
+  confirmationsId bigint(20) IDENTITY PRIMARY KEY NOT NULL,
+  central_check tinyint(1) DEFAULT '0',
+  constructionsite_check tinyint(1) DEFAULT '0',
+  date date NOT NULL,
+  constructionsiteId bigint(20) NOT NULL,
+  PRIMARY KEY (confirmationsId)
+) ;
+
+
+CREATE TABLE IF NOT EXISTS license (
+  licenseId bigint(20) IDENTITY PRIMARY KEY NOT NULL,
+  confirmed tinyint(1) DEFAULT '0',
+  description varchar(1024) DEFAULT NULL,
+  from_date date DEFAULT NULL,
+  absence_type int(11) DEFAULT NULL,
+  to_date date DEFAULT NULL,
+  laborer_constructionsiteId bigint(20) NOT NULL,
+  PRIMARY KEY (licenseId),
+  KEY fk_license_laborer_constructionsiteId (laborer_constructionsiteId),
+  CONSTRAINT fk_license_laborer_constructionsiteId FOREIGN KEY (laborer_constructionsiteId) REFERENCES laborer_constructionsite (laborer_constructionsiteId)
+) ;
+
+
+CREATE TABLE IF NOT EXISTS salary (
+  salarytId bigint(20) IDENTITY PRIMARY KEY NOT NULL,
+  date date NOT NULL,
+  salary int(11) DEFAULT NULL,
+  suple int(11) DEFAULT NULL,
+  laborer_constructionsiteId bigint(20) NOT NULL,
+  PRIMARY KEY (salarytId),
+  KEY fk_salary_laborer_constructionsiteId (laborer_constructionsiteId),
+  CONSTRAINT fk_salary_laborer_constructionsiteId FOREIGN KEY (laborer_constructionsiteId) REFERENCES laborer_constructionsite (laborer_constructionsiteId)
+);
