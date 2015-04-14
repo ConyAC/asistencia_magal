@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
+import javax.validation.ConstraintViolationException;
 
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
@@ -34,6 +35,7 @@ import cl.magal.asistencia.ui.MagalUI;
 import cl.magal.asistencia.ui.OnValueChangeFieldFactory;
 import cl.magal.asistencia.ui.OnValueChangeFieldFactory.OnValueChangeListener;
 import cl.magal.asistencia.util.SecurityHelper;
+import cl.magal.asistencia.util.Utils;
 
 import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeEvent;
@@ -642,7 +644,12 @@ public class ConfigView extends VerticalLayout implements View {
 									confService.save(bean);
 								} catch (Exception e) {
 									logger.error("Error al guardar las propiedades de fecha ",e);
-									Notification.show("Error al guardar");
+									if(e instanceof ConstraintViolationException ){
+										logger.error("Error de constraint "+Utils.printConstraintMessages(((ConstraintViolationException) e).getConstraintViolations()),e);
+										Notification.show("Error al validar los datos:\n"+Utils.printConstraintMessages(((ConstraintViolationException) e).getConstraintViolations()), Type.ERROR_MESSAGE);
+									}else{
+										Notification.show("Error al guardar");
+									}
 								}
 							}
 						};

@@ -307,7 +307,8 @@ public class WorkerFileView extends HorizontalLayout implements View {
 				if(propertyId == null ){ //estilo para la fila
 					//si es la activa, la marca
 					Item item = source.getItem(itemId);
-					boolean isActive = (Short) item.getItemProperty("active").getValue() == 1;
+					Property prop = item.getItemProperty("active");
+					boolean isActive = (Short) prop.getValue() == 1;
 					return isActive ? "active-row":null;
 				}
 				return null;

@@ -32,6 +32,7 @@ import cl.magal.asistencia.util.SecurityHelper;
 
 import com.vaadin.data.Container.Filterable;
 import com.vaadin.data.Container.SimpleFilterable;
+import com.vaadin.data.Container;
 import com.vaadin.data.Item;
 import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeEvent;
@@ -72,6 +73,7 @@ import com.vaadin.ui.Panel;
 import com.vaadin.ui.ProgressBar;
 import com.vaadin.ui.TabSheet;
 import com.vaadin.ui.Table;
+import com.vaadin.ui.TableFieldFactory;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.Upload;
@@ -148,7 +150,7 @@ public class AttendancePanel extends Panel implements View {
 		}
 		return new DateTime(dateConfig.getAssistance());
 	}
-	
+
 	/**
 	 * obtiene la fecha de cierre del mes anterior
 	 * @return
@@ -156,9 +158,9 @@ public class AttendancePanel extends Panel implements View {
 	private DateTime getPastMonthClosingDate(){
 		DateTime dt = getAttendanceDate();
 		DateConfigurations dateConfig = configurationService.getDateConfigurationByCsAndMonth(cs,dt.minusMonths(1));
-		
+
 		if( dateConfig.getAssistance() == null ){
-			
+
 			dateConfig.setAssistance(dt.minusMonths(1).withDayOfMonth(dt.minusMonths(1).dayOfMonth().getMaximumValue()).toDate());
 		}
 		return new DateTime(dateConfig.getAssistance());
@@ -170,7 +172,7 @@ public class AttendancePanel extends Panel implements View {
 
 	@PostConstruct
 	private void init(){
-		
+
 		setSizeFull();
 
 		//crea la parte superior de la interfaz de asistencia
@@ -236,24 +238,24 @@ public class AttendancePanel extends Panel implements View {
 		tab.addTab(attendanceGrid,"Asistencia");
 
 		Grid overtimeGrid = drawOvertimeGrid();
-		
+
 		tab.addTab(overtimeGrid,"Horas Extras");
-		
+
 		Grid extraParamsTable = drawExtraParamsGrid();
-		
+
 		tab.addTab(extraParamsTable,"Parámetros Extra");
 
 		Table confirmTable = drawAbsenceConfirmTable();
 
 		tab.addTab(confirmTable,"Confirmar Licencias y Accidentes");
-		
+
 		VerticalLayout vl = drawSalaryLayout();
-		
+
 		tab.addTab(vl,"Cálculos");
 
 		return tab;
 	}
-	
+
 	private void enableAttendance(boolean state) {
 		attendanceGrid.setEnabled(state);
 		overtimeGrid.setEnabled(state);
@@ -263,25 +265,25 @@ public class AttendancePanel extends Panel implements View {
 	}
 
 	private Grid drawExtraParamsGrid() {
-		
-		extraParamContainer.addNestedContainerProperty("laborerConstructionSite.activeContract.jobCode");
-		
-		GeneratedPropertyContainer gpcontainer =
-			    new GeneratedPropertyContainer(extraParamContainer);
-		
-		gpcontainer.addGeneratedProperty("jobCode",new PropertyValueGenerator<Integer>() {
-			    @Override
-			    public Integer getValue(Item item, Object itemId,Object propertyId) {
-			        int born = (Integer)item.getItemProperty("laborerConstructionSite.activeContract.jobCode").getValue();
-			        return born;
-			    }
 
-			    @Override
-			    public Class<Integer> getType() {
-			        return Integer.class;
-			    }
-			});
-		
+		extraParamContainer.addNestedContainerProperty("laborerConstructionSite.activeContract.jobCode");
+
+		GeneratedPropertyContainer gpcontainer =
+				new GeneratedPropertyContainer(extraParamContainer);
+
+		gpcontainer.addGeneratedProperty("jobCode",new PropertyValueGenerator<Integer>() {
+			@Override
+			public Integer getValue(Item item, Object itemId,Object propertyId) {
+				int born = (Integer)item.getItemProperty("laborerConstructionSite.activeContract.jobCode").getValue();
+				return born;
+			}
+
+			@Override
+			public Class<Integer> getType() {
+				return Integer.class;
+			}
+		});
+
 		extraGrid = new Grid(extraParamContainer);
 		extraGrid.setSelectionMode(SelectionMode.SINGLE);
 		extraGrid.setSizeFull();
@@ -311,7 +313,7 @@ public class AttendancePanel extends Panel implements View {
 			extraGrid.removeColumn("date");
 		if(extraGrid.getColumn("id") != null )
 			extraGrid.removeColumn("id");
-		
+
 		extraGrid.setColumnOrder("laborerConstructionSite.activeContract.jobCode","bondMov2","km","specialBond","overtimeHours");
 
 		extraParamContainer.sort(new Object[]{"laborerConstructionSite.activeContract.jobCode"}, new boolean[]{true});
@@ -320,7 +322,7 @@ public class AttendancePanel extends Panel implements View {
 		extraGrid.getColumn("km").setHeaderCaption("Km");
 		extraGrid.getColumn("specialBond").setHeaderCaption("Bono Imponible Especial");
 		extraGrid.getColumn("overtimeHours").setHeaderCaption("Horas Sobretiempo");
-		
+
 		createHeaders(extraGrid);
 		return extraGrid;
 	}
@@ -369,28 +371,28 @@ public class AttendancePanel extends Panel implements View {
 						dt2 = dt2.minusMonths(1);
 					//el número de mes no es un número válido de mes o si es un día a la fecha de cierre del mes pasado, oculta la columna
 					if(monthDay > dt2.dayOfMonth().getMaximumValue() || 
-					   ( ((String) pid).startsWith("dmp") && monthDay <= getPastMonthClosingDate().getDayOfMonth())){
+							( ((String) pid).startsWith("dmp") && monthDay <= getPastMonthClosingDate().getDayOfMonth())){
 						grid.removeColumn(pid);
 					}else{ //solo lo setea si el número es mayor a la cantidad de dias del mes
 						label.setValue( dt2.withDayOfMonth(monthDay).dayOfWeek().getAsShortText() );
 						grid.getColumn(pid).setHeaderCaption(((String) pid).replace("dmp","").replace("dma","")).setSortable(false);
-						
+
 					}
-					
+
 				}
-				
+
 				if(cell != null)
 					cell.setComponent(label);
 			}
-			
+
 			grid.setCellStyleGenerator(new Grid.CellStyleGenerator() {
-				
+
 				@Override
 				public String getStyle(CellReference cellReference) {
 					String post = "";
 					if( (cellReference.getValue() instanceof AttendanceMark && !AttendanceMark.ATTEND.equals(cellReference.getValue())) ||
-						(cellReference.getValue() instanceof Integer && 0 != (Integer)cellReference.getValue()))
-							post = " red-color";
+							(cellReference.getValue() instanceof Integer && 0 != (Integer)cellReference.getValue()))
+						post = " red-color";
 					String pid = (String) cellReference.getPropertyId();
 					if( pid.startsWith("dmp") || pid.startsWith("dma") ){
 						//calcula el numero del mes
@@ -419,23 +421,24 @@ public class AttendancePanel extends Panel implements View {
 
 	private VerticalLayout drawSalaryLayout() {
 		salaryContainer.addNestedContainerProperty("laborerConstructionSite.activeContract.jobCode");
+		salaryContainer.addNestedContainerProperty("laborerConstructionSite.supleCode");
 		VerticalLayout vl = new VerticalLayout(){
 			{
 				setSpacing(true);
-				
+
 				btnGenerateSalary = new Button("Generar Sueldo y Anticipo",FontAwesome.GEARS);
 				btnGenerateSalary.setDisableOnClick(true);
 				btnGenerateSalary.addClickListener(new Button.ClickListener() {
-					
+
 					@Override
 					public void buttonClick(ClickEvent event) {
-						
+
 						//se pide confirmación, pues este proceso reemplazará lo que exista en base de datos para la fecha
 						ConfirmDialog.show(UI.getCurrent(), "Confirmar Acción:", "El siguiente proceso reemplazará la información de sueldo que se tenga guardada. ¿Está seguro de que desea continuar con el proceso?",
 								"Continuar", "Cancelar", new ConfirmDialog.Listener() {
 							public void onClose(ConfirmDialog dialog) {
 								if (dialog.isConfirmed()) {
-									
+
 									try{
 										//comienza el procesamiento de los sueldos y se guarda el resultado en base de datos
 										// recupera los resultados  este procesamiento puede tardar un tiempo
@@ -457,16 +460,29 @@ public class AttendancePanel extends Panel implements View {
 						btnGenerateSalary.setEnabled(true);
 					}
 				});
-				addComponent(btnGenerateSalary);
-				setComponentAlignment(btnGenerateSalary, Alignment.TOP_RIGHT);
+				//				addComponent(btnGenerateSalary);
+				//				setComponentAlignment(btnGenerateSalary, Alignment.TOP_RIGHT);
 				Table salaryTable = new Table();
 				salaryTable.setWidth("100%");
 				salaryTable.setContainerDataSource(salaryContainer);
-				
-				salaryTable.setVisibleColumns("laborerConstructionSite.activeContract.jobCode","suple","salary");
-				salaryTable.setColumnHeaders("Oficio","Anticipo","Sueldo");
-				
-				
+
+				salaryTable.setVisibleColumns("laborerConstructionSite.activeContract.jobCode","laborerConstructionSite.supleCode","suple","jornalPromedio","salary");
+				salaryTable.setColumnHeaders("Oficio","Código suple","Suple","Jornal Promedio","Sueldo");
+				salaryTable.setEditable(true);
+				salaryTable.setTableFieldFactory(new TableFieldFactory() {
+
+					@Override
+					public Field<?> createField(Container container, Object itemId,Object propertyId, com.vaadin.ui.Component uiContext) {
+						if(propertyId.equals("laborerConstructionSite.activeContract.jobCode")||
+								propertyId.equals("salary") )
+							return null;
+						TextField tf = new TextField();
+						tf.setNullRepresentation("");
+						return tf;
+					}
+				});
+
+
 				addComponent(salaryTable);
 				setExpandRatio(salaryTable, 1.0f);
 			}
@@ -476,49 +492,49 @@ public class AttendancePanel extends Panel implements View {
 	}
 
 	private Table drawAbsenceConfirmTable() {
-		
+
 		absenceContainer.addNestedContainerProperty("laborerConstructionsite.activeContract.jobCode");
 		confirmTable = new Table();
 		confirmTable.setContainerDataSource(absenceContainer);
 		confirmTable.setSizeFull();
 		confirmTable.setEditable(true);
-		
+
 		confirmTable.addGeneratedColumn("laborerConstructionsite.activeContract.jobCode", new Table.ColumnGenerator() {
 			@Override
 			public Object generateCell(Table source, Object itemId, Object columnId) {
-				
+
 				return source.getContainerProperty(itemId, columnId).getValue();
 			}
 		});
-		
+
 		confirmTable.addGeneratedColumn("type", new Table.ColumnGenerator() {
 			@Override
 			public Object generateCell(Table source, Object itemId, Object columnId) {
-				
+
 				return source.getContainerProperty(itemId, columnId).getValue();
 			}
 		});
-		
+
 		confirmTable.addGeneratedColumn("description", new Table.ColumnGenerator() {
 			@Override
 			public Object generateCell(Table source, Object itemId, Object columnId) {
-				
+
 				return source.getContainerProperty(itemId, columnId).getValue();
 			}
 		});
-		
+
 		confirmTable.addGeneratedColumn("confirm", new Table.ColumnGenerator() {
-			
+
 			@Override
 			public Object generateCell(Table source, Object itemId, Object columnId) {
-				
+
 				final AbsenceVO absence = ((BeanItem<AbsenceVO>) source.getItem(itemId)).getBean(); 
 				final Button btn = new Button();
-				
+
 				toogleButtonState(btn, absence);
-				
+
 				btn.addClickListener(new Button.ClickListener() {
-					
+
 					@Override
 					public void buttonClick(ClickEvent event) {
 						absence.setConfirmed(!absence.isConfirmed());
@@ -526,7 +542,7 @@ public class AttendancePanel extends Panel implements View {
 						service.confirmAbsence(absence);
 					}
 				});
-				
+
 				return btn;
 			}
 
@@ -544,18 +560,18 @@ public class AttendancePanel extends Panel implements View {
 				}
 			}
 		});
-		
+
 		confirmTable.setVisibleColumns("laborerConstructionsite.activeContract.jobCode","type","description","fromDate","toDate","confirm");
 		confirmTable.setColumnHeaders("Oficio","Tipo","Descripción","Fecha inicio","Fecha Fin","Acción");
 		return confirmTable;
 	}
 
 	private Grid drawOvertimeGrid() {
-		
+
 		overtimeContainer.addNestedContainerProperty("laborerConstructionSite.activeContract.jobCode");
 		overtimeGrid = new Grid(overtimeContainer);
 		overtimeGrid.setSelectionMode(SelectionMode.SINGLE);
-//		overtimeGrid.setSizeFull();
+		//		overtimeGrid.setSizeFull();
 		overtimeGrid.setHeight("100%");
 		overtimeGrid.setWidth("100%");
 		overtimeGrid.setEditorFieldGroup(new BeanFieldGroup<Overtime>(Overtime.class));
@@ -604,7 +620,7 @@ public class AttendancePanel extends Panel implements View {
 	}
 
 	private Grid drawAttendanceGrid() {
-		
+
 		attendanceContainer.addNestedContainerProperty("laborerConstructionSite.activeContract.jobCode");
 		attendanceGrid = new Grid(attendanceContainer);
 		attendanceGrid.setSelectionMode(SelectionMode.SINGLE);
@@ -664,7 +680,7 @@ public class AttendancePanel extends Panel implements View {
 		attendanceGrid.getColumn("laborerConstructionSite.activeContract.jobCode").setHeaderCaption("Oficio").setEditorField(new TextField(){{setReadOnly(true);}}).setWidth(100);
 
 		createHeaders(attendanceGrid);
-		
+
 		return attendanceGrid;
 	}
 
@@ -810,8 +826,8 @@ public class AttendancePanel extends Panel implements View {
 								ConfirmDialog.show(UI.getCurrent(), "Confirmar Acción:", 
 										confirmations.isConstructionSiteCheck() ? 
 												"¿Está seguro de cancelar la confirmación de asistencia? Esto desbloqueará la edición en obra de la asistencia del mes.":
-												"¿Está seguro de confirmar la asistencia? Esto bloqueará la edición en obra de la asistencia del mes.",
-										"Continuar", "Cancelar", new ConfirmDialog.Listener() {
+													"¿Está seguro de confirmar la asistencia? Esto bloqueará la edición en obra de la asistencia del mes.",
+													"Continuar", "Cancelar", new ConfirmDialog.Listener() {
 									public void onClose(ConfirmDialog dialog) {
 										if (dialog.isConfirmed()) {
 											confirmations.setConstructionSiteCheck(!confirmations.isConstructionSiteCheck());
@@ -820,11 +836,11 @@ public class AttendancePanel extends Panel implements View {
 											btnCentralConfirm.setEnabled(confirmations.isConstructionSiteCheck());
 											//si tiene confirmación de obra y no tiene permisos de confirmar central o si tiene ambos checheados, bloqueda la interfaz
 											enableAttendance(!(
-														(confirmations.isConstructionSiteCheck() && !SecurityHelper.hasPermission(Permission.CONFIRMAR_ASISTENCIA_CENTRAL)) || 
-														(confirmations.isConstructionSiteCheck() && confirmations.isCentralCheck())||
-														(!confirmations.isConstructionSiteCheck() && !SecurityHelper.hasPermission(Permission.CONFIRMAR_ASISTENCIA_OBRA))
-														));
-											
+													(confirmations.isConstructionSiteCheck() && !SecurityHelper.hasPermission(Permission.CONFIRMAR_ASISTENCIA_CENTRAL)) || 
+													(confirmations.isConstructionSiteCheck() && confirmations.isCentralCheck())||
+													(!confirmations.isConstructionSiteCheck() && !SecurityHelper.hasPermission(Permission.CONFIRMAR_ASISTENCIA_OBRA))
+													));
+
 											if( !confirmations.isConstructionSiteCheck() && !SecurityHelper.hasPermission(Permission.CONFIRMAR_ASISTENCIA_OBRA)){
 												btnConstructionSiteConfirm.setVisible(false);
 											}else if( !confirmations.isConstructionSiteCheck() && SecurityHelper.hasPermission(Permission.CONFIRMAR_ASISTENCIA_CENTRAL)){
@@ -835,7 +851,7 @@ public class AttendancePanel extends Panel implements View {
 									}
 
 								});
-								
+
 							}
 						});
 
@@ -851,8 +867,8 @@ public class AttendancePanel extends Panel implements View {
 								ConfirmDialog.show(UI.getCurrent(), "Confirmar Acción:", 
 										confirmations.isCentralCheck() ? 
 												"¿Está seguro de cancelar la confirmación de asistencia? Esto desbloqueará la edición en la central de la asistencia del mes.":
-												"¿Está seguro de confirmar la asistencia? Esto bloqueará la edición en la central de la asistencia del mes.",
-										"Continuar", "Cancelar", new ConfirmDialog.Listener() {
+													"¿Está seguro de confirmar la asistencia? Esto bloqueará la edición en la central de la asistencia del mes.",
+													"Continuar", "Cancelar", new ConfirmDialog.Listener() {
 									public void onClose(ConfirmDialog dialog) {
 										if (dialog.isConfirmed()) {
 											confirmations.setCentralCheck(!confirmations.isCentralCheck());
@@ -918,15 +934,15 @@ public class AttendancePanel extends Panel implements View {
 		}
 		//deshabilita si tiene confirmación de obra y no tiene permisos de confirmar central, si tiene ambos checheados, bloqueda la interfaz o si no tiene confirmacion de obra y no tiene permiso de obra 
 		enableAttendance(!(
-							(confirmations.isConstructionSiteCheck() && !SecurityHelper.hasPermission(Permission.CONFIRMAR_ASISTENCIA_CENTRAL)) || 
-							(confirmations.isConstructionSiteCheck() && confirmations.isCentralCheck()) ||
-							(!confirmations.isConstructionSiteCheck() && !SecurityHelper.hasPermission(Permission.CONFIRMAR_ASISTENCIA_OBRA))
-						));
+				(confirmations.isConstructionSiteCheck() && !SecurityHelper.hasPermission(Permission.CONFIRMAR_ASISTENCIA_CENTRAL)) || 
+				(confirmations.isConstructionSiteCheck() && confirmations.isCentralCheck()) ||
+				(!confirmations.isConstructionSiteCheck() && !SecurityHelper.hasPermission(Permission.CONFIRMAR_ASISTENCIA_OBRA))
+				));
 
 		btnCentralConfirm.setVisible(SecurityHelper.hasPermission(Permission.CONFIRMAR_ASISTENCIA_CENTRAL));
 		toogleButtonState(btnCentralConfirm,confirmations.isCentralCheck());
 		btnCentralConfirm.setEnabled( (confirmations.isConstructionSiteCheck() && !confirmations.isCentralCheck()) ||
-				                      (confirmations.isConstructionSiteCheck() && confirmations.isCentralCheck() && SecurityHelper.hasPermission(Permission.DESBLOQUEDAR_ASISTENCIA) ));
+				(confirmations.isConstructionSiteCheck() && confirmations.isCentralCheck() && SecurityHelper.hasPermission(Permission.DESBLOQUEDAR_ASISTENCIA) ));
 	}
 
 	private void toogleButtonState(Button btn, boolean confirmations ){
@@ -958,7 +974,7 @@ public class AttendancePanel extends Panel implements View {
 		reloadMonthGridData(dt);
 
 		reloadMonthAttendanceData(dt);
-		
+
 		configureInterface();
 
 		// Enable polling and set frequency to 1 seconds
@@ -976,27 +992,35 @@ public class AttendancePanel extends Panel implements View {
 		//		logger.debug("se van a generar las filas para {} dias",days);
 
 		clearGrids();
+		try{
 
-		List<Overtime> overtime = service.getOvertimeByConstruction(cs,dt);
-		overtimeContainer.addAll(overtime);
-		overtimeContainer.sort(new Object[]{"laborerConstructionSite.activeContract.jobCode"}, new boolean[]{true});
+			List<Overtime> overtime = service.getOvertimeByConstruction(cs,dt);
+			overtimeContainer.addAll(overtime);
+			overtimeContainer.sort(new Object[]{"laborerConstructionSite.activeContract.jobCode"}, new boolean[]{true});
 
-		List<Attendance> attendance = service.getAttendanceByConstruction(cs,dt);
-		attendanceContainer.addAll(attendance);
-		attendanceContainer.sort(new Object[]{"laborerConstructionSite.activeContract.jobCode"}, new boolean[]{true});
-		
-		List<AbsenceVO> absences = service.getAbsencesByConstructionAndMonth(cs,dt);
-		absenceContainer.addAll(absences);
-		absenceContainer.sort(new String[]{"laborerConstructionsite.activeContract.jobCode"},new boolean[]{ true });
-		
-		List<Salary> salaries = service.getSalariesByConstructionAndMonth(cs,dt);
-		salaryContainer.addAll(salaries);
-		salaryContainer.sort(new String[]{"laborerConstructionsite.activeContract.jobCode"},new boolean[]{ true });
-		
-		List<ExtraParams> params = service.getExtraParamsByConstructionAndMonth(cs,dt);
-		//limpia
-		extraParamContainer.addAll(params);
-		extraParamContainer.sort(new String[]{"laborerConstructionsite.activeContract.jobCode"},new boolean[]{ true });
+			List<Attendance> attendance = service.getAttendanceByConstruction(cs,dt);
+			attendanceContainer.addAll(attendance);
+			attendanceContainer.sort(new Object[]{"laborerConstructionSite.activeContract.jobCode"}, new boolean[]{true});
+
+			List<AbsenceVO> absences = service.getAbsencesByConstructionAndMonth(cs,dt);
+			absenceContainer.addAll(absences);
+			absenceContainer.sort(new String[]{"laborerConstructionsite.activeContract.jobCode"},new boolean[]{ true });
+
+			List<Salary> salaries = service.getSalariesByConstructionAndMonth(cs,dt);
+			salaryContainer.addAll(salaries);
+			salaryContainer.sort(new String[]{"laborerConstructionsite.activeContract.jobCode"},new boolean[]{ true });
+
+			List<ExtraParams> params = service.getExtraParamsByConstructionAndMonth(cs,dt);
+			//limpia
+			extraParamContainer.addAll(params);
+			extraParamContainer.sort(new String[]{"laborerConstructionsite.activeContract.jobCode"},new boolean[]{ true });
+		}catch(Exception e){
+			logger.error("Error al calcular los sueldos",e);
+			String mensaje = "Error al calcular los sueldos.";
+			if( e.getMessage() != null )
+				mensaje = e.getMessage();
+			Notification.show(mensaje,Type.ERROR_MESSAGE);
+		}
 	}
 	/**
 	 * Según la fecha y la obra, verifica cual es el estado de confirmación de cada una

@@ -26,7 +26,7 @@ public class SalaryCalculator {
 	 * PARAMETROS
 	 */
 	DateTime closingDateLastMonth;
-	double suple, tool, loan,
+	Double suple, tool, loan,
 		   sueldoMinimo;
 	Attendance attendance,lastMonthAttendance;
 	Overtime overtime;
@@ -125,6 +125,21 @@ public class SalaryCalculator {
 		return vTrato;
 	}
 	
+	/**
+	 * Usar este constructor cuando se quiera calcular un unico sueldo
+	 * @param closingDateLastMonth
+	 * @param suple
+	 * @param tool
+	 * @param loan
+	 * @param attendance
+	 * @param lastMonthAttendance
+	 * @param overtime
+	 * @param extraParams
+	 * @param wageConfigurations
+	 * @param dateConfigurations
+	 * @param famillyTable
+	 * @param taxTable
+	 */
 	public SalaryCalculator(DateTime closingDateLastMonth, 
 			                double suple , 
 			                double tool , 
@@ -136,17 +151,139 @@ public class SalaryCalculator {
 			                WageConfigurations wageConfigurations,
 			                DateConfigurations dateConfigurations,
 			                List<FamilyAllowanceConfigurations> famillyTable,
-			                List<TaxationConfigurations> taxTable
-			                ){
+			                List<TaxationConfigurations> taxTable){
 		
-		this.date = attendance.getDate();
-		this.closingDateLastMonth = closingDateLastMonth;
+		
+		setInformation(suple, tool, loan, attendance, lastMonthAttendance, overtime, extraParams);
+		init(closingDateLastMonth, wageConfigurations, dateConfigurations, famillyTable, taxTable);
+		
+	}
+	
+	/**
+	 * asigna la información necesaria para calcular un sueldo especifico
+	 * @param suple
+	 * @param tool
+	 * @param loan
+	 * @param attendance
+	 * @param lastMonthAttendance
+	 * @param overtime
+	 * @param extraParams
+	 */
+	public void setInformation(double suple , 
+            double tool , 
+            double loan,
+            Attendance attendance,
+            Attendance lastMonthAttendance,
+            Overtime overtime,
+            ExtraParams extraParams){
+		
+		this.attendance = attendance;	
+		this.date = attendance.getDate();	
+		this.lastMonthAttendance = lastMonthAttendance;		
+		this.overtime = overtime;	
+		this.extraParams = extraParams;
+		
+		this.bonoImponibleEspecial = extraParams.getSpecialBond();
+		this.bonoCargoLoc2 = extraParams.getBondMov2();
+		this.km = extraParams.getKm();
+		this.horasDescuento = extraParams.getDescHours();
+		this.horasSobreTiempo = extraParams.getOvertimeHours();
+		
 		this.suple = suple;
 		this.tool = tool;
 		this.loan = loan;
-		this.attendance = attendance;
-		this.lastMonthAttendance = lastMonthAttendance;
-		this.overtime = overtime;
+		
+	}
+	
+	/**
+	 * 
+	 * @param closingDateLastMonth
+	 * @param wageConfigurations
+	 * @param dateConfigurations
+	 * @param famillyTable
+	 * @param taxTable
+	 */
+	public void setConfiguration(DateTime closingDateLastMonth, 
+            WageConfigurations wageConfigurations,
+            DateConfigurations dateConfigurations,
+            List<FamilyAllowanceConfigurations> famillyTable,
+            List<TaxationConfigurations> taxTable){
+		init(closingDateLastMonth, wageConfigurations, dateConfigurations, famillyTable, taxTable);
+	}
+	
+	/**
+	 * Permite validar la información necesaria para correr el calculo del sueldo
+	 */
+	private void validateInformation(){
+		
+		if(closingDateLastMonth == null )
+			throw new RuntimeException("Aún no se define una fecha de cierre del mes anterior, no se puede calcular el sueldo.");
+		
+		if(famillyTable == null || famillyTable.isEmpty() )
+			throw new RuntimeException("Aún no se definen los valores de asignación familiar, no se puede calcular el sueldo.");
+		
+		if(taxTable == null || taxTable.isEmpty() )
+			throw new RuntimeException("Aún no se definen los valores de impuestos, no se puede calcular el sueldo.");
+
+		if(attendance == null )
+			throw new RuntimeException("La asistencia no está definida(null)");
+		
+		if(attendance.getDate() == null )
+			throw new RuntimeException("La asistencia tiene una fecha definida(null)");
+		
+		if(lastMonthAttendance == null )
+			throw new RuntimeException("La asistencia del mes anterior no está definida(null)");
+		
+		if(overtime == null )
+			throw new RuntimeException("Las horas de sobre tiempo, no están definidas(null)");
+		
+		if(extraParams == null )
+			throw new RuntimeException("Los parámetros extras (bono especial, km ,etc), no están definidos(null)");
+		
+		if(suple == null )
+			throw new RuntimeException("El suple no está definido(null)");
+		if(tool == null )
+			throw new RuntimeException("La deuda por herramientas no está definida(null)");
+		if(loan == null )
+			throw new RuntimeException("La deuda por prestamos no está definida(null)");
+	}
+	
+	/**
+	 * Permite crear un objeto con la configuración global para ser reutilizado
+	 * @param closingDateLastMonth
+	 * @param wageConfigurations
+	 * @param dateConfigurations
+	 * @param famillyTable
+	 * @param taxTable
+	 */
+	public SalaryCalculator(DateTime closingDateLastMonth, 
+            WageConfigurations wageConfigurations,
+            DateConfigurations dateConfigurations,
+            List<FamilyAllowanceConfigurations> famillyTable,
+            List<TaxationConfigurations> taxTable){
+		init(closingDateLastMonth, wageConfigurations, dateConfigurations, famillyTable, taxTable);
+	}
+	
+	/**
+	 * inicializa el objeto con la configuración global necesaria para los calculos
+	 * @param closingDateLastMonth
+	 * @param wageConfigurations
+	 * @param dateConfigurations
+	 * @param famillyTable
+	 * @param taxTable
+	 */
+	private void init(DateTime closingDateLastMonth, 
+            WageConfigurations wageConfigurations,
+            DateConfigurations dateConfigurations,
+            List<FamilyAllowanceConfigurations> famillyTable,
+            List<TaxationConfigurations> taxTable){
+		
+		if(closingDateLastMonth == null )
+			throw new RuntimeException("Aún no se define una fecha de cierre del mes anterior, no se puede calcular el sueldo.");
+		this.closingDateLastMonth = closingDateLastMonth;
+		
+		if(wageConfigurations == null )
+			throw new RuntimeException("Aún no se definen los valores de sueldo mínimo, colación y movilización, no se puede calcular el sueldo.");
 		
 		this.sueldoMinimo = wageConfigurations.getMinimumWage();
 		this.collation = wageConfigurations.getCollation();
@@ -160,22 +297,28 @@ public class SalaryCalculator {
 			}
 		}
 		
+		if(famillyTable == null || famillyTable.isEmpty() )
+			throw new RuntimeException("Aún no se definen los valores de asignación familiar, no se puede calcular el sueldo.");
 		this.famillyTable = famillyTable;
-		this.taxTable = taxTable;
 		
-		this.extraParams = extraParams;
-		this.bonoImponibleEspecial = extraParams.getSpecialBond();
-		this.bonoCargoLoc2 = extraParams.getBondMov2();
-		this.km = extraParams.getKm();
-		this.horasDescuento = extraParams.getDescHours();
-		this.horasSobreTiempo = extraParams.getOvertimeHours();
+		if(taxTable == null || taxTable.isEmpty() )
+			throw new RuntimeException("Aún no se definen los valores de impuestos, no se puede calcular el sueldo.");
+		this.taxTable = taxTable;
+
+		if(dateConfigurations == null )
+			throw new RuntimeException("Aún no se definen los valores de fecha de cierres, uf, bencina, petroleo, etc., no se puede calcular el sueldo.");
 		
 		this.bencina = dateConfigurations.getBenzine();
 		this.ufMes = dateConfigurations.getUf();
-		
 	}
 
+	/**
+	 * Permite calcular el sueldo de un trabajador
+	 * @return
+	 */
 	public double calculateSalary() {
+		//valida que este toda la información necesaria para el calculo
+		validateInformation();
 		return getAfecto() + getSobreAfecto() + getTNoAfecto() - getTDesc();
 	}
 	

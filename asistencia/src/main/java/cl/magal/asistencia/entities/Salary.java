@@ -16,6 +16,9 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.validation.constraints.NotNull;
 
+import cl.magal.asistencia.services.bo.SalaryCalculator;
+import cl.magal.asistencia.services.bo.SupleCalculator;
+
 @Entity
 @Table(name="salary")
 public class Salary implements Serializable {
@@ -30,6 +33,9 @@ public class Salary implements Serializable {
 	@Column(name="salarytId")
 	Long id;
 	
+	@Column(name="jornal")
+	Integer jornalPromedio = 0;
+	
 	@ManyToOne
 	@JoinColumn(name="laborer_constructionsiteId",nullable=false)
 	LaborerConstructionsite laborerConstructionSite;
@@ -40,11 +46,42 @@ public class Salary implements Serializable {
 	Date date;
 	
 	@Column(name = "suple")
-	double suple;
+	Double suple;
 	
 	@Column(name = "salary")
-	double salary;
+	Double salary;
 	
+	/**
+	 * Objeto que permite el calculo de los sueldos
+	 */
+	transient SalaryCalculator salaryCalculator;
+	transient SupleCalculator supleCalculator;
+	
+	public void setSalaryCalculator(SalaryCalculator calculator) {
+		this.salaryCalculator = calculator;
+	}
+	public void setSupleCalculator(SupleCalculator supleCalculator) {
+		this.supleCalculator = supleCalculator;
+	}
+	public void setSalaryCalculatorInformation(
+			double tool , 
+            double loan,
+            Attendance attendance,
+            Attendance lastMonthAttendance,
+            Overtime overtime,
+            ExtraParams extraParams){
+		if(this.salaryCalculator == null )
+			throw new RuntimeException("Es necesario que el objeto de calculo sea distinto a null");
+		this.salaryCalculator.setInformation(getSuple(), tool, loan, attendance, lastMonthAttendance, overtime, extraParams);
+	}
+	
+	public void setSupleCalculatorInformation(
+			Attendance attendance,
+			Integer supleCode){
+		if(this.supleCalculator == null )
+			throw new RuntimeException("Es necesario que el objeto de calculo sea distinto a null");
+		this.supleCalculator.setInformation( attendance,supleCode);
+	}
 	
 	public Long getId() {
 		return id;
@@ -55,17 +92,27 @@ public class Salary implements Serializable {
 	public LaborerConstructionsite getLaborerConstructionSite() {
 		return laborerConstructionSite;
 	}
-	public void setLaborerConstructionSite(
-			LaborerConstructionsite laborerConstructionSite) {
+	public void setLaborerConstructionSite(LaborerConstructionsite laborerConstructionSite) {
 		this.laborerConstructionSite = laborerConstructionSite;
 	}
+	
+	public Integer getJornalPromedio() {
+		return jornalPromedio;
+	}
+	public void setJornalPromedio(Integer jornalPromedio) {
+		this.jornalPromedio = jornalPromedio;
+	}
 	public double getSuple() {
+		if(suple == null )
+			suple = supleCalculator.calculateSuple();
 		return suple;
 	}
 	public void setSuple(double suple) {
 		this.suple = suple;
 	}
 	public double getSalary() {
+		if(salary == null)
+			salary = salaryCalculator.calculateSalary();
 		return salary;
 	}
 	public void setSalary(double salary) {
@@ -76,5 +123,33 @@ public class Salary implements Serializable {
 	}
 	public void setDate(Date date) {
 		this.date = date;
+	}
+	
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime
+				* result
+				+ ((laborerConstructionSite == null) ? 0
+						: laborerConstructionSite.hashCode());
+		return result;
+	}
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		ExtraParams other = (ExtraParams) obj;
+		if (laborerConstructionSite == null) {
+			if (other.laborerConstructionSite != null)
+				return false;
+		} else if (!laborerConstructionSite.getId()
+				.equals(other.laborerConstructionSite.getId()))
+			return false;
+		return true;
 	}
 }
