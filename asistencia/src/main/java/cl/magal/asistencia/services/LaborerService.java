@@ -99,6 +99,7 @@ public class LaborerService {
 			//TODO
 			vo.setReward(laborerConstructionsite.getReward());
 			vo.setAverageWage(Double.valueOf(Utils.random(9000, 15000)));
+			vo.setBlock(laborerConstructionsite.isBlock());
 			
 			result.add(vo);
 		}

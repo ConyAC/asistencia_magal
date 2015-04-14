@@ -28,6 +28,7 @@ import cl.magal.asistencia.services.ConstructionSiteService;
 import cl.magal.asistencia.services.LaborerService;
 import cl.magal.asistencia.ui.AbstractWindowEditor;
 import cl.magal.asistencia.ui.MagalUI;
+import cl.magal.asistencia.ui.vo.HistoryVO;
 import cl.magal.asistencia.util.Constants;
 import cl.magal.asistencia.util.SecurityHelper;
 import cl.magal.asistencia.util.Utils;
@@ -302,9 +303,13 @@ public class AddLaborerContractDialog extends AbstractWindowEditor implements Ne
 		if( cs != null ){
 			msj = "El trabajador ya pertenece a otra obra : "+cs.getName();
 		}
-		
-//		else if( laborer.getLaborerId() == null )
-//			msj = "Debe crear el trabajador antes de agregarlo";
+		//obtengo la lista de obras donde el obrero trabajó y verifico si en alguna fue bloqueado.
+		List <HistoryVO> verify_block = laborerService.getLaborerHistory(laborer);		
+		for(HistoryVO vb : verify_block){
+			if(vb.isBlock()){
+				msj = "El trabajador fue bloqueado en la obra: "+vb.getConstructionSite().getName();
+			}
+		}
 		
 		if(msj == null ){
 			RutDigitValidator rdv = new RutDigitValidator();
@@ -317,10 +322,8 @@ public class AddLaborerContractDialog extends AbstractWindowEditor implements Ne
 			else if( !cbStep.isValid() )
 				msj = cbStep.getRequiredError();
 			else if( !dfAdmissionDate.isValid() )
-				msj = dfAdmissionDate.getRequiredError();
-			
-		}
-		
+				msj = dfAdmissionDate.getRequiredError();			
+		}		
 		
 		if(msj != null)
 			Notification.show(msj,Type.ERROR_MESSAGE);

@@ -27,6 +27,7 @@ public class HistoryVO implements Serializable {
 	Date endingDate;
 	Date startingDate;
 	boolean active;
+	boolean block;
 	
 	public ConstructionSite getConstructionSite() {
 		return constructionSite;
@@ -75,5 +76,11 @@ public class HistoryVO implements Serializable {
 	}
 	public void setActive(boolean active) {
 		this.active = active;
+	}
+	public boolean isBlock() {
+		return block;
+	}
+	public void setBlock(boolean block) {
+		this.block = block;
 	}
 }
