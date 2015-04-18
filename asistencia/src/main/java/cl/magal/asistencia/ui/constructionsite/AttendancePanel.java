@@ -692,7 +692,7 @@ public class AttendancePanel extends Panel implements View {
 					@Override
 					public Object generateCell(final Table source, final Object itemId,final Object columnId) {
 						final BeanItem<Salary> item = (BeanItem<Salary>) source.getItem(itemId);
-						final Label label  = new Label("<b>"+Utils.formatInteger((Integer) salaryContainer.getContainerProperty(itemId, "roundSalary").getValue())+"<b>"+
+						final Label label  = new Label("<b>"+Utils.formatInteger((Integer) salaryContainer.getContainerProperty(itemId, "roundSalary").getValue())+"</b>"+
 								"  ("+Utils.formatInteger((Integer) salaryContainer.getContainerProperty(itemId, columnId).getValue())+")");
 						label.setContentMode(ContentMode.HTML);
 						((ValueChangeNotifier)item.getItemProperty("jornalPromedio")).addValueChangeListener(new Property.ValueChangeListener() {
@@ -702,7 +702,7 @@ public class AttendancePanel extends Panel implements View {
 								logger.debug("jornalPromedio changed");
 								Object result = salaryContainer.getItem(itemId).getItemProperty("forceSalary").getValue();
 								logger.debug("salary == null {}",result);
-								label.setValue( "<b>"+Utils.formatInteger((Integer) salaryContainer.getContainerProperty(itemId, "roundSalary").getValue())+"<b>"+
+								label.setValue( "<b>"+Utils.formatInteger((Integer) salaryContainer.getContainerProperty(itemId, "roundSalary").getValue())+"</b>"+
 										"  ("+Utils.formatInteger((Integer) salaryContainer.getContainerProperty(itemId, columnId).getValue())+")");
 								
 							}
@@ -712,8 +712,8 @@ public class AttendancePanel extends Panel implements View {
 					
 				});
 				
-				salaryTable.setVisibleColumns("laborerConstructionSite.activeContract.jobCode","jornalPromedio","totalLiquido");
-				salaryTable.setColumnHeaders("Oficio","Jornal Promedio","A Pagar (Tot Liquido)");
+				salaryTable.setVisibleColumns("laborerConstructionSite.activeContract.jobCode","jornalPromedio","suple","totalLiquido");
+				salaryTable.setColumnHeaders("Oficio","Jornal Promedio","Suple","A Pagar (Tot Liquido)");
 				salaryTable.setEditable(true);
 				salaryTable.setTableFieldFactory(new TableFieldFactory() {
 
@@ -721,7 +721,7 @@ public class AttendancePanel extends Panel implements View {
 					public Field<?> createField(Container container, final Object itemId,Object propertyId, com.vaadin.ui.Component uiContext) {
 						if(propertyId.equals("laborerConstructionSite.activeContract.jobCode")||
 								propertyId.equals("totalLiquido") ||
-								propertyId.equals("roundSalary") )
+								propertyId.equals("suple") )
 							return null;
 						TextField tf = new TextField();
 						tf.setNullRepresentation("");
