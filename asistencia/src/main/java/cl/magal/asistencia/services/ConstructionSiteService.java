@@ -622,7 +622,9 @@ public class ConstructionSiteService {
 			Salary salary = new Salary();
 			salary.setLaborerConstructionSite(lc);
 			salary.setSuple(suple);
-			salary.setSalary(sc.calculateSalary());
+			if(true)
+				throw new RuntimeException("No implementado");
+//			salary.setSalary(sc.calculateSalary());
 			salary.setDate(date.toDate());
 			salaries.add(salary);
 
@@ -742,7 +744,10 @@ public class ConstructionSiteService {
 			List<TaxationConfigurations> taxTable) {
 
 		SalaryCalculator sc = new SalaryCalculator(closingDateLastMonth, suple, tool, loan, attendance, lastMonthAttendance, overtime,extraParams,wageConfiguration, dateConfigurations, famillyTable, taxTable);
-		return (int) sc.calculateSalary();
+//		return (int) sc.calculateSalary();
+		if(true)
+			throw new RuntimeException("No implementado");
+		return 1;
 		
 		
 	}

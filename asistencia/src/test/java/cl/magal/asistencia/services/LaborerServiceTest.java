@@ -59,7 +59,7 @@ public class LaborerServiceTest {
 		LaborerConstructionsite lc = new LaborerConstructionsite();
 		lc.setConstructionsite(constructionSite);
 		lc.setLaborer(laborer);
-		lc.setActive((short) 1);
+		lc.setActive(true);
 		lc.setConfirmed(true);
 		service.save(lc);
 		fail("no puede llegar hasta aquí es necesario al menos un contrato");
@@ -78,7 +78,7 @@ public class LaborerServiceTest {
 		LaborerConstructionsite lc = new LaborerConstructionsite();
 		lc.setConstructionsite(constructionSite);
 		lc.setLaborer(laborer);
-		lc.setActive((short) 1);
+		lc.setActive(true);
 		lc.setConfirmed(true);
 		
 		Job job = Job.JORNAL;
@@ -171,7 +171,7 @@ public class LaborerServiceTest {
 		LaborerConstructionsite lc = new LaborerConstructionsite();
 		lc.setConstructionsite(constructionSite);
 		lc.setLaborer(laborer);
-		lc.setActive((short) 1);
+		lc.setActive(true);
 		lc.setConfirmed(true);
 		
 		Job job = Job.ALBAÑIL;

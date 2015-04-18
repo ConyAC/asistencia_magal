@@ -16,12 +16,18 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.validation.constraints.NotNull;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import cl.magal.asistencia.services.bo.SalaryCalculator;
 import cl.magal.asistencia.services.bo.SupleCalculator;
 
 @Entity
 @Table(name="salary")
 public class Salary implements Serializable {
+	
+	
+	Logger logger = LoggerFactory.getLogger(Salary.class);
 	
 	/**
 	 * 
@@ -111,8 +117,9 @@ public class Salary implements Serializable {
 		this.suple = suple;
 	}
 	public double getSalary() {
-		if(salary == null)
-			salary = salaryCalculator.calculateSalary();
+		if(salary == null){
+			salary = salaryCalculator.calculateSalary(getJornalPromedio());
+		}
 		return salary;
 	}
 	public void setSalary(double salary) {
@@ -123,6 +130,21 @@ public class Salary implements Serializable {
 	}
 	public void setDate(Date date) {
 		this.date = date;
+	}
+	
+	public int getRoundSalary(){
+		return (int) Math.round( (getSalary()) );
+	}
+	
+	public int getTotalLiquido(){
+		return (int) Math.round( (getSuple()+getSalary()) );
+	}
+	
+	public boolean getForceSalary(){
+		logger.debug("forceSalary");
+		salary = null;
+		salaryCalculator.resetCal();
+		return salary == null;
 	}
 	
 	@Override

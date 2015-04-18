@@ -34,6 +34,7 @@ public class SalaryCalculator {
 	Date date;
 	List<FamilyAllowanceConfigurations> famillyTable;
 	List<TaxationConfigurations> taxTable;
+	Integer jornalPromedio;
 	
 	double bonoImponibleEspecial,bonoCargoLoc2, km, bencina, horasDescuento, horasSobreTiempo,ufMes,mov2,collation,mov1;
 	
@@ -123,6 +124,24 @@ public class SalaryCalculator {
 			vTrato = calculateVTrato(closingDateLastMonth,attendance,lastMonthAttendance);
 		}
 		return vTrato;
+	}
+	
+	/**
+	 * fuerza a que se recalculen las variables reutilizables
+	 * @return
+	 */
+	public boolean resetCal(){
+		afecto= null;
+		sobreAfecto= null;
+		tNoAfecto = null;
+		tDesc = null;
+		jornalBaseMes = null;
+		diasHabiles = null;
+		diaTrab = null;
+		col = null;
+		diasNoConsideradosMesAnterior = null;
+		vTrato = null;
+		return true;
 	}
 	
 	/**
@@ -246,6 +265,8 @@ public class SalaryCalculator {
 			throw new RuntimeException("La deuda por herramientas no está definida(null)");
 		if(loan == null )
 			throw new RuntimeException("La deuda por prestamos no está definida(null)");
+		if(jornalPromedio == null )
+			throw new RuntimeException("Jornal Promedio no definido(null)");
 	}
 	
 	/**
@@ -316,10 +337,14 @@ public class SalaryCalculator {
 	 * Permite calcular el sueldo de un trabajador
 	 * @return
 	 */
-	public double calculateSalary() {
+	public double calculateSalary(Integer jornalPromedio) {
+		this.jornalPromedio = jornalPromedio;
+		logger.debug("jornalPromedio {}",jornalPromedio);
 		//valida que este toda la información necesaria para el calculo
 		validateInformation();
-		return getAfecto() + getSobreAfecto() + getTNoAfecto() - getTDesc();
+		double salary = getAfecto() + getSobreAfecto() + getTNoAfecto() - getTDesc();
+		logger.debug("salario calculado {}",salary);
+		return salary;
 	}
 	
 	/**
@@ -432,13 +457,10 @@ public class SalaryCalculator {
 		int count = 0;
 		for(int i = lastClosingDate != null ? lastClosingDate : 0 ; i < maxDays ; i ++){
 			//si son distintos, lo contabiliza
-			logger.debug(" lastRealMarks.get(i) {} != projectionsMarks.get(i) {} ", lastRealMarks.get(i) , projectionsMarks.get(i));
 			if(lastRealMarks.get(i) != projectionsMarks.get(i)){
 				//lo cuenta solo si está dentro del grupo a contabilizar
 				AttendanceMark mark = lastRealMarks.get(i);
-				logger.debug("!= mark {} , on marks {}",mark,marks);
 				if(ArrayUtils.contains(marks, mark)){
-					logger.debug("++");
 					count++;
 				}
 			}
@@ -583,7 +605,7 @@ public class SalaryCalculator {
 	 * @return
 	 */
 	private int getJPromedio() {
-		return attendance.getJornalPromedio();
+		return jornalPromedio;
 	}
 
 	/**
