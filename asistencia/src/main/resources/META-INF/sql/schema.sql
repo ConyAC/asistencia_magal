@@ -79,7 +79,7 @@ CREATE TABLE IF NOT EXISTS "user"
 ALTER TABLE "user"
 ADD CONSTRAINT IF NOT EXISTS FK_USER_ROLE
 FOREIGN KEY (roleId)
-REFERENCES "ROLE"(roleId)
+REFERENCES "role"(roleId)
 ;
 CREATE INDEX IF NOT EXISTS  FK_INDX_ROLE ON "user"(roleId)
 ;
@@ -685,7 +685,7 @@ CREATE TABLE IF NOT EXISTS attendance
 ALTER TABLE attendance
 ADD CONSTRAINT IF NOT EXISTS FK_ATTENDANCE_LABORER_CONSTRUCTIONSITEID
 FOREIGN KEY (laborer_constructionsiteId)
-REFERENCES laborer_constructionsite(laborer_constructionsiteId)
+REFERENCES "laborer_constructionsite"(laborer_constructionsiteId)
 ;
 CREATE UNIQUE INDEX IF NOT EXISTS  PRIMARY_KEY_8E ON attendance(attendanceId)
 ;
@@ -766,7 +766,7 @@ CREATE TABLE IF NOT EXISTS overtime
 ALTER TABLE overtime
 ADD CONSTRAINT IF NOT EXISTS FK_OVERTIME_LABORER_CONSTRUCTIONSITEID
 FOREIGN KEY (laborer_constructionsiteId)
-REFERENCES laborer_constructionsite(laborer_constructionsiteId)
+REFERENCES "laborer_constructionsite"(laborer_constructionsiteId)
 ;
 CREATE UNIQUE INDEX IF NOT EXISTS PRIMARY_KEY_4E ON overtime(overtimeId)
 ;
@@ -794,7 +794,6 @@ CREATE TABLE IF NOT EXISTS license (
   to_date date DEFAULT NULL,
   laborer_constructionsiteId bigint(20) NOT NULL,
   PRIMARY KEY (licenseId),
-  KEY fk_license_laborer_constructionsiteId (laborer_constructionsiteId),
   CONSTRAINT fk_license_laborer_constructionsiteId FOREIGN KEY (laborer_constructionsiteId) REFERENCES laborer_constructionsite (laborer_constructionsiteId)
 ) ;
 
@@ -806,7 +805,6 @@ CREATE TABLE IF NOT EXISTS salary (
   suple int(11) DEFAULT NULL,
   laborer_constructionsiteId bigint(20) NOT NULL,
   PRIMARY KEY (salarytId),
-  KEY fk_salary_laborer_constructionsiteId (laborer_constructionsiteId),
   CONSTRAINT fk_salary_laborer_constructionsiteId FOREIGN KEY (laborer_constructionsiteId) REFERENCES laborer_constructionsite (laborer_constructionsiteId)
 );
 
@@ -823,11 +821,11 @@ CREATE TABLE IF NOT EXISTS extra_params
 )
 ;
 ALTER TABLE extra_params
-ADD CONSTRAINT FK_EXTRA_PARAMS_LABORER_CONSTRUCTIONSITEID
+ADD CONSTRAINT IF NOT EXISTS FK_EXTRA_PARAMS_LABORER_CONSTRUCTIONSITEID
 FOREIGN KEY (laborer_constructionsiteId)
-REFERENCES laborer_constructionsite(laborer_constructionsiteId)
+REFERENCES "laborer_constructionsite"(laborer_constructionsiteId)
 ;
-CREATE INDEX FK_EXTRA_PARAMS_LABORER_CONSTRUCTIONSITEID_INDEX_7 ON extra_params(laborer_constructionsiteId)
+CREATE INDEX IF NOT EXISTS FK_EXTRA_PARAMS_LABORER_CONSTRUCTIONSITEID_INDEX_7 ON extra_params(laborer_constructionsiteId)
 ;
-CREATE UNIQUE INDEX PRIMARY_KEY_7 ON extra_params(extra_paramsId)
+CREATE UNIQUE INDEX IF NOT EXISTS PRIMARY_KEY_7 ON extra_params(extra_paramsId)
 ;

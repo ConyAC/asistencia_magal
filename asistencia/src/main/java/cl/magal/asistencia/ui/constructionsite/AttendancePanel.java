@@ -112,7 +112,7 @@ public class AttendancePanel extends Panel implements View {
 	Grid attendanceGrid, overtimeGrid,extraGrid;
 	Window progressDialog;
 	InlineDateField attendanceDate;
-	Button btnExportSoftland,btnConstructionSiteConfirm,btnCentralConfirm,btnGenerateSalary;
+	Button btnExportSoftland,btnConstructionSiteConfirm,btnCentralConfirm,btnGenerateSalary,btnSupleObraConfirm,btnSupleCentralConfirm;
 	Table confirmTable;
 
 	/** ATRIBUTOS **/
@@ -246,6 +246,10 @@ public class AttendancePanel extends Panel implements View {
 		Table confirmTable = drawAbsenceConfirmTable();
 
 		tab.addTab(confirmTable,"Confirmar Licencias y Accidentes");
+		
+		VerticalLayout suple = drawSupleLayout();
+		
+		tab.addTab(suple,"Suple");
 		
 		VerticalLayout vl = drawSalaryLayout();
 		
@@ -415,6 +419,104 @@ public class AttendancePanel extends Panel implements View {
 				}
 			});
 		}
+	}
+	
+	//TODO
+	private VerticalLayout drawSupleLayout() {
+		salaryContainer.addNestedContainerProperty("laborerConstructionSite.activeContract.jobCode");
+		VerticalLayout vl = new VerticalLayout(){
+			Table supleTable = new Table();
+			{
+				setSpacing(true);
+				
+				HorizontalLayout hl = new HorizontalLayout(){
+					{
+						btnSupleObraConfirm = new Button("Confirmación Obra",FontAwesome.CHECK);
+						btnSupleObraConfirm.setDisableOnClick(true);						
+						addComponent(btnSupleObraConfirm);			
+						setComponentAlignment(btnSupleObraConfirm, Alignment.TOP_RIGHT);
+						btnSupleObraConfirm.addClickListener(new Button.ClickListener() {					
+
+							@Override
+							public void buttonClick(ClickEvent event) {
+								//mensaje depende del estado
+								final Confirmations confirmations = getConfirmations();
+								ConfirmDialog.show(UI.getCurrent(), "Confirmar Acción:", 
+										confirmations.isConstructionSiteCheck() ? 
+												"¿Está seguro de cancelar la confirmación de asistencia? Esto desbloqueará la edición en obra de la asistencia del mes.":
+												"¿Está seguro de confirmar la asistencia? Esto bloqueará la edición en obra de la asistencia del mes.",
+										"Continuar", "Cancelar", new ConfirmDialog.Listener() {
+									public void onClose(ConfirmDialog dialog) {
+										if (dialog.isConfirmed()) {
+											confirmations.setConstructionSiteCheck(!confirmations.isConstructionSiteCheck());
+											service.save(confirmations);
+											toogleButtonState(btnSupleObraConfirm, confirmations.isConstructionSiteCheck());
+											btnSupleCentralConfirm.setEnabled(confirmations.isConstructionSiteCheck());
+											//si tiene confirmación de obra y no tiene permisos de confirmar central o si tiene ambos checheados, bloqueda la interfaz
+											//supleTable.setEnabled(true);
+											enableAttendance(!(
+														(confirmations.isConstructionSiteCheck() && !SecurityHelper.hasPermission(Permission.CONFIRMAR_ASISTENCIA_CENTRAL)) || 
+														(confirmations.isConstructionSiteCheck() && confirmations.isCentralCheck())||
+														(!confirmations.isConstructionSiteCheck() && !SecurityHelper.hasPermission(Permission.CONFIRMAR_ASISTENCIA_OBRA))
+														));
+											
+											if( !confirmations.isConstructionSiteCheck() && !SecurityHelper.hasPermission(Permission.CONFIRMAR_ASISTENCIA_OBRA)){
+												btnSupleObraConfirm.setVisible(false);
+											}else if( !confirmations.isConstructionSiteCheck() && SecurityHelper.hasPermission(Permission.CONFIRMAR_ASISTENCIA_CENTRAL)){
+												btnSupleObraConfirm.setVisible(true);
+												btnSupleObraConfirm.setEnabled(true);
+											}
+										}
+									}
+
+								});						
+							}
+						});
+						
+						btnSupleCentralConfirm = new Button("Confirmación Central",FontAwesome.CHECK);
+						btnSupleCentralConfirm.setDisableOnClick(true);						
+						addComponent(btnSupleCentralConfirm);
+						setComponentAlignment(btnSupleCentralConfirm, Alignment.TOP_RIGHT);
+						btnSupleCentralConfirm.addClickListener(new Button.ClickListener() {
+							@Override
+							public void buttonClick(ClickEvent event) {
+								final Confirmations confirmations = getConfirmations();
+								ConfirmDialog.show(UI.getCurrent(), "Confirmar Acción:", 
+										confirmations.isCentralCheck() ? 
+												"¿Está seguro de cancelar la confirmación de asistencia? Esto desbloqueará la edición en la central de la asistencia del mes.":
+												"¿Está seguro de confirmar la asistencia? Esto bloqueará la edición en la central de la asistencia del mes.",
+										"Continuar", "Cancelar", new ConfirmDialog.Listener() {
+									public void onClose(ConfirmDialog dialog) {
+										if (dialog.isConfirmed()) {
+											confirmations.setCentralCheck(!confirmations.isSupleCentralCheck());
+											service.save(confirmations);
+											toogleButtonState(btnSupleCentralConfirm, confirmations.isSupleCentralCheck());
+											//actualiza el estado del boton exportar
+											configureInterface();
+										}
+									}
+								});
+							}
+						});
+					}					
+				};
+				
+				addComponent(hl);
+				setComponentAlignment(hl, Alignment.TOP_RIGHT);
+				
+				supleTable.setWidth("100%");
+				supleTable.setContainerDataSource(salaryContainer);
+				
+				supleTable.setVisibleColumns("laborerConstructionSite.activeContract.jobCode","suple","salary");
+				supleTable.setColumnHeaders("Oficio","Código","Monto");				
+				
+				addComponent(supleTable);
+				setExpandRatio(supleTable, 1.0f);
+			}
+		};
+		
+		vl.setSizeFull();
+		return vl;
 	}
 
 	private VerticalLayout drawSalaryLayout() {
