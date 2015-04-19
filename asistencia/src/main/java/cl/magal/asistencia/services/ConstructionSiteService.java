@@ -698,9 +698,25 @@ public class ConstructionSiteService {
 		Map<Integer,ExtraParams> extraParams = getExtraParamsMapByConstructionAndMonth(cs,date);
 
 		List<LaborerConstructionsite> lcs =  labcsRepo.findByConstructionsiteAndIsActive(cs);
+		
+		List<Salary> salariesList =  salaryRepo.findByConstructionsiteAndMonth(cs,date.toDate());
+		
 		List<Salary> salaries = new ArrayList<Salary>(lcs.size());
+		
+		Salary tmp = new Salary(); 
 		//verifica que exista una asistencia para cada elemento, si no existe la crea
 		for(LaborerConstructionsite lc : lcs ){
+			
+			tmp.setLaborerConstructionSite(lc);
+			
+			int index = salariesList.indexOf(tmp);
+			
+			Salary salary = null;
+			if( index >= 0 ){
+				salary = salariesList.remove(index);
+			}else{
+				salary = new Salary();
+			}
 			
 			//crea el objeto que calculará los sueldos 
 			SalaryCalculator sc =  new SalaryCalculator(assistanceClose,wageConfiguration, dateConfiguration, famillyTable, taxTable);
@@ -713,7 +729,6 @@ public class ConstructionSiteService {
 			
 			suc.setInformation(attendance.get(lc.getJobCode()), lc.getSupleCode());
 			
-			Salary salary = new Salary();
 			salary.setSalaryCalculator(sc);
 			salary.setSupleCalculator(suc);
 			salary.setLaborerConstructionSite(lc);
@@ -750,6 +765,16 @@ public class ConstructionSiteService {
 		return 1;
 		
 		
+	}
+
+	/**
+	 * 
+	 * @param bean
+	 */
+	public void save(Salary bean) {
+		logger.debug("guardando salary {}, {}, {}, {}",bean.getId(), bean.getSalary(),bean.getSuple(),bean.isCalculatedSuple());
+		Salary bdSalary = salaryRepo.save(bean);
+		logger.debug("guardando salary {}, {}, {}, {}",bdSalary.getId(), bdSalary.getSalary(),bdSalary.getSuple(),bdSalary.isCalculatedSuple());
 	}
 	
 //	/**

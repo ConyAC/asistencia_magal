@@ -19,7 +19,6 @@ public class RutDigitValidator implements ConstraintValidator<RutDigit, String> 
 	public boolean isValid(String rut, ConstraintValidatorContext context) {
 		if(rut == null )
 			return false;
-		logger.debug("rut {} ",rut);
 		String[] rutTemp = rut.split("-");
 		if( rutTemp == null || rutTemp.length != 2 )
 			return false;
