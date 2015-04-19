@@ -216,6 +216,15 @@ public class SalaryCalculator {
 	
 	/**
 	 * 
+	 * @param attendance2
+	 */
+	public void setAttendance(Attendance attendance2) {
+		this.attendance = attendance2;
+	}
+
+	
+	/**
+	 * 
 	 * @param closingDateLastMonth
 	 * @param wageConfigurations
 	 * @param dateConfigurations
@@ -337,8 +346,9 @@ public class SalaryCalculator {
 	 * Permite calcular el sueldo de un trabajador
 	 * @return
 	 */
-	public double calculateSalary(Integer jornalPromedio) {
+	public double calculateSalary(Integer jornalPromedio,Double suple) {
 		this.jornalPromedio = jornalPromedio;
+		this.suple = suple;
 		logger.debug("jornalPromedio {}",jornalPromedio);
 		//valida que este toda la información necesaria para el calculo
 		validateInformation();
@@ -858,5 +868,6 @@ public class SalaryCalculator {
 		}
 		return count;
 	}
+
 
 }

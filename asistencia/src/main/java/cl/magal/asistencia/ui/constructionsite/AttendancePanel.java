@@ -44,6 +44,7 @@ import com.vaadin.data.fieldgroup.DefaultFieldGroupFieldFactory;
 import com.vaadin.data.fieldgroup.FieldGroup.CommitEvent;
 import com.vaadin.data.fieldgroup.FieldGroup.CommitException;
 import com.vaadin.data.fieldgroup.FieldGroup.CommitHandler;
+import com.vaadin.data.util.BeanContainer;
 import com.vaadin.data.util.BeanItem;
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.data.util.GeneratedPropertyContainer;
@@ -106,9 +107,9 @@ public class AttendancePanel extends Panel implements View {
 
 	/** CONTAINERS **/
 	BeanItemContainer<ExtraParams> extraParamContainer = new BeanItemContainer<ExtraParams>(ExtraParams.class);
-	BeanItemContainer<Attendance> attendanceContainer = new BeanItemContainer<Attendance>(Attendance.class);
+	BeanContainer<Long,Attendance> attendanceContainer = new BeanContainer<Long,Attendance>(Attendance.class);
 	BeanItemContainer<Overtime> overtimeContainer = new BeanItemContainer<Overtime>(Overtime.class);
-	BeanItemContainer<Salary> salaryContainer = new BeanItemContainer<Salary>(Salary.class);
+	BeanContainer<Long,Salary> salaryContainer = new BeanContainer<Long,Salary>(Salary.class);
 	BeanItemContainer<AbsenceVO> absenceContainer = new BeanItemContainer<AbsenceVO>(AbsenceVO.class);
 
 	/** COMPONENTES **/
@@ -475,6 +476,8 @@ public class AttendancePanel extends Panel implements View {
 	private VerticalLayout drawSupleLayout() {
 		salaryContainer.addNestedContainerProperty("laborerConstructionSite.activeContract.jobCode");
 		salaryContainer.addNestedContainerProperty("laborerConstructionSite.supleCode");
+		salaryContainer.addNestedContainerProperty("laborerConstructionSite.id");
+		salaryContainer.setBeanIdProperty("laborerConstructionSite.id");
 		VerticalLayout vl = new VerticalLayout(){
 			{
 				setSpacing(true);
@@ -531,6 +534,7 @@ public class AttendancePanel extends Panel implements View {
 							return null;
 						TextField tf = new TextField();
 						tf.setNullRepresentation("");
+						tf.setImmediate(true);
 						return tf;
 					}
 				});
@@ -691,11 +695,11 @@ public class AttendancePanel extends Panel implements View {
 
 					@Override
 					public Object generateCell(final Table source, final Object itemId,final Object columnId) {
-						final BeanItem<Salary> item = (BeanItem<Salary>) source.getItem(itemId);
+						final BeanItem<Salary> item = (BeanItem<Salary>) salaryContainer.getItem(itemId);
 						final Label label  = new Label("<b>"+Utils.formatInteger((Integer) salaryContainer.getContainerProperty(itemId, "roundSalary").getValue())+"</b>"+
 								"  ("+Utils.formatInteger((Integer) salaryContainer.getContainerProperty(itemId, columnId).getValue())+")");
 						label.setContentMode(ContentMode.HTML);
-						((ValueChangeNotifier)item.getItemProperty("jornalPromedio")).addValueChangeListener(new Property.ValueChangeListener() {
+						Property.ValueChangeListener listener = new Property.ValueChangeListener() {
 							
 							@Override
 							public void valueChange(ValueChangeEvent event) {
@@ -706,7 +710,9 @@ public class AttendancePanel extends Panel implements View {
 										"  ("+Utils.formatInteger((Integer) salaryContainer.getContainerProperty(itemId, columnId).getValue())+")");
 								
 							}
-						});
+						};
+						for(String pid : new String[]{"jornalPromedio","suple"})
+							((ValueChangeNotifier)item.getItemProperty(pid)).addValueChangeListener(listener);
 						return label;
 					}
 					
@@ -869,16 +875,33 @@ public class AttendancePanel extends Panel implements View {
 	private Grid drawAttendanceGrid() {
 
 		attendanceContainer.addNestedContainerProperty("laborerConstructionSite.activeContract.jobCode");
+		attendanceContainer.addNestedContainerProperty("laborerConstructionSite.id");
+		attendanceContainer.setBeanIdProperty("laborerConstructionSite.id");
 		attendanceGrid = new Grid(attendanceContainer);
 		attendanceGrid.setSelectionMode(SelectionMode.SINGLE);
 		attendanceGrid.setSizeFull();
-		attendanceGrid.setEditorFieldGroup(new BeanFieldGroup<Attendance>(Attendance.class));
+		BeanFieldGroup<Attendance> bfg = new BeanFieldGroup<Attendance>(Attendance.class);
+		bfg.addCommitHandler(new CommitHandler() {
+			
+			@Override
+			public void preCommit(CommitEvent commitEvent) throws CommitException {
+			}
+			
+			@Override
+			public void postCommit(CommitEvent commitEvent) throws CommitException {
+				BeanItem<Attendance> item = (BeanItem<Attendance>) commitEvent.getFieldBinder().getItemDataSource();
+				Attendance attendance = item.getBean(); 
+				salaryContainer.getItem(attendance.getLaborerConstructionSite().getId()).getItemProperty("attendance").setValue(attendance);
+			}
+		});
+		attendanceGrid.setEditorFieldGroup(bfg);
 		attendanceGrid.setEditorFieldFactory(new DefaultFieldGroupFieldFactory(){
 			@Override
 			public <T extends Field> T createField(Class<?> type, Class<T> fieldType) {
 
 				if (type.isAssignableFrom(AttendanceMark.class) && fieldType.isAssignableFrom(ComboBox.class)) {
 					ComboBox cb = new ComboBox();
+					cb.setImmediate(true);
 					for(AttendanceMark a : AttendanceMark.values()){
 						cb.addItem(a);
 					}

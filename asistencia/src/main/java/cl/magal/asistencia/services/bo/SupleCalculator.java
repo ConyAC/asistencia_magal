@@ -23,6 +23,10 @@ public class SupleCalculator {
 	Integer supleCode;
 	Attendance attendance;
 	
+	public void setAttendance(Attendance attendance2) {
+		this.attendance = attendance2;
+	}
+	
 	/**
 	 * 
 	 * @param supleTable
@@ -125,5 +129,5 @@ public class SupleCalculator {
 		}
 		return count;
 	}
-	
+
 }

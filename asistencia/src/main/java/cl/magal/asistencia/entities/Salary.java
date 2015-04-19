@@ -89,6 +89,18 @@ public class Salary implements Serializable {
 		this.supleCalculator.setInformation( attendance,supleCode);
 	}
 	
+	transient Attendance attendance;
+	public Attendance getAttendance(){
+		return attendance;
+	}
+	public void setAttendance(Attendance attendance){
+		if(this.supleCalculator == null || this.salaryCalculator == null )
+			throw new RuntimeException("Es necesario que el objeto de calculo sea distinto a null");
+		supleCalculator.setAttendance(attendance);
+		salaryCalculator.setAttendance(attendance);
+		getForceSalary();
+	}
+	
 	public Long getId() {
 		return id;
 	}
@@ -118,7 +130,7 @@ public class Salary implements Serializable {
 	}
 	public double getSalary() {
 		if(salary == null){
-			salary = salaryCalculator.calculateSalary(getJornalPromedio());
+			salary = salaryCalculator.calculateSalary(getJornalPromedio(),getSuple());
 		}
 		return salary;
 	}
