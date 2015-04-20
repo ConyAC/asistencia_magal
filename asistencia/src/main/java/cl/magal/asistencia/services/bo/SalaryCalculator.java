@@ -34,9 +34,10 @@ public class SalaryCalculator {
 	Date date;
 	List<FamilyAllowanceConfigurations> famillyTable;
 	List<TaxationConfigurations> taxTable;
+	WageConfigurations wageConfigurations;
 	Integer jornalPromedio;
 	
-	double bonoImponibleEspecial,bonoCargoLoc2, km, bencina, horasDescuento, horasSobreTiempo,ufMes,mov2,collation,mov1;
+	double bonoImponibleEspecial,bonoCargoLoc2, km, bencina, horasDescuento, horasSobreTiempo,ufMes,collation,mov1;
 	
 	/**
 	 * CALCULOS
@@ -319,13 +320,7 @@ public class SalaryCalculator {
 		this.collation = wageConfigurations.getCollation();
 		this.mov1 = wageConfigurations.getMobilization();
 		//asigna la movilización 2 si corresponde
-		this.mov2 = 0;
-		for(Mobilization2 m2 : wageConfigurations.getMobilizations2()){
-			if(m2.getConstructionSite().equals(attendance.getLaborerConstructionSite().getConstructionsite())){
-				mov2 = m2.getAmount();
-				break;
-			}
-		}
+		this.wageConfigurations = wageConfigurations;
 		
 		if(famillyTable == null || famillyTable.isEmpty() )
 			throw new RuntimeException("Aún no se definen los valores de asignación familiar, no se puede calcular el sueldo.");
@@ -647,6 +642,15 @@ public class SalaryCalculator {
 	 * @return
 	 */
 	private double calculateMov2(DateTime closingDateLastMonth,Attendance attendance,Attendance lastMonthAttendance) {
+		
+		double mov2 = 0;
+		for(Mobilization2 m2 : wageConfigurations.getMobilizations2()){
+			if(m2.getConstructionSite().equals(attendance.getLaborerConstructionSite().getConstructionsite())){
+				mov2 = m2.getAmount();
+				break;
+			}
+		}
+		
 		return getCol()*mov2+ bonoCargoLoc2;
 	}
 
