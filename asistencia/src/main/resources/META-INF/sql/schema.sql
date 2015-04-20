@@ -340,7 +340,7 @@ CREATE UNIQUE INDEX IF NOT EXISTS PK_WG ON wage_configurations(wage_configuratio
 -- MOBILIZATION2
 CREATE TABLE IF NOT EXISTS mobilization2
 (
-   wage_configurationsId IDENTITY NOT NULL,
+   wage_configurationsId bigint  NOT NULL,
    amount double,
    linked_constructionsiteId bigint
 )
