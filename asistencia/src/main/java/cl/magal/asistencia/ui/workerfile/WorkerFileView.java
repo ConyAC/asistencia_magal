@@ -296,8 +296,8 @@ public class WorkerFileView extends HorizontalLayout implements View {
 			
 			@Override
 			public Object generateCell(Table source, Object itemId, Object columnId) {
-				Property<Short> p = source.getItem(itemId).getItemProperty("active");
-				return p != null && (Short)p.getValue() == 1  ? "Activo":"No activo";
+				Property<Boolean> p = source.getItem(itemId).getItemProperty("active");
+				return p != null && (Boolean)p.getValue() ? "Activo":"No activo";
 			}
 		});
 		table.setCellStyleGenerator(new Table.CellStyleGenerator() {
@@ -307,7 +307,9 @@ public class WorkerFileView extends HorizontalLayout implements View {
 				if(propertyId == null ){ //estilo para la fila
 					//si es la activa, la marca
 					Item item = source.getItem(itemId);
-					boolean isActive = (Short) item.getItemProperty("active").getValue() == 1;
+					Property prop = item.getItemProperty("active");
+					logger.debug("prop : {}",prop);
+					boolean isActive = prop != null ? (Boolean) prop.getValue() : false;
 					return isActive ? "active-row":null;
 				}
 				return null;

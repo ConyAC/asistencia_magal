@@ -815,7 +815,7 @@ public class LaborerAndTeamPanel extends Panel implements View {
 								"Eliminar", "Cancelar", new ConfirmDialog.Listener() {
 							public void onClose(ConfirmDialog dialog) {
 								if (dialog.isConfirmed()) {
-									laborerConstruction.getBean().setActive((short)0);
+									laborerConstruction.getBean().setActive(false);
 									laborerService.save(laborerConstruction.getBean());
 									laborerConstructionContainer.removeItem(itemId);
 								}
@@ -893,7 +893,7 @@ public class LaborerAndTeamPanel extends Panel implements View {
 							logger.debug("laborer constructionsite {}, rut {} postcommit ",laborer,laborer.getLaborer().getRut());
 							laborerService.save(laborer);	
 							//si el elemento no esta activo, lo quita de la lista
-							if(laborer.getActive() == (short)0){
+							if( !laborer.isActive() ){
 								laborerConstructionContainer.removeItem(laborer);
 							}
 							table.refreshRowCache();

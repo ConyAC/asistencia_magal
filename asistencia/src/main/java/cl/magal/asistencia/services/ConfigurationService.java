@@ -99,7 +99,7 @@ public class ConfigurationService {
 	}
 
 	public DateConfigurations getDateConfigurationByCsAndMonth(ConstructionSite cs,DateTime date) {
-		logger.debug("buscando configuraciones de la fecha {}",date.toDate());
+//		logger.debug("buscando configuraciones de la fecha {}",date.toDate());
 		DateConfigurations dateConfig = dateConfigurationsRepo.findByDate(date.toDate());
 		//si no se ha seteado la fecha, elije el último día del mes anterior
 		if( dateConfig == null ){

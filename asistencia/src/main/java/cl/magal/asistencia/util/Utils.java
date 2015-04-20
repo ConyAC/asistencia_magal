@@ -1,5 +1,7 @@
 package cl.magal.asistencia.util;
 
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -25,6 +27,25 @@ import com.vaadin.ui.TextField;
 public class Utils {
 	
 	static Logger logger = LoggerFactory.getLogger(Utils.class);
+
+	static DecimalFormatSymbols decimalFormatSymbols;
+	static DecimalFormat decimalFormatSinDecimal;
+	
+	public static DecimalFormatSymbols getDecimalFormatSymbols(){
+		if(decimalFormatSymbols == null){
+			decimalFormatSymbols = new DecimalFormatSymbols();
+			decimalFormatSymbols.setDecimalSeparator(',');
+			decimalFormatSymbols.setGroupingSeparator('.');
+		}
+		return decimalFormatSymbols;
+	}
+	
+	public static DecimalFormat getDecimalFormatSinDecimal(){
+		if(decimalFormatSinDecimal == null){
+			decimalFormatSinDecimal = new DecimalFormat("#,###", getDecimalFormatSymbols());
+		}
+		return decimalFormatSinDecimal;
+	}
 	
 	final static Random r = new Random();
 	
@@ -107,5 +128,17 @@ public class Utils {
 //		logger.error("Error al guardar la información del usuario");
 //		Notification.show("Error al guardar la información del usuario : "+invalidFields.get(firstField).getMessage(), Type.ERROR_MESSAGE);
 	}
+
+	public static String formatInteger(Integer number) {
+		if(number == null )
+			return "0";
+		return getDecimalFormatSinDecimal().format(number);
+	}
 	
+	public static String formatInteger(Double number) {
+		if(number == null )
+			return "0";
+		return getDecimalFormatSinDecimal().format(number);
+	}
 }
+

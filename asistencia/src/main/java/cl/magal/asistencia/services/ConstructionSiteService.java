@@ -9,7 +9,6 @@ import java.util.Map;
 
 import javax.annotation.PostConstruct;
 
-import org.apache.commons.lang.ArrayUtils;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,7 +21,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import cl.magal.asistencia.entities.Accident;
 import cl.magal.asistencia.entities.AdvancePaymentConfigurations;
-import cl.magal.asistencia.entities.AdvancePaymentItem;
 import cl.magal.asistencia.entities.Attendance;
 import cl.magal.asistencia.entities.Confirmations;
 import cl.magal.asistencia.entities.ConstructionCompany;
@@ -41,7 +39,6 @@ import cl.magal.asistencia.entities.User;
 import cl.magal.asistencia.entities.Vacation;
 import cl.magal.asistencia.entities.WageConfigurations;
 import cl.magal.asistencia.entities.enums.AbsenceType;
-import cl.magal.asistencia.entities.enums.AttendanceMark;
 import cl.magal.asistencia.repositories.AccidentRepository;
 import cl.magal.asistencia.repositories.AttendanceRepository;
 import cl.magal.asistencia.repositories.ConfirmationsRepository;
@@ -57,6 +54,7 @@ import cl.magal.asistencia.repositories.TeamRepository;
 import cl.magal.asistencia.repositories.UserRepository;
 import cl.magal.asistencia.repositories.VacationRepository;
 import cl.magal.asistencia.services.bo.SalaryCalculator;
+import cl.magal.asistencia.services.bo.SupleCalculator;
 import cl.magal.asistencia.ui.vo.AbsenceVO;
 
 @Service
@@ -606,24 +604,27 @@ public class ConstructionSiteService {
 		//busca los valores extra de cada trabajador
 		Map<Integer,ExtraParams> extraParams = getExtraParamsMapByConstructionAndMonth(cs,date);
 
-		//verifica que exista una asistencia para cada elemento, si no existe la crea
+		//crea el objeto que calculará los sueldos 
+		SalaryCalculator sc =  new SalaryCalculator(assistanceClose,wageConfiguration, dateConfiguration, famillyTable, taxTable);
+		//acumulador de trabajadores sin codigo de suple
+		List<LaborerConstructionsite> withoutSupleCode = new ArrayList<LaborerConstructionsite>(lcs.size()); 
+		//para cada trabajador activo en el mes calcula su asistencia
 		for(LaborerConstructionsite lc : lcs ){
 			Integer supleCode = lc.getSupleCode();
-			if(supleCode == null )
-				continue; //TODO notificar que el usuario tanto, no tenia suple (o parar la ejecución)
-			//TODO CALCULAR AQUI 
+			if(supleCode == null ) {
+				withoutSupleCode.add(lc);
+				continue; 
+			}
+			//setea la información del trabajador
+//			Double suple = calculateSuple(supleCode,supleTable,supleClose,attendance.get(lc.getJobCode()));
+			Double suple  = 0d;
+			sc.setInformation( suple, 0, 0, attendance.get(lc.getJobCode()), lastMonthAttendance.get(lc.getJobCode()), overtimes.get(lc.getJobCode()),extraParams.get(lc.getJobCode()));
 			Salary salary = new Salary();
 			salary.setLaborerConstructionSite(lc);
-			salary.setSuple(calculateSuple(supleCode,supleTable,supleClose,attendance.get(lc.getJobCode())));
-			salary.setSalary(
-					calculateSalary(assistanceClose,
-							(int) salary.getSuple(), 
-							0, 
-							0, 
-							attendance.get(lc.getJobCode()),
-							lastMonthAttendance.get(lc.getJobCode()),
-							overtimes.get(lc.getJobCode()),extraParams.get(lc.getJobCode()),
-							wageConfiguration,dateConfiguration, famillyTable, taxTable));
+			salary.setSuple(suple);
+			if(true)
+				throw new RuntimeException("No implementado");
+//			salary.setSalary(sc.calculateSalary());
 			salary.setDate(date.toDate());
 			salaries.add(salary);
 
@@ -633,24 +634,24 @@ public class ConstructionSiteService {
 
 		return salaries;
 	}
-
-	public Double calculateSuple(Integer supleCode,AdvancePaymentConfigurations supleTable, Date supleCloseDate,Attendance attendance){
-
-		Map<Integer,AdvancePaymentItem> supleItemTable = supleTable.getMapTable();
-		//primero obtiene el monto de anticipo que le corresponde por tabla
-		Double maxAmount = supleItemTable.get(supleCode).getSupleTotalAmount();
-		//obtiene el día en que se cierra el suple
-		Integer supleCloseDay = new DateTime(supleCloseDate).dayOfMonth().get();
-		//luego descuenta por cada X S V D LL 
-		Integer countNotAttendance = countMarks(supleCloseDay,attendance,AttendanceMark.SATURDAY,AttendanceMark.ATTEND,AttendanceMark.VACATION,AttendanceMark.SUNDAY,AttendanceMark.RAIN);
-		logger.debug("(supleCloseDay {} - countNotAttendance {} ) * supleTable.getFailureDiscount() ",supleCloseDay,countNotAttendance,supleTable.getFailureDiscount());
-		Integer firstDiscount = (int) ((supleCloseDay - countNotAttendance)*supleTable.getFailureDiscount());
-		logger.debug("first discount {}",firstDiscount);		
-		Integer countFails = countMarks(supleCloseDay,attendance,AttendanceMark.FAIL);
-		Integer secondDiscount = (int) (countFails*supleTable.getPermissionDiscount());
-		logger.debug("second discount {}",secondDiscount);
-		return maxAmount -firstDiscount -secondDiscount;
-	}
+//
+//	public Double calculateSuple(Integer supleCode,AdvancePaymentConfigurations supleTable, Date supleCloseDate,Attendance attendance){
+//
+//		Map<Integer,AdvancePaymentItem> supleItemTable = supleTable.getMapTable();
+//		//primero obtiene el monto de anticipo que le corresponde por tabla
+//		Double maxAmount = supleItemTable.get(supleCode).getSupleTotalAmount();
+//		//obtiene el día en que se cierra el suple
+//		Integer supleCloseDay = new DateTime(supleCloseDate).dayOfMonth().get();
+//		//luego descuenta por cada X S V D LL 
+//		Integer countNotAttendance = countMarks(supleCloseDay,attendance,AttendanceMark.SATURDAY,AttendanceMark.ATTEND,AttendanceMark.VACATION,AttendanceMark.SUNDAY,AttendanceMark.RAIN);
+//		logger.debug("(supleCloseDay {} - countNotAttendance {} ) * supleTable.getFailureDiscount() ",supleCloseDay,countNotAttendance,supleTable.getFailureDiscount());
+//		Integer firstDiscount = (int) ((supleCloseDay - countNotAttendance)*supleTable.getFailureDiscount());
+//		logger.debug("first discount {}",firstDiscount);		
+//		Integer countFails = countMarks(supleCloseDay,attendance,AttendanceMark.FAIL);
+//		Integer secondDiscount = (int) (countFails*supleTable.getPermissionDiscount());
+//		logger.debug("second discount {}",secondDiscount);
+//		return maxAmount -firstDiscount -secondDiscount;
+//	}
 
 	/**
 	 * 
@@ -658,8 +659,83 @@ public class ConstructionSiteService {
 	 * @param dt
 	 * @return
 	 */
-	public List<Salary> getSalariesByConstructionAndMonth(ConstructionSite cs,DateTime dt) {
-		List<Salary> salaries = salaryRepo.findByConstructionsiteAndMonth(cs,dt.toDate());
+	public List<Salary> getSalariesByConstructionAndMonth(ConstructionSite cs,DateTime date) {
+		
+		// tabla de suple de la obra
+		AdvancePaymentConfigurations advancePaymentConfig = configurationService.getSupleTableByCs(cs);
+		if(advancePaymentConfig == null )
+			throw new RuntimeException("Aún no se define la tabla de suples. Ésta es necesaria para cálcular el sueldo.");
+//		Double failDiscount = configurationService.getFailDiscount(cs);
+//		Double permissionDiscount = configurationService.getPermissionDiscount(cs);
+		//fechas 
+		DateConfigurations dateConfiguration = configurationService.getDateConfigurationByCsAndMonth(cs,date);
+		if(dateConfiguration == null )
+			throw new RuntimeException("Aún no se definen las fechas de cierre de anticipo y cierre de asistencia. Ambas son necesarias para cálcular el sueldo.");
+		DateTime assistanceClose = new DateTime(dateConfiguration.getAssistance());
+		Date supleClose = dateConfiguration.getAdvance();
+		if(supleClose == null )
+			throw new RuntimeException("Aún no se definen las fechas de cierre de anticipo. Ésta es necesaria para cálcular el sueldo.");
+		
+		WageConfigurations wageConfiguration = configurationService.findWageConfigurations();
+		if(wageConfiguration == null )
+			throw new RuntimeException("Aún no se definen los montos de sueldo de sueldo minimo, colación y movilización. Todos son necesarias para cálcular el sueldo.");
+		
+		List<FamilyAllowanceConfigurations> famillyTable = configurationService.findFamylyAllowanceConfigurations();
+		if(famillyTable == null )
+			throw new RuntimeException("Aún no se definen la tabla de asignación familiar. Ésta es necesaria para cálcular el sueldo.");
+		
+		List<TaxationConfigurations> taxTable = configurationService.findTaxationConfigurations();
+		if(taxTable == null )
+			throw new RuntimeException("Aún no se definen la tabla de impuestos. Ésta es necesaria para cálcular el sueldo.");
+		
+		//busca la asistencia del mes 
+		Map<Integer,Attendance> attendance = getAttendanceMapByConstructionAndMonth(cs, date);
+		//busca la asistencia del mes anterior 
+		Map<Integer,Attendance> lastMonthAttendance = getAttendanceMapByConstructionAndMonth(cs, date.minusMonths(1));
+		//busca las sobre horas
+		Map<Integer,Overtime> overtimes = getOvertimeMapByConstructionAndMonth(cs, date);
+		//busca los valores extra de cada trabajador
+		Map<Integer,ExtraParams> extraParams = getExtraParamsMapByConstructionAndMonth(cs,date);
+
+		List<LaborerConstructionsite> lcs =  labcsRepo.findByConstructionsiteAndIsActive(cs);
+		
+		List<Salary> salariesList =  salaryRepo.findByConstructionsiteAndMonth(cs,date.toDate());
+		
+		List<Salary> salaries = new ArrayList<Salary>(lcs.size());
+		
+		Salary tmp = new Salary(); 
+		//verifica que exista una asistencia para cada elemento, si no existe la crea
+		for(LaborerConstructionsite lc : lcs ){
+			
+			tmp.setLaborerConstructionSite(lc);
+			
+			int index = salariesList.indexOf(tmp);
+			
+			Salary salary = null;
+			if( index >= 0 ){
+				salary = salariesList.remove(index);
+			}else{
+				salary = new Salary();
+			}
+			
+			//crea el objeto que calculará los sueldos 
+			SalaryCalculator sc =  new SalaryCalculator(assistanceClose,wageConfiguration, dateConfiguration, famillyTable, taxTable);
+			sc.setInformation( 0, 0, 0, attendance.get(lc.getJobCode()), lastMonthAttendance.get(lc.getJobCode()), overtimes.get(lc.getJobCode()),extraParams.get(lc.getJobCode()));
+			SupleCalculator suc = new SupleCalculator(advancePaymentConfig, supleClose);
+			//si el codigo de suple es nulo, entonces usa el primero de la tabla de suples FIXME CONFIRMAR ESTE COMPORTAMIENTO!!!
+			if(lc.getSupleCode() == null ){
+				lc.setSupleCode( advancePaymentConfig.getMapTable().keySet().iterator().next() );
+			}
+			
+			suc.setInformation(attendance.get(lc.getJobCode()), lc.getSupleCode());
+			
+			salary.setSalaryCalculator(sc);
+			salary.setSupleCalculator(suc);
+			salary.setLaborerConstructionSite(lc);
+			salary.setDate(date.toDate());
+			salaries.add(salary);
+			
+		}
 		return salaries;
 	}
 
@@ -683,31 +759,44 @@ public class ConstructionSiteService {
 			List<TaxationConfigurations> taxTable) {
 
 		SalaryCalculator sc = new SalaryCalculator(closingDateLastMonth, suple, tool, loan, attendance, lastMonthAttendance, overtime,extraParams,wageConfiguration, dateConfigurations, famillyTable, taxTable);
-		return (int) sc.calculateSalary();
+//		return (int) sc.calculateSalary();
+		if(true)
+			throw new RuntimeException("No implementado");
+		return 1;
 		
 		
+	}
+
+	/**
+	 * 
+	 * @param bean
+	 */
+	public void save(Salary bean) {
+		logger.debug("guardando salary {}, {}, {}, {}",bean.getId(), bean.getSalary(),bean.getSuple(),bean.isCalculatedSuple());
+		Salary bdSalary = salaryRepo.save(bean);
+		logger.debug("guardando salary {}, {}, {}, {}",bdSalary.getId(), bdSalary.getSalary(),bdSalary.getSuple(),bdSalary.isCalculatedSuple());
 	}
 	
-	/**
-	 * Cuenta las marcas hasta el dia dada, si el dia dado es nulo, entonces cuenta todos los dias
-	 * @param supleCloseDay
-	 * @param attendance
-	 * @param marks
-	 * @return
-	 */
-	private Integer countMarks(Integer supleCloseDay,Attendance attendance, AttendanceMark ... marks) {
-		if(attendance == null )
-			throw new RuntimeException("El objeto de asistencia no puede ser nulo.");
-
-		int i = 0,count = 0;
-		for(AttendanceMark mark : attendance.getMarksAsList()){
-			if(supleCloseDay != null && i >= supleCloseDay)
-				break;
-			if(ArrayUtils.contains(marks, mark))
-				count++;
-			i++;
-		}
-		return count;
-	}
+//	/**
+//	 * Cuenta las marcas hasta el dia dada, si el dia dado es nulo, entonces cuenta todos los dias
+//	 * @param supleCloseDay
+//	 * @param attendance
+//	 * @param marks
+//	 * @return
+//	 */
+//	private Integer countMarks(Integer supleCloseDay,Attendance attendance, AttendanceMark ... marks) {
+//		if(attendance == null )
+//			throw new RuntimeException("El objeto de asistencia no puede ser nulo.");
+//
+//		int i = 0,count = 0;
+//		for(AttendanceMark mark : attendance.getMarksAsList()){
+//			if(supleCloseDay != null && i >= supleCloseDay)
+//				break;
+//			if(ArrayUtils.contains(marks, mark))
+//				count++;
+//			i++;
+//		}
+//		return count;
+//	}
 
 }

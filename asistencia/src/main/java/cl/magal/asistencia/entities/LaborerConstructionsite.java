@@ -68,7 +68,7 @@ public class LaborerConstructionsite implements Serializable {
     private ConstructionSite constructionsite;
     
     @Column(name = "active")
-    private Short active;
+    private boolean active;
     
     /**
      * Define si un trabajador está confirmado en la obra o no
@@ -129,7 +129,7 @@ public class LaborerConstructionsite implements Serializable {
     /**
      * define el contrato activo o el primero
      */
-    @OneToOne(mappedBy="laborerConstructionSite",cascade = {CascadeType.PERSIST,CascadeType.MERGE})
+    @OneToOne(mappedBy="laborerConstructionSite",cascade = {CascadeType.PERSIST,CascadeType.MERGE},optional=false)
     Contract activeContract;
     
     @Column(name = "suple_code")
@@ -150,8 +150,6 @@ public class LaborerConstructionsite implements Serializable {
     		rewardEndDate = new Date();
     	if(rewardStartDate == null )
     		rewardStartDate = new Date();
-    	if(active == null)
-    		active = 1;
     }
     
     public Integer getSupleCode() {
@@ -313,12 +311,12 @@ public class LaborerConstructionsite implements Serializable {
 	}
 
 
-	public Short getActive() {
+	public boolean isActive() {
 		return active;
 	}
 
 
-	public void setActive(Short active) {
+	public void setActive(boolean active) {
 		this.active = active;
 	}
 	

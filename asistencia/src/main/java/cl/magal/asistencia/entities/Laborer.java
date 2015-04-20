@@ -124,7 +124,7 @@ public class Laborer implements Serializable {
 //    private Integer contractId;
     
     @Column(name="dependents")
-    private Integer dependents;
+    private int dependents;
     
     @Column(name="town")
     private String town;
@@ -250,7 +250,7 @@ public class Laborer implements Serializable {
 		return dependents;
 	}
 
-	public void setDependents(Integer dependents) {
+	public void setDependents(int dependents) {
 		this.dependents = dependents;
 	}
 

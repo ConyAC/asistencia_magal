@@ -47,8 +47,8 @@ public class Attendance implements Serializable {
 	@JoinColumn(name="laborer_constructionsiteId",nullable=false)
 	LaborerConstructionsite laborerConstructionSite;
 	
-	@Column(name="jornal")
-	Integer jornalPromedio = 0;
+//	@Column(name="jornal")
+//	Integer jornalPromedio = 0;
 	
 	@Convert(converter = AttendanceMarkConverter.class)
 	@Column(name="dmp1")
@@ -336,13 +336,13 @@ public class Attendance implements Serializable {
 		return Collections.unmodifiableList(tmp);
 	}
 	
-	public Integer getJornalPromedio() {
-		return jornalPromedio == null ? 0 : jornalPromedio;
-	}
-
-	public void setJornalPromedio(Integer jornalPromedio) {
-		this.jornalPromedio = jornalPromedio;
-	}
+//	public Integer getJornalPromedio() {
+//		return jornalPromedio == null ? 0 : jornalPromedio;
+//	}
+//
+//	public void setJornalPromedio(Integer jornalPromedio) {
+//		this.jornalPromedio = jornalPromedio;
+//	}
 
 	public Long getId() {
 		return id;

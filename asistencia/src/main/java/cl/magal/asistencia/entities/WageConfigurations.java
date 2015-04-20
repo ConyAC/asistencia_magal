@@ -32,15 +32,15 @@ public class WageConfigurations implements Serializable{
 	
 	@Digits(fraction = 0, integer = 6)
 	@Column(name ="minimum_wage")
-	Double minimumWage;
+	Double minimumWage = 0D;
 	
 	@Digits(fraction = 0, integer = 6)
 	@Column(name ="collation")
-	Double collation;
+	Double collation = 0D;
 	
 	@Digits(fraction = 0, integer = 6)
 	@Column(name ="mobilization")
-	Double mobilization;
+	Double mobilization = 0D;
 	
 	@ElementCollection(targetClass=Mobilization2.class)
 	@CollectionTable(

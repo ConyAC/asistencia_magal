@@ -805,7 +805,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 				activeContract.setSettlement(100000);
 				//deja desactivo tanto el contrato como el laborer constructionsite
 				activeContract.setActive(false);
-				((LaborerConstructionsite)getItem().getBean()).setActive((short)0);
+				((LaborerConstructionsite)getItem().getBean()).setActive(false);
 				setContractGl(activeContract);
 			}
 		});
