@@ -18,6 +18,7 @@ import cl.magal.asistencia.ui.MagalUI;
 import com.vaadin.data.util.BeanItem;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
+import com.vaadin.server.Page;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.HorizontalLayout;
@@ -69,6 +70,7 @@ public class ConstructionSiteView extends BaseView  implements View {
 			if(root.getComponentIndex(laborerAndTeamPanel) >= 0){
 				UI.getCurrent().getNavigator().navigateTo(ConstructionSitesView.NAME);
 			}else{
+				Page.getCurrent().setUriFragment(Page.getCurrent().getUriFragment().replace("/asistencia",""), false);
 				switchPanels();
 			}
 
@@ -86,7 +88,7 @@ public class ConstructionSiteView extends BaseView  implements View {
 
 			@Override
 			public void buttonClick(ClickEvent event) {
-				
+				Page.getCurrent().setUriFragment(Page.getCurrent().getUriFragment()+"/asistencia", false);
 				switchPanels();
 
 			}
@@ -95,12 +97,16 @@ public class ConstructionSiteView extends BaseView  implements View {
 		((MagalUI)UI.getCurrent()).getBackButton().addClickListener(backListener);
 	}
 
-	private void switchPanels() {
+	private void switchPanels(){
+		switchPanels(null);
+	}
+	
+	private void switchPanels(ViewChangeEvent event) {
 
 		if(root.getComponentIndex(laborerAndTeamPanel) >= 0){
 			root.removeComponent(laborerAndTeamPanel);
 			root.addComponent(attendancePanel);
-			attendancePanel.enter(null);
+			attendancePanel.enter(event);
 		}else{
 			root.removeComponent(attendancePanel);
 			root.addComponent(laborerAndTeamPanel);
@@ -134,7 +140,7 @@ public class ConstructionSiteView extends BaseView  implements View {
 				}else if( msgs.length == 2 ){
 					String function = msgs[1];
 					if(function.equals("asistencia")){
-						attendancePanel.enter(event);
+						switchPanels(event);
 					}else{
 						showErrorParam();
 					}

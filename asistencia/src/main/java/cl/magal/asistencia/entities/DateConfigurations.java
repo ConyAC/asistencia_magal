@@ -49,17 +49,17 @@ public class DateConfigurations implements Serializable {
 	@Temporal(TemporalType.DATE)
 	Date finishDeal;
 	
-	@Digits(fraction = 2, integer = 6)
+	@Digits(fraction = 2, integer = 6,message="debe ser un número de máximo 2 decimales")
 	@Column(name ="benzine")
-	Double benzine;
+	Double benzine = 0D;
 	
-	@Digits(fraction = 0, integer = 6)
+	@Digits(fraction = 2, integer = 6,message="debe ser un número sin decimales")
 	@Column(name ="oil")
-	Double oil;
+	Double oil = 0D;
 	
-	@Digits(fraction = 2, integer = 6)
+	@Digits(fraction = 2, integer = 6,message="debe ser un número de máximo 2 decimales")
 	@Column(name ="uf")
-	Double uf;
+	Double uf = 0D;
 
 	public Long getDateConfigurationsId() {
 		return id;
