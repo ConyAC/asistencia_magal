@@ -846,6 +846,17 @@ public class AttendancePanel extends Panel implements View {
 						TextField tf = new TextField();
 						tf.setNullRepresentation("");
 						tf.setImmediate(true);
+						if(propertyId.equals("jornalPromedio")){
+							tf.addBlurListener(new FieldEvents.BlurListener() {
+								
+								@Override
+								public void blur(BlurEvent event) {
+									BeanItem<Salary> beanItem = salaryContainer.getItem(itemId);
+									//guarda el salario
+									service.save(beanItem.getBean());
+								}
+							});
+						}
 						return tf;
 					}
 				});
