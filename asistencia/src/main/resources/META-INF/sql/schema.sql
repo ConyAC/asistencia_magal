@@ -79,7 +79,7 @@ CREATE TABLE IF NOT EXISTS "user"
 ALTER TABLE "user"
 ADD CONSTRAINT IF NOT EXISTS FK_USER_ROLE
 FOREIGN KEY (roleId)
-REFERENCES "ROLE"(roleId)
+REFERENCES "role"(roleId)
 ;
 CREATE INDEX IF NOT EXISTS  FK_INDX_ROLE ON "user"(roleId)
 ;
@@ -428,7 +428,8 @@ CREATE TABLE IF NOT EXISTS "advance_payment_configurations"
 (
    advance_payment_configurationsId bigint PRIMARY KEY NOT NULL,
    permission_discount double,
-   failure_discount double
+   failure_discount double,
+   constructionsiteId bigint
 )
 ;
 CREATE UNIQUE INDEX IF NOT EXISTS PK_APC ON "advance_payment_configurations"(advance_payment_configurationsId)
@@ -685,7 +686,7 @@ CREATE TABLE IF NOT EXISTS attendance
 ALTER TABLE attendance
 ADD CONSTRAINT IF NOT EXISTS FK_ATTENDANCE_LABORER_CONSTRUCTIONSITEID
 FOREIGN KEY (laborer_constructionsiteId)
-REFERENCES laborer_constructionsite(laborer_constructionsiteId)
+REFERENCES "laborer_constructionsite"(laborer_constructionsiteId)
 ;
 CREATE UNIQUE INDEX IF NOT EXISTS  PRIMARY_KEY_8E ON attendance(attendanceId)
 ;
@@ -766,7 +767,7 @@ CREATE TABLE IF NOT EXISTS overtime
 ALTER TABLE overtime
 ADD CONSTRAINT IF NOT EXISTS FK_OVERTIME_LABORER_CONSTRUCTIONSITEID
 FOREIGN KEY (laborer_constructionsiteId)
-REFERENCES laborer_constructionsite(laborer_constructionsiteId)
+REFERENCES "laborer_constructionsite"(laborer_constructionsiteId)
 ;
 CREATE UNIQUE INDEX IF NOT EXISTS PRIMARY_KEY_4E ON overtime(overtimeId)
 ;
@@ -780,10 +781,11 @@ CREATE TABLE IF NOT EXISTS confirmations
   central_check tinyint(1) DEFAULT '0',
   constructionsite_check tinyint(1) DEFAULT '0',
   date date NOT NULL,
-  constructionsiteId bigint(20) NOT NULL
-  ) ;
+  constructionsiteId bigint(20) NOT NULL,
+  PRIMARY KEY (confirmationsId)
+) ;
 
-
+/*
 CREATE TABLE IF NOT EXISTS license (
   licenseId bigint(20) IDENTITY PRIMARY KEY NOT NULL,
   confirmed tinyint(1) DEFAULT '0',
@@ -791,29 +793,23 @@ CREATE TABLE IF NOT EXISTS license (
   from_date date DEFAULT NULL,
   absence_type int(11) DEFAULT NULL,
   to_date date DEFAULT NULL,
-  laborer_constructionsiteId bigint(20) NOT NULL
-) ;
-
-ALTER TABLE license
-ADD CONSTRAINT IF NOT EXISTS fk_license_laborer_constructionsiteId
-FOREIGN KEY (laborer_constructionsiteId)
-REFERENCES laborer_constructionsite(laborer_constructionsiteId)
-;
+  laborer_constructionsiteId bigint(20) NOT NULL,
+  PRIMARY KEY (licenseId),
+  KEY fk_license_laborer_constructionsiteId (laborer_constructionsiteId),
+  CONSTRAINT fk_license_laborer_constructionsiteId FOREIGN KEY (laborer_constructionsiteId) REFERENCES laborer_constructionsite (laborer_constructionsiteId)
+) ;*/
 
 
-CREATE TABLE IF NOT EXISTS salary (
+/*CREATE TABLE IF NOT EXISTS salary (
   salarytId bigint(20) IDENTITY PRIMARY KEY NOT NULL,
   date date NOT NULL,
   salary int(11) DEFAULT NULL,
   suple int(11) DEFAULT NULL,
-  laborer_constructionsiteId bigint(20) NOT NULL
-);
-
-ALTER TABLE salary
-ADD CONSTRAINT IF NOT EXISTS fk_salary_laborer_constructionsiteId
-FOREIGN KEY (laborer_constructionsiteId)
-REFERENCES laborer_constructionsite(laborer_constructionsiteId)
-;
+  laborer_constructionsiteId bigint(20) NOT NULL,
+  PRIMARY KEY (salarytId),
+  KEY fk_salary_laborer_constructionsiteId (laborer_constructionsiteId),
+  CONSTRAINT fk_salary_laborer_constructionsiteId FOREIGN KEY (laborer_constructionsiteId) REFERENCES laborer_constructionsite (laborer_constructionsiteId)
+);*/
 
 CREATE TABLE IF NOT EXISTS extra_params
 (
@@ -828,11 +824,11 @@ CREATE TABLE IF NOT EXISTS extra_params
 )
 ;
 ALTER TABLE extra_params
-ADD CONSTRAINT IF NOT EXISTS  FK_EXTRA_PARAMS_LABORER_CONSTRUCTIONSITEID
+ADD CONSTRAINT IF NOT EXISTS FK_EXTRA_PARAMS_LABORER_CONSTRUCTIONSITEID
 FOREIGN KEY (laborer_constructionsiteId)
-REFERENCES laborer_constructionsite(laborer_constructionsiteId)
+REFERENCES "laborer_constructionsite"(laborer_constructionsiteId)
 ;
 CREATE INDEX IF NOT EXISTS FK_EXTRA_PARAMS_LABORER_CONSTRUCTIONSITEID_INDEX_7 ON extra_params(laborer_constructionsiteId)
 ;
-CREATE UNIQUE INDEX IF NOT EXISTS uq_extra_param ON extra_params(extra_paramsId)
+CREATE UNIQUE INDEX IF NOT EXISTS PRIMARY_KEY_7 ON extra_params(extra_paramsId)
 ;

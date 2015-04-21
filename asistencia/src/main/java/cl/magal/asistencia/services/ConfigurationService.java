@@ -139,5 +139,12 @@ public class ConfigurationService {
 	public void delete(FamilyAllowanceConfigurations family) {
 		familyAllowanceRepo.delete(family);
 	}
+	
+	public AdvancePaymentConfigurations findAdvancePaymentConfigurationsByCS(ConstructionSite cs) {
+		List<AdvancePaymentConfigurations> configurations = (List<AdvancePaymentConfigurations>)advancePaymentRepo.findAdvancePaymentConfigurationsByCS(cs);
+		if(configurations.isEmpty())
+			return null;
+		return configurations.get(0);
+	}
 
 }

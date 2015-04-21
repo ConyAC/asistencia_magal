@@ -972,16 +972,16 @@ public class AttendancePanel extends Panel implements View {
 		}
 	};
 
+	@SuppressWarnings("serial")
 	private HorizontalLayout drawTopAttendance() {
 		return new HorizontalLayout(){
 			{
 				setWidth("100%");
-
 				addComponent(new HorizontalLayout(){
 					{
+						setSpacing(true);
 						addComponent(new FormLayout(){
 							{
-
 								attendanceDate  =  new InlineDateField("Mes");
 								attendanceDate.setResolution(Resolution.MONTH);
 								attendanceDate.setValue(new Date());
@@ -1102,11 +1102,11 @@ public class AttendancePanel extends Panel implements View {
 												VerticalLayout form = new VerticalLayout(){
 													{
 														setWidth("980px");
-														setHeight("600px");
+														setHeight("610px");
 														setSpacing(true);
 
 														final FieldGroup fg = new FieldGroup();
-														advancepayment = confService.findAdvancePaymentConfigurations();
+														advancepayment = confService.findAdvancePaymentConfigurationsByCS(cs);
 														if( advancepayment  == null )
 															advancepayment  = new AdvancePaymentConfigurations();
 														fg.setItemDataSource(new BeanItem<AdvancePaymentConfigurations>(advancepayment));
@@ -1127,10 +1127,11 @@ public class AttendancePanel extends Panel implements View {
 														};														
 														
 														addComponent( new VerticalLayout(){
-															{																
+															{			
 																setSpacing(true);																
-																addComponent(new Panel(new VerticalLayout(){
+																addComponent(new Panel("Configurar Suple", new VerticalLayout(){
 																	{
+																		setMargin(true);
 																		addComponent(new FormLayout(){
 																			{
 																				Field permissionDiscount = fg.buildAndBind("Descuento por Permiso", "permissionDiscount");
@@ -1162,7 +1163,7 @@ public class AttendancePanel extends Panel implements View {
 																							
 																							AdvancePaymentItem advancePaymentItem = new AdvancePaymentItem();
 																							advancePaymentItem.setSupleCode(Integer.valueOf(supleCode.getValue()));
-																							//TODO hacer dialogo para crear y validar nuevo item
+																							advancepayment.setConstructionSite(cs);
 																							advancepayment.addAdvancePaymentItem(advancePaymentItem);
 																							confService.save(advancepayment);
 																							
@@ -1196,18 +1197,26 @@ public class AttendancePanel extends Panel implements View {
 																			@Override
 																			public Object generateCell(Table source,final Object itemId, Object columnId) {
 																				return new Button(null,new Button.ClickListener() {
+																					
 																					final AdvancePaymentItem advancePaymentItem = container.getItem(itemId).getBean();
 																					@Override
 																					public void buttonClick(ClickEvent event) {
-																						
-																						try{
-																							advancepayment.removeAdvancePaymentItem(advancePaymentItem);
-																							confService.save(advancepayment);
-																							container.removeItem(itemId);
-																						}catch(Exception e){
-																							Notification.show("Error al quitar elemento",Type.ERROR_MESSAGE);
-																							logger.error("Error al quitar una mobilización 2",e);
-																						}
+																						ConfirmDialog.show(UI.getCurrent(), "Confirmar Acción:", "¿Está seguro de eliminar el suple seleccionado?",
+																								"Eliminar", "Cancelar", new ConfirmDialog.Listener() {
+
+																							public void onClose(ConfirmDialog dialog) {
+																								if (dialog.isConfirmed()) {
+																									try{
+																										advancepayment.removeAdvancePaymentItem(advancePaymentItem);
+																										confService.save(advancepayment);
+																										container.removeItem(itemId);
+																									}catch(Exception e){
+																										Notification.show("Error al quitar elemento",Type.ERROR_MESSAGE);
+																										logger.error("Error al eliminar un suple",e);
+																									}
+																								}
+																							}
+																						});
 																					}
 																				}){
 																					{setIcon(FontAwesome.TRASH_O);}
@@ -1227,9 +1236,7 @@ public class AttendancePanel extends Panel implements View {
 																			setEnabled(true);
 																		}
 																	}
-																}));
-																
-																
+																}));															
 															}
 														});
 													}
@@ -1279,7 +1286,7 @@ public class AttendancePanel extends Panel implements View {
 									}
 								}){
 									{
-										setIcon(FontAwesome.BEER);
+										setIcon(FontAwesome.DOLLAR);
 									}
 								});
 							}
