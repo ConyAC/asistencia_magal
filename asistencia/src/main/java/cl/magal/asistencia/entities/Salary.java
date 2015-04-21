@@ -27,7 +27,7 @@ import cl.magal.asistencia.services.bo.SupleCalculator;
 public class Salary implements Serializable {
 	
 	
-	Logger logger = LoggerFactory.getLogger(Salary.class);
+	transient static Logger logger = LoggerFactory.getLogger(Salary.class);
 	
 	/**
 	 * 
@@ -56,6 +56,9 @@ public class Salary implements Serializable {
 	
 	@Column(name = "salary")
 	Double salary;
+	
+	@Column(name = "calculated_suple")
+	boolean calculatedSuple = true;
 	
 	/**
 	 * Objeto que permite el calculo de los sueldos
@@ -121,8 +124,10 @@ public class Salary implements Serializable {
 		this.jornalPromedio = jornalPromedio;
 	}
 	public double getSuple() {
-		if(suple == null )
-			suple = supleCalculator.calculateSuple();
+		if(suple == null && isCalculatedSuple() ){
+			suple = supleCalculator.calculateSuple(getLaborerConstructionSite().getSupleCode());
+		}else if( suple == null && !isCalculatedSuple() )
+			suple = 0d;
 		return suple;
 	}
 	public void setSuple(double suple) {
@@ -159,6 +164,19 @@ public class Salary implements Serializable {
 		return salary == null;
 	}
 	
+	public boolean getForceSuple(){
+		logger.debug("forceSuple");
+		suple = null;
+		supleCalculator.resetCal();
+		return suple == null;
+	}
+	
+	public boolean isCalculatedSuple() {
+		return calculatedSuple;
+	}
+	public void setCalculatedSuple(boolean calculatedSuple) {
+		this.calculatedSuple = calculatedSuple;
+	}
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -177,7 +195,7 @@ public class Salary implements Serializable {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		ExtraParams other = (ExtraParams) obj;
+		Salary other = (Salary) obj;
 		if (laborerConstructionSite == null) {
 			if (other.laborerConstructionSite != null)
 				return false;

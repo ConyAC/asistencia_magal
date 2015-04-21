@@ -27,6 +27,7 @@ import cl.magal.asistencia.entities.enums.AttendanceMark;
 import cl.magal.asistencia.entities.enums.Permission;
 import cl.magal.asistencia.services.ConfigurationService;
 import cl.magal.asistencia.services.ConstructionSiteService;
+import cl.magal.asistencia.services.LaborerService;
 import cl.magal.asistencia.services.UserService;
 import cl.magal.asistencia.ui.MagalUI;
 import cl.magal.asistencia.ui.vo.AbsenceVO;
@@ -53,6 +54,8 @@ import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.data.util.GeneratedPropertyContainer;
 import com.vaadin.data.util.PropertyValueGenerator;
 import com.vaadin.data.util.filter.SimpleStringFilter;
+import com.vaadin.event.FieldEvents;
+import com.vaadin.event.FieldEvents.BlurEvent;
 import com.vaadin.event.FieldEvents.TextChangeEvent;
 import com.vaadin.event.FieldEvents.TextChangeListener;
 import com.vaadin.navigator.View;
@@ -104,6 +107,8 @@ public class AttendancePanel extends Panel implements View {
 	/** SERVICIOS **/
 	@Autowired
 	private transient ConstructionSiteService service;
+	@Autowired
+	private transient LaborerService laborerService;
 	@Autowired
 	private transient ConfigurationService configurationService;
 	@Autowired
@@ -503,7 +508,8 @@ public class AttendancePanel extends Panel implements View {
 						
 						final BeanItem<Salary> beanItem = salaryContainer.getItem(itemId);
 						//TODO recuperar posibles codigos de suple
-						ComboBox cb = new ComboBox();
+						final ComboBox cb = new ComboBox();
+						cb.setImmediate(true);
 						cb.addItem(1);
 						cb.addItem(2);
 						cb.addItem(3);
@@ -517,9 +523,20 @@ public class AttendancePanel extends Panel implements View {
 							
 							@Override
 							public void buttonClick(ClickEvent event) {
+								logger.debug(" suple value calculated ");
 								//obliga a calcular el suple con la tabla
-								//TODO recuperar monto suple
-								beanItem.getItemProperty("suple").setValue(500d);
+								//define el suple como calculado
+								beanItem.getItemProperty("calculatedSuple").setValue(true);
+								//obliga a que se recalcule el suple
+								beanItem.getItemProperty("forceSuple").getValue();
+								//lo pide explicitamente para obligar a recalcular el suple
+								double suple = (Double) beanItem.getItemProperty("suple").getValue();
+								//recupera monto suple de la tabla
+								beanItem.getItemProperty("suple").setValue(suple);
+								//guarda el trabajador, para guardar el codigo de suple
+								laborerService.save(beanItem.getBean().getLaborerConstructionSite());
+								//guarda el salario
+								service.save(beanItem.getBean());
 							}
 						}){
 							{
@@ -537,12 +554,35 @@ public class AttendancePanel extends Panel implements View {
 				salaryTable.setTableFieldFactory(new TableFieldFactory() {
 
 					@Override
-					public Field<?> createField(Container container, Object itemId,Object propertyId, com.vaadin.ui.Component uiContext) {
-						if(propertyId.equals("laborerConstructionSite.activeContract.jobCode")|| propertyId.equals("salary") )
+					public Field<?> createField(Container container, final Object itemId,Object propertyId, com.vaadin.ui.Component uiContext) {
+						if(propertyId.equals("laborerConstructionSite.activeContract.jobCode") )
 							return null;
 						TextField tf = new TextField();
 						tf.setNullRepresentation("");
 						tf.setImmediate(true);
+						if(propertyId.equals("suple")){
+							tf.addBlurListener(new FieldEvents.BlurListener() {
+								
+								@Override
+								public void blur(BlurEvent event) {
+									BeanItem<Salary> beanItem = salaryContainer.getItem(itemId);
+									beanItem.getItemProperty("calculatedSuple").setValue(false);
+									//guarda el salario
+									service.save(beanItem.getBean());
+								}
+							});
+							tf.addValueChangeListener(new Property.ValueChangeListener() {
+								
+								@Override
+								public void valueChange(ValueChangeEvent event) {
+//									logger.debug(" suple value changed ");
+//									BeanItem<Salary> beanItem = salaryContainer.getItem(itemId);
+//									beanItem.getItemProperty("calculatedSuple").setValue(false);
+//									//guarda el salario
+//									service.save(beanItem.getBean());
+								}
+							});
+						}
 						return tf;
 					}
 				});
@@ -707,20 +747,22 @@ public class AttendancePanel extends Panel implements View {
 						final Label label  = new Label("<b>"+Utils.formatInteger((Integer) salaryContainer.getContainerProperty(itemId, "roundSalary").getValue())+"</b>"+
 								"  ("+Utils.formatInteger((Integer) salaryContainer.getContainerProperty(itemId, columnId).getValue())+")");
 						label.setContentMode(ContentMode.HTML);
-						Property.ValueChangeListener listener = new Property.ValueChangeListener() {
-							
-							@Override
-							public void valueChange(ValueChangeEvent event) {
-								logger.debug("jornalPromedio changed");
-								Object result = salaryContainer.getItem(itemId).getItemProperty("forceSalary").getValue();
-								logger.debug("salary == null {}",result);
-								label.setValue( "<b>"+Utils.formatInteger((Integer) salaryContainer.getContainerProperty(itemId, "roundSalary").getValue())+"</b>"+
-										"  ("+Utils.formatInteger((Integer) salaryContainer.getContainerProperty(itemId, columnId).getValue())+")");
+//						Property.ValueChangeListener listener = ;
+						for(final String pid : new String[]{"jornalPromedio","suple"})
+							((ValueChangeNotifier)item.getItemProperty(pid)).addValueChangeListener(new Property.ValueChangeListener() {
 								
-							}
-						};
-						for(String pid : new String[]{"jornalPromedio","suple"})
-							((ValueChangeNotifier)item.getItemProperty(pid)).addValueChangeListener(listener);
+								@Override
+								public void valueChange(ValueChangeEvent event) {
+									if("jornalPromedio".equals(pid)){
+									}else if("suple".equals(pid)){
+									}
+									Object result = salaryContainer.getItem(itemId).getItemProperty("forceSalary").getValue();
+									logger.debug("salary == null {}, {}",result,itemId);
+									label.setValue( "<b>"+Utils.formatInteger((Integer) salaryContainer.getContainerProperty(itemId, "roundSalary").getValue())+"</b>"+
+											"  ("+Utils.formatInteger((Integer) salaryContainer.getContainerProperty(itemId, columnId).getValue())+")");
+									
+								}
+							});
 						return label;
 					}
 					
@@ -846,8 +888,8 @@ public class AttendancePanel extends Panel implements View {
 			@Override
 			public void postCommit(CommitEvent commitEvent) throws CommitException {
 				//guarda el elmento
-				Overtime attedance = ((BeanItem<Overtime>) commitEvent.getFieldBinder().getItemDataSource()).getBean();
-				service.save(attedance);
+				Overtime overtime = ((BeanItem<Overtime>) commitEvent.getFieldBinder().getItemDataSource()).getBean();
+				service.save(overtime);
 				overtimeContainer.sort(new Object[]{"laborerConstructionSite.activeContract.jobCode"}, new boolean[]{true});
 			}
 		});
@@ -900,6 +942,9 @@ public class AttendancePanel extends Panel implements View {
 				BeanItem<Attendance> item = (BeanItem<Attendance>) commitEvent.getFieldBinder().getItemDataSource();
 				Attendance attendance = item.getBean(); 
 				salaryContainer.getItem(attendance.getLaborerConstructionSite().getId()).getItemProperty("attendance").setValue(attendance);
+				
+				salaryContainer.getItem(attendance.getLaborerConstructionSite().getId()).getItemProperty("forceSalary").getValue();
+				salaryContainer.getItem(attendance.getLaborerConstructionSite().getId()).getItemProperty("forceSuple").getValue();
 			}
 		});
 		attendanceGrid.setEditorFieldGroup(bfg);
@@ -939,6 +984,8 @@ public class AttendancePanel extends Panel implements View {
 		attendanceGrid.setFrozenColumnCount(1);
 		if(attendanceGrid.getColumn("laborerConstructionSite") != null )
 			attendanceGrid.removeColumn("laborerConstructionSite");
+		if(attendanceGrid.getColumn("laborerConstructionSite.id") != null )
+			attendanceGrid.removeColumn("laborerConstructionSite.id");
 		if(attendanceGrid.getColumn("id") != null )
 			attendanceGrid.removeColumn("id");
 		if(attendanceGrid.getColumn("date") != null )

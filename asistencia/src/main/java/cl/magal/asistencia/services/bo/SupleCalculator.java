@@ -56,7 +56,7 @@ public class SupleCalculator {
 		if(supleTable == null || supleTable.getMapTable() == null || supleTable.getMapTable().isEmpty() )
 			throw new RuntimeException("Aún no se definen los valores de suple, no se puede calcular el suple.");
 		if(attendance == null )
-			throw new RuntimeException("Aún no se definen los valores de suple, no se puede calcular el suple.");
+			throw new RuntimeException("Aún no se definen los valores de la asistencia, no se puede calcular el suple.");
 	}
 	
 	/**
@@ -80,12 +80,12 @@ public class SupleCalculator {
 	
 	/**
 	 * Permite calcular el anticipo
-	 * @param supleTable
-	 * @param supleCloseDate
-	 * @param supleCode
+	 * @param integer 
 	 * @return
 	 */
-	public double calculateSuple(){
+	public double calculateSuple(Integer supleCode){
+		
+		this.supleCode = supleCode;
 		
 		validateInformationForSuple();
 
@@ -128,6 +128,13 @@ public class SupleCalculator {
 				count++;
 		}
 		return count;
+	}
+
+	/**
+	 * No hace nada
+	 */
+	public void resetCal() {
+		
 	}
 
 }
