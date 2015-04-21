@@ -126,6 +126,7 @@ public class AttendancePanel extends Panel implements View {
 	Button btnExportSoftland,btnConstructionSiteConfirm,btnCentralConfirm,btnGenerateSalary,btnSupleObraConfirm,btnSupleCentralConfirm;
 	Table confirmTable;
 	VerticalLayout root;
+	Table salaryTable;
 
 	/** ATRIBUTOS **/
 	Confirmations confirmations;
@@ -316,6 +317,10 @@ public class AttendancePanel extends Panel implements View {
 		confirmTable.setEnabled(state);
 //		btnGenerateSalary.setEnabled(state);
 	}
+	
+	private void enableSuple(boolean state) {
+		salaryTable.setEnabled(state);
+	}
 
 	private Grid drawExtraParamsGrid() {
 		
@@ -485,7 +490,7 @@ public class AttendancePanel extends Panel implements View {
 			{
 				setSpacing(true);
 
-				final Table salaryTable = new Table();
+				salaryTable = new Table();
 				salaryTable.setWidth("100%");
 				salaryTable.setContainerDataSource(salaryContainer);
 				
@@ -513,11 +518,11 @@ public class AttendancePanel extends Panel implements View {
 											toogleButtonState(btnSupleObraConfirm, confirmations.isSupleObraCheck());
 											btnSupleCentralConfirm.setEnabled(confirmations.isSupleObraCheck());
 											//si tiene confirmación de obra y no tiene permisos de confirmar central o si tiene ambos checheados, bloqueda la interfaz
-											if(!((confirmations.isConstructionSiteCheck() && !SecurityHelper.hasPermission(Permission.CONFIRMAR_ASISTENCIA_CENTRAL)) || 
-													(confirmations.isConstructionSiteCheck() && confirmations.isCentralCheck())||
-													(!confirmations.isConstructionSiteCheck() && !SecurityHelper.hasPermission(Permission.CONFIRMAR_ASISTENCIA_OBRA)))){
-												salaryTable.setEnabled(true);
-											}
+											enableSuple(!(
+													(confirmations.isSupleObraCheck() && !SecurityHelper.hasPermission(Permission.CONFIRMAR_ASISTENCIA_CENTRAL)) || 
+													(confirmations.isSupleObraCheck() && confirmations.isSupleCentralCheck())||
+													(!confirmations.isSupleObraCheck() && !SecurityHelper.hasPermission(Permission.CONFIRMAR_ASISTENCIA_OBRA))
+													));
 											
 											if( !confirmations.isSupleObraCheck() && !SecurityHelper.hasPermission(Permission.CONFIRMAR_ASISTENCIA_OBRA)){
 												btnSupleObraConfirm.setVisible(false);
@@ -1343,6 +1348,32 @@ public class AttendancePanel extends Panel implements View {
 		toogleButtonState(btnCentralConfirm,confirmations.isCentralCheck());
 		btnCentralConfirm.setEnabled( (confirmations.isConstructionSiteCheck() && !confirmations.isCentralCheck()) ||
 				(confirmations.isConstructionSiteCheck() && confirmations.isCentralCheck() && SecurityHelper.hasPermission(Permission.DESBLOQUEDAR_ASISTENCIA) ));
+		
+		
+		/**
+		 * Use el mismo código de arriba, reemplace los valores para considerar los botones del suple que se comportan igual.
+		 */
+		btnSupleObraConfirm.setVisible(SecurityHelper.hasPermission(Permission.CONFIRMAR_ASISTENCIA_OBRA));
+		toogleButtonState(btnSupleObraConfirm, confirmations.isSupleObraCheck());
+		//si está confirmado, lo habilita solo si tiene permiso para confirmar asistencia central
+		if(confirmations.isSupleObraCheck()){
+			//se asegura que lo vea
+			btnSupleObraConfirm.setVisible(true);
+			btnSupleObraConfirm.setEnabled( !confirmations.isSupleCentralCheck() && SecurityHelper.hasPermission(Permission.CONFIRMAR_ASISTENCIA_CENTRAL));
+		}else{
+			btnSupleObraConfirm.setEnabled(true);
+		}
+		//deshabilita si tiene confirmación de obra y no tiene permisos de confirmar central, si tiene ambos checheados, bloqueda la interfaz o si no tiene confirmacion de obra y no tiene permiso de obra 		
+		enableSuple(!(
+				(confirmations.isSupleObraCheck() && !SecurityHelper.hasPermission(Permission.CONFIRMAR_ASISTENCIA_CENTRAL)) || 
+				(confirmations.isSupleObraCheck() && confirmations.isSupleCentralCheck()) ||
+				(!confirmations.isSupleObraCheck() && !SecurityHelper.hasPermission(Permission.CONFIRMAR_ASISTENCIA_OBRA))
+				));
+
+		btnSupleCentralConfirm.setVisible(SecurityHelper.hasPermission(Permission.CONFIRMAR_ASISTENCIA_CENTRAL));
+		toogleButtonState(btnSupleCentralConfirm, confirmations.isSupleCentralCheck());
+		btnSupleCentralConfirm.setEnabled( (confirmations.isSupleObraCheck() && !confirmations.isSupleCentralCheck()) ||
+				(confirmations.isSupleObraCheck() && confirmations.isSupleCentralCheck() && SecurityHelper.hasPermission(Permission.DESBLOQUEDAR_ASISTENCIA) ));
 	}
 
 	private void toogleButtonState(Button btn, boolean confirmations ){
