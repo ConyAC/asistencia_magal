@@ -14,6 +14,8 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.vaadin.dialogs.ConfirmDialog;
 
+import cl.magal.asistencia.entities.AdvancePaymentConfigurations;
+import cl.magal.asistencia.entities.AdvancePaymentItem;
 import cl.magal.asistencia.entities.Attendance;
 import cl.magal.asistencia.entities.Confirmations;
 import cl.magal.asistencia.entities.ConstructionSite;
@@ -42,6 +44,7 @@ import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeNotifier;
 import com.vaadin.data.fieldgroup.BeanFieldGroup;
 import com.vaadin.data.fieldgroup.DefaultFieldGroupFieldFactory;
+import com.vaadin.data.fieldgroup.FieldGroup;
 import com.vaadin.data.fieldgroup.FieldGroup.CommitEvent;
 import com.vaadin.data.fieldgroup.FieldGroup.CommitException;
 import com.vaadin.data.fieldgroup.FieldGroup.CommitHandler;
@@ -62,6 +65,7 @@ import com.vaadin.shared.ui.datefield.Resolution;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
+import com.vaadin.ui.AbstractSelect.ItemCaptionMode;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Field;
@@ -109,13 +113,17 @@ public class AttendancePanel extends Panel implements View {
 	private transient ConfigurationService configurationService;
 	@Autowired
 	private transient UserService userService;
-
+	@Autowired
+	private transient ConfigurationService confService;
+	
+	AdvancePaymentConfigurations advancepayment;
 	/** CONTAINERS **/
 	BeanItemContainer<ExtraParams> extraParamContainer = new BeanItemContainer<ExtraParams>(ExtraParams.class);
 	BeanContainer<Long,Attendance> attendanceContainer = new BeanContainer<Long,Attendance>(Attendance.class);
 	BeanItemContainer<Overtime> overtimeContainer = new BeanItemContainer<Overtime>(Overtime.class);
 	BeanContainer<Long,Salary> salaryContainer = new BeanContainer<Long,Salary>(Salary.class);
 	BeanItemContainer<AbsenceVO> absenceContainer = new BeanItemContainer<AbsenceVO>(AbsenceVO.class);
+	BeanItemContainer<ConstructionSite> constructionContainer = new BeanItemContainer<ConstructionSite>(ConstructionSite.class);
 
 	/** COMPONENTES **/
 	ProgressBar progress;
@@ -1099,16 +1107,16 @@ public class AttendancePanel extends Panel implements View {
 		}
 	};
 
+	@SuppressWarnings("serial")
 	private HorizontalLayout drawTopAttendance() {
 		return new HorizontalLayout(){
 			{
 				setWidth("100%");
-
 				addComponent(new HorizontalLayout(){
 					{
+						setSpacing(true);
 						addComponent(new FormLayout(){
 							{
-
 								attendanceDate  =  new InlineDateField("Mes");
 								attendanceDate.setResolution(Resolution.MONTH);
 								attendanceDate.setValue(new Date());
@@ -1206,6 +1214,214 @@ public class AttendancePanel extends Panel implements View {
 								}){
 									{
 										setIcon(FontAwesome.UPLOAD);
+									}
+								});
+							}
+						});
+						
+						//Suple
+						addComponent(new HorizontalLayout(){
+							{
+								addComponent(new Button("Configurar Suple", new Button.ClickListener() {
+
+									@Override
+									public void buttonClick(ClickEvent event) {
+										final Window window = new Window();
+
+										window.center();
+										window.setModal(true);
+										window.setResizable(false);
+										window.setContent(new VerticalLayout(){
+											{
+												setMargin(true);
+												VerticalLayout form = new VerticalLayout(){
+													{
+														setWidth("980px");
+														setHeight("610px");
+														setSpacing(true);
+
+														final FieldGroup fg = new FieldGroup();
+														advancepayment = confService.findAdvancePaymentConfigurationsByCS(cs);
+														if( advancepayment  == null )
+															advancepayment  = new AdvancePaymentConfigurations();
+														fg.setItemDataSource(new BeanItem<AdvancePaymentConfigurations>(advancepayment));
+														
+														final Property.ValueChangeListener listener = new Property.ValueChangeListener() {
+															
+															@Override
+															public void valueChange(ValueChangeEvent event) {
+																try {
+																	fg.commit();
+																	AdvancePaymentConfigurations bean = ((BeanItem<AdvancePaymentConfigurations>)fg.getItemDataSource()).getBean();
+																	confService.save(bean);
+																} catch (Exception e) {
+																	logger.error("Error al guardar las propiedades de suple",e);
+																	Notification.show("Error al guardar");
+																}
+															}
+														};														
+														
+														addComponent( new VerticalLayout(){
+															{			
+																setSpacing(true);																
+																addComponent(new Panel("Configurar Suple", new VerticalLayout(){
+																	{
+																		setMargin(true);
+																		addComponent(new FormLayout(){
+																			{
+																				Field permissionDiscount = fg.buildAndBind("Descuento por Permiso", "permissionDiscount");
+																				((TextField)permissionDiscount).setNullRepresentation("");
+																				permissionDiscount.addValueChangeListener(listener);
+																				
+																				Field failureDiscount = fg.buildAndBind("Descuento por Falla", "failureDiscount");
+																				((TextField)failureDiscount).setNullRepresentation("");
+																				failureDiscount.addValueChangeListener(listener);
+																				
+																				addComponent(permissionDiscount);
+																				addComponent(failureDiscount);
+																			}
+																		});
+																		
+																		
+																		final BeanItemContainer<AdvancePaymentItem> container = new BeanItemContainer<AdvancePaymentItem>(AdvancePaymentItem.class,advancepayment.getAdvancePaymentTable());
+																		
+																		HorizontalLayout hl = new HorizontalLayout(){
+																			{
+																				setSpacing(true);
+																				final TextField supleCode = new TextField("Código Suple");
+																				addComponent(new FormLayout(supleCode));
+																				Button add = new Button(null,new Button.ClickListener() {
+																					
+																					@Override
+																					public void buttonClick(ClickEvent event) {
+																						try{
+																							
+																							AdvancePaymentItem advancePaymentItem = new AdvancePaymentItem();
+																							advancePaymentItem.setSupleCode(Integer.valueOf(supleCode.getValue()));
+																							advancepayment.setConstructionSite(cs);
+																							advancepayment.addAdvancePaymentItem(advancePaymentItem);
+																							confService.save(advancepayment);
+																							
+																							container.addBean(advancePaymentItem);
+																						}catch(Exception e){
+																							Notification.show("Error al agregar el nuevo suple",Type.ERROR_MESSAGE);
+																							logger.error("Error al agregar el nuevo suple",e);
+																						}
+																					}
+																			}){
+																					{
+																						setIcon(FontAwesome.PLUS);
+																					}
+																				};
+																				addComponent(add);
+																				setComponentAlignment(add, Alignment.MIDDLE_CENTER);
+																			}
+																		};
+																		addComponent(hl);
+
+																		final Table table = new Table("Tabla Anticipo"){
+																			{
+																				setSizeFull();
+																				setPageLength(5);
+																			}
+																		};
+																		
+																		table.setContainerDataSource(container);																		
+																		table.addGeneratedColumn("eliminar", new Table.ColumnGenerator() {
+																			
+																			@Override
+																			public Object generateCell(Table source,final Object itemId, Object columnId) {
+																				return new Button(null,new Button.ClickListener() {
+																					
+																					final AdvancePaymentItem advancePaymentItem = container.getItem(itemId).getBean();
+																					@Override
+																					public void buttonClick(ClickEvent event) {
+																						ConfirmDialog.show(UI.getCurrent(), "Confirmar Acción:", "¿Está seguro de eliminar el suple seleccionado?",
+																								"Eliminar", "Cancelar", new ConfirmDialog.Listener() {
+
+																							public void onClose(ConfirmDialog dialog) {
+																								if (dialog.isConfirmed()) {
+																									try{
+																										advancepayment.removeAdvancePaymentItem(advancePaymentItem);
+																										confService.save(advancepayment);
+																										container.removeItem(itemId);
+																									}catch(Exception e){
+																										Notification.show("Error al quitar elemento",Type.ERROR_MESSAGE);
+																										logger.error("Error al eliminar un suple",e);
+																									}
+																								}
+																							}
+																						});
+																					}
+																				}){
+																					{setIcon(FontAwesome.TRASH_O);}
+																				};
+																			}
+																		});
+																		
+																		table.setVisibleColumns("supleCode","supleTotalAmount","supleNormalAmount","supleIncreaseAmount","eliminar");
+																		table.setColumnHeaders("Código Suple","Monto Suple","Normal","Aumento Anticipo","Eliminar");
+																		table.setEditable(true);
+																		
+																		addComponent(table);
+
+																		if(!SecurityHelper.hasPermission(Permission.DEFINIR_VARIABLE_GLOBAL)){
+																			setEnabled(false);
+																		}else{
+																			setEnabled(true);
+																		}
+																	}
+																}));															
+															}
+														});
+													}
+												};
+
+												addComponent(form);
+												setExpandRatio(form, 1.0F);
+
+												HorizontalLayout footer = new HorizontalLayout();
+												footer.setHeight("60px");
+												footer.setSpacing(true);
+
+												Button btnGuardar = new Button("Aceptar");
+												btnGuardar.addClickListener(new Button.ClickListener() {
+
+													@Override
+													public void buttonClick(ClickEvent event) {
+														window.close();
+
+													}
+												});
+												btnGuardar.addStyleName("default");
+												footer.addComponent(btnGuardar);
+												footer.setComponentAlignment(btnGuardar, Alignment.MIDDLE_RIGHT);
+
+												Button btnCancelar = new Button("Cancelar");
+												btnCancelar.addClickListener(new Button.ClickListener() {
+
+													@Override
+													public void buttonClick(ClickEvent event) {
+														window.close();
+
+													}
+												});
+												btnCancelar.addStyleName("link");
+												footer.addComponent(btnCancelar);
+												footer.setComponentAlignment(btnCancelar, Alignment.MIDDLE_RIGHT);
+
+												addComponent(new Label("<hr />", ContentMode.HTML));
+												addComponent(footer);
+												setComponentAlignment(footer, Alignment.MIDDLE_RIGHT);
+
+											}
+										});
+
+										UI.getCurrent().addWindow(window);
+									}
+								}){
+									{
+										setIcon(FontAwesome.DOLLAR);
 									}
 								});
 							}

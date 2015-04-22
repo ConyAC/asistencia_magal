@@ -227,7 +227,7 @@ WHERE NOT EXISTS (select 1 FROM contract WHERE laborer_constructionsiteId = LC.l
 MERGE INTO wage_configurations(wage_configurationsId,collation,minimum_wage,mobilization) values (1,31,210000,220);
 
 -- anticipos
-MERGE INTO advance_payment_configurations values (1,15000,10000);
+MERGE INTO advance_payment_configurations values (1,15000,10000,2);
 
 MERGE into advance_payment_item (SUPLE_CODE,SUPLE_INCREASE_AMOUNT,SUPLE_NORMAL_AMOUNT,ADVANCE_PAYMENT_CONFIGURATIONSID) 
 KEY(SUPLE_CODE,ADVANCE_PAYMENT_CONFIGURATIONSID) values (1,0,105000,1);

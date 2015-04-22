@@ -428,7 +428,8 @@ CREATE TABLE IF NOT EXISTS "advance_payment_configurations"
 (
    advance_payment_configurationsId bigint PRIMARY KEY NOT NULL,
    permission_discount double,
-   failure_discount double
+   failure_discount double,
+   constructionsiteId bigint
 )
 ;
 CREATE UNIQUE INDEX IF NOT EXISTS PK_APC ON "advance_payment_configurations"(advance_payment_configurationsId)
@@ -783,7 +784,6 @@ CREATE TABLE IF NOT EXISTS confirmations
   constructionsiteId bigint(20) NOT NULL
 ) ;
 
-
 CREATE TABLE IF NOT EXISTS license (
   licenseId bigint(20) IDENTITY PRIMARY KEY NOT NULL,
   confirmed tinyint(1) DEFAULT '0',
@@ -808,7 +808,7 @@ CREATE TABLE IF NOT EXISTS salary (
   salary int(11) DEFAULT NULL,
   suple int(11) DEFAULT NULL,
   laborer_constructionsiteId bigint(20) NOT NULL
- );
+);
 
 CREATE TABLE IF NOT EXISTS extra_params
 (

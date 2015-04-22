@@ -50,6 +50,9 @@ public class AdvancePaymentConfigurations implements Serializable {
 	
 	transient Map<Integer, AdvancePaymentItem> mapTable;
 	
+	@JoinColumn(name="constructionsiteId")
+    ConstructionSite constructionSite;
+
 	public Map<Integer, AdvancePaymentItem> getMapTable() {
 		return mapTable;
 	}
@@ -89,6 +92,14 @@ public class AdvancePaymentConfigurations implements Serializable {
 
 	public void setAdvancePaymentTable(List<AdvancePaymentItem> advancePaymentTable) {
 		this.advancePaymentTable = advancePaymentTable;
+	}
+
+	public ConstructionSite getConstructionSite() {
+		return constructionSite;
+	}
+
+	public void setConstructionSite(ConstructionSite constructionSite) {
+		this.constructionSite = constructionSite;
 	}
 
 	@Override
