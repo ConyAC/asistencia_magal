@@ -29,6 +29,7 @@ import cl.magal.asistencia.services.ConfigurationService;
 import cl.magal.asistencia.services.ConstructionSiteService;
 import cl.magal.asistencia.services.LaborerService;
 import cl.magal.asistencia.services.UserService;
+import cl.magal.asistencia.ui.ListenerFieldFactory;
 import cl.magal.asistencia.ui.MagalUI;
 import cl.magal.asistencia.ui.vo.AbsenceVO;
 import cl.magal.asistencia.util.Constants;
@@ -65,7 +66,6 @@ import com.vaadin.shared.ui.datefield.Resolution;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
-import com.vaadin.ui.AbstractSelect.ItemCaptionMode;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Field;
@@ -587,11 +587,14 @@ public class AttendancePanel extends Panel implements View {
 						//TODO recuperar posibles codigos de suple
 						final ComboBox cb = new ComboBox();
 						cb.setImmediate(true);
-						cb.addItem(1);
-						cb.addItem(2);
-						cb.addItem(3);
-						cb.addItem(4);
-						cb.addItem(5);
+//						cb.addItem(1);
+//						cb.addItem(2);
+//						cb.addItem(3);
+//						cb.addItem(4);
+//						cb.addItem(5);
+						for(AdvancePaymentItem item : advancepayment.getAdvancePaymentTable() ){
+							cb.addItem(item.getSupleCode());
+						}
 						cb.setPropertyDataSource(beanItem.getItemProperty("laborerConstructionSite.supleCode"));
 						
 						hl.addComponent(cb);
@@ -1241,9 +1244,12 @@ public class AttendancePanel extends Panel implements View {
 														setSpacing(true);
 
 														final FieldGroup fg = new FieldGroup();
-														advancepayment = confService.findAdvancePaymentConfigurationsByCS(cs);
-														if( advancepayment  == null )
+														
+														if( advancepayment  == null ){
+															advancepayment = confService.findAdvancePaymentConfigurationsByCS(cs);
 															advancepayment  = new AdvancePaymentConfigurations();
+														}
+														
 														fg.setItemDataSource(new BeanItem<AdvancePaymentConfigurations>(advancepayment));
 														
 														final Property.ValueChangeListener listener = new Property.ValueChangeListener() {
@@ -1326,7 +1332,9 @@ public class AttendancePanel extends Panel implements View {
 																			}
 																		};
 																		
-																		table.setContainerDataSource(container);																		
+																		table.setContainerDataSource(container);		
+																		
+																		table.setTableFieldFactory(new ListenerFieldFactory(listener));
 																		table.addGeneratedColumn("eliminar", new Table.ColumnGenerator() {
 																			
 																			@Override
@@ -1641,6 +1649,10 @@ public class AttendancePanel extends Panel implements View {
 
 		clearGrids();
 		try{
+			
+			advancepayment = confService.findAdvancePaymentConfigurationsByCS(cs);
+			if(advancepayment ==  null )
+				advancepayment  = new AdvancePaymentConfigurations();
 
 			List<Overtime> overtime = service.getOvertimeByConstruction(cs,dt);
 			overtimeContainer.addAll(overtime);
@@ -1662,6 +1674,7 @@ public class AttendancePanel extends Panel implements View {
 			//limpia
 			extraParamContainer.addAll(params);
 			extraParamContainer.sort(new String[]{"laborerConstructionsite.activeContract.jobCode"},new boolean[]{ true });
+
 		}catch(Exception e){
 			logger.error("Error al calcular los sueldos",e);
 			String mensaje = "Error al calcular los sueldos.";

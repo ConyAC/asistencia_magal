@@ -426,7 +426,7 @@ CREATE UNIQUE INDEX IF NOT EXISTS UK_INDX_CS ON construction_site_team(teams_tea
 
 CREATE TABLE IF NOT EXISTS advance_payment_configurations
 (
-   advance_payment_configurationsId bigint PRIMARY KEY NOT NULL,
+   advance_payment_configurationsId bigint IDENTITY PRIMARY KEY NOT NULL,
    permission_discount double,
    failure_discount double,
    constructionsiteId bigint
@@ -452,7 +452,7 @@ ADD CONSTRAINT IF NOT EXISTS ADVANCEPAYMENTITEMADVANCE_PAYMENT_CONFIGURATIONSID
 FOREIGN KEY (advance_payment_configurationsId)
 REFERENCES advance_payment_configurations(advance_payment_configurationsId)
 ;
-CREATE UNIQUE INDEX IF NOT EXISTS UK_INDX_SUPLE ON advance_payment_item(suple_code)
+CREATE UNIQUE INDEX IF NOT EXISTS UK_INDX_SUPLE ON advance_payment_item(suple_code,advance_payment_configurationsId)
 ;
 CREATE INDEX IF NOT EXISTS API_INDX_ID ON advance_payment_item(advance_payment_configurationsId)
 ;
