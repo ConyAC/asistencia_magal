@@ -291,7 +291,8 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 					gl.addComponent(new Label("Fecha Ingreso : "));
 					gl.addComponent(new Label(getItem().getItemProperty("activeContract.startDate")));
 				}
-				gl.addComponent(new Label("Premio : "));gl.addComponent(new Label(getItem().getItemProperty("reward").getValue()+""));						
+				gl.addComponent(new Label("Premio : "));gl.addComponent(new Label(getItem().getItemProperty("reward").getValue()+""));
+				gl.addComponent(new Label("Cargas : "));gl.addComponent(new Label(getItem().getItemProperty("dependents").getValue()+""));
 				setSpacing(true);
 				//				POR AHORA OCULTAR ESTE BOTON HASTA QUE SE DEFINA BIEN QUE HARA Y SI VA
 				//				Button btnPrint = new Button(null,new Button.ClickListener() {

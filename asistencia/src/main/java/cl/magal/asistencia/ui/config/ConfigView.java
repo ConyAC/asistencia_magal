@@ -17,8 +17,6 @@ import org.springframework.stereotype.Component;
 import org.vaadin.dialogs.ConfirmDialog;
 
 import ru.xpoft.vaadin.VaadinView;
-import cl.magal.asistencia.entities.AdvancePaymentConfigurations;
-import cl.magal.asistencia.entities.AdvancePaymentItem;
 import cl.magal.asistencia.entities.AfpAndInsuranceConfigurations;
 import cl.magal.asistencia.entities.AfpItem;
 import cl.magal.asistencia.entities.ConstructionSite;
@@ -88,7 +86,6 @@ public class ConfigView extends VerticalLayout implements View {
 	private transient ConfigurationService confService;
 	//atributos globales
 	WageConfigurations wageconfiguration;
-	AdvancePaymentConfigurations advancepayment;
 	AfpAndInsuranceConfigurations afpAndInsurance;
 	
 	public ConfigView(){}
@@ -105,8 +102,6 @@ public class ConfigView extends VerticalLayout implements View {
 		ts.addTab(drawMensuales(),"Fechas Mensuales",FontAwesome.REBEL);
 
 		ts.addTab(drawGlobales(),"Bonos y Sueldos",FontAwesome.GLOBE);
-
-		ts.addTab(drawAnticipos(),"Tabla de Anticipos",FontAwesome.BEER);
 
 		ts.addTab(drawAFP(),"Tabla de Afp y Seguros",FontAwesome.CROSSHAIRS);
 		
@@ -243,149 +238,6 @@ public class ConfigView extends VerticalLayout implements View {
 				}else{
 					setEnabled(true);
 				}
-			}
-		};
-	}
-
-	private com.vaadin.ui.Component drawAnticipos() {
-		
-		final FieldGroup fg = new FieldGroup();
-		advancepayment = confService.findAdvancePaymentConfigurations();
-		if( advancepayment  == null )
-			advancepayment  = new AdvancePaymentConfigurations();
-		fg.setItemDataSource(new BeanItem<AdvancePaymentConfigurations>(advancepayment));
-		
-		final Property.ValueChangeListener listener = new Property.ValueChangeListener() {
-			
-			@Override
-			public void valueChange(ValueChangeEvent event) {
-				try {
-					fg.commit();
-					AdvancePaymentConfigurations bean = ((BeanItem<AdvancePaymentConfigurations>)fg.getItemDataSource()).getBean();
-					confService.save(bean);
-				} catch (Exception e) {
-					logger.error("Error al guardar las propiedades de suple",e);
-					Notification.show("Error al guardar");
-				}
-			}
-		};
-		
-		
-		return new VerticalLayout(){
-			{
-				
-				setMargin(true);
-				setSpacing(true);
-				
-				final ComboBox nombre = new ComboBox("Obra",constructionContainer);
-				nombre.setItemCaptionMode(ItemCaptionMode.PROPERTY);
-				nombre.setItemCaptionPropertyId("name");
-				addComponent(nombre);
-				
-				addComponent(new Panel(new VerticalLayout(){
-					{
-						setMargin(true);
-						addComponent(new FormLayout(){
-							{
-								Field permissionDiscount = fg.buildAndBind("Descuento por Permiso", "permissionDiscount");
-								((TextField)permissionDiscount).setNullRepresentation("");
-								permissionDiscount.addValueChangeListener(listener);
-								
-								Field failureDiscount = fg.buildAndBind("Descuento por Falla", "failureDiscount");
-								((TextField)failureDiscount).setNullRepresentation("");
-								failureDiscount.addValueChangeListener(listener);
-								
-								addComponent(permissionDiscount);
-								addComponent(failureDiscount);
-							}
-						});
-						
-						
-						final BeanItemContainer<AdvancePaymentItem> container = new BeanItemContainer<AdvancePaymentItem>(AdvancePaymentItem.class,advancepayment.getAdvancePaymentTable());
-						
-						HorizontalLayout hl = new HorizontalLayout(){
-							{
-								setSpacing(true);
-								final TextField supleCode = new TextField("Código Suple");
-								addComponent(new FormLayout(supleCode));
-								Button add = new Button(null,new Button.ClickListener() {
-									
-									@Override
-									public void buttonClick(ClickEvent event) {
-										try{
-											
-											AdvancePaymentItem advancePaymentItem = new AdvancePaymentItem();
-											advancePaymentItem.setSupleCode(Integer.valueOf(supleCode.getValue()));
-											//TODO hacer dialogo para crear y validar nuevo item
-											advancepayment.addAdvancePaymentItem(advancePaymentItem);
-											confService.save(advancepayment);
-											
-											container.addBean(advancePaymentItem);
-										}catch(Exception e){
-											Notification.show("Error al agregar el nuevo suple",Type.ERROR_MESSAGE);
-											logger.error("Error al agregar el nuevo suple",e);
-										}
-									}
-							}){
-									{
-										setIcon(FontAwesome.PLUS);
-									}
-								};
-								addComponent(add);
-								setComponentAlignment(add, Alignment.MIDDLE_CENTER);
-							}
-						};
-						addComponent(hl);
-
-						final Table table = new Table("Tabla Anticipo"){
-							{
-								setSizeFull();
-								setPageLength(5);
-							}
-
-						};
-						
-						table.setContainerDataSource(container);
-						
-						table.addGeneratedColumn("eliminar", new Table.ColumnGenerator() {
-							
-							@Override
-							public Object generateCell(Table source,final Object itemId, Object columnId) {
-								return new Button(null,new Button.ClickListener() {
-									final AdvancePaymentItem advancePaymentItem = container.getItem(itemId).getBean();
-									@Override
-									public void buttonClick(ClickEvent event) {
-										
-										try{
-											advancepayment.removeAdvancePaymentItem(advancePaymentItem);
-											confService.save(advancepayment);
-											container.removeItem(itemId);
-										}catch(Exception e){
-											Notification.show("Error al quitar elemento",Type.ERROR_MESSAGE);
-											logger.error("Error al quitar una mobilización 2",e);
-										}
-									}
-								}){
-									{setIcon(FontAwesome.TRASH_O);}
-								};
-							}
-						});
-						
-						table.setVisibleColumns("supleCode","supleTotalAmount","supleNormalAmount","supleIncreaseAmount","eliminar");
-						table.setColumnHeaders("Código Suple","Monto Suple","Normal","Aumento Anticipo","Eliminar");
-						table.setEditable(true);
-						
-						addComponent(table);
-
-						if(!SecurityHelper.hasPermission(Permission.DEFINIR_VARIABLE_GLOBAL)){
-							setEnabled(false);
-						}else{
-							setEnabled(true);
-						}
-					}
-				}));
-				
-				
 			}
 		};
 	}

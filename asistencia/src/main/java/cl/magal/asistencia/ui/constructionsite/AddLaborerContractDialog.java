@@ -428,6 +428,8 @@ public class AddLaborerContractDialog extends AbstractWindowEditor implements Ne
 			return "Calzado";
 		else if(propertyId.equals("bankAccount"))
 			return "Cta. Banco";
+		else if(propertyId.equals("dependes"))
+			return "Cargas";
 		else
 			return propertyId.toString();
 	}

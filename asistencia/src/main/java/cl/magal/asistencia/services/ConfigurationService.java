@@ -1,5 +1,6 @@
 package cl.magal.asistencia.services;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -123,7 +124,20 @@ public class ConfigurationService {
 	}
 
 	public AdvancePaymentConfigurations getSupleTableByCs(ConstructionSite cs) {
-		List<AdvancePaymentConfigurations> config = (List<AdvancePaymentConfigurations>) advancePaymentRepo.findAll();
+		List<AdvancePaymentConfigurations> config = (List<AdvancePaymentConfigurations>) advancePaymentRepo.findAdvancePaymentConfigurationsByCS(cs);
+		if(config.isEmpty()){
+			AdvancePaymentConfigurations apc = new AdvancePaymentConfigurations();
+			apc.setFailureDiscount(0d);
+			apc.setPermissionDiscount(0d);
+			AdvancePaymentItem api = new AdvancePaymentItem();
+			api.setSupleCode(1);
+			api.setSupleNormalAmount(105000d);
+			Map<Integer, AdvancePaymentItem> map = new HashMap<Integer, AdvancePaymentItem>();
+			map.put(1, api);
+			apc.setAdvancePaymentTable(Arrays.asList(api));
+			apc.setMapTable(map);
+			return apc;
+		}
 		AdvancePaymentConfigurations table = config.get(0);
 
 		Map<Integer,AdvancePaymentItem> map = new HashMap<Integer,AdvancePaymentItem>();
@@ -138,6 +152,13 @@ public class ConfigurationService {
 
 	public void delete(FamilyAllowanceConfigurations family) {
 		familyAllowanceRepo.delete(family);
+	}
+	
+	public AdvancePaymentConfigurations findAdvancePaymentConfigurationsByCS(ConstructionSite cs) {
+		List<AdvancePaymentConfigurations> configurations = (List<AdvancePaymentConfigurations>)advancePaymentRepo.findAdvancePaymentConfigurationsByCS(cs);
+		if(configurations.isEmpty())
+			return null;
+		return configurations.get(0);
 	}
 
 }

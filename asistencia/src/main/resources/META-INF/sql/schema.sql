@@ -148,7 +148,7 @@ CREATE TABLE IF NOT EXISTS user_constructionsite
 (
    constructionsiteId bigint NOT NULL,
    userId bigint NOT NULL,
-   CONSTRAINT pf_user_constructionsite PRIMARY KEY (constructionsiteId,userId)
+   CONSTRAINT pk_user_constructionsite PRIMARY KEY (constructionsiteId,userId)
 )
 ;
 ALTER TABLE user_constructionsite
@@ -400,25 +400,25 @@ CREATE TABLE IF NOT EXISTS laborer_constructionsite_team
 /*
 -- CONSTRUCTION SITE TEAM
 
-CREATE TABLE IF NOT EXISTS "CONSTRUCTION_SITE_TEAM"
+CREATE TABLE IF NOT EXISTS construction_site_team
 (
-   CST_CSID bigint NOT NULL,
-   TEAMS_TEAMID bigint NOT NULL
+   cst_csId bigint NOT NULL,
+   teams_teamId bigint NOT NULL
 )
 ;
-ALTER TABLE "CONSTRUCTION_SITE_TEAM"
+ALTER TABLE construction_site_team
 ADD CONSTRAINT IF NOT EXISTS FK_CST_CS
-FOREIGN KEY (CST_CSID)
-REFERENCES construction_site(CONSTRUCTION_SITEID)
+FOREIGN KEY (cst_csId)
+REFERENCES construction_site(constructionsiteId)
 ;
-ALTER TABLE "CONSTRUCTION_SITE_TEAM"
+ALTER TABLE construction_site_team
 ADD CONSTRAINT IF NOT EXISTS FK_CST_TEAM
-FOREIGN KEY (TEAMS_TEAMID)
-REFERENCES team(TEAMID)
+FOREIGN KEY (teams_teamId)
+REFERENCES team(teamId)
 ;
-CREATE INDEX IF NOT EXISTS  FK_INDX_CS_TEAM ON "CONSTRUCTION_SITE_TEAM"(CST_CSID)
+CREATE INDEX IF NOT EXISTS  FK_INDX_CS_TEAM ON construction_site_team(cst_csId)
 ;
-CREATE UNIQUE INDEX IF NOT EXISTS UK_INDX_CS ON "CONSTRUCTION_SITE_TEAM"(TEAMS_TEAMID)
+CREATE UNIQUE INDEX IF NOT EXISTS UK_INDX_CS ON construction_site_team(teams_teamId)
 ;
 */
 
@@ -426,9 +426,10 @@ CREATE UNIQUE INDEX IF NOT EXISTS UK_INDX_CS ON "CONSTRUCTION_SITE_TEAM"(TEAMS_T
 
 CREATE TABLE IF NOT EXISTS advance_payment_configurations
 (
-   advance_payment_configurationsId bigint PRIMARY KEY NOT NULL,
+   advance_payment_configurationsId bigint IDENTITY PRIMARY KEY NOT NULL,
    permission_discount double,
-   failure_discount double
+   failure_discount double,
+   constructionsiteId bigint
 )
 ;
 CREATE UNIQUE INDEX IF NOT EXISTS PK_APC ON advance_payment_configurations(advance_payment_configurationsId)
@@ -451,7 +452,7 @@ ADD CONSTRAINT IF NOT EXISTS ADVANCEPAYMENTITEMADVANCE_PAYMENT_CONFIGURATIONSID
 FOREIGN KEY (advance_payment_configurationsId)
 REFERENCES advance_payment_configurations(advance_payment_configurationsId)
 ;
-CREATE UNIQUE INDEX IF NOT EXISTS UK_INDX_SUPLE ON advance_payment_item(suple_code)
+CREATE UNIQUE INDEX IF NOT EXISTS UK_INDX_SUPLE ON advance_payment_item(suple_code,advance_payment_configurationsId)
 ;
 CREATE INDEX IF NOT EXISTS API_INDX_ID ON advance_payment_item(advance_payment_configurationsId)
 ;
@@ -779,6 +780,8 @@ CREATE TABLE IF NOT EXISTS confirmations
   confirmationsId bigint(20) IDENTITY PRIMARY KEY NOT NULL,
   central_check tinyint(1) DEFAULT '0',
   constructionsite_check tinyint(1) DEFAULT '0',
+  suple_central_check tinyint(1) DEFAULT '0',
+  suple_obra_check tinyint(1) DEFAULT '0',
   date date NOT NULL,
   constructionsiteId bigint(20) NOT NULL
   ) ;

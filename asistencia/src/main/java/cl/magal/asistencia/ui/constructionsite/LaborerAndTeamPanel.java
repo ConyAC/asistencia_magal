@@ -2,7 +2,6 @@ package cl.magal.asistencia.ui.constructionsite;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
@@ -15,8 +14,6 @@ import javax.annotation.PostConstruct;
 import javax.validation.ConstraintViolationException;
 
 import org.apache.velocity.app.VelocityEngine;
-import org.joda.time.DateTime;
-import org.joda.time.Days;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -229,6 +226,7 @@ public class LaborerAndTeamPanel extends Panel implements View {
 				}
 
 				LaborerConstructionsite laborer = new LaborerConstructionsite();
+				laborer.setActive(true);
 				laborer.setConstructionsite(item.getBean());
 
 				BeanItem<LaborerConstructionsite> laborerItem = new BeanItem<LaborerConstructionsite>(laborer);

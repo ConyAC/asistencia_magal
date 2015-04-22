@@ -57,6 +57,14 @@ public class Confirmations implements Serializable {
     @Column(name="central_check")
 	boolean centralCheck = false;
     
+    /**
+     * Permite identificar, según perfil, el bloqueo del suple.
+     */
+    @Column(name="suple_obra_check")
+	boolean supleObraCheck = false;
+    @Column(name="suple_central_check")
+	boolean supleCentralCheck = false;
+    
 	public Long getId() {
 		return id;
 	}
@@ -87,6 +95,16 @@ public class Confirmations implements Serializable {
 	public void setCentralCheck(boolean centralCheck) {
 		this.centralCheck = centralCheck;
 	}
-	
-	
+	public boolean isSupleObraCheck() {
+		return supleObraCheck;
+	}
+	public void setSupleObraCheck(boolean supleObraCheck) {
+		this.supleObraCheck = supleObraCheck;
+	}
+	public boolean isSupleCentralCheck() {
+		return supleCentralCheck;
+	}
+	public void setSupleCentralCheck(boolean supleCentralCheck) {
+		this.supleCentralCheck = supleCentralCheck;
+	}	
 }
