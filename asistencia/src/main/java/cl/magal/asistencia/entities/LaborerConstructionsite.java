@@ -143,6 +143,7 @@ public class LaborerConstructionsite implements Serializable {
     @PrePersist
     public void prePersist(){
     	defineRequired();
+    	this.active = true;
     }
     
     public void defineRequired(){
