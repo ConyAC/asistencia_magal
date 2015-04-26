@@ -130,7 +130,7 @@ public class AttendancePanel extends Panel implements View {
 	Button btnExportSoftland,btnConstructionSiteConfirm,btnCentralConfirm,btnGenerateSalary,btnSupleObraConfirm,btnSupleCentralConfirm;
 	Table confirmTable;
 	VerticalLayout root;
-	Table salaryTable;
+	Table supleTable,salaryTable;
 
 	/** ATRIBUTOS **/
 	Confirmations confirmations;
@@ -314,14 +314,35 @@ public class AttendancePanel extends Panel implements View {
 	}
 
 	private void enableAttendance(boolean state) {
-		attendanceGrid.setEnabled(state);
-		overtimeGrid.setEnabled(state);
-		confirmTable.setEnabled(state);
-//		btnGenerateSalary.setEnabled(state);
+//		attendanceGrid.setEnabled(state);
+//		overtimeGrid.setEnabled(state);
+//		confirmTable.setEnabled(state);
+		
+//		attendanceGrid.setReadOnly(!state);
+//		overtimeGrid.setReadOnly(!state);
+//		confirmTable.setReadOnly(!state);
+//		salaryTable.setReadOnly(!state);
+		
+		//fuerza que ningun item esté siendo editado
+		if(attendanceGrid.isEditorActive()){ 
+			attendanceGrid.cancelEditor();
+		}
+		attendanceGrid.setEditorEnabled(state);
+		
+		//fuerza que ningun item esté siendo editado
+		if(overtimeGrid.isEditorActive()) {
+			overtimeGrid.cancelEditor();
+		}
+		overtimeGrid.setEditorEnabled(state);
+		
+		confirmTable.setEditable(state);
+		salaryTable.setEditable(state);
+		
 	}
 	
 	private void enableSuple(boolean state) {
-		salaryTable.setEnabled(state);
+//		supleTable.setReadOnly(!state);
+		supleTable.setEditable(state);
 	}
 
 //	private Grid drawExtraParamsGrid() {
@@ -492,9 +513,9 @@ public class AttendancePanel extends Panel implements View {
 			{
 				setSpacing(true);
 
-				salaryTable = new Table();
-				salaryTable.setWidth("100%");
-				salaryTable.setContainerDataSource(salaryContainer);
+				supleTable = new Table();
+				supleTable.setWidth("100%");
+				supleTable.setContainerDataSource(salaryContainer);
 				
 				HorizontalLayout hl = new HorizontalLayout(){
 					{
@@ -570,7 +591,7 @@ public class AttendancePanel extends Panel implements View {
 				addComponent(hl);
 				setComponentAlignment(hl, Alignment.TOP_RIGHT);
 				
-				salaryTable.addGeneratedColumn("laborerConstructionSite.supleCode", new Table.ColumnGenerator() {
+				supleTable.addGeneratedColumn("laborerConstructionSite.supleCode", new Table.ColumnGenerator() {
 					
 					@Override
 					public Object generateCell(Table source, Object itemId, Object columnId) {
@@ -610,6 +631,7 @@ public class AttendancePanel extends Panel implements View {
 						}){
 							{
 								setIcon(FontAwesome.ARROW_CIRCLE_O_RIGHT);
+								setEnabled(supleTable.isEditable());
 							}
 						});
 						
@@ -617,10 +639,10 @@ public class AttendancePanel extends Panel implements View {
 					}
 				});
 
-				salaryTable.setVisibleColumns("laborerConstructionSite.activeContract.jobCode","laborerConstructionSite.supleCode","suple");
-				salaryTable.setColumnHeaders("Oficio","Código suple","Suple");
-				salaryTable.setEditable(true);
-				salaryTable.setTableFieldFactory(new TableFieldFactory() {
+				supleTable.setVisibleColumns("laborerConstructionSite.activeContract.jobCode","laborerConstructionSite.supleCode","suple");
+				supleTable.setColumnHeaders("Oficio","Código suple","Suple");
+				supleTable.setEditable(true);
+				supleTable.setTableFieldFactory(new TableFieldFactory() {
 
 					@Override
 					public Field<?> createField(Container container, final Object itemId,Object propertyId, com.vaadin.ui.Component uiContext) {
@@ -657,8 +679,8 @@ public class AttendancePanel extends Panel implements View {
 				});
 
 
-				addComponent(salaryTable);
-				setExpandRatio(salaryTable, 1.0f);
+				addComponent(supleTable);
+				setExpandRatio(supleTable, 1.0f);
 			}
 		};
 		vl.setSizeFull();
@@ -770,7 +792,7 @@ public class AttendancePanel extends Panel implements View {
 
 				addComponent(hl);
 				setComponentAlignment(hl, Alignment.TOP_RIGHT);
-				final Table salaryTable = new Table();
+				salaryTable = new Table();
 //				salaryTable.setWidth("100%");
 				salaryTable.setSizeFull();
 				salaryTable.setContainerDataSource(salaryContainer);
