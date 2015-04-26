@@ -19,6 +19,8 @@ import cl.magal.asistencia.entities.Laborer;
 
 import com.vaadin.data.Validator.InvalidValueException;
 import com.vaadin.data.fieldgroup.FieldGroup.CommitException;
+import com.vaadin.data.util.BeanItem;
+import com.vaadin.data.util.MethodProperty;
 import com.vaadin.ui.Field;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Notification.Type;
@@ -139,6 +141,20 @@ public class Utils {
 		if(number == null )
 			return "0";
 		return getDecimalFormatSinDecimal().format(number);
+	}
+
+	public static void notifyPropertyValueChanged(BeanItem<?> item,String... props) {
+		if(props == null )
+			throw new RuntimeException("La lista de propiedades no puede ser nula");
+		if(item == null )
+			throw new RuntimeException("El item no puede ser nulo");
+		for(String propItem : props) {
+			MethodProperty<?> statusProperty = (MethodProperty<?>)item.getItemProperty(propItem);
+			if( statusProperty == null )
+				continue;
+			statusProperty.fireValueChange();
+		}
+		
 	}
 }
 
