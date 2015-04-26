@@ -16,6 +16,7 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.validation.constraints.NotNull;
 
+@Deprecated
 @Entity
 @Table(name="extra_params")
 public class ExtraParams implements Serializable {

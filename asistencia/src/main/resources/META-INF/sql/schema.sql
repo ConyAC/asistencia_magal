@@ -811,6 +811,10 @@ CREATE TABLE IF NOT EXISTS salary (
   salary int(11) DEFAULT NULL,
   suple int(11) DEFAULT NULL,
   calculated_suple BOOLEAN DEFAULT true,
+  mov2_bond integer,
+  desc_hours integer,
+  overtime_hours integer,
+  special_bond integer,
   laborer_constructionsiteId bigint(20) NOT NULL
 );
 

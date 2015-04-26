@@ -26,7 +26,6 @@ import cl.magal.asistencia.entities.AdvancePaymentConfigurations;
 import cl.magal.asistencia.entities.Attendance;
 import cl.magal.asistencia.entities.ConstructionSite;
 import cl.magal.asistencia.entities.DateConfigurations;
-import cl.magal.asistencia.entities.ExtraParams;
 import cl.magal.asistencia.entities.FamilyAllowanceConfigurations;
 import cl.magal.asistencia.entities.Laborer;
 import cl.magal.asistencia.entities.Overtime;
@@ -470,7 +469,6 @@ public class ConstructionSiteServiceTest {
 		Map<Integer,Attendance> attendanceJune = csService.getAttendanceMapByConstructionAndMonth(cs, monthDate.minusMonths(1));
 		Map<Integer,Overtime> overtimeJuly = csService.getOvertimeMapByConstructionAndMonth(cs, monthDate);
 		//busca la asistencia del mes anterior 
-		Map<Integer,ExtraParams> extraParams = csService.getExtraParamsMapByConstructionAndMonth(cs,monthDate);
 		//se obtiene su tabla de suple
 		AdvancePaymentConfigurations supleTable = configurationService.getSupleTableByCs(cs);
 //		Double suple = csService.calculateSuple(supleCode,supleTable,closingSupleDate.toDate(),attendanceJuly.get(lcCode));
@@ -509,7 +507,6 @@ public class ConstructionSiteServiceTest {
 		Map<Integer,Attendance> attendanceJune = csService.getAttendanceMapByConstructionAndMonth(cs, monthDate.minusMonths(1));
 		Map<Integer,Overtime> overtimeJuly = csService.getOvertimeMapByConstructionAndMonth(cs, monthDate);
 		//busca la asistencia del mes anterior 
-		Map<Integer,ExtraParams> extraParams = csService.getExtraParamsMapByConstructionAndMonth(cs,monthDate);
 		//se obtiene su tabla de suple
 		AdvancePaymentConfigurations supleTable = configurationService.getSupleTableByCs(cs);
 //		Double suple = csService.calculateSuple(supleCode,supleTable,closingSupleDate.toDate(),attendanceJuly.get(lcCode));

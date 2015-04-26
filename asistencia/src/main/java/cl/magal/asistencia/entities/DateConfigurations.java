@@ -49,13 +49,13 @@ public class DateConfigurations implements Serializable {
 	@Temporal(TemporalType.DATE)
 	Date finishDeal;
 	
-	@Digits(fraction = 2, integer = 6,message="debe ser un número de máximo 2 decimales")
-	@Column(name ="benzine")
-	Double benzine = 0D;
-	
-	@Digits(fraction = 2, integer = 6,message="debe ser un número sin decimales")
-	@Column(name ="oil")
-	Double oil = 0D;
+//	@Digits(fraction = 2, integer = 6,message="debe ser un número de máximo 2 decimales")
+//	@Column(name ="benzine")
+//	Double benzine = 0D;
+//	
+//	@Digits(fraction = 2, integer = 6,message="debe ser un número sin decimales")
+//	@Column(name ="oil")
+//	Double oil = 0D;
 	
 	@Digits(fraction = 2, integer = 6,message="debe ser un número de máximo 2 decimales")
 	@Column(name ="uf")
@@ -109,21 +109,21 @@ public class DateConfigurations implements Serializable {
 		this.date = date;
 	}
 	
-	public Double getBenzine() {
-		return benzine;
-	}
+//	public Double getBenzine() {
+//		return benzine;
+//	}
+//
+//	public void setBenzine(Double benzine) {
+//		this.benzine = benzine;
+//	}
 
-	public void setBenzine(Double benzine) {
-		this.benzine = benzine;
-	}
-
-	public Double getOil() {
-		return oil;
-	}
-
-	public void setOil(Double oil) {
-		this.oil = oil;
-	}
+//	public Double getOil() {
+//		return oil;
+//	}
+//
+//	public void setOil(Double oil) {
+//		this.oil = oil;
+//	}
 
 	public Double getUf() {
 		return uf;

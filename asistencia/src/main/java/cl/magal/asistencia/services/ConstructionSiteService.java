@@ -495,6 +495,7 @@ public class ConstructionSiteService {
 		}
 	}
 	/**
+	 * @deprecated ya no se usan los parametros extras
 	 * permite guardar un objeto de parametros extras
 	 * @param extraParams
 	 */
@@ -503,7 +504,7 @@ public class ConstructionSiteService {
 	}
 	
 	/**
-	 * 
+	 * @deprecated
 	 * @param cs
 	 * @param dt
 	 * @return
@@ -527,6 +528,12 @@ public class ConstructionSiteService {
 	}
 	
 
+	/**
+	 * @deprecated
+	 * @param cs
+	 * @param date
+	 * @return
+	 */
 	public Map<Integer, ExtraParams> getExtraParamsMapByConstructionAndMonth(ConstructionSite cs, DateTime date) {
 		//obtiene la lista de trabajadores de la obra
 		List<LaborerConstructionsite> lcs =  labcsRepo.findByConstructionsiteAndIsActive(cs);
@@ -602,7 +609,7 @@ public class ConstructionSiteService {
 		//busca las sobre horas
 		Map<Integer,Overtime> overtimes = getOvertimeMapByConstructionAndMonth(cs, date);
 		//busca los valores extra de cada trabajador
-		Map<Integer,ExtraParams> extraParams = getExtraParamsMapByConstructionAndMonth(cs,date);
+//		Map<Integer,ExtraParams> extraParams = getExtraParamsMapByConstructionAndMonth(cs,date);
 
 		//crea el objeto que calculará los sueldos 
 		SalaryCalculator sc =  new SalaryCalculator(assistanceClose,wageConfiguration, dateConfiguration, famillyTable, taxTable);
@@ -618,8 +625,9 @@ public class ConstructionSiteService {
 			//setea la información del trabajador
 //			Double suple = calculateSuple(supleCode,supleTable,supleClose,attendance.get(lc.getJobCode()));
 			Double suple  = 0d;
-			sc.setInformation( suple, 0, 0, attendance.get(lc.getJobCode()), lastMonthAttendance.get(lc.getJobCode()), overtimes.get(lc.getJobCode()),extraParams.get(lc.getJobCode()));
+
 			Salary salary = new Salary();
+			sc.setInformation( suple, 0, 0, attendance.get(lc.getJobCode()), lastMonthAttendance.get(lc.getJobCode()), overtimes.get(lc.getJobCode()));
 			salary.setLaborerConstructionSite(lc);
 			salary.setSuple(suple);
 			if(true)
@@ -654,7 +662,6 @@ public class ConstructionSiteService {
 //	}
 
 	/**
-	 * 
 	 * @param cs
 	 * @param dt
 	 * @return
@@ -694,12 +701,12 @@ public class ConstructionSiteService {
 		Map<Integer,Attendance> lastMonthAttendance = getAttendanceMapByConstructionAndMonth(cs, date.minusMonths(1));
 		//busca las sobre horas
 		Map<Integer,Overtime> overtimes = getOvertimeMapByConstructionAndMonth(cs, date);
-		//busca los valores extra de cada trabajador
-		Map<Integer,ExtraParams> extraParams = getExtraParamsMapByConstructionAndMonth(cs,date);
 
 		List<LaborerConstructionsite> lcs =  labcsRepo.findByConstructionsiteAndIsActive(cs);
 		
 		List<Salary> salariesList =  salaryRepo.findByConstructionsiteAndMonth(cs,date.toDate());
+		//busca el salario del mes anterior, para mostrar el ultimo jornal promedio
+		List<Salary> lastSalariesList =  salaryRepo.findByConstructionsiteAndMonth(cs,date.minusMonths(1).toDate());
 		
 		List<Salary> salaries = new ArrayList<Salary>(lcs.size());
 		
@@ -708,19 +715,27 @@ public class ConstructionSiteService {
 		for(LaborerConstructionsite lc : lcs ){
 			
 			tmp.setLaborerConstructionSite(lc);
-			
+
+			//trata de recuperar los salarios ya guardados
 			int index = salariesList.indexOf(tmp);
 			
 			Salary salary = null;
 			if( index >= 0 ){
 				salary = salariesList.remove(index);
 			}else{
+				//si no existe, crea uno nuevo
 				salary = new Salary();
 			}
 			
+			//trata de recuperar el jornal promedio del mes anterior
+			index = lastSalariesList.indexOf(tmp);
+			int lastJornalPromedio = 0;
+			if( index >= 0 )
+				lastJornalPromedio = lastSalariesList.remove(index).getJornalPromedio();
+			
 			//crea el objeto que calculará los sueldos 
 			SalaryCalculator sc =  new SalaryCalculator(assistanceClose,wageConfiguration, dateConfiguration, famillyTable, taxTable);
-			sc.setInformation( 0, 0, 0, attendance.get(lc.getJobCode()), lastMonthAttendance.get(lc.getJobCode()), overtimes.get(lc.getJobCode()),extraParams.get(lc.getJobCode()));
+			sc.setInformation( 0, 0, 0, attendance.get(lc.getJobCode()), lastMonthAttendance.get(lc.getJobCode()), overtimes.get(lc.getJobCode()));
 			SupleCalculator suc = new SupleCalculator(advancePaymentConfig, supleClose);
 			//si el codigo de suple es nulo, entonces usa el primero de la tabla de suples FIXME CONFIRMAR ESTE COMPORTAMIENTO!!!
 			if(lc.getSupleCode() == null ){
@@ -733,6 +748,7 @@ public class ConstructionSiteService {
 			salary.setSupleCalculator(suc);
 			salary.setLaborerConstructionSite(lc);
 			salary.setDate(date.toDate());
+			salary.setLastJornalPromedio(lastJornalPromedio);
 			salaries.add(salary);
 			
 		}
@@ -740,6 +756,7 @@ public class ConstructionSiteService {
 	}
 
 	/**
+	 * @deprecated ya no se usa extraparams
 	 * Calcula el sueldo asociado a la asistencia dada
 	 * @param closingDateLastMonth
 	 * @param suple
@@ -758,7 +775,7 @@ public class ConstructionSiteService {
 			List<FamilyAllowanceConfigurations> famillyTable,
 			List<TaxationConfigurations> taxTable) {
 
-		SalaryCalculator sc = new SalaryCalculator(closingDateLastMonth, suple, tool, loan, attendance, lastMonthAttendance, overtime,extraParams,wageConfiguration, dateConfigurations, famillyTable, taxTable);
+		SalaryCalculator sc = new SalaryCalculator(closingDateLastMonth, suple, tool, loan, attendance, lastMonthAttendance, overtime,wageConfiguration, dateConfigurations, famillyTable, taxTable);
 //		return (int) sc.calculateSalary();
 		if(true)
 			throw new RuntimeException("No implementado");
@@ -772,9 +789,7 @@ public class ConstructionSiteService {
 	 * @param bean
 	 */
 	public void save(Salary bean) {
-		logger.debug("guardando salary {}, {}, {}, {}",bean.getId(), bean.getSalary(),bean.getSuple(),bean.isCalculatedSuple());
-		Salary bdSalary = salaryRepo.save(bean);
-		logger.debug("guardando salary {}, {}, {}, {}",bdSalary.getId(), bdSalary.getSalary(),bdSalary.getSuple(),bdSalary.isCalculatedSuple());
+		salaryRepo.save(bean);
 	}
 	
 //	/**
