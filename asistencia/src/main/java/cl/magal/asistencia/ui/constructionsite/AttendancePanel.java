@@ -453,6 +453,8 @@ public class AttendancePanel extends Panel implements View {
 					if( (cellReference.getValue() instanceof AttendanceMark && !AttendanceMark.ATTEND.equals(cellReference.getValue())) ||
 						(cellReference.getValue() instanceof Integer && 0 != (Integer)cellReference.getValue()))
 							post = " red-color";
+					if(cellReference.getValue() instanceof AttendanceMark && !AttendanceMark.ATTEND.equals(cellReference.getValue()))
+						post += " bold";
 					String pid = (String) cellReference.getPropertyId();
 					if( pid.startsWith("dmp") || pid.startsWith("dma") ){
 						//calcula el numero del mes
@@ -805,7 +807,7 @@ public class AttendancePanel extends Panel implements View {
 				
 				salaryTable.setVisibleColumns("laborerConstructionSite.activeContract.jobCode",
 						"laborerConstructionSite.laborer.fullname","lastJornalPromedio","jornalPromedio","descHours","bondMov2","specialBond","totalLiquido");
-				salaryTable.setColumnHeaders("Oficio","Nombre","Último Jornal Promedio","Jornal Promedio","H Desc","Bono Adic. Locom 2","Bono Imp.","A Pagar (Tot Liquido)");
+				salaryTable.setColumnHeaders("Oficio","Nombre","Último Jornal Promedio","Jornal Promedio","H Desc","Adicional Locomoción 2","Bono Imp.","Total Líquido (A Pagar)");
 				salaryTable.setEditable(true);
 				salaryTable.setTableFieldFactory(new TableFieldFactory() {
 
@@ -968,7 +970,6 @@ public class AttendancePanel extends Panel implements View {
 
 		overtimeContainer.sort(new Object[]{"laborerConstructionSite.activeContract.jobCode"}, new boolean[]{true});
 		overtimeGrid.getColumn("laborerConstructionSite.activeContract.jobCode").setHeaderCaption("Oficio").setEditorField(new TextField(){{setReadOnly(true);}}).setWidth(100);
-
 		createHeaders(overtimeGrid);
 
 		return overtimeGrid;
