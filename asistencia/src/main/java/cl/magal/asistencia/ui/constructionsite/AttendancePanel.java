@@ -678,7 +678,7 @@ public class AttendancePanel extends Panel implements View {
 		VerticalLayout vl = new VerticalLayout(){
 			{
 				setSpacing(true);
-				
+				setMargin(true);
 				HorizontalLayout hl = new HorizontalLayout(){
 					{
 
@@ -773,8 +773,10 @@ public class AttendancePanel extends Panel implements View {
 				addComponent(hl);
 				setComponentAlignment(hl, Alignment.TOP_RIGHT);
 				final Table salaryTable = new Table();
-				salaryTable.setWidth("100%");
+//				salaryTable.setWidth("100%");
+				salaryTable.setSizeFull();
 				salaryTable.setContainerDataSource(salaryContainer);
+				salaryTable.setColumnCollapsingAllowed(true);
 				
 				salaryTable.addGeneratedColumn("totalLiquido", new Table.ColumnGenerator(){
 
@@ -784,7 +786,6 @@ public class AttendancePanel extends Panel implements View {
 						final Label label  = new Label("<b>"+Utils.formatInteger((Integer) salaryContainer.getContainerProperty(itemId, "roundSalary").getValue())+"</b>"+
 								"  ("+Utils.formatInteger((Integer) salaryContainer.getContainerProperty(itemId, columnId).getValue())+")");
 						label.setContentMode(ContentMode.HTML);
-//						Property.ValueChangeListener listener = ;
 						for(final String pid : new String[]{"jornalPromedio","suple","descHours","bondMov2","specialBond"})
 							((ValueChangeNotifier)item.getItemProperty(pid)).addValueChangeListener(new Property.ValueChangeListener() {
 								
@@ -797,7 +798,7 @@ public class AttendancePanel extends Panel implements View {
 									logger.debug("salary == null {}, {}",result,itemId);
 									label.setValue( "<b>"+Utils.formatInteger((Integer) salaryContainer.getContainerProperty(itemId, "roundSalary").getValue())+"</b>"+
 											"  ("+Utils.formatInteger((Integer) salaryContainer.getContainerProperty(itemId, columnId).getValue())+")");
-									
+									Utils.notifyPropertyValueChanged(item,"jornalBaseMes","vtrato","valorSabado","vsCorrd","sobreTiempo","descHoras","bonifImpo","glegal","afecto","sobreAfecto","cargas","asigFamiliar","colacion","mov","mov2","tnoAfecto");
 								}
 							});
 						return label;
@@ -806,8 +807,31 @@ public class AttendancePanel extends Panel implements View {
 				});
 				
 				salaryTable.setVisibleColumns("laborerConstructionSite.activeContract.jobCode",
-						"laborerConstructionSite.laborer.fullname","lastJornalPromedio","jornalPromedio","descHours","bondMov2","specialBond","totalLiquido");
-				salaryTable.setColumnHeaders("Oficio","Nombre","Último Jornal Promedio","Jornal Promedio","H Desc","Adicional Locomoción 2","Bono Imp.","Total Líquido (A Pagar)");
+						"laborerConstructionSite.laborer.fullname","lastJornalPromedio","jornalPromedio","descHours","bondMov2","specialBond","totalLiquido"
+						,"jornalBaseMes","vtrato","valorSabado","vsCorrd","sobreTiempo","descHoras","bonifImpo","glegal","afecto","sobreAfecto","cargas","asigFamiliar","colacion","mov","mov2","tnoAfecto"
+						);
+				
+				salaryTable.setColumnHeaders("Oficio","Nombre","Último Jornal Promedio","Jornal Promedio","H Desc","Adicional Locomoción 2","Bono Imp.","Total Líquido (A Pagar)"
+						,"Jornal Base", " V Trato", "Valor Sábado" , "V S Corrd", "Sobre Tiempo", "Desc Horas","Bonif Imp","G Legal","Afecto","Sobre Afecto","Cargas","A Familiar","Colación","Mov","Movi 2","T No Afecto"
+						);
+				
+				salaryTable.setColumnCollapsed("jornalBaseMes", true);
+				salaryTable.setColumnCollapsed("vtrato", true);
+				salaryTable.setColumnCollapsed("valorSabado", true);
+				salaryTable.setColumnCollapsed("vsCorrd", true);
+				salaryTable.setColumnCollapsed("sobreTiempo", true);
+				salaryTable.setColumnCollapsed("descHoras", true);
+				salaryTable.setColumnCollapsed("bonifImpo", true);
+				salaryTable.setColumnCollapsed("glegal", true);
+				salaryTable.setColumnCollapsed("afecto", true);
+				salaryTable.setColumnCollapsed("sobreAfecto", true);
+				salaryTable.setColumnCollapsed("cargas", true);
+				salaryTable.setColumnCollapsed("asigFamiliar", true);
+				salaryTable.setColumnCollapsed("colacion", true);
+				salaryTable.setColumnCollapsed("mov", true);
+				salaryTable.setColumnCollapsed("mov2", true);
+				salaryTable.setColumnCollapsed("tnoAfecto", true);
+				
 				salaryTable.setEditable(true);
 				salaryTable.setTableFieldFactory(new TableFieldFactory() {
 
@@ -840,6 +864,8 @@ public class AttendancePanel extends Panel implements View {
 					}
 				});
 
+				Panel p = new Panel(salaryTable);
+				p.getContent().setSizeFull();
 				addComponent(salaryTable);
 				setExpandRatio(salaryTable, 1.0f);
 			}
@@ -970,6 +996,7 @@ public class AttendancePanel extends Panel implements View {
 
 		overtimeContainer.sort(new Object[]{"laborerConstructionSite.activeContract.jobCode"}, new boolean[]{true});
 		overtimeGrid.getColumn("laborerConstructionSite.activeContract.jobCode").setHeaderCaption("Oficio").setEditorField(new TextField(){{setReadOnly(true);}}).setWidth(100);
+		
 		createHeaders(overtimeGrid);
 
 		return overtimeGrid;

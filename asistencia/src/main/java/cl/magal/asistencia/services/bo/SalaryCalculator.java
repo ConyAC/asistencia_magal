@@ -42,7 +42,7 @@ public class SalaryCalculator {
 	 * CALCULOS
 	 */
 	Double afecto;
-	Double getAfecto(){
+	public Double getAfecto(){
 		if(afecto == null ) {
 			afecto = calculateAfecto(closingDateLastMonth,getDiasHabiles(),attendance,lastMonthAttendance,overtime,getJornalBaseMes());
 			logger.debug("afecto {}",afecto);
@@ -51,7 +51,7 @@ public class SalaryCalculator {
 	}
 		
 	Double sobreAfecto;
-	Double getSobreAfecto(){
+	public Double getSobreAfecto(){
 		if(sobreAfecto == null ){
 			sobreAfecto = calculateSobreAfecto(closingDateLastMonth,getAfecto(),getDiasHabiles(),attendance,lastMonthAttendance,overtime,getJornalBaseMes());
 			logger.debug("sobreAfecto {}",sobreAfecto);
@@ -60,7 +60,7 @@ public class SalaryCalculator {
 	}
 	
 	Double tNoAfecto;
-	Double getTNoAfecto(){
+	public Double getTNoAfecto(){
 		if(tNoAfecto == null ){
 			tNoAfecto = calculateTNoAfecto(closingDateLastMonth,getAfecto(),getDiasHabiles(),attendance,lastMonthAttendance);
 			logger.debug("tNoAfecto {}",tNoAfecto);
@@ -78,7 +78,7 @@ public class SalaryCalculator {
 	}
 	
 	Double jornalBaseMes;
-	Double getJornalBaseMes(){
+	public Double getJornalBaseMes(){
 		if( jornalBaseMes == null )
 			jornalBaseMes = sueldoMinimo  / 30;
 		return jornalBaseMes;
@@ -119,11 +119,92 @@ public class SalaryCalculator {
 	}
 	
 	Double vTrato;
-	Double getVTrato(){
+	public Double getVTrato(){
 		if(vTrato == null ){
 			vTrato = calculateVTrato(closingDateLastMonth,attendance,lastMonthAttendance);
 		}
 		return vTrato;
+	}
+	
+	Double valorSabado;
+	public Double getValorSabado(){
+		if(valorSabado == null ){
+			valorSabado = calculateValorSabado(closingDateLastMonth, attendance, lastMonthAttendance);
+		}
+		return valorSabado;
+	}
+	
+	Double vSCorrd;
+	public Double getVSCorrd(){
+		if(vSCorrd == null ){
+			vSCorrd = calculateVSCorrd(closingDateLastMonth, attendance, lastMonthAttendance, overtime);
+		}
+		return vSCorrd;
+		
+	}
+	
+	Double sobreTiempo;
+	public Double getSobreTiempo(){
+		if(sobreTiempo == null ){
+			sobreTiempo = calculateSobreTiempo(overtime);
+		}
+		return sobreTiempo;
+	}
+	
+	Double descHoras;
+	public Double getDescHoras(){
+		if(descHoras == null ){
+			descHoras = calculateDescHoras(closingDateLastMonth, attendance, lastMonthAttendance);
+		}
+		return descHoras;
+	}
+	
+	Double bonifImpo;
+	public Double getBonifImpo(){
+		if(bonifImpo == null ){
+			bonifImpo = calculateBonifImpo(closingDateLastMonth, attendance, lastMonthAttendance, getJornalBaseMes()); 
+		}
+		return bonifImpo;
+	}
+	
+	Double gLegal;
+	public Double getGLegal(){
+		if(gLegal == null ){
+			gLegal = calculateGLegal(closingDateLastMonth, getDiasHabiles(), attendance, lastMonthAttendance);
+		}
+		return gLegal;
+	}
+	
+	Double asigFamiliar;
+	public double getAsigFamiliar(){
+		if(asigFamiliar == null ){
+			asigFamiliar = calculateAsigFamiliar(closingDateLastMonth, getAfecto(), attendance, lastMonthAttendance);
+		}
+		return asigFamiliar;
+	}
+	
+	Double colacion;
+	public Double getColacion(){
+		if(colacion == null ){
+			colacion = calculateColacion(closingDateLastMonth, attendance, lastMonthAttendance);
+		}
+		return colacion;
+	}
+	
+	Double mov;
+	public Double getMov(){
+		if(mov == null ){
+			mov = calculateMov(closingDateLastMonth, attendance, lastMonthAttendance);
+		}
+		return mov;
+	}
+	
+	Double mov2;
+	public Double getMov2(){
+		if(mov2 == null ){
+			mov2 = calculateMov2(closingDateLastMonth, attendance, lastMonthAttendance);
+		}
+		return mov2;
 	}
 	
 	/**
@@ -141,6 +222,16 @@ public class SalaryCalculator {
 		col = null;
 		diasNoConsideradosMesAnterior = null;
 		vTrato = null;
+		valorSabado = null;
+		vSCorrd = null;
+		sobreTiempo = null;
+		descHoras = null;
+		bonifImpo = null;
+		gLegal = null;
+		asigFamiliar = null;
+		colacion = null;
+		mov = null;
+		mov2 = null;
 		return true;
 	}
 	
@@ -166,14 +257,13 @@ public class SalaryCalculator {
 			                Attendance attendance,
 			                Attendance lastMonthAttendance,
 			                Overtime overtime,
-			                Salary salary,
 			                WageConfigurations wageConfigurations,
 			                DateConfigurations dateConfigurations,
 			                List<FamilyAllowanceConfigurations> famillyTable,
 			                List<TaxationConfigurations> taxTable){
 		
 		
-		setInformation(suple, tool, loan, attendance, lastMonthAttendance, overtime, salary);
+		setInformation(suple, tool, loan, attendance, lastMonthAttendance, overtime);
 		init(closingDateLastMonth, wageConfigurations, dateConfigurations, famillyTable, taxTable);
 		
 	}
@@ -193,15 +283,12 @@ public class SalaryCalculator {
             double loan,
             Attendance attendance,
             Attendance lastMonthAttendance,
-            Overtime overtime,
-            Salary salary){
+            Overtime overtime){
 		
 		this.attendance = attendance;	
 		this.date = attendance.getDate();	
 		this.lastMonthAttendance = lastMonthAttendance;		
 		this.overtime = overtime;	
-		
-		setSalary(salary);
 		
 		this.suple = suple;
 		this.tool = tool;
@@ -364,8 +451,8 @@ public class SalaryCalculator {
 		if( maxImponible == afecto )
 			return 0;
 		else{
-			double sum = getVTrato() + calculateValorSabado(closingDateLastMonth,attendance,lastMonthAttendance) + calculateVSCorrd(closingDateLastMonth,attendance,lastMonthAttendance,overtime) + calculateSobreTiempo(overtime) + calculateDescHoras(closingDateLastMonth,attendance,lastMonthAttendance) 
-					+ calculateBonifImpo(closingDateLastMonth,attendance,lastMonthAttendance,jornalBaseMes) + calculateGLegal(closingDateLastMonth,diasHabiles,attendance,lastMonthAttendance);
+			double sum = getVTrato() + getValorSabado() + getVSCorrd() + getSobreTiempo() + getDescHoras() 
+					+ getBonifImpo() + getGLegal();
 			return sum - afecto;
 		}
 	}
@@ -376,8 +463,8 @@ public class SalaryCalculator {
 	 */
 	private double calculateAfecto(DateTime closingDateLastMonth, int diasHabiles,Attendance attendance,Attendance lastMonthAttendance,Overtime overtime,double jornalBaseMes) {
 		double maxImponible = calculateMaxImponible();
-		double sum = getVTrato() + calculateValorSabado(closingDateLastMonth,attendance,lastMonthAttendance) + calculateVSCorrd(closingDateLastMonth,attendance,lastMonthAttendance,overtime) + calculateSobreTiempo(overtime) + 
-				calculateDescHoras(closingDateLastMonth,attendance,lastMonthAttendance) + calculateBonifImpo(closingDateLastMonth,attendance,lastMonthAttendance,jornalBaseMes) + calculateGLegal(closingDateLastMonth,diasHabiles,attendance,lastMonthAttendance);
+		double sum = getVTrato() + getValorSabado() + getVSCorrd() + getSobreTiempo() + 
+				getDescHoras() + getBonifImpo() + getGLegal();
 		return sum > maxImponible ? maxImponible : sum ;
 	}
 	/**
@@ -551,7 +638,7 @@ public class SalaryCalculator {
 	 * @return
 	 */
 	private double calculateVSCorrd(DateTime closingDateLastMonth,Attendance attendance,Attendance lastMonthAttendance,Overtime overtime) {
-		return ( getVTrato() + calculateValorSabado(closingDateLastMonth,attendance,lastMonthAttendance) + calculateSobreTiempo(overtime) )/ calculateDPD(attendance) * calculateSep(attendance);
+		return ( getVTrato() + getValorSabado() + getSobreTiempo() )/ calculateDPD(attendance) * calculateSep(attendance);
 	}
 
 	/**
@@ -576,7 +663,7 @@ public class SalaryCalculator {
 	 * @return
 	 */
 	private double calculateValorSabado(DateTime closingDateLastMonth,Attendance attendance,Attendance lastMonthAttendance) {
-		return ( getVTrato() +  calculateDescHoras(closingDateLastMonth,attendance,lastMonthAttendance) ) / calculateDPS(attendance) * calculateSab(attendance);
+		return ( getVTrato() +  getDescHoras() ) / calculateDPS(attendance) * calculateSab(attendance);
 	}
 
 	/**
@@ -628,9 +715,9 @@ public class SalaryCalculator {
 	 * @return
 	 */
 	private double calculateTNoAfecto(DateTime closingDateLastMonth,double afecto,int diasHabiles,Attendance attendance,Attendance lastMonthAttendance) {
-		double asigFam = calculateAsigFamiliar(closingDateLastMonth,afecto,attendance,lastMonthAttendance); 
+		double asigFam = getAsigFamiliar(); 
 		logger.debug("asigFam {}",asigFam);
-		double colacion = calculateColacion(closingDateLastMonth,attendance,lastMonthAttendance);
+		double colacion = getColacion();
 		logger.debug("colacion {}",colacion);
 		double mov = calculateMov(closingDateLastMonth,attendance,lastMonthAttendance); 
 		logger.debug("mov {}",mov);

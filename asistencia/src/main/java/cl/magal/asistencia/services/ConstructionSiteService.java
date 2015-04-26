@@ -627,7 +627,7 @@ public class ConstructionSiteService {
 			Double suple  = 0d;
 
 			Salary salary = new Salary();
-			sc.setInformation( suple, 0, 0, attendance.get(lc.getJobCode()), lastMonthAttendance.get(lc.getJobCode()), overtimes.get(lc.getJobCode()),salary);
+			sc.setInformation( suple, 0, 0, attendance.get(lc.getJobCode()), lastMonthAttendance.get(lc.getJobCode()), overtimes.get(lc.getJobCode()));
 			salary.setLaborerConstructionSite(lc);
 			salary.setSuple(suple);
 			if(true)
@@ -735,7 +735,7 @@ public class ConstructionSiteService {
 			
 			//crea el objeto que calculará los sueldos 
 			SalaryCalculator sc =  new SalaryCalculator(assistanceClose,wageConfiguration, dateConfiguration, famillyTable, taxTable);
-			sc.setInformation( 0, 0, 0, attendance.get(lc.getJobCode()), lastMonthAttendance.get(lc.getJobCode()), overtimes.get(lc.getJobCode()),salary);
+			sc.setInformation( 0, 0, 0, attendance.get(lc.getJobCode()), lastMonthAttendance.get(lc.getJobCode()), overtimes.get(lc.getJobCode()));
 			SupleCalculator suc = new SupleCalculator(advancePaymentConfig, supleClose);
 			//si el codigo de suple es nulo, entonces usa el primero de la tabla de suples FIXME CONFIRMAR ESTE COMPORTAMIENTO!!!
 			if(lc.getSupleCode() == null ){
@@ -775,7 +775,7 @@ public class ConstructionSiteService {
 			List<FamilyAllowanceConfigurations> famillyTable,
 			List<TaxationConfigurations> taxTable) {
 
-		SalaryCalculator sc = new SalaryCalculator(closingDateLastMonth, suple, tool, loan, attendance, lastMonthAttendance, overtime,null,wageConfiguration, dateConfigurations, famillyTable, taxTable);
+		SalaryCalculator sc = new SalaryCalculator(closingDateLastMonth, suple, tool, loan, attendance, lastMonthAttendance, overtime,wageConfiguration, dateConfigurations, famillyTable, taxTable);
 //		return (int) sc.calculateSalary();
 		if(true)
 			throw new RuntimeException("No implementado");
@@ -789,9 +789,7 @@ public class ConstructionSiteService {
 	 * @param bean
 	 */
 	public void save(Salary bean) {
-		logger.debug("guardando salary {}, {}, {}, {}",bean.getId(), bean.getSalary(),bean.getSuple(),bean.isCalculatedSuple());
-		Salary bdSalary = salaryRepo.save(bean);
-		logger.debug("guardando salary {}, {}, {}, {}",bdSalary.getId(), bdSalary.getSalary(),bdSalary.getSuple(),bdSalary.isCalculatedSuple());
+		salaryRepo.save(bean);
 	}
 	
 //	/**

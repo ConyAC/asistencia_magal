@@ -56,8 +56,8 @@ public class Salary implements Serializable {
 	@Column(name = "suple")
 	Double suple;
 	
-	@Column(name = "salary")
-	Double salary;
+//	@Column(name = "salary")
+	transient Double salary;
 	
 	@Column(name = "calculated_suple")
 	boolean calculatedSuple = true;
@@ -94,7 +94,7 @@ public class Salary implements Serializable {
             Overtime overtime){
 		if(this.salaryCalculator == null )
 			throw new RuntimeException("Es necesario que el objeto de calculo sea distinto a null");
-		this.salaryCalculator.setInformation(getSuple(), tool, loan, attendance, lastMonthAttendance, overtime, this);
+		this.salaryCalculator.setInformation(getSuple(), tool, loan, attendance, lastMonthAttendance, overtime);
 	}
 	
 	public void setSupleCalculatorInformation(
@@ -138,6 +138,8 @@ public class Salary implements Serializable {
 	}
 	public double getSuple() {
 		if(suple == null && isCalculatedSuple() ){
+			if(supleCalculator == null )
+				throw new RuntimeException("El calculador de anticipos no puede ser nulo.");
 			suple = supleCalculator.calculateSuple(getLaborerConstructionSite().getSupleCode());
 		}else if( suple == null && !isCalculatedSuple() )
 			suple = 0d;
@@ -148,6 +150,8 @@ public class Salary implements Serializable {
 	}
 	public double getSalary() {
 		if(salary == null){
+			if(salaryCalculator == null )
+				throw new RuntimeException("El calculador de sueldos no puede ser nulo.");
 			salary = salaryCalculator.calculateSalary(getJornalPromedio(),getSuple(),this);
 		}
 		return salary;
@@ -222,6 +226,75 @@ public class Salary implements Serializable {
 	public void setLastJornalPromedio(Integer lastJornalPromedio) {
 		this.lastJornalPromedio = lastJornalPromedio;
 	}
+	
+	/**
+	 * columnas ocultables
+	 * @return
+	 */
+	public double getJornalBaseMes(){
+		return salaryCalculator.getJornalBaseMes();
+	}
+	
+	public double getVtrato(){
+		return salaryCalculator.getVTrato();
+	}
+	
+	public double getValorSabado(){
+		return salaryCalculator.getValorSabado();
+	}
+	
+	public double getVsCorrd(){
+		return salaryCalculator.getVSCorrd();
+	}
+	
+	public double getSobreTiempo(){
+		return salaryCalculator.getSobreTiempo();
+	}
+	
+	public double getDescHoras(){
+		return salaryCalculator.getDescHoras();
+	}
+	
+	public double getBonifImpo(){
+		return salaryCalculator.getBonifImpo();
+	}
+	
+	public double getGlegal(){
+		return salaryCalculator.getGLegal();
+	}
+	
+	public double getAfecto(){
+		return salaryCalculator.getAfecto();
+	}
+	
+	public double getSobreAfecto(){
+		return salaryCalculator.getSobreAfecto();
+	}
+	
+	public double getCargas(){
+		return laborerConstructionSite.getLaborer().getDependents();
+	}
+	
+	public double getAsigFamiliar(){
+		return salaryCalculator.getAsigFamiliar();
+	}
+	
+	public double getColacion(){
+		return salaryCalculator.getColacion();
+	}
+	
+	public double getMov(){
+		return salaryCalculator.getMov();
+	}
+	
+	public double getMov2(){
+		return salaryCalculator.getMov2();
+	}
+	
+	public double getTnoAfecto(){
+		return salaryCalculator.getTNoAfecto();
+	}
+	
 	@Override
 	public int hashCode() {
 		final int prime = 31;
