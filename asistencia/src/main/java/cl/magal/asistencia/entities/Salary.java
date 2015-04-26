@@ -41,6 +41,8 @@ public class Salary implements Serializable {
 	
 	@Column(name="jornal")
 	Integer jornalPromedio = 0;
+	//usado para visualizar el ultimo jornal promedio
+	transient Integer lastJornalPromedio = 0;
 	
 	@ManyToOne
 	@JoinColumn(name="laborer_constructionsiteId",nullable=false)
@@ -60,6 +62,18 @@ public class Salary implements Serializable {
 	@Column(name = "calculated_suple")
 	boolean calculatedSuple = true;
 	
+	@Column(name="mov2_bond")
+	Integer bondMov2 = 0;
+	
+	@Column(name="special_bond")
+	Integer specialBond = 0;
+	
+	@Column(name="overtime_hours")
+	Integer overtimeHours = 0;
+	
+	@Column(name="desc_hours")
+	Integer descHours = 0;
+	
 	/**
 	 * Objeto que permite el calculo de los sueldos
 	 */
@@ -77,11 +91,10 @@ public class Salary implements Serializable {
             double loan,
             Attendance attendance,
             Attendance lastMonthAttendance,
-            Overtime overtime,
-            ExtraParams extraParams){
+            Overtime overtime){
 		if(this.salaryCalculator == null )
 			throw new RuntimeException("Es necesario que el objeto de calculo sea distinto a null");
-		this.salaryCalculator.setInformation(getSuple(), tool, loan, attendance, lastMonthAttendance, overtime, extraParams);
+		this.salaryCalculator.setInformation(getSuple(), tool, loan, attendance, lastMonthAttendance, overtime, this);
 	}
 	
 	public void setSupleCalculatorInformation(
@@ -135,7 +148,7 @@ public class Salary implements Serializable {
 	}
 	public double getSalary() {
 		if(salary == null){
-			salary = salaryCalculator.calculateSalary(getJornalPromedio(),getSuple());
+			salary = salaryCalculator.calculateSalary(getJornalPromedio(),getSuple(),this);
 		}
 		return salary;
 	}
@@ -171,11 +184,43 @@ public class Salary implements Serializable {
 		return suple == null;
 	}
 	
+	public Integer getBondMov2() {
+		return bondMov2;
+	}
+	public void setBondMov2(Integer bondMov2) {
+		this.bondMov2 = bondMov2;
+	}
+	public Integer getOvertimeHours() {
+		return overtimeHours;
+	}
+	public void setOvertimeHours(Integer overtimeHours) {
+		this.overtimeHours = overtimeHours;
+	}
+	public Integer getDescHours() {
+		return descHours;
+	}
+	public void setDescHours(Integer descHours) {
+		this.descHours = descHours;
+	}
 	public boolean isCalculatedSuple() {
 		return calculatedSuple;
 	}
 	public void setCalculatedSuple(boolean calculatedSuple) {
 		this.calculatedSuple = calculatedSuple;
+	}
+	
+	public Integer getSpecialBond() {
+		return specialBond;
+	}
+	public void setSpecialBond(Integer specialBond) {
+		this.specialBond = specialBond;
+	}
+
+	public Integer getLastJornalPromedio() {
+		return lastJornalPromedio;
+	}
+	public void setLastJornalPromedio(Integer lastJornalPromedio) {
+		this.lastJornalPromedio = lastJornalPromedio;
 	}
 	@Override
 	public int hashCode() {

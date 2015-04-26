@@ -20,7 +20,6 @@ import cl.magal.asistencia.entities.Attendance;
 import cl.magal.asistencia.entities.Confirmations;
 import cl.magal.asistencia.entities.ConstructionSite;
 import cl.magal.asistencia.entities.DateConfigurations;
-import cl.magal.asistencia.entities.ExtraParams;
 import cl.magal.asistencia.entities.Overtime;
 import cl.magal.asistencia.entities.Salary;
 import cl.magal.asistencia.entities.enums.AttendanceMark;
@@ -39,7 +38,6 @@ import cl.magal.asistencia.util.Utils;
 import com.vaadin.data.Container;
 import com.vaadin.data.Container.Filterable;
 import com.vaadin.data.Container.SimpleFilterable;
-import com.vaadin.data.Item;
 import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeNotifier;
@@ -52,8 +50,6 @@ import com.vaadin.data.fieldgroup.FieldGroup.CommitHandler;
 import com.vaadin.data.util.BeanContainer;
 import com.vaadin.data.util.BeanItem;
 import com.vaadin.data.util.BeanItemContainer;
-import com.vaadin.data.util.GeneratedPropertyContainer;
-import com.vaadin.data.util.PropertyValueGenerator;
 import com.vaadin.data.util.filter.SimpleStringFilter;
 import com.vaadin.event.FieldEvents;
 import com.vaadin.event.FieldEvents.BlurEvent;
@@ -118,7 +114,7 @@ public class AttendancePanel extends Panel implements View {
 	
 	AdvancePaymentConfigurations advancepayment;
 	/** CONTAINERS **/
-	BeanItemContainer<ExtraParams> extraParamContainer = new BeanItemContainer<ExtraParams>(ExtraParams.class);
+//	BeanItemContainer<ExtraParams> extraParamContainer = new BeanItemContainer<ExtraParams>(ExtraParams.class);
 	BeanContainer<Long,Attendance> attendanceContainer = new BeanContainer<Long,Attendance>(Attendance.class);
 	BeanItemContainer<Overtime> overtimeContainer = new BeanItemContainer<Overtime>(Overtime.class);
 	BeanContainer<Long,Salary> salaryContainer = new BeanContainer<Long,Salary>(Salary.class);
@@ -128,7 +124,7 @@ public class AttendancePanel extends Panel implements View {
 	/** COMPONENTES **/
 	ProgressBar progress;
 	Label status;
-	Grid attendanceGrid, overtimeGrid,extraGrid;
+	Grid attendanceGrid, overtimeGrid/*,extraGrid*/;
 	Window progressDialog;
 	InlineDateField attendanceDate;
 	Button btnExportSoftland,btnConstructionSiteConfirm,btnCentralConfirm,btnGenerateSalary,btnSupleObraConfirm,btnSupleCentralConfirm;
@@ -290,7 +286,6 @@ public class AttendancePanel extends Panel implements View {
 		overtimeContainer.removeAllItems();
 		absenceContainer.removeAllItems();
 		salaryContainer.removeAllItems();
-		extraParamContainer.removeAllItems();
 	}
 
 	private TabSheet drawAttendanceDetail() {
@@ -303,8 +298,8 @@ public class AttendancePanel extends Panel implements View {
 		Grid overtimeGrid = drawOvertimeGrid();		
 		tab.addTab(overtimeGrid,"Horas Extras");
 		
-		Grid extraParamsTable = drawExtraParamsGrid();		
-		tab.addTab(extraParamsTable,"Parámetros Extra");
+//		Grid extraParamsTable = drawExtraParamsGrid();		
+//		tab.addTab(extraParamsTable,"Parámetros Extra");
 
 		Table confirmTable = drawAbsenceConfirmTable();
 		tab.addTab(confirmTable,"Confirmar Licencias y Accidentes");
@@ -321,7 +316,6 @@ public class AttendancePanel extends Panel implements View {
 	private void enableAttendance(boolean state) {
 		attendanceGrid.setEnabled(state);
 		overtimeGrid.setEnabled(state);
-		extraGrid.setEnabled(state);
 		confirmTable.setEnabled(state);
 //		btnGenerateSalary.setEnabled(state);
 	}
@@ -330,68 +324,68 @@ public class AttendancePanel extends Panel implements View {
 		salaryTable.setEnabled(state);
 	}
 
-	private Grid drawExtraParamsGrid() {
-		
-		extraParamContainer.addNestedContainerProperty("laborerConstructionSite.activeContract.jobCode");
-		
-		GeneratedPropertyContainer gpcontainer =
-			    new GeneratedPropertyContainer(extraParamContainer);
-		
-		gpcontainer.addGeneratedProperty("jobCode",new PropertyValueGenerator<Integer>() {
-			    @Override
-			    public Integer getValue(Item item, Object itemId,Object propertyId) {
-			        int born = (Integer)item.getItemProperty("laborerConstructionSite.activeContract.jobCode").getValue();
-			        return born;
-			    }
-
-			    @Override
-			    public Class<Integer> getType() {
-			        return Integer.class;
-			    }
-			});
-		
-		extraGrid = new Grid(extraParamContainer);
-		extraGrid.setSelectionMode(SelectionMode.SINGLE);
-		extraGrid.setSizeFull();
-		extraGrid.setEditorFieldGroup(new BeanFieldGroup<ExtraParams>(ExtraParams.class));
-		extraGrid.getEditorFieldGroup().addCommitHandler(new CommitHandler() {
-
-			@Override
-			public void preCommit(CommitEvent commitEvent) throws CommitException {
-
-			}
-
-			@Override
-			public void postCommit(CommitEvent commitEvent) throws CommitException {
-				//guarda el elmento
-				ExtraParams attedance = ((BeanItem<ExtraParams>) commitEvent.getFieldBinder().getItemDataSource()).getBean();
-				service.save(attedance);
-				extraParamContainer.sort(new Object[]{"laborerConstructionSite.activeContract.jobCode"}, new boolean[]{true});
-			}
-		});
-
-		extraGrid.addStyleName("grid-attendace");
-		extraGrid.setEditorEnabled(true);
-		extraGrid.setFrozenColumnCount(1);
-		if(extraGrid.getColumn("laborerConstructionSite") != null )
-			extraGrid.removeColumn("laborerConstructionSite");
-		if(extraGrid.getColumn("date") != null )
-			extraGrid.removeColumn("date");
-		if(extraGrid.getColumn("id") != null )
-			extraGrid.removeColumn("id");
-		
-		extraGrid.setColumnOrder("laborerConstructionSite.activeContract.jobCode","bondMov2","km","specialBond","overtimeHours");
-
-		extraParamContainer.sort(new Object[]{"laborerConstructionSite.activeContract.jobCode"}, new boolean[]{true});
-		extraGrid.getColumn("laborerConstructionSite.activeContract.jobCode").setHeaderCaption("Oficio").setEditable(false).setWidth(100);
-		extraGrid.getColumn("bondMov2").setHeaderCaption("Bono Cargo a Locomocion 2 (No Imponible)");
-		extraGrid.getColumn("km").setHeaderCaption("Km");
-		extraGrid.getColumn("specialBond").setHeaderCaption("Bono Imponible Especial");
-		extraGrid.getColumn("overtimeHours").setHeaderCaption("Horas Sobretiempo");
-		
-		createHeaders(extraGrid);
-		return extraGrid;
-	}
+//	private Grid drawExtraParamsGrid() {
+//		
+//		extraParamContainer.addNestedContainerProperty("laborerConstructionSite.activeContract.jobCode");
+//		
+//		GeneratedPropertyContainer gpcontainer =
+//			    new GeneratedPropertyContainer(extraParamContainer);
+//		
+//		gpcontainer.addGeneratedProperty("jobCode",new PropertyValueGenerator<Integer>() {
+//			    @Override
+//			    public Integer getValue(Item item, Object itemId,Object propertyId) {
+//			        int born = (Integer)item.getItemProperty("laborerConstructionSite.activeContract.jobCode").getValue();
+//			        return born;
+//			    }
+//
+//			    @Override
+//			    public Class<Integer> getType() {
+//			        return Integer.class;
+//			    }
+//			});
+//		
+//		extraGrid = new Grid(extraParamContainer);
+//		extraGrid.setSelectionMode(SelectionMode.SINGLE);
+//		extraGrid.setSizeFull();
+//		extraGrid.setEditorFieldGroup(new BeanFieldGroup<ExtraParams>(ExtraParams.class));
+//		extraGrid.getEditorFieldGroup().addCommitHandler(new CommitHandler() {
+//
+//			@Override
+//			public void preCommit(CommitEvent commitEvent) throws CommitException {
+//
+//			}
+//
+//			@Override
+//			public void postCommit(CommitEvent commitEvent) throws CommitException {
+//				//guarda el elmento
+//				ExtraParams attedance = ((BeanItem<ExtraParams>) commitEvent.getFieldBinder().getItemDataSource()).getBean();
+//				service.save(attedance);
+//				extraParamContainer.sort(new Object[]{"laborerConstructionSite.activeContract.jobCode"}, new boolean[]{true});
+//			}
+//		});
+//
+//		extraGrid.addStyleName("grid-attendace");
+//		extraGrid.setEditorEnabled(true);
+//		extraGrid.setFrozenColumnCount(1);
+//		if(extraGrid.getColumn("laborerConstructionSite") != null )
+//			extraGrid.removeColumn("laborerConstructionSite");
+//		if(extraGrid.getColumn("date") != null )
+//			extraGrid.removeColumn("date");
+//		if(extraGrid.getColumn("id") != null )
+//			extraGrid.removeColumn("id");
+//		
+//		extraGrid.setColumnOrder("laborerConstructionSite.activeContract.jobCode","bondMov2","km","specialBond","overtimeHours");
+//
+//		extraParamContainer.sort(new Object[]{"laborerConstructionSite.activeContract.jobCode"}, new boolean[]{true});
+//		extraGrid.getColumn("laborerConstructionSite.activeContract.jobCode").setHeaderCaption("Oficio").setEditable(false).setWidth(100);
+//		extraGrid.getColumn("bondMov2").setHeaderCaption("Bono Cargo a Locomocion 2 (No Imponible)");
+//		extraGrid.getColumn("km").setHeaderCaption("Km");
+//		extraGrid.getColumn("specialBond").setHeaderCaption("Bono Imponible Especial");
+//		extraGrid.getColumn("overtimeHours").setHeaderCaption("Horas Sobretiempo");
+//		
+//		createHeaders(extraGrid);
+//		return extraGrid;
+//	}
 
 	private void createHeaders(final Grid grid) {
 		HeaderRow filterRow =  grid.appendHeaderRow();
@@ -584,18 +578,13 @@ public class AttendancePanel extends Panel implements View {
 						hl.setSizeFull();
 						
 						final BeanItem<Salary> beanItem = salaryContainer.getItem(itemId);
-						//TODO recuperar posibles codigos de suple
+						// recuperar posibles codigos de suple
 						final ComboBox cb = new ComboBox();
-						cb.setImmediate(true);
-//						cb.addItem(1);
-//						cb.addItem(2);
-//						cb.addItem(3);
-//						cb.addItem(4);
-//						cb.addItem(5);
 						for(AdvancePaymentItem item : advancepayment.getAdvancePaymentTable() ){
 							cb.addItem(item.getSupleCode());
 						}
 						cb.setPropertyDataSource(beanItem.getItemProperty("laborerConstructionSite.supleCode"));
+						cb.setReadOnly(true);
 						
 						hl.addComponent(cb);
 						
@@ -682,6 +671,7 @@ public class AttendancePanel extends Panel implements View {
 	 */
 	private VerticalLayout drawSalaryLayout() {
 		salaryContainer.addNestedContainerProperty("laborerConstructionSite.activeContract.jobCode");
+		salaryContainer.addNestedContainerProperty("laborerConstructionSite.laborer.fullname");
 		salaryContainer.addNestedContainerProperty("laborerConstructionSite.supleCode");
 		VerticalLayout vl = new VerticalLayout(){
 			{
@@ -780,41 +770,6 @@ public class AttendancePanel extends Panel implements View {
 
 				addComponent(hl);
 				setComponentAlignment(hl, Alignment.TOP_RIGHT);
-
-//				btnGenerateSalary = new Button("Generar Sueldo y Anticipo",FontAwesome.GEARS);
-//				btnGenerateSalary.setDisableOnClick(true);
-//				btnGenerateSalary.addClickListener(new Button.ClickListener() {
-//
-//					@Override
-//					public void buttonClick(ClickEvent event) {
-//
-//						//se pide confirmación, pues este proceso reemplazará lo que exista en base de datos para la fecha
-//						ConfirmDialog.show(UI.getCurrent(), "Confirmar Acción:", "El siguiente proceso reemplazará la información de sueldo que se tenga guardada. ¿Está seguro de que desea continuar con el proceso?",
-//								"Continuar", "Cancelar", new ConfirmDialog.Listener() {
-//							public void onClose(ConfirmDialog dialog) {
-//								if (dialog.isConfirmed()) {
-//
-//									try{
-//										//comienza el procesamiento de los sueldos y se guarda el resultado en base de datos
-//										// recupera los resultados  este procesamiento puede tardar un tiempo
-//										List<Salary> salaries = service.calculateSalaries(cs,getAttendanceDate());
-//										logger.debug("sueldos calculados {} ",salaries);
-//										//limpia
-//										salaryContainer.removeAllItems();
-//										salaryContainer.addAll(salaries);
-//									}catch(Exception e){
-//										logger.error("Error al calcular los sueldos",e);
-//										String mensaje = "Error al calcular los sueldos.";
-//										if( e.getMessage() != null )
-//											mensaje = e.getMessage();
-//										Notification.show(mensaje,Type.ERROR_MESSAGE);
-//									}
-//								}
-//							}
-//						});
-//						btnGenerateSalary.setEnabled(true);
-//					}
-//				});
 				final Table salaryTable = new Table();
 				salaryTable.setWidth("100%");
 				salaryTable.setContainerDataSource(salaryContainer);
@@ -828,7 +783,7 @@ public class AttendancePanel extends Panel implements View {
 								"  ("+Utils.formatInteger((Integer) salaryContainer.getContainerProperty(itemId, columnId).getValue())+")");
 						label.setContentMode(ContentMode.HTML);
 //						Property.ValueChangeListener listener = ;
-						for(final String pid : new String[]{"jornalPromedio","suple"})
+						for(final String pid : new String[]{"jornalPromedio","suple","descHours","bondMov2","specialBond"})
 							((ValueChangeNotifier)item.getItemProperty(pid)).addValueChangeListener(new Property.ValueChangeListener() {
 								
 								@Override
@@ -848,21 +803,27 @@ public class AttendancePanel extends Panel implements View {
 					
 				});
 				
-				salaryTable.setVisibleColumns("laborerConstructionSite.activeContract.jobCode","jornalPromedio","suple","totalLiquido");
-				salaryTable.setColumnHeaders("Oficio","Jornal Promedio","Suple","A Pagar (Tot Liquido)");
+				salaryTable.setVisibleColumns("laborerConstructionSite.activeContract.jobCode",
+						"laborerConstructionSite.laborer.fullname","lastJornalPromedio","jornalPromedio","descHours","bondMov2","specialBond","totalLiquido");
+				salaryTable.setColumnHeaders("Oficio","Nombre","Último Jornal Promedio","Jornal Promedio","H Desc","Bono Adic. Locom 2","Bono Imp.","A Pagar (Tot Liquido)");
 				salaryTable.setEditable(true);
 				salaryTable.setTableFieldFactory(new TableFieldFactory() {
 
 					@Override
 					public Field<?> createField(Container container, final Object itemId,Object propertyId, com.vaadin.ui.Component uiContext) {
 						if(propertyId.equals("laborerConstructionSite.activeContract.jobCode")||
+								propertyId.equals("laborerConstructionSite.laborer.fullname") ||
 								propertyId.equals("totalLiquido") ||
+								propertyId.equals("lastJornalPromedio") ||
 								propertyId.equals("suple") )
 							return null;
 						TextField tf = new TextField();
 						tf.setNullRepresentation("");
 						tf.setImmediate(true);
-						if(propertyId.equals("jornalPromedio")){
+						if(propertyId.equals("jornalPromedio")||
+						   propertyId.equals("descHours")||
+						   propertyId.equals("specialBond")||
+						   propertyId.equals("bondMov2")){
 							tf.addBlurListener(new FieldEvents.BlurListener() {
 								
 								@Override
@@ -1670,10 +1631,10 @@ public class AttendancePanel extends Panel implements View {
 			salaryContainer.addAll(salaries);
 			salaryContainer.sort(new String[]{"laborerConstructionsite.activeContract.jobCode"},new boolean[]{ true });
 
-			List<ExtraParams> params = service.getExtraParamsByConstructionAndMonth(cs,dt);
-			//limpia
-			extraParamContainer.addAll(params);
-			extraParamContainer.sort(new String[]{"laborerConstructionsite.activeContract.jobCode"},new boolean[]{ true });
+//			List<ExtraParams> params = service.getExtraParamsByConstructionAndMonth(cs,dt);
+//			//limpia
+//			extraParamContainer.addAll(params);
+//			extraParamContainer.sort(new String[]{"laborerConstructionsite.activeContract.jobCode"},new boolean[]{ true });
 
 		}catch(Exception e){
 			logger.error("Error al calcular los sueldos",e);

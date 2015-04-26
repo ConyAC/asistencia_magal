@@ -10,10 +10,10 @@ import org.slf4j.LoggerFactory;
 
 import cl.magal.asistencia.entities.Attendance;
 import cl.magal.asistencia.entities.DateConfigurations;
-import cl.magal.asistencia.entities.ExtraParams;
 import cl.magal.asistencia.entities.FamilyAllowanceConfigurations;
 import cl.magal.asistencia.entities.Mobilization2;
 import cl.magal.asistencia.entities.Overtime;
+import cl.magal.asistencia.entities.Salary;
 import cl.magal.asistencia.entities.TaxationConfigurations;
 import cl.magal.asistencia.entities.WageConfigurations;
 import cl.magal.asistencia.entities.enums.AttendanceMark;
@@ -30,14 +30,13 @@ public class SalaryCalculator {
 		   sueldoMinimo;
 	Attendance attendance,lastMonthAttendance;
 	Overtime overtime;
-	ExtraParams extraParams;
 	Date date;
 	List<FamilyAllowanceConfigurations> famillyTable;
 	List<TaxationConfigurations> taxTable;
 	WageConfigurations wageConfigurations;
 	Integer jornalPromedio;
 	
-	double bonoImponibleEspecial,bonoCargoLoc2, km, bencina, horasDescuento, horasSobreTiempo,ufMes,collation,mov1;
+	double bonoImponibleEspecial,bonoCargoLoc2, horasDescuento, horasSobreTiempo,ufMes,collation,mov1;
 	
 	/**
 	 * CALCULOS
@@ -154,7 +153,7 @@ public class SalaryCalculator {
 	 * @param attendance
 	 * @param lastMonthAttendance
 	 * @param overtime
-	 * @param extraParams
+	 * @param salary
 	 * @param wageConfigurations
 	 * @param dateConfigurations
 	 * @param famillyTable
@@ -167,14 +166,14 @@ public class SalaryCalculator {
 			                Attendance attendance,
 			                Attendance lastMonthAttendance,
 			                Overtime overtime,
-			                ExtraParams extraParams,
+			                Salary salary,
 			                WageConfigurations wageConfigurations,
 			                DateConfigurations dateConfigurations,
 			                List<FamilyAllowanceConfigurations> famillyTable,
 			                List<TaxationConfigurations> taxTable){
 		
 		
-		setInformation(suple, tool, loan, attendance, lastMonthAttendance, overtime, extraParams);
+		setInformation(suple, tool, loan, attendance, lastMonthAttendance, overtime, salary);
 		init(closingDateLastMonth, wageConfigurations, dateConfigurations, famillyTable, taxTable);
 		
 	}
@@ -195,24 +194,26 @@ public class SalaryCalculator {
             Attendance attendance,
             Attendance lastMonthAttendance,
             Overtime overtime,
-            ExtraParams extraParams){
+            Salary salary){
 		
 		this.attendance = attendance;	
 		this.date = attendance.getDate();	
 		this.lastMonthAttendance = lastMonthAttendance;		
 		this.overtime = overtime;	
-		this.extraParams = extraParams;
 		
-		this.bonoImponibleEspecial = extraParams.getSpecialBond();
-		this.bonoCargoLoc2 = extraParams.getBondMov2();
-		this.km = extraParams.getKm();
-		this.horasDescuento = extraParams.getDescHours();
-		this.horasSobreTiempo = extraParams.getOvertimeHours();
+		setSalary(salary);
 		
 		this.suple = suple;
 		this.tool = tool;
 		this.loan = loan;
 		
+	}
+	
+	private void setSalary(Salary salary){
+		this.bonoImponibleEspecial = salary.getSpecialBond();
+		this.bonoCargoLoc2 = salary.getBondMov2();
+		this.horasDescuento = salary.getDescHours();
+		this.horasSobreTiempo = salary.getOvertimeHours();
 	}
 	
 	/**
@@ -266,8 +267,8 @@ public class SalaryCalculator {
 		if(overtime == null )
 			throw new RuntimeException("Las horas de sobre tiempo, no están definidas(null)");
 		
-		if(extraParams == null )
-			throw new RuntimeException("Los parámetros extras (bono especial, km ,etc), no están definidos(null)");
+//		if(extraParams == null )
+//			throw new RuntimeException("Los parámetros extras (bono especial, km ,etc), no están definidos(null)");
 		
 		if(suple == null )
 			throw new RuntimeException("El suple no está definido(null)");
@@ -333,7 +334,7 @@ public class SalaryCalculator {
 		if(dateConfigurations == null )
 			throw new RuntimeException("Aún no se definen los valores de fecha de cierres, uf, bencina, petroleo, etc., no se puede calcular el sueldo.");
 		
-		this.bencina = dateConfigurations.getBenzine();
+//		this.bencina = dateConfigurations.getBenzine();
 		this.ufMes = dateConfigurations.getUf();
 	}
 
@@ -341,10 +342,11 @@ public class SalaryCalculator {
 	 * Permite calcular el sueldo de un trabajador
 	 * @return
 	 */
-	public double calculateSalary(Integer jornalPromedio,Double suple) {
+	public double calculateSalary(Integer jornalPromedio,Double suple,Salary salary2) {
 		this.jornalPromedio = jornalPromedio;
 		this.suple = suple;
 		logger.debug("jornalPromedio {}",jornalPromedio);
+		setSalary(salary2);
 		//valida que este toda la información necesaria para el calculo
 		validateInformation();
 		double salary = getAfecto() + getSobreAfecto() + getTNoAfecto() - getTDesc();
@@ -419,7 +421,7 @@ public class SalaryCalculator {
 	 * @return
 	 */
 	private double calculateBonifImpo(DateTime closingDate,Attendance attendance,Attendance lastMonthAttendance,double jornalBaseMes) {
-		return calculateBonoBencina() + bonoImponibleEspecial + calculateLLuvia(attendance,jornalBaseMes) + calculateLLuviaMesAnterior(closingDate,attendance,lastMonthAttendance,jornalBaseMes) + calculateAjusteAsistenciaMesAnterior(closingDate,attendance,lastMonthAttendance);
+		return /*calculateBonoBencina() +*/ bonoImponibleEspecial + calculateLLuvia(attendance,jornalBaseMes) + calculateLLuviaMesAnterior(closingDate,attendance,lastMonthAttendance,jornalBaseMes) + calculateAjusteAsistenciaMesAnterior(closingDate,attendance,lastMonthAttendance);
 	}
 
 	/**
@@ -493,14 +495,14 @@ public class SalaryCalculator {
 		return sumLluvia * jornalBaseMes * 1.2;
 	}
 
-	/**
-	 * DONE
-	 * =(64+$DC$7/8)*DD32
-	 * @return
-	 */
-	private double calculateBonoBencina() {
-		return (64 + bencina / 8 )*km;
-	}
+//	/**
+//	 * DONE
+//	 * =(64+$DC$7/8)*DD32
+//	 * @return
+//	 */
+//	private double calculateBonoBencina() {
+//		return (64 + bencina / 8 )*km;
+//	}
 
 	/**
 	 * DONE

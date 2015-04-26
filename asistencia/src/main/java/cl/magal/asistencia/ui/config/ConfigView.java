@@ -520,16 +520,6 @@ public class ConfigView extends VerticalLayout implements View {
 						finishDeal.addValueChangeListener(listener);
 						addComponent(finishDeal);
 						
-						Field oil = fg.buildAndBind("Petroleo", "oil");
-						((TextField)oil).setNullRepresentation("");
-						oil.addValueChangeListener(listener);
-						addComponent(oil);
-						
-						Field benzine = fg.buildAndBind("Bencina", "benzine");
-						((TextField)benzine).setNullRepresentation("");
-						benzine.addValueChangeListener(listener);
-						addComponent(benzine);
-
 						Field uf = fg.buildAndBind("UF Mes", "uf");
 						((TextField)uf).setNullRepresentation("");
 						uf.addValueChangeListener(listener);
