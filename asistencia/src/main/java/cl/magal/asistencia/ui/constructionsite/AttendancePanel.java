@@ -783,8 +783,8 @@ public class AttendancePanel extends Panel implements View {
 					@Override
 					public Object generateCell(final Table source, final Object itemId,final Object columnId) {
 						final BeanItem<Salary> item = (BeanItem<Salary>) salaryContainer.getItem(itemId);
-						final Label label  = new Label("<b>"+Utils.formatInteger((Integer) salaryContainer.getContainerProperty(itemId, "roundSalary").getValue())+"</b>"+
-								"  ("+Utils.formatInteger((Integer) salaryContainer.getContainerProperty(itemId, columnId).getValue())+")");
+						final Label label  = new Label("<b>"+Utils.formatInteger((Integer) salaryContainer.getContainerProperty(itemId, columnId).getValue())+"</b>"+
+								"  ("+Utils.formatInteger((Integer) salaryContainer.getContainerProperty(itemId, "roundSalary").getValue())+")");
 						label.setContentMode(ContentMode.HTML);
 						for(final String pid : new String[]{"jornalPromedio","suple","descHours","bondMov2","specialBond"})
 							((ValueChangeNotifier)item.getItemProperty(pid)).addValueChangeListener(new Property.ValueChangeListener() {
@@ -796,8 +796,8 @@ public class AttendancePanel extends Panel implements View {
 									}
 									Object result = salaryContainer.getItem(itemId).getItemProperty("forceSalary").getValue();
 									logger.debug("salary == null {}, {}",result,itemId);
-									label.setValue( "<b>"+Utils.formatInteger((Integer) salaryContainer.getContainerProperty(itemId, "roundSalary").getValue())+"</b>"+
-											"  ("+Utils.formatInteger((Integer) salaryContainer.getContainerProperty(itemId, columnId).getValue())+")");
+									label.setValue( "<b>"+Utils.formatInteger((Integer) salaryContainer.getContainerProperty(itemId, columnId).getValue())+"</b>"+
+											"  ("+Utils.formatInteger((Integer) salaryContainer.getContainerProperty(itemId, "roundSalary").getValue())+")");
 									Utils.notifyPropertyValueChanged(item,"jornalBaseMes","vtrato","valorSabado","vsCorrd","sobreTiempo","descHoras","bonifImpo","glegal","afecto","sobreAfecto","cargas","asigFamiliar","colacion","mov","mov2","tnoAfecto");
 								}
 							});
@@ -957,7 +957,12 @@ public class AttendancePanel extends Panel implements View {
 		//		overtimeGrid.setSizeFull();
 		overtimeGrid.setHeight("100%");
 		overtimeGrid.setWidth("100%");
-		overtimeGrid.setEditorFieldGroup(new BeanFieldGroup<Overtime>(Overtime.class));
+		//overtimeGrid.setEditorFieldGroup(new BeanFieldGroup<Overtime>(Overtime.class));
+		
+		BeanFieldGroup binder = new BeanFieldGroup<Overtime>(Overtime.class);
+		binder.setFieldFactory(new EnhancedFieldGroupFieldFactory());
+		overtimeGrid.setEditorFieldGroup(binder);
+		//overtimeGrid.setEditorFieldGroup(new BeanFieldGroup<EnhancedFieldGroupFieldFactory>(EnhancedFieldGroupFieldFactory.class));
 		overtimeGrid.getEditorFieldGroup().addCommitHandler(new CommitHandler() {
 
 			@Override
@@ -996,7 +1001,7 @@ public class AttendancePanel extends Panel implements View {
 
 		overtimeContainer.sort(new Object[]{"laborerConstructionSite.activeContract.jobCode"}, new boolean[]{true});
 		overtimeGrid.getColumn("laborerConstructionSite.activeContract.jobCode").setHeaderCaption("Oficio").setEditorField(new TextField(){{setReadOnly(true);}}).setWidth(100);
-		
+         
 		createHeaders(overtimeGrid);
 
 		return overtimeGrid;

@@ -44,158 +44,158 @@ public class Overtime implements Serializable {
 	LaborerConstructionsite laborerConstructionSite;
 	
 	@Column(name = "dmp1")
-	Integer dmp1 = 0;
+	Integer dmp1;
 	@Column(name = "dmp2")
-	Integer dmp2 = 0;
+	Integer dmp2;
 	@Column(name = "dmp3")
-	Integer dmp3 = 0;
+	Integer dmp3;
 	@Column(name = "dmp4")
-	Integer dmp4 = 0;
+	Integer dmp4;
 	@Column(name = "dmp5")
-	Integer dmp5 = 0;
+	Integer dmp5;
 	@Column(name = "dmp6")
-	Integer dmp6 = 0;
+	Integer dmp6;
 	@Column(name = "dmp7")
-	Integer dmp7 = 0;
+	Integer dmp7;
 	@Column(name = "dmp8")
-	Integer dmp8 = 0;
+	Integer dmp8;
 	@Column(name = "dmp9")
-	Integer dmp9 = 0;
+	Integer dmp9;
 	@Column(name = "dmp10")
-	Integer dmp10 = 0;
+	Integer dmp10;
 	@Column(name = "dmp11")
-	Integer dmp11 = 0;
+	Integer dmp11;
 	@Column(name = "dmp12")
-	Integer dmp12 = 0;
+	Integer dmp12;
 	@Column(name = "dmp13")
-	Integer dmp13 = 0;
+	Integer dmp13;
 	@Column(name = "dmp14")
-	Integer dmp14 = 0;
+	Integer dmp14;
 	@Column(name = "dmp15")
-	Integer dmp15 = 0;
+	Integer dmp15;
 	@Column(name = "dmp16")
-	Integer dmp16 = 0;
+	Integer dmp16;
 	@Column(name = "dmp17")
-	Integer dmp17 = 0;
+	Integer dmp17;
 	@Column(name = "dmp18")
-	Integer dmp18 = 0;
+	Integer dmp18;
 	@Column(name = "dmp19")
-	Integer dmp19 = 0;
+	Integer dmp19;
 	@Column(name = "dmp20")
-	Integer dmp20 = 0;
+	Integer dmp20;
 	@Column(name = "dmp21")
-	Integer dmp21 = 0;
+	Integer dmp21;
 	@Column(name = "dmp22")
-	Integer dmp22 = 0;
+	Integer dmp22;
 	@Column(name = "dmp23")
-	Integer dmp23 = 0;
+	Integer dmp23;
 	@Column(name = "dmp24")
-	Integer dmp24 = 0;
+	Integer dmp24;
 	@Column(name = "dmp25")
-	Integer dmp25 = 0;
+	Integer dmp25;
 	@Column(name = "dmp26")
-	Integer dmp26 = 0;
+	Integer dmp26;
 	@Column(name = "dmp27")
-	Integer dmp27 = 0;
+	Integer dmp27;
 	@Column(name = "dmp28")
-	Integer dmp28 = 0;
+	Integer dmp28;
 	@Column(name = "dmp29")
-	Integer dmp29 = 0;
+	Integer dmp29;
 	@Column(name = "dmp30")
-	Integer dmp30 = 0;
+	Integer dmp30;
 	@Column(name = "dmp31")
-	Integer dmp31 = 0;
+	Integer dmp31;
 	
 	@Column(name = "dma1" ,nullable = false )
-	Integer dma1 = 0;
+	Integer dma1;
 	
 	@Column(name = "dma2" ,nullable = false )
-	Integer dma2 = 0;
+	Integer dma2;
 	
 	@Column(name = "dma3" ,nullable = false )
-	Integer dma3 = 0;
+	Integer dma3;
 	
 	@Column(name = "dma4" ,nullable = false )
-	Integer dma4 = 0;
+	Integer dma4;
 	
 	@Column(name = "dma5" ,nullable = false )
-	Integer dma5 = 0;
+	Integer dma5;
 	
 	@Column(name = "dma6" ,nullable = false )
-	Integer dma6 = 0;
+	Integer dma6;
 	
 	@Column(name = "dma7" ,nullable = false )
-	Integer dma7 = 0;
+	Integer dma7;
 	
 	@Column(name = "dma8" ,nullable = false )
-	Integer dma8 = 0;
+	Integer dma8;
 	
 	@Column(name = "dma9" ,nullable = false )
-	Integer dma9 = 0;
+	Integer dma9;
 	
 	@Column(name = "dma10" ,nullable = false )
-	Integer dma10 = 0;
+	Integer dma10;
 	
 	@Column(name = "dma11" ,nullable = false )
-	Integer dma11 = 0;
+	Integer dma11;
 	
 	@Column(name = "dma12" ,nullable = false )
-	Integer dma12 = 0;
+	Integer dma12;
 	
 	@Column(name = "dma13" ,nullable = false )
-	Integer dma13 = 0;
+	Integer dma13;
 	
 	@Column(name = "dma14" ,nullable = false )
-	Integer dma14 = 0;
+	Integer dma14;
 	
 	@Column(name = "dma15" ,nullable = false )
-	Integer dma15 = 0;
+	Integer dma15;
 	
 	@Column(name = "dma16" ,nullable = false )
-	Integer dma16 = 0;
+	Integer dma16;
 	
 	@Column(name = "dma17" ,nullable = false )
-	Integer dma17 = 0;
+	Integer dma17;
 	
 	@Column(name = "dma18" ,nullable = false )
-	Integer dma18 = 0;
+	Integer dma18;
 	
 	@Column(name = "dma19" ,nullable = false )
-	Integer dma19 = 0;
+	Integer dma19;
 	
 	@Column(name = "dma20" ,nullable = false )
-	Integer dma20 = 0;
+	Integer dma20;
 	
 	@Column(name = "dma21" ,nullable = false )
-	Integer dma21 = 0;
+	Integer dma21;
 	
 	@Column(name = "dma22" ,nullable = false )
-	Integer dma22 = 0;
+	Integer dma22;
 	
 	@Column(name = "dma23" ,nullable = false )
-	Integer dma23 = 0;
+	Integer dma23;
 	
 	@Column(name = "dma24" ,nullable = false )
-	Integer dma24 = 0;
+	Integer dma24;
 	
 	@Column(name = "dma25" ,nullable = false )
-	Integer dma25 = 0;
+	Integer dma25;
 	
 	@Column(name = "dma26" ,nullable = false )
-	Integer dma26 = 0;
+	Integer dma26;
 	
 	@Column(name = "dma27" ,nullable = false )
-	Integer dma27 = 0;
+	Integer dma27;
 	
 	@Column(name = "dma28" ,nullable = false )
-	Integer dma28 = 0;
+	Integer dma28;
 	
 	@Column(name = "dma29")
-	Integer dma29 = 0;
+	Integer dma29;
 	@Column(name = "dma30")
-	Integer dma30 = 0;
+	Integer dma30;
 	@Column(name = "dma31")
-	Integer dma31 = 0;
+	Integer dma31;
 	
 	public List<Integer> getOvertimeAsList() {
 		ArrayList<Integer> tmp = new ArrayList<Integer>();

@@ -625,10 +625,12 @@ public class SalaryCalculator {
 	private int calculateHorasSobrtpo(Overtime overtime) {
 		int count = 0;
 		for(Integer i : overtime.getOvertimeAsList()){
-			count += i;
+			if(i != null)
+				count += i;
 		}
 		for(Integer i : overtime.getLastMonthOvertimeAsList()){
-			count += i;
+			if(i != null)
+				count += i;
 		}
 		return count;
 	}
