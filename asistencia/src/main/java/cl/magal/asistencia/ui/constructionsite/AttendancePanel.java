@@ -957,7 +957,12 @@ public class AttendancePanel extends Panel implements View {
 		//		overtimeGrid.setSizeFull();
 		overtimeGrid.setHeight("100%");
 		overtimeGrid.setWidth("100%");
-		overtimeGrid.setEditorFieldGroup(new BeanFieldGroup<Overtime>(Overtime.class));
+		//overtimeGrid.setEditorFieldGroup(new BeanFieldGroup<Overtime>(Overtime.class));
+		
+		BeanFieldGroup binder = new BeanFieldGroup<Overtime>(Overtime.class);
+		binder.setFieldFactory(new EnhancedFieldGroupFieldFactory());
+		overtimeGrid.setEditorFieldGroup(binder);
+		//overtimeGrid.setEditorFieldGroup(new BeanFieldGroup<EnhancedFieldGroupFieldFactory>(EnhancedFieldGroupFieldFactory.class));
 		overtimeGrid.getEditorFieldGroup().addCommitHandler(new CommitHandler() {
 
 			@Override
@@ -996,7 +1001,7 @@ public class AttendancePanel extends Panel implements View {
 
 		overtimeContainer.sort(new Object[]{"laborerConstructionSite.activeContract.jobCode"}, new boolean[]{true});
 		overtimeGrid.getColumn("laborerConstructionSite.activeContract.jobCode").setHeaderCaption("Oficio").setEditorField(new TextField(){{setReadOnly(true);}}).setWidth(100);
-		
+         
 		createHeaders(overtimeGrid);
 
 		return overtimeGrid;
