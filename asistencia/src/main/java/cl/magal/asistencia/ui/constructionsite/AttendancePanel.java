@@ -27,6 +27,7 @@ import cl.magal.asistencia.entities.enums.Permission;
 import cl.magal.asistencia.services.ConfigurationService;
 import cl.magal.asistencia.services.ConstructionSiteService;
 import cl.magal.asistencia.services.LaborerService;
+import cl.magal.asistencia.services.MailService;
 import cl.magal.asistencia.services.UserService;
 import cl.magal.asistencia.ui.ListenerFieldFactory;
 import cl.magal.asistencia.ui.MagalUI;
@@ -111,6 +112,8 @@ public class AttendancePanel extends Panel implements View {
 	private transient UserService userService;
 	@Autowired
 	private transient ConfigurationService confService;
+	@Autowired
+	private transient MailService mailService;
 	
 	AdvancePaymentConfigurations advancepayment;
 	/** CONTAINERS **/
@@ -556,6 +559,10 @@ public class AttendancePanel extends Panel implements View {
 												btnSupleObraConfirm.setEnabled(true);
 											}
 										}
+										
+										//si todo sale bien, manda un email a los centrales
+										if(confirmations.isSupleObraCheck())
+											mailService.sendSupleConfirmationEmail(cs);
 									}
 
 								});						
@@ -740,6 +747,9 @@ public class AttendancePanel extends Panel implements View {
 												btnConstructionSiteConfirm.setVisible(true);
 												btnConstructionSiteConfirm.setEnabled(true);
 											}
+											//si todo sale bien, envia el mail a los centrales
+											if(confirmations.isConstructionSiteCheck())
+												mailService.sendSalaryConfirmationEmail(cs);
 										}
 									}
 

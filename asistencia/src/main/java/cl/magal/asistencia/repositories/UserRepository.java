@@ -10,6 +10,7 @@ import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 
 import cl.magal.asistencia.entities.User;
+import cl.magal.asistencia.entities.enums.Permission;
 
 public interface UserRepository extends PagingAndSortingRepository<User, Long> {
 
@@ -25,4 +26,7 @@ public interface UserRepository extends PagingAndSortingRepository<User, Long> {
 	
 	@Query(value="SELECT u FROM User u WHERE u.deleted = false " )
 	List<User> findAllNotDeteled();
+
+	@Query(value="SELECT u FROM User u, u.role r WHERE ?1 member of r.permission and u.deleted = false " )
+	List<User> findAllByPermission(Permission confirmarAsistenciaCentral);
 }
