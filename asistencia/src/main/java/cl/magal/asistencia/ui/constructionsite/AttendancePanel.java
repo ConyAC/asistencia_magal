@@ -151,8 +151,10 @@ public class AttendancePanel extends Panel implements View {
 
 	private DateTime getAttendanceDate() {
 		if(attendanceDate.getValue() == null ){
+			logger.debug("Ingreso a la funcion: ");
 			attendanceDate.setValue(new DateTime().dayOfMonth().withMinimumValue().toDate()); //agrega el primer día del mes actual
 		}
+		logger.debug("Ingreso a la funcion: "+ attendanceDate.getValue());
 		return new DateTime(attendanceDate.getValue());
 	}
 	
@@ -415,10 +417,13 @@ public class AttendancePanel extends Panel implements View {
 		HeaderRow filterRow =  grid.appendHeaderRow();
 		//si la propiedad comienza con d (dia) o dmp (dia mes pasado), entonces muestra el dia de la semana correspondiente
 		final DateTime dt = getAttendanceDate();
+		final Label label = new Label();
+		logger.debug("Día del primer mes: "+dt);
 		for (final Object pid: grid.getContainerDataSource().getContainerPropertyIds()) {
-
+			logger.debug("PID: "+pid.toString());
 			final HeaderCell cell = filterRow.getCell(pid);
-
+			if(cell != null)
+				logger.debug("CELLL: "+cell.getText());
 			if(pid.equals("laborerConstructionSite.activeContract.jobCode")){
 				// Have an input field to use for filter
 				TextField filterField = new TextField();
@@ -443,16 +448,18 @@ public class AttendancePanel extends Panel implements View {
 				if(cell != null)
 					cell.setComponent(filterField);
 			}else {
-				Label label = new Label();
 				if(grid.getColumn(pid) != null )
 					grid.getColumn(pid).setSortable(false);//.setWidth(50);
+				logger.debug("GRIDD: "+grid.toString());
 				//calculo de la semana
 				if(((String) pid).startsWith("dmp") || ((String) pid).startsWith("dma")  ){
 					//calcula el numero del mes
 					int monthDay = Integer.parseInt(((String) pid).replace("dmp","").replace("dma",""));
+					logger.debug("MES :"+monthDay);
 					DateTime dt2 = dt;
 					if ( ((String) pid).startsWith("dmp") )
 						dt2 = dt2.minusMonths(1);
+					logger.debug("DT2: "+dt2);
 					//el número de mes no es un número válido de mes o si es un día a la fecha de cierre del mes pasado, oculta la columna
 					if(monthDay > dt2.dayOfMonth().getMaximumValue() || 
 					   ( ((String) pid).startsWith("dmp") && monthDay <= getPastMonthClosingDate().getDayOfMonth())){
@@ -464,7 +471,8 @@ public class AttendancePanel extends Panel implements View {
 					}
 					
 				}
-				
+				logger.debug("Label: "+label.getValue());
+					
 				if(cell != null)
 					cell.setComponent(label);
 			}
@@ -473,6 +481,9 @@ public class AttendancePanel extends Panel implements View {
 				
 				@Override
 				public String getStyle(CellReference cellReference) {
+					Label labelt = label;
+					logger.debug("tya puro weando"+labelt.getValue());
+					logger.debug("tya puro weando"+cellReference.getValue());
 					String post = "";
 					if( (cellReference.getValue() instanceof AttendanceMark && !AttendanceMark.ATTEND.equals(cellReference.getValue())) ||
 						(cellReference.getValue() instanceof Integer && 0 != (Integer)cellReference.getValue()))
@@ -1120,7 +1131,7 @@ public class AttendancePanel extends Panel implements View {
 
 		attendanceContainer.sort(new Object[]{"laborerConstructionSite.activeContract.jobCode"}, new boolean[]{true});
 		attendanceGrid.getColumn("laborerConstructionSite.activeContract.jobCode").setHeaderCaption("Oficio").setEditorField(new TextField(){{setReadOnly(true);}}).setWidth(100);
-
+		logger.debug("VER: "+attendanceContainer.getItem("dma1"));
 		createHeaders(attendanceGrid);
 		
 		return attendanceGrid;
