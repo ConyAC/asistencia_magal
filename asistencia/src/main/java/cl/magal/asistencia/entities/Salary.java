@@ -155,7 +155,7 @@ public class Salary implements Serializable {
 		if(salary == null){
 			if(salaryCalculator == null )
 				throw new RuntimeException("El calculador de sueldos no puede ser nulo.");
-			salary = salaryCalculator.calculateSalary(getJornalPromedio(),getSuple(),this);
+			salary = salaryCalculator.calculateSalary(getJornalPromedio(),getSuple(),getLoanBond(),this);
 		}
 		return salary;
 	}

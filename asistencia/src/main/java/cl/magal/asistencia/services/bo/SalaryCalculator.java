@@ -34,7 +34,7 @@ public class SalaryCalculator {
 	List<FamilyAllowanceConfigurations> famillyTable;
 	List<TaxationConfigurations> taxTable;
 	WageConfigurations wageConfigurations;
-	Integer jornalPromedio;
+	Integer jornalPromedio,bonoCalculado;
 	
 	double bonoImponibleEspecial,bonoCargoLoc2, horasDescuento, horasSobreTiempo,ufMes,collation,mov1;
 	
@@ -301,6 +301,7 @@ public class SalaryCalculator {
 		this.bonoCargoLoc2 = salary.getBondMov2();
 		this.horasDescuento = salary.getDescHours();
 		this.horasSobreTiempo = salary.getOvertimeHours();
+		this.bonoCalculado = salary.getLoanBond();
 	}
 	
 	/**
@@ -436,7 +437,7 @@ public class SalaryCalculator {
 		setSalary(salary2);
 		//valida que este toda la información necesaria para el calculo
 		validateInformation();
-		double salary = getAfecto() + getSobreAfecto() + getTNoAfecto() - getTDesc();
+		double salary = getAfecto() + getSobreAfecto() + getTNoAfecto() - getTDesc() + salary2.getLoanBond();
 		logger.debug("salario calculado {}",salary);
 		return salary;
 	}

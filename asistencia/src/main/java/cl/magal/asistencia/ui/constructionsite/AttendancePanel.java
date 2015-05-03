@@ -817,12 +817,14 @@ public class AttendancePanel extends Panel implements View {
 					@Override
 					public Object generateCell(final Table source, final Object itemId,final Object columnId) {
 						final BeanItem<Salary> item = (BeanItem<Salary>) salaryContainer.getItem(itemId);
+						final Label label  = new Label();
+
 						List<Integer> l = laborerService.findPriceLoan((Long) item.getItemProperty("laborerConstructionSite.id").getValue());
 						int prestamo = 0;
 						for(Integer p : l){
 							prestamo += p;
 						}
-						final Label label  = new Label();
+						item.getItemProperty("loanBond").setValue(prestamo);
 						label.setValue(Utils.formatInteger(prestamo));
 						label.setContentMode(ContentMode.HTML);
 
