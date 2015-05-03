@@ -441,7 +441,6 @@ public class AttendancePanel extends Panel implements View {
 	}
 
 	private void createHeaders(final Grid grid) {
-		Label test = new Label();
 		HeaderRow filterRow =  grid.appendHeaderRow();
 		//si la propiedad comienza con d (dia) o dmp (dia mes pasado), entonces muestra el dia de la semana correspondiente
 		final DateTime dt = getAttendanceDate();
@@ -497,20 +496,12 @@ public class AttendancePanel extends Panel implements View {
 				
 				if(cell != null)
 					cell.setComponent(label);
-				
-				test = label;
 			}
-			logger.debug("if : "+test.getValue());
-			final Label t = test;
-			logger.debug("t : "+t.getValue());
+			
 			grid.setCellStyleGenerator(new Grid.CellStyleGenerator() {
 				
 				@Override
 				public String getStyle(CellReference cellReference) {
-					Label q = t;
-					logger.debug("tesT: "+q.getValue()+ " "+q);
-					logger.debug("getI: "+cellReference.getItem());
-					logger.debug("getII: "+cellReference.getItemId());
 					String post = "";
 					if( (cellReference.getValue() instanceof AttendanceMark && !AttendanceMark.ATTEND.equals(cellReference.getValue())) ||
 						(cellReference.getValue() instanceof Integer && 0 != (Integer)cellReference.getValue()))
@@ -1056,7 +1047,6 @@ public class AttendancePanel extends Panel implements View {
 		attendanceGrid.setSelectionMode(SelectionMode.SINGLE);
 		attendanceGrid.setSizeFull();
 		BeanFieldGroup<Attendance> bfg = new BeanFieldGroup<Attendance>(Attendance.class);
-		logger.debug("bfg: "+bfg.getFields());
 		bfg.addCommitHandler(new CommitHandler() {
 			
 			@Override
@@ -1136,9 +1126,7 @@ public class AttendancePanel extends Panel implements View {
 		attendanceGrid.getColumn("laborerConstructionSite.activeContract.jobCode").setHeaderCaption("Oficio").setEditorField(new TextField(){{setReadOnly(true);}}).setWidth(100);
 
 		createHeaders(attendanceGrid);
-		logger.debug("LALA: "+attendanceGrid.getData());
-		logger.debug("LALA: "+attendanceGrid.getColumns().get(0).getHeaderCaption());
-		logger.debug("LALA: "+attendanceGrid.getId());
+		
 		return attendanceGrid;
 	}
 
