@@ -106,88 +106,88 @@ public class Overtime implements Serializable {
 	@Column(name = "dmp31")
 	Integer dmp31;
 	
-	@Column(name = "dma1" ,nullable = false )
+	@Column(name = "dma1"  )
 	Integer dma1;
 	
-	@Column(name = "dma2" ,nullable = false )
+	@Column(name = "dma2"  )
 	Integer dma2;
 	
-	@Column(name = "dma3" ,nullable = false )
+	@Column(name = "dma3"  )
 	Integer dma3;
 	
-	@Column(name = "dma4" ,nullable = false )
+	@Column(name = "dma4"  )
 	Integer dma4;
 	
-	@Column(name = "dma5" ,nullable = false )
+	@Column(name = "dma5"  )
 	Integer dma5;
 	
-	@Column(name = "dma6" ,nullable = false )
+	@Column(name = "dma6"  )
 	Integer dma6;
 	
-	@Column(name = "dma7" ,nullable = false )
+	@Column(name = "dma7"  )
 	Integer dma7;
 	
-	@Column(name = "dma8" ,nullable = false )
+	@Column(name = "dma8"  )
 	Integer dma8;
 	
-	@Column(name = "dma9" ,nullable = false )
+	@Column(name = "dma9"  )
 	Integer dma9;
 	
-	@Column(name = "dma10" ,nullable = false )
+	@Column(name = "dma10"  )
 	Integer dma10;
 	
-	@Column(name = "dma11" ,nullable = false )
+	@Column(name = "dma11"  )
 	Integer dma11;
 	
-	@Column(name = "dma12" ,nullable = false )
+	@Column(name = "dma12"  )
 	Integer dma12;
 	
-	@Column(name = "dma13" ,nullable = false )
+	@Column(name = "dma13"  )
 	Integer dma13;
 	
-	@Column(name = "dma14" ,nullable = false )
+	@Column(name = "dma14"  )
 	Integer dma14;
 	
-	@Column(name = "dma15" ,nullable = false )
+	@Column(name = "dma15"  )
 	Integer dma15;
 	
-	@Column(name = "dma16" ,nullable = false )
+	@Column(name = "dma16"  )
 	Integer dma16;
 	
-	@Column(name = "dma17" ,nullable = false )
+	@Column(name = "dma17"  )
 	Integer dma17;
 	
-	@Column(name = "dma18" ,nullable = false )
+	@Column(name = "dma18"  )
 	Integer dma18;
 	
-	@Column(name = "dma19" ,nullable = false )
+	@Column(name = "dma19"  )
 	Integer dma19;
 	
-	@Column(name = "dma20" ,nullable = false )
+	@Column(name = "dma20"  )
 	Integer dma20;
 	
-	@Column(name = "dma21" ,nullable = false )
+	@Column(name = "dma21"  )
 	Integer dma21;
 	
-	@Column(name = "dma22" ,nullable = false )
+	@Column(name = "dma22"  )
 	Integer dma22;
 	
-	@Column(name = "dma23" ,nullable = false )
+	@Column(name = "dma23"  )
 	Integer dma23;
 	
-	@Column(name = "dma24" ,nullable = false )
+	@Column(name = "dma24"  )
 	Integer dma24;
 	
-	@Column(name = "dma25" ,nullable = false )
+	@Column(name = "dma25"  )
 	Integer dma25;
 	
-	@Column(name = "dma26" ,nullable = false )
+	@Column(name = "dma26"  )
 	Integer dma26;
 	
-	@Column(name = "dma27" ,nullable = false )
+	@Column(name = "dma27"  )
 	Integer dma27;
 	
-	@Column(name = "dma28" ,nullable = false )
+	@Column(name = "dma28"  )
 	Integer dma28;
 	
 	@Column(name = "dma29")
