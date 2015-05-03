@@ -74,6 +74,9 @@ public class Salary implements Serializable {
 	@Column(name="desc_hours")
 	Integer descHours = 0;
 	
+	@Column(name="loan_bond")
+	Integer loanBond = 0;
+	
 	/**
 	 * Objeto que permite el calculo de los sueldos
 	 */
@@ -225,6 +228,13 @@ public class Salary implements Serializable {
 	}
 	public void setLastJornalPromedio(Integer lastJornalPromedio) {
 		this.lastJornalPromedio = lastJornalPromedio;
+	}
+	
+	public Integer getLoanBond() {
+		return loanBond;
+	}
+	public void setLoanBond(Integer loanBond) {
+		this.loanBond = loanBond;
 	}
 	
 	/**

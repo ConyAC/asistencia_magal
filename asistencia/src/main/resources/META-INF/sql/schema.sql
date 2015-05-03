@@ -815,6 +815,7 @@ CREATE TABLE IF NOT EXISTS salary (
   desc_hours integer,
   overtime_hours integer,
   special_bond integer,
+  loan_bond integer,
   laborer_constructionsiteId bigint(20) NOT NULL
 );
 

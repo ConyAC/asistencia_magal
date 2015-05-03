@@ -17,6 +17,7 @@ import org.springframework.transaction.TransactionSystemException;
 import cl.magal.asistencia.entities.ConstructionSite;
 import cl.magal.asistencia.entities.Laborer;
 import cl.magal.asistencia.entities.LaborerConstructionsite;
+import cl.magal.asistencia.entities.Loan;
 import cl.magal.asistencia.entities.Tool;
 import cl.magal.asistencia.entities.enums.Job;
 import cl.magal.asistencia.repositories.LicenseRepositoy;
@@ -204,5 +205,9 @@ public class LaborerService {
 	
 	public Tool saveDatePostponed(Tool tool) {
 		return toolRepo.save(tool);
+	}	
+	
+	public List<Integer> findPriceLoan( Long id ) {
+		return loanRepo.findPriceLoan(id);
 	}	
 }

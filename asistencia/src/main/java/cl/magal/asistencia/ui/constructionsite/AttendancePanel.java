@@ -2,6 +2,7 @@ package cl.magal.asistencia.ui.constructionsite;
 
 import java.io.OutputStream;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
@@ -20,6 +21,7 @@ import cl.magal.asistencia.entities.Attendance;
 import cl.magal.asistencia.entities.Confirmations;
 import cl.magal.asistencia.entities.ConstructionSite;
 import cl.magal.asistencia.entities.DateConfigurations;
+import cl.magal.asistencia.entities.Loan;
 import cl.magal.asistencia.entities.Overtime;
 import cl.magal.asistencia.entities.Salary;
 import cl.magal.asistencia.entities.enums.AttendanceMark;
@@ -810,6 +812,26 @@ public class AttendancePanel extends Panel implements View {
 				salaryTable.setContainerDataSource(salaryContainer);
 				salaryTable.setColumnCollapsingAllowed(true);
 				
+				//Bono préstamo
+				salaryTable.addGeneratedColumn("bonoCal", new Table.ColumnGenerator(){
+
+					@Override
+					public Object generateCell(final Table source, final Object itemId,final Object columnId) {
+						final BeanItem<Salary> item = (BeanItem<Salary>) salaryContainer.getItem(itemId);
+						List<Integer> l = laborerService.findPriceLoan((Long) item.getItemProperty("laborerConstructionSite.id").getValue());
+						int prestamo = 0;
+						for(Integer p : l){
+							prestamo += p;
+						}
+						final Label label  = new Label();
+						label.setValue(Utils.formatInteger(prestamo));
+						label.setContentMode(ContentMode.HTML);
+
+						return label;
+					}
+					
+				});
+				
 				salaryTable.addGeneratedColumn("totalLiquido", new Table.ColumnGenerator(){
 
 					@Override
@@ -818,7 +840,7 @@ public class AttendancePanel extends Panel implements View {
 						final Label label  = new Label("<b>"+Utils.formatInteger((Integer) salaryContainer.getContainerProperty(itemId, columnId).getValue())+"</b>"+
 								"  ("+Utils.formatInteger((Integer) salaryContainer.getContainerProperty(itemId, "roundSalary").getValue())+")");
 						label.setContentMode(ContentMode.HTML);
-						for(final String pid : new String[]{"jornalPromedio","suple","descHours","bondMov2","specialBond"})
+						for(final String pid : new String[]{"jornalPromedio","suple","descHours","bondMov2","specialBond","loanBond"})
 							((ValueChangeNotifier)item.getItemProperty(pid)).addValueChangeListener(new Property.ValueChangeListener() {
 								
 								@Override
@@ -839,11 +861,11 @@ public class AttendancePanel extends Panel implements View {
 				});
 				
 				salaryTable.setVisibleColumns("laborerConstructionSite.activeContract.jobCode",
-						"laborerConstructionSite.laborer.fullname","lastJornalPromedio","jornalPromedio","descHours","bondMov2","specialBond","totalLiquido"
+						"laborerConstructionSite.laborer.fullname","lastJornalPromedio","jornalPromedio","descHours","bondMov2","bonoCal","specialBond","totalLiquido"
 						,"jornalBaseMes","vtrato","valorSabado","vsCorrd","sobreTiempo","descHoras","bonifImpo","glegal","afecto","sobreAfecto","cargas","asigFamiliar","colacion","mov","mov2","tnoAfecto"
 						);
 				
-				salaryTable.setColumnHeaders("Oficio","Nombre","Último Jornal Promedio","Jornal Promedio","H Desc","Adicional Locomoción 2","Bono Imp.","Total Líquido (A Pagar)"
+				salaryTable.setColumnHeaders("Oficio","Nombre","Último Jornal Promedio","Jornal Promedio","H Desc","Adicional Locomoción 2","Bono Prest.","Bono Imp.","Total Líquido (A Pagar)"
 						,"Jornal Base", " V Trato", "Valor Sábado" , "V S Corrd", "Sobre Tiempo", "Desc Horas","Bonif Imp","G Legal","Afecto","Sobre Afecto","Cargas","A Familiar","Colación","Mov","Movi 2","T No Afecto"
 						);
 				
@@ -881,6 +903,7 @@ public class AttendancePanel extends Panel implements View {
 						if(propertyId.equals("jornalPromedio")||
 						   propertyId.equals("descHours")||
 						   propertyId.equals("specialBond")||
+						   propertyId.equals("loanBond")||
 						   propertyId.equals("bondMov2")){
 							tf.addBlurListener(new FieldEvents.BlurListener() {
 								
