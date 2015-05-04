@@ -203,8 +203,8 @@ MERGE INTO construction_company (construction_companyId,address,commune,rut,name
 
 --Construction SITE
 
-MERGE INTO construction_site (constructionsiteId,address,code,deleted,name,status,person_in_chargeId,construction_companyId) VALUES (1,'Av. Las Condes 8798','2332443',0,'Carolina Rabat 4 Etapa B',1,null,1);
-MERGE INTO construction_site (constructionsiteId,address,code,deleted,name,status,person_in_chargeId,construction_companyId) VALUES (2,'Av. Pajaritos 9934','565643',0,'Edificio Jardines de Olivares',1,null,2);
+MERGE INTO construction_site (constructionsiteId,address,code,cost_center,deleted,name,status,person_in_chargeId,construction_companyId) VALUES (1,'Av. Las Condes 8798','CR4B',8,0,'Carolina Rabat 4 Etapa B',1,null,1);
+MERGE INTO construction_site (constructionsiteId,address,code,cost_center,deleted,name,status,person_in_chargeId,construction_companyId) VALUES (2,'Av. Pajaritos 9934','EJO',1,0,'Edificio Jardines de Olivares',1,null,2);
 
 -- agrega los trabajadores a la obra Carolina Rabat 4 Etapa B
 

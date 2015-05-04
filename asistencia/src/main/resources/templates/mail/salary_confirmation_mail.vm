@@ -1,0 +1,9 @@
+<html>
+    <body>
+        <h3>Hola ${user.fullname}, 
+
+        <div>
+            Se ha confirmado la asistencia de la obra ${constructionsite.name} por el administrador de obra
+        </div>
+    </body>
+</html>

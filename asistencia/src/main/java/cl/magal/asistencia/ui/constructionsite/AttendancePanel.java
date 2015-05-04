@@ -1,17 +1,24 @@
 package cl.magal.asistencia.ui.constructionsite;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.velocity.app.VelocityEngine;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
+import org.springframework.ui.velocity.VelocityEngineUtils;
 import org.vaadin.dialogs.ConfirmDialog;
 
 import cl.magal.asistencia.entities.AdvancePaymentConfigurations;
@@ -27,6 +34,7 @@ import cl.magal.asistencia.entities.enums.Permission;
 import cl.magal.asistencia.services.ConfigurationService;
 import cl.magal.asistencia.services.ConstructionSiteService;
 import cl.magal.asistencia.services.LaborerService;
+import cl.magal.asistencia.services.MailService;
 import cl.magal.asistencia.services.UserService;
 import cl.magal.asistencia.ui.ListenerFieldFactory;
 import cl.magal.asistencia.ui.MagalUI;
@@ -34,10 +42,12 @@ import cl.magal.asistencia.ui.vo.AbsenceVO;
 import cl.magal.asistencia.util.Constants;
 import cl.magal.asistencia.util.SecurityHelper;
 import cl.magal.asistencia.util.Utils;
+import cl.magal.asistencia.util.VelocityHelper;
 
 import com.vaadin.data.Container;
 import com.vaadin.data.Container.Filterable;
 import com.vaadin.data.Container.SimpleFilterable;
+import com.vaadin.data.Item;
 import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeNotifier;
@@ -57,7 +67,9 @@ import com.vaadin.event.FieldEvents.TextChangeEvent;
 import com.vaadin.event.FieldEvents.TextChangeListener;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
+import com.vaadin.server.FileDownloader;
 import com.vaadin.server.FontAwesome;
+import com.vaadin.server.StreamResource;
 import com.vaadin.shared.ui.datefield.Resolution;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Alignment;
@@ -111,6 +123,10 @@ public class AttendancePanel extends Panel implements View {
 	private transient UserService userService;
 	@Autowired
 	private transient ConfigurationService confService;
+	@Autowired
+	private transient MailService mailService;
+	@Autowired
+	private transient VelocityEngine velocityEngine;
 	
 	AdvancePaymentConfigurations advancepayment;
 	/** CONTAINERS **/
@@ -127,10 +143,10 @@ public class AttendancePanel extends Panel implements View {
 	Grid attendanceGrid, overtimeGrid/*,extraGrid*/;
 	Window progressDialog;
 	InlineDateField attendanceDate;
-	Button btnExportSoftland,btnConstructionSiteConfirm,btnCentralConfirm,btnGenerateSalary,btnSupleObraConfirm,btnSupleCentralConfirm;
+	Button btnExportSoftland,btnExportSupleSoftland,btnConstructionSiteConfirm,btnCentralConfirm,btnSupleObraConfirm,btnSupleCentralConfirm;
 	Table confirmTable;
 	VerticalLayout root;
-	Table salaryTable;
+	Table supleTable,salaryTable;
 
 	/** ATRIBUTOS **/
 	Confirmations confirmations;
@@ -312,80 +328,131 @@ public class AttendancePanel extends Panel implements View {
 
 		return tab;
 	}
+	
+	private void enableOrDisableComponents(){
+		//la asistencia de obra se puede editar si
+		boolean attendanceEnabled =  
+			(
+			SecurityHelper.hasConstructionSite(cs) && //tiene asociada la obra
+			SecurityHelper.hasPermission(Permission.EDITAR_ASISTENCIA) && //tiene permisos para editar asistencia
+			!getConfirmations().isConstructionSiteCheck() //si aún no se confirma ese mes
+			) || // O
+			SecurityHelper.hasPermission(Permission.DESBLOQUEDAR_ASISTENCIA); //si tiene permisos para cancelar confirmación central (solo lo deberia tener el admin)
+		enableAttendance(attendanceEnabled);
+		enableSalary(attendanceEnabled);
+		//la asistencia de obra se puede editar si
+		boolean supleEnabled =  
+			(
+			SecurityHelper.hasConstructionSite(cs) && //tiene asociada la obra
+			SecurityHelper.hasPermission(Permission.EDITAR_ASISTENCIA) && //tiene permisos para editar asistencia
+			!getConfirmations().isSupleObraCheck() //si aún no se confirma ese mes
+			) || // O
+			SecurityHelper.hasPermission(Permission.DESBLOQUEDAR_ASISTENCIA); 
+		enableSuple(supleEnabled);
+		
+	}
+
+	private void setVisibilityOfButtons() {
+		//muestra el boton de obra, si tiene el permiso o si tiene permisos de confirmación central y esta confirmado de obra (para que pueda cancelar la confirmación)
+		boolean showOnConstructionSite = 
+				SecurityHelper.hasPermission(Permission.CONFIRMAR_ASISTENCIA_OBRA )||
+				( SecurityHelper.hasPermission(Permission.CONFIRMAR_ASISTENCIA_CENTRAL ) && getConfirmations().isConstructionSiteCheck()) ;
+		
+		boolean showOnCentral = 
+				SecurityHelper.hasPermission(Permission.CONFIRMAR_ASISTENCIA_CENTRAL) ;
+		
+		btnConstructionSiteConfirm.setVisible(showOnConstructionSite);
+		//muestra el boton de confirmación central, si tiene el permiso
+		btnCentralConfirm.setVisible(showOnCentral);
+		
+		//permite exportar a softland si se tiene doble confirmación y se tiene permisos
+		
+		btnExportSoftland.setVisible(SecurityHelper.hasPermission(Permission.GENERAR_SUELDOS_SOFTLAND));
+		btnExportSupleSoftland.setVisible(SecurityHelper.hasPermission(Permission.GENERAR_SUELDOS_SOFTLAND));
+		/**
+		 * Use el mismo código de arriba, reemplace los valores para considerar los botones del suple que se comportan igual.
+		 */
+		btnSupleObraConfirm.setVisible(
+				SecurityHelper.hasPermission(Permission.CONFIRMAR_ASISTENCIA_OBRA )||
+				( SecurityHelper.hasPermission(Permission.CONFIRMAR_ASISTENCIA_CENTRAL ) && getConfirmations().isSupleObraCheck() ));
+		btnSupleCentralConfirm.setVisible(showOnCentral);
+		
+	}
+
+	private void toogleButtonState(Button btn, boolean confirmations ){
+		if(confirmations){
+
+			btn.removeStyleName(Constants.STYLE_CLASS_GREEN_COLOR);
+			btn.addStyleName(Constants.STYLE_CLASS_RED_COLOR);
+			btn.setCaption(btn.getCaption().indexOf("Cancelar ") >= 0 ? btn.getCaption() : "Cancelar " + btn.getCaption());
+			btn.setIcon(FontAwesome.TIMES);
+
+		}else{
+
+			btn.removeStyleName(Constants.STYLE_CLASS_RED_COLOR);
+			btn.addStyleName(Constants.STYLE_CLASS_GREEN_COLOR);
+			btn.setCaption(btn.getCaption().indexOf("Cancelar ") >= 0 ? btn.getCaption().replace("Cancelar ", ""): btn.getCaption() );
+			btn.setIcon(FontAwesome.CHECK);
+		}
+	}
+	
+	private void enableOrDisableButtons(){
+		//el boton de confirmación obra se activa si
+		//se asegura que lo vea
+		btnConstructionSiteConfirm.setEnabled(
+				(
+				getConfirmations().isConstructionSiteCheck() && !getConfirmations().isCentralCheck() // si está confirmado por obra pero no por central 
+				&& SecurityHelper.hasPermission(Permission.CONFIRMAR_ASISTENCIA_CENTRAL) //y el usuario tiene permitido confirmar asistencia central (para que el central pueda cancelar la confirmación de obra )
+				)||
+				!getConfirmations().isConstructionSiteCheck() // si no se ha checkeado la construcción
+				);
+		
+		//boton de confirmación de central
+		btnCentralConfirm.setEnabled( 
+				(getConfirmations().isConstructionSiteCheck() && !getConfirmations().isCentralCheck()) ||
+				(getConfirmations().isConstructionSiteCheck() && getConfirmations().isCentralCheck() && 
+						SecurityHelper.hasPermission(Permission.DESBLOQUEDAR_ASISTENCIA) 
+		));
+		
+		//si está confirmado, lo habilita solo si tiene permiso para confirmar asistencia central
+		btnSupleObraConfirm.setEnabled((
+				getConfirmations().isSupleObraCheck() && !getConfirmations().isSupleCentralCheck() // si está confirmado por obra pero no por central 
+				&& SecurityHelper.hasPermission(Permission.CONFIRMAR_ASISTENCIA_CENTRAL) //y el usuario tiene permitido confirmar asistencia central (para que el central pueda cancelar la confirmación de obra )
+				)||
+				!getConfirmations().isSupleObraCheck());// si no se ha checkeado la construcción);
+		
+		btnSupleCentralConfirm.setEnabled(
+				(getConfirmations().isSupleObraCheck() && !getConfirmations().isSupleCentralCheck()) ||
+				(getConfirmations().isSupleObraCheck() && getConfirmations().isSupleCentralCheck() && 
+						SecurityHelper.hasPermission(Permission.DESBLOQUEDAR_ASISTENCIA) ) );
+
+		btnExportSoftland.setEnabled(getConfirmations().isCentralCheck()); //sólo se habilita si está la confirmación de central
+		btnExportSupleSoftland.setEnabled(getConfirmations().isSupleCentralCheck());
+	}
+	
+	private void enableSalary(boolean state) {
+		salaryTable.setEditable(state);
+	}
 
 	private void enableAttendance(boolean state) {
-		attendanceGrid.setEnabled(state);
-		overtimeGrid.setEnabled(state);
-		confirmTable.setEnabled(state);
-//		btnGenerateSalary.setEnabled(state);
+		
+		//fuerza que ningun item esté siendo editado
+		if(attendanceGrid.isEditorActive()){ 
+			attendanceGrid.cancelEditor();
+		}
+		attendanceGrid.setEditorEnabled(state);
+		
+		//fuerza que ningun item esté siendo editado
+		if(overtimeGrid.isEditorActive()) {
+			overtimeGrid.cancelEditor();
+		}
+		overtimeGrid.setEditorEnabled(state);
+		confirmTable.setEditable(state);
 	}
 	
 	private void enableSuple(boolean state) {
-		salaryTable.setEnabled(state);
+		supleTable.setEditable(state);
 	}
-
-//	private Grid drawExtraParamsGrid() {
-//		
-//		extraParamContainer.addNestedContainerProperty("laborerConstructionSite.activeContract.jobCode");
-//		
-//		GeneratedPropertyContainer gpcontainer =
-//			    new GeneratedPropertyContainer(extraParamContainer);
-//		
-//		gpcontainer.addGeneratedProperty("jobCode",new PropertyValueGenerator<Integer>() {
-//			    @Override
-//			    public Integer getValue(Item item, Object itemId,Object propertyId) {
-//			        int born = (Integer)item.getItemProperty("laborerConstructionSite.activeContract.jobCode").getValue();
-//			        return born;
-//			    }
-//
-//			    @Override
-//			    public Class<Integer> getType() {
-//			        return Integer.class;
-//			    }
-//			});
-//		
-//		extraGrid = new Grid(extraParamContainer);
-//		extraGrid.setSelectionMode(SelectionMode.SINGLE);
-//		extraGrid.setSizeFull();
-//		extraGrid.setEditorFieldGroup(new BeanFieldGroup<ExtraParams>(ExtraParams.class));
-//		extraGrid.getEditorFieldGroup().addCommitHandler(new CommitHandler() {
-//
-//			@Override
-//			public void preCommit(CommitEvent commitEvent) throws CommitException {
-//
-//			}
-//
-//			@Override
-//			public void postCommit(CommitEvent commitEvent) throws CommitException {
-//				//guarda el elmento
-//				ExtraParams attedance = ((BeanItem<ExtraParams>) commitEvent.getFieldBinder().getItemDataSource()).getBean();
-//				service.save(attedance);
-//				extraParamContainer.sort(new Object[]{"laborerConstructionSite.activeContract.jobCode"}, new boolean[]{true});
-//			}
-//		});
-//
-//		extraGrid.addStyleName("grid-attendace");
-//		extraGrid.setEditorEnabled(true);
-//		extraGrid.setFrozenColumnCount(1);
-//		if(extraGrid.getColumn("laborerConstructionSite") != null )
-//			extraGrid.removeColumn("laborerConstructionSite");
-//		if(extraGrid.getColumn("date") != null )
-//			extraGrid.removeColumn("date");
-//		if(extraGrid.getColumn("id") != null )
-//			extraGrid.removeColumn("id");
-//		
-//		extraGrid.setColumnOrder("laborerConstructionSite.activeContract.jobCode","bondMov2","km","specialBond","overtimeHours");
-//
-//		extraParamContainer.sort(new Object[]{"laborerConstructionSite.activeContract.jobCode"}, new boolean[]{true});
-//		extraGrid.getColumn("laborerConstructionSite.activeContract.jobCode").setHeaderCaption("Oficio").setEditable(false).setWidth(100);
-//		extraGrid.getColumn("bondMov2").setHeaderCaption("Bono Cargo a Locomocion 2 (No Imponible)");
-//		extraGrid.getColumn("km").setHeaderCaption("Km");
-//		extraGrid.getColumn("specialBond").setHeaderCaption("Bono Imponible Especial");
-//		extraGrid.getColumn("overtimeHours").setHeaderCaption("Horas Sobretiempo");
-//		
-//		createHeaders(extraGrid);
-//		return extraGrid;
-//	}
 
 	private void createHeaders(final Grid grid) {
 		HeaderRow filterRow =  grid.appendHeaderRow();
@@ -493,13 +560,15 @@ public class AttendancePanel extends Panel implements View {
 		VerticalLayout vl = new VerticalLayout(){
 			{
 				setSpacing(true);
+				setMargin(true);
 
-				salaryTable = new Table();
-				salaryTable.setWidth("100%");
-				salaryTable.setContainerDataSource(salaryContainer);
+				supleTable = new Table();
+				supleTable.setWidth("100%");
+				supleTable.setContainerDataSource(salaryContainer);
 				
 				HorizontalLayout hl = new HorizontalLayout(){
 					{
+						setSpacing(true);
 						btnSupleObraConfirm = new Button("Confirmación Obra",FontAwesome.CHECK);
 						btnSupleObraConfirm.setDisableOnClick(true);						
 						addComponent(btnSupleObraConfirm);			
@@ -519,22 +588,13 @@ public class AttendancePanel extends Panel implements View {
 										if (dialog.isConfirmed()) {
 											confirmations.setSupleObraCheck(!confirmations.isSupleObraCheck());
 											service.save(confirmations);
-											toogleButtonState(btnSupleObraConfirm, confirmations.isSupleObraCheck());
-											btnSupleCentralConfirm.setEnabled(confirmations.isSupleObraCheck());
-											//si tiene confirmación de obra y no tiene permisos de confirmar central o si tiene ambos checheados, bloqueda la interfaz
-											enableSuple(!(
-													(confirmations.isSupleObraCheck() && !SecurityHelper.hasPermission(Permission.CONFIRMAR_ASISTENCIA_CENTRAL)) || 
-													(confirmations.isSupleObraCheck() && confirmations.isSupleCentralCheck())||
-													(!confirmations.isSupleObraCheck() && !SecurityHelper.hasPermission(Permission.CONFIRMAR_ASISTENCIA_OBRA))
-													));
-											
-											if( !confirmations.isSupleObraCheck() && !SecurityHelper.hasPermission(Permission.CONFIRMAR_ASISTENCIA_OBRA)){
-												btnSupleObraConfirm.setVisible(false);
-											}else if( !confirmations.isSupleObraCheck() && SecurityHelper.hasPermission(Permission.CONFIRMAR_ASISTENCIA_CENTRAL)){
-												btnSupleObraConfirm.setVisible(true);
-												btnSupleObraConfirm.setEnabled(true);
-											}
+											configureInterface();
+
+											//si todo sale bien, manda un email a los centrales
+											if(confirmations.isSupleObraCheck())
+												mailService.sendSupleConfirmationEmail(cs);
 										}
+										
 									}
 
 								});						
@@ -566,13 +626,27 @@ public class AttendancePanel extends Panel implements View {
 								});
 							}
 						});
+						
+						btnExportSupleSoftland = new Button("Exportar a Softland",FontAwesome.FILE_EXCEL_O);
+//						btnExportSupleSoftland.setDisableOnClick(true);
+						addComponent(btnExportSupleSoftland);
+						setComponentAlignment(btnExportSupleSoftland, Alignment.TOP_RIGHT);
+						generateSupleSoftlandFile(btnExportSupleSoftland);
+//						btnExportSupleSoftland.addClickListener(new Button.ClickListener() {
+//
+//							@Override
+//							public void buttonClick(ClickEvent event) {
+//								
+//							}
+//
+//						});
 					}					
 				};
 				
 				addComponent(hl);
 				setComponentAlignment(hl, Alignment.TOP_RIGHT);
 				
-				salaryTable.addGeneratedColumn("laborerConstructionSite.supleCode", new Table.ColumnGenerator() {
+				supleTable.addGeneratedColumn("laborerConstructionSite.supleCode", new Table.ColumnGenerator() {
 					
 					@Override
 					public Object generateCell(Table source, Object itemId, Object columnId) {
@@ -612,6 +686,7 @@ public class AttendancePanel extends Panel implements View {
 						}){
 							{
 								setIcon(FontAwesome.ARROW_CIRCLE_O_RIGHT);
+								setEnabled(supleTable.isEditable());
 							}
 						});
 						
@@ -619,10 +694,10 @@ public class AttendancePanel extends Panel implements View {
 					}
 				});
 
-				salaryTable.setVisibleColumns("laborerConstructionSite.activeContract.jobCode","laborerConstructionSite.supleCode","suple");
-				salaryTable.setColumnHeaders("Oficio","Código suple","Suple");
-				salaryTable.setEditable(true);
-				salaryTable.setTableFieldFactory(new TableFieldFactory() {
+				supleTable.setVisibleColumns("laborerConstructionSite.activeContract.jobCode","laborerConstructionSite.supleCode","suple");
+				supleTable.setColumnHeaders("Oficio","Código suple","Suple");
+				supleTable.setEditable(true);
+				supleTable.setTableFieldFactory(new TableFieldFactory() {
 
 					@Override
 					public Field<?> createField(Container container, final Object itemId,Object propertyId, com.vaadin.ui.Component uiContext) {
@@ -659,8 +734,8 @@ public class AttendancePanel extends Panel implements View {
 				});
 
 
-				addComponent(salaryTable);
-				setExpandRatio(salaryTable, 1.0f);
+				addComponent(supleTable);
+				setExpandRatio(supleTable, 1.0f);
 			}
 		};
 		vl.setSizeFull();
@@ -703,21 +778,10 @@ public class AttendancePanel extends Panel implements View {
 										if (dialog.isConfirmed()) {
 											confirmations.setConstructionSiteCheck(!confirmations.isConstructionSiteCheck());
 											service.save(confirmations);
-											toogleButtonState(btnConstructionSiteConfirm, confirmations.isConstructionSiteCheck());
-											btnCentralConfirm.setEnabled(confirmations.isConstructionSiteCheck());
-											//si tiene confirmación de obra y no tiene permisos de confirmar central o si tiene ambos checheados, bloqueda la interfaz
-											enableAttendance(!(
-													(confirmations.isConstructionSiteCheck() && !SecurityHelper.hasPermission(Permission.CONFIRMAR_ASISTENCIA_CENTRAL)) || 
-													(confirmations.isConstructionSiteCheck() && confirmations.isCentralCheck())||
-													(!confirmations.isConstructionSiteCheck() && !SecurityHelper.hasPermission(Permission.CONFIRMAR_ASISTENCIA_OBRA))
-													));
-
-											if( !confirmations.isConstructionSiteCheck() && !SecurityHelper.hasPermission(Permission.CONFIRMAR_ASISTENCIA_OBRA)){
-												btnConstructionSiteConfirm.setVisible(false);
-											}else if( !confirmations.isConstructionSiteCheck() && SecurityHelper.hasPermission(Permission.CONFIRMAR_ASISTENCIA_CENTRAL)){
-												btnConstructionSiteConfirm.setVisible(true);
-												btnConstructionSiteConfirm.setEnabled(true);
-											}
+											configureInterface();
+											//si todo sale bien, envia el mail a los centrales
+											if(confirmations.isConstructionSiteCheck())
+												mailService.sendSalaryConfirmationEmail(cs);
 										}
 									}
 
@@ -744,9 +808,6 @@ public class AttendancePanel extends Panel implements View {
 										if (dialog.isConfirmed()) {
 											confirmations.setCentralCheck(!confirmations.isCentralCheck());
 											service.save(confirmations);
-											toogleButtonState(btnCentralConfirm, confirmations.isCentralCheck());
-											//actualiza el estado del boton exportar
-											btnExportSoftland.setEnabled(confirmations.isCentralCheck());
 											configureInterface();
 										}
 									}
@@ -755,24 +816,18 @@ public class AttendancePanel extends Panel implements View {
 						});
 
 						btnExportSoftland = new Button("Exportar a Softland",FontAwesome.FILE_EXCEL_O);
-						btnExportSoftland.setDisableOnClick(true);
+//						btnExportSoftland.setDisableOnClick(true);
 						addComponent(btnExportSoftland);
 						setComponentAlignment(btnExportSoftland, Alignment.TOP_RIGHT);
 
-						btnExportSoftland.addClickListener(new Button.ClickListener() {
-
-							@Override
-							public void buttonClick(ClickEvent event) {
-								generateSoftlandFile();
-							}
-
-						});
+						generateSoftlandFile(btnExportSoftland);
+						
 					}
 				};
 
 				addComponent(hl);
 				setComponentAlignment(hl, Alignment.TOP_RIGHT);
-				final Table salaryTable = new Table();
+				salaryTable = new Table();
 //				salaryTable.setWidth("100%");
 				salaryTable.setSizeFull();
 				salaryTable.setContainerDataSource(salaryContainer);
@@ -1026,10 +1081,15 @@ public class AttendancePanel extends Panel implements View {
 			public void postCommit(CommitEvent commitEvent) throws CommitException {
 				BeanItem<Attendance> item = (BeanItem<Attendance>) commitEvent.getFieldBinder().getItemDataSource();
 				Attendance attendance = item.getBean(); 
-				salaryContainer.getItem(attendance.getLaborerConstructionSite().getId()).getItemProperty("attendance").setValue(attendance);
 				
-				salaryContainer.getItem(attendance.getLaborerConstructionSite().getId()).getItemProperty("forceSalary").getValue();
-				salaryContainer.getItem(attendance.getLaborerConstructionSite().getId()).getItemProperty("forceSuple").getValue();
+				Item salaryItem = salaryContainer.getItem(attendance.getLaborerConstructionSite().getId());
+				if(salaryItem == null )
+					return;
+				Property prop = salaryItem.getItemProperty("attendance");
+				prop.setValue(attendance);
+				
+				salaryItem.getItemProperty("forceSalary").getValue();
+				salaryItem.getItemProperty("forceSuple").getValue();
 			}
 		});
 		attendanceGrid.setEditorFieldGroup(bfg);
@@ -1431,185 +1491,96 @@ public class AttendancePanel extends Panel implements View {
 					}
 				});
 
-//				HorizontalLayout hl = new HorizontalLayout(){
-//					{
-//
-//						setSpacing(true);
-//
-//						btnConstructionSiteConfirm = new Button("Confirmación Obra",FontAwesome.CHECK);
-//						btnConstructionSiteConfirm.setDisableOnClick(true);
-//						addComponent(btnConstructionSiteConfirm);
-//						setComponentAlignment(btnConstructionSiteConfirm, Alignment.TOP_RIGHT);
-//						btnConstructionSiteConfirm.addClickListener(new Button.ClickListener() {
-//
-//							@Override
-//							public void buttonClick(ClickEvent event) {
-//								//mensaje depende del estado
-//								final Confirmations confirmations = getConfirmations();
-//								ConfirmDialog.show(UI.getCurrent(), "Confirmar Acción:", 
-//										confirmations.isConstructionSiteCheck() ? 
-//												"¿Está seguro de cancelar la confirmación de asistencia? Esto desbloqueará la edición en obra de la asistencia del mes.":
-//													"¿Está seguro de confirmar la asistencia? Esto bloqueará la edición en obra de la asistencia del mes.",
-//													"Continuar", "Cancelar", new ConfirmDialog.Listener() {
-//									public void onClose(ConfirmDialog dialog) {
-//										if (dialog.isConfirmed()) {
-//											confirmations.setConstructionSiteCheck(!confirmations.isConstructionSiteCheck());
-//											service.save(confirmations);
-//											toogleButtonState(btnConstructionSiteConfirm, confirmations.isConstructionSiteCheck());
-//											btnCentralConfirm.setEnabled(confirmations.isConstructionSiteCheck());
-//											//si tiene confirmación de obra y no tiene permisos de confirmar central o si tiene ambos checheados, bloqueda la interfaz
-//											enableAttendance(!(
-//													(confirmations.isConstructionSiteCheck() && !SecurityHelper.hasPermission(Permission.CONFIRMAR_ASISTENCIA_CENTRAL)) || 
-//													(confirmations.isConstructionSiteCheck() && confirmations.isCentralCheck())||
-//													(!confirmations.isConstructionSiteCheck() && !SecurityHelper.hasPermission(Permission.CONFIRMAR_ASISTENCIA_OBRA))
-//													));
-//
-//											if( !confirmations.isConstructionSiteCheck() && !SecurityHelper.hasPermission(Permission.CONFIRMAR_ASISTENCIA_OBRA)){
-//												btnConstructionSiteConfirm.setVisible(false);
-//											}else if( !confirmations.isConstructionSiteCheck() && SecurityHelper.hasPermission(Permission.CONFIRMAR_ASISTENCIA_CENTRAL)){
-//												btnConstructionSiteConfirm.setVisible(true);
-//												btnConstructionSiteConfirm.setEnabled(true);
-//											}
-//										}
-//									}
-//
-//								});
-//
-//							}
-//						});
-//
-//						btnCentralConfirm = new Button("Confirmación Central",FontAwesome.CHECK);
-//						btnCentralConfirm.setDisableOnClick(true);
-//						addComponent(btnCentralConfirm);
-//						setComponentAlignment(btnCentralConfirm, Alignment.TOP_RIGHT);
-//						btnCentralConfirm.addClickListener(new Button.ClickListener() {
-//
-//							@Override
-//							public void buttonClick(ClickEvent event) {
-//								final Confirmations confirmations = getConfirmations();
-//								ConfirmDialog.show(UI.getCurrent(), "Confirmar Acción:", 
-//										confirmations.isCentralCheck() ? 
-//												"¿Está seguro de cancelar la confirmación de asistencia? Esto desbloqueará la edición en la central de la asistencia del mes.":
-//													"¿Está seguro de confirmar la asistencia? Esto bloqueará la edición en la central de la asistencia del mes.",
-//													"Continuar", "Cancelar", new ConfirmDialog.Listener() {
-//									public void onClose(ConfirmDialog dialog) {
-//										if (dialog.isConfirmed()) {
-//											confirmations.setCentralCheck(!confirmations.isCentralCheck());
-//											service.save(confirmations);
-//											toogleButtonState(btnCentralConfirm, confirmations.isCentralCheck());
-//											//actualiza el estado del boton exportar
-//											btnExportSoftland.setEnabled(confirmations.isCentralCheck());
-//											configureInterface();
-//										}
-//									}
-//								});
-//							}
-//						});
-//
-//						btnExportSoftland = new Button("Exportar a Softland",FontAwesome.FILE_EXCEL_O);
-//						btnExportSoftland.setDisableOnClick(true);
-//						addComponent(btnExportSoftland);
-//						setComponentAlignment(btnExportSoftland, Alignment.TOP_RIGHT);
-//
-//						btnExportSoftland.addClickListener(new Button.ClickListener() {
-//
-//							@Override
-//							public void buttonClick(ClickEvent event) {
-//								generateSoftlandFile();
-//							}
-//
-//						});
-//					}
-//				};
-//
-//				addComponent(hl);
-//				setComponentAlignment(hl, Alignment.TOP_RIGHT);
 
 
 			}
 		};
 	}
 
-	private void generateSoftlandFile() {
-		Notification.show("Descagando archivo de softland...");
+	private void generateSoftlandFile(final Button btnExportSoftland) {
+		
+		//recupera la lista de sueldos
+		StreamResource.StreamSource myResource = new StreamResource.StreamSource() {
+
+			public InputStream getStream() {
+				//recupera la lista de sueldos
+				List<Salary> salaries = new ArrayList<Salary>(salaryContainer.size());
+				for(Object itemId : salaryContainer.getItemIds()){
+					salaries.add(salaryContainer.getItem(itemId).getBean());
+				}
+				
+				final Map<String, Object> input = new HashMap<String, Object>();
+				input.put("salaries", salaries);
+				VelocityHelper.addTools(input);
+				
+				final StringBuilder sb = new StringBuilder();
+
+				// contrato
+				sb.append( VelocityEngineUtils.mergeTemplateIntoString(velocityEngine, "templates/export/salary.vm", "UTF-8", input));
+				
+				InputStream stream =  new ByteArrayInputStream(sb.toString().getBytes());
+//				btnExportSoftland.setEnabled(true);
+				return stream;
+			}
+		};
+		StreamResource resource = new StreamResource(myResource, "pruebaSalary.txt"); //mes_año_codobra_ant/liq.txt
+		
+        FileDownloader fileDownloader = new FileDownloader(resource);
+        fileDownloader.extend(btnExportSoftland);
+	}
+	
+	private void generateSupleSoftlandFile(final Button btnExportSoftland) {
+		
+		
+		StreamResource.StreamSource myResource = new StreamResource.StreamSource() {
+
+			public InputStream getStream() {
+				//recupera la lista de sueldos
+				List<Salary> salaries = new ArrayList<Salary>(salaryContainer.size());
+				for(Object itemId : salaryContainer.getItemIds()){
+					salaries.add(salaryContainer.getItem(itemId).getBean());
+				}
+				
+				final Map<String, Object> input = new HashMap<String, Object>();
+				input.put("salaries", salaries);
+				VelocityHelper.addTools(input);
+				
+				final StringBuilder sb = new StringBuilder();
+
+				// contrato
+				sb.append( VelocityEngineUtils.mergeTemplateIntoString(velocityEngine, "templates/export/suple.vm", "UTF-8", input));
+				
+				InputStream stream =  new ByteArrayInputStream(sb.toString().getBytes());
+//				btnExportSoftland.setEnabled(true);
+				return stream;
+			}
+		};
+		StreamResource resource = new StreamResource(myResource, "pruebaSuple.txt"); //mes_año_codobra_ant/liq.txt
+		
+        FileDownloader fileDownloader = new FileDownloader(resource);
+        fileDownloader.extend(btnExportSoftland);
+        
 	}
 
 	/**
 	 * Muestra o no los botones según el perfil del usuario
 	 */
-	private void configureInterface() {
+	private void configureInterface() {	
 
-		Confirmations confirmations = getConfirmations();
-
-		//permite exportar a softland si se tiene doble confirmación y se tiene permisos
-		btnExportSoftland.setVisible(SecurityHelper.hasPermission(Permission.GENERAR_SUELDOS_SOFTLAND));
-		btnExportSoftland.setEnabled(confirmations.isCentralCheck()); //sólo se habilita si está la confirmación de central
-
-		btnConstructionSiteConfirm.setVisible(SecurityHelper.hasPermission(Permission.CONFIRMAR_ASISTENCIA_OBRA));
-		toogleButtonState(btnConstructionSiteConfirm,confirmations.isConstructionSiteCheck());
-		//si está confirmado, lo habilita solo si tiene permiso para confirmar asistencia central
-		if(confirmations.isConstructionSiteCheck()){
-			//se asegura que lo vea
-			btnConstructionSiteConfirm.setVisible(true);
-			btnConstructionSiteConfirm.setEnabled( !confirmations.isCentralCheck() && SecurityHelper.hasPermission(Permission.CONFIRMAR_ASISTENCIA_CENTRAL));
-		}else{
-			btnConstructionSiteConfirm.setEnabled(true);
-		}
-		//deshabilita si tiene confirmación de obra y no tiene permisos de confirmar central, si tiene ambos checheados, bloqueda la interfaz o si no tiene confirmacion de obra y no tiene permiso de obra 
-		enableAttendance(!(
-				(confirmations.isConstructionSiteCheck() && !SecurityHelper.hasPermission(Permission.CONFIRMAR_ASISTENCIA_CENTRAL)) || 
-				(confirmations.isConstructionSiteCheck() && confirmations.isCentralCheck()) ||
-				(!confirmations.isConstructionSiteCheck() && !SecurityHelper.hasPermission(Permission.CONFIRMAR_ASISTENCIA_OBRA))
-				));
-
-		btnCentralConfirm.setVisible(SecurityHelper.hasPermission(Permission.CONFIRMAR_ASISTENCIA_CENTRAL));
-		toogleButtonState(btnCentralConfirm,confirmations.isCentralCheck());
-		btnCentralConfirm.setEnabled( (confirmations.isConstructionSiteCheck() && !confirmations.isCentralCheck()) ||
-				(confirmations.isConstructionSiteCheck() && confirmations.isCentralCheck() && SecurityHelper.hasPermission(Permission.DESBLOQUEDAR_ASISTENCIA) ));
-		
-		
-		/**
-		 * Use el mismo código de arriba, reemplace los valores para considerar los botones del suple que se comportan igual.
-		 */
-		btnSupleObraConfirm.setVisible(SecurityHelper.hasPermission(Permission.CONFIRMAR_ASISTENCIA_OBRA));
+		//se preocupa de deshabilitar o habilitar los componentes
+		enableOrDisableComponents();
+		//se preocupa de mostrar o esconder los botones
+		setVisibilityOfButtons();
+		//define los estados de los botones
+		toogleButtonState(btnConstructionSiteConfirm,getConfirmations().isConstructionSiteCheck());
+		toogleButtonState(btnCentralConfirm,getConfirmations().isCentralCheck());
 		toogleButtonState(btnSupleObraConfirm, confirmations.isSupleObraCheck());
-		//si está confirmado, lo habilita solo si tiene permiso para confirmar asistencia central
-		if(confirmations.isSupleObraCheck()){
-			//se asegura que lo vea
-			btnSupleObraConfirm.setVisible(true);
-			btnSupleObraConfirm.setEnabled( !confirmations.isSupleCentralCheck() && SecurityHelper.hasPermission(Permission.CONFIRMAR_ASISTENCIA_CENTRAL));
-		}else{
-			btnSupleObraConfirm.setEnabled(true);
-		}
-		//deshabilita si tiene confirmación de obra y no tiene permisos de confirmar central, si tiene ambos checheados, bloqueda la interfaz o si no tiene confirmacion de obra y no tiene permiso de obra 		
-		enableSuple(!(
-				(confirmations.isSupleObraCheck() && !SecurityHelper.hasPermission(Permission.CONFIRMAR_ASISTENCIA_CENTRAL)) || 
-				(confirmations.isSupleObraCheck() && confirmations.isSupleCentralCheck()) ||
-				(!confirmations.isSupleObraCheck() && !SecurityHelper.hasPermission(Permission.CONFIRMAR_ASISTENCIA_OBRA))
-				));
-
-		btnSupleCentralConfirm.setVisible(SecurityHelper.hasPermission(Permission.CONFIRMAR_ASISTENCIA_CENTRAL));
 		toogleButtonState(btnSupleCentralConfirm, confirmations.isSupleCentralCheck());
-		btnSupleCentralConfirm.setEnabled( (confirmations.isSupleObraCheck() && !confirmations.isSupleCentralCheck()) ||
-				(confirmations.isSupleObraCheck() && confirmations.isSupleCentralCheck() && SecurityHelper.hasPermission(Permission.DESBLOQUEDAR_ASISTENCIA) ));
+		
+		//se preocupa de deshabilitar o habilitar los botones de confirmación
+		enableOrDisableButtons();
 	}
 
-	private void toogleButtonState(Button btn, boolean confirmations ){
-		if(confirmations){
-
-			btn.removeStyleName(Constants.STYLE_CLASS_GREEN_COLOR);
-			btn.addStyleName(Constants.STYLE_CLASS_RED_COLOR);
-			btn.setCaption(btn.getCaption().indexOf("Cancelar ") >= 0 ? btn.getCaption() : "Cancelar " + btn.getCaption());
-			btn.setIcon(FontAwesome.TIMES);
-
-		}else{
-
-			btn.removeStyleName(Constants.STYLE_CLASS_RED_COLOR);
-			btn.addStyleName(Constants.STYLE_CLASS_GREEN_COLOR);
-			btn.setCaption(btn.getCaption().indexOf("Cancelar ") >= 0 ? btn.getCaption().replace("Cancelar ", ""): btn.getCaption() );
-			btn.setIcon(FontAwesome.CHECK);
-		}
-	}
 
 	private void populateAttendanceGrid(){
 
