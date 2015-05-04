@@ -16,6 +16,7 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.validation.constraints.NotNull;
 
+import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -321,5 +322,43 @@ public class Salary implements Serializable {
 				.equals(other.laborerConstructionSite.getId()))
 			return false;
 		return true;
+	}
+	
+	private void mask(StringBuilder sb,String code,Object value){
+		sb.append("\"").append(((getLaborerConstructionSite().getConstructionsite().getCostCenter() * 1000) + getLaborerConstructionSite().getJobCode()))
+		.append("\";\"").append(code).append("\"")
+		.append(";\"").append(new DateTime(getDate()).toString("MM/yyyy")).append("\"")
+		.append(";\"").append(value).append("\"#");
+	}
+
+	public String salaryToSofland(){
+		
+		StringBuilder sb = new StringBuilder();
+		mask(sb,"P007",salaryCalculator.getDiaTrab());//Dias trabajados de lunes a viernes
+		mask(sb,"P005",salaryCalculator.getSep());//Septimos
+		mask(sb,"P011",salaryCalculator.getDpd());//Dp Septimos (DPD)
+		mask(sb,"P006",salaryCalculator.getCol());//D Colacion (DPS)
+		mask(sb,"P006",salaryCalculator.getMov());//D movil
+		mask(sb,"H001",getJornalPromedio());//J Promedio
+		mask(sb,"H011",salaryCalculator.getSobreTiempo());//Sobretiempo
+		mask(sb,"H012",salaryCalculator.getBonifImpo());//Bonif Imponible
+		mask(sb,"P024",salaryCalculator.getCollationConfig());//$ Colacion Dia
+		mask(sb,"P025",salaryCalculator.getMov1Config());//$ Mov 1 Dia
+		mask(sb,"P010",salaryCalculator.getMov2Export());//Dias Mov 2
+		mask(sb,"P097",salaryCalculator.getMov2DayExport());//$Mov 2 Dia
+		mask(sb,"P012",salaryCalculator.getSab());//Sabados
+		mask(sb,"P013",salaryCalculator.getDps());//DP Sabados
+		mask(sb,"P014",salaryCalculator.getDescHoras());//Descuento Horas
+		// En el código generador de softland no está este codigo, revisar!
+//		mask(sb,"P041","");//Cuota Herr
+//		mask(sb,"P042","");//Cuota Prestamo
+		
+		return sb.toString();
+	}
+	
+	public String supleToSofland(){
+		StringBuilder sb = new StringBuilder();
+		mask(sb,"D020",getSuple());//DT L-V
+		return sb.toString();
 	}
 }

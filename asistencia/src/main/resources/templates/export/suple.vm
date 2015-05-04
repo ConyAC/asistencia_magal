@@ -1,0 +1,6 @@
+#foreach( $salary in $salaries )
+#set($salaryString = $salary.supleToSofland() )
+#foreach( $salaryItem in $salaryString.split("#") ) 
+$salaryItem
+#end
+#end

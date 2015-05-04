@@ -29,6 +29,7 @@ import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.PrePersist;
 import javax.persistence.Table;
+import javax.validation.constraints.Digits;
 import javax.validation.constraints.NotNull;
 
 import org.hibernate.validator.constraints.NotEmpty;
@@ -74,6 +75,11 @@ public class ConstructionSite implements Serializable {
     @NotNull(message="El código es obligatorio.")
     @Column(name = "code",nullable=false)
     String code;
+    
+    @NotNull(message="El número de centro de costo es obligatorio.")
+    @Digits(fraction=0,message="El número de centro de costo debe ser un número entero", integer = 6)
+    @Column(name = "cost_center",nullable=false)
+    Integer costCenter;
     
     @NotEmpty(message="El nombre es obligatorio.")
    	@NotNull(message="El nombre es obligatorio.")
@@ -128,7 +134,19 @@ public class ConstructionSite implements Serializable {
     	   deleted = Boolean.FALSE;
     }
     
-    public ConstructionSite() {
+    public Integer getCostCenter() {
+		return costCenter;
+	}
+
+
+
+	public void setCostCenter(Integer costCenter) {
+		this.costCenter = costCenter;
+	}
+
+
+
+	public ConstructionSite() {
     }
 
     public ConstructionSite(Long constructionsiteId) {
