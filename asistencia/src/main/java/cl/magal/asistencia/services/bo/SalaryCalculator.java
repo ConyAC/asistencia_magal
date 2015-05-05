@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import cl.magal.asistencia.entities.Attendance;
 import cl.magal.asistencia.entities.DateConfigurations;
 import cl.magal.asistencia.entities.FamilyAllowanceConfigurations;
+import cl.magal.asistencia.entities.Loan;
 import cl.magal.asistencia.entities.Mobilization2;
 import cl.magal.asistencia.entities.Overtime;
 import cl.magal.asistencia.entities.Salary;
@@ -34,8 +35,9 @@ public class SalaryCalculator {
 	List<FamilyAllowanceConfigurations> famillyTable;
 	List<TaxationConfigurations> taxTable;
 	WageConfigurations wageConfigurations;
-	Integer jornalPromedio,bonoCalculado;
-	
+	Integer jornalPromedio;
+	int loans;
+
 	double bonoImponibleEspecial,bonoCargoLoc2, horasDescuento, horasSobreTiempo,ufMes,collation,mov1;
 	
 	/**
@@ -260,10 +262,11 @@ public class SalaryCalculator {
 			                WageConfigurations wageConfigurations,
 			                DateConfigurations dateConfigurations,
 			                List<FamilyAllowanceConfigurations> famillyTable,
-			                List<TaxationConfigurations> taxTable){
+			                List<TaxationConfigurations> taxTable,
+			                int loans){
 		
 		
-		setInformation(suple, tool, loan, attendance, lastMonthAttendance, overtime);
+		setInformation(suple, tool, loan, attendance, lastMonthAttendance, overtime, loans);
 		init(closingDateLastMonth, wageConfigurations, dateConfigurations, famillyTable, taxTable);
 		
 	}
@@ -283,12 +286,14 @@ public class SalaryCalculator {
             double loan,
             Attendance attendance,
             Attendance lastMonthAttendance,
-            Overtime overtime){
+            Overtime overtime,
+            int loans){
 		
 		this.attendance = attendance;	
 		this.date = attendance.getDate();	
 		this.lastMonthAttendance = lastMonthAttendance;		
 		this.overtime = overtime;	
+		this.loans = loans;
 		
 		this.suple = suple;
 		this.tool = tool;
@@ -301,7 +306,7 @@ public class SalaryCalculator {
 		this.bonoCargoLoc2 = salary.getBondMov2();
 		this.horasDescuento = salary.getDescHours();
 		this.horasSobreTiempo = salary.getOvertimeHours();
-		this.bonoCalculado = salary.getLoanBond();
+		//this.loans = salary.getLoanBond();
 	}
 	
 	/**
@@ -433,6 +438,7 @@ public class SalaryCalculator {
 	public double calculateSalary(Integer jornalPromedio,Double suple,Salary salary2) {
 		this.jornalPromedio = jornalPromedio;
 		this.suple = suple;
+		this.loans = salary2.getLoanBond();
 		logger.debug("jornalPromedio {}",jornalPromedio);
 		setSalary(salary2);
 		//valida que este toda la información necesaria para el calculo

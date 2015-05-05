@@ -94,10 +94,11 @@ public class Salary implements Serializable {
             double loan,
             Attendance attendance,
             Attendance lastMonthAttendance,
-            Overtime overtime){
+            Overtime overtime,
+            int loans){
 		if(this.salaryCalculator == null )
 			throw new RuntimeException("Es necesario que el objeto de calculo sea distinto a null");
-		this.salaryCalculator.setInformation(getSuple(), tool, loan, attendance, lastMonthAttendance, overtime);
+		this.salaryCalculator.setInformation(getSuple(), tool, loan, attendance, lastMonthAttendance, overtime, loans);
 	}
 	
 	public void setSupleCalculatorInformation(
