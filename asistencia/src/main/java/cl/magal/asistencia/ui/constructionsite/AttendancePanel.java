@@ -502,6 +502,7 @@ public class AttendancePanel extends Panel implements View {
 				
 				@Override
 				public String getStyle(CellReference cellReference) {
+					logger.debug("T: "+ cellReference.getValue());
 					String post = "";
 					if( (cellReference.getValue() instanceof AttendanceMark && !AttendanceMark.ATTEND.equals(cellReference.getValue())) ||
 						(cellReference.getValue() instanceof Integer && 0 != (Integer)cellReference.getValue()))
@@ -509,6 +510,13 @@ public class AttendancePanel extends Panel implements View {
 					if(cellReference.getValue() instanceof AttendanceMark && !AttendanceMark.ATTEND.equals(cellReference.getValue()))
 						post += " bold";
 					String pid = (String) cellReference.getPropertyId();
+					logger.debug("LE: "+pid);
+					if(!pid.equals("laborerConstructionSite.activeContract.jobCode")){
+						String day = dt.withDayOfMonth(Integer.parseInt(((String) pid).replace("dmp","").replace("dma",""))).dayOfWeek().getAsShortText();
+						if(day == "dom"){
+								//attendanceContainer.getItem(cellReference.getValue()).getItemProperty(pid).setValue(AttendanceMark.SUNDAY);							
+						}
+					}
 					if( pid.startsWith("dmp") || pid.startsWith("dma") ){
 						//calcula el numero del mes
 						int monthDay = Integer.parseInt(((String) pid).replace("dmp","").replace("dma",""));
