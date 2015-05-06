@@ -13,11 +13,8 @@ import cl.magal.asistencia.entities.Loan;
 
 public interface LoanRepository extends PagingAndSortingRepository<Loan, Long> {
 	
-	@Query(value="SELECT l.price FROM Loan l WHERE l.laborerConstructionSite.id = :id ")
-	List<Integer> findPriceLoan(@Param("id")Long id);
-	
-	@Query(value = "select l.price from Loan l where l.laborerConstructionSite.constructionsite = ?1 and extract( month from l.dateBuy ) = extract ( month from ?2 ) and extract( year from l.dateBuy ) = extract ( year from ?2 )" )
-	List<Integer> findByConstructionsiteAndMonth(ConstructionSite cs, Date date);
+	@Query(value = "select l from Loan l where l.laborerConstructionSite.constructionsite = ?1 and extract( month from l.dateBuy ) = extract ( month from ?2 ) and extract( year from l.dateBuy ) = extract ( year from ?2 )" )
+	List<Loan> findByConstructionsiteAndMonth(ConstructionSite cs, Date date);
 
 }
 

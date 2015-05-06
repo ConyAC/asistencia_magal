@@ -306,7 +306,6 @@ public class SalaryCalculator {
 		this.bonoCargoLoc2 = salary.getBondMov2();
 		this.horasDescuento = salary.getDescHours();
 		this.horasSobreTiempo = salary.getOvertimeHours();
-		//this.loans = salary.getLoanBond();
 	}
 	
 	/**
@@ -317,6 +316,9 @@ public class SalaryCalculator {
 		this.attendance = attendance2;
 	}
 
+	public int getLoans(){
+        return this.loans;
+    }
 	
 	/**
 	 * 
@@ -438,12 +440,11 @@ public class SalaryCalculator {
 	public double calculateSalary(Integer jornalPromedio,Double suple,Salary salary2) {
 		this.jornalPromedio = jornalPromedio;
 		this.suple = suple;
-		this.loans = salary2.getLoanBond();
 		logger.debug("jornalPromedio {}",jornalPromedio);
 		setSalary(salary2);
 		//valida que este toda la información necesaria para el calculo
 		validateInformation();
-		double salary = getAfecto() + getSobreAfecto() + getTNoAfecto() - getTDesc() + salary2.getLoanBond();
+		double salary = getAfecto() + getSobreAfecto() + getTNoAfecto() - getTDesc() + this.loans;
 		logger.debug("salario calculado {}",salary);
 		return salary;
 	}

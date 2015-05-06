@@ -232,11 +232,8 @@ public class Salary implements Serializable {
 	}
 	
 	public Integer getLoanBond() {
-		return loanBond;
-	}
-	public void setLoanBond(Integer loanBond) {
-		this.loanBond = loanBond;
-	}
+        return salaryCalculator.getLoans();
+    }
 	
 	/**
 	 * columnas ocultables

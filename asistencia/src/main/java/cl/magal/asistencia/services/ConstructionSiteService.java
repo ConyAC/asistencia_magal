@@ -368,18 +368,21 @@ public class ConstructionSiteService {
 		logger.debug("trabajadores activos {} ",lcs);
 		logger.debug("date {} ",date);
 
-		List<Integer> loanResultList =  loanRepo.findByConstructionsiteAndMonth(cs, date.toDate());
-		int p = 0;
-		for(Integer i : loanResultList){
-			p += i;
-		}
+		List<Loan> loanResultList =  loanRepo.findByConstructionsiteAndMonth(cs, date.toDate());
+
 		if(!loanResultList.isEmpty())
 			logger.debug("loanResultList.getmarks {} ",loanResultList.get(0));
 
 		Map<Integer, Integer> loanResult = new HashMap<Integer, Integer>();
 		//verifica que exista una asistencia para cada elemento, si no existe la crea
 		for(LaborerConstructionsite lc : lcs ){
-			loanResult.put(lc.getJobCode(), p);
+			int p = 0;
+			for(Loan l : loanResultList){
+				if(l.getLaborerConstructionSite().getId() == lc.getId()){
+					p += l.getPrice(); 
+				}
+			}
+			loanResult.put(lc.getJobCode(), p);			
 		}
 		return loanResult;
 	}
