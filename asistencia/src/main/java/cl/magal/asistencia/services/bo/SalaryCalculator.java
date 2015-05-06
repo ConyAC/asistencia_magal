@@ -40,6 +40,14 @@ public class SalaryCalculator {
 
 	double bonoImponibleEspecial,bonoCargoLoc2, horasDescuento, horasSobreTiempo,ufMes,collation,mov1;
 	
+	public double getCollationConfig(){
+		return collation;
+	}
+	public double getMov1Config(){
+		return mov1;
+	}
+	
+	
 	/**
 	 * CALCULOS
 	 */
@@ -94,7 +102,7 @@ public class SalaryCalculator {
 	}
 	
 	Integer diaTrab;
-	Integer getDiaTrab(){
+	public Integer getDiaTrab(){
 		if(diaTrab == null ){
 			diaTrab = calculateDiaTrab(closingDateLastMonth,attendance,lastMonthAttendance);
 			logger.debug("diaTrab {}",diaTrab);
@@ -103,7 +111,7 @@ public class SalaryCalculator {
 	}
 	
 	Double col;
-	Double getCol(){
+	public Double getCol(){
 		if(col == null ){
 			col = calculateCol(closingDateLastMonth,attendance,lastMonthAttendance);
 			logger.debug("col {}",col);
@@ -207,6 +215,45 @@ public class SalaryCalculator {
 			mov2 = calculateMov2(closingDateLastMonth, attendance, lastMonthAttendance);
 		}
 		return mov2;
+	}
+	
+	public Double getMov2Export(){
+		return getMov2() / getMov2ConstructionSite();
+	}
+	public Double getMov2DayExport(){
+		return getMov2() / getDiaTrab();
+	}
+	
+	Double sep;
+	public Double getSep(){
+		if(sep == null ){
+			sep = calculateSep(attendance);
+		}
+		return sep;
+	}
+	
+	Double dpd;
+	public Double getDpd(){
+		if(dpd == null ){
+			dpd = calculateDPD(attendance);
+		}
+		return dpd;
+	}
+	
+	Integer dps;
+	public Integer getDps(){
+		if(dps == null ){
+			dps = calculateDPS(attendance);
+		}
+		return dps;
+	}
+	
+	Integer sab;
+	public Integer getSab(){
+		if(sab == null ){
+			sab = calculateSab(attendance);
+		}
+		return sab;
 	}
 	
 	/**
@@ -648,7 +695,7 @@ public class SalaryCalculator {
 	 * @return
 	 */
 	private double calculateVSCorrd(DateTime closingDateLastMonth,Attendance attendance,Attendance lastMonthAttendance,Overtime overtime) {
-		return ( getVTrato() + getValorSabado() + getSobreTiempo() )/ calculateDPD(attendance) * calculateSep(attendance);
+		return ( getVTrato() + getValorSabado() + getSobreTiempo() )/ getDpd() * getSep();
 	}
 
 	/**
@@ -673,7 +720,7 @@ public class SalaryCalculator {
 	 * @return
 	 */
 	private double calculateValorSabado(DateTime closingDateLastMonth,Attendance attendance,Attendance lastMonthAttendance) {
-		return ( getVTrato() +  getDescHoras() ) / calculateDPS(attendance) * calculateSab(attendance);
+		return ( getVTrato() +  getDescHoras() ) / getDps() * getSab();
 	}
 
 	/**
@@ -709,7 +756,7 @@ public class SalaryCalculator {
 	 * @return
 	 */
 	private int getJPromedio() {
-		return jornalPromedio;
+		return jornalPromedio == null ? 0 : jornalPromedio;
 	}
 
 	/**
@@ -742,6 +789,11 @@ public class SalaryCalculator {
 	 */
 	private double calculateMov2(DateTime closingDateLastMonth,Attendance attendance,Attendance lastMonthAttendance) {
 		
+		double mov2 = getMov2ConstructionSite();
+		return getCol()*mov2+ bonoCargoLoc2;
+	}
+	
+	private double getMov2ConstructionSite(){
 		double mov2 = 0;
 		for(Mobilization2 m2 : wageConfigurations.getMobilizations2()){
 			if(m2.getConstructionSite().equals(attendance.getLaborerConstructionSite().getConstructionsite())){
@@ -749,8 +801,7 @@ public class SalaryCalculator {
 				break;
 			}
 		}
-		
-		return getCol()*mov2+ bonoCargoLoc2;
+		return mov2;
 	}
 
 	/**
@@ -971,6 +1022,5 @@ public class SalaryCalculator {
 		}
 		return count;
 	}
-
 
 }

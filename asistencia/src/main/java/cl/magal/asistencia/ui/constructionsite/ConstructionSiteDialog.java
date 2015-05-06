@@ -96,7 +96,7 @@ public class ConstructionSiteDialog extends AbstractWindowEditor {
 		hl.setComponentAlignment(fl, Alignment.MIDDLE_CENTER);
 		fl.setSpacing(true);
 
-		for (Object propertyId : new String[]{"name", "code", "address","status"}) {
+		for (Object propertyId : new String[]{"name","costCenter" ,"code", "address","status"}) {
 			if(propertyId.equals("constructionsiteId") || propertyId.equals("deleted"))
 				;
 			else if(propertyId.equals("status")){
@@ -189,8 +189,10 @@ public class ConstructionSiteDialog extends AbstractWindowEditor {
 	}
 
 	private String tradProperty(Object propertyId) {
-		if(propertyId.equals("code"))
-			return "Código";
+		if(propertyId.equals("costCenter"))
+			return "Centro de Costo";
+		else if(propertyId.equals("code"))
+			return "Nombre en Código";
 		else if(propertyId.equals("name"))
 			return "Nombre";
 		else if(propertyId.equals("address"))

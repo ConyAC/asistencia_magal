@@ -1,18 +1,25 @@
 package cl.magal.asistencia.ui.constructionsite;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.velocity.app.VelocityEngine;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
+import org.springframework.ui.velocity.VelocityEngineUtils;
 import org.vaadin.dialogs.ConfirmDialog;
 
 import cl.magal.asistencia.entities.AdvancePaymentConfigurations;
@@ -37,6 +44,7 @@ import cl.magal.asistencia.ui.vo.AbsenceVO;
 import cl.magal.asistencia.util.Constants;
 import cl.magal.asistencia.util.SecurityHelper;
 import cl.magal.asistencia.util.Utils;
+import cl.magal.asistencia.util.VelocityHelper;
 
 import com.vaadin.data.Container;
 import com.vaadin.data.Container.Filterable;
@@ -61,7 +69,9 @@ import com.vaadin.event.FieldEvents.TextChangeEvent;
 import com.vaadin.event.FieldEvents.TextChangeListener;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
+import com.vaadin.server.FileDownloader;
 import com.vaadin.server.FontAwesome;
+import com.vaadin.server.StreamResource;
 import com.vaadin.shared.ui.datefield.Resolution;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Alignment;
@@ -117,6 +127,8 @@ public class AttendancePanel extends Panel implements View {
 	private transient ConfigurationService confService;
 	@Autowired
 	private transient MailService mailService;
+	@Autowired
+	private transient VelocityEngine velocityEngine;
 	
 	AdvancePaymentConfigurations advancepayment;
 	/** CONTAINERS **/
@@ -133,7 +145,7 @@ public class AttendancePanel extends Panel implements View {
 	Grid attendanceGrid, overtimeGrid/*,extraGrid*/;
 	Window progressDialog;
 	InlineDateField attendanceDate;
-	Button btnExportSoftland,btnConstructionSiteConfirm,btnCentralConfirm,btnSupleObraConfirm,btnSupleCentralConfirm;
+	Button btnExportSoftland,btnExportSupleSoftland,btnConstructionSiteConfirm,btnCentralConfirm,btnSupleObraConfirm,btnSupleCentralConfirm;
 	Table confirmTable;
 	VerticalLayout root;
 	Table supleTable,salaryTable;
@@ -356,8 +368,9 @@ public class AttendancePanel extends Panel implements View {
 		btnCentralConfirm.setVisible(showOnCentral);
 		
 		//permite exportar a softland si se tiene doble confirmación y se tiene permisos
-		btnExportSoftland.setVisible(SecurityHelper.hasPermission(Permission.GENERAR_SUELDOS_SOFTLAND));
 		
+		btnExportSoftland.setVisible(SecurityHelper.hasPermission(Permission.GENERAR_SUELDOS_SOFTLAND));
+		btnExportSupleSoftland.setVisible(SecurityHelper.hasPermission(Permission.GENERAR_SUELDOS_SOFTLAND));
 		/**
 		 * Use el mismo código de arriba, reemplace los valores para considerar los botones del suple que se comportan igual.
 		 */
@@ -416,6 +429,7 @@ public class AttendancePanel extends Panel implements View {
 						SecurityHelper.hasPermission(Permission.DESBLOQUEDAR_ASISTENCIA) ) );
 
 		btnExportSoftland.setEnabled(getConfirmations().isCentralCheck()); //sólo se habilita si está la confirmación de central
+		btnExportSupleSoftland.setEnabled(getConfirmations().isSupleCentralCheck());
 	}
 	
 	private void enableSalary(boolean state) {
@@ -548,6 +562,7 @@ public class AttendancePanel extends Panel implements View {
 		VerticalLayout vl = new VerticalLayout(){
 			{
 				setSpacing(true);
+				setMargin(true);
 
 				supleTable = new Table();
 				supleTable.setWidth("100%");
@@ -555,6 +570,7 @@ public class AttendancePanel extends Panel implements View {
 				
 				HorizontalLayout hl = new HorizontalLayout(){
 					{
+						setSpacing(true);
 						btnSupleObraConfirm = new Button("Confirmación Obra",FontAwesome.CHECK);
 						btnSupleObraConfirm.setDisableOnClick(true);						
 						addComponent(btnSupleObraConfirm);			
@@ -612,6 +628,20 @@ public class AttendancePanel extends Panel implements View {
 								});
 							}
 						});
+						
+						btnExportSupleSoftland = new Button("Exportar a Softland",FontAwesome.FILE_EXCEL_O);
+//						btnExportSupleSoftland.setDisableOnClick(true);
+						addComponent(btnExportSupleSoftland);
+						setComponentAlignment(btnExportSupleSoftland, Alignment.TOP_RIGHT);
+						generateSupleSoftlandFile(btnExportSupleSoftland);
+//						btnExportSupleSoftland.addClickListener(new Button.ClickListener() {
+//
+//							@Override
+//							public void buttonClick(ClickEvent event) {
+//								
+//							}
+//
+//						});
 					}					
 				};
 				
@@ -788,18 +818,12 @@ public class AttendancePanel extends Panel implements View {
 						});
 
 						btnExportSoftland = new Button("Exportar a Softland",FontAwesome.FILE_EXCEL_O);
-						btnExportSoftland.setDisableOnClick(true);
+//						btnExportSoftland.setDisableOnClick(true);
 						addComponent(btnExportSoftland);
 						setComponentAlignment(btnExportSoftland, Alignment.TOP_RIGHT);
 
-						btnExportSoftland.addClickListener(new Button.ClickListener() {
-
-							@Override
-							public void buttonClick(ClickEvent event) {
-								generateSoftlandFile();
-							}
-
-						});
+						generateSoftlandFile(btnExportSoftland);
+						
 					}
 				};
 
@@ -1476,8 +1500,69 @@ public class AttendancePanel extends Panel implements View {
 		};
 	}
 
-	private void generateSoftlandFile() {
-		Notification.show("Descagando archivo de softland...");
+	private void generateSoftlandFile(final Button btnExportSoftland) {
+		
+		//recupera la lista de sueldos
+		StreamResource.StreamSource myResource = new StreamResource.StreamSource() {
+
+			public InputStream getStream() {
+				//recupera la lista de sueldos
+				List<Salary> salaries = new ArrayList<Salary>(salaryContainer.size());
+				for(Object itemId : salaryContainer.getItemIds()){
+					salaries.add(salaryContainer.getItem(itemId).getBean());
+				}
+				
+				final Map<String, Object> input = new HashMap<String, Object>();
+				input.put("salaries", salaries);
+				VelocityHelper.addTools(input);
+				
+				final StringBuilder sb = new StringBuilder();
+
+				// contrato
+				sb.append( VelocityEngineUtils.mergeTemplateIntoString(velocityEngine, "templates/export/salary.vm", "UTF-8", input));
+				
+				InputStream stream =  new ByteArrayInputStream(sb.toString().getBytes());
+//				btnExportSoftland.setEnabled(true);
+				return stream;
+			}
+		};
+		StreamResource resource = new StreamResource(myResource, "pruebaSalary.txt"); //mes_año_codobra_ant/liq.txt
+		
+        FileDownloader fileDownloader = new FileDownloader(resource);
+        fileDownloader.extend(btnExportSoftland);
+	}
+	
+	private void generateSupleSoftlandFile(final Button btnExportSoftland) {
+		
+		
+		StreamResource.StreamSource myResource = new StreamResource.StreamSource() {
+
+			public InputStream getStream() {
+				//recupera la lista de sueldos
+				List<Salary> salaries = new ArrayList<Salary>(salaryContainer.size());
+				for(Object itemId : salaryContainer.getItemIds()){
+					salaries.add(salaryContainer.getItem(itemId).getBean());
+				}
+				
+				final Map<String, Object> input = new HashMap<String, Object>();
+				input.put("salaries", salaries);
+				VelocityHelper.addTools(input);
+				
+				final StringBuilder sb = new StringBuilder();
+
+				// contrato
+				sb.append( VelocityEngineUtils.mergeTemplateIntoString(velocityEngine, "templates/export/suple.vm", "UTF-8", input));
+				
+				InputStream stream =  new ByteArrayInputStream(sb.toString().getBytes());
+//				btnExportSoftland.setEnabled(true);
+				return stream;
+			}
+		};
+		StreamResource resource = new StreamResource(myResource, "pruebaSuple.txt"); //mes_año_codobra_ant/liq.txt
+		
+        FileDownloader fileDownloader = new FileDownloader(resource);
+        fileDownloader.extend(btnExportSoftland);
+        
 	}
 
 	/**

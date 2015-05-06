@@ -111,6 +111,7 @@ CREATE TABLE IF NOT EXISTS construction_site
 (
    constructionsiteId IDENTITY PRIMARY KEY NOT NULL,
    code varchar(255) NOT NULL,
+   cost_center integer NOT NULL,
    address varchar(255),
    deleted boolean,
    name varchar(255) NOT NULL,
