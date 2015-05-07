@@ -282,5 +282,7 @@ MERGE INTO family_allowance_configurations (family_allowance_configurationsId,am
 MERGE INTO family_allowance_configurations (family_allowance_configurationsId,amount,fromr,tor) VALUES (3,4650.0,12696.32,19801.92);
 MERGE INTO family_allowance_configurations (family_allowance_configurationsId,amount,fromr,tor) VALUES (4,0.0,19801.96,1000000.64);
 
+-- feriados
+MERGE INTO holiday (holidayId,date,name) VALUES (1, {ts '2015-05-21 00:00:00.0'}, '21 de Mayo');
 
 

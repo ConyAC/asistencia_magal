@@ -846,3 +846,15 @@ CREATE INDEX IF NOT EXISTS FK_EXTRA_PARAMS_LABORER_CONSTRUCTIONSITEID_INDEX_7 ON
 ;
 CREATE UNIQUE INDEX IF NOT EXISTS uq_extra_param ON extra_params(extra_paramsId)
 ;
+
+-- Feriados
+
+CREATE TABLE IF NOT EXISTS holiday
+(
+   holidayId IDENTITY PRIMARY KEY NOT NULL,
+   date timestamp NOT NULL,
+   name varchar(255) NOT NULL
+)
+;
+CREATE UNIQUE INDEX IF NOT EXISTS PK_HOLIDAY ON holiday(holidayId)
+;

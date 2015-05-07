@@ -28,6 +28,7 @@ import cl.magal.asistencia.entities.ConstructionSite;
 import cl.magal.asistencia.entities.DateConfigurations;
 import cl.magal.asistencia.entities.ExtraParams;
 import cl.magal.asistencia.entities.FamilyAllowanceConfigurations;
+import cl.magal.asistencia.entities.Holiday;
 import cl.magal.asistencia.entities.Laborer;
 import cl.magal.asistencia.entities.LaborerConstructionsite;
 import cl.magal.asistencia.entities.License;
@@ -39,12 +40,14 @@ import cl.magal.asistencia.entities.User;
 import cl.magal.asistencia.entities.Vacation;
 import cl.magal.asistencia.entities.WageConfigurations;
 import cl.magal.asistencia.entities.enums.AbsenceType;
+import cl.magal.asistencia.entities.enums.AttendanceMark;
 import cl.magal.asistencia.repositories.AccidentRepository;
 import cl.magal.asistencia.repositories.AttendanceRepository;
 import cl.magal.asistencia.repositories.ConfirmationsRepository;
 import cl.magal.asistencia.repositories.ConstructionCompanyRepository;
 import cl.magal.asistencia.repositories.ConstructionSiteRepository;
 import cl.magal.asistencia.repositories.ExtraParamsRepository;
+import cl.magal.asistencia.repositories.HolidayRepository;
 import cl.magal.asistencia.repositories.LaborerConstructionsiteRepository;
 import cl.magal.asistencia.repositories.LaborerRepository;
 import cl.magal.asistencia.repositories.LicenseRepositoy;
@@ -90,6 +93,8 @@ public class ConstructionSiteService {
 	SalaryRepository salaryRepo;
 	@Autowired
 	ExtraParamsRepository extraParamsRepo;
+	@Autowired
+	HolidayRepository holidayRepo;
 	
 	//SERVICES
 	@Autowired
@@ -280,7 +285,7 @@ public class ConstructionSiteService {
 			if( index >= 0 ){
 				Attendance attendance = attendanceResultList.remove(index);
 				attendance.setLaborerConstructionSite(lc);
-				attendance.setDate(date.toDate());
+				attendance.setDate(date.toDate());	
 				attendanceResult.put(lc.getJobCode(),attendance);
 			}else{
 				Attendance attendance = new Attendance();
@@ -304,14 +309,39 @@ public class ConstructionSiteService {
 		List<LaborerConstructionsite> lcs =  labcsRepo.findByConstructionsiteAndIsActive(cs);
 		List<Attendance> attendanceResult =  attendanceRepo.findByConstructionsiteAndMonth(cs,date.toDate());
 		Attendance tmp = new Attendance();
+		List<Holiday> h = holidayRepo.findByMonth(date.toDate());
+		logger.debug("holiday: "+h);
+		for(Holiday hol : h){
+			logger.debug("holiday: "+hol.getDate().getDay());
+		}
 		//verifica que exista una asistencia para cada elemento, si no existe la crea
 		for(LaborerConstructionsite lc : lcs ){
 			tmp.setLaborerConstructionSite(lc);
 			if(!attendanceResult.contains(tmp)){
 				Attendance attendance = new Attendance();
+				for (int i = 0; i < attendance.getMarksAsList().size(); i++){
+					if(i <=29){//FIXME
+						int day = date.withDayOfMonth(i+1).dayOfWeek().get();
+						int day_p = date.minusMonths(1).withDayOfMonth(i+1).dayOfWeek().get();
+
+						if(day == 7){
+							attendance.setMark(AttendanceMark.SUNDAY, i);	
+						}else if(day == 6){
+							attendance.setMark(AttendanceMark.SATURDAY, i);
+						}
+						
+						if(day_p == 7){
+							attendance.setLastMark(AttendanceMark.SUNDAY, i);	
+						}else if(day_p == 6){
+							attendance.setLastMark(AttendanceMark.SATURDAY, i);
+						}
+					}
+				}
+				
 				attendance.setLaborerConstructionSite(lc);
 				attendance.setDate(date.toDate());
 				attendanceResult.add(attendance);
+				attendanceRepo.save(attendance);
 			}
 		}
 		return attendanceResult;

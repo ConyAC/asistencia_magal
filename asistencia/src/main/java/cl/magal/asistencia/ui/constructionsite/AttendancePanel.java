@@ -305,7 +305,7 @@ public class AttendancePanel extends Panel implements View {
 	}
 
 	private TabSheet drawAttendanceDetail() {
-		
+		logger.debug("PRIMERO");
 		TabSheet tab = new TabSheet();
 
 		Grid attendanceGrid = drawAttendanceGrid();
@@ -523,6 +523,16 @@ public class AttendancePanel extends Panel implements View {
 					if(cellReference.getValue() instanceof AttendanceMark && !AttendanceMark.ATTEND.equals(cellReference.getValue()))
 						post += " bold";
 					String pid = (String) cellReference.getPropertyId();
+					
+//					if(!pid.equals("laborerConstructionSite.activeContract.jobCode")){
+//						String day = dt.withDayOfMonth(Integer.parseInt(((String) pid).replace("dmp","").replace("dma",""))).dayOfWeek().getAsShortText();
+//						if(day == "dom"){
+//							attendanceContainer.getItem(cellReference.getPropertyId()).getItemProperty(pid).setValue(AttendanceMark.SUNDAY);														
+//						}else if(day == "sáb"){
+//							attendanceContainer.getItem(cellReference.getPropertyId()).getItemProperty(pid).setValue(AttendanceMark.SATURDAY);
+//						}
+//					}	
+//					
 					if( pid.startsWith("dmp") || pid.startsWith("dma") ){
 						//calcula el numero del mes
 						int monthDay = Integer.parseInt(((String) pid).replace("dmp","").replace("dma",""));
@@ -1063,7 +1073,7 @@ public class AttendancePanel extends Panel implements View {
 	}
 
 	private Grid drawAttendanceGrid() {
-		
+		logger.debug("SEGUNDO");
 		attendanceContainer.addNestedContainerProperty("laborerConstructionSite.activeContract.jobCode");
 		attendanceContainer.addNestedContainerProperty("laborerConstructionSite.id");
 		attendanceContainer.setBeanIdProperty("laborerConstructionSite.id");
