@@ -59,6 +59,7 @@ import cl.magal.asistencia.repositories.VacationRepository;
 import cl.magal.asistencia.services.bo.SalaryCalculator;
 import cl.magal.asistencia.services.bo.SupleCalculator;
 import cl.magal.asistencia.ui.vo.AbsenceVO;
+import cl.magal.asistencia.util.Utils;
 
 @Service
 public class ConstructionSiteService {
@@ -268,12 +269,12 @@ public class ConstructionSiteService {
 	public Map<Integer,Attendance> getAttendanceMapByConstructionAndMonth(ConstructionSite cs,DateTime date) {
 		//obtiene la lista de trabajadores de la obra
 		List<LaborerConstructionsite> lcs =  labcsRepo.findByConstructionsiteAndIsActive(cs);
-		logger.debug("trabajadores activos {} ",lcs);
-		logger.debug("date {} ",date);
+//		logger.debug("trabajadores activos {} ",lcs);
+//		logger.debug("date {} ",date);
 
 		List<Attendance> attendanceResultList =  attendanceRepo.findByConstructionsiteAndMonth(cs,date.toDate());
-		if(!attendanceResultList.isEmpty())
-			logger.debug("attendanceResultList.getmarks {} ",attendanceResultList.get(0).getMarksAsList());
+//		if(!attendanceResultList.isEmpty())
+//			logger.debug("attendanceResultList.getmarks {} ",attendanceResultList.get(0).getMarksAsList());
 		Attendance tmp = new Attendance();
 
 		Map<Integer,Attendance> attendanceResult = new HashMap<Integer,Attendance>();
@@ -307,42 +308,54 @@ public class ConstructionSiteService {
 	public List<Attendance> getAttendanceByConstruction(ConstructionSite cs,DateTime date) {
 		//obtiene la lista de trabajadores de la obra
 		List<LaborerConstructionsite> lcs =  labcsRepo.findByConstructionsiteAndIsActive(cs);
-		List<Attendance> attendanceResult =  attendanceRepo.findByConstructionsiteAndMonth(cs,date.toDate());
+		List<Attendance> attendanceList =  attendanceRepo.findByConstructionsiteAndMonth(cs,date.toDate());
+		
+		List<Attendance> attendanceResult = new ArrayList<Attendance>(lcs.size());
+		
 		Attendance tmp = new Attendance();
 		List<Holiday> h = holidayRepo.findByMonth(date.toDate());
-		logger.debug("holiday: "+h);
-		for(Holiday hol : h){
-			logger.debug("holiday: "+hol.getDate().getDay());
-		}
+		List<Holiday> h_p = holidayRepo.findByMonth(new DateTime(date.toDate()).minus(1).toDate());
 		//verifica que exista una asistencia para cada elemento, si no existe la crea
 		for(LaborerConstructionsite lc : lcs ){
 			tmp.setLaborerConstructionSite(lc);
-			if(!attendanceResult.contains(tmp)){
-				Attendance attendance = new Attendance();
-				for (int i = 0; i < attendance.getMarksAsList().size(); i++){
-					if(i <=29){//FIXME
-						int day = date.withDayOfMonth(i+1).dayOfWeek().get();
-						int day_p = date.minusMonths(1).withDayOfMonth(i+1).dayOfWeek().get();
-
-						if(day == 7){
-							attendance.setMark(AttendanceMark.SUNDAY, i);	
-						}else if(day == 6){
-							attendance.setMark(AttendanceMark.SATURDAY, i);
-						}
-						
-						if(day_p == 7){
-							attendance.setLastMark(AttendanceMark.SUNDAY, i);	
-						}else if(day_p == 6){
-							attendance.setLastMark(AttendanceMark.SATURDAY, i);
-						}
+			
+			int index = attendanceList.indexOf(tmp);
+			Attendance attendance ;
+			if(index >= 0){
+				attendance = attendanceList.remove(index);
+			}else{
+				attendance = new Attendance();
+				attendance.setLaborerConstructionSite(lc);
+				attendance.setDate(date.toDate());
+			}
+			
+			for (int i = 0; i < attendance.getMarksAsList().size(); i++){
+				if( i + 1 <= date.dayOfMonth().getMaximumValue() ){ //solo setea hasta el maximo
+					
+					int day = date.withDayOfMonth(i+1).dayOfWeek().get();
+					if (Utils.containsHoliday(h,(i+1))){
+						attendance.setMark(AttendanceMark.SUNDAY, i);
+					}else if(day == 7 && index >= 0){ //solo asigna el domingo si es nuevo
+						attendance.setMark(AttendanceMark.SUNDAY, i);	
+					}else if(day == 6 && index >= 0){
+						attendance.setMark(AttendanceMark.SATURDAY, i);
 					}
 				}
 				
-				attendance.setLaborerConstructionSite(lc);
-				attendance.setDate(date.toDate());
-				attendanceResult.add(attendance);
-				attendanceRepo.save(attendance);
+				if( i + 1 <= date.minusMonths(1).dayOfMonth().getMaximumValue()){ //solo setea hasta el maximo
+					int day_p = date.minusMonths(1).withDayOfMonth(i+1).dayOfWeek().get();
+					if (Utils.containsHoliday(h_p,(i+1))){
+						attendance.setLastMark(AttendanceMark.SUNDAY, i);
+					}else if(day_p == 7 && index >= 0){//solo asigna el domingo si es nuevo
+						attendance.setLastMark(AttendanceMark.SUNDAY, i);	
+					}else if(day_p == 6 && index >= 0){
+						attendance.setLastMark(AttendanceMark.SATURDAY, i);
+					}
+				}
 			}
+			attendanceResult.add(attendance);
+			attendanceRepo.save(attendance);
+			
 		}
 		return attendanceResult;
 	}

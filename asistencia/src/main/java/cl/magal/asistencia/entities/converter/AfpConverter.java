@@ -15,7 +15,6 @@ public class AfpConverter implements AttributeConverter<Afp, Integer>{
 	@Override
 	public Integer convertToDatabaseColumn(Afp arg0) {
 		Integer r = arg0.getCorrelative();
-		logger.debug("convertToDatabaseColumn {} y {} ",arg0,r);
 		return r;
 	}
 
