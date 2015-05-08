@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,6 +28,7 @@ import cl.magal.asistencia.entities.Attendance;
 import cl.magal.asistencia.entities.Confirmations;
 import cl.magal.asistencia.entities.ConstructionSite;
 import cl.magal.asistencia.entities.DateConfigurations;
+import cl.magal.asistencia.entities.Loan;
 import cl.magal.asistencia.entities.Overtime;
 import cl.magal.asistencia.entities.Salary;
 import cl.magal.asistencia.entities.enums.AttendanceMark;
@@ -854,7 +856,7 @@ public class AttendancePanel extends Panel implements View {
 						final Label label  = new Label("<b>"+Utils.formatInteger((Integer) salaryContainer.getContainerProperty(itemId, columnId).getValue())+"</b>"+
 								"  ("+Utils.formatInteger((Integer) salaryContainer.getContainerProperty(itemId, "roundSalary").getValue())+")");
 						label.setContentMode(ContentMode.HTML);
-						for(final String pid : new String[]{"jornalPromedio","suple","descHours","bondMov2","specialBond"})
+						for(final String pid : new String[]{"jornalPromedio","suple","descHours","bondMov2","specialBond","loanBond"})
 							((ValueChangeNotifier)item.getItemProperty(pid)).addValueChangeListener(new Property.ValueChangeListener() {
 								
 								@Override
@@ -875,11 +877,11 @@ public class AttendancePanel extends Panel implements View {
 				});
 				
 				salaryTable.setVisibleColumns("laborerConstructionSite.activeContract.jobCode",
-						"laborerConstructionSite.laborer.fullname","lastJornalPromedio","jornalPromedio","descHours","bondMov2","specialBond","totalLiquido"
+						"laborerConstructionSite.laborer.fullname","lastJornalPromedio","jornalPromedio","descHours","bondMov2","loanBond","specialBond","totalLiquido"
 						,"jornalBaseMes","vtrato","valorSabado","vsCorrd","sobreTiempo","descHoras","bonifImpo","glegal","afecto","sobreAfecto","cargas","asigFamiliar","colacion","mov","mov2","tnoAfecto"
 						);
 				
-				salaryTable.setColumnHeaders("Oficio","Nombre","Último Jornal Promedio","Jornal Promedio","H Desc","Adicional Locomoción 2","Bono Imp.","Total Líquido (A Pagar)"
+				salaryTable.setColumnHeaders("Oficio","Nombre","Último Jornal Promedio","Jornal Promedio","H Desc","Adicional Locomoción 2","Bono Prest.","Bono Imp.","Total Líquido (A Pagar)"
 						,"Jornal Base", " V Trato", "Valor Sábado" , "V S Corrd", "Sobre Tiempo", "Desc Horas","Bonif Imp","G Legal","Afecto","Sobre Afecto","Cargas","A Familiar","Colación","Mov","Movi 2","T No Afecto"
 						);
 				
@@ -917,6 +919,7 @@ public class AttendancePanel extends Panel implements View {
 						if(propertyId.equals("jornalPromedio")||
 						   propertyId.equals("descHours")||
 						   propertyId.equals("specialBond")||
+						   propertyId.equals("loanBond")||
 						   propertyId.equals("bondMov2")){
 							tf.addBlurListener(new FieldEvents.BlurListener() {
 								

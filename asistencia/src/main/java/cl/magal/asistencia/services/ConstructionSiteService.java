@@ -32,6 +32,7 @@ import cl.magal.asistencia.entities.Holiday;
 import cl.magal.asistencia.entities.Laborer;
 import cl.magal.asistencia.entities.LaborerConstructionsite;
 import cl.magal.asistencia.entities.License;
+import cl.magal.asistencia.entities.Loan;
 import cl.magal.asistencia.entities.Overtime;
 import cl.magal.asistencia.entities.Salary;
 import cl.magal.asistencia.entities.TaxationConfigurations;
@@ -51,6 +52,7 @@ import cl.magal.asistencia.repositories.HolidayRepository;
 import cl.magal.asistencia.repositories.LaborerConstructionsiteRepository;
 import cl.magal.asistencia.repositories.LaborerRepository;
 import cl.magal.asistencia.repositories.LicenseRepositoy;
+import cl.magal.asistencia.repositories.LoanRepository;
 import cl.magal.asistencia.repositories.OvertimeRepository;
 import cl.magal.asistencia.repositories.SalaryRepository;
 import cl.magal.asistencia.repositories.TeamRepository;
@@ -96,6 +98,8 @@ public class ConstructionSiteService {
 	ExtraParamsRepository extraParamsRepo;
 	@Autowired
 	HolidayRepository holidayRepo;
+	@Autowired
+	LoanRepository loanRepo;
 	
 	//SERVICES
 	@Autowired
@@ -401,6 +405,31 @@ public class ConstructionSiteService {
 		return overtimeResult;
 	}
 
+	public Map<Integer, Integer> getLoanMapByConstructionAndMonth(ConstructionSite cs, DateTime date) {
+		//obtiene la lista de trabajadores de la obra
+		List<LaborerConstructionsite> lcs =  labcsRepo.findByConstructionsiteAndIsActive(cs);
+		logger.debug("trabajadores activos {} ",lcs);
+		logger.debug("date {} ",date);
+
+		List<Loan> loanResultList =  loanRepo.findByConstructionsiteAndMonth(cs, date.toDate());
+
+		if(!loanResultList.isEmpty())
+			logger.debug("loanResultList.getmarks {} ",loanResultList.get(0));
+
+		Map<Integer, Integer> loanResult = new HashMap<Integer, Integer>();
+		//verifica que exista una asistencia para cada elemento, si no existe la crea
+		for(LaborerConstructionsite lc : lcs ){
+			int p = 0;
+			for(Loan l : loanResultList){
+				if(l.getLaborerConstructionSite().getId() == lc.getId()){
+					p += l.getPrice(); 
+				}
+			}
+			loanResult.put(lc.getJobCode(), p);			
+		}
+		return loanResult;
+	}
+	
 	/**
 	 * 
 	 * @param cs
@@ -653,6 +682,8 @@ public class ConstructionSiteService {
 		Map<Integer,Overtime> overtimes = getOvertimeMapByConstructionAndMonth(cs, date);
 		//busca los valores extra de cada trabajador
 //		Map<Integer,ExtraParams> extraParams = getExtraParamsMapByConstructionAndMonth(cs,date);
+		
+		Map<Integer,Integer> loans = getLoanMapByConstructionAndMonth(cs, date);
 
 		//crea el objeto que calculará los sueldos 
 		SalaryCalculator sc =  new SalaryCalculator(assistanceClose,wageConfiguration, dateConfiguration, famillyTable, taxTable);
@@ -670,7 +701,7 @@ public class ConstructionSiteService {
 			Double suple  = 0d;
 
 			Salary salary = new Salary();
-			sc.setInformation( suple, 0, 0, attendance.get(lc.getJobCode()), lastMonthAttendance.get(lc.getJobCode()), overtimes.get(lc.getJobCode()));
+			sc.setInformation( suple, 0, 0, attendance.get(lc.getJobCode()), lastMonthAttendance.get(lc.getJobCode()), overtimes.get(lc.getJobCode()), loans.get(lc.getJobCode()));
 			salary.setLaborerConstructionSite(lc);
 			salary.setSuple(suple);
 			if(true)
@@ -744,6 +775,8 @@ public class ConstructionSiteService {
 		Map<Integer,Attendance> lastMonthAttendance = getAttendanceMapByConstructionAndMonth(cs, date.minusMonths(1));
 		//busca las sobre horas
 		Map<Integer,Overtime> overtimes = getOvertimeMapByConstructionAndMonth(cs, date);
+		//busca los prestamos
+		Map<Integer, Integer> loans = getLoanMapByConstructionAndMonth(cs, date);
 
 		List<LaborerConstructionsite> lcs =  labcsRepo.findByConstructionsiteAndIsActive(cs);
 		
@@ -778,7 +811,7 @@ public class ConstructionSiteService {
 			
 			//crea el objeto que calculará los sueldos 
 			SalaryCalculator sc =  new SalaryCalculator(assistanceClose,wageConfiguration, dateConfiguration, famillyTable, taxTable);
-			sc.setInformation( 0, 0, 0, attendance.get(lc.getJobCode()), lastMonthAttendance.get(lc.getJobCode()), overtimes.get(lc.getJobCode()));
+			sc.setInformation( 0, 0, 0, attendance.get(lc.getJobCode()), lastMonthAttendance.get(lc.getJobCode()), overtimes.get(lc.getJobCode()), loans.get(lc.getJobCode()));
 			SupleCalculator suc = new SupleCalculator(advancePaymentConfig, supleClose);
 			//si el codigo de suple es nulo, entonces usa el primero de la tabla de suples FIXME CONFIRMAR ESTE COMPORTAMIENTO!!!
 			if(lc.getSupleCode() == null ){
@@ -816,9 +849,10 @@ public class ConstructionSiteService {
 			WageConfigurations wageConfiguration,
 			DateConfigurations dateConfigurations,
 			List<FamilyAllowanceConfigurations> famillyTable,
-			List<TaxationConfigurations> taxTable) {
+			List<TaxationConfigurations> taxTable,
+			int loans) {
 
-		SalaryCalculator sc = new SalaryCalculator(closingDateLastMonth, suple, tool, loan, attendance, lastMonthAttendance, overtime,wageConfiguration, dateConfigurations, famillyTable, taxTable);
+		SalaryCalculator sc = new SalaryCalculator(closingDateLastMonth, suple, tool, loan, attendance, lastMonthAttendance, overtime,wageConfiguration, dateConfigurations, famillyTable, taxTable, loans);
 //		return (int) sc.calculateSalary();
 		if(true)
 			throw new RuntimeException("No implementado");
