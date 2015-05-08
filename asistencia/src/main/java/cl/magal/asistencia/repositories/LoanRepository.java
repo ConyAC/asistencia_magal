@@ -15,6 +15,7 @@ public interface LoanRepository extends PagingAndSortingRepository<Loan, Long> {
 	@Query(value = "select l from Loan l where l.laborerConstructionSite.constructionsite = ?1 and extract( month from l.dateBuy ) = extract ( month from ?2 ) and extract( year from l.dateBuy ) = extract ( year from ?2 )" )
 	List<Loan> findByConstructionsiteAndMonth(ConstructionSite cs, Date date);
 
+	@Query(value ="select l from Loan l where l.laborerConstructionSite.id = ?1 ")
 	List<Integer> findPriceLoan(Long id);
 
 }
