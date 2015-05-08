@@ -28,9 +28,11 @@ import cl.magal.asistencia.entities.ConstructionSite;
 import cl.magal.asistencia.entities.DateConfigurations;
 import cl.magal.asistencia.entities.ExtraParams;
 import cl.magal.asistencia.entities.FamilyAllowanceConfigurations;
+import cl.magal.asistencia.entities.Holiday;
 import cl.magal.asistencia.entities.Laborer;
 import cl.magal.asistencia.entities.LaborerConstructionsite;
 import cl.magal.asistencia.entities.License;
+import cl.magal.asistencia.entities.Loan;
 import cl.magal.asistencia.entities.Overtime;
 import cl.magal.asistencia.entities.Salary;
 import cl.magal.asistencia.entities.TaxationConfigurations;
@@ -39,15 +41,18 @@ import cl.magal.asistencia.entities.User;
 import cl.magal.asistencia.entities.Vacation;
 import cl.magal.asistencia.entities.WageConfigurations;
 import cl.magal.asistencia.entities.enums.AbsenceType;
+import cl.magal.asistencia.entities.enums.AttendanceMark;
 import cl.magal.asistencia.repositories.AccidentRepository;
 import cl.magal.asistencia.repositories.AttendanceRepository;
 import cl.magal.asistencia.repositories.ConfirmationsRepository;
 import cl.magal.asistencia.repositories.ConstructionCompanyRepository;
 import cl.magal.asistencia.repositories.ConstructionSiteRepository;
 import cl.magal.asistencia.repositories.ExtraParamsRepository;
+import cl.magal.asistencia.repositories.HolidayRepository;
 import cl.magal.asistencia.repositories.LaborerConstructionsiteRepository;
 import cl.magal.asistencia.repositories.LaborerRepository;
 import cl.magal.asistencia.repositories.LicenseRepositoy;
+import cl.magal.asistencia.repositories.LoanRepository;
 import cl.magal.asistencia.repositories.OvertimeRepository;
 import cl.magal.asistencia.repositories.SalaryRepository;
 import cl.magal.asistencia.repositories.TeamRepository;
@@ -56,6 +61,7 @@ import cl.magal.asistencia.repositories.VacationRepository;
 import cl.magal.asistencia.services.bo.SalaryCalculator;
 import cl.magal.asistencia.services.bo.SupleCalculator;
 import cl.magal.asistencia.ui.vo.AbsenceVO;
+import cl.magal.asistencia.util.Utils;
 
 @Service
 public class ConstructionSiteService {
@@ -90,6 +96,10 @@ public class ConstructionSiteService {
 	SalaryRepository salaryRepo;
 	@Autowired
 	ExtraParamsRepository extraParamsRepo;
+	@Autowired
+	HolidayRepository holidayRepo;
+	@Autowired
+	LoanRepository loanRepo;
 	
 	//SERVICES
 	@Autowired
@@ -263,12 +273,12 @@ public class ConstructionSiteService {
 	public Map<Integer,Attendance> getAttendanceMapByConstructionAndMonth(ConstructionSite cs,DateTime date) {
 		//obtiene la lista de trabajadores de la obra
 		List<LaborerConstructionsite> lcs =  labcsRepo.findByConstructionsiteAndIsActive(cs);
-		logger.debug("trabajadores activos {} ",lcs);
-		logger.debug("date {} ",date);
+//		logger.debug("trabajadores activos {} ",lcs);
+//		logger.debug("date {} ",date);
 
 		List<Attendance> attendanceResultList =  attendanceRepo.findByConstructionsiteAndMonth(cs,date.toDate());
-		if(!attendanceResultList.isEmpty())
-			logger.debug("attendanceResultList.getmarks {} ",attendanceResultList.get(0).getMarksAsList());
+//		if(!attendanceResultList.isEmpty())
+//			logger.debug("attendanceResultList.getmarks {} ",attendanceResultList.get(0).getMarksAsList());
 		Attendance tmp = new Attendance();
 
 		Map<Integer,Attendance> attendanceResult = new HashMap<Integer,Attendance>();
@@ -280,7 +290,7 @@ public class ConstructionSiteService {
 			if( index >= 0 ){
 				Attendance attendance = attendanceResultList.remove(index);
 				attendance.setLaborerConstructionSite(lc);
-				attendance.setDate(date.toDate());
+				attendance.setDate(date.toDate());	
 				attendanceResult.put(lc.getJobCode(),attendance);
 			}else{
 				Attendance attendance = new Attendance();
@@ -302,17 +312,54 @@ public class ConstructionSiteService {
 	public List<Attendance> getAttendanceByConstruction(ConstructionSite cs,DateTime date) {
 		//obtiene la lista de trabajadores de la obra
 		List<LaborerConstructionsite> lcs =  labcsRepo.findByConstructionsiteAndIsActive(cs);
-		List<Attendance> attendanceResult =  attendanceRepo.findByConstructionsiteAndMonth(cs,date.toDate());
+		List<Attendance> attendanceList =  attendanceRepo.findByConstructionsiteAndMonth(cs,date.toDate());
+		
+		List<Attendance> attendanceResult = new ArrayList<Attendance>(lcs.size());
+		
 		Attendance tmp = new Attendance();
+		List<Holiday> h = holidayRepo.findByMonth(date.toDate());
+		List<Holiday> h_p = holidayRepo.findByMonth(new DateTime(date.toDate()).minus(1).toDate());
 		//verifica que exista una asistencia para cada elemento, si no existe la crea
 		for(LaborerConstructionsite lc : lcs ){
 			tmp.setLaborerConstructionSite(lc);
-			if(!attendanceResult.contains(tmp)){
-				Attendance attendance = new Attendance();
+			
+			int index = attendanceList.indexOf(tmp);
+			Attendance attendance ;
+			if(index >= 0){
+				attendance = attendanceList.remove(index);
+			}else{
+				attendance = new Attendance();
 				attendance.setLaborerConstructionSite(lc);
 				attendance.setDate(date.toDate());
-				attendanceResult.add(attendance);
 			}
+			
+			for (int i = 0; i < attendance.getMarksAsList().size(); i++){
+				if( i + 1 <= date.dayOfMonth().getMaximumValue() ){ //solo setea hasta el maximo
+					
+					int day = date.withDayOfMonth(i+1).dayOfWeek().get();
+					if (Utils.containsHoliday(h,(i+1))){
+						attendance.setMark(AttendanceMark.SUNDAY, i);
+					}else if(day == 7 && index >= 0){ //solo asigna el domingo si es nuevo
+						attendance.setMark(AttendanceMark.SUNDAY, i);	
+					}else if(day == 6 && index >= 0){
+						attendance.setMark(AttendanceMark.SATURDAY, i);
+					}
+				}
+				
+				if( i + 1 <= date.minusMonths(1).dayOfMonth().getMaximumValue()){ //solo setea hasta el maximo
+					int day_p = date.minusMonths(1).withDayOfMonth(i+1).dayOfWeek().get();
+					if (Utils.containsHoliday(h_p,(i+1))){
+						attendance.setLastMark(AttendanceMark.SUNDAY, i);
+					}else if(day_p == 7 && index >= 0){//solo asigna el domingo si es nuevo
+						attendance.setLastMark(AttendanceMark.SUNDAY, i);	
+					}else if(day_p == 6 && index >= 0){
+						attendance.setLastMark(AttendanceMark.SATURDAY, i);
+					}
+				}
+			}
+			attendanceResult.add(attendance);
+			attendanceRepo.save(attendance);
+			
 		}
 		return attendanceResult;
 	}
@@ -358,6 +405,31 @@ public class ConstructionSiteService {
 		return overtimeResult;
 	}
 
+	public Map<Integer, Integer> getLoanMapByConstructionAndMonth(ConstructionSite cs, DateTime date) {
+		//obtiene la lista de trabajadores de la obra
+		List<LaborerConstructionsite> lcs =  labcsRepo.findByConstructionsiteAndIsActive(cs);
+		logger.debug("trabajadores activos {} ",lcs);
+		logger.debug("date {} ",date);
+
+		List<Loan> loanResultList =  loanRepo.findByConstructionsiteAndMonth(cs, date.toDate());
+
+		if(!loanResultList.isEmpty())
+			logger.debug("loanResultList.getmarks {} ",loanResultList.get(0));
+
+		Map<Integer, Integer> loanResult = new HashMap<Integer, Integer>();
+		//verifica que exista una asistencia para cada elemento, si no existe la crea
+		for(LaborerConstructionsite lc : lcs ){
+			int p = 0;
+			for(Loan l : loanResultList){
+				if(l.getLaborerConstructionSite().getId() == lc.getId()){
+					p += l.getPrice(); 
+				}
+			}
+			loanResult.put(lc.getJobCode(), p);			
+		}
+		return loanResult;
+	}
+	
 	/**
 	 * 
 	 * @param cs
@@ -610,6 +682,8 @@ public class ConstructionSiteService {
 		Map<Integer,Overtime> overtimes = getOvertimeMapByConstructionAndMonth(cs, date);
 		//busca los valores extra de cada trabajador
 //		Map<Integer,ExtraParams> extraParams = getExtraParamsMapByConstructionAndMonth(cs,date);
+		
+		Map<Integer,Integer> loans = getLoanMapByConstructionAndMonth(cs, date);
 
 		//crea el objeto que calculará los sueldos 
 		SalaryCalculator sc =  new SalaryCalculator(assistanceClose,wageConfiguration, dateConfiguration, famillyTable, taxTable);
@@ -627,7 +701,7 @@ public class ConstructionSiteService {
 			Double suple  = 0d;
 
 			Salary salary = new Salary();
-			sc.setInformation( suple, 0, 0, attendance.get(lc.getJobCode()), lastMonthAttendance.get(lc.getJobCode()), overtimes.get(lc.getJobCode()));
+			sc.setInformation( suple, 0, 0, attendance.get(lc.getJobCode()), lastMonthAttendance.get(lc.getJobCode()), overtimes.get(lc.getJobCode()), loans.get(lc.getJobCode()));
 			salary.setLaborerConstructionSite(lc);
 			salary.setSuple(suple);
 			if(true)
@@ -701,6 +775,8 @@ public class ConstructionSiteService {
 		Map<Integer,Attendance> lastMonthAttendance = getAttendanceMapByConstructionAndMonth(cs, date.minusMonths(1));
 		//busca las sobre horas
 		Map<Integer,Overtime> overtimes = getOvertimeMapByConstructionAndMonth(cs, date);
+		//busca los prestamos
+		Map<Integer, Integer> loans = getLoanMapByConstructionAndMonth(cs, date);
 
 		List<LaborerConstructionsite> lcs =  labcsRepo.findByConstructionsiteAndIsActive(cs);
 		
@@ -735,7 +811,7 @@ public class ConstructionSiteService {
 			
 			//crea el objeto que calculará los sueldos 
 			SalaryCalculator sc =  new SalaryCalculator(assistanceClose,wageConfiguration, dateConfiguration, famillyTable, taxTable);
-			sc.setInformation( 0, 0, 0, attendance.get(lc.getJobCode()), lastMonthAttendance.get(lc.getJobCode()), overtimes.get(lc.getJobCode()));
+			sc.setInformation( 0, 0, 0, attendance.get(lc.getJobCode()), lastMonthAttendance.get(lc.getJobCode()), overtimes.get(lc.getJobCode()), loans.get(lc.getJobCode()));
 			SupleCalculator suc = new SupleCalculator(advancePaymentConfig, supleClose);
 			//si el codigo de suple es nulo, entonces usa el primero de la tabla de suples FIXME CONFIRMAR ESTE COMPORTAMIENTO!!!
 			if(lc.getSupleCode() == null ){
@@ -773,9 +849,10 @@ public class ConstructionSiteService {
 			WageConfigurations wageConfiguration,
 			DateConfigurations dateConfigurations,
 			List<FamilyAllowanceConfigurations> famillyTable,
-			List<TaxationConfigurations> taxTable) {
+			List<TaxationConfigurations> taxTable,
+			int loans) {
 
-		SalaryCalculator sc = new SalaryCalculator(closingDateLastMonth, suple, tool, loan, attendance, lastMonthAttendance, overtime,wageConfiguration, dateConfigurations, famillyTable, taxTable);
+		SalaryCalculator sc = new SalaryCalculator(closingDateLastMonth, suple, tool, loan, attendance, lastMonthAttendance, overtime,wageConfiguration, dateConfigurations, famillyTable, taxTable, loans);
 //		return (int) sc.calculateSalary();
 		if(true)
 			throw new RuntimeException("No implementado");

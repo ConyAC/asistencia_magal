@@ -15,6 +15,7 @@ import org.joda.time.format.DateTimeFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import cl.magal.asistencia.entities.Holiday;
 import cl.magal.asistencia.entities.Laborer;
 
 import com.vaadin.data.Validator.InvalidValueException;
@@ -155,6 +156,16 @@ public class Utils {
 			statusProperty.fireValueChange();
 		}
 		
+	}
+
+	public static boolean containsHoliday(List<Holiday> h, int day) {
+		for(Holiday holiday : h){
+			DateTime dt = new DateTime(holiday.getDate());
+			if( dt.getDayOfMonth() == day ){
+				return true;
+			}
+		}
+		return false;
 	}
 }
 

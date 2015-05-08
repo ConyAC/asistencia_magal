@@ -75,6 +75,9 @@ public class Salary implements Serializable {
 	@Column(name="desc_hours")
 	Integer descHours = 0;
 	
+	@Column(name="loan_bond")
+	Integer loanBond = 0;
+	
 	/**
 	 * Objeto que permite el calculo de los sueldos
 	 */
@@ -92,10 +95,11 @@ public class Salary implements Serializable {
             double loan,
             Attendance attendance,
             Attendance lastMonthAttendance,
-            Overtime overtime){
+            Overtime overtime,
+            int loans){
 		if(this.salaryCalculator == null )
 			throw new RuntimeException("Es necesario que el objeto de calculo sea distinto a null");
-		this.salaryCalculator.setInformation(getSuple(), tool, loan, attendance, lastMonthAttendance, overtime);
+		this.salaryCalculator.setInformation(getSuple(), tool, loan, attendance, lastMonthAttendance, overtime, loans);
 	}
 	
 	public void setSupleCalculatorInformation(
@@ -227,6 +231,10 @@ public class Salary implements Serializable {
 	public void setLastJornalPromedio(Integer lastJornalPromedio) {
 		this.lastJornalPromedio = lastJornalPromedio;
 	}
+	
+	public Integer getLoanBond() {
+        return salaryCalculator.getLoans();
+    }
 	
 	/**
 	 * columnas ocultables

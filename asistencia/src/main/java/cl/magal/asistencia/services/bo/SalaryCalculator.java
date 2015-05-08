@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import cl.magal.asistencia.entities.Attendance;
 import cl.magal.asistencia.entities.DateConfigurations;
 import cl.magal.asistencia.entities.FamilyAllowanceConfigurations;
+import cl.magal.asistencia.entities.Loan;
 import cl.magal.asistencia.entities.Mobilization2;
 import cl.magal.asistencia.entities.Overtime;
 import cl.magal.asistencia.entities.Salary;
@@ -35,7 +36,8 @@ public class SalaryCalculator {
 	List<TaxationConfigurations> taxTable;
 	WageConfigurations wageConfigurations;
 	Integer jornalPromedio;
-	
+	int loans;
+
 	double bonoImponibleEspecial,bonoCargoLoc2, horasDescuento, horasSobreTiempo,ufMes,collation,mov1;
 	
 	public double getCollationConfig(){
@@ -307,10 +309,11 @@ public class SalaryCalculator {
 			                WageConfigurations wageConfigurations,
 			                DateConfigurations dateConfigurations,
 			                List<FamilyAllowanceConfigurations> famillyTable,
-			                List<TaxationConfigurations> taxTable){
+			                List<TaxationConfigurations> taxTable,
+			                int loans){
 		
 		
-		setInformation(suple, tool, loan, attendance, lastMonthAttendance, overtime);
+		setInformation(suple, tool, loan, attendance, lastMonthAttendance, overtime, loans);
 		init(closingDateLastMonth, wageConfigurations, dateConfigurations, famillyTable, taxTable);
 		
 	}
@@ -330,12 +333,14 @@ public class SalaryCalculator {
             double loan,
             Attendance attendance,
             Attendance lastMonthAttendance,
-            Overtime overtime){
+            Overtime overtime,
+            int loans){
 		
 		this.attendance = attendance;	
 		this.date = attendance.getDate();	
 		this.lastMonthAttendance = lastMonthAttendance;		
 		this.overtime = overtime;	
+		this.loans = loans;
 		
 		this.suple = suple;
 		this.tool = tool;
@@ -358,6 +363,9 @@ public class SalaryCalculator {
 		this.attendance = attendance2;
 	}
 
+	public int getLoans(){
+        return this.loans;
+    }
 	
 	/**
 	 * 
@@ -483,7 +491,7 @@ public class SalaryCalculator {
 		setSalary(salary2);
 		//valida que este toda la información necesaria para el calculo
 		validateInformation();
-		double salary = getAfecto() + getSobreAfecto() + getTNoAfecto() - getTDesc();
+		double salary = getAfecto() + getSobreAfecto() + getTNoAfecto() - getTDesc() + this.loans;
 		logger.debug("salario calculado {}",salary);
 		return salary;
 	}

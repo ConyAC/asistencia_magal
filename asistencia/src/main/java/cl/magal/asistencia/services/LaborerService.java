@@ -19,12 +19,12 @@ import cl.magal.asistencia.entities.Laborer;
 import cl.magal.asistencia.entities.LaborerConstructionsite;
 import cl.magal.asistencia.entities.Tool;
 import cl.magal.asistencia.entities.enums.Job;
-import cl.magal.asistencia.repositories.LicenseRepositoy;
 import cl.magal.asistencia.repositories.AccidentRepository;
 import cl.magal.asistencia.repositories.ConstructionSiteRepository;
 import cl.magal.asistencia.repositories.ContractRepository;
 import cl.magal.asistencia.repositories.LaborerConstructionsiteRepository;
 import cl.magal.asistencia.repositories.LaborerRepository;
+import cl.magal.asistencia.repositories.LicenseRepositoy;
 import cl.magal.asistencia.repositories.LoanRepository;
 import cl.magal.asistencia.repositories.ToolRepository;
 import cl.magal.asistencia.repositories.VacationRepository;
@@ -204,5 +204,9 @@ public class LaborerService {
 	
 	public Tool saveDatePostponed(Tool tool) {
 		return toolRepo.save(tool);
+	}	
+	
+	public List<Integer> findPriceLoan( Long id ) {
+		return loanRepo.findPriceLoan(id);
 	}	
 }

@@ -893,5 +893,140 @@ public class Attendance implements Serializable {
 		return "Attendance [attendanceId=" + id + ", date=" + date
 				+ ", laborerConstructionSite=" + laborerConstructionSite + "]";
 	}
+
+	public void setMark(AttendanceMark attendanceMark, int i) {
+		switch(i){
+			case 0: dma1 = attendanceMark;
+			break;			
+			case 1: dma2 = attendanceMark;
+			break;
+			case 2: dma3 = attendanceMark;
+			break;
+			case 3: dma4 = attendanceMark;
+			break;
+			case 4: dma5 = attendanceMark;
+			break;
+			case 5: dma6 = attendanceMark;
+			break;
+			case 6: dma7 = attendanceMark;
+			break;
+			case 7: dma8 = attendanceMark;
+			break;
+			case 8: dma9 = attendanceMark;
+			break;
+			case 9: dma10 = attendanceMark;
+			break;
+			case 10: dma11 = attendanceMark;
+			break;
+			case 11: dma12 = attendanceMark;
+			break;
+			case 12: dma13 = attendanceMark;
+			break;
+			case 13: dma14 = attendanceMark;
+			break;
+			case 14: dma15 = attendanceMark;
+			break;
+			case 15: dma16 = attendanceMark;
+			break;
+			case 16: dma17 = attendanceMark;
+			break;
+			case 17: dma18 = attendanceMark;
+			break;
+			case 18: dma19 = attendanceMark;
+			break;
+			case 19: dma20 = attendanceMark;
+			break;
+			case 20: dma21 = attendanceMark;
+			break;
+			case 21: dma22 = attendanceMark;
+			break;
+			case 22: dma23 = attendanceMark;
+			break;
+			case 23: dma24 = attendanceMark;
+			break;
+			case 24: dma25 = attendanceMark;
+			break;
+			case 25: dma26 = attendanceMark;
+			break;
+			case 26: dma27 = attendanceMark;
+			break;
+			case 27: dma28 = attendanceMark;
+			break;
+			case 28: dma29 = attendanceMark;
+			break;
+			case 29: dma30 = attendanceMark;
+			break;
+			case 30: dma31 = attendanceMark;
+			break;
+		}
+		
+	}
 	
+	public void setLastMark(AttendanceMark attendanceMark, int i) {
+		switch(i){
+			case 0: dmp1 = attendanceMark;
+			break;			
+			case 1: dmp2 = attendanceMark;
+			break;
+			case 2: dmp3 = attendanceMark;
+			break;
+			case 3: dmp4 = attendanceMark;
+			break;
+			case 4: dmp5 = attendanceMark;
+			break;
+			case 5: dmp6 = attendanceMark;
+			break;
+			case 6: dmp7 = attendanceMark;
+			break;
+			case 7: dmp8 = attendanceMark;
+			break;
+			case 8: dmp9 = attendanceMark;
+			break;
+			case 9: dmp10 = attendanceMark;
+			break;
+			case 10: dmp11 = attendanceMark;
+			break;
+			case 11: dmp12 = attendanceMark;
+			break;
+			case 12: dmp13 = attendanceMark;
+			break;
+			case 13: dmp14 = attendanceMark;
+			break;
+			case 14: dmp15 = attendanceMark;
+			break;
+			case 15: dmp16 = attendanceMark;
+			break;
+			case 16: dmp17 = attendanceMark;
+			break;
+			case 17: dmp18 = attendanceMark;
+			break;
+			case 18: dmp19 = attendanceMark;
+			break;
+			case 19: dmp20 = attendanceMark;
+			break;
+			case 20: dmp21 = attendanceMark;
+			break;
+			case 21: dmp22 = attendanceMark;
+			break;
+			case 22: dmp23 = attendanceMark;
+			break;
+			case 23: dmp24 = attendanceMark;
+			break;
+			case 24: dmp25 = attendanceMark;
+			break;
+			case 25: dmp26 = attendanceMark;
+			break;
+			case 26: dmp27 = attendanceMark;
+			break;
+			case 27: dmp28 = attendanceMark;
+			break;
+			case 28: dmp29 = attendanceMark;
+			break;
+			case 29: dmp30 = attendanceMark;
+			break;
+			case 30: dmp31 = attendanceMark;
+			break;
+		}
+		
+	}
 }

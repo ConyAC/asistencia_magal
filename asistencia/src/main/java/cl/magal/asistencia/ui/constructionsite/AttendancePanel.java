@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,6 +28,7 @@ import cl.magal.asistencia.entities.Attendance;
 import cl.magal.asistencia.entities.Confirmations;
 import cl.magal.asistencia.entities.ConstructionSite;
 import cl.magal.asistencia.entities.DateConfigurations;
+import cl.magal.asistencia.entities.Loan;
 import cl.magal.asistencia.entities.Overtime;
 import cl.magal.asistencia.entities.Salary;
 import cl.magal.asistencia.entities.enums.AttendanceMark;
@@ -305,7 +307,7 @@ public class AttendancePanel extends Panel implements View {
 	}
 
 	private TabSheet drawAttendanceDetail() {
-		
+		logger.debug("PRIMERO");
 		TabSheet tab = new TabSheet();
 
 		Grid attendanceGrid = drawAttendanceGrid();
@@ -455,12 +457,18 @@ public class AttendancePanel extends Panel implements View {
 	}
 
 	private void createHeaders(final Grid grid) {
-		HeaderRow filterRow =  grid.appendHeaderRow();
+
+		HeaderRow filterRow = null;
+
+		if(grid.getHeaderRowCount() == 1)
+			filterRow = grid.appendHeaderRow();
+		else
+			filterRow = grid.getHeaderRow(1);
 		//si la propiedad comienza con d (dia) o dmp (dia mes pasado), entonces muestra el dia de la semana correspondiente
 		final DateTime dt = getAttendanceDate();
 		for (final Object pid: grid.getContainerDataSource().getContainerPropertyIds()) {
 
-			final HeaderCell cell = filterRow.getCell(pid);
+			HeaderCell cell = filterRow.getCell(pid);
 
 			if(pid.equals("laborerConstructionSite.activeContract.jobCode")){
 				// Have an input field to use for filter
@@ -497,32 +505,39 @@ public class AttendancePanel extends Panel implements View {
 					if ( ((String) pid).startsWith("dmp") )
 						dt2 = dt2.minusMonths(1);
 					//el número de mes no es un número válido de mes o si es un día a la fecha de cierre del mes pasado, oculta la columna
-					if(monthDay > dt2.dayOfMonth().getMaximumValue() || 
-					   ( ((String) pid).startsWith("dmp") && monthDay <= getPastMonthClosingDate().getDayOfMonth())){
-						grid.removeColumn(pid);
+					if( monthDay > dt2.dayOfMonth().getMaximumValue() || 
+						( ((String) pid).startsWith("dmp") && monthDay <= getPastMonthClosingDate().getDayOfMonth())){
+						if(grid.getColumn(pid) != null)
+							grid.removeColumn(pid);
 					}else{ //solo lo setea si el número es mayor a la cantidad de dias del mes
+						if(grid.getColumn(pid) == null)
+							grid.addColumn(pid);
 						label.setValue( dt2.withDayOfMonth(monthDay).dayOfWeek().getAsShortText() );
 						grid.getColumn(pid).setHeaderCaption(((String) pid).replace("dmp","").replace("dma","")).setSortable(false);
-						
 					}
-					
 				}
 				
-				if(cell != null)
+				if(cell == null){
+					cell = filterRow.getCell(pid);
+				}
+
+				if(cell != null){
 					cell.setComponent(label);
+				}
 			}
-			
+
 			grid.setCellStyleGenerator(new Grid.CellStyleGenerator() {
-				
+
 				@Override
 				public String getStyle(CellReference cellReference) {
 					String post = "";
 					if( (cellReference.getValue() instanceof AttendanceMark && !AttendanceMark.ATTEND.equals(cellReference.getValue())) ||
-						(cellReference.getValue() instanceof Integer && 0 != (Integer)cellReference.getValue()))
-							post = " red-color";
+							(cellReference.getValue() instanceof Integer && 0 != (Integer)cellReference.getValue()))
+						post = " red-color";
 					if(cellReference.getValue() instanceof AttendanceMark && !AttendanceMark.ATTEND.equals(cellReference.getValue()))
 						post += " bold";
 					String pid = (String) cellReference.getPropertyId();
+
 					if( pid.startsWith("dmp") || pid.startsWith("dma") ){
 						//calcula el numero del mes
 						int monthDay = Integer.parseInt(((String) pid).replace("dmp","").replace("dma",""));
@@ -841,7 +856,7 @@ public class AttendancePanel extends Panel implements View {
 						final Label label  = new Label("<b>"+Utils.formatInteger((Integer) salaryContainer.getContainerProperty(itemId, columnId).getValue())+"</b>"+
 								"  ("+Utils.formatInteger((Integer) salaryContainer.getContainerProperty(itemId, "roundSalary").getValue())+")");
 						label.setContentMode(ContentMode.HTML);
-						for(final String pid : new String[]{"jornalPromedio","suple","descHours","bondMov2","specialBond"})
+						for(final String pid : new String[]{"jornalPromedio","suple","descHours","bondMov2","specialBond","loanBond"})
 							((ValueChangeNotifier)item.getItemProperty(pid)).addValueChangeListener(new Property.ValueChangeListener() {
 								
 								@Override
@@ -862,11 +877,11 @@ public class AttendancePanel extends Panel implements View {
 				});
 				
 				salaryTable.setVisibleColumns("laborerConstructionSite.activeContract.jobCode",
-						"laborerConstructionSite.laborer.fullname","lastJornalPromedio","jornalPromedio","descHours","bondMov2","specialBond","totalLiquido"
+						"laborerConstructionSite.laborer.fullname","lastJornalPromedio","jornalPromedio","descHours","bondMov2","loanBond","specialBond","totalLiquido"
 						,"jornalBaseMes","vtrato","valorSabado","vsCorrd","sobreTiempo","descHoras","bonifImpo","glegal","afecto","sobreAfecto","cargas","asigFamiliar","colacion","mov","mov2","tnoAfecto"
 						);
 				
-				salaryTable.setColumnHeaders("Oficio","Nombre","Último Jornal Promedio","Jornal Promedio","H Desc","Adicional Locomoción 2","Bono Imp.","Total Líquido (A Pagar)"
+				salaryTable.setColumnHeaders("Oficio","Nombre","Último Jornal Promedio","Jornal Promedio","H Desc","Adicional Locomoción 2","Bono Prest.","Bono Imp.","Total Líquido (A Pagar)"
 						,"Jornal Base", " V Trato", "Valor Sábado" , "V S Corrd", "Sobre Tiempo", "Desc Horas","Bonif Imp","G Legal","Afecto","Sobre Afecto","Cargas","A Familiar","Colación","Mov","Movi 2","T No Afecto"
 						);
 				
@@ -904,6 +919,7 @@ public class AttendancePanel extends Panel implements View {
 						if(propertyId.equals("jornalPromedio")||
 						   propertyId.equals("descHours")||
 						   propertyId.equals("specialBond")||
+						   propertyId.equals("loanBond")||
 						   propertyId.equals("bondMov2")){
 							tf.addBlurListener(new FieldEvents.BlurListener() {
 								
@@ -1048,22 +1064,31 @@ public class AttendancePanel extends Panel implements View {
 		if(overtimeGrid.getColumn("lastMonthOvertimeAsList") != null )
 			overtimeGrid.removeColumn("lastMonthOvertimeAsList");
 
-		overtimeGrid.setColumnOrder("laborerConstructionSite.activeContract.jobCode",
-				"dmp1","dmp2","dmp3","dmp4","dmp5","dmp6","dmp7","dmp8","dmp9","dmp10","dmp11","dmp12","dmp13","dmp14","dmp15","dmp16"
-				,"dmp17","dmp18","dmp19","dmp20","dmp21","dmp22","dmp23","dmp24","dmp25","dmp26","dmp27","dmp28","dmp29","dmp30","dmp31",
-				"dma1","dma2","dma3","dma4","dma5","dma6","dma7","dma8","dma9","dma10","dma11","dma12","dma13","dma14","dma15","dma16"
-				,"dma17","dma18","dma19","dma20","dma21","dma22","dma23","dma24","dma25","dma26","dma27","dma28","dma29","dma30","dma31");
-
 		overtimeContainer.sort(new Object[]{"laborerConstructionSite.activeContract.jobCode"}, new boolean[]{true});
 		overtimeGrid.getColumn("laborerConstructionSite.activeContract.jobCode").setHeaderCaption("Oficio").setEditorField(new TextField(){{setReadOnly(true);}}).setWidth(100);
          
 		createHeaders(overtimeGrid);
-
+		setOvertimeOrders();
+		
 		return overtimeGrid;
 	}
 
+	private void setOvertimeOrders() {
+		String[] s = new String[]{ "laborerConstructionSite.activeContract.jobCode",
+				"dmp1","dmp2","dmp3","dmp4","dmp5","dmp6","dmp7","dmp8","dmp9","dmp10","dmp11","dmp12","dmp13","dmp14","dmp15","dmp16"
+				,"dmp17","dmp18","dmp19","dmp20","dmp21","dmp22","dmp23","dmp24","dmp25","dmp26","dmp27","dmp28","dmp29","dmp30","dmp31",
+				"dma1","dma2","dma3","dma4","dma5","dma6","dma7","dma8","dma9","dma10","dma11","dma12","dma13","dma14","dma15","dma16"
+				,"dma17","dma18","dma19","dma20","dma21","dma22","dma23","dma24","dma25","dma26","dma27","dma28","dma29","dma30","dma31"};
+		List<String> sList = new ArrayList<String>(s.length);
+		for(String ss : s){
+			if(overtimeGrid.getColumn(ss) != null)
+				sList.add(ss);
+		}
+		overtimeGrid.setColumnOrder(sList.toArray(new String[sList.size()]));		
+	}
+
 	private Grid drawAttendanceGrid() {
-		
+		logger.debug("SEGUNDO");
 		attendanceContainer.addNestedContainerProperty("laborerConstructionSite.activeContract.jobCode");
 		attendanceContainer.addNestedContainerProperty("laborerConstructionSite.id");
 		attendanceContainer.setBeanIdProperty("laborerConstructionSite.id");
@@ -1140,18 +1165,27 @@ public class AttendancePanel extends Panel implements View {
 		if(attendanceGrid.getColumn("lastMarksAsList") != null )
 			attendanceGrid.removeColumn("lastMarksAsList");
 
-		attendanceGrid.setColumnOrder("laborerConstructionSite.activeContract.jobCode",
-				"dmp1","dmp2","dmp3","dmp4","dmp5","dmp6","dmp7","dmp8","dmp9","dmp10","dmp11","dmp12","dmp13","dmp14","dmp15","dmp16"
-				,"dmp17","dmp18","dmp19","dmp20","dmp21","dmp22","dmp23","dmp24","dmp25","dmp26","dmp27","dmp28","dmp29","dmp30","dmp31",
-				"dma1","dma2","dma3","dma4","dma5","dma6","dma7","dma8","dma9","dma10","dma11","dma12","dma13","dma14","dma15","dma16"
-				,"dma17","dma18","dma19","dma20","dma21","dma22","dma23","dma24","dma25","dma26","dma27","dma28","dma29","dma30","dma31");
-
 		attendanceContainer.sort(new Object[]{"laborerConstructionSite.activeContract.jobCode"}, new boolean[]{true});
 		attendanceGrid.getColumn("laborerConstructionSite.activeContract.jobCode").setHeaderCaption("Oficio").setEditorField(new TextField(){{setReadOnly(true);}}).setWidth(100);
 
 		createHeaders(attendanceGrid);
+		setAttendanceOrder();
 		
 		return attendanceGrid;
+	}
+
+	private void setAttendanceOrder() {
+		String[] s = new String[]{"laborerConstructionSite.activeContract.jobCode",
+				"dmp1","dmp2","dmp3","dmp4","dmp5","dmp6","dmp7","dmp8","dmp9","dmp10","dmp11","dmp12","dmp13","dmp14","dmp15","dmp16"
+				,"dmp17","dmp18","dmp19","dmp20","dmp21","dmp22","dmp23","dmp24","dmp25","dmp26","dmp27","dmp28","dmp29","dmp30","dmp31",
+				"dma1","dma2","dma3","dma4","dma5","dma6","dma7","dma8","dma9","dma10","dma11","dma12","dma13","dma14","dma15","dma16"
+				,"dma17","dma18","dma19","dma20","dma21","dma22","dma23","dma24","dma25","dma26","dma27","dma28","dma29","dma30","dma31"};
+		List<String> sList = new ArrayList<String>(s.length);
+		for(String ss : s){
+			if(attendanceGrid.getColumn(ss) != null)
+				sList.add(ss);
+		}
+		attendanceGrid.setColumnOrder(sList.toArray(new String[sList.size()]));		
 	}
 
 	Property.ValueChangeListener listener = new Property.ValueChangeListener() {
@@ -1589,6 +1623,14 @@ public class AttendancePanel extends Panel implements View {
 		//		final WorkThread thread = new WorkThread();
 		//		thread.start();
 		DateTime dt = getAttendanceDate();
+		
+		
+		createHeaders(attendanceGrid);
+		setAttendanceOrder();
+		
+		createHeaders(overtimeGrid);
+		setOvertimeOrders();
+		
 		//		DateTime attendanceDate = dt.withDayOfMonth(dt.dayOfMonth().getMinimumValue());
 		//		DateTime date2 = attendanceDate.withDayOfMonth( attendanceDate.dayOfMonth().getMaximumValue() );
 		reloadMonthGridData(dt);

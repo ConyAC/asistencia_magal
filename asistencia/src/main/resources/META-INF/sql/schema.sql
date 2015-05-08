@@ -816,6 +816,7 @@ CREATE TABLE IF NOT EXISTS salary (
   desc_hours integer,
   overtime_hours integer,
   special_bond integer,
+  loan_bond integer,
   laborer_constructionsiteId bigint(20) NOT NULL
 );
 
@@ -845,4 +846,16 @@ REFERENCES laborer_constructionsite(laborer_constructionsiteId)
 CREATE INDEX IF NOT EXISTS FK_EXTRA_PARAMS_LABORER_CONSTRUCTIONSITEID_INDEX_7 ON extra_params(laborer_constructionsiteId)
 ;
 CREATE UNIQUE INDEX IF NOT EXISTS uq_extra_param ON extra_params(extra_paramsId)
+;
+
+-- Feriados
+
+CREATE TABLE IF NOT EXISTS holiday
+(
+   holidayId IDENTITY PRIMARY KEY NOT NULL,
+   date timestamp NOT NULL,
+   name varchar(255) NOT NULL
+)
+;
+CREATE UNIQUE INDEX IF NOT EXISTS PK_HOLIDAY ON holiday(holidayId)
 ;
