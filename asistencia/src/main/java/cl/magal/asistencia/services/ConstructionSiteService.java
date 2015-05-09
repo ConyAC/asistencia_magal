@@ -878,6 +878,10 @@ public class ConstructionSiteService {
 		holidayRepo.save(holiday);
 		
 	}
+
+	public List<Holiday> findAllHoliday() {
+		return (List<Holiday>) holidayRepo.findAll();
+	}
 	
 //	/**
 //	 * Cuenta las marcas hasta el dia dada, si el dia dado es nulo, entonces cuenta todos los dias
