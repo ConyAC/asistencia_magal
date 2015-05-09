@@ -124,9 +124,12 @@ public class DateConfigurations implements Serializable {
 //	public void setOil(Double oil) {
 //		this.oil = oil;
 //	}
-
+	
 	public Double getUf() {
-		return uf;
+		if(uf == null)
+			return (uf = (double) 0);
+		else
+			return uf;
 	}
 
 	public void setUf(Double uf) {
