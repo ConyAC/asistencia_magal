@@ -1547,9 +1547,18 @@ public class AttendancePanel extends Panel implements View {
 											Sheet sheet = wb.getSheetAt(1);
 											for(Object itemId : attendanceContainer.getItemIds()){
 												
-												BeanItem<Attendance> item = attendanceContainer.getItem(itemId);
-												Attendance attendance = item.getBean(); 
+												BeanItem<Attendance> attendanceItem = attendanceContainer.getItem(itemId);
+												BeanItem<Salary> salaryItem = salaryContainer.getItem(itemId);
+												
+												Salary salary = salaryItem.getBean();
+												Attendance attendance = attendanceItem.getBean();
+												
 												Row row = sheet.getRow(8);
+												
+												//información del trabajador
+												row.getCell(0).setCellValue(attendance.getLaborerConstructionSite().getJobCode());
+												row.getCell(1).setCellValue(attendance.getLaborerConstructionSite().getLaborer().getFullname());
+												
 												int i = 3;
 												for(AttendanceMark mark : attendance.getMarksAsList()){
 													if(i == 17)
@@ -1557,7 +1566,19 @@ public class AttendancePanel extends Panel implements View {
 													row.getCell(i).setCellValue(mark.toString());
 													i++;
 												}
+												//jornal promedio
+												row.getCell(44).setCellValue(salary.getJornalPromedio());
+												//horas desc TODO
+//												row.getCell(46).setCellValue(salary.getJornalPromedio());
+												//herramientas TODO
+//												row.getCell(48).setCellValue(salary.getJornalPromedio());
+												//prestamos TODO
+//												row.getCell(49).setCellValue(salary.getJornalPromedio());
+												//codigo suple 
+												row.getCell(57).setCellValue(salary.getLaborerConstructionSite().getSupleCode());
 												
+												row.getCell(57).setCellValue(attendance.getLaborerConstructionSite().getJobCode());
+												row.getCell(57).setCellValue(attendance.getLaborerConstructionSite().getJobCode());
 												row.getCell(57).setCellValue(attendance.getLaborerConstructionSite().getJobCode());
 												break;
 											}
