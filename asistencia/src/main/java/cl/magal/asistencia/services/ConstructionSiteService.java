@@ -360,7 +360,6 @@ public class ConstructionSiteService {
 				}
 			}
 			attendanceRepo.save(attendance);
-			logger.debug("attendance {} ",attendance.getMarksAsList());
 			attendanceResult.add(attendance);
 			
 			

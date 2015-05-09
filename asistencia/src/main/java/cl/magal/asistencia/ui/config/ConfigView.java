@@ -646,6 +646,17 @@ public class ConfigView extends VerticalLayout implements View {
 				setColumnHeaders("Nombre","Fecha","Eliminar");
 				setPageLength(4);
 			}
+			
+			@Override
+		    protected String formatPropertyValue(Object rowId,
+		            Object colId, Property property) {
+		        // Format by property type
+		        if (property.getType() == Date.class) {
+		            return new DateTime((Date)property.getValue()).toString("dd-MMM-yyyy");
+		        }
+
+		        return super.formatPropertyValue(rowId, colId, property);
+		    }
 		};	
 		
 		vl.addComponent(table);
