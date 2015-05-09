@@ -1,17 +1,23 @@
 package cl.magal.asistencia.ui.constructionsite;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.LinkedList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.poi.hssf.usermodel.HSSFFormulaEvaluator;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.apache.velocity.app.VelocityEngine;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
@@ -28,7 +34,6 @@ import cl.magal.asistencia.entities.Attendance;
 import cl.magal.asistencia.entities.Confirmations;
 import cl.magal.asistencia.entities.ConstructionSite;
 import cl.magal.asistencia.entities.DateConfigurations;
-import cl.magal.asistencia.entities.Loan;
 import cl.magal.asistencia.entities.Overtime;
 import cl.magal.asistencia.entities.Salary;
 import cl.magal.asistencia.entities.enums.AttendanceMark;
@@ -1522,6 +1527,58 @@ public class AttendancePanel extends Panel implements View {
 								});
 							}
 						});
+						
+						//Exportar a excel
+						addComponent(new HorizontalLayout(){
+							{
+								
+								Button btnExportAttendance = new Button("Exportar a Excel",FontAwesome.FILE_ARCHIVE_O);
+								addComponent(btnExportAttendance);
+								//recupera la lista de sueldos
+								StreamResource.StreamSource myResource = new StreamResource.StreamSource() {
+
+									public InputStream getStream() {
+										Workbook wb = null;
+
+										//1. Open the file
+										try {
+											wb = WorkbookFactory.create(new File(AttendancePanel.class.getResource("/templates/asistencia/planilla_asistencia.xlsx").toURI()));
+											//pone la asistencia en la segunda pestaña
+											Sheet sheet = wb.getSheetAt(1);
+											for(Object itemId : attendanceContainer.getItemIds()){
+												
+												BeanItem<Attendance> item = attendanceContainer.getItem(itemId);
+												Attendance attendance = item.getBean(); 
+												Row row = sheet.getRow(8);
+												int i = 3;
+												for(AttendanceMark mark : attendance.getMarksAsList()){
+													if(i == 17)
+														i++;
+													row.getCell(i).setCellValue(mark.toString());
+													i++;
+												}
+												
+												row.getCell(57).setCellValue(attendance.getLaborerConstructionSite().getJobCode());
+												break;
+											}
+											try { HSSFFormulaEvaluator.evaluateAllFormulaCells(wb); }catch(Exception e){}
+											
+											ByteArrayOutputStream outputStream =  new ByteArrayOutputStream();
+											wb.write(outputStream);
+											InputStream stream =  new ByteArrayInputStream(outputStream.toByteArray());
+											return stream;
+										}catch(Exception e){
+											logger.error("Error al generarl el excel",e);
+											Notification.show("Error al generar el archivo excel.");
+										}
+										return null;
+										
+									}
+								};
+								StreamResource resource = new StreamResource(myResource, "pruebaAsistencia.xlsx"); //TODO mes_año_codobra_ant/liq.txt
+								 FileDownloader fileDownloader = new FileDownloader(resource);
+							     fileDownloader.extend(btnExportAttendance);
+							}});
 					}
 				});
 
@@ -1557,7 +1614,7 @@ public class AttendancePanel extends Panel implements View {
 				return stream;
 			}
 		};
-		StreamResource resource = new StreamResource(myResource, "pruebaSalary.txt"); //mes_año_codobra_ant/liq.txt
+		StreamResource resource = new StreamResource(myResource, "pruebaSalary.txt"); //TODO mes_año_codobra_ant/liq.txt
 		
         FileDownloader fileDownloader = new FileDownloader(resource);
         fileDownloader.extend(btnExportSoftland);
