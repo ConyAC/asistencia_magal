@@ -333,15 +333,15 @@ public class ConstructionSiteService {
 				attendance.setDate(date.toDate());
 			}
 			
-			for (int i = 0; i < attendance.getMarksAsList().size(); i++){
+			for (int i = 0; i < 31; i++){
 				if( i + 1 <= date.dayOfMonth().getMaximumValue() ){ //solo setea hasta el maximo
 					
 					int day = date.withDayOfMonth(i+1).dayOfWeek().get();
 					if (Utils.containsHoliday(h,(i+1))){
 						attendance.setMark(AttendanceMark.SUNDAY, i);
-					}else if(day == 7 && index >= 0){ //solo asigna el domingo si es nuevo
+					}else if(day == 7 && index < 0){ //solo asigna el domingo si es nuevo
 						attendance.setMark(AttendanceMark.SUNDAY, i);	
-					}else if(day == 6 && index >= 0){
+					}else if(day == 6 && index < 0){
 						attendance.setMark(AttendanceMark.SATURDAY, i);
 					}
 				}
@@ -350,15 +350,17 @@ public class ConstructionSiteService {
 					int day_p = date.minusMonths(1).withDayOfMonth(i+1).dayOfWeek().get();
 					if (Utils.containsHoliday(h_p,(i+1))){
 						attendance.setLastMark(AttendanceMark.SUNDAY, i);
-					}else if(day_p == 7 && index >= 0){//solo asigna el domingo si es nuevo
+					}else if(day_p == 7 && index < 0){//solo asigna el domingo si es nuevo
 						attendance.setLastMark(AttendanceMark.SUNDAY, i);	
-					}else if(day_p == 6 && index >= 0){
+					}else if(day_p == 6 && index < 0){
 						attendance.setLastMark(AttendanceMark.SATURDAY, i);
 					}
 				}
 			}
-			attendanceResult.add(attendance);
 			attendanceRepo.save(attendance);
+			logger.debug("attendance {} ",attendance.getMarksAsList());
+			attendanceResult.add(attendance);
+			
 			
 		}
 		return attendanceResult;
