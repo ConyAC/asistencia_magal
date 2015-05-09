@@ -19,6 +19,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.vaadin.ui.DateField;
+
 import cl.magal.asistencia.entities.Accident;
 import cl.magal.asistencia.entities.AdvancePaymentConfigurations;
 import cl.magal.asistencia.entities.Attendance;
@@ -883,6 +885,13 @@ public class ConstructionSiteService {
 
 	public List<Holiday> findAllHoliday() {
 		return (List<Holiday>) holidayRepo.findAll();
+	}
+
+	public Long findExistingDate(Date fecha) {
+		List<Long> h = (List<Long>)holidayRepo.findExistingDate(fecha);
+		if(h.isEmpty())
+			return null;
+		return h.get(0);
 	}
 	
 //	/**

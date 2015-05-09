@@ -14,7 +14,6 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
-import org.tepi.filtertable.FilterTable;
 import org.vaadin.dialogs.ConfirmDialog;
 
 import ru.xpoft.vaadin.VaadinView;
@@ -661,7 +660,11 @@ public class ConfigView extends VerticalLayout implements View {
 					if(nombre.getValue() == "" || fecha.getValue() == null){
 						Notification.show("Debe ingresar tanto el nombre como la fecha del nuevo feriado.",Type.ERROR_MESSAGE);
 						return;
-					}else{					
+					}else if(service.findExistingDate(fecha.getValue()) != null){
+						logger.debug("DDD: "+service.findExistingDate(fecha.getValue()).toString());
+						Notification.show("La fecha ya ha sido registrada.",Type.ERROR_MESSAGE);
+						return;
+					}else{
 						Holiday h = new Holiday();
 						h.setName(nombre.getValue());
 						h.setDate(fecha.getValue());
@@ -669,7 +672,7 @@ public class ConfigView extends VerticalLayout implements View {
 						holidayContainer.addBean(h);
 						
 						nombre.setValue("");
-						fecha.setValue(null);
+						fecha.setValue(null);						
 					}
 				}catch(Exception e){
 					Notification.show("Error al quitar elemento",Type.ERROR_MESSAGE);
