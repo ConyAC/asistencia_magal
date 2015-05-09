@@ -477,7 +477,8 @@ public class SalaryCalculator {
 			throw new RuntimeException("Aún no se definen los valores de fecha de cierres, uf, bencina, petroleo, etc., no se puede calcular el sueldo.");
 		
 //		this.bencina = dateConfigurations.getBenzine();
-		this.ufMes = dateConfigurations.getUf();
+		if(dateConfigurations.getUf() != null)
+			this.ufMes = dateConfigurations.getUf();
 	}
 
 	/**
