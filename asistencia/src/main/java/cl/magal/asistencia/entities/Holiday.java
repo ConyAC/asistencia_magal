@@ -19,6 +19,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.validation.constraints.NotNull;
 
 
 @Entity
@@ -36,10 +37,12 @@ public class Holiday implements Serializable {
     private Long id;
 	
     @Basic(optional = false)
+    @NotNull(message="El nombre es necesario")
     @Column(name = "name")
     private String name;
 	
     @Basic(optional = false)
+    @NotNull(message="La fecha es necesaria")
     @Column(name = "date")
     @Temporal(TemporalType.TIMESTAMP)
     private Date date;
