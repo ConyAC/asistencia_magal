@@ -14,6 +14,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
+import org.tepi.filtertable.FilterTable;
 import org.vaadin.dialogs.ConfirmDialog;
 
 import ru.xpoft.vaadin.VaadinView;
@@ -22,16 +23,22 @@ import cl.magal.asistencia.entities.AfpItem;
 import cl.magal.asistencia.entities.ConstructionSite;
 import cl.magal.asistencia.entities.DateConfigurations;
 import cl.magal.asistencia.entities.FamilyAllowanceConfigurations;
+import cl.magal.asistencia.entities.Holiday;
 import cl.magal.asistencia.entities.Mobilization2;
+import cl.magal.asistencia.entities.Overtime;
 import cl.magal.asistencia.entities.TaxationConfigurations;
+import cl.magal.asistencia.entities.Team;
 import cl.magal.asistencia.entities.WageConfigurations;
 import cl.magal.asistencia.entities.enums.Permission;
 import cl.magal.asistencia.services.ConfigurationService;
 import cl.magal.asistencia.services.ConstructionSiteService;
+import cl.magal.asistencia.ui.AbstractWindowEditor;
 import cl.magal.asistencia.ui.ListenerFieldFactory;
 import cl.magal.asistencia.ui.MagalUI;
 import cl.magal.asistencia.ui.OnValueChangeFieldFactory;
+import cl.magal.asistencia.ui.AbstractWindowEditor.EditorSavedEvent;
 import cl.magal.asistencia.ui.OnValueChangeFieldFactory.OnValueChangeListener;
+import cl.magal.asistencia.ui.constructionsite.AddTeamDialog;
 import cl.magal.asistencia.util.SecurityHelper;
 import cl.magal.asistencia.util.Utils;
 
@@ -40,6 +47,8 @@ import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.fieldgroup.FieldGroup;
 import com.vaadin.data.util.BeanItem;
 import com.vaadin.data.util.BeanItemContainer;
+import com.vaadin.event.ItemClickEvent;
+import com.vaadin.event.ItemClickEvent.ItemClickListener;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.FontAwesome;
@@ -50,6 +59,7 @@ import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.ComboBox;
+import com.vaadin.ui.CustomTable;
 import com.vaadin.ui.DateField;
 import com.vaadin.ui.Field;
 import com.vaadin.ui.FormLayout;
@@ -79,7 +89,9 @@ public class ConfigView extends VerticalLayout implements View {
 
 	public static final String NAME = "configuraciones";
 	BeanItemContainer<ConstructionSite> constructionContainer = new BeanItemContainer<ConstructionSite>(ConstructionSite.class);
-
+	BeanItemContainer<Holiday> holidayContainer = new BeanItemContainer<Holiday>(Holiday.class);
+	BeanItem<Holiday> item;
+	
 	@Autowired
 	private transient ConstructionSiteService service;
 	@Autowired
@@ -575,36 +587,6 @@ public class ConfigView extends VerticalLayout implements View {
 		VerticalLayout vl = new VerticalLayout();
 		
 		vl.setMargin(true);
-		
-//		Calendar calendar = new Calendar();
-//		calendar.setLocale(Locale.getDefault());
-//		calendar.setImmediate(true);
-//		calendar.setSizeFull();
-//
-//		GregorianCalendar gregorianCalendar = new GregorianCalendar(calendar.getLocale());
-//
-//		//        final int rollAmount = gregorianCalendar
-//		//                .get(GregorianCalendar.DAY_OF_MONTH) - 1;
-//		gregorianCalendar.set(GregorianCalendar.DAY_OF_MONTH, 1);
-//		//        resetTime(false);
-//		Date currentMonthsFirstDate = gregorianCalendar.getTime();
-//		calendar.setStartDate(currentMonthsFirstDate);
-//		gregorianCalendar.add(GregorianCalendar.MONTH, 1);
-//		gregorianCalendar.add(GregorianCalendar.DATE, -1);
-//		calendar.setEndDate(gregorianCalendar.getTime());
-////
-//		HorizontalLayout hl = new HorizontalLayout();
-//		hl.setSizeFull();
-//		hl.addComponent(calendar);
-//		VerticalLayout form = new VerticalLayout(){
-//			{
-//				addComponent(new TextField("Nombre Feriado"));
-//			}
-//		};
-//		hl.addComponent(form);
-//		hl.setComponentAlignment(form, Alignment.MIDDLE_CENTER);
-//		hl.setExpandRatio(form, 1.0F);
-		
 		setMargin(true);
 		
 		final Table table = new Table("Feriados"){
@@ -670,6 +652,199 @@ public class ConfigView extends VerticalLayout implements View {
 		return vl;
 	}
 
+	/**
+	 * 
+	 * @return
+	 */
+	private com.vaadin.ui.Component drawFeriadoks() {
+		return new VerticalLayout(){
+			{
+				setMargin(true);
+				setSpacing(true);
+
+				final Table table = new Table("Feriados"){
+					{
+						setWidth("100%");
+						setHeightUndefined();
+						setPageLength(8);
+						int i = 1;
+						addContainerProperty("nombre", String.class, "");
+						addContainerProperty("fecha", DateField.class, new DateField());
+						addContainerProperty("eliminar", Button.class, new Button(null,FontAwesome.TRASH_O));
+						setVisibleColumns("nombre","fecha","eliminar");
+						setColumnHeaders("Nombre","Fecha","Eliminar");
+
+						addItem(new Object[]{"Feriado 1",new DateField(null,new Date()),new Button(null,FontAwesome.TRASH_O)}, i++);
+						addItem(new Object[]{"Feriado 2",new DateField(null,new Date()),new Button(null,FontAwesome.TRASH_O)}, i++);
+						addItem(new Object[]{"Feriado 3",new DateField(null,new Date()),new Button(null,FontAwesome.TRASH_O)}, i++);
+
+					}
+				};
+
+				HorizontalLayout hl = new HorizontalLayout(){
+					{
+						final TextField nombre = new TextField("Nombre Feriado");
+						addComponent(nombre);
+						final DateField fecha = new DateField("Fecha");
+						addComponent(fecha);
+						addComponent(new Button(null,new Button.ClickListener() {
+							
+							@Override
+							public void buttonClick(ClickEvent event) {
+								final DateField df = new DateField();
+								df.setValue(fecha.getValue());
+								Button btn = new Button(null,FontAwesome.TRASH_O);
+								final Object itemId = table.addItem(new Object[]{nombre.getValue(),df, btn }, fecha.getValue());
+								btn.addClickListener(new Button.ClickListener() {
+									
+									@Override
+									public void buttonClick(ClickEvent event) {
+										table.removeItem(itemId);
+									}
+								});
+							}
+						}){
+							{
+								setIcon(FontAwesome.PLUS);
+							}
+						});
+					}
+				};
+				hl.setSizeFull();
+				addComponent(hl);
+				
+				table.addGeneratedColumn("delete", new Table.ColumnGenerator() {
+
+					@Override
+					public Object generateCell(Table source, final Object itemId, Object columnId) {
+
+						return new Button(null,new Button.ClickListener() {
+
+							@Override
+							public void buttonClick(ClickEvent event) {
+
+								ConfirmDialog.show(UI.getCurrent(), "Confirmar Acción:", "¿Está seguro de eliminar el feriado?",
+										"Continuar", "Cancelar", new ConfirmDialog.Listener() {
+									public void onClose(ConfirmDialog dialog) {
+										if (dialog.isConfirmed()) {
+
+											try{
+												Holiday holiday = ((BeanItem<Holiday>)holidayContainer.getItem(itemId)).getBean();
+												service.delete(holiday);
+												holidayContainer.removeItem(itemId);
+											}catch(Exception e){
+												logger.error("Error al eliminar el feriado",e);
+												String mensaje = "Error al eliminar el feriado";
+												Notification.show(mensaje,Type.ERROR_MESSAGE);
+											}
+										}
+									}
+								});
+							}
+						}){
+							{
+								setIcon(FontAwesome.TRASH_O);
+							}
+						};
+					}
+				});
+				
+				OnValueChangeListener listener = new OnValueChangeListener(){
+
+					@Override
+					public void onValueChange(Object itemId) {
+						Holiday holiday = ((BeanItem<Holiday>)holidayContainer.getItem(itemId)).getBean();
+						service.save(holiday);
+					}
+					
+				};
+				OnValueChangeFieldFactory factory = new OnValueChangeFieldFactory(2);
+				factory.addListener(listener);
+				table.setTableFieldFactory(factory);
+				table.setContainerDataSource(holidayContainer);
+				table.setVisibleColumns("name","date","delete");
+				table.setColumnHeaders("Nombre","Fecha","Acciones");
+				addComponent(table);
+
+				if(!SecurityHelper.hasPermission(Permission.DEFINIR_VARIABLE_GLOBAL)){
+					setEnabled(false);
+				}else{
+					setEnabled(true);
+				}
+			}
+		};
+	}
+	
+	
+	protected VerticalLayout drawFeriadohhs() {
+		VerticalLayout vl = new VerticalLayout();
+		vl.setSpacing(true);
+		vl.setMargin(true);
+		vl.setSizeFull();
+
+		Button btnAddHoliday = new Button(null,FontAwesome.PLUS);
+		final Table table = new Table();
+		vl.addComponent(table);
+		vl.addComponent(btnAddHoliday);
+		vl.setComponentAlignment(btnAddHoliday, Alignment.TOP_RIGHT);
+		
+		table.setContainerDataSource(holidayContainer);
+		final TextField nombre = new TextField("Nombre Feriado");
+		vl.addComponent(nombre);
+		final DateField fecha = new DateField("Fecha");
+		vl.addComponent(fecha);
+		btnAddHoliday.addClickListener(new Button.ClickListener() {
+
+			@Override
+			public void buttonClick(ClickEvent event) {
+				final DateField df = new DateField();
+				df.setValue(fecha.getValue());
+				Button btn = new Button(null,FontAwesome.TRASH_O);
+				final Object itemId = table.addItem(new Object[]{nombre.getValue(),df, btn }, fecha.getValue());
+				btn.addClickListener(new Button.ClickListener() {
+					
+					@Override
+					public void buttonClick(ClickEvent event) {
+						table.removeItem(itemId);
+					}
+				});
+			}
+		});		
+
+		table.setPageLength(6);
+		table.setWidth("100%");
+		table.addGeneratedColumn("eliminar", new Table.ColumnGenerator() {
+			
+			@Override
+			public Object generateCell(Table source, final Object itemId, Object columnId) {
+				return new Button(null,new Button.ClickListener() {
+
+					@Override
+					public void buttonClick(ClickEvent event) {
+						ConfirmDialog.show(UI.getCurrent(), "Confirmar Acción:", "¿Está seguro de eliminar el feriado seleccionado?",
+								"Eliminar", "Cancelar", new ConfirmDialog.Listener() {
+
+							public void onClose(ConfirmDialog dialog) {
+								if (dialog.isConfirmed()) {
+									holidayContainer.removeItem(itemId);
+								}
+							}
+						});
+					}
+				}){{setIcon(FontAwesome.TRASH_O);}};
+			}
+		});
+
+		table.setVisibleColumns("name","date","eliminar");
+		table.setColumnHeaders("Nombre","Fecha", "Acciones");
+		table.setSelectable(true);
+
+		vl.addComponent(table);
+		vl.setExpandRatio(table,1.0F);
+
+		return vl;
+	}
+	
 	@Override
 	public void enter(ViewChangeEvent event) {
 		

@@ -868,6 +868,16 @@ public class ConstructionSiteService {
 	public void save(Salary bean) {
 		salaryRepo.save(bean);
 	}
+
+	public void delete(Holiday holiday) {
+		holidayRepo.delete(holiday);
+		
+	}
+
+	public void save(Holiday holiday) {
+		holidayRepo.save(holiday);
+		
+	}
 	
 //	/**
 //	 * Cuenta las marcas hasta el dia dada, si el dia dado es nulo, entonces cuenta todos los dias
