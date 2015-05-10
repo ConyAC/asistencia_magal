@@ -1,5 +1,6 @@
 package cl.magal.asistencia.services.bo;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -11,7 +12,6 @@ import org.slf4j.LoggerFactory;
 import cl.magal.asistencia.entities.Attendance;
 import cl.magal.asistencia.entities.DateConfigurations;
 import cl.magal.asistencia.entities.FamilyAllowanceConfigurations;
-import cl.magal.asistencia.entities.Loan;
 import cl.magal.asistencia.entities.Mobilization2;
 import cl.magal.asistencia.entities.Overtime;
 import cl.magal.asistencia.entities.Salary;
@@ -29,6 +29,14 @@ public class SalaryCalculator {
 	DateTime closingDateLastMonth;
 	Double suple, tool, loan,
 		   sueldoMinimo;
+	
+	public Double getLoan(){
+		return loan;
+	}
+	public Double getTool(){
+		return tool;
+	}
+	
 	Attendance attendance,lastMonthAttendance;
 	Overtime overtime;
 	Date date;
@@ -615,6 +623,51 @@ public class SalaryCalculator {
 			}
 		}
 		return count;
+	}
+	
+	public List<AttendanceMark> getAjusteMesAnterior(){
+		return getDiffMarksFromDate(closingDateLastMonth,attendance,lastMonthAttendance);
+	}
+	
+	/**
+	 * DONE
+	 * @param closingDate
+	 * @param attendance
+	 * @param lastMonthAttendance
+	 * @param marks
+	 * @return
+	 */
+	public List<AttendanceMark> getDiffMarksFromDate(DateTime closingDate,Attendance attendance, Attendance lastMonthAttendance) {
+		return getDiffMarksFromDay(closingDate.getDayOfMonth(),closingDate.dayOfMonth().getMaximumValue(),attendance,lastMonthAttendance);
+	}
+	
+	/**
+	 * DONE
+	 * @param lastClosingDate
+	 * @param attendance
+	 * @param lastMonthAttendance
+	 * @param marks
+	 * @return
+	 */
+	private List<AttendanceMark> getDiffMarksFromDay(Integer lastClosingDate,int maxDays, Attendance attendance,Attendance lastMonthAttendance) {
+		if(attendance == null || lastMonthAttendance == null )
+			throw new RuntimeException("Los objeto de asistencia no pueden ser nulo.");
+
+		List<AttendanceMark> lastRealMarks = attendance.getLastMarksAsList();
+		List<AttendanceMark> projectionsMarks = lastMonthAttendance.getMarksAsList();
+		
+		List<AttendanceMark> resultMarks = new ArrayList<AttendanceMark>();
+		for(int i = lastClosingDate != null ? lastClosingDate : 0 ; i < maxDays ; i ++){
+			//si son distintos, lo contabiliza
+			if(lastRealMarks.get(i) != projectionsMarks.get(i)){
+				//lo cuenta solo si está dentro del grupo a contabilizar
+				AttendanceMark mark = lastRealMarks.get(i);
+				resultMarks.add(mark);
+			}else{
+				resultMarks.add(null);
+			}
+		}
+		return resultMarks;
 	}
 
 	/**

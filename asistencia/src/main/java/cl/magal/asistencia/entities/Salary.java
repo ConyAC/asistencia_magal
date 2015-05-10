@@ -2,6 +2,7 @@ package cl.magal.asistencia.entities;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
 import javax.persistence.Basic;
 import javax.persistence.Column;
@@ -20,6 +21,7 @@ import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import cl.magal.asistencia.entities.enums.AttendanceMark;
 import cl.magal.asistencia.services.bo.SalaryCalculator;
 import cl.magal.asistencia.services.bo.SupleCalculator;
 
@@ -302,6 +304,17 @@ public class Salary implements Serializable {
 	
 	public double getTnoAfecto(){
 		return salaryCalculator.getTNoAfecto();
+	}
+	
+	public double getLoan(){
+		return salaryCalculator.getLoan();
+	}
+	
+	public double getTools(){
+		return salaryCalculator.getTool();
+	}
+	public List<AttendanceMark> getAjusteMesAnterior(){
+		return salaryCalculator.getAjusteMesAnterior();
 	}
 	
 	@Override
