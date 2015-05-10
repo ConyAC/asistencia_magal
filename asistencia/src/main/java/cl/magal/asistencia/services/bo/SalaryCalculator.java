@@ -27,14 +27,14 @@ public class SalaryCalculator {
 	 * PARAMETROS
 	 */
 	DateTime closingDateLastMonth;
-	Double suple, tool, loan,
+	Double suple, toolFee, loanFee,
 		   sueldoMinimo;
 	
-	public Double getLoan(){
-		return loan;
+	public Double getLoanFee(){
+		return loanFee;
 	}
-	public Double getTool(){
-		return tool;
+	public Double getToolFee(){
+		return toolFee;
 	}
 	
 	Attendance attendance,lastMonthAttendance;
@@ -89,7 +89,7 @@ public class SalaryCalculator {
 	Double tDesc;
 	Double getTDesc(){
 		if ( tDesc == null ) {
-			tDesc= calculateTDesc(getAfecto(),getSobreAfecto(),suple,tool,loan);
+			tDesc= calculateTDesc(getAfecto(),getSobreAfecto(),suple,toolFee,loanFee);
 			logger.debug("tDesc {}",tDesc);
 		}
 		return tDesc;
@@ -329,16 +329,16 @@ public class SalaryCalculator {
 	/**
 	 * asigna la información necesaria para calcular un sueldo especifico
 	 * @param suple
-	 * @param tool
-	 * @param loan
+	 * @param toolFee
+	 * @param loanFee
 	 * @param attendance
 	 * @param lastMonthAttendance
 	 * @param overtime
-	 * @param extraParams
+	 * @param loans
 	 */
 	public void setInformation(double suple , 
-            double tool , 
-            double loan,
+            double toolFee , 
+            double loanFee,
             Attendance attendance,
             Attendance lastMonthAttendance,
             Overtime overtime,
@@ -351,8 +351,10 @@ public class SalaryCalculator {
 		this.loans = loans;
 		
 		this.suple = suple;
-		this.tool = tool;
-		this.loan = loan;
+		logger.debug("toolFee {}",toolFee);
+		this.toolFee = toolFee;
+		logger.debug("loanFee {}",loanFee);
+		this.loanFee = loanFee;
 		
 	}
 	
@@ -422,9 +424,9 @@ public class SalaryCalculator {
 		
 		if(suple == null )
 			throw new RuntimeException("El suple no está definido(null)");
-		if(tool == null )
+		if(toolFee == null )
 			throw new RuntimeException("La deuda por herramientas no está definida(null)");
-		if(loan == null )
+		if(loanFee == null )
 			throw new RuntimeException("La deuda por prestamos no está definida(null)");
 		if(jornalPromedio == null )
 			throw new RuntimeException("Jornal Promedio no definido(null)");
