@@ -3,6 +3,7 @@ package cl.magal.asistencia.ui.constructionsite;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
@@ -15,9 +16,8 @@ import javax.annotation.PostConstruct;
 
 import org.apache.poi.hssf.usermodel.HSSFFormulaEvaluator;
 import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.velocity.app.VelocityEngine;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
@@ -139,7 +139,7 @@ public class AttendancePanel extends Panel implements View {
 	/** CONTAINERS **/
 //	BeanItemContainer<ExtraParams> extraParamContainer = new BeanItemContainer<ExtraParams>(ExtraParams.class);
 	BeanContainer<Long,Attendance> attendanceContainer = new BeanContainer<Long,Attendance>(Attendance.class);
-	BeanItemContainer<Overtime> overtimeContainer = new BeanItemContainer<Overtime>(Overtime.class);
+	BeanContainer<Long,Overtime> overtimeContainer = new BeanContainer<Long,Overtime>(Overtime.class);
 	BeanContainer<Long,Salary> salaryContainer = new BeanContainer<Long,Salary>(Salary.class);
 	BeanItemContainer<AbsenceVO> absenceContainer = new BeanItemContainer<AbsenceVO>(AbsenceVO.class);
 	BeanItemContainer<ConstructionSite> constructionContainer = new BeanItemContainer<ConstructionSite>(ConstructionSite.class);
@@ -520,15 +520,15 @@ public class AttendancePanel extends Panel implements View {
 						label.setValue( dt2.withDayOfMonth(monthDay).dayOfWeek().getAsShortText() );
 						grid.getColumn(pid).setHeaderCaption(((String) pid).replace("dmp","").replace("dma","")).setSortable(false);
 					}
-				}
-				
-				if(cell == null){
-					cell = filterRow.getCell(pid);
+					if(cell == null){
+						cell = filterRow.getCell(pid);
+					}
+
+					if(cell != null){
+						cell.setComponent(label);
+					}
 				}
 
-				if(cell != null){
-					cell.setComponent(label);
-				}
 			}
 
 			grid.setCellStyleGenerator(new Grid.CellStyleGenerator() {
@@ -666,7 +666,7 @@ public class AttendancePanel extends Panel implements View {
 				addComponent(hl);
 				setComponentAlignment(hl, Alignment.TOP_RIGHT);
 				
-				supleTable.addGeneratedColumn("laborerConstructionSite.supleCode", new Table.ColumnGenerator() {
+				supleTable.addGeneratedColumn("supleSection", new Table.ColumnGenerator() {
 					
 					@Override
 					public Object generateCell(Table source, Object itemId, Object columnId) {
@@ -714,7 +714,7 @@ public class AttendancePanel extends Panel implements View {
 					}
 				});
 
-				supleTable.setVisibleColumns("laborerConstructionSite.activeContract.jobCode","laborerConstructionSite.supleCode","suple");
+				supleTable.setVisibleColumns("laborerConstructionSite.activeContract.jobCode","supleSection","suple");
 				supleTable.setColumnHeaders("Oficio","Código suple","Suple");
 				supleTable.setEditable(true);
 				supleTable.setTableFieldFactory(new TableFieldFactory() {
@@ -1028,6 +1028,9 @@ public class AttendancePanel extends Panel implements View {
 	private Grid drawOvertimeGrid() {
 		
 		overtimeContainer.addNestedContainerProperty("laborerConstructionSite.activeContract.jobCode");
+		overtimeContainer.addNestedContainerProperty("laborerConstructionSite.id");
+		overtimeContainer.setBeanIdProperty("laborerConstructionSite.id");
+		
 		overtimeGrid = new Grid(overtimeContainer);
 		overtimeGrid.setSelectionMode(SelectionMode.SINGLE);
 		//		overtimeGrid.setSizeFull();
@@ -1060,6 +1063,8 @@ public class AttendancePanel extends Panel implements View {
 		overtimeGrid.setFrozenColumnCount(1);
 		if(overtimeGrid.getColumn("laborerConstructionSite") != null )
 			overtimeGrid.removeColumn("laborerConstructionSite");
+		if(overtimeGrid.getColumn("laborerConstructionSite.id") != null )
+			overtimeGrid.removeColumn("laborerConstructionSite.id");
 		if(overtimeGrid.getColumn("date") != null )
 			overtimeGrid.removeColumn("date");
 		if(overtimeGrid.getColumn("overtimeAsList") != null )
@@ -1538,49 +1543,81 @@ public class AttendancePanel extends Panel implements View {
 								StreamResource.StreamSource myResource = new StreamResource.StreamSource() {
 
 									public InputStream getStream() {
-										Workbook wb = null;
+										XSSFWorkbook wb = null;
 
 										//1. Open the file
 										try {
-											wb = WorkbookFactory.create(new File(AttendancePanel.class.getResource("/templates/asistencia/planilla_asistencia.xlsx").toURI()));
+											wb = new XSSFWorkbook(new FileInputStream(new File(AttendancePanel.class.getResource("/templates/asistencia/planilla_asistencia.xlsx").toURI())));
 											//pone la asistencia en la segunda pestaña
-											Sheet sheet = wb.getSheetAt(1);
+											XSSFSheet sheet = wb.getSheetAt(1);
+											int i = 11;
 											for(Object itemId : attendanceContainer.getItemIds()){
 												
 												BeanItem<Attendance> attendanceItem = attendanceContainer.getItem(itemId);
 												BeanItem<Salary> salaryItem = salaryContainer.getItem(itemId);
+												BeanItem<Overtime> overtimeItem = overtimeContainer.getItem(itemId);
 												
 												Salary salary = salaryItem.getBean();
 												Attendance attendance = attendanceItem.getBean();
+												Overtime overtime = overtimeItem.getBean();
 												
-												Row row = sheet.getRow(8);
+												Row row = sheet.getRow(i++);
 												
 												//información del trabajador
 												row.getCell(0).setCellValue(attendance.getLaborerConstructionSite().getJobCode());
 												row.getCell(1).setCellValue(attendance.getLaborerConstructionSite().getLaborer().getFullname());
-												
-												int i = 3;
+												//asistencia
+												int j = 3;
 												for(AttendanceMark mark : attendance.getMarksAsList()){
-													if(i == 17)
-														i++;
-													row.getCell(i).setCellValue(mark.toString());
-													i++;
+													if(j == 17)
+														j++;
+													row.getCell(j).setCellValue(mark.toString());
+													j++;
 												}
 												//jornal promedio
 												row.getCell(44).setCellValue(salary.getJornalPromedio());
 												//horas desc TODO
-//												row.getCell(46).setCellValue(salary.getJornalPromedio());
+												row.getCell(46).setCellValue(salary.getDescHoras());
 												//herramientas TODO
-//												row.getCell(48).setCellValue(salary.getJornalPromedio());
+												row.getCell(48).setCellValue(salary.getTools());
 												//prestamos TODO
-//												row.getCell(49).setCellValue(salary.getJornalPromedio());
+												row.getCell(49).setCellValue(salary.getLoan());
+												//información del trabajador y su contrato
+												row.getCell(52).setCellValue(salary.getLaborerConstructionSite().getLaborer().getRut());
+												row.getCell(53).setCellValue(attendance.getLaborerConstructionSite().getActiveContract().getStartDate());
+												if(attendance.getLaborerConstructionSite().getActiveContract().getTerminationDate() != null )
+													row.getCell(54).setCellValue(attendance.getLaborerConstructionSite().getActiveContract().getTerminationDate());
 												//codigo suple 
+												logger.debug("suple code {} ",salary.getLaborerConstructionSite().getSupleCode());
 												row.getCell(57).setCellValue(salary.getLaborerConstructionSite().getSupleCode());
+												//ajuste sobre tiempo 60 74
 												
-												row.getCell(57).setCellValue(attendance.getLaborerConstructionSite().getJobCode());
-												row.getCell(57).setCellValue(attendance.getLaborerConstructionSite().getJobCode());
-												row.getCell(57).setCellValue(attendance.getLaborerConstructionSite().getJobCode());
-												break;
+												//sobre tiempo 75 103
+												int k = 75;
+												for(Integer o : overtime.getOvertimeAsList()){
+													if(o != null )
+														row.getCell(k).setCellValue(o);
+													k++;
+												}
+												
+												//loc mov2 105
+												row.getCell(105).setCellValue(salary.getBondMov2());
+												//bono especial 108
+												row.getCell(108).setCellValue(salary.getBonifImpo());
+												//ajuste mes anterior 117 a 130
+												k = 117;
+												for(AttendanceMark m : salary.getAjusteMesAnterior()){
+													if(m != null)
+														row.getCell(k).setCellValue(m.toString());
+													k++;
+												}
+												// TODO salud isapre , monto 152 153
+												row.getCell(152).setCellValue(salary.getLaborerConstructionSite().getLaborer().getIsapre().toString());
+//												row.getCell(153).setCellValue(salary.getLaborerConstructionSite().getLaborer().getIsapre().toString());
+												// TODO afp y espacio?= 156 157
+												row.getCell(156).setCellValue(salary.getLaborerConstructionSite().getLaborer().getAfp().toString());
+//												row.getCell(157).setCellValue(salary.getLaborerConstructionSite().getLaborer().getIsapre().toString()); 
+												
 											}
 											try { HSSFFormulaEvaluator.evaluateAllFormulaCells(wb); }catch(Exception e){}
 											
@@ -1608,6 +1645,92 @@ public class AttendancePanel extends Panel implements View {
 			}
 		};
 	}
+	
+//	private void CopyRow(XSSFWorkbook workbook, XSSFSheet worksheet, int sourceRowNum, int destinationRowNum)
+//	{
+//	    // Get the source / new row
+//		XSSFRow newRow = worksheet.getRow(destinationRowNum);
+//		XSSFRow sourceRow = worksheet.getRow(sourceRowNum);
+//	 
+//	    // If the row exist in destination, push down all rows by 1 else create a new row
+//	    if (newRow != null)
+//	    {
+//	        worksheet.shiftRows(destinationRowNum, worksheet.getLastRowNum(), 1);
+//	    }
+//	    else
+//	    {
+//	        newRow = worksheet.createRow(destinationRowNum);
+//	    }
+//	 
+//	    // Loop through source columns to add to new row
+//	    for (int i = 0; i < sourceRow.getLastCellNum(); i++)
+//	    {
+//	        // Grab a copy of the old/new cell
+//	    	XSSFCell oldCell = sourceRow.getCell(i);
+//	    	XSSFCell newCell = newRow.createCell(i);
+//	 
+//	        // If the old cell is null jump to next cell
+//	        if (oldCell == null)
+//	        {
+//	            newCell = null;
+//	            continue;
+//	        }
+//	        
+//	        // Set the cell data type
+//	        newCell.setCellType(oldCell.getCellType());
+//	 
+//	        // Set the cell data value
+//	        switch (oldCell.getCellType()) {
+//	        case Cell.CELL_TYPE_BLANK:
+//	          break;
+//	        case Cell.CELL_TYPE_BOOLEAN:
+//	          newCell.setCellValue(oldCell.getBooleanCellValue());
+//	          break;
+//	        case Cell.CELL_TYPE_ERROR:
+//	          newCell.setCellErrorValue(oldCell.getErrorCellValue());
+//	          break;
+//	        case Cell.CELL_TYPE_FORMULA:
+//	          newCell.setCellFormula(oldCell.getCellFormula());
+//	          break;
+//	        case Cell.CELL_TYPE_NUMERIC:
+//	          newCell.setCellValue(oldCell.getNumericCellValue());
+//	          break;
+//	        case Cell.CELL_TYPE_STRING:
+//	          newCell.setCellValue(oldCell.getRichStringCellValue());
+//	          break;
+//	        }
+//	 
+//	        // Copy style from old cell and apply to new cell
+//	        XSSFCellStyle newCellStyle = workbook.createCellStyle();
+//	        newCellStyle.cloneStyleFrom(oldCell.getCellStyle()); ;
+//	        newCell.setCellStyle(newCellStyle);
+//	 
+//	        // If there is a cell comment, copy
+//	        if (newCell.getCellComment() != null) newCell.setCellComment(oldCell.getCellComment());
+//	 
+//	        // If there is a cell hyperlink, copy
+//	        if (oldCell.getHyperlink() != null) newCell.setHyperlink( oldCell.getHyperlink() );
+//	 
+//
+//	    }
+//	 
+//	    // If there are are any merged regions in the source row, copy to new row
+//	    for (int i = 0; i < worksheet.getNumMergedRegions(); i++)
+//	    {
+//	        CellRangeAddress cellRangeAddress = worksheet.getMergedRegion(i);
+//	        if (cellRangeAddress.getFirstRow() == sourceRow.getRowNum())
+//	        {
+//	            CellRangeAddress newCellRangeAddress = new CellRangeAddress(newRow.getRowNum(),
+//	                                                                        (newRow.getRowNum() +
+//	                                                                         (cellRangeAddress.getFirstRow() -
+//	                                                                          cellRangeAddress.getLastRow())),
+//	                                                                        cellRangeAddress.getFirstColumn(),
+//	                                                                        cellRangeAddress.getLastColumn());
+//	            worksheet.addMergedRegion(newCellRangeAddress);
+//	        }
+//	    }
+//	 
+//	}
 
 	private void generateSoftlandFile(final Button btnExportSoftland) {
 		
