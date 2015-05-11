@@ -182,7 +182,6 @@ public class Salary implements Serializable {
 	}
 	
 	public boolean getForceSalary(){
-		logger.debug("forceSalary");
 		salary = null;
 		salaryCalculator.resetCal();
 		return salary == null;
@@ -307,11 +306,11 @@ public class Salary implements Serializable {
 	}
 	
 	public double getLoan(){
-		return salaryCalculator.getLoan();
+		return salaryCalculator.getLoanFee();
 	}
 	
 	public double getTools(){
-		return salaryCalculator.getTool();
+		return salaryCalculator.getToolFee();
 	}
 	public List<AttendanceMark> getAjusteMesAnterior(){
 		return salaryCalculator.getAjusteMesAnterior();
