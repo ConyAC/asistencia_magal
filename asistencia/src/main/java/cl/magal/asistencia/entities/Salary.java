@@ -182,7 +182,6 @@ public class Salary implements Serializable {
 	}
 	
 	public boolean getForceSalary(){
-		logger.debug("forceSalary");
 		salary = null;
 		salaryCalculator.resetCal();
 		return salary == null;

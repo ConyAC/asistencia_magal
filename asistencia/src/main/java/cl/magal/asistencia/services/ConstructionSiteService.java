@@ -19,8 +19,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.vaadin.ui.DateField;
-
 import cl.magal.asistencia.entities.Accident;
 import cl.magal.asistencia.entities.AdvancePaymentConfigurations;
 import cl.magal.asistencia.entities.Attendance;
@@ -441,7 +439,9 @@ public class ConstructionSiteService {
 		//obtiene la lista de trabajadores
 		List<LaborerConstructionsite> lcs =  labcsRepo.findByConstructionsiteAndIsActive(cs);
 		//obtiene la lista de las herramientas que deberian ser cargadas en el mes
-		List<Tool> toolFees = toolRepo.findByConstructionsiteAndMonth(cs,date.withDayOfMonth(1).toDate()); //se asegura de pasar el primero del mes para verificar las fechas pospuestas
+		Date toDate = date.withDayOfMonth(1).toDate();
+		logger.debug("toDate {}",toDate);
+		List<Tool> toolFees = toolRepo.findFeeByConstructionsiteAndMonth(cs,toDate); //se asegura de pasar el primero del mes para verificar las fechas pospuestas
 		Map<Integer, Integer> toolResult = new HashMap<Integer, Integer>();
 		//verifica que exista una asistencia para cada elemento, si no existe la crea
 		for(LaborerConstructionsite lc : lcs ){
@@ -449,9 +449,10 @@ public class ConstructionSiteService {
 			for(Tool l : toolFees){
 				if(l.getLaborerConstructionSite().getId() == lc.getId()){
 					p = l.getPrice() / l.getFee(); 
+					break;
 				}
 			}
-			toolResult.put(lc.getJobCode(), p);			
+			toolResult.put(lc.getJobCode(), p);
 		}
 		return toolResult;
 	}
@@ -460,15 +461,18 @@ public class ConstructionSiteService {
 			ConstructionSite cs, DateTime date) {
 		//obtiene la lista de trabajadores
 		List<LaborerConstructionsite> lcs =  labcsRepo.findByConstructionsiteAndIsActive(cs);
+		//obtiene la lista de las prestamos que deberian ser cargadas en el mes
+		List<Loan> loanFees = loanRepo.findFeeByConstructionsiteAndMonth(cs,date.withDayOfMonth(1).toDate()); //se asegura de pasar el primero del mes para verificar las fechas pospuestas
 		Map<Integer, Integer> toolResult = new HashMap<Integer, Integer>();
 		//verifica que exista una asistencia para cada elemento, si no existe la crea
 		for(LaborerConstructionsite lc : lcs ){
 			int p = 0;
-//			for(Tool l : toolFees){
-//				if(l.getLaborerConstructionSite().getId() == lc.getId()){
-//					p = l.getPrice() / l.getFee(); 
-//				}
-//			}
+			for(Loan l : loanFees){
+				if(l.getLaborerConstructionSite().getId() == lc.getId()){
+					p = l.getPrice() / l.getFee(); 
+					break;
+				}
+			}
 			toolResult.put(lc.getJobCode(), p);			
 		}
 		return toolResult;
@@ -760,24 +764,6 @@ public class ConstructionSiteService {
 
 		return salaries;
 	}
-//
-//	public Double calculateSuple(Integer supleCode,AdvancePaymentConfigurations supleTable, Date supleCloseDate,Attendance attendance){
-//
-//		Map<Integer,AdvancePaymentItem> supleItemTable = supleTable.getMapTable();
-//		//primero obtiene el monto de anticipo que le corresponde por tabla
-//		Double maxAmount = supleItemTable.get(supleCode).getSupleTotalAmount();
-//		//obtiene el día en que se cierra el suple
-//		Integer supleCloseDay = new DateTime(supleCloseDate).dayOfMonth().get();
-//		//luego descuenta por cada X S V D LL 
-//		Integer countNotAttendance = countMarks(supleCloseDay,attendance,AttendanceMark.SATURDAY,AttendanceMark.ATTEND,AttendanceMark.VACATION,AttendanceMark.SUNDAY,AttendanceMark.RAIN);
-//		logger.debug("(supleCloseDay {} - countNotAttendance {} ) * supleTable.getFailureDiscount() ",supleCloseDay,countNotAttendance,supleTable.getFailureDiscount());
-//		Integer firstDiscount = (int) ((supleCloseDay - countNotAttendance)*supleTable.getFailureDiscount());
-//		logger.debug("first discount {}",firstDiscount);		
-//		Integer countFails = countMarks(supleCloseDay,attendance,AttendanceMark.FAIL);
-//		Integer secondDiscount = (int) (countFails*supleTable.getPermissionDiscount());
-//		logger.debug("second discount {}",secondDiscount);
-//		return maxAmount -firstDiscount -secondDiscount;
-//	}
 
 	/**
 	 * @param cs
@@ -790,8 +776,6 @@ public class ConstructionSiteService {
 		AdvancePaymentConfigurations advancePaymentConfig = configurationService.getSupleTableByCs(cs);
 		if(advancePaymentConfig == null )
 			throw new RuntimeException("Aún no se define la tabla de suples. Ésta es necesaria para cálcular el sueldo.");
-//		Double failDiscount = configurationService.getFailDiscount(cs);
-//		Double permissionDiscount = configurationService.getPermissionDiscount(cs);
 		//fechas 
 		DateConfigurations dateConfiguration = configurationService.getDateConfigurationByCsAndMonth(cs,date);
 		if(dateConfiguration == null )
@@ -856,7 +840,6 @@ public class ConstructionSiteService {
 			int lastJornalPromedio = 0;
 			if( index >= 0 )
 				lastJornalPromedio = lastSalariesList.remove(index).getJornalPromedio();
-			
 
 			SupleCalculator suc = new SupleCalculator(advancePaymentConfig, supleClose);
 			//si el codigo de suple es nulo, entonces usa el primero de la tabla de suples FIXME CONFIRMAR ESTE COMPORTAMIENTO!!!
@@ -873,7 +856,11 @@ public class ConstructionSiteService {
 			
 			//crea el objeto que calculará los sueldos 
 			SalaryCalculator sc =  new SalaryCalculator(assistanceClose,wageConfiguration, dateConfiguration, famillyTable, taxTable);
-			sc.setInformation( salary.getSuple(), toolFees.get(lc.getJob()), loanFees.get(lc.getJob()), attendance.get(lc.getJobCode()), lastMonthAttendance.get(lc.getJobCode()), overtimes.get(lc.getJobCode()), loans.get(lc.getJobCode()));		
+			sc.setInformation( salary.getSuple(), 
+							   toolFees.get(lc.getJobCode()), 
+							   loanFees.get(lc.getJobCode()), 
+								attendance.get(lc.getJobCode()), lastMonthAttendance.get(lc.getJobCode()), 
+								overtimes.get(lc.getJobCode()), loans.get(lc.getJobCode()));		
 			salary.setSalaryCalculator(sc);
 
 			salaries.add(salary);

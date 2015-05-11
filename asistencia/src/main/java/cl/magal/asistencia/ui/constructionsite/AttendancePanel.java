@@ -870,7 +870,6 @@ public class AttendancePanel extends Panel implements View {
 									}else if("suple".equals(pid)){
 									}
 									Object result = salaryContainer.getItem(itemId).getItemProperty("forceSalary").getValue();
-									logger.debug("salary == null {}, {}",result,itemId);
 									label.setValue( "<b>"+Utils.formatInteger((Integer) salaryContainer.getContainerProperty(itemId, columnId).getValue())+"</b>"+
 											"  ("+Utils.formatInteger((Integer) salaryContainer.getContainerProperty(itemId, "roundSalary").getValue())+")");
 									Utils.notifyPropertyValueChanged(item,"jornalBaseMes","vtrato","valorSabado","vsCorrd","sobreTiempo","descHoras","bonifImpo","glegal","afecto","sobreAfecto","cargas","asigFamiliar","colacion","mov","mov2","tnoAfecto");
@@ -1588,7 +1587,6 @@ public class AttendancePanel extends Panel implements View {
 												if(attendance.getLaborerConstructionSite().getActiveContract().getTerminationDate() != null )
 													row.getCell(54).setCellValue(attendance.getLaborerConstructionSite().getActiveContract().getTerminationDate());
 												//codigo suple 
-												logger.debug("suple code {} ",salary.getLaborerConstructionSite().getSupleCode());
 												row.getCell(57).setCellValue(salary.getLaborerConstructionSite().getSupleCode());
 												//ajuste sobre tiempo 60 74
 												

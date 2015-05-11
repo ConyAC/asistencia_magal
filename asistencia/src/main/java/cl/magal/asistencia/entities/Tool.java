@@ -6,8 +6,10 @@
 package cl.magal.asistencia.entities;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import javax.persistence.Basic;
@@ -103,11 +105,11 @@ public class Tool implements Serializable {
     transient private boolean postponed;
     
     //tabla intermedia entre role y sus permisos    
-    @ElementCollection(targetClass= Date.class,fetch=FetchType.EAGER)
+    @ElementCollection(targetClass= Date.class,fetch=FetchType.EAGER )
     @CollectionTable(name="postponedpaymenttool", joinColumns = @JoinColumn(name = "toolId"))
     @Column(name="tool_date")
-    @Temporal(TemporalType.TIMESTAMP)
-    Set<Date> datePostponed = new HashSet<Date>(); 
+    @Temporal(TemporalType.DATE)
+    List<Date> datePostponed = new ArrayList<Date>(); 
     
     @PrePersist
     public void prePersist(){
@@ -213,11 +215,11 @@ public class Tool implements Serializable {
 		this.postponed = postponed;
 	}
 
-	public Set<Date> getDatePostponed() {
+	public List<Date> getDatePostponed() {
 		return datePostponed;
 	}
 
-	public void setDatePostponed(Set<Date> datePostponed) {
+	public void setDatePostponed(List<Date> datePostponed) {
 		this.datePostponed = datePostponed;
 	}
 

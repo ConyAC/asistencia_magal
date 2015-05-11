@@ -81,7 +81,7 @@ public class Loan implements Serializable {
     @ElementCollection(targetClass= Date.class,fetch=FetchType.EAGER)
     @CollectionTable(name="postponedpaymentloan", joinColumns = @JoinColumn(name = "loanId"))
     @Column(name="loan_date")
-    @Temporal(TemporalType.TIMESTAMP)
+    @Temporal(TemporalType.DATE)
     Set<Date> datePostponed = new HashSet<Date>(); 
     
     @PrePersist
