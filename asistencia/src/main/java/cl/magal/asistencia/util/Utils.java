@@ -190,7 +190,7 @@ public class Utils {
 		 Calendar cal = Calendar.getInstance();
 		 cal.setTime(vacation.getFromDate());
 		 int day_iv = cal.get(Calendar.DAY_OF_MONTH);
-		 	if(sabOrdom != 6  || sabOrdom != 7 ){
+		 	if(sabOrdom != 6  && sabOrdom != 7 ){
 				for (int i = 0; i <= vacation.getTotal();i++){
 					if(day_iv+i == day && lc.getLaborer().getId() == vacation.getLaborerConstructionSite().getLaborer().getId()){
 						return true;
