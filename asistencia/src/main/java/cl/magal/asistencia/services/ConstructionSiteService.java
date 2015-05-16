@@ -323,6 +323,16 @@ public class ConstructionSiteService {
 		Attendance tmp = new Attendance();
 		List<Holiday> h = holidayRepo.findByMonth(date.toDate());
 		List<Holiday> h_p = holidayRepo.findByMonth(new DateTime(date.toDate()).minus(1).toDate());
+		
+		List<Vacation> vacations = vacationRepo.findByConstructionsiteAndMonth(cs,date.toDate());
+		List<Vacation> vacations_p = vacationRepo.findByConstructionsiteAndMonth(cs,new DateTime(date.toDate()).minus(1).toDate());
+		
+		List<License> license = licenseRepo.findByConstructionsiteAndMonth(cs, date.toDate());
+		List<License> license_p = licenseRepo.findByConstructionsiteAndMonth(cs, new DateTime(date.toDate()).minus(1).toDate());
+		
+		List<Accident> accident = accidentRepo.findByConstructionsiteAndMonth(cs, date.toDate());
+		List<Accident> accident_p = accidentRepo.findByConstructionsiteAndMonth(cs, new DateTime(date.toDate()).minus(1).toDate());
+
 		//verifica que exista una asistencia para cada elemento, si no existe la crea
 		for(LaborerConstructionsite lc : lcs ){
 			tmp.setLaborerConstructionSite(lc);
@@ -347,6 +357,12 @@ public class ConstructionSiteService {
 						attendance.setMark(AttendanceMark.SUNDAY, i);	
 					}else if(day == 6 && index < 0){
 						attendance.setMark(AttendanceMark.SATURDAY, i);
+					}else if (Utils.containsVacation(vacations,(i+1), lc, day)){//Si tiene vacaciones registradas las marca
+						attendance.setMark(AttendanceMark.VACATION, i);
+					}else if(Utils.containsLicense(license, (i+1), lc)){//Si tiene licencia registradas las marca
+						attendance.setMark(AttendanceMark.SICK, i);
+					}else if(Utils.containsAccident(accident, (i+1), lc)){//Si tiene accidentes registradas las marca
+						attendance.setMark(AttendanceMark.ACCIDENT, i);
 					}
 				}
 				
@@ -358,6 +374,12 @@ public class ConstructionSiteService {
 						attendance.setLastMark(AttendanceMark.SUNDAY, i);	
 					}else if(day_p == 6 && index < 0){
 						attendance.setLastMark(AttendanceMark.SATURDAY, i);
+					}else if (Utils.containsVacation(vacations_p,(i+1), lc, day_p)){//Si tiene vacaciones registradas las marca
+						attendance.setLastMark(AttendanceMark.VACATION, i);
+					}else if (Utils.containsLicense(license_p,(i+1), lc)){//Si tiene licencia registradas las marca
+						attendance.setLastMark(AttendanceMark.SICK, i);
+					}else if (Utils.containsAccident(accident_p,(i+1), lc)){//Si tiene accidentes registradas las marca
+						attendance.setLastMark(AttendanceMark.ACCIDENT, i);
 					}
 				}
 			}
