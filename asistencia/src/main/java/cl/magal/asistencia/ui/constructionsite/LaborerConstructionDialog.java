@@ -18,6 +18,7 @@ import javax.validation.Validator;
 import org.apache.velocity.app.VelocityEngine;
 import org.joda.time.DateTime;
 import org.joda.time.Days;
+import org.joda.time.Period;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ui.velocity.VelocityEngineUtils;
@@ -804,13 +805,14 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 					return;
 				}
 
-				//TODO calcular finiquito
-				//setea un finiquito
-				activeContract.setSettlement(100000);
+				LaborerConstructionsite lc = (LaborerConstructionsite)getItem().getBean();
 				//deja desactivo tanto el contrato como el laborer constructionsite
 				activeContract.setActive(false);
-				((LaborerConstructionsite)getItem().getBean()).setActive(false);
+				lc.setActive(false);
+				//setea un finiquito
+				activeContract.setSettlement(calculateSettlement(lc));
 				setContractGl(activeContract);
+
 			}
 		});
 
@@ -926,6 +928,39 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 
 		gl2.addComponent(annexedTable,columna++,fila,columna--,fila++);
 		return vl;
+	}
+
+	/**
+	 * Calcula el finiquito
+	 * Mes por Año = 30 * Promedio Jornal * codigo (1) * cantidad (0) +
+	 * Desahucio = 30 * Promedio Jornal * codigo (1) * cantidad (0) +
+	 * Calculo Vacaciones = Años Duracion Contrato * 12 *1.75 * Promedio Jornal +
+	 * Vacaciones Efectivas = -1 *  vacaciones tomadas * Promedio Jornal * 1.4
+	 *
+	 * @param lc
+	 * @return
+	 */
+	protected double calculateSettlement(LaborerConstructionsite lc) {
+		
+		//TODO
+		double JornalPromedio = service.getJornalPromedioLastThreeMonth(lc,lc.getActiveContract().getTerminationDate());
+		logger.debug("JornalPromedio {}",JornalPromedio);
+		
+		double MesPorAnoCod = 1,MesPorAnoCant = 1;
+		double DesahucioCod = 1,DesahucioCant = 1;
+		Period period = new Period(new DateTime(lc.getActiveContract().getStartDate()), new DateTime(lc.getActiveContract().getTerminationDate()));
+		//TODO
+		double AnoDuracionContrato = period.getYears() + (period.getMonths() - (period.getYears() * 12)) / 12;
+		logger.debug("AnoDuracionContrato {}",AnoDuracionContrato);
+		double vacacionesTomadas = calcularUsadas(vacationContainer.getItemIds());
+		logger.debug("vacacionesTomadas {}",vacacionesTomadas);
+		
+		double MesPorAno = 30 * JornalPromedio * MesPorAnoCod * MesPorAnoCant;
+		double Desahucio = 30 * JornalPromedio * DesahucioCod * DesahucioCant;
+		double Vacaciones = AnoDuracionContrato * 12 * 1.75 * JornalPromedio;
+		double VacacionesEfectivas = -1 * vacacionesTomadas * JornalPromedio * 1.4;
+		logger.debug("MesPorAno + Desahucio + Vacaciones + VacacionesEfectivas {} + {} + {} + {}",MesPorAno , Desahucio , Vacaciones , VacacionesEfectivas);
+		return Math.round( MesPorAno + Desahucio + Vacaciones + VacacionesEfectivas);
 	}
 
 	Label lbJob ,lbJobCode,lbStep ,lbStarting, lbEnding,lbSettlement,lbStatus;
