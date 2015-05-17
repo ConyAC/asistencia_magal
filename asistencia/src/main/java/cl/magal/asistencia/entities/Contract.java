@@ -85,7 +85,7 @@ public class Contract implements Serializable {
     private String step;
     
     @Column(name = "settlement")
-    private Integer settlement;
+    private Double settlement;
     
     @Column(name = "contract_description")
     String contractDescription;
@@ -211,11 +211,11 @@ public class Contract implements Serializable {
 	     }
 	}
 
-	public Integer getSettlement() {
+	public Double getSettlement() {
 		return settlement;
 	}
 
-	public void setSettlement(Integer settlement) {
+	public void setSettlement(Double settlement) {
 		this.settlement = settlement;
 		setActive(false);
 	}
