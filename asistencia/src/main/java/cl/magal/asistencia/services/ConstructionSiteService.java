@@ -2,6 +2,7 @@ package cl.magal.asistencia.services;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -333,6 +334,11 @@ public class ConstructionSiteService {
 		List<Accident> accident = accidentRepo.findByConstructionsiteAndMonth(cs, date.toDate());
 		List<Accident> accident_p = accidentRepo.findByConstructionsiteAndMonth(cs, new DateTime(date.toDate()).minus(1).toDate());
 
+		 //Mes seleccionado
+		 Calendar cal3 = Calendar.getInstance();
+		 cal3.setTime(date.toDate());
+		 int mes_select = cal3.get(Calendar.MONTH);
+		 
 		//verifica que exista una asistencia para cada elemento, si no existe la crea
 		for(LaborerConstructionsite lc : lcs ){
 			tmp.setLaborerConstructionSite(lc);
@@ -361,7 +367,7 @@ public class ConstructionSiteService {
 						attendance.setMark(AttendanceMark.VACATION, i);
 					}else if(Utils.containsLicense(license, (i+1), lc)){//Si tiene licencia registradas las marca
 						attendance.setMark(AttendanceMark.SICK, i);
-					}else if(Utils.containsAccident(accident, (i+1), lc)){//Si tiene accidentes registradas las marca
+					}else if(Utils.containsAccident(accident, (i+1), lc, mes_select)){//Si tiene accidentes registradas las marca
 						attendance.setMark(AttendanceMark.ACCIDENT, i);
 					}
 				}
@@ -378,7 +384,7 @@ public class ConstructionSiteService {
 						attendance.setLastMark(AttendanceMark.VACATION, i);
 					}else if (Utils.containsLicense(license_p,(i+1), lc)){//Si tiene licencia registradas las marca
 						attendance.setLastMark(AttendanceMark.SICK, i);
-					}else if (Utils.containsAccident(accident_p,(i+1), lc)){//Si tiene accidentes registradas las marca
+					}else if (Utils.containsAccident(accident_p,(i+1), lc, mes_select)){//Si tiene accidentes registradas las marca
 						attendance.setLastMark(AttendanceMark.ACCIDENT, i);
 					}
 				}

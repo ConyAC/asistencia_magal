@@ -12,6 +12,7 @@ import java.util.Set;
 import javax.validation.ConstraintViolation;
 
 import org.joda.time.DateTime;
+import org.joda.time.Days;
 import org.joda.time.format.DateTimeFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -207,7 +208,7 @@ public class Utils {
 		 cal.setTime(license.getFromDate());
 		 int day_il = cal.get(Calendar.DAY_OF_MONTH);
 			for (int i = 0; i <= license.getTotal();i++){
-				if(day_il+i == day && lc.getId() == license.getLaborerConstructionSite().getId()){
+				if(day_il+i == day && lc.getLaborer().getId() == license.getLaborerConstructionSite().getLaborer().getId()){
 					return true;
 				}
 			}
@@ -215,16 +216,38 @@ public class Utils {
 		return false;
 	}
 	
-	public static boolean containsAccident(List<Accident> a, int day, LaborerConstructionsite lc) {
+	public static boolean containsAccident(List<Accident> a, int day, LaborerConstructionsite lc, int mes_select) {
 		for(Accident accident : a){
+		 //Inicio accidente
 		 Calendar cal = Calendar.getInstance();
 		 cal.setTime(accident.getFromDate());
 		 int day_ia = cal.get(Calendar.DAY_OF_MONTH);
-			for (int i = 0; i <= accident.getTotal();i++){
-				if(day_ia+i == day && lc.getId() == accident.getLaborerConstructionSite().getId()){
-					return true;
-				}
-			}
+		 int mes_ia = cal.get(Calendar.MONTH);
+		 //Fin accidente
+		 Calendar cal2 = Calendar.getInstance();
+		 cal2.setTime(accident.getToDate());
+		 int day_fa = cal2.get(Calendar.DAY_OF_MONTH);
+		 int mes_fa = cal2.get(Calendar.MONTH);
+
+		 	if(mes_fa != mes_ia){//si la fecha de accidente se registro en más de un mes
+				for (int i = 0; i <= accident.getTotal();i++){
+					if(mes_ia == mes_select){//si la fecha de inicio es la misma a la seleccionada.
+						if(day_ia+i == day && lc.getLaborer().getId() == accident.getLaborerConstructionSite().getLaborer().getId()){
+							return true;
+						}
+					}else if(mes_fa == mes_select){//si la fecha final es la misma a la seleccionada.
+						if(day_fa-i == day && lc.getLaborer().getId() == accident.getLaborerConstructionSite().getLaborer().getId()){
+							return true;
+						}
+					}					
+				}			 
+			 }else{//la fecha de accidente se registro en un mes.
+				 for(int i = 0; i <= accident.getTotal();i++){
+						if(day_ia+i == day && lc.getLaborer().getId() == accident.getLaborerConstructionSite().getLaborer().getId()){
+							return true;
+						}
+					}
+			 }
 		}
 		return false;
 	}
