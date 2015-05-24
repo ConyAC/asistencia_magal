@@ -12,7 +12,6 @@ import java.util.Set;
 import javax.validation.ConstraintViolation;
 
 import org.joda.time.DateTime;
-import org.joda.time.Days;
 import org.joda.time.format.DateTimeFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -186,69 +185,52 @@ public class Utils {
 		return false;
 	}
 	
-	public static boolean containsVacation(List<Vacation> v, int day, LaborerConstructionsite lc, int sabOrdom) {
+	public static boolean containsVacation(List<Vacation> v, int day, LaborerConstructionsite lc, DateTime dt, int sabOrdom) {
 		for(Vacation vacation : v){
-		 Calendar cal = Calendar.getInstance();
-		 cal.setTime(vacation.getFromDate());
-		 int day_iv = cal.get(Calendar.DAY_OF_MONTH);
-		 	if(sabOrdom != 6  && sabOrdom != 7 ){
+		 Calendar calV = Calendar.getInstance();
+		 calV.setTime(vacation.getFromDate());
+
+		 if(sabOrdom != 6  && sabOrdom != 7 ){
 				for (int i = 0; i <= vacation.getTotal();i++){
-					if(day_iv+i == day && lc.getLaborer().getId() == vacation.getLaborerConstructionSite().getLaborer().getId()){
+					 if(calV.get(Calendar.DAY_OF_MONTH) == day && new DateTime(calV.getTime()).getMonthOfYear() == dt.getMonthOfYear() && lc.getLaborer().getId() == vacation.getLaborerConstructionSite().getLaborer().getId()){
 						return true;
 					}
+					 calV.add(Calendar.DATE, 1);
 				}
 		 	}
 		}
 		return false;
 	}
 	
-	public static boolean containsLicense(List<License> l, int day, LaborerConstructionsite lc) {
+	public static boolean containsLicense(List<License> l, int day, LaborerConstructionsite lc, DateTime dt) {
 		for(License license : l){
-		 Calendar cal = Calendar.getInstance();
-		 cal.setTime(license.getFromDate());
-		 int day_il = cal.get(Calendar.DAY_OF_MONTH);
-			for (int i = 0; i <= license.getTotal();i++){
-				if(day_il+i == day && lc.getLaborer().getId() == license.getLaborerConstructionSite().getLaborer().getId()){
+		 Calendar calL = Calendar.getInstance();
+		 calL.setTime(license.getFromDate());
+
+		 for (int i = 0; i <= license.getTotal();i++){
+			 if(calL.get(Calendar.DAY_OF_MONTH) == day && new DateTime(calL.getTime()).getMonthOfYear() == dt.getMonthOfYear() && lc.getLaborer().getId() == license.getLaborerConstructionSite().getLaborer().getId()){
 					return true;
 				}
+			 calL.add(Calendar.DATE, 1);
 			}
 		}
 		return false;
 	}
 	
-	public static boolean containsAccident(List<Accident> a, int day, LaborerConstructionsite lc, int mes_select) {
+	public static boolean containsAccident(List<Accident> a, int day, LaborerConstructionsite lc, DateTime dt) {
 		for(Accident accident : a){
-		 //Inicio accidente
-		 Calendar cal = Calendar.getInstance();
-		 cal.setTime(accident.getFromDate());
-		 int day_ia = cal.get(Calendar.DAY_OF_MONTH);
-		 int mes_ia = cal.get(Calendar.MONTH);
-		 //Fin accidente
-		 Calendar cal2 = Calendar.getInstance();
-		 cal2.setTime(accident.getToDate());
-		 int day_fa = cal2.get(Calendar.DAY_OF_MONTH);
-		 int mes_fa = cal2.get(Calendar.MONTH);
-
-		 	if(mes_fa != mes_ia){//si la fecha de accidente se registro en más de un mes
-				for (int i = 0; i <= accident.getTotal();i++){
-					if(mes_ia == mes_select){//si la fecha de inicio es la misma a la seleccionada.
-						if(day_ia+i == day && lc.getLaborer().getId() == accident.getLaborerConstructionSite().getLaborer().getId()){
-							return true;
-						}
-					}else if(mes_fa == mes_select){//si la fecha final es la misma a la seleccionada.
-						if(day_fa-i == day && lc.getLaborer().getId() == accident.getLaborerConstructionSite().getLaborer().getId()){
-							return true;
-						}
-					}					
-				}			 
-			 }else{//la fecha de accidente se registro en un mes.
-				 for(int i = 0; i <= accident.getTotal();i++){
-						if(day_ia+i == day && lc.getLaborer().getId() == accident.getLaborerConstructionSite().getLaborer().getId()){
-							return true;
-						}
-					}
-			 }
-		}
+		 Calendar calA = Calendar.getInstance();
+		 calA.setTime(accident.getFromDate());
+		 
+		 //DateTime t = new DateTime(accident.getFromDate());
+		 //Days.daysBetween(new DateTime(accident.getFromDate()), new DateTime(accident.getToDate())).getDays()
+		 for (int i = 0; i <= accident.getTotal() ;i++){
+			 if(calA.get(Calendar.DAY_OF_MONTH) == day && new DateTime(calA.getTime()).getMonthOfYear() == dt.getMonthOfYear() && lc.getLaborer().getId() == accident.getLaborerConstructionSite().getLaborer().getId()){
+					return true;
+				}
+			 calA.add(Calendar.DATE, 1);
+			}	
+		}		
 		return false;
 	}
 }

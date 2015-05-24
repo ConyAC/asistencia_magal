@@ -323,21 +323,16 @@ public class ConstructionSiteService {
 		
 		Attendance tmp = new Attendance();
 		List<Holiday> h = holidayRepo.findByMonth(date.toDate());
-		List<Holiday> h_p = holidayRepo.findByMonth(new DateTime(date.toDate()).minus(1).toDate());
+		List<Holiday> h_p = holidayRepo.findByMonth(new DateTime(date.toDate()).minusMonths(1).toDate());
 		
 		List<Vacation> vacations = vacationRepo.findByConstructionsiteAndMonth(cs,date.toDate());
-		List<Vacation> vacations_p = vacationRepo.findByConstructionsiteAndMonth(cs,new DateTime(date.toDate()).minus(1).toDate());
+		List<Vacation> vacations_p = vacationRepo.findByConstructionsiteAndMonth(cs,new DateTime(date.toDate()).minusMonths(1).toDate());
 		
 		List<License> license = licenseRepo.findByConstructionsiteAndMonth(cs, date.toDate());
-		List<License> license_p = licenseRepo.findByConstructionsiteAndMonth(cs, new DateTime(date.toDate()).minus(1).toDate());
+		List<License> license_p = licenseRepo.findByConstructionsiteAndMonth(cs, new DateTime(date.toDate()).minusMonths(1).toDate());
 		
 		List<Accident> accident = accidentRepo.findByConstructionsiteAndMonth(cs, date.toDate());
-		List<Accident> accident_p = accidentRepo.findByConstructionsiteAndMonth(cs, new DateTime(date.toDate()).minus(1).toDate());
-
-		 //Mes seleccionado
-		 Calendar cal3 = Calendar.getInstance();
-		 cal3.setTime(date.toDate());
-		 int mes_select = cal3.get(Calendar.MONTH);
+		List<Accident> accident_p = accidentRepo.findByConstructionsiteAndMonth(cs, new DateTime(date.toDate()).minusMonths(1).toDate());
 		 
 		//verifica que exista una asistencia para cada elemento, si no existe la crea
 		for(LaborerConstructionsite lc : lcs ){
@@ -352,23 +347,23 @@ public class ConstructionSiteService {
 				attendance.setLaborerConstructionSite(lc);
 				attendance.setDate(date.toDate());
 			}
-			
+
 			for (int i = 0; i < 31; i++){
 				if( i + 1 <= date.dayOfMonth().getMaximumValue() ){ //solo setea hasta el maximo
 					
 					int day = date.withDayOfMonth(i+1).dayOfWeek().get();
 					if (Utils.containsHoliday(h,(i+1))){
 						attendance.setMark(AttendanceMark.SUNDAY, i);
+					}else if(Utils.containsAccident(accident, (i+1), lc, date)){//Si tiene accidentes registradas las marca
+						attendance.setMark(AttendanceMark.ACCIDENT, i);
+					}else if(Utils.containsLicense(license, (i+1), lc, date)){
+						attendance.setMark(AttendanceMark.SICK, i);
+					}else if(Utils.containsVacation(vacations, (i+1), lc, date, day)){
+						attendance.setMark(AttendanceMark.VACATION, i);
 					}else if(day == 7 && index < 0){ //solo asigna el domingo si es nuevo
 						attendance.setMark(AttendanceMark.SUNDAY, i);	
 					}else if(day == 6 && index < 0){
 						attendance.setMark(AttendanceMark.SATURDAY, i);
-					}else if (Utils.containsVacation(vacations,(i+1), lc, day)){//Si tiene vacaciones registradas las marca
-						attendance.setMark(AttendanceMark.VACATION, i);
-					}else if(Utils.containsLicense(license, (i+1), lc)){//Si tiene licencia registradas las marca
-						attendance.setMark(AttendanceMark.SICK, i);
-					}else if(Utils.containsAccident(accident, (i+1), lc, mes_select)){//Si tiene accidentes registradas las marca
-						attendance.setMark(AttendanceMark.ACCIDENT, i);
 					}
 				}
 				
@@ -376,16 +371,16 @@ public class ConstructionSiteService {
 					int day_p = date.minusMonths(1).withDayOfMonth(i+1).dayOfWeek().get();
 					if (Utils.containsHoliday(h_p,(i+1))){
 						attendance.setLastMark(AttendanceMark.SUNDAY, i);
+					}else if (Utils.containsAccident(accident_p,(i+1), lc, date.minusMonths(1))){//Si tiene accidentes registradas las marca
+						attendance.setLastMark(AttendanceMark.ACCIDENT, i);
+					}else if(Utils.containsLicense(license_p, (i+1), lc, date.minusMonths(1))){//Si tiene licencias registradas las marca
+						attendance.setMark(AttendanceMark.SICK, i);
+					}else if(Utils.containsVacation(vacations_p, (i+1), lc, date.minusMonths(1), day_p)){//Si tiene vacaciones registradas las marca
+						attendance.setMark(AttendanceMark.VACATION, i);
 					}else if(day_p == 7 && index < 0){//solo asigna el domingo si es nuevo
 						attendance.setLastMark(AttendanceMark.SUNDAY, i);	
 					}else if(day_p == 6 && index < 0){
 						attendance.setLastMark(AttendanceMark.SATURDAY, i);
-					}else if (Utils.containsVacation(vacations_p,(i+1), lc, day_p)){//Si tiene vacaciones registradas las marca
-						attendance.setLastMark(AttendanceMark.VACATION, i);
-					}else if (Utils.containsLicense(license_p,(i+1), lc)){//Si tiene licencia registradas las marca
-						attendance.setLastMark(AttendanceMark.SICK, i);
-					}else if (Utils.containsAccident(accident_p,(i+1), lc, mes_select)){//Si tiene accidentes registradas las marca
-						attendance.setLastMark(AttendanceMark.ACCIDENT, i);
 					}
 				}
 			}
