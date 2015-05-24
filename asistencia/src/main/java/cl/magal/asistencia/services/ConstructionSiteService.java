@@ -462,7 +462,7 @@ public class ConstructionSiteService {
 		//obtiene la lista de trabajadores
 		List<LaborerConstructionsite> lcs =  labcsRepo.findByConstructionsiteAndIsActive(cs);
 		//obtiene la lista de las herramientas que deberian ser cargadas en el mes
-		Date toDate = date.withDayOfMonth(1).toDate();
+		Date toDate = date.withDayOfMonth(1).withHourOfDay(0).withMinuteOfHour(0).withSecondOfMinute(0).withMillisOfSecond(0).toDate();
 		logger.debug("toDate {}",toDate);
 		List<Tool> toolFees = toolRepo.findFeeByConstructionsiteAndMonth(cs,toDate); //se asegura de pasar el primero del mes para verificar las fechas pospuestas
 		Map<Integer, Integer> toolResult = new HashMap<Integer, Integer>();
@@ -471,7 +471,7 @@ public class ConstructionSiteService {
 			int p = 0;
 			for(Tool l : toolFees){
 				if(l.getLaborerConstructionSite().getId() == lc.getId()){
-					p = l.getPrice() / l.getFee(); 
+					p = l.getPrice() / l.getFee();
 					break;
 				}
 			}

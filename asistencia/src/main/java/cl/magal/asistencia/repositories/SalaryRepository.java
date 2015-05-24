@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 
 import cl.magal.asistencia.entities.ConstructionSite;
+import cl.magal.asistencia.entities.LaborerConstructionsite;
 import cl.magal.asistencia.entities.Salary;
 
 public interface SalaryRepository extends
@@ -20,5 +21,9 @@ public interface SalaryRepository extends
 
 	@Query(value = "select s from Salary s where s.laborerConstructionSite.constructionsite = ?1 AND extract( month from s.date ) = extract ( month from ?2 ) and extract( year from s.date ) = extract ( year from ?2 )" )
 	List<Salary> findByConstructionsiteAndMonth(ConstructionSite cs, Date date);
+
+	
+	@Query(value = "select avg(s.jornalPromedio) from Salary s where s.laborerConstructionSite = ?1 AND extract( month from s.date ) in ( extract ( month from ?2 ) , extract ( month from ?2 ) - 1 , extract ( month from ?2 ) - 2 )" )
+	Double calculateJornalPromedioAvg(LaborerConstructionsite lc,Date terminationDate);
 
 }

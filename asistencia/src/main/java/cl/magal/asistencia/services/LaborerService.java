@@ -26,6 +26,7 @@ import cl.magal.asistencia.repositories.LaborerConstructionsiteRepository;
 import cl.magal.asistencia.repositories.LaborerRepository;
 import cl.magal.asistencia.repositories.LicenseRepositoy;
 import cl.magal.asistencia.repositories.LoanRepository;
+import cl.magal.asistencia.repositories.SalaryRepository;
 import cl.magal.asistencia.repositories.ToolRepository;
 import cl.magal.asistencia.repositories.VacationRepository;
 import cl.magal.asistencia.ui.vo.HistoryVO;
@@ -54,6 +55,8 @@ public class LaborerService {
 	ContractRepository contractRepo;
 	@Autowired
 	LoanRepository loanRepo; 
+	@Autowired
+	SalaryRepository salaryRepo;
 	
 	public Laborer saveLaborer(Laborer l) {
 		Laborer laborer = laborerRepo.save(l);
@@ -208,5 +211,20 @@ public class LaborerService {
 	
 	public List<Integer> findPriceLoan( Long id ) {
 		return loanRepo.findPriceLoan(id);
+	}
+
+	/**
+	 * Busca el promedio de los jornales promedios de los últimos 3 meses desde la fecha de termino de contrato desde la fecha dada
+	 * @param lc
+	 * @param date
+	 * @return
+	 */
+	public double getJornalPromedioLastThreeMonth(LaborerConstructionsite lc, Date date) {
+		if( lc == null )
+			throw new RuntimeException("El obrero es necesario");
+		if( lc.getActiveContract().getTerminationDate() == null )
+			throw new RuntimeException("La fecha de termino de contrato es necesario");
+		Double avg = salaryRepo.calculateJornalPromedioAvg(lc,date);
+		return avg != null ? avg : 0;
 	}	
 }
