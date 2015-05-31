@@ -103,7 +103,7 @@ public class Contract implements Serializable {
     @Column(name = "finished")
     private boolean finished;
     
-    @OneToOne
+    @OneToOne(optional = false, fetch =FetchType.EAGER)
     @JoinColumn(name="laborer_constructionsiteId",nullable = false,unique=true )
 	LaborerConstructionsite laborerConstructionSite;
     
