@@ -155,6 +155,7 @@ public class ConfigurationService {
 	}
 	
 	public AdvancePaymentConfigurations findAdvancePaymentConfigurationsByCS(ConstructionSite cs) {
+		logger.debug("obteniendo tabla de suple");
 		List<AdvancePaymentConfigurations> configurations = (List<AdvancePaymentConfigurations>)advancePaymentRepo.findAdvancePaymentConfigurationsByCS(cs);
 		if(configurations.isEmpty())
 			return null;

@@ -113,10 +113,10 @@ public class LaborerConstructionsite implements Serializable {
     @OneToMany(mappedBy="laborerConstructionSite",fetch=FetchType.LAZY,cascade={CascadeType.PERSIST,CascadeType.MERGE},orphanRemoval=true )
     List<Accident> accidents = new ArrayList<Accident>();
     
-    @OneToMany(mappedBy="laborerConstructionSite",fetch=FetchType.EAGER,cascade={CascadeType.PERSIST,CascadeType.MERGE},orphanRemoval=true )
+    @OneToMany(mappedBy="laborerConstructionSite",fetch=FetchType.LAZY,cascade={CascadeType.PERSIST,CascadeType.MERGE},orphanRemoval=true )
     List<Tool> tool = new ArrayList<Tool>();
     
-    @OneToMany(mappedBy="laborerConstructionSite",fetch=FetchType.EAGER,cascade = { CascadeType.PERSIST, CascadeType.MERGE },orphanRemoval=true )
+    @OneToMany(mappedBy="laborerConstructionSite",fetch=FetchType.LAZY,cascade = { CascadeType.PERSIST, CascadeType.MERGE },orphanRemoval=true )
     List<Loan> loan = new ArrayList<Loan>();
    
     @ManyToMany(mappedBy="laborerConstructionsites",cascade = { CascadeType.PERSIST, CascadeType.MERGE })
@@ -129,7 +129,7 @@ public class LaborerConstructionsite implements Serializable {
     /**
      * define el contrato activo o el primero
      */
-    @OneToOne(mappedBy="laborerConstructionSite",cascade = {CascadeType.PERSIST,CascadeType.MERGE},optional=false)
+    @OneToOne(mappedBy="laborerConstructionSite",fetch =FetchType.EAGER, cascade = {CascadeType.PERSIST,CascadeType.MERGE},optional=false)
     Contract activeContract;
     
     @Column(name = "suple_code")
