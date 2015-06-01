@@ -2,6 +2,7 @@ package cl.magal.asistencia.util;
 
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -15,8 +16,12 @@ import org.joda.time.format.DateTimeFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import cl.magal.asistencia.entities.Accident;
 import cl.magal.asistencia.entities.Holiday;
 import cl.magal.asistencia.entities.Laborer;
+import cl.magal.asistencia.entities.LaborerConstructionsite;
+import cl.magal.asistencia.entities.License;
+import cl.magal.asistencia.entities.Vacation;
 
 import com.vaadin.data.Validator.InvalidValueException;
 import com.vaadin.data.fieldgroup.FieldGroup.CommitException;
@@ -177,6 +182,51 @@ public class Utils {
 				return true;
 			}
 		}
+		return false;
+	}
+	
+	public static boolean containsVacation(List<Vacation> v, int day, LaborerConstructionsite lc, DateTime dt, int sabOrdom) {
+		for(Vacation vacation : v){
+		 Calendar calV = Calendar.getInstance();
+		 calV.setTime(vacation.getFromDate());
+
+		 if(sabOrdom != 6  && sabOrdom != 7 ){
+				for (int i = 0; i <= vacation.getTotal();i++){
+					 if(calV.get(Calendar.DAY_OF_MONTH) == day && new DateTime(calV.getTime()).getMonthOfYear() == dt.getMonthOfYear() && lc.getLaborer().getId() == vacation.getLaborerConstructionSite().getLaborer().getId()){
+						return true;
+					}
+					 calV.add(Calendar.DATE, 1);
+				}
+		 	}
+		}
+		return false;
+	}
+	
+	public static boolean containsLicense(List<License> l, int day, LaborerConstructionsite lc, DateTime dt) {
+		for(License license : l){
+		 Calendar calL = Calendar.getInstance();
+		 calL.setTime(license.getFromDate());
+		 for (int i = 0; i <= license.getTotal();i++){
+			 if(calL.get(Calendar.DAY_OF_MONTH) == day && new DateTime(calL.getTime()).getMonthOfYear() == dt.getMonthOfYear() && lc.getLaborer().getId() == license.getLaborerConstructionSite().getLaborer().getId()){
+					return true;
+				}
+			 calL.add(Calendar.DATE, 1);
+			}
+		}
+		return false;
+	}
+	
+	public static boolean containsAccident(List<Accident> a, int day, LaborerConstructionsite lc, DateTime dt) {
+		for(Accident accident : a){
+		 Calendar calA = Calendar.getInstance();
+		 calA.setTime(accident.getFromDate());
+		 for (int i = 0; i <= accident.getTotal() ;i++){
+			 if(calA.get(Calendar.DAY_OF_MONTH) == day && new DateTime(calA.getTime()).getMonthOfYear() == dt.getMonthOfYear() && lc.getLaborer().getId() == accident.getLaborerConstructionSite().getLaborer().getId()){
+					return true;
+				}
+			 calA.add(Calendar.DATE, 1);
+			}	
+		}		
 		return false;
 	}
 }

@@ -475,7 +475,8 @@ public class AttendancePanel extends Panel implements View {
 
 			HeaderCell cell = filterRow.getCell(pid);
 
-			if(pid.equals("laborerConstructionSite.activeContract.jobCode")){
+			if(pid.equals("laborerConstructionSite.activeContract.jobCode")||
+					pid.equals("laborerConstructionSite.laborer.fullname")){
 				// Have an input field to use for filter
 				TextField filterField = new TextField();
 				filterField.setWidth("100%");
@@ -574,6 +575,7 @@ public class AttendancePanel extends Panel implements View {
 	 */
 	private VerticalLayout drawSupleLayout() {
 		salaryContainer.addNestedContainerProperty("laborerConstructionSite.activeContract.jobCode");
+		salaryContainer.addNestedContainerProperty("laborerConstructionSite.laborer.fullname");
 		salaryContainer.addNestedContainerProperty("laborerConstructionSite.supleCode");
 		salaryContainer.addNestedContainerProperty("laborerConstructionSite.id");
 		salaryContainer.setBeanIdProperty("laborerConstructionSite.id");
@@ -714,14 +716,15 @@ public class AttendancePanel extends Panel implements View {
 					}
 				});
 
-				supleTable.setVisibleColumns("laborerConstructionSite.activeContract.jobCode","supleSection","suple");
-				supleTable.setColumnHeaders("Oficio","Código suple","Suple");
+				supleTable.setVisibleColumns("laborerConstructionSite.activeContract.jobCode","laborerConstructionSite.laborer.fullname","supleSection","suple");
+				supleTable.setColumnHeaders("Oficio","Nombre","Código suple","Suple");
 				supleTable.setEditable(true);
 				supleTable.setTableFieldFactory(new TableFieldFactory() {
 
 					@Override
 					public Field<?> createField(Container container, final Object itemId,Object propertyId, com.vaadin.ui.Component uiContext) {
-						if(propertyId.equals("laborerConstructionSite.activeContract.jobCode") )
+						if(propertyId.equals("laborerConstructionSite.activeContract.jobCode")||
+								propertyId.equals("laborerConstructionSite.laborer.fullname"))
 							return null;
 						TextField tf = new TextField();
 						tf.setNullRepresentation("");
@@ -952,12 +955,21 @@ public class AttendancePanel extends Panel implements View {
 	private Table drawAbsenceConfirmTable() {
 		
 		absenceContainer.addNestedContainerProperty("laborerConstructionsite.activeContract.jobCode");
+		absenceContainer.addNestedContainerProperty("laborerConstructionsite.laborer.fullname");
 		confirmTable = new Table();
 		confirmTable.setContainerDataSource(absenceContainer);
 		confirmTable.setSizeFull();
 		confirmTable.setEditable(true);
 		
 		confirmTable.addGeneratedColumn("laborerConstructionsite.activeContract.jobCode", new Table.ColumnGenerator() {
+			@Override
+			public Object generateCell(Table source, Object itemId, Object columnId) {
+				
+				return source.getContainerProperty(itemId, columnId).getValue();
+			}
+		});
+		
+		confirmTable.addGeneratedColumn("laborerConstructionsite.laborer.fullname", new Table.ColumnGenerator() {
 			@Override
 			public Object generateCell(Table source, Object itemId, Object columnId) {
 				
@@ -1019,14 +1031,15 @@ public class AttendancePanel extends Panel implements View {
 			}
 		});
 		
-		confirmTable.setVisibleColumns("laborerConstructionsite.activeContract.jobCode","type","description","fromDate","toDate","confirm");
-		confirmTable.setColumnHeaders("Oficio","Tipo","Descripción","Fecha inicio","Fecha Fin","Acción");
+		confirmTable.setVisibleColumns("laborerConstructionsite.activeContract.jobCode","laborerConstructionsite.laborer.fullname","type","description","fromDate","toDate","confirm");
+		confirmTable.setColumnHeaders("Oficio","Nombre","Tipo","Descripción","Fecha inicio","Fecha Fin","Acción");
 		return confirmTable;
 	}
 
 	private Grid drawOvertimeGrid() {
 		
 		overtimeContainer.addNestedContainerProperty("laborerConstructionSite.activeContract.jobCode");
+		overtimeContainer.addNestedContainerProperty("laborerConstructionSite.laborer.fullname");
 		overtimeContainer.addNestedContainerProperty("laborerConstructionSite.id");
 		overtimeContainer.setBeanIdProperty("laborerConstructionSite.id");
 		
@@ -1059,7 +1072,7 @@ public class AttendancePanel extends Panel implements View {
 
 		overtimeGrid.addStyleName("grid-attendace");
 		overtimeGrid.setEditorEnabled(true);
-		overtimeGrid.setFrozenColumnCount(1);
+		overtimeGrid.setFrozenColumnCount(2);
 		if(overtimeGrid.getColumn("laborerConstructionSite") != null )
 			overtimeGrid.removeColumn("laborerConstructionSite");
 		if(overtimeGrid.getColumn("laborerConstructionSite.id") != null )
@@ -1075,6 +1088,7 @@ public class AttendancePanel extends Panel implements View {
 
 		overtimeContainer.sort(new Object[]{"laborerConstructionSite.activeContract.jobCode"}, new boolean[]{true});
 		overtimeGrid.getColumn("laborerConstructionSite.activeContract.jobCode").setHeaderCaption("Oficio").setEditorField(new TextField(){{setReadOnly(true);}}).setWidth(100);
+		overtimeGrid.getColumn("laborerConstructionSite.laborer.fullname").setHeaderCaption("Nombre").setEditorField(new TextField(){{setReadOnly(true);}});
          
 		createHeaders(overtimeGrid);
 		setOvertimeOrders();
@@ -1083,7 +1097,7 @@ public class AttendancePanel extends Panel implements View {
 	}
 
 	private void setOvertimeOrders() {
-		String[] s = new String[]{ "laborerConstructionSite.activeContract.jobCode",
+		String[] s = new String[]{ "laborerConstructionSite.activeContract.jobCode","laborerConstructionSite.laborer.fullname",
 				"dmp1","dmp2","dmp3","dmp4","dmp5","dmp6","dmp7","dmp8","dmp9","dmp10","dmp11","dmp12","dmp13","dmp14","dmp15","dmp16"
 				,"dmp17","dmp18","dmp19","dmp20","dmp21","dmp22","dmp23","dmp24","dmp25","dmp26","dmp27","dmp28","dmp29","dmp30","dmp31",
 				"dma1","dma2","dma3","dma4","dma5","dma6","dma7","dma8","dma9","dma10","dma11","dma12","dma13","dma14","dma15","dma16"
@@ -1099,6 +1113,7 @@ public class AttendancePanel extends Panel implements View {
 	private Grid drawAttendanceGrid() {
 		logger.debug("SEGUNDO");
 		attendanceContainer.addNestedContainerProperty("laborerConstructionSite.activeContract.jobCode");
+		attendanceContainer.addNestedContainerProperty("laborerConstructionSite.laborer.fullname");
 		attendanceContainer.addNestedContainerProperty("laborerConstructionSite.id");
 		attendanceContainer.setBeanIdProperty("laborerConstructionSite.id");
 		attendanceGrid = new Grid(attendanceContainer);
@@ -1160,7 +1175,7 @@ public class AttendancePanel extends Panel implements View {
 
 		attendanceGrid.addStyleName("grid-attendace");
 		attendanceGrid.setEditorEnabled(true);
-		attendanceGrid.setFrozenColumnCount(1);
+		attendanceGrid.setFrozenColumnCount(2);
 		if(attendanceGrid.getColumn("laborerConstructionSite") != null )
 			attendanceGrid.removeColumn("laborerConstructionSite");
 		if(attendanceGrid.getColumn("laborerConstructionSite.id") != null )
@@ -1175,7 +1190,8 @@ public class AttendancePanel extends Panel implements View {
 			attendanceGrid.removeColumn("lastMarksAsList");
 
 		attendanceContainer.sort(new Object[]{"laborerConstructionSite.activeContract.jobCode"}, new boolean[]{true});
-		attendanceGrid.getColumn("laborerConstructionSite.activeContract.jobCode").setHeaderCaption("Oficio").setEditorField(new TextField(){{setReadOnly(true);}}).setWidth(100);
+		attendanceGrid.getColumn("laborerConstructionSite.activeContract.jobCode").setHeaderCaption("Oficio").setWidth(100).setEditorField(new TextField(){{setReadOnly(true);}});
+		attendanceGrid.getColumn("laborerConstructionSite.laborer.fullname").setHeaderCaption("Nombre").setEditorField(new TextField(){{setReadOnly(true);}});
 
 		createHeaders(attendanceGrid);
 		setAttendanceOrder();
@@ -1184,7 +1200,7 @@ public class AttendancePanel extends Panel implements View {
 	}
 
 	private void setAttendanceOrder() {
-		String[] s = new String[]{"laborerConstructionSite.activeContract.jobCode",
+		String[] s = new String[]{"laborerConstructionSite.activeContract.jobCode","laborerConstructionSite.laborer.fullname",
 				"dmp1","dmp2","dmp3","dmp4","dmp5","dmp6","dmp7","dmp8","dmp9","dmp10","dmp11","dmp12","dmp13","dmp14","dmp15","dmp16"
 				,"dmp17","dmp18","dmp19","dmp20","dmp21","dmp22","dmp23","dmp24","dmp25","dmp26","dmp27","dmp28","dmp29","dmp30","dmp31",
 				"dma1","dma2","dma3","dma4","dma5","dma6","dma7","dma8","dma9","dma10","dma11","dma12","dma13","dma14","dma15","dma16"
