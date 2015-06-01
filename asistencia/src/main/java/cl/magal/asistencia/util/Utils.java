@@ -206,7 +206,6 @@ public class Utils {
 		for(License license : l){
 		 Calendar calL = Calendar.getInstance();
 		 calL.setTime(license.getFromDate());
-
 		 for (int i = 0; i <= license.getTotal();i++){
 			 if(calL.get(Calendar.DAY_OF_MONTH) == day && new DateTime(calL.getTime()).getMonthOfYear() == dt.getMonthOfYear() && lc.getLaborer().getId() == license.getLaborerConstructionSite().getLaborer().getId()){
 					return true;
@@ -221,9 +220,6 @@ public class Utils {
 		for(Accident accident : a){
 		 Calendar calA = Calendar.getInstance();
 		 calA.setTime(accident.getFromDate());
-		 
-		 //DateTime t = new DateTime(accident.getFromDate());
-		 //Days.daysBetween(new DateTime(accident.getFromDate()), new DateTime(accident.getToDate())).getDays()
 		 for (int i = 0; i <= accident.getTotal() ;i++){
 			 if(calA.get(Calendar.DAY_OF_MONTH) == day && new DateTime(calA.getTime()).getMonthOfYear() == dt.getMonthOfYear() && lc.getLaborer().getId() == accident.getLaborerConstructionSite().getLaborer().getId()){
 					return true;

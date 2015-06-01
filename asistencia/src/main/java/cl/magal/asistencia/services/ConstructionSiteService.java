@@ -333,7 +333,7 @@ public class ConstructionSiteService {
 		
 		List<Accident> accident = accidentRepo.findByConstructionsiteAndMonth(cs, date.toDate());
 		List<Accident> accident_p = accidentRepo.findByConstructionsiteAndMonth(cs, new DateTime(date.toDate()).minusMonths(1).toDate());
-		 
+		
 		//verifica que exista una asistencia para cada elemento, si no existe la crea
 		for(LaborerConstructionsite lc : lcs ){
 			tmp.setLaborerConstructionSite(lc);
@@ -374,9 +374,9 @@ public class ConstructionSiteService {
 					}else if (Utils.containsAccident(accident_p,(i+1), lc, date.minusMonths(1))){//Si tiene accidentes registradas las marca
 						attendance.setLastMark(AttendanceMark.ACCIDENT, i);
 					}else if(Utils.containsLicense(license_p, (i+1), lc, date.minusMonths(1))){//Si tiene licencias registradas las marca
-						attendance.setMark(AttendanceMark.SICK, i);
+						attendance.setLastMark(AttendanceMark.SICK, i);
 					}else if(Utils.containsVacation(vacations_p, (i+1), lc, date.minusMonths(1), day_p)){//Si tiene vacaciones registradas las marca
-						attendance.setMark(AttendanceMark.VACATION, i);
+						attendance.setLastMark(AttendanceMark.VACATION, i);
 					}else if(day_p == 7 && index < 0){//solo asigna el domingo si es nuevo
 						attendance.setLastMark(AttendanceMark.SUNDAY, i);	
 					}else if(day_p == 6 && index < 0){
