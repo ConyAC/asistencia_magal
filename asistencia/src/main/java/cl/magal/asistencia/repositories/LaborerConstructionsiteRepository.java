@@ -13,7 +13,7 @@ public interface LaborerConstructionsiteRepository extends
 		PagingAndSortingRepository<LaborerConstructionsite, Long> {
 
 	
-	@Query(value="select lc from LaborerConstructionsite lc where lc.constructionsite = ?1 and lc.active != 0 ")
+	@Query(value="select lc from LaborerConstructionsite lc join fetch lc.activeContract where lc.constructionsite = ?1 and lc.active != 0 ")
 	List<LaborerConstructionsite> findByConstructionsiteAndIsActive(ConstructionSite constructionsite);
 	
 	LaborerConstructionsite findByConstructionsiteAndLaborer(ConstructionSite constructionsite, Laborer laborer);

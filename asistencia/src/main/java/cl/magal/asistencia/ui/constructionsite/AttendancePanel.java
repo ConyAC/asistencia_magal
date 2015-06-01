@@ -1893,7 +1893,10 @@ public class AttendancePanel extends Panel implements View {
 	 * Según la fecha y la obra, verifica cual es el estado de confirmación de cada una
 	 */
 	private void reloadMonthAttendanceData(DateTime dt){
+		//obteniendo fechas de confirmación
+		logger.debug("obteniendo fecha de confirmación");
 		confirmations = service.getConfirmationsByConstructionsiteAndMonth(cs,dt);
+		logger.debug("end");
 	}
 
 	/**

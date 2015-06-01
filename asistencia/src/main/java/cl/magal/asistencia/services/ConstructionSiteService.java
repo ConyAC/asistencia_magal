@@ -123,9 +123,11 @@ public class ConstructionSiteService {
 	}
 
 	public ConstructionSite findConstructionSite(Long id) {
+		logger.debug("recuperando la información de la obra ");
 		ConstructionSite cs =constructionSiterepo.findOneNotDeleted(id);
 		if(cs != null){
 			//recupera la lista de trabajadores
+			logger.debug("recuperando lista de trabajadores ");
 			List<Laborer> lbs = labRepo.findByConstructionSite(id);
 			cs.setLaborers(lbs);
 		}
@@ -207,6 +209,7 @@ public class ConstructionSiteService {
 	}
 
 	public List<LaborerConstructionsite> getLaborerActiveByConstruction(ConstructionSite cs) {
+		logger.debug("recuperando lista de trabajadores de la obra");
 		List<LaborerConstructionsite> laborers = labcsRepo.findByConstructionsiteAndIsActive(cs);
 		return laborers;
 	}
@@ -258,6 +261,7 @@ public class ConstructionSiteService {
 	}
 
 	public List<Team> getTeamsByConstruction(ConstructionSite bean) {
+		logger.debug("obteniendo equipos");
 		return teamRepo.findByConstructionSite(bean);
 	}
 
@@ -316,13 +320,17 @@ public class ConstructionSiteService {
 	 */
 	public List<Attendance> getAttendanceByConstruction(ConstructionSite cs,DateTime date) {
 		//obtiene la lista de trabajadores de la obra
+		logger.debug("Obteniendo Trabajadores");
 		List<LaborerConstructionsite> lcs =  labcsRepo.findByConstructionsiteAndIsActive(cs);
+		logger.debug("Asistencia");
 		List<Attendance> attendanceList =  attendanceRepo.findByConstructionsiteAndMonth(cs,date.toDate());
 		
 		List<Attendance> attendanceResult = new ArrayList<Attendance>(lcs.size());
 		
 		Attendance tmp = new Attendance();
+		logger.debug("feriados");
 		List<Holiday> h = holidayRepo.findByMonth(date.toDate());
+		logger.debug("feriados pasados");
 		List<Holiday> h_p = holidayRepo.findByMonth(new DateTime(date.toDate()).minusMonths(1).toDate());
 		
 		List<Vacation> vacations = vacationRepo.findByConstructionsiteAndMonth(cs,date.toDate());
@@ -386,9 +394,9 @@ public class ConstructionSiteService {
 			}
 			attendanceRepo.save(attendance);
 			attendanceResult.add(attendance);
-			
-			
 		}
+		//optimización para hacerlo en una transacción
+		attendanceRepo.save(attendanceResult);
 		return attendanceResult;
 	}
 
@@ -509,7 +517,9 @@ public class ConstructionSiteService {
 	 */
 	public List<Overtime> getOvertimeByConstruction(ConstructionSite cs,DateTime date) {
 		//obtiene la lista de trabajadores de la obra
+		logger.debug("obteniendo trabajadores");
 		List<LaborerConstructionsite> lcs =  labcsRepo.findByConstructionsiteAndIsActive(cs);
+		logger.debug("oteniendo sobretiempos");
 		List<Overtime> overtimeResult =  overtimeRepo.findByConstructionsiteAndMonth(cs,date.toDate());
 		Overtime tmp = new Overtime();
 		//verifica que exista una asistencia para cada elemento, si no existe la crea
@@ -560,8 +570,11 @@ public class ConstructionSiteService {
 	public List<AbsenceVO> getAbsencesByConstructionAndMonth(ConstructionSite cs, DateTime dt) {
 
 		//busca todas las vacaciones de la obra en el mes dado
+		logger.debug("obteniendo vacaciones");
 		List<Vacation> vacations = vacationRepo.findByConstructionsiteAndMonth(cs,dt.toDate());
+		logger.debug("obteniendo accidentes");
 		List<Accident> accidents = accidentRepo.findByConstructionsiteAndMonth(cs,dt.toDate());
+		logger.debug("obteniendo licencias");
 		List<License> licenses	= licenseRepo.findByConstructionsiteAndMonth(cs,dt.toDate());
 
 		List<AbsenceVO> result = new ArrayList<AbsenceVO>(vacations.size()+accidents.size()+licenses.size());
