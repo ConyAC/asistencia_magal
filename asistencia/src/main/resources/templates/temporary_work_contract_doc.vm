@@ -7,11 +7,13 @@
 	@media all {
 	.page-break	{ display: none; }
 	.print-hidden	{  }
+     body {font-size : 10pt;}
 	}
 	
 	@media print {
 		.page-break	{ display: block; page-break-before: always; }
 		.print-hidden	{ display: none; }
+  		body {font-size : 10pt;}
 	}
 	
 	</style>
@@ -36,11 +38,9 @@
 				PRIMERO: El trabajador se obliga a prestar servicios personales para el empleador como <b>${laborerConstruction.activeContract.job}</b>, funciones que se encuentran descritas al dorso del presente contrato y que se consideran como parte integral del mismo. Estas funciones del trabajador se realizar&aacute;n en la obra que el empleador se encuentra realizando en la calle <b>${laborerConstruction.constructionsite.address}</b> "de igual forma, el trabajador ejecutar&aacute; labores ocasionales que le pueda se&ntilde;alar el empleador, relacionadas con las que son inherentes a su trabajo y que puedan presentarse fuera de la obra". 
 				<br />
 				SEGUNDO: El trabajador cumplir&aacute; una jornada semanal de trabajado de 45 horas distribuida en 5 d&iacute;as de la siguiente manera:</p>
-					<br />
-
+					
 				<p style="text-align:center;"> LUNES A VIERNES: 08:00 horas a 12:00 horas <br/>
 				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;12:45 horas a 17:45 horas</p>
-					<br />
 				
 				<p style="text-align:justify;">TERCERO: El empleador pagar&aacute; al trabajador la siguiente remuneraci&oacute;n: <br />
 				a) La suma que resulte de los tratos realizados en obra para distintos trabajos en relaci&oacute;n  a su funci&oacute;n de <b>${laborerConstruction.activeContract.job}</b> Estos tratos se calcular&aacute;n tomando como base los valores establecidos en el Tarifado Nacional de la Construcci&oacute;n de fecha 12 Septiembre de 1978, aprobado por el Ministerio de Econom&iacute;a y del Trabajo y Previsi&oacute;n social, que en el art&iacute;culo 34 fij&oacute; las remuneraciones variables para efecto de los tratos, debidamente reajustados seg&uacute;n variaci&oacute;n experimentada por el &iacute;ndice de Precios al Consumidor fijado por el Instituto Nacional de Estad&iacute;sticas o el organismo que lo reemplace e incrementados en un 25%. Este tarifado referencial se considera como parte integrante del presente contrato.<br />
