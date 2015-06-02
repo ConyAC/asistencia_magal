@@ -41,9 +41,9 @@
 		<p style="text-align:left;"><b>Ma&ntilde;ana ${morning} hrs.</b></p>
 		<p style="text-align:left;"><b>Tarde ${afternoon} Hrs.</b></p>
 	    <br /><br />
-	     <span style="text-align:left;"><b>${laborerConstruction.constructionsite.constructionCompany.name}</b></span><br />
-	    <span style="text-align:left;"><b>$numberTools.integer(${laborerConstruction.constructionsite.constructionCompany.rut.split("-").get(0)})-${laborerConstruction.constructionsite.constructionCompany.rut.split("-").get(1)}</b></span><br />
-	    <span style="text-align:left;"><b>${laborerConstruction.constructionsite.constructionCompany.address}, ${laborerConstruction.constructionsite.constructionCompany.commune}</b></span><br />
+	     <span style="text-align:left;"><b>#if (${laborerConstruction.constructionsite.constructionCompany.name}) ${laborerConstruction.constructionsite.constructionCompany.name} #else ____________________________________ #end </b></span><br />
+	    <span style="text-align:left;"><b>#if(${laborerConstruction.constructionsite.constructionCompany.rut}) $numberTools.integer(${laborerConstruction.constructionsite.constructionCompany.rut.split("-").get(0)})-${laborerConstruction.constructionsite.constructionCompany.rut.split("-").get(1)} #else ____________________________________ #end </b></span><br />
+	    <span style="text-align:left;"><b>#if(${laborerConstruction.constructionsite.constructionCompany.address}) ${laborerConstruction.constructionsite.constructionCompany.address} #else ____________________________________ #end, #if(${laborerConstruction.constructionsite.constructionCompany.commune}) ${laborerConstruction.constructionsite.constructionCompany.commune} #else ____________________________________ #end</b></span><br />
 	    <span style="text-align:left;">Obra: <b>${laborerConstruction.constructionsite.name}</b></span>
 	    <br /><br />
 		<table cellpadding="0" cellspacing="0" border="0" style="width:100%;margin:10px">
