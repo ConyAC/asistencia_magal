@@ -54,9 +54,9 @@
             </th>
 			<th>
             <hr style="width:200px" />
-            <b>${laborerConstruction.constructionsite.constructionCompany.name}</b>
-            <b>$numberTools.integer(${laborerConstruction.constructionsite.constructionCompany.rut.split("-").get(0)})-${laborerConstruction.constructionsite.constructionCompany.rut.split("-").get(1)}</b><br />
-            <b>${laborerConstruction.constructionsite.constructionCompany.address}, ${laborerConstruction.constructionsite.constructionCompany.commune}</b>
+            <b>#if (${laborerConstruction.constructionsite.constructionCompany.name}) ${laborerConstruction.constructionsite.constructionCompany.name} #else ____________________________________ #end </b>
+            <b>#if(${laborerConstruction.constructionsite.constructionCompany.rut}) $numberTools.integer(${laborerConstruction.constructionsite.constructionCompany.rut.split("-").get(0)})-${laborerConstruction.constructionsite.constructionCompany.rut.split("-").get(1)} #else ____________________________________ #end </b><br />
+            <b>#if(${laborerConstruction.constructionsite.constructionCompany.address}) ${laborerConstruction.constructionsite.constructionCompany.address} #else ____________________________________ #end, #if(${laborerConstruction.constructionsite.constructionCompany.commune}) ${laborerConstruction.constructionsite.constructionCompany.commune} #else ____________________________________ #end</b>
             </th>
         </tr>
         <tr>

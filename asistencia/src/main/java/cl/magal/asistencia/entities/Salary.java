@@ -355,20 +355,20 @@ public class Salary implements Serializable {
 		
 		StringBuilder sb = new StringBuilder();
 		mask(sb,"P007",salaryCalculator.getDiaTrab());//Dias trabajados de lunes a viernes
-		mask(sb,"P005",salaryCalculator.getSep());//Septimos
-		mask(sb,"P011",salaryCalculator.getDpd());//Dp Septimos (DPD)
-		mask(sb,"P006",salaryCalculator.getCol());//D Colacion (DPS)
-		mask(sb,"P006",salaryCalculator.getMov());//D movil
-		mask(sb,"H001",getJornalPromedio());//J Promedio
-		mask(sb,"H011",salaryCalculator.getSobreTiempo());//Sobretiempo
-		mask(sb,"H012",salaryCalculator.getBonifImpo());//Bonif Imponible
-		mask(sb,"P024",salaryCalculator.getCollationConfig());//$ Colacion Dia
-		mask(sb,"P025",salaryCalculator.getMov1Config());//$ Mov 1 Dia
-		mask(sb,"P010",salaryCalculator.getMov2Export());//Dias Mov 2
-		mask(sb,"P097",salaryCalculator.getMov2DayExport());//$Mov 2 Dia
+		mask(sb,"P005",salaryCalculator.getSep().intValue());//Septimos
+		mask(sb,"P011",salaryCalculator.getDpd().intValue());//Dp Septimos (DPD)
+		mask(sb,"P006",salaryCalculator.getCol().intValue());//D Colacion (DPS)
+		mask(sb,"P006",salaryCalculator.getMov().intValue());//D movil
+		mask(sb,"H001",getJornalPromedio().intValue());//J Promedio
+		mask(sb,"H011",salaryCalculator.getSobreTiempo().intValue());//Sobretiempo
+		mask(sb,"H012",salaryCalculator.getBonifImpo().intValue());//Bonif Imponible
+		mask(sb,"P024",(int)salaryCalculator.getCollationConfig());//$ Colacion Dia
+		mask(sb,"P025",(int)salaryCalculator.getMov1Config());//$ Mov 1 Dia
+		mask(sb,"P010",salaryCalculator.getMov2Export().intValue());//Dias Mov 2
+		mask(sb,"P097",salaryCalculator.getMov2DayExport().intValue());//$Mov 2 Dia
 		mask(sb,"P012",salaryCalculator.getSab());//Sabados
 		mask(sb,"P013",salaryCalculator.getDps());//DP Sabados
-		mask(sb,"P014",salaryCalculator.getDescHoras());//Descuento Horas
+		mask(sb,"P014",salaryCalculator.getDescHoras().intValue());//Descuento Horas
 		// En el código generador de softland no está este codigo, revisar!
 //		mask(sb,"P041","");//Cuota Herr
 //		mask(sb,"P042","");//Cuota Prestamo
@@ -378,7 +378,7 @@ public class Salary implements Serializable {
 	
 	public String supleToSofland(){
 		StringBuilder sb = new StringBuilder();
-		mask(sb,"D020",getSuple());//DT L-V
+		mask(sb,"D020",(int)getSuple());//DT L-V
 		return sb.toString();
 	}
 }
