@@ -327,7 +327,7 @@ public class WorkerFileView extends HorizontalLayout implements View {
 			@Override
 			public void itemClick(ItemClickEvent event) {
 				final BeanItem<LaborerConstructionsite> beanItem = (BeanItem<LaborerConstructionsite>) event.getItem();
-				LaborerConstructionDialog userWindow = new LaborerConstructionDialog(beanItem,service,velocityEngine,true);
+				LaborerConstructionDialog userWindow = new LaborerConstructionDialog(beanItem,true);
 		        UI.getCurrent().addWindow(userWindow);
 			}
 		});

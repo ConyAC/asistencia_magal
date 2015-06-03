@@ -111,26 +111,24 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 	
 	boolean readOnly = false;
 
-	public LaborerConstructionDialog(BeanItem<LaborerConstructionsite> item,LaborerService service ,VelocityEngine velocityEngine,boolean readOnly){
+	public LaborerConstructionDialog(BeanItem<LaborerConstructionsite> item,boolean readOnly){
 		super(item);
 		this.readOnly = readOnly;
-		init(service,velocityEngine);
+		init();
 	}
 
-	public LaborerConstructionDialog(BeanItem<LaborerConstructionsite> item,LaborerService service ,VelocityEngine velocityEngine){
+	public LaborerConstructionDialog(BeanItem<LaborerConstructionsite> item){
 		super(item);
-		init(service,velocityEngine);
+		init();
 	}
 
-	public void init(LaborerService service ,VelocityEngine velocityEngine){
+	public void init(){
 
+		this.velocityEngine = (VelocityEngine) ((MagalUI)UI.getCurrent()).getSpringBean(Constants.VELOCITY_ENGINE_BEAN);
+		this.service = (LaborerService) ((MagalUI)UI.getCurrent()).getSpringBean(Constants.LABORER_SERVICE_BEAN);
+		this.validator = (Validator) ((MagalUI)UI.getCurrent()).getSpringBean(Constants.BEANVALIDATOR_BEAN);
 		if(service == null )
 			throw new RuntimeException("Error al crear el dialgo, el servicio de trabajadores no puede ser nulo.");
-
-		this.velocityEngine = velocityEngine;
-		this.service = service;
-		
-		this.validator = (Validator) ((MagalUI)UI.getCurrent()).getSpringBean(Constants.BEANVALIDATOR_BEAN);
 
 		getBtnGuardar().setVisible(!readOnly);
 		if(readOnly)

@@ -874,7 +874,7 @@ public class LaborerAndTeamPanel extends Panel implements View {
 
 				final BeanItem<LaborerConstructionsite> beanItem = (BeanItem<LaborerConstructionsite>) event.getItem();
 				logger.debug("laborer constructionsite click item {} rut {} ",beanItem.getBean(),beanItem.getBean().getLaborer().getRut());
-				LaborerConstructionDialog userWindow = new LaborerConstructionDialog(beanItem,laborerService,velocityEngine);
+				LaborerConstructionDialog userWindow = new LaborerConstructionDialog(beanItem);
 
 				userWindow.addListener(new AbstractWindowEditor.EditorSavedListener() {
 
@@ -888,7 +888,7 @@ public class LaborerAndTeamPanel extends Panel implements View {
 						try {
 							//			    			LaborerConstructionsite laborer = ((BeanItem<LaborerConstructionsite>) event.getSavedItem()).getBean();
 							LaborerConstructionsite laborer = beanItem.getBean();
-							logger.debug("laborer constructionsite {}, rut {} postcommit ",laborer,laborer.getLaborer().getRut());
+							logger.debug("laborer constructionsite {}, rut {}, photo {} postcommit ",laborer,laborer.getLaborer().getRut(),laborer.getLaborer().getPhoto());
 							laborerService.save(laborer);	
 							//si el elemento no esta activo, lo quita de la lista
 							if( !laborer.isActive() ){
