@@ -108,6 +108,12 @@ public class LaborerBaseInformation extends VerticalLayout {
 		            file = new File(basepath + "/WEB-INF/images/" + filename);
 		            fos = new FileOutputStream(file);
 		        } catch (final java.io.FileNotFoundException e) {
+		        	logger.error("Error al obtener el archivo ",e);
+		        	new Notification("No es posible acceder al archivo", e.getMessage());
+		            //Notification.show("Error al guardar la imagen.");
+		            return null;
+		        }catch (Exception e) {
+		        	logger.error("Error al obtener el archivo ",e);
 		        	new Notification("No es posible acceder al archivo", e.getMessage());
 		            //Notification.show("Error al guardar la imagen.");
 		            return null;
@@ -123,6 +129,8 @@ public class LaborerBaseInformation extends VerticalLayout {
 		        image.setSource(new FileResource(file));
 		    }
 		};
+		//agrega la propiedad de la foto
+		addNestedPropertyIfNeeded(prefix+"photo");
 		final ImageUploader uploader = new ImageUploader(); 
 		upload.setReceiver(uploader);
 		upload.addListener(uploader);
