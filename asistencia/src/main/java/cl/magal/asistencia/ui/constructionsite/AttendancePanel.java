@@ -536,7 +536,11 @@ public class AttendancePanel extends Panel implements View {
 
 				@Override
 				public String getStyle(CellReference cellReference) {
-					String post = "";
+					String post = "";	
+					if( cellReference.getValue() instanceof Integer ){
+						if((Integer)cellReference.getValue() == 0)
+							cellReference.getProperty().setReadOnly(true);
+					}
 					if( (cellReference.getValue() instanceof AttendanceMark && !AttendanceMark.ATTEND.equals(cellReference.getValue())) ||
 							(cellReference.getValue() instanceof Integer && 0 != (Integer)cellReference.getValue()))
 						post = " red-color";

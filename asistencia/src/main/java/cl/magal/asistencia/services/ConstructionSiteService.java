@@ -522,15 +522,59 @@ public class ConstructionSiteService {
 		logger.debug("oteniendo sobretiempos");
 		List<Overtime> overtimeResult =  overtimeRepo.findByConstructionsiteAndMonth(cs,date.toDate());
 		Overtime tmp = new Overtime();
+		List<Holiday> h = holidayRepo.findByMonth(date.toDate());
+		List<Holiday> h_p = holidayRepo.findByMonth(new DateTime(date.toDate()).minusMonths(1).toDate());
+		
+		List<Vacation> vacations = vacationRepo.findByConstructionsiteAndMonth(cs,date.toDate());
+		List<Vacation> vacations_p = vacationRepo.findByConstructionsiteAndMonth(cs,new DateTime(date.toDate()).minusMonths(1).toDate());
+		
+		List<License> license = licenseRepo.findByConstructionsiteAndMonth(cs, date.toDate());
+		List<License> license_p = licenseRepo.findByConstructionsiteAndMonth(cs, new DateTime(date.toDate()).minusMonths(1).toDate());
+		
+		List<Accident> accident = accidentRepo.findByConstructionsiteAndMonth(cs, date.toDate());
+		List<Accident> accident_p = accidentRepo.findByConstructionsiteAndMonth(cs, new DateTime(date.toDate()).minusMonths(1).toDate());
+		
+		
 		//verifica que exista una asistencia para cada elemento, si no existe la crea
 		for(LaborerConstructionsite lc : lcs ){
 			tmp.setLaborerConstructionSite(lc);
+			
+			//int index = overtimeList.indexOf(tmp);
+			Overtime overtime = new Overtime();;
 			if(!overtimeResult.contains(tmp)){
-				Overtime overtime = new Overtime();
 				overtime.setLaborerConstructionSite(lc);
 				overtime.setDate(date.toDate());
 				overtimeResult.add(overtime);
 			}
+			
+			for (int i = 0; i < 31; i++){
+				if( i + 1 <= date.dayOfMonth().getMaximumValue() ){ //solo setea hasta el maximo
+					int day = date.withDayOfMonth(i+1).dayOfWeek().get();
+					if (Utils.containsHoliday(h,(i+1))){
+						overtime.setMark(0, i);
+					}else if(Utils.containsAccident(accident, (i+1), lc, date)){
+						overtime.setMark(0, i);
+					}else if(Utils.containsLicense(license, (i+1), lc, date)){
+						overtime.setMark(0, i);
+					}else if(Utils.containsVacation(vacations, (i+1), lc, date, day)){
+						overtime.setMark(0, i);
+					}
+				}
+				
+				if( i + 1 <= date.minusMonths(1).dayOfMonth().getMaximumValue()){ //solo setea hasta el maximo
+					int day_p = date.minusMonths(1).withDayOfMonth(i+1).dayOfWeek().get();
+					if (Utils.containsHoliday(h_p,(i+1))){
+						overtime.setLastMark(0, i);
+					}else if (Utils.containsAccident(accident_p,(i+1), lc, date.minusMonths(1))){
+						overtime.setLastMark(0, i);
+					}else if(Utils.containsLicense(license_p, (i+1), lc, date.minusMonths(1))){
+						overtime.setLastMark(0, i);
+					}else if(Utils.containsVacation(vacations_p, (i+1), lc, date.minusMonths(1), day_p)){
+						overtime.setLastMark(0, i);
+					}
+				}
+			}
+			//overtimeRepo.save(overtime);
 		}
 		return overtimeResult;
 	}
