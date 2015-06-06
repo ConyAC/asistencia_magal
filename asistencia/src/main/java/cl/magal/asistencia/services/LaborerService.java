@@ -135,8 +135,7 @@ public class LaborerService {
 			throw new RuntimeException("El trabajador no puede ser nula");
 		
 		//si el trabajador es nuevo, lo guarda primero
-		if(laborerConstructionSite.getLaborer().getId() == null )
-			laborerRepo.save(laborerConstructionSite.getLaborer());
+		laborerRepo.save(laborerConstructionSite.getLaborer());
 		
 		//guarda los contratos
 		laborerConstructionsiteRepo.save(laborerConstructionSite);		
