@@ -19,8 +19,6 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.validation.constraints.NotNull;
 
-import cl.magal.asistencia.entities.enums.AttendanceMark;
-
 @Entity
 @Table(name="overtime")
 public class Overtime implements Serializable {
