@@ -2,7 +2,6 @@ package cl.magal.asistencia.services;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -392,7 +391,6 @@ public class ConstructionSiteService {
 					}
 				}
 			}
-			attendanceRepo.save(attendance);
 			attendanceResult.add(attendance);
 		}
 		//optimización para hacerlo en una transacción
