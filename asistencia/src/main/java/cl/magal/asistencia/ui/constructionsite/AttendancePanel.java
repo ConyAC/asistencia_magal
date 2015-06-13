@@ -108,7 +108,8 @@ import com.vaadin.ui.Window;
 
 @Component
 @Scope("prototype")
-public class AttendancePanel extends Panel implements View {
+//public class AttendancePanel extends Panel implements View {
+public class AttendancePanel extends VerticalLayout implements View {
 
 	/**
 	 * 
@@ -152,7 +153,7 @@ public class AttendancePanel extends Panel implements View {
 	InlineDateField attendanceDate;
 	Button btnExportSoftland,btnExportSupleSoftland,btnConstructionSiteConfirm,btnCentralConfirm,btnSupleObraConfirm,btnSupleCentralConfirm;
 	Table confirmTable;
-	VerticalLayout root;
+//	VerticalLayout root;
 	Table supleTable,salaryTable;
 
 	/** ATRIBUTOS **/
@@ -212,28 +213,27 @@ public class AttendancePanel extends Panel implements View {
 	@PostConstruct
 	private void init(){
 		
-		setSizeFull();
-
 		//crea la parte superior de la interfaz de asistencia
 		final HorizontalLayout topAsistencia = drawTopAttendance();
 		//crea las tabs que contienen la información de asistencia
 		final TabSheet detalleAsistencia = drawAttendanceDetail();
+		
+		setSizeFull();
+		setSpacing(true);
 
-		root = new VerticalLayout(){
-			{
-				setSizeFull();
-				setSpacing(true);
-				setMargin(true);
+		topAsistencia.setSizeFull();
+		addComponent(topAsistencia);
+		setExpandRatio(topAsistencia, 0.1F);
+		detalleAsistencia.setSizeFull();
+		addComponent(detalleAsistencia);
+		setExpandRatio(detalleAsistencia, 0.9F);
 
-				topAsistencia.setSizeFull();
-				addComponent(topAsistencia);
-				setExpandRatio(topAsistencia, 0.1F);
-				detalleAsistencia.setSizeFull();
-				addComponent(detalleAsistencia);
-				setExpandRatio(detalleAsistencia, 0.9F);
-			}
-		};
-		setContent(root);
+//		root = new VerticalLayout(){
+//			{
+//				
+//			}
+//		};
+//		setContent(root);
 
 		progressDialog = new Window();
 		progressDialog.setModal(true);
@@ -301,7 +301,8 @@ public class AttendancePanel extends Panel implements View {
 		Notification.show("Debe seleccionar una obra ",Type.ERROR_MESSAGE);
 		//setea el titulo como vacio
 		((MagalUI)UI.getCurrent()).getTitle().setValue("");
-		root.setEnabled(false);		
+//		root.setEnabled(false);		
+		setEnabled(false);
 	}
 
 	private void clearGrids(){
@@ -717,7 +718,7 @@ public class AttendancePanel extends Panel implements View {
 				});
 
 				supleTable.setVisibleColumns("laborerConstructionSite.activeContract.jobCode","laborerConstructionSite.laborer.fullname","supleSection","suple");
-				supleTable.setColumnHeaders("Oficio","Nombre","Código suple","Suple");
+				supleTable.setColumnHeaders("Rol","Nombre","Código suple","Suple");
 				supleTable.setEditable(true);
 				supleTable.setTableFieldFactory(new TableFieldFactory() {
 
@@ -888,7 +889,7 @@ public class AttendancePanel extends Panel implements View {
 						,"jornalBaseMes","vtrato","valorSabado","vsCorrd","sobreTiempo","descHoras","bonifImpo","glegal","afecto","sobreAfecto","cargas","asigFamiliar","colacion","mov","mov2","tnoAfecto"
 						);
 				
-				salaryTable.setColumnHeaders("Oficio","Nombre","Último Jornal Promedio","Jornal Promedio","H Desc","Adicional Locomoción 2","Bono Prest.","Bono Imp.","Total Líquido (A Pagar)"
+				salaryTable.setColumnHeaders("Rol","Nombre","Último Jornal Promedio","Jornal Promedio","H Desc","Adicional Locomoción 2","Bono Prest.","Bono Imp.","Total Líquido (A Pagar)"
 						,"Jornal Base", " V Trato", "Valor Sábado" , "V S Corrd", "Sobre Tiempo", "Desc Horas","Bonif Imp","G Legal","Afecto","Sobre Afecto","Cargas","A Familiar","Colación","Mov","Movi 2","T No Afecto"
 						);
 				
@@ -1032,7 +1033,7 @@ public class AttendancePanel extends Panel implements View {
 		});
 		
 		confirmTable.setVisibleColumns("laborerConstructionsite.activeContract.jobCode","laborerConstructionsite.laborer.fullname","type","description","fromDate","toDate","confirm");
-		confirmTable.setColumnHeaders("Oficio","Nombre","Tipo","Descripción","Fecha inicio","Fecha Fin","Acción");
+		confirmTable.setColumnHeaders("Rol","Nombre","Tipo","Descripción","Fecha inicio","Fecha Fin","Acción");
 		return confirmTable;
 	}
 
@@ -1087,7 +1088,7 @@ public class AttendancePanel extends Panel implements View {
 			overtimeGrid.removeColumn("lastMonthOvertimeAsList");
 
 		overtimeContainer.sort(new Object[]{"laborerConstructionSite.activeContract.jobCode"}, new boolean[]{true});
-		overtimeGrid.getColumn("laborerConstructionSite.activeContract.jobCode").setHeaderCaption("Oficio").setEditorField(new TextField(){{setReadOnly(true);}}).setWidth(100);
+		overtimeGrid.getColumn("laborerConstructionSite.activeContract.jobCode").setHeaderCaption("Rol").setEditorField(new TextField(){{setReadOnly(true);}}).setWidth(100);
 		overtimeGrid.getColumn("laborerConstructionSite.laborer.fullname").setHeaderCaption("Nombre").setEditorField(new TextField(){{setReadOnly(true);}});
          
 		createHeaders(overtimeGrid);
@@ -1190,7 +1191,7 @@ public class AttendancePanel extends Panel implements View {
 			attendanceGrid.removeColumn("lastMarksAsList");
 
 		attendanceContainer.sort(new Object[]{"laborerConstructionSite.activeContract.jobCode"}, new boolean[]{true});
-		attendanceGrid.getColumn("laborerConstructionSite.activeContract.jobCode").setHeaderCaption("Oficio").setWidth(100).setEditorField(new TextField(){{setReadOnly(true);}});
+		attendanceGrid.getColumn("laborerConstructionSite.activeContract.jobCode").setHeaderCaption("Rol").setWidth(100).setEditorField(new TextField(){{setReadOnly(true);}});
 		attendanceGrid.getColumn("laborerConstructionSite.laborer.fullname").setHeaderCaption("Nombre").setEditorField(new TextField(){{setReadOnly(true);}});
 
 		createHeaders(attendanceGrid);

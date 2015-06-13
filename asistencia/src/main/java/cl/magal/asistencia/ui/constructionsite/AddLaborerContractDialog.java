@@ -140,7 +140,7 @@ public class AddLaborerContractDialog extends AbstractWindowEditor implements Ne
 				if(laborer != null){
 					//setea la información del trabajador si ya existe
 					BeanItem<LaborerConstructionsite> laborerConstructionsiteItem = ((BeanItem<LaborerConstructionsite>)getItem());
-					laborerConstructionsiteItem.getItemProperty("laborer").setValue(laborer);
+					laborerConstructionsiteItem.getItemProperty("laborer").setValue(laborer);	
 					getBinder().setItemDataSource(laborerConstructionsiteItem);
 					//muestra la procedencia
 					if(addLaborer){
@@ -148,6 +148,11 @@ public class AddLaborerContractDialog extends AbstractWindowEditor implements Ne
 						logger.debug("lastConstructionSite {}",lastConstructionSite);
 						if(lastConstructionSite != null && laborerConstructionsiteItem.getItemProperty("laborer.provenance").getValue() == null )
 							laborerConstructionsiteItem.getItemProperty("laborer.provenance").setValue(lastConstructionSite.getName());
+						//valida que no tenga otra obra
+						ConstructionSite cs  = laborerService.findActiveConstructionSite(laborer);
+						if( cs != null ){ //si tiene otra obra, avisa y de igual forma validará antes de agregar
+							Notification.show("El trabajador ya pertenece a otra obra : "+cs.getName(),Type.ERROR_MESSAGE);
+						}
 					}
 				}
 			}
@@ -176,7 +181,7 @@ public class AddLaborerContractDialog extends AbstractWindowEditor implements Ne
 		gl.setComponentAlignment(cbJob, Alignment.MIDDLE_CENTER);	
 		
 		// codigo por asignar
-		lbCodJob = new TextField("Código Asignado a Trabajador");
+		lbCodJob = new TextField("Rol asignado a Trabajador");
 		lbCodJob.setReadOnly(true);
 		gl.addComponent(lbCodJob,1,rows);
 		gl.setComponentAlignment(lbCodJob, Alignment.MIDDLE_CENTER);	

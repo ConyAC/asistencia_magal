@@ -13,4 +13,10 @@ public interface ContractRepository extends PagingAndSortingRepository<Contract,
 			+ "WHERE c.laborerConstructionSite.constructionsite = ?1 AND c.jobCode >= ?2 AND c.jobCode <= ?3 ")
 	Integer findJobCodeByConstructionsiteAndBetweenMinAndMax(ConstructionSite constructionsite, int min, int max);
 
+	
+	@Query(value="SELECT max(c.jobCode) "
+			+ "FROM Contract c "
+			+ "WHERE c.laborerConstructionSite.constructionsite = ?1 AND c.step = ?2 ")
+	Integer existsWithStep(ConstructionSite bean, String step);
+
 }

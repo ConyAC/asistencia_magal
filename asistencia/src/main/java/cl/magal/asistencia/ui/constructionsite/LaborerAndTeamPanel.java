@@ -76,7 +76,6 @@ import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.OptionGroup;
-import com.vaadin.ui.Panel;
 import com.vaadin.ui.TabSheet;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
@@ -85,7 +84,8 @@ import com.vaadin.ui.Window;
 
 @Component
 @Scope("prototype")
-public class LaborerAndTeamPanel extends Panel implements View {
+//public class LaborerAndTeamPanel extends Panel implements View {
+public class LaborerAndTeamPanel extends VerticalLayout implements View {
 
 	/**
 	 * 
@@ -106,8 +106,6 @@ public class LaborerAndTeamPanel extends Panel implements View {
 
 	/** FIELD GROUP **/
 	BeanFieldGroup<ConstructionSite> bfg = new BeanFieldGroup<ConstructionSite>(ConstructionSite.class);
-	/** LAYOUTS **/
-	HorizontalLayout detailLayout;
 
 	/** SERVICES **/
 	@Autowired
@@ -147,6 +145,7 @@ public class LaborerAndTeamPanel extends Panel implements View {
 		teamContainer.addNestedContainerProperty("leader.firstname");
 		laborerConstructionContainer.addNestedContainerBean("laborer");
 		laborerConstructionContainer.addNestedContainerBean("activeContract");
+		setSizeFull();
 		//crea el tab con trabajadores y cuadrillas
 		TabSheet tab = new TabSheet();
 		tab.setSizeFull();
@@ -157,7 +156,8 @@ public class LaborerAndTeamPanel extends Panel implements View {
 		//tab de cuadrillas
 		tab.addTab(drawTeam(),"Cuadrillas");
 		//rellena el panel de la información de obra
-		setContent(tab);
+//		setContent(tab);
+		addComponent(tab);
 	}
 
 	@Override
@@ -261,6 +261,7 @@ public class LaborerAndTeamPanel extends Panel implements View {
 		hl2.setSpacing(true);
 
 		confirmed = new Label("No Confirmado");
+		confirmed.setWidth("90px");
 		confirmed.addStyleName("laborer-confirmed");
 		hl2.addComponent(confirmed);
 		
@@ -847,6 +848,7 @@ public class LaborerAndTeamPanel extends Panel implements View {
 
 		table.setContainerDataSource(laborerConstructionContainer);
 		table.setSizeFull();
+//		table.setWidth("100%");
 		table.setFilterBarVisible(true);
 
 		//		table.addGeneratedColumn("confirmed", new CustomTable.ColumnGenerator() {
@@ -862,7 +864,7 @@ public class LaborerAndTeamPanel extends Panel implements View {
 
 		//TODO estado
 		table.setVisibleColumns("selected","activeContract.jobCode","laborer.fullname","activeContract.step","actions"); //FIXME laborerId
-		table.setColumnHeaders("","Cod","Nombre","Etapa","Acciones");
+		table.setColumnHeaders("","Rol","Nombre","Etapa","Acciones");
 		table.setColumnWidth("selected", 40);
 
 		table.setSelectable(true);
@@ -1101,8 +1103,6 @@ public class LaborerAndTeamPanel extends Panel implements View {
 	protected void setEnabledDetail(boolean enable,BeanItem<ConstructionSite> item) {
 		bfg.setEnabled(enable);
 		bfg.setItemDataSource(item);
-		if(detailLayout != null)
-			detailLayout.setEnabled(enable);
 		cbFilterStep.removeAllItems();
 		for(String step : item.getBean().getSteps())
 			cbFilterStep.addItem(step);

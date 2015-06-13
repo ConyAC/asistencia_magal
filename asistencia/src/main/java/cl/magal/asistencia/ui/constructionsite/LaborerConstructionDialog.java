@@ -267,7 +267,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 				setComponentAlignment(gl, Alignment.MIDDLE_CENTER);
 				//gl.setComponentAlignment(hl, Alignment.MIDDLE_CENTER);
 
-				gl.addComponent(new Label("Código Oficio :   "));gl.addComponent(new Label(getItem().getItemProperty("activeContract.jobCode")));
+				gl.addComponent(new Label("Rol :   "));gl.addComponent(new Label(getItem().getItemProperty("activeContract.jobCode")));
 				gl.addComponent(new Label("Nombre :   "));gl.addComponent(new Label(getItem().getItemProperty("laborer.fullname")));
 				gl.addComponent(new Label("Rut :   "));gl.addComponent(new Label(getItem().getItemProperty("laborer.rut")));
 				gl.addComponent(new Label("Fecha Nacimiento :   "));gl.addComponent(new Label(getItem().getItemProperty("laborer.dateBirth")));
@@ -686,7 +686,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 
 		gl.addComponent(new UndefinedWidthLabel("Etapa : "),columna++,fila);gl.addComponent(lbStep,columna--,fila++);
 		gl.addComponent(new UndefinedWidthLabel("Oficio : "),columna++,fila);gl.addComponent(lbJob,columna--,fila++);
-		gl.addComponent(new UndefinedWidthLabel("Código : "),columna++,fila);gl.addComponent(lbJobCode,columna--,fila++);
+		gl.addComponent(new UndefinedWidthLabel("Rol : "),columna++,fila);gl.addComponent(lbJobCode,columna--,fila++);
 		gl.addComponent(new UndefinedWidthLabel("Fecha Inicio : "),columna++,fila);gl.addComponent(lbStarting,columna--,fila++);
 		gl.addComponent(new UndefinedWidthLabel("Fecha Termino : "),columna++,fila);gl.addComponent(lbEnding,columna--,fila++);
 

@@ -47,7 +47,6 @@ public class ConstructionSiteDialog extends AbstractWindowEditor {
 
 	BeanItemContainer<User> userContainer;
 	BeanItemContainer<ConstructionCompany> constructioncompanyContainer;
-	ConstructionSite constructionSite;
 	User user;
 
 	UserService userService;
@@ -143,7 +142,7 @@ public class ConstructionSiteDialog extends AbstractWindowEditor {
 		tableSteps.setPageLength(6);
 		tableSteps.setWidth("100%");
 		tableSteps.addContainerProperty("Etapa", String.class, "");
-		tableSteps.addContainerProperty("Eliminar", Button.class, null);
+		tableSteps.addContainerProperty("delete", Button.class, null);
 		
 		int i = 0;
 		for(String step : steps){
@@ -151,7 +150,7 @@ public class ConstructionSiteDialog extends AbstractWindowEditor {
 			item.getItemProperty("Etapa").setValue(step);
 		}
 
-		tableSteps.addGeneratedColumn("Eliminar", new Table.ColumnGenerator() {
+		tableSteps.addGeneratedColumn("delete", new Table.ColumnGenerator() {
 
 			@Override
 			public Object generateCell(Table source, final Object itemId, Object columnId) {
@@ -159,13 +158,20 @@ public class ConstructionSiteDialog extends AbstractWindowEditor {
 
 					@Override
 					public void buttonClick(ClickEvent event) {
+						//confirma que no se esté usando
+						String step = (String) tableSteps.getItem(itemId).getItemProperty("Etapa").getValue();
+						if(service.checkStepInUse((ConstructionSite) getItem().getBean(),step)){
+							Notification.show("No se puede borrar la etapa dado que está asignada a trabajadores de la obra");
+							return;
+						}
 						tableSteps.removeItem(itemId);
 					}
 				}){ {setIcon(FontAwesome.TRASH_O);} };
 			}
 		});
 
-		tableSteps.setColumnWidth("Eliminar", 100);
+		tableSteps.setColumnWidth("delete", 100);
+		tableSteps.setColumnHeader("delete", "");
 
 		//boton para agregar etapas
 		Button btn = new Button(null,FontAwesome.PLUS_CIRCLE);

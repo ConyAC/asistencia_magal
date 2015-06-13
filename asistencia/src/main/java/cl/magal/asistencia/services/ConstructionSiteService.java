@@ -48,6 +48,7 @@ import cl.magal.asistencia.repositories.AttendanceRepository;
 import cl.magal.asistencia.repositories.ConfirmationsRepository;
 import cl.magal.asistencia.repositories.ConstructionCompanyRepository;
 import cl.magal.asistencia.repositories.ConstructionSiteRepository;
+import cl.magal.asistencia.repositories.ContractRepository;
 import cl.magal.asistencia.repositories.ExtraParamsRepository;
 import cl.magal.asistencia.repositories.HolidayRepository;
 import cl.magal.asistencia.repositories.LaborerConstructionsiteRepository;
@@ -104,10 +105,13 @@ public class ConstructionSiteService {
 	LoanRepository loanRepo;
 	@Autowired
 	ToolRepository toolRepo;
+	@Autowired
+	ContractRepository contractRepo;
 	
 	//SERVICES
 	@Autowired
 	ConfigurationService configurationService;
+	
 
 	@PostConstruct
 	public void init(){
@@ -941,47 +945,52 @@ public class ConstructionSiteService {
 		salaryRepo.save(bean);
 	}
 
+	/**
+	 * 
+	 * @param holiday
+	 */
 	public void delete(Holiday holiday) {
 		holidayRepo.delete(holiday);
 		
 	}
 
+	/**
+	 * 
+	 * @param holiday
+	 */
 	public void save(Holiday holiday) {
 		holidayRepo.save(holiday);
 		
 	}
 
+	/**
+	 * 
+	 * @return
+	 */
 	public List<Holiday> findAllHoliday() {
 		return (List<Holiday>) holidayRepo.findAll();
 	}
 
+	/**
+	 * 
+	 * @param fecha
+	 * @return
+	 */
 	public Long findExistingDate(Date fecha) {
 		List<Long> h = (List<Long>)holidayRepo.findExistingDate(fecha);
 		if(h.isEmpty())
 			return null;
 		return h.get(0);
 	}
-	
-//	/**
-//	 * Cuenta las marcas hasta el dia dada, si el dia dado es nulo, entonces cuenta todos los dias
-//	 * @param supleCloseDay
-//	 * @param attendance
-//	 * @param marks
-//	 * @return
-//	 */
-//	private Integer countMarks(Integer supleCloseDay,Attendance attendance, AttendanceMark ... marks) {
-//		if(attendance == null )
-//			throw new RuntimeException("El objeto de asistencia no puede ser nulo.");
-//
-//		int i = 0,count = 0;
-//		for(AttendanceMark mark : attendance.getMarksAsList()){
-//			if(supleCloseDay != null && i >= supleCloseDay)
-//				break;
-//			if(ArrayUtils.contains(marks, mark))
-//				count++;
-//			i++;
-//		}
-//		return count;
-//	}
 
+	/**
+	 * Verifica si la etapa entregada esta siendo utilizada por algún contrato de la obra o no.
+	 * @param bean
+	 * @param step
+	 * @return
+	 */
+	public boolean checkStepInUse(ConstructionSite bean, String step) {
+		return contractRepo.existsWithStep(bean,step) != null;
+	}
+	
 }
