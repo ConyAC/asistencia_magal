@@ -1486,6 +1486,27 @@ public class AttendancePanel extends VerticalLayout implements View {
 																			}
 																		});
 																		
+																		table.addGeneratedColumn("supleTotalAmount", new Table.ColumnGenerator() {
+
+																			@Override
+																			public Object generateCell(Table source, Object itemId, Object columnId) {
+
+																				final BeanItem<?> item = (BeanItem<?>) source.getItem(itemId);
+																				Double value = (Double) source.getContainerProperty(itemId, columnId).getValue();																				
+																				final Label label  = new Label(""+value.intValue());
+																				Property.ValueChangeListener listener = new Property.ValueChangeListener() {
+																					@Override
+																					public void valueChange(Property.ValueChangeEvent event) {
+																						label.setValue(((AdvancePaymentItem) item.getBean()).getSupleTotalAmount().intValue()+"");
+																					}
+																				};
+																				for (String pid: new String[]{"supleIncreaseAmount", "supleNormalAmount"})
+																					((ValueChangeNotifier)item.getItemProperty(pid)).addValueChangeListener(listener);
+
+																				return label; 
+																			}
+																		});
+																		
 																		table.setVisibleColumns("supleCode","supleTotalAmount","supleNormalAmount","supleIncreaseAmount","eliminar");
 																		table.setColumnHeaders("Código Suple","Monto Suple","Normal","Aumento Anticipo","Eliminar");
 																		table.setEditable(true);
