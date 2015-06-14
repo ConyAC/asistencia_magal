@@ -835,7 +835,7 @@ public class SalaryCalculator {
 		logger.debug("mov {}",mov);
 		double mov2 = calculateMov2(closingDateLastMonth, attendance, lastMonthAttendance); 
 		logger.debug("mov2 {}",mov2);
-		return  asigFam + colacion + mov + mov2;
+		return  asigFam + colacion + mov + mov2 + bonoCargoLoc2;
 	}
 
 	/**
@@ -845,7 +845,7 @@ public class SalaryCalculator {
 	private double calculateMov2(DateTime closingDateLastMonth,Attendance attendance,Attendance lastMonthAttendance) {
 		
 		double mov2 = getMov2ConstructionSite();
-		return getCol()*mov2+ bonoCargoLoc2;
+		return getCol()*mov2;
 	}
 	
 	private double getMov2ConstructionSite(){

@@ -311,10 +311,12 @@ public class AttendancePanel extends VerticalLayout implements View {
 		absenceContainer.removeAllItems();
 		salaryContainer.removeAllItems();
 	}
+	
+	TabSheet tab;
 
 	private TabSheet drawAttendanceDetail() {
 		logger.debug("PRIMERO");
-		TabSheet tab = new TabSheet();
+		tab = new TabSheet();
 
 		Grid attendanceGrid = drawAttendanceGrid();
 		tab.addTab(attendanceGrid,"Asistencia");
@@ -325,8 +327,9 @@ public class AttendancePanel extends VerticalLayout implements View {
 //		Grid extraParamsTable = drawExtraParamsGrid();		
 //		tab.addTab(extraParamsTable,"Parámetros Extra");
 
+		//agrega las confirmaciones solo si se tiene permiso para confirmar central
 		Table confirmTable = drawAbsenceConfirmTable();
-		tab.addTab(confirmTable,"Confirmar Licencias y Accidentes");
+		tab.addTab(confirmTable,"Licencias y Accidentes");
 
 		VerticalLayout vl = drawSupleLayout();
 		tab.addTab(vl,"Suple");		
@@ -384,6 +387,8 @@ public class AttendancePanel extends VerticalLayout implements View {
 				SecurityHelper.hasPermission(Permission.CONFIRMAR_ASISTENCIA_OBRA )||
 				( SecurityHelper.hasPermission(Permission.CONFIRMAR_ASISTENCIA_CENTRAL ) && getConfirmations().isSupleObraCheck() ));
 		btnSupleCentralConfirm.setVisible(showOnCentral);
+		
+		tab.getTab(2).setVisible(showOnCentral);
 		
 	}
 
@@ -885,19 +890,19 @@ public class AttendancePanel extends VerticalLayout implements View {
 				});
 				
 				salaryTable.setVisibleColumns("laborerConstructionSite.activeContract.jobCode",
-						"laborerConstructionSite.laborer.fullname","lastJornalPromedio","jornalPromedio","descHours","bondMov2","loanBond","specialBond","totalLiquido"
-						,"jornalBaseMes","vtrato","valorSabado","vsCorrd","sobreTiempo","descHoras","bonifImpo","glegal","afecto","sobreAfecto","cargas","asigFamiliar","colacion","mov","mov2","tnoAfecto"
+						"laborerConstructionSite.laborer.fullname","lastJornalPromedio","jornalPromedio","specialBond","bondMov2","loanBond","sobreTiempo","descHours","loan","tools","totalLiquido"
+						,"jornalBaseMes","vtrato","valorSabado","vsCorrd","descHoras","bonifImpo","glegal","afecto","sobreAfecto","cargas","asigFamiliar","colacion","mov","mov2","tnoAfecto"
 						);
 				
-				salaryTable.setColumnHeaders("Rol","Nombre","Último Jornal Promedio","Jornal Promedio","H Desc","Adicional Locomoción 2","Bono Prest.","Bono Imp.","Total Líquido (A Pagar)"
-						,"Jornal Base", " V Trato", "Valor Sábado" , "V S Corrd", "Sobre Tiempo", "Desc Horas","Bonif Imp","G Legal","Afecto","Sobre Afecto","Cargas","A Familiar","Colación","Mov","Movi 2","T No Afecto"
+				salaryTable.setColumnHeaders("Rol","Nombre","Último Jornal Promedio","Jornal Promedio","Bono Imp.","Bono no Imp.","Bono Prest.", "Sobre Tiempo","H Desc","V Cuota Prestamo","V Cuota Herramienta","Total Líquido (A Pagar)"
+						,"Jornal Base", " V Trato", "Valor Sábado" , "V S Corrd", "Desc Horas","Bonif Imp","G Legal","Afecto","Sobre Afecto","Cargas","A Familiar","Colación","Mov","Movi 2","T No Afecto"
 						);
 				
 				salaryTable.setColumnCollapsed("jornalBaseMes", true);
 				salaryTable.setColumnCollapsed("vtrato", true);
 				salaryTable.setColumnCollapsed("valorSabado", true);
 				salaryTable.setColumnCollapsed("vsCorrd", true);
-				salaryTable.setColumnCollapsed("sobreTiempo", true);
+//				salaryTable.setColumnCollapsed("sobreTiempo", true);
 				salaryTable.setColumnCollapsed("descHoras", true);
 				salaryTable.setColumnCollapsed("bonifImpo", true);
 				salaryTable.setColumnCollapsed("glegal", true);
