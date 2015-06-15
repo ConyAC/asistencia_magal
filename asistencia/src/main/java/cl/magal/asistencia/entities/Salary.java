@@ -195,7 +195,7 @@ public class Salary implements Serializable {
 	}
 	
 	public Integer getBondMov2() {
-		return bondMov2;
+		return bondMov2 == null ? 0 : bondMov2;
 	}
 	public void setBondMov2(Integer bondMov2) {
 		this.bondMov2 = bondMov2;
