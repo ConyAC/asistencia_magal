@@ -398,45 +398,5 @@ public class AddLaborerContractDialog extends AbstractWindowEditor implements Ne
 		UI.getCurrent().addWindow(window);
 		return true;
 	}
-	
-
-	private String tradProperty(Object propertyId) {
-		if(propertyId.equals("rut"))
-			return "RUT";
-		else if(propertyId.equals("firstname"))
-			return "Primer Nombre";
-		else if(propertyId.equals("secondname"))
-			return "Segundo Nombre";
-		else if(propertyId.equals("lastname"))
-			return "Primer Apellido";
-		else if(propertyId.equals("secondlastname"))
-			return "Segundo Apellido";
-		else if(propertyId.equals("dateBirth"))
-			return "Fecha de Nacimiento";
-		else if(propertyId.equals("address"))
-			return "Dirección";
-		else if(propertyId.equals("mobileNumber"))
-			return "Teléfono móvil";
-		else if(propertyId.equals("phone"))
-			return "Teléfono fijo";
-		else if(propertyId.equals("dateAdmission"))
-			return "Fecha de Admisión";
-		else if(propertyId.equals("provenance"))
-			return "Procedencia";
-		else if(propertyId.equals("reward"))
-			return "Premio";
-		else if(propertyId.equals("town"))
-			return "Ciudad";
-		else if(propertyId.equals("commune"))
-			return "Comuna";
-		else if(propertyId.equals("wedge"))
-			return "Calzado";
-		else if(propertyId.equals("bankAccount"))
-			return "Cta. Banco";
-		else if(propertyId.equals("dependes"))
-			return "Cargas";
-		else
-			return propertyId.toString();
-	}
 
 }

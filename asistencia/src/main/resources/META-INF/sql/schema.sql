@@ -21,7 +21,8 @@ CREATE TABLE IF NOT EXISTS laborer
    wedge integer,
    provenance varchar(255),
    bank integer,
-   bank_account varchar(255)   
+   bank_account varchar(255)  ,
+   validity_pension_review date 
 )
 ;
 CREATE UNIQUE INDEX IF NOT EXISTS PK_LABORER ON laborer(laborerId)

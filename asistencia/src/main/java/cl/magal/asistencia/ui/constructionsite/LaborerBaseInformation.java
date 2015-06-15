@@ -13,6 +13,7 @@ import cl.magal.asistencia.entities.enums.Bank;
 import cl.magal.asistencia.entities.enums.Isapre;
 import cl.magal.asistencia.entities.enums.MaritalStatus;
 import cl.magal.asistencia.entities.enums.Nationality;
+import cl.magal.asistencia.util.Constants;
 
 import com.vaadin.data.fieldgroup.BeanFieldGroup;
 import com.vaadin.data.util.BeanItem;
@@ -140,7 +141,7 @@ public class LaborerBaseInformation extends VerticalLayout {
 
 		// Loop through the properties, build fields for them and add the fields
 		// to this UI
-		for (Object propertyId : new String[]{"rut","firstname","secondname","lastname", "secondlastname", "dateBirth", "commune", "town", "address", "mobileNumber", "phone","afp", "maritalStatus", "isapre", "nationality", "provenance", "wedge", "bank", "bankAccount","dependents"}) {
+		for (Object propertyId : new String[]{"rut","firstname","secondname","lastname", "secondlastname", "dateBirth", "commune", "town", "address", "mobileNumber", "phone","afp", "maritalStatus", "isapre", "nationality", "provenance", "wedge", "bank", "bankAccount","dependents","validityPensionReview"}) {
 			Field<?> field = null;
 			if(propertyId.equals("laborerId") || propertyId.equals("constructionSites") || propertyId.equals("contractId") || propertyId.equals("teamId") || (propertyId.equals("rut") && !viewElement))
 				;
@@ -150,7 +151,18 @@ public class LaborerBaseInformation extends VerticalLayout {
 				for(Afp a : Afp.values()){
 					((AbstractSelect) field).addItem(a);
 				}
-				
+			}else if(propertyId.equals("commune")){
+				field = new ComboBox("Comuna");
+				((AbstractSelect) field).setNullSelectionAllowed(false);
+				for(String ms : Constants.COMUNAS ){
+					((AbstractSelect) field).addItem(ms);
+				}
+			}else if(propertyId.equals("town")){
+				field = new ComboBox("Ciudad");
+				((AbstractSelect) field).setNullSelectionAllowed(false);
+				for(String ms : Constants.PROVINCIAS){
+					((AbstractSelect) field).addItem(ms);
+				}
 			}else if(propertyId.equals("maritalStatus")){
 				field = new ComboBox("Estado Civil");
 				((AbstractSelect) field).setNullSelectionAllowed(false);
@@ -294,6 +306,10 @@ public class LaborerBaseInformation extends VerticalLayout {
 			return "Calzado";
 		else if(propertyId.equals("bankAccount"))
 			return "Cta. Banco";
+		else if(propertyId.equals("dependents"))
+			return "Cargas";
+		else if(propertyId.equals("validityPensionReview"))
+			return "Vigencia Examen Previsional";
 		else
 			return propertyId.toString();
 	}
