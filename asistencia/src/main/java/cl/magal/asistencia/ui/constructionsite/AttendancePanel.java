@@ -34,10 +34,13 @@ import cl.magal.asistencia.entities.Attendance;
 import cl.magal.asistencia.entities.Confirmations;
 import cl.magal.asistencia.entities.ConstructionSite;
 import cl.magal.asistencia.entities.DateConfigurations;
+import cl.magal.asistencia.entities.LaborerConstructionsite;
 import cl.magal.asistencia.entities.Overtime;
 import cl.magal.asistencia.entities.Salary;
 import cl.magal.asistencia.entities.enums.AttendanceMark;
 import cl.magal.asistencia.entities.enums.Permission;
+import cl.magal.asistencia.repositories.AdvancePaymentRepository;
+import cl.magal.asistencia.repositories.LaborerConstructionsiteRepository;
 import cl.magal.asistencia.services.ConfigurationService;
 import cl.magal.asistencia.services.ConstructionSiteService;
 import cl.magal.asistencia.services.LaborerService;
@@ -135,6 +138,8 @@ public class AttendancePanel extends VerticalLayout implements View {
 	private transient MailService mailService;
 	@Autowired
 	private transient VelocityEngine velocityEngine;
+	@Autowired
+	LaborerConstructionsiteRepository labcsRepo;
 	
 	AdvancePaymentConfigurations advancepayment;
 	/** CONTAINERS **/
@@ -1463,22 +1468,35 @@ public class AttendancePanel extends VerticalLayout implements View {
 																					final AdvancePaymentItem advancePaymentItem = container.getItem(itemId).getBean();
 																					@Override
 																					public void buttonClick(ClickEvent event) {
-																						ConfirmDialog.show(UI.getCurrent(), "Confirmar Acción:", "¿Está seguro de eliminar el suple seleccionado?",
-																								"Eliminar", "Cancelar", new ConfirmDialog.Listener() {
-
-																							public void onClose(ConfirmDialog dialog) {
-																								if (dialog.isConfirmed()) {
-																									try{
-																										advancepayment.removeAdvancePaymentItem(advancePaymentItem);
-																										confService.save(advancepayment);
-																										container.removeItem(itemId);
-																									}catch(Exception e){
-																										Notification.show("Error al quitar elemento",Type.ERROR_MESSAGE);
-																										logger.error("Error al eliminar un suple",e);
+																						List<LaborerConstructionsite> lcs =  labcsRepo.findByConstructionsiteAndIsActive(cs);
+																						boolean verify = false;
+																						for(LaborerConstructionsite lcsItem : lcs){
+																							if(lcsItem.getSupleCode() == advancePaymentItem.getSupleCode()){
+																								verify = true;
+																							}
+																						}
+																						
+																						// No se permitirá eliminar un suple que esta siendo utilizado por algún trabajador de la obra.
+																						if(verify){
+																							Notification.show("El suple seleccionado no puede ser eliminado ya que está siendo utilizado.", Type.ERROR_MESSAGE);
+																						}else{
+																							ConfirmDialog.show(UI.getCurrent(), "Confirmar Acción:", "¿Está seguro de eliminar el suple seleccionado?",
+																									"Eliminar", "Cancelar", new ConfirmDialog.Listener() {
+	
+																								public void onClose(ConfirmDialog dialog) {
+																									if (dialog.isConfirmed()) {
+																										try{
+																											advancepayment.removeAdvancePaymentItem(advancePaymentItem);
+																											confService.save(advancepayment);
+																											container.removeItem(itemId);
+																										}catch(Exception e){
+																											Notification.show("Error al quitar elemento",Type.ERROR_MESSAGE);
+																											logger.error("Error al eliminar un suple",e);
+																										}
 																									}
 																								}
-																							}
-																						});
+																							});
+																						}
 																					}
 																				}){
 																					{setIcon(FontAwesome.TRASH_O);}
