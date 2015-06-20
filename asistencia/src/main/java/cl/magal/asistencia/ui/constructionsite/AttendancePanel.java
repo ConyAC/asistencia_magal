@@ -39,7 +39,6 @@ import cl.magal.asistencia.entities.Overtime;
 import cl.magal.asistencia.entities.Salary;
 import cl.magal.asistencia.entities.enums.AttendanceMark;
 import cl.magal.asistencia.entities.enums.Permission;
-import cl.magal.asistencia.repositories.AdvancePaymentRepository;
 import cl.magal.asistencia.repositories.LaborerConstructionsiteRepository;
 import cl.magal.asistencia.services.ConfigurationService;
 import cl.magal.asistencia.services.ConstructionSiteService;
