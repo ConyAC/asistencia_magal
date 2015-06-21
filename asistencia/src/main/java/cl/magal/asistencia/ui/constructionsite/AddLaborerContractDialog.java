@@ -281,6 +281,7 @@ public class AddLaborerContractDialog extends AbstractWindowEditor implements Ne
 			}
 		}
 		Laborer laborer = new Laborer();
+		//si el rut no tiene guion, lo agrega al final
 		laborer.setRut(newItemCaption);
 		//por defecto el nuevo trabajador tiene al menos 18 años
 		laborer.setDateBirth( new DateTime().plusYears(-18).toDate() );
