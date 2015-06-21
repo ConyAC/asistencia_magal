@@ -108,6 +108,9 @@ public class LaborerConstructionsite implements Serializable {
     List<Vacation> vacations = new ArrayList<Vacation>();
     
     @OneToMany(mappedBy="laborerConstructionSite",fetch=FetchType.LAZY,cascade={CascadeType.PERSIST,CascadeType.MERGE},orphanRemoval=true )
+    List<ProgressiveVacation> progressiveVacation = new ArrayList<ProgressiveVacation>();
+    
+    @OneToMany(mappedBy="laborerConstructionSite",fetch=FetchType.LAZY,cascade={CascadeType.PERSIST,CascadeType.MERGE},orphanRemoval=true )
     List<License> absences = new ArrayList<License>();
     
     @OneToMany(mappedBy="laborerConstructionSite",fetch=FetchType.LAZY,cascade={CascadeType.PERSIST,CascadeType.MERGE},orphanRemoval=true )
@@ -202,7 +205,28 @@ public class LaborerConstructionsite implements Serializable {
         	vacation.setLaborerConstructionSite(null);
         }
     }
-    	
+	
+	public List<ProgressiveVacation> getProgressiveVacation() {
+		return progressiveVacation;
+	}
+	public void setProgressiveVacation(List<ProgressiveVacation> progressiveVacation) {
+		this.progressiveVacation = progressiveVacation;
+	}
+	
+	public void addProgressiveVacation(ProgressiveVacation vacation) {
+        if (!getProgressiveVacation().contains(vacation)) {
+        	getProgressiveVacation().add(vacation);
+        	vacation.setLaborerConstructionSite(this);
+        }
+    }
+	
+	public void removeVacation(ProgressiveVacation vacation) {
+        if (getProgressiveVacation().contains(vacation)) {
+        	getProgressiveVacation().remove(vacation);
+        	vacation.setLaborerConstructionSite(null);
+        }
+    }
+	
 	public List<Tool> getTool() {
 		return tool;
 	}
