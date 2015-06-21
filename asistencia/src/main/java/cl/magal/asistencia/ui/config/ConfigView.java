@@ -353,13 +353,40 @@ public class ConfigView extends VerticalLayout implements View {
 							}
 						};
 						
+						String grat = "#",jb = "#";
+						if(wageconfiguration.getMinimumWage() != null){
+							Double sueldoMinimo = wageconfiguration.getMinimumWage();
+							jb = Utils.getDecimalFormatSinDecimal().format(sueldoMinimo/30);
+							grat = Utils.getDecimalFormatSinDecimal().format(4.75*sueldoMinimo/12);
+						}
+						
+						final Label jornaBase = new Label("Jornal base : "+ jb);
+						final Label gratificacion = new Label("Gratificación : "+grat);
+						
 						Field advance = fg.buildAndBind("Sueldo Mínimo", "minimumWage");
 						((TextField)advance).setNullRepresentation("");
 						advance.addValueChangeListener(listener);
+						advance.addValueChangeListener(new Property.ValueChangeListener() {
+							
+							@Override
+							public void valueChange(ValueChangeEvent event) {
+								Double sueldoMinimo = 0D;
+								try{
+									sueldoMinimo = Utils.getDecimalFormatSinDecimal().parse((String) event.getProperty().getValue()).doubleValue();
+								}catch(Exception e){
+									logger.error("Error al transformar el sueldo mínimo",e);
+									return;
+								}
+								double grat = 4.75*sueldoMinimo/12;
+								double jb = sueldoMinimo/30;
+								jornaBase.setValue("Jornal base : "+Utils.getDecimalFormatSinDecimal().format( jb ));
+								gratificacion.setValue("Gratificación : "+Utils.getDecimalFormatSinDecimal().format( grat ));
+							}
+						});
 						
 						addComponent(advance);
-						addComponent(new Label("Jornal base : #"));
-						addComponent(new Label("Gratificación : #"));
+						addComponent(jornaBase);
+						addComponent(gratificacion);
 						
 						addComponent(new Label("<hr />",ContentMode.HTML){
 							{
