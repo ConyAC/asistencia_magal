@@ -280,8 +280,18 @@ public class AddLaborerContractDialog extends AbstractWindowEditor implements Ne
 				laborersBC.removeItem(itemId);
 			}
 		}
-		Laborer laborer = new Laborer();
+		
 		//si el rut no tiene guion, lo agrega al final
+		if(newItemCaption != null && !newItemCaption.contains("-"))
+			newItemCaption = new StringBuilder(newItemCaption).insert(newItemCaption.length() - 1, "-").toString();
+		//busca si ya existia en el combobox
+		Laborer l = laborerService.findByRut(newItemCaption);
+		if(l != null){
+			cbRut.select(l);
+			return ;
+		}
+		//si no existe hace todo el proceso de nuevo trabajador
+		Laborer laborer = new Laborer();
 		laborer.setRut(newItemCaption);
 		//por defecto el nuevo trabajador tiene al menos 18 años
 		laborer.setDateBirth( new DateTime().plusYears(-18).toDate() );
