@@ -483,8 +483,10 @@ public class AttendancePanel extends VerticalLayout implements View {
 
 			if(pid.equals("laborerConstructionSite.activeContract.jobCode")||
 					pid.equals("laborerConstructionSite.laborer.fullname")){
+				
 				// Have an input field to use for filter
 				TextField filterField = new TextField();
+				filterField.setStyleName("no-padding");
 				filterField.setWidth("100%");
 				filterField.setHeight("90%");
 
@@ -549,6 +551,9 @@ public class AttendancePanel extends VerticalLayout implements View {
 					if(cellReference.getValue() instanceof AttendanceMark && !AttendanceMark.ATTEND.equals(cellReference.getValue()))
 						post += " bold";
 					String pid = (String) cellReference.getPropertyId();
+					
+					if(pid.equals("laborerConstructionSite.laborer.fullname"))
+						return "textalignLeft";
 
 					if( pid.startsWith("dmp") || pid.startsWith("dma") ){
 						//calcula el numero del mes
@@ -894,9 +899,11 @@ public class AttendancePanel extends VerticalLayout implements View {
 						,"jornalBaseMes","vtrato","valorSabado","vsCorrd","descHoras","bonifImpo","glegal","afecto","sobreAfecto","cargas","asigFamiliar","colacion","mov","mov2","tnoAfecto"
 						);
 				
-				salaryTable.setColumnHeaders("Rol","Nombre","Último Jornal Promedio","Jornal Promedio","Bono Imp.","Bono no Imp.","Bono Prest.", "Sobre Tiempo","H Desc","V Cuota Prestamo","V Cuota Herramienta","Total Líquido (A Pagar)"
+				salaryTable.setColumnHeaders("Rol","Nombre","Último<br />Jornal Prom","Jornal Prom","Bono Imp.","Bono no Imp.","Bono Prest.", "Sobre Tiempo","H Desc","V Cuota<br />Prestamo","V Cuota<br />Herramienta","Total Líquido<br />(A Pagar)"
 						,"Jornal Base", " V Trato", "Valor Sábado" , "V S Corrd", "Desc Horas","Bonif Imp","G Legal","Afecto","Sobre Afecto","Cargas","A Familiar","Colación","Mov","Movi 2","T No Afecto"
 						);
+				
+				salaryTable.setColumnWidth("jornalPromedio", 100);
 				
 				salaryTable.setColumnCollapsed("jornalBaseMes", true);
 				salaryTable.setColumnCollapsed("vtrato", true);
@@ -927,6 +934,7 @@ public class AttendancePanel extends VerticalLayout implements View {
 								propertyId.equals("suple") )
 							return null;
 						TextField tf = new TextField();
+						tf.setWidth("100%");
 						tf.setNullRepresentation("");
 						tf.setImmediate(true);
 						if(propertyId.equals("jornalPromedio")||
@@ -1093,7 +1101,7 @@ public class AttendancePanel extends VerticalLayout implements View {
 			overtimeGrid.removeColumn("lastMonthOvertimeAsList");
 
 		overtimeContainer.sort(new Object[]{"laborerConstructionSite.activeContract.jobCode"}, new boolean[]{true});
-		overtimeGrid.getColumn("laborerConstructionSite.activeContract.jobCode").setHeaderCaption("Rol").setEditorField(new TextField(){{setReadOnly(true);}}).setWidth(100);
+		overtimeGrid.getColumn("laborerConstructionSite.activeContract.jobCode").setHeaderCaption("Rol").setEditorField(new TextField(){{setReadOnly(true);}}).setWidth(50);
 		overtimeGrid.getColumn("laborerConstructionSite.laborer.fullname").setHeaderCaption("Nombre").setEditorField(new TextField(){{setReadOnly(true);}});
          
 		createHeaders(overtimeGrid);
@@ -1196,8 +1204,8 @@ public class AttendancePanel extends VerticalLayout implements View {
 			attendanceGrid.removeColumn("lastMarksAsList");
 
 		attendanceContainer.sort(new Object[]{"laborerConstructionSite.activeContract.jobCode"}, new boolean[]{true});
-		attendanceGrid.getColumn("laborerConstructionSite.activeContract.jobCode").setHeaderCaption("Rol").setWidth(100).setEditorField(new TextField(){{setReadOnly(true);}});
-		attendanceGrid.getColumn("laborerConstructionSite.laborer.fullname").setHeaderCaption("Nombre").setEditorField(new TextField(){{setReadOnly(true);}});
+		attendanceGrid.getColumn("laborerConstructionSite.activeContract.jobCode").setHeaderCaption("Rol").setWidth(50).setEditorField(new TextField(){{setReadOnly(true);}});
+		attendanceGrid.getColumn("laborerConstructionSite.laborer.fullname").setHeaderCaption("Nombre").setWidth(120).setEditorField(new TextField(){{setReadOnly(true);}});
 
 		createHeaders(attendanceGrid);
 		setAttendanceOrder();
