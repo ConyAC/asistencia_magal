@@ -151,7 +151,7 @@ public class AttendancePanel extends VerticalLayout implements View {
 	Grid attendanceGrid, overtimeGrid/*,extraGrid*/;
 	Window progressDialog;
 	InlineDateField attendanceDate;
-	Button btnExportSoftland,btnExportSupleSoftland,btnConstructionSiteConfirm,btnCentralConfirm,btnSupleObraConfirm,btnSupleCentralConfirm;
+	Button btnExportSoftland,btnExportSupleSoftland,btnConstructionSiteConfirm,btnCentralConfirm,btnSupleObraConfirm,btnSupleCentralConfirm,btnSuple;
 	Table confirmTable;
 //	VerticalLayout root;
 	Table supleTable,salaryTable;
@@ -690,20 +690,37 @@ public class AttendancePanel extends VerticalLayout implements View {
 						cb.setPropertyDataSource(beanItem.getItemProperty("laborerConstructionSite.supleCode"));
 						cb.setReadOnly(true);
 						
-						hl.addComponent(cb);
+						hl.addComponent(cb);						
+						return hl;
+					}
+				});
+
+				supleTable.addGeneratedColumn("supleAction", new Table.ColumnGenerator() {
+					
+					@Override
+					public Object generateCell(Table source, Object itemId, Object columnId) {
 						
-						hl.addComponent(new Button(null, new Button.ClickListener() {
+						HorizontalLayout hls = new HorizontalLayout();
+						hls.setSizeFull();
+						
+						final BeanItem<Salary> beanItem = salaryContainer.getItem(itemId);
+						btnSuple = new Button(FontAwesome.ARROW_CIRCLE_O_RIGHT);
+						hls.addComponent(btnSuple);
+						btnSuple.setEnabled(supleTable.isEditable());
+						btnSuple.addClickListener(new Button.ClickListener() {
 							
 							@Override
 							public void buttonClick(ClickEvent event) {
 								logger.debug(" suple value calculated ");
+								logger.debug("VALOR: "+beanItem.getItemProperty("suple").getValue());
+								double suple = (Double) beanItem.getItemProperty("suple").getValue();
 								//obliga a calcular el suple con la tabla
 								//define el suple como calculado
 								beanItem.getItemProperty("calculatedSuple").setValue(true);
 								//obliga a que se recalcule el suple
 								beanItem.getItemProperty("forceSuple").getValue();
 								//lo pide explicitamente para obligar a recalcular el suple
-								double suple = (Double) beanItem.getItemProperty("suple").getValue();
+								//double suple = (Double) beanItem.getItemProperty("suple").getValue();							
 								//recupera monto suple de la tabla
 								beanItem.getItemProperty("suple").setValue(suple);
 								//guarda el trabajador, para guardar el codigo de suple
@@ -711,19 +728,37 @@ public class AttendancePanel extends VerticalLayout implements View {
 								//guarda el salario
 								service.save(beanItem.getBean());
 							}
-						}){
-							{
-								setIcon(FontAwesome.ARROW_CIRCLE_O_RIGHT);
-								setEnabled(supleTable.isEditable());
-							}
 						});
-						
-						return hl;
+						changeToolView(false);
+
+						return hls;
 					}
 				});
-
-				supleTable.setVisibleColumns("laborerConstructionSite.activeContract.jobCode","laborerConstructionSite.laborer.fullname","supleSection","suple");
-				supleTable.setColumnHeaders("Rol","Nombre","Código suple","Suple");
+				
+//				supleTable.addGeneratedColumn("suple", new Table.ColumnGenerator() {
+//
+//					@Override
+//					public Object generateCell(Table source, Object itemId, Object columnId) {
+//
+//						final BeanItem<?> item = (BeanItem<?>) source.getItem(itemId);
+//						Double value = (Double) source.getContainerProperty(itemId, columnId).getValue();																				
+//						final Label label  = new Label(""+value.intValue());
+//						Property.ValueChangeListener listener = new Property.ValueChangeListener() {
+//							@Override
+//							public void valueChange(Property.ValueChangeEvent event) {
+//								hls.setVisible(true);
+//								label.setValue(((AdvancePaymentItem) item.getBean()).getSupleTotalAmount().intValue()+"");
+//							}
+//						};
+//						for (String pid: new String[]{"suple"})
+//							((ValueChangeNotifier)item.getItemProperty(pid)).addValueChangeListener(listener);
+//
+//						return label; 
+//					}
+//				});
+				
+				supleTable.setVisibleColumns("laborerConstructionSite.activeContract.jobCode","laborerConstructionSite.laborer.fullname","supleSection","supleAction","suple");
+				supleTable.setColumnHeaders("Rol","Nombre","Código suple","Cálculo Manual","Suple");
 				supleTable.setEditable(true);
 				supleTable.setTableFieldFactory(new TableFieldFactory() {
 
@@ -742,6 +777,7 @@ public class AttendancePanel extends VerticalLayout implements View {
 								public void blur(BlurEvent event) {
 									BeanItem<Salary> beanItem = salaryContainer.getItem(itemId);
 									beanItem.getItemProperty("calculatedSuple").setValue(false);
+									changeToolView(true);
 									//guarda el salario
 									service.save(beanItem.getBean());
 								}
@@ -1507,6 +1543,29 @@ public class AttendancePanel extends VerticalLayout implements View {
 																			}
 																		});
 																		
+																		table.setTableFieldFactory(new TableFieldFactory() {
+																			public Field<?> createField(Container container, final Object itemId,Object propertyId, com.vaadin.ui.Component uiContext) {
+																				TextField tf = new TextField();
+																				tf.setNullRepresentation("");
+																				tf.setImmediate(true);
+																				if(propertyId.equals("suple")){
+																					logger.debug("LALA:dddd");
+																					tf.addBlurListener(new FieldEvents.BlurListener() {
+																						
+																						@Override
+																						public void blur(BlurEvent event) {
+																							logger.debug("LALA: "+event.getComponent());
+																							BeanItem<Salary> beanItem = salaryContainer.getItem(itemId);
+																							beanItem.getItemProperty("calculatedSuple").setValue(false);
+																							//guarda el salario
+																							service.save(beanItem.getBean());
+																						}
+																					});
+																				}
+																				return tf;
+																			}
+																		});
+																		
 																		table.setVisibleColumns("supleCode","supleTotalAmount","supleNormalAmount","supleIncreaseAmount","eliminar");
 																		table.setColumnHeaders("Código Suple","Monto Suple","Normal","Aumento Anticipo","Eliminar");
 																		table.setEditable(true);
@@ -2062,5 +2121,13 @@ public class AttendancePanel extends VerticalLayout implements View {
 	////		}
 	//
 	//	}
+	
+	private void changeToolView(boolean toolsShown) {
+        if (toolsShown) {
+            btnSuple.setVisible(true);
+        } else {
+        	btnSuple.setVisible(false);
+        }
+    }
 
 }
