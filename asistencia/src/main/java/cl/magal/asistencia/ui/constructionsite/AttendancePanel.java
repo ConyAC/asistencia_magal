@@ -684,6 +684,7 @@ public class AttendancePanel extends VerticalLayout implements View {
 						final BeanItem<Salary> beanItem = salaryContainer.getItem(itemId);
 						// recuperar posibles codigos de suple
 						final ComboBox cb = new ComboBox();
+						btnSuple = new Button(FontAwesome.ARROW_CIRCLE_O_RIGHT);
 						for(AdvancePaymentItem item : advancepayment.getAdvancePaymentTable() ){
 							cb.addItem(item.getSupleCode());
 						}
@@ -691,74 +692,34 @@ public class AttendancePanel extends VerticalLayout implements View {
 						cb.setReadOnly(true);
 						
 						hl.addComponent(cb);						
-						return hl;
-					}
-				});
-
-				supleTable.addGeneratedColumn("supleAction", new Table.ColumnGenerator() {
-					
-					@Override
-					public Object generateCell(Table source, Object itemId, Object columnId) {
-						
-						HorizontalLayout hls = new HorizontalLayout();
-						hls.setSizeFull();
-						
-						final BeanItem<Salary> beanItem = salaryContainer.getItem(itemId);
-						btnSuple = new Button(FontAwesome.ARROW_CIRCLE_O_RIGHT);
-						hls.addComponent(btnSuple);
-						btnSuple.setEnabled(supleTable.isEditable());
+						hl.addComponent(btnSuple);
 						btnSuple.addClickListener(new Button.ClickListener() {
 							
 							@Override
 							public void buttonClick(ClickEvent event) {
 								logger.debug(" suple value calculated ");
-								logger.debug("VALOR: "+beanItem.getItemProperty("suple").getValue());
-								double suple = (Double) beanItem.getItemProperty("suple").getValue();
 								//obliga a calcular el suple con la tabla
 								//define el suple como calculado
 								beanItem.getItemProperty("calculatedSuple").setValue(true);
 								//obliga a que se recalcule el suple
-								beanItem.getItemProperty("forceSuple").getValue();
+								//beanItem.getItemProperty("forceSuple").getValue();
 								//lo pide explicitamente para obligar a recalcular el suple
-								//double suple = (Double) beanItem.getItemProperty("suple").getValue();							
+								double suple = (Double) beanItem.getItemProperty("suple").getValue();
 								//recupera monto suple de la tabla
 								beanItem.getItemProperty("suple").setValue(suple);
 								//guarda el trabajador, para guardar el codigo de suple
 								laborerService.save(beanItem.getBean().getLaborerConstructionSite());
 								//guarda el salario
-								service.save(beanItem.getBean());
-							}
+								service.save(beanItem.getBean());								
+							}							
 						});
 						changeToolView(false);
-
-						return hls;
+						return hl;
 					}
 				});
 				
-//				supleTable.addGeneratedColumn("suple", new Table.ColumnGenerator() {
-//
-//					@Override
-//					public Object generateCell(Table source, Object itemId, Object columnId) {
-//
-//						final BeanItem<?> item = (BeanItem<?>) source.getItem(itemId);
-//						Double value = (Double) source.getContainerProperty(itemId, columnId).getValue();																				
-//						final Label label  = new Label(""+value.intValue());
-//						Property.ValueChangeListener listener = new Property.ValueChangeListener() {
-//							@Override
-//							public void valueChange(Property.ValueChangeEvent event) {
-//								hls.setVisible(true);
-//								label.setValue(((AdvancePaymentItem) item.getBean()).getSupleTotalAmount().intValue()+"");
-//							}
-//						};
-//						for (String pid: new String[]{"suple"})
-//							((ValueChangeNotifier)item.getItemProperty(pid)).addValueChangeListener(listener);
-//
-//						return label; 
-//					}
-//				});
-				
-				supleTable.setVisibleColumns("laborerConstructionSite.activeContract.jobCode","laborerConstructionSite.laborer.fullname","supleSection","supleAction","suple");
-				supleTable.setColumnHeaders("Rol","Nombre","Código suple","Cálculo Manual","Suple");
+				supleTable.setVisibleColumns("laborerConstructionSite.activeContract.jobCode","laborerConstructionSite.laborer.fullname","supleSection","suple");
+				supleTable.setColumnHeaders("Rol","Nombre","Código suple","Suple");
 				supleTable.setEditable(true);
 				supleTable.setTableFieldFactory(new TableFieldFactory() {
 
@@ -2123,11 +2084,19 @@ public class AttendancePanel extends VerticalLayout implements View {
 	//	}
 	
 	private void changeToolView(boolean toolsShown) {
-        if (toolsShown) {
-            btnSuple.setVisible(true);
-        } else {
-        	btnSuple.setVisible(false);
-        }
+		DateTime dt = getAttendanceDate();
+		List<Attendance> attendance = service.getAttendanceByConstruction(cs,dt);		
+		for (Attendance item : attendance){
+			for(AttendanceMark i : item.getMarksAsList()){
+				if(i != AttendanceMark.ATTEND && i != AttendanceMark.SATURDAY && i != AttendanceMark.SUNDAY){
+					if (toolsShown) {
+			            btnSuple.setVisible(true);
+			        } else {
+			        	btnSuple.setVisible(false);
+			        }
+				}
+			}
+		}
     }
 
 }

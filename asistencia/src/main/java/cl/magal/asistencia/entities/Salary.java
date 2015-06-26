@@ -147,6 +147,7 @@ public class Salary implements Serializable {
 		if(suple == null && isCalculatedSuple() ){
 			if(supleCalculator == null )
 				throw new RuntimeException("El calculador de anticipos no puede ser nulo.");
+			logger.debug("entro a la función");
 			suple = supleCalculator.calculateSuple(getLaborerConstructionSite().getSupleCode());
 		}else if( suple == null && !isCalculatedSuple() )
 			suple = 0d;
