@@ -684,15 +684,15 @@ public class AttendancePanel extends VerticalLayout implements View {
 						final BeanItem<Salary> beanItem = salaryContainer.getItem(itemId);
 						// recuperar posibles codigos de suple
 						final ComboBox cb = new ComboBox();
-						btnSuple = new Button(FontAwesome.ARROW_CIRCLE_O_RIGHT);
+						
 						for(AdvancePaymentItem item : advancepayment.getAdvancePaymentTable() ){
 							cb.addItem(item.getSupleCode());
 						}
 						cb.setPropertyDataSource(beanItem.getItemProperty("laborerConstructionSite.supleCode"));
 						cb.setReadOnly(true);
 						
-						hl.addComponent(cb);						
-						hl.addComponent(btnSuple);
+						hl.addComponent(cb);			
+						btnSuple = new Button(FontAwesome.ARROW_CIRCLE_O_RIGHT);
 						btnSuple.addClickListener(new Button.ClickListener() {
 							
 							@Override
@@ -702,7 +702,7 @@ public class AttendancePanel extends VerticalLayout implements View {
 								//define el suple como calculado
 								beanItem.getItemProperty("calculatedSuple").setValue(true);
 								//obliga a que se recalcule el suple
-								//beanItem.getItemProperty("forceSuple").getValue();
+								beanItem.getItemProperty("forceSuple").getValue();
 								//lo pide explicitamente para obligar a recalcular el suple
 								double suple = (Double) beanItem.getItemProperty("suple").getValue();
 								//recupera monto suple de la tabla
@@ -713,7 +713,9 @@ public class AttendancePanel extends VerticalLayout implements View {
 								service.save(beanItem.getBean());								
 							}							
 						});
-						changeToolView(false);
+						hl.addComponent(btnSuple);
+						changeToolView(false,beanItem.getBean().getLaborerConstructionSite().getLaborer().getId());
+
 						return hl;
 					}
 				});
@@ -738,7 +740,7 @@ public class AttendancePanel extends VerticalLayout implements View {
 								public void blur(BlurEvent event) {
 									BeanItem<Salary> beanItem = salaryContainer.getItem(itemId);
 									beanItem.getItemProperty("calculatedSuple").setValue(false);
-									changeToolView(true);
+									changeToolView(true, beanItem.getBean().getLaborerConstructionSite().getLaborer().getId());
 									//guarda el salario
 									service.save(beanItem.getBean());
 								}
@@ -2083,20 +2085,26 @@ public class AttendancePanel extends VerticalLayout implements View {
 	//
 	//	}
 	
-	private void changeToolView(boolean toolsShown) {
+	
+	private void changeToolView(boolean toolsShown, long id) {
 		DateTime dt = getAttendanceDate();
-		List<Attendance> attendance = service.getAttendanceByConstruction(cs,dt);		
+		List<Attendance> attendance = service.getAttendanceByConstruction(cs,dt);	
+		boolean check = false;
 		for (Attendance item : attendance){
-			for(AttendanceMark i : item.getMarksAsList()){
-				if(i != AttendanceMark.ATTEND && i != AttendanceMark.SATURDAY && i != AttendanceMark.SUNDAY){
-					if (toolsShown) {
-			            btnSuple.setVisible(true);
-			        } else {
-			        	btnSuple.setVisible(false);
-			        }
+			for(AttendanceMark i : item.getMarksAsList()){			
+				//ingresará si la asistencia del obrero esté modificada
+				if(i != AttendanceMark.ATTEND && i != AttendanceMark.SATURDAY && i != AttendanceMark.SUNDAY && item.getLaborerConstructionSite().getLaborer().getId() == id){
+					check = true;
+					break;
 				}
 			}
+		}		
+		if (!check && toolsShown) {			
+			logger.debug("Mostrar");
+			btnSuple.setVisible(true);
+		} else if((!check && !toolsShown) || (check && !toolsShown)) {
+			logger.debug("Ocultar");
+			btnSuple.setVisible(false);
 		}
     }
-
 }
