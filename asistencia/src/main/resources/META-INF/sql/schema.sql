@@ -300,6 +300,28 @@ CREATE INDEX IF NOT EXISTS  FK_INDX_VACATION_LC ON vacation(laborer_construction
 CREATE UNIQUE INDEX IF NOT EXISTS PK_VACATION ON vacation(vacationId)
 ;
 
+-- PROGESSIVE VACATION
+
+CREATE TABLE IF NOT EXISTS progressive_vacation
+(
+   progressive_vacationId IDENTITY PRIMARY KEY NOT NULL,
+   from_date date not null,
+   to_date date not null,
+   progressive integer,
+   laborer_constructionsiteId bigint not null,
+   confirmed boolean
+)
+;
+ALTER TABLE progressive_vacation
+ADD CONSTRAINT IF NOT EXISTS FK_PROGRESSIVE_VACATION_LC
+FOREIGN KEY (laborer_constructionsiteId)
+REFERENCES laborer_constructionsite(laborer_constructionsiteId)
+;
+CREATE INDEX IF NOT EXISTS  FK_INDX_PROGRESSIVE_VACATION_LC ON progressive_vacation(laborer_constructionsiteId)
+;
+CREATE UNIQUE INDEX IF NOT EXISTS PK_PROGRESSIVE_VACATION ON progressive_vacation(progressive_vacationId)
+;
+
 
 -- ACCIDENTS
 

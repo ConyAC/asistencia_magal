@@ -138,7 +138,7 @@ public class Salary implements Serializable {
 	}
 	
 	public Integer getJornalPromedio() {
-		return jornalPromedio;
+		return jornalPromedio == null? 0 : jornalPromedio;
 	}
 	public void setJornalPromedio(Integer jornalPromedio) {
 		this.jornalPromedio = jornalPromedio;
@@ -208,7 +208,7 @@ public class Salary implements Serializable {
 		this.overtimeHours = overtimeHours;
 	}
 	public Integer getDescHours() {
-		return descHours;
+		return descHours == null ? 0 : descHours;
 	}
 	public void setDescHours(Integer descHours) {
 		this.descHours = descHours;
@@ -221,15 +221,16 @@ public class Salary implements Serializable {
 	}
 	
 	public Integer getSpecialBond() {
-		return specialBond;
+		return specialBond == null ? 0 : specialBond;
 	}
 	public void setSpecialBond(Integer specialBond) {
 		this.specialBond = specialBond;
 	}
 
 	public Integer getLastJornalPromedio() {
-		return lastJornalPromedio;
+		return lastJornalPromedio == null ? 0 : lastJornalPromedio ;
 	}
+	
 	public void setLastJornalPromedio(Integer lastJornalPromedio) {
 		this.lastJornalPromedio = lastJornalPromedio;
 	}
