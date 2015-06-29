@@ -87,6 +87,8 @@ import com.vaadin.ui.Field;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.Grid;
 import com.vaadin.ui.Grid.CellReference;
+import com.vaadin.ui.Grid.FooterCell;
+import com.vaadin.ui.Grid.FooterRow;
 import com.vaadin.ui.Grid.HeaderCell;
 import com.vaadin.ui.Grid.HeaderRow;
 import com.vaadin.ui.Grid.SelectionMode;
@@ -596,7 +598,7 @@ public class AttendancePanel extends VerticalLayout implements View {
 				setMargin(true);
 
 				supleTable = new Table();
-				supleTable.setWidth("100%");
+				supleTable.setSizeFull();
 				supleTable.setContainerDataSource(salaryContainer);
 				
 				HorizontalLayout hl = new HorizontalLayout(){
@@ -661,18 +663,9 @@ public class AttendancePanel extends VerticalLayout implements View {
 						});
 						
 						btnExportSupleSoftland = new Button("Exportar a Softland",FontAwesome.FILE_EXCEL_O);
-//						btnExportSupleSoftland.setDisableOnClick(true);
 						addComponent(btnExportSupleSoftland);
 						setComponentAlignment(btnExportSupleSoftland, Alignment.TOP_RIGHT);
 						generateSupleSoftlandFile(btnExportSupleSoftland);
-//						btnExportSupleSoftland.addClickListener(new Button.ClickListener() {
-//
-//							@Override
-//							public void buttonClick(ClickEvent event) {
-//								
-//							}
-//
-//						});
 					}					
 				};
 				
@@ -730,6 +723,7 @@ public class AttendancePanel extends VerticalLayout implements View {
 				supleTable.setVisibleColumns("laborerConstructionSite.activeContract.jobCode","laborerConstructionSite.laborer.fullname","supleSection","suple");
 				supleTable.setColumnHeaders("Rol","Nombre","Código suple","Suple");
 				supleTable.setEditable(true);
+				supleTable.setFooterVisible(true);
 				supleTable.setTableFieldFactory(new TableFieldFactory() {
 
 					@Override
@@ -887,6 +881,7 @@ public class AttendancePanel extends VerticalLayout implements View {
 									label.setValue( "<b>"+Utils.formatInteger((Integer) salaryContainer.getContainerProperty(itemId, columnId).getValue())+"</b>"+
 											"  ("+Utils.formatInteger((Integer) salaryContainer.getContainerProperty(itemId, "roundSalary").getValue())+")");
 									Utils.notifyPropertyValueChanged(item,"jornalBaseMes","vtrato","valorSabado","vsCorrd","sobreTiempo","descHoras","bonifImpo","glegal","afecto","sobreAfecto","cargas","asigFamiliar","colacion","mov","mov2","tnoAfecto");
+									createTableFooter(salaryTable);
 								}
 							});
 						return label;
@@ -960,10 +955,38 @@ public class AttendancePanel extends VerticalLayout implements View {
 				p.getContent().setSizeFull();
 				addComponent(salaryTable);
 				setExpandRatio(salaryTable, 1.0f);
+				
+				salaryTable.setFooterVisible(true);
 			}
 		};
 		vl.setSizeFull();
 		return vl;
+	}
+	
+	private void createTableFooter(Table table){
+		int[] counts = new int[table.getContainerPropertyIds().size()];
+		int i = 0;
+		for(Object itemId : table.getContainerDataSource().getItemIds()){
+			i = 0;
+			for(Object propertyId : table.getContainerPropertyIds()){
+				if(propertyId.equals("laborerConstructionSite.activeContract.jobCode")||
+				propertyId.equals("laborerConstructionSite.laborer.fullname"))
+					continue;
+				if( table.getContainerProperty(itemId, propertyId).getValue() instanceof Double )
+					counts[i] +=  (Double)table.getContainerProperty(itemId, propertyId).getValue();
+				else if( table.getContainerProperty(itemId, propertyId).getValue() instanceof Integer )
+					counts[i] +=  (Integer)table.getContainerProperty(itemId, propertyId).getValue();
+				i++;
+			}
+		}
+		i = 0;
+		for(Object propertyId : table.getContainerPropertyIds()){
+			if(propertyId.equals("laborerConstructionSite.activeContract.jobCode")||
+					propertyId.equals("laborerConstructionSite.laborer.fullname"))
+						continue;
+			table.setColumnFooter(propertyId, Utils.formatInteger( counts[i] ) );
+			i++;
+		}	
 	}
 
 	private Table drawAbsenceConfirmTable() {
@@ -1081,6 +1104,9 @@ public class AttendancePanel extends VerticalLayout implements View {
 				Overtime overtime = ((BeanItem<Overtime>) commitEvent.getFieldBinder().getItemDataSource()).getBean();
 				service.save(overtime);
 				overtimeContainer.sort(new Object[]{"laborerConstructionSite.activeContract.jobCode"}, new boolean[]{true});
+				
+				//por cada variable
+				createGridFooters(overtimeGrid);
 			}
 		});
 
@@ -1184,6 +1210,8 @@ public class AttendancePanel extends VerticalLayout implements View {
 				Attendance attedance = ((BeanItem<Attendance>) commitEvent.getFieldBinder().getItemDataSource()).getBean();
 				service.save(attedance);
 				attendanceContainer.sort(new Object[]{"laborerConstructionSite.activeContract.jobCode"}, new boolean[]{true});
+				//por cada variable
+				createGridFooters(attendanceGrid);
 			}
 		});
 
@@ -1212,15 +1240,50 @@ public class AttendancePanel extends VerticalLayout implements View {
 		
 		return attendanceGrid;
 	}
+	
+	private void createGridFooters(Grid grid){
+		FooterRow footer = null;
+		if( grid.getFooterRowCount() == 1 )
+			footer = grid.getFooterRow(0);
+		else
+			footer = grid.appendFooterRow();
+				
+		//por cada variable
+		int[] counts = new int[grid.getContainerDataSource().getContainerPropertyIds().size()];
+		for(Object attendanceId : grid.getContainerDataSource().getItemIds() ) {
+			BeanItem attendanceItem = (BeanItem) grid.getContainerDataSource().getItem(attendanceId);
+			int i = 0;
+			for(Object propertyId : grid.getContainerDataSource().getContainerPropertyIds() ){
+				//cuenta las X
+				if( attendanceItem.getBean() instanceof Attendance ){
+					if( attendanceItem.getItemProperty(propertyId).getValue() instanceof AttendanceMark &&
+						(AttendanceMark)attendanceItem.getItemProperty(propertyId).getValue()  == AttendanceMark.ATTEND )
+						counts[i] ++;
+				}else if( attendanceItem.getBean() instanceof Overtime ){
+					if( attendanceItem.getItemProperty(propertyId).getValue() instanceof Integer  )
+						counts[i] += (Integer)attendanceItem.getItemProperty(propertyId).getValue();
+				}
+				i++;
+			}
+		}
+		int i = 0;
+		for(Object propertyId : grid.getContainerDataSource().getContainerPropertyIds() ){
+			FooterCell cell = footer.getCell(propertyId);
+			if(cell != null )
+				cell.setText(counts[i]+"");
+			i++;
+		}
+	}
+	String[] attendanceOrder = new String[]{"laborerConstructionSite.activeContract.jobCode","laborerConstructionSite.laborer.fullname",
+			"dmp1","dmp2","dmp3","dmp4","dmp5","dmp6","dmp7","dmp8","dmp9","dmp10","dmp11","dmp12","dmp13","dmp14","dmp15","dmp16"
+			,"dmp17","dmp18","dmp19","dmp20","dmp21","dmp22","dmp23","dmp24","dmp25","dmp26","dmp27","dmp28","dmp29","dmp30","dmp31",
+			"dma1","dma2","dma3","dma4","dma5","dma6","dma7","dma8","dma9","dma10","dma11","dma12","dma13","dma14","dma15","dma16"
+			,"dma17","dma18","dma19","dma20","dma21","dma22","dma23","dma24","dma25","dma26","dma27","dma28","dma29","dma30","dma31"};
 
 	private void setAttendanceOrder() {
-		String[] s = new String[]{"laborerConstructionSite.activeContract.jobCode","laborerConstructionSite.laborer.fullname",
-				"dmp1","dmp2","dmp3","dmp4","dmp5","dmp6","dmp7","dmp8","dmp9","dmp10","dmp11","dmp12","dmp13","dmp14","dmp15","dmp16"
-				,"dmp17","dmp18","dmp19","dmp20","dmp21","dmp22","dmp23","dmp24","dmp25","dmp26","dmp27","dmp28","dmp29","dmp30","dmp31",
-				"dma1","dma2","dma3","dma4","dma5","dma6","dma7","dma8","dma9","dma10","dma11","dma12","dma13","dma14","dma15","dma16"
-				,"dma17","dma18","dma19","dma20","dma21","dma22","dma23","dma24","dma25","dma26","dma27","dma28","dma29","dma30","dma31"};
-		List<String> sList = new ArrayList<String>(s.length);
-		for(String ss : s){
+		
+		List<String> sList = new ArrayList<String>(attendanceOrder.length);
+		for(String ss : attendanceOrder){
 			if(attendanceGrid.getColumn(ss) != null)
 				sList.add(ss);
 		}
@@ -1695,91 +1758,6 @@ public class AttendancePanel extends VerticalLayout implements View {
 		};
 	}
 	
-//	private void CopyRow(XSSFWorkbook workbook, XSSFSheet worksheet, int sourceRowNum, int destinationRowNum)
-//	{
-//	    // Get the source / new row
-//		XSSFRow newRow = worksheet.getRow(destinationRowNum);
-//		XSSFRow sourceRow = worksheet.getRow(sourceRowNum);
-//	 
-//	    // If the row exist in destination, push down all rows by 1 else create a new row
-//	    if (newRow != null)
-//	    {
-//	        worksheet.shiftRows(destinationRowNum, worksheet.getLastRowNum(), 1);
-//	    }
-//	    else
-//	    {
-//	        newRow = worksheet.createRow(destinationRowNum);
-//	    }
-//	 
-//	    // Loop through source columns to add to new row
-//	    for (int i = 0; i < sourceRow.getLastCellNum(); i++)
-//	    {
-//	        // Grab a copy of the old/new cell
-//	    	XSSFCell oldCell = sourceRow.getCell(i);
-//	    	XSSFCell newCell = newRow.createCell(i);
-//	 
-//	        // If the old cell is null jump to next cell
-//	        if (oldCell == null)
-//	        {
-//	            newCell = null;
-//	            continue;
-//	        }
-//	        
-//	        // Set the cell data type
-//	        newCell.setCellType(oldCell.getCellType());
-//	 
-//	        // Set the cell data value
-//	        switch (oldCell.getCellType()) {
-//	        case Cell.CELL_TYPE_BLANK:
-//	          break;
-//	        case Cell.CELL_TYPE_BOOLEAN:
-//	          newCell.setCellValue(oldCell.getBooleanCellValue());
-//	          break;
-//	        case Cell.CELL_TYPE_ERROR:
-//	          newCell.setCellErrorValue(oldCell.getErrorCellValue());
-//	          break;
-//	        case Cell.CELL_TYPE_FORMULA:
-//	          newCell.setCellFormula(oldCell.getCellFormula());
-//	          break;
-//	        case Cell.CELL_TYPE_NUMERIC:
-//	          newCell.setCellValue(oldCell.getNumericCellValue());
-//	          break;
-//	        case Cell.CELL_TYPE_STRING:
-//	          newCell.setCellValue(oldCell.getRichStringCellValue());
-//	          break;
-//	        }
-//	 
-//	        // Copy style from old cell and apply to new cell
-//	        XSSFCellStyle newCellStyle = workbook.createCellStyle();
-//	        newCellStyle.cloneStyleFrom(oldCell.getCellStyle()); ;
-//	        newCell.setCellStyle(newCellStyle);
-//	 
-//	        // If there is a cell comment, copy
-//	        if (newCell.getCellComment() != null) newCell.setCellComment(oldCell.getCellComment());
-//	 
-//	        // If there is a cell hyperlink, copy
-//	        if (oldCell.getHyperlink() != null) newCell.setHyperlink( oldCell.getHyperlink() );
-//	 
-//
-//	    }
-//	 
-//	    // If there are are any merged regions in the source row, copy to new row
-//	    for (int i = 0; i < worksheet.getNumMergedRegions(); i++)
-//	    {
-//	        CellRangeAddress cellRangeAddress = worksheet.getMergedRegion(i);
-//	        if (cellRangeAddress.getFirstRow() == sourceRow.getRowNum())
-//	        {
-//	            CellRangeAddress newCellRangeAddress = new CellRangeAddress(newRow.getRowNum(),
-//	                                                                        (newRow.getRowNum() +
-//	                                                                         (cellRangeAddress.getFirstRow() -
-//	                                                                          cellRangeAddress.getLastRow())),
-//	                                                                        cellRangeAddress.getFirstColumn(),
-//	                                                                        cellRangeAddress.getLastColumn());
-//	            worksheet.addMergedRegion(newCellRangeAddress);
-//	        }
-//	    }
-//	 
-//	}
 
 	private void generateSoftlandFile(final Button btnExportSoftland) {
 		
@@ -1888,6 +1866,14 @@ public class AttendancePanel extends VerticalLayout implements View {
 		reloadMonthAttendanceData(dt);
 		
 		configureInterface();
+		
+		createGridFooters(attendanceGrid);
+		
+		createGridFooters(overtimeGrid);
+		
+		createTableFooter(salaryTable);
+		
+		createTableFooter(supleTable);
 
 		// Enable polling and set frequency to 1 seconds
 		//		UI.getCurrent().setPollInterval(1000);
