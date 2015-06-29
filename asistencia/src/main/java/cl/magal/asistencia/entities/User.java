@@ -6,12 +6,18 @@
 package cl.magal.asistencia.entities;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import javax.persistence.Basic;
+import javax.persistence.CollectionTable;
 import javax.persistence.Column;
 import javax.persistence.Convert;
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -25,6 +31,8 @@ import javax.persistence.NamedQuery;
 import javax.persistence.OneToOne;
 import javax.persistence.PrePersist;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 
@@ -110,6 +118,14 @@ public class User implements Serializable {
 	)
      @ManyToMany(targetEntity=ConstructionSite.class,fetch=FetchType.EAGER)
      List<ConstructionSite> cs = new LinkedList<ConstructionSite>();
+    
+    /**
+     * Tabla que guarda los propertyId seleccionadas por el usuario de la tabla de sueldos
+     */
+    @ElementCollection(targetClass= String.class,fetch=FetchType.EAGER )
+    @CollectionTable(name="user_salarycolumns", joinColumns = @JoinColumn(name = "userId"))
+    @Column(name="salary_column")
+    Set<String> salaryColumns = new HashSet<String>(); 
     
     /**
      * Obliga a que status sea activo, si no viene uno seteado
@@ -260,8 +276,16 @@ public class User implements Serializable {
         }
         return true;
     }
+    
+    public Set<String> getSalaryColumns() {
+		return salaryColumns;
+	}
 
-    @Override
+	public void setSalaryColumns(Set<String> salaryColumns) {
+		this.salaryColumns = salaryColumns;
+	}
+
+	@Override
     public String toString() {
         return "jpa.magal.entities.User[ userId=" + id + " ,cs= "+ cs +" ]";
     }

@@ -36,6 +36,7 @@ import cl.magal.asistencia.entities.ConstructionSite;
 import cl.magal.asistencia.entities.DateConfigurations;
 import cl.magal.asistencia.entities.Overtime;
 import cl.magal.asistencia.entities.Salary;
+import cl.magal.asistencia.entities.User;
 import cl.magal.asistencia.entities.enums.AttendanceMark;
 import cl.magal.asistencia.entities.enums.Permission;
 import cl.magal.asistencia.services.ConfigurationService;
@@ -45,6 +46,8 @@ import cl.magal.asistencia.services.MailService;
 import cl.magal.asistencia.services.UserService;
 import cl.magal.asistencia.ui.ListenerFieldFactory;
 import cl.magal.asistencia.ui.MagalUI;
+import cl.magal.asistencia.ui.components.ColumnCollapsedObservableTable;
+import cl.magal.asistencia.ui.components.ColumnCollapsedObservableTable.ColumnCollapsedEvent;
 import cl.magal.asistencia.ui.vo.AbsenceVO;
 import cl.magal.asistencia.util.Constants;
 import cl.magal.asistencia.util.SecurityHelper;
@@ -155,11 +158,20 @@ public class AttendancePanel extends VerticalLayout implements View {
 	Button btnExportSoftland,btnExportSupleSoftland,btnConstructionSiteConfirm,btnCentralConfirm,btnSupleObraConfirm,btnSupleCentralConfirm;
 	Table confirmTable;
 //	VerticalLayout root;
-	Table supleTable,salaryTable;
+	Table supleTable;
+	ColumnCollapsedObservableTable salaryTable;
 
 	/** ATRIBUTOS **/
 	Confirmations confirmations;
 	ConstructionSite cs;
+	
+	final static String[] defaultSalaryTableVisibleTable = new String[]{"laborerConstructionSite.activeContract.jobCode",
+		"laborerConstructionSite.laborer.fullname","lastJornalPromedio","jornalPromedio","specialBond","bondMov2","loanBond","sobreTiempo","descHours","loan","tools","totalLiquido"
+	};
+	final static String[] salaryTableVisibleTable = new String[]{"laborerConstructionSite.activeContract.jobCode",
+			"laborerConstructionSite.laborer.fullname","lastJornalPromedio","jornalPromedio","specialBond","bondMov2","loanBond","sobreTiempo","descHours","loan","tools","totalLiquido"
+			,"jornalBaseMes","vtrato","valorSabado","vsCorrd","descHoras","bonifImpo","glegal","afecto","sobreAfecto","cargas","asigFamiliar","colacion","mov","mov2","tnoAfecto"
+	};
 
 	public Confirmations getConfirmations() {
 		if(confirmations == null )
@@ -885,7 +897,7 @@ public class AttendancePanel extends VerticalLayout implements View {
 
 				addComponent(hl);
 				setComponentAlignment(hl, Alignment.TOP_RIGHT);
-				salaryTable = new Table();
+				salaryTable = new ColumnCollapsedObservableTable();
 //				salaryTable.setWidth("100%");
 				salaryTable.setSizeFull();
 				salaryTable.setContainerDataSource(salaryContainer);
@@ -919,10 +931,7 @@ public class AttendancePanel extends VerticalLayout implements View {
 					
 				});
 				
-				salaryTable.setVisibleColumns("laborerConstructionSite.activeContract.jobCode",
-						"laborerConstructionSite.laborer.fullname","lastJornalPromedio","jornalPromedio","specialBond","bondMov2","loanBond","sobreTiempo","descHours","loan","tools","totalLiquido"
-						,"jornalBaseMes","vtrato","valorSabado","vsCorrd","descHoras","bonifImpo","glegal","afecto","sobreAfecto","cargas","asigFamiliar","colacion","mov","mov2","tnoAfecto"
-						);
+				salaryTable.setVisibleColumns(salaryTableVisibleTable);
 				
 				salaryTable.setColumnHeaders("Rol","Nombre","Último<br />Jornal Prom","Jornal Prom","Bono Imp.","Bono no Imp.","Bono Prest.", "Sobre Tiempo","H Desc","V Cuota<br />Prestamo","V Cuota<br />Herramienta","Total Líquido<br />(A Pagar)"
 						,"Jornal Base", " V Trato", "Valor Sábado" , "V S Corrd", "Desc Horas","Bonif Imp","G Legal","Afecto","Sobre Afecto","Cargas","A Familiar","Colación","Mov","Movi 2","T No Afecto"
@@ -946,6 +955,22 @@ public class AttendancePanel extends VerticalLayout implements View {
 				salaryTable.setColumnCollapsed("mov", true);
 				salaryTable.setColumnCollapsed("mov2", true);
 				salaryTable.setColumnCollapsed("tnoAfecto", true);
+				
+				salaryTable.addColumnCollapsedListener(new ColumnCollapsedObservableTable.ColumnCollapsedListener() {
+					
+					@Override
+					public void colapseColumn(ColumnCollapsedEvent event) {
+						User user = SecurityHelper.getCredentials();
+						//agrega la columna al usuario si es que se setea como no colapsada
+						if(!event.isCollapsed()){
+							user.getSalaryColumns().add((String) event.getPropertyId());
+						}else{ //si no lo quita
+							user.getSalaryColumns().remove((String) event.getPropertyId());
+						}
+						user.setPassword(null);
+						userService.saveUser(user);
+					}
+				});
 				
 				salaryTable.setEditable(true);
 				salaryTable.setTableFieldFactory(new TableFieldFactory() {
@@ -1932,6 +1957,20 @@ public class AttendancePanel extends VerticalLayout implements View {
 		createTableFooter(salaryTable);
 		
 		createTableFooter(supleTable);
+		
+		//recupera las columnas de la tabla de sueldos seleccionadas del usuario
+		User user = SecurityHelper.getCredentials();
+		//si no tiene ninguna columna seleccionada, le agrega las por defecto
+		if( user.getSalaryColumns().isEmpty() ){
+			for(String s : defaultSalaryTableVisibleTable){
+				user.getSalaryColumns().add(s);
+			}
+			user.setPassword(null);
+			userService.saveUser(user);
+		}
+		for(String column : salaryTableVisibleTable ){
+			salaryTable.setColumnCollapsed(column, !user.getSalaryColumns().contains(column));
+		}
 
 		// Enable polling and set frequency to 1 seconds
 		//		UI.getCurrent().setPollInterval(1000);
@@ -1970,11 +2009,6 @@ public class AttendancePanel extends VerticalLayout implements View {
 			List<Salary> salaries = service.getSalariesByConstructionAndMonth(cs,dt);
 			salaryContainer.addAll(salaries);
 			salaryContainer.sort(new String[]{"laborerConstructionsite.activeContract.jobCode"},new boolean[]{ true });
-
-//			List<ExtraParams> params = service.getExtraParamsByConstructionAndMonth(cs,dt);
-//			//limpia
-//			extraParamContainer.addAll(params);
-//			extraParamContainer.sort(new String[]{"laborerConstructionsite.activeContract.jobCode"},new boolean[]{ true });
 
 		}catch(Exception e){
 			logger.error("Error al calcular los sueldos",e);
@@ -2039,80 +2073,5 @@ public class AttendancePanel extends VerticalLayout implements View {
 		}
 
 	}
-
-
-	//	private void configAttendanceColumns(DateTime initialDate, DateTime lastDate){
-	//
-	//		//cuenta la cantidad de dias entre ambas fechas
-	//		int days = Days.daysBetween(initialDate, lastDate).getDays() + 1;
-	//		logger.debug("cantidad de dias {}",days);
-	//		//oculta las columnas que no se usarán
-	//		for(int i = 29 ; i <= 31 ; i++){
-	//			String propertyId = "d"+i;
-	//			//si el dia es menor o igual la cantidad de dias, lo agrega si no está
-	//			if( i <= days && attendanceGrid.getColumn(propertyId) == null ){
-	//				logger.debug("agregando la columna {} ",i);
-	//				attendanceGrid.addColumn(propertyId);//.setSortable(false).setWidth(50);
-	//			}else if ( i > days && attendanceGrid.getColumn(propertyId) != null ){ // si no , la quita
-	//				logger.debug("quitando la columna {} ",i);
-	//				attendanceGrid.removeColumn(propertyId);
-	//			}else{
-	//				logger.debug("la columna {} se deja como está",i);
-	//			}
-	//		}
-	//
-	////		logger.debug("se van a generar {} columnas",days);
-	////		
-	////		table1.addStyleName("grid-attendace");
-	////		table1.setEditorEnabled(true);
-	////		table1.setFrozenColumnCount(1);
-	////		if(table1.getColumn("laborerConstructionSite") != null )
-	////			table1.removeColumn("laborerConstructionSite");
-	////		if(table1.getColumn("attendanceId") != null )
-	////			table1.removeColumn("attendanceId");
-	////		if(table1.getColumn("date") != null )
-	////			table1.removeColumn("date");
-	////		
-	//
-	//		//si las columnas no están cargadas, las carga
-	////		if( table1.getColumns().size() == 0 ){
-	//
-	//			//crea 31 columnas y luego oculta las ultimas según sea necesario
-	////			Object[] visibleColumns = new Object[ days + 1];
-	////			visibleColumns[0] = "activeContract.jobCode";
-	////
-	////			if( table1.getColumn("activeContract.jobCode") == null ){
-	////				table1.addColumn("activeContract.jobCode",Integer.class).setHeaderCaption("Código").setEditable(false).setWidth(100);
-	////			}
-	////			table1.addStyleName("grid-attendace");
-	////			table1.setEditorEnabled(true);
-	////			table1.setFrozenColumnCount(1);
-	////
-	////			for(int i = 1 ; i <= days ; i++){
-	////				String propertyId = "day"+i;
-	////				if( table1.getColumn(propertyId) == null ){
-	////					table1.addColumn("day"+i,AttendanceMark.class).setHeaderCaption( initialDate.plusDays(i - 1).getDayOfMonth()+"" ).setSortable(false).setWidth(50);
-	////					visibleColumns[i] = "day"+i; 
-	////				}
-	////			}
-	//		
-	////			table1.getColumn("laborerConstructionSite.activeContract.jobCode").setHeaderCas
-	////		}
-	////		//oculta las columnas que no se usarán
-	////		for(int i = 29 ; i <= 31 ; i++){
-	////			String propertyId = "day"+i;
-	////			//si el dia es menor o igual la cantidad de dias, lo agrega si no está
-	////			if( i <= days && table1.getColumn(propertyId) == null ){
-	////				logger.debug("agregando la columna {} ",i);
-	////				table1.addColumn(propertyId,AttendanceMark.class).setHeaderCaption( initialDate.plusDays(i - 1).getDayOfMonth()+"" ).setSortable(false).setWidth(50);
-	////			}else if ( i > days && table1.getColumn(propertyId) != null ){ // si no , la quita
-	////				logger.debug("quitando la columna {} ",i);
-	////				table1.removeColumn(propertyId);
-	////			}else{
-	////				logger.debug("la columna {} se deja como está",i);
-	////			}
-	////		}
-	//
-	//	}
 
 }
