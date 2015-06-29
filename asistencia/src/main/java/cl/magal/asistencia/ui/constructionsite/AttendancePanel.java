@@ -140,7 +140,6 @@ public class AttendancePanel extends VerticalLayout implements View {
 	
 	AdvancePaymentConfigurations advancepayment;
 	/** CONTAINERS **/
-//	BeanItemContainer<ExtraParams> extraParamContainer = new BeanItemContainer<ExtraParams>(ExtraParams.class);
 	BeanContainer<Long,Attendance> attendanceContainer = new BeanContainer<Long,Attendance>(Attendance.class);
 	BeanContainer<Long,Overtime> overtimeContainer = new BeanContainer<Long,Overtime>(Overtime.class);
 	BeanContainer<Long,Salary> salaryContainer = new BeanContainer<Long,Salary>(Salary.class);
@@ -150,7 +149,7 @@ public class AttendancePanel extends VerticalLayout implements View {
 	/** COMPONENTES **/
 	ProgressBar progress;
 	Label status;
-	Grid attendanceGrid, overtimeGrid/*,extraGrid*/;
+	Grid attendanceGrid, overtimeGrid;
 	Window progressDialog;
 	InlineDateField attendanceDate;
 	Button btnExportSoftland,btnExportSupleSoftland,btnConstructionSiteConfirm,btnCentralConfirm,btnSupleObraConfirm,btnSupleCentralConfirm;
@@ -229,13 +228,6 @@ public class AttendancePanel extends VerticalLayout implements View {
 		detalleAsistencia.setSizeFull();
 		addComponent(detalleAsistencia);
 		setExpandRatio(detalleAsistencia, 0.9F);
-
-//		root = new VerticalLayout(){
-//			{
-//				
-//			}
-//		};
-//		setContent(root);
 
 		progressDialog = new Window();
 		progressDialog.setModal(true);
@@ -326,9 +318,6 @@ public class AttendancePanel extends VerticalLayout implements View {
 		Grid overtimeGrid = drawOvertimeGrid();		
 		tab.addTab(overtimeGrid,"Horas Extras");
 		
-//		Grid extraParamsTable = drawExtraParamsGrid();		
-//		tab.addTab(extraParamsTable,"Parámetros Extra");
-
 		//agrega las confirmaciones solo si se tiene permiso para confirmar central
 		Table confirmTable = drawAbsenceConfirmTable();
 		tab.addTab(confirmTable,"Licencias y Accidentes");
@@ -604,6 +593,27 @@ public class AttendancePanel extends VerticalLayout implements View {
 				HorizontalLayout hl = new HorizontalLayout(){
 					{
 						setSpacing(true);
+						
+						final Button btnValidate = new Button("Validar Negativos",FontAwesome.CHECK_CIRCLE_O);
+						btnValidate.setDisableOnClick(true);
+						btnValidate.addClickListener(new Button.ClickListener() {
+							
+							@Override
+							public void buttonClick(ClickEvent event) {
+								Object itemId = null;
+								if( (itemId = checkHasNegativeOrNull(salaryContainer,"suple")) == null ) {
+									Notification.show("La lista de trabajadores no tiene valores negativos en el suple.",Type.HUMANIZED_MESSAGE);
+								}else{
+									BeanItem<Salary> item = salaryContainer.getItem(itemId);
+									Notification.show("El trabajador "+item.getBean().getLaborerConstructionSite().getJobCode()+" tiene un suple negativo."
+											,Type.ERROR_MESSAGE);
+								}
+								btnValidate.setEnabled(true);
+							}
+
+						});
+						addComponent(btnValidate);
+						
 						btnSupleObraConfirm = new Button("Confirmación Obra",FontAwesome.CHECK);
 						btnSupleObraConfirm.setDisableOnClick(true);						
 						addComponent(btnSupleObraConfirm);			
@@ -786,6 +796,26 @@ public class AttendancePanel extends VerticalLayout implements View {
 					{
 
 						setSpacing(true);
+						
+						final Button btnValidate = new Button("Validar Negativos",FontAwesome.CHECK_CIRCLE_O);
+						btnValidate.setDisableOnClick(true);
+						btnValidate.addClickListener(new Button.ClickListener() {
+							
+							@Override
+							public void buttonClick(ClickEvent event) {
+								Object itemId = null;
+								if( (itemId = checkHasNegativeOrNull(salaryContainer,"salary","jornalPromedio")) == null ) {
+									Notification.show("La lista de trabajadores no tiene valores negativos en el sueldo ni en el jornal promedio.",Type.HUMANIZED_MESSAGE);
+								}else{
+									BeanItem<Salary> item = salaryContainer.getItem(itemId);
+									Notification.show("El trabajador "+item.getBean().getLaborerConstructionSite().getJobCode()+" tiene un sueldo o jornal promedio negativo."
+											,Type.ERROR_MESSAGE);
+								}
+								btnValidate.setEnabled(true);
+							}
+
+						});
+						addComponent(btnValidate);
 
 						btnConstructionSiteConfirm = new Button("Confirmación Obra",FontAwesome.CHECK);
 						btnConstructionSiteConfirm.setDisableOnClick(true);
@@ -963,6 +993,29 @@ public class AttendancePanel extends VerticalLayout implements View {
 		return vl;
 	}
 	
+	/**
+	 * Permite verificar si un contenedor tiene valores nulos o menores a 0 para las propiedades dadas. 
+	 * @param container
+	 * @param propertyIds
+	 * @return El primer itemId del item que tiene una propiedad nula o menor a 0
+	 */
+	private Object checkHasNegativeOrNull(BeanContainer container,String... propertyIds ) {
+		for(Object itemId : container.getItemIds())
+			for(String propertyId : propertyIds){
+				Property property = container.getContainerProperty(itemId, propertyId);
+				if( property == null || 
+					property.getValue() == null || 
+					((Number)property.getValue()).intValue() < 0 )
+					return itemId;
+			}
+		return null;
+	}
+	
+	/**
+	 * Permite crear el footer de la tabla dada, sumando las propiedades de las columnas de tipo double o integer.
+	 * Ignora las columnas de jobCode o fullname si las tuviera.
+	 * @param table
+	 */
 	private void createTableFooter(Table table){
 		int[] counts = new int[table.getContainerPropertyIds().size()];
 		int i = 0;
@@ -989,6 +1042,11 @@ public class AttendancePanel extends VerticalLayout implements View {
 		}	
 	}
 
+	/**
+	 * Tabla que contiene un listado de todas las posibles ausencias en el sistema (enfermedad, vacaciones, accidentes, etc) y las lista dando la posibilidad
+	 * de modificar sus fechas de inicio/final o marcarla como confirmada en el caso que corresponda.
+	 * @return
+	 */
 	private Table drawAbsenceConfirmTable() {
 		
 		absenceContainer.addNestedContainerProperty("laborerConstructionsite.activeContract.jobCode");
