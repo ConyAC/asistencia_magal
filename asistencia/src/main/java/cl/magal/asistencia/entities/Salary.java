@@ -188,7 +188,6 @@ public class Salary implements Serializable {
 	}
 	
 	public boolean getForceSuple(){
-		logger.debug("forceSuple");
 		suple = null;
 		supleCalculator.resetCal();
 		return suple == null;
