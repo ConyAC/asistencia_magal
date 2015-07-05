@@ -32,6 +32,7 @@ import javax.persistence.UniqueConstraint;
 
 import cl.magal.asistencia.entities.converter.JobConverter;
 import cl.magal.asistencia.entities.enums.Job;
+import cl.magal.asistencia.util.Utils;
 
 /**
  *
@@ -90,9 +91,15 @@ public class Contract implements Serializable {
     @Column(name = "contract_description")
     String contractDescription;
     
+    /**
+     * @deprecated se usará la especialidad y se obtendrá el oficio a través de ella
+     */
     @Convert(converter = JobConverter.class)
     @Column(name = "job",nullable = false)
     private Job job;
+    
+    @JoinColumn(name="specialityId",nullable = false)
+    Speciality speciality;
     
     @Column(name="job_code",nullable = false)
     private Integer jobCode;
@@ -160,6 +167,10 @@ public class Contract implements Serializable {
 
     public void setStartDate(Date startDate) {
         this.startDate = startDate;
+    }
+    
+    public String getStartDateString() {
+        return Utils.date2String(startDate);
     }
 
     public Date getTerminationDate() {
@@ -263,6 +274,14 @@ public class Contract implements Serializable {
 		return (getJob() != null ? getJob().toString():"")+" ("+getJobCode()+")";
 	}
 	
+	public Speciality getSpeciality() {
+		return speciality;
+	}
+
+	public void setSpeciality(Speciality speciality) {
+		this.speciality = speciality;
+	}
+
 	@Override
     public String toString() {
         return "jpa.magal.entities.Contract[ contractId=" + id + " ]";
