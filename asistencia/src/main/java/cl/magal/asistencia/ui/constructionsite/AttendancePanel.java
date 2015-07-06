@@ -1503,6 +1503,7 @@ public class AttendancePanel extends VerticalLayout implements View {
 									@Override
 									public void buttonClick(ClickEvent event) {
 										final Window window = new Window();
+										final FieldGroup fg = new FieldGroup();
 
 										window.center();
 										window.setModal(true);
@@ -1515,8 +1516,6 @@ public class AttendancePanel extends VerticalLayout implements View {
 														setWidth("980px");
 														setHeight("610px");
 														setSpacing(true);
-
-														final FieldGroup fg = new FieldGroup();
 														
 														if( advancepayment  == null ){
 															advancepayment = confService.findAdvancePaymentConfigurationsByCS(cs);
@@ -1667,6 +1666,12 @@ public class AttendancePanel extends VerticalLayout implements View {
 																		
 																		addComponent(table);
 
+																		for(AdvancePaymentItem api : container.getItemIds()){
+																			logger.debug("VER: "+api.getSupleCode());
+																			logger.debug("VER: "+api.getSupleTotalAmount());
+																			logger.debug("VERll: "+container.getItem(api).getItemProperty("supleTotalAmount").getValue());																		
+																		}
+
 																		if(!SecurityHelper.hasPermission(Permission.DEFINIR_VARIABLE_GLOBAL)){
 																			setEnabled(false);
 																		}else{
@@ -1691,6 +1696,17 @@ public class AttendancePanel extends VerticalLayout implements View {
 
 													@Override
 													public void buttonClick(ClickEvent event) {
+														try {
+															fg.commit();
+															
+															
+															
+															
+														} catch (CommitException e) {
+															// TODO Auto-generated catch block
+															e.printStackTrace();
+														}
+														
 														window.close();
 
 													}

@@ -116,12 +116,20 @@ public class Salary implements Serializable {
 	public Attendance getAttendance(){
 		return attendance;
 	}
-	public void setAttendance(Attendance attendance){
+	public void setAttendance(Attendance attendance){logger.debug("INGRESO A LA FUNCIÓN");
 		if(this.supleCalculator == null || this.salaryCalculator == null )
 			throw new RuntimeException("Es necesario que el objeto de calculo sea distinto a null");
 		supleCalculator.setAttendance(attendance);
 		salaryCalculator.setAttendance(attendance);
 		getForceSalary();
+	}
+	
+	public void setAdvancePayment(Attendance attendance){
+		if(this.supleCalculator == null || this.salaryCalculator == null )
+			throw new RuntimeException("Es necesario que el objeto de calculo sea distinto a null");
+		supleCalculator.setAttendance(attendance);
+		salaryCalculator.setAttendance(attendance);
+		getForceSuple();
 	}
 	
 	public Long getId() {
