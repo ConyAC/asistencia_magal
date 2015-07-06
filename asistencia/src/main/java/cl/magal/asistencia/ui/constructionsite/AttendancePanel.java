@@ -20,7 +20,6 @@ import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.velocity.app.VelocityEngine;
 import org.joda.time.DateTime;
-import org.joda.time.DateTimeConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -515,6 +514,9 @@ public class AttendancePanel extends VerticalLayout implements View {
 				Label label = new Label();
 				if(grid.getColumn(pid) != null )
 					grid.getColumn(pid).setSortable(false);//.setWidth(50);
+				
+				//TODO si hay que cambiar la fecha de sobretiempo, aqui se deberia discriminar
+				int maxDay = getPastMonthClosingDate().getDayOfMonth();
 				//calculo de la semana
 				if(((String) pid).startsWith("dmp") || ((String) pid).startsWith("dma")  ){
 					//calcula el numero del mes
@@ -524,7 +526,7 @@ public class AttendancePanel extends VerticalLayout implements View {
 						dt2 = dt2.minusMonths(1);
 					//el número de mes no es un número válido de mes o si es un día a la fecha de cierre del mes pasado, oculta la columna
 					if( monthDay > dt2.dayOfMonth().getMaximumValue() || 
-						( ((String) pid).startsWith("dmp") && monthDay <= getPastMonthClosingDate().getDayOfMonth())){
+						( ((String) pid).startsWith("dmp") && monthDay <= maxDay )){
 						if(grid.getColumn(pid) != null)
 							grid.removeColumn(pid);
 					}else{ //solo lo setea si el número es mayor a la cantidad de dias del mes

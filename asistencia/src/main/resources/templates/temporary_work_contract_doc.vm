@@ -11,9 +11,33 @@
 	}
 	
 	@media print {
+		@page {
+            size: Legal portrait;
+		}
 		.page-break	{ display: block; page-break-before: always; }
 		.print-hidden	{ display: none; }
   		body {font-size : 10pt;}
+		header:after { content: "1"; }
+		#fecha_contrato { position : absolute ; top : 2.5cm; left: 4.1cm; }
+        #nombre_constructora { position : absolute ; top : 2.5cm; left: 12.9cm; }
+        #rut_constructora { position : absolute ; top : 3cm; left: 2.2cm; }
+        #direccion_constructora { display: none; /* FIXME */ } 
+        #comuna_constructora { display: none; /* FIXME */ }
+        #nombre_trabajador { position : absolute ; top : 4cm; left: 12.1cm; }
+        #nacionalidad_trabajador { position : absolute ; top : 4.3cm; left: 3.5cm;}
+        #fecha_nac_trabajador { position : absolute ; top : 4.3cm; left: 8cm; }
+        #direccion_trabajador { position : absolute ; top : 4.3cm; left: 15cm; }
+        #comuna_trabajador { position : absolute ; top : 4.8cm; left: 10.3cm; }
+        #rut_trabajador {position : absolute ; top : 4.8cm; left: 17.3cm;}
+        #oficio_trabajador {position : absolute ; top : 6cm; left: 14.2cm; }
+        #direccion_obra {position : absolute ; top : 7cm; left: 13.5cm;}
+        #oficio_trabajador2 { position : absolute ; top : 11.2cm; left: 16.8cm;}
+        #etapa_obra { position : absolute ; top : 16.9cm; left: 11.8cm; }
+        #afp_trabajador { position : absolute ; top : 27.1cm; left: 3.4cm; }
+        #isapre_trabajador { position : absolute ; top : 27.1cm; left: 15cm; }
+        #nombre_trabajador2 { position : absolute ; top : 29.9cm; left: 8.5cm; }
+        #inicio_contrato_trabajador { position : absolute ; top : 30.3cm; left: 8cm;}
+		
 	}
 	
 	</style>
@@ -25,55 +49,53 @@
 		</div>
 		
 		<br />
-		
+		6
 #foreach( $laborerConstruction in $laborerConstructions )
-		
-		<table cellpadding="0" cellspacing="0" border="0" style="width:100%">
-		
-			<h2 style="margin:1px;text-align:center;left;">CONTRATO DE TRABAJO PARA OBRA TRANSITORIA</h2>		
+			<h2 style="margin:1px;text-align:center;left;" class="print-hidden">CONTRATO DE TRABAJO PARA OBRA TRANSITORIA</h2>		
 
-				<p style="text-align:justify;">En Santiago, <b>$tools.format('dd MMMM yyyy', $tools.date)</b> entre la empresa <b> #if (${laborerConstruction.constructionsite.constructionCompany.name}) ${laborerConstruction.constructionsite.constructionCompany.name} #else ____________________________________ #end </b> R.U.T.: <b> #if(${laborerConstruction.constructionsite.constructionCompany.rut}) $numberTools.integer(${laborerConstruction.constructionsite.constructionCompany.rut.split("-").get(0)})-${laborerConstruction.constructionsite.constructionCompany.rut.split("-").get(1)} #else ____________________________________ #end </b> direcci&oacute;n: <b>#if(${laborerConstruction.constructionsite.constructionCompany.address}) ${laborerConstruction.constructionsite.constructionCompany.address} #else ____________________________________ #end </b>, comuna de <b>#if(${laborerConstruction.constructionsite.constructionCompany.commune}) ${laborerConstruction.constructionsite.constructionCompany.commune} #else ____________________________________ #end</b> representada por don Cristian Marinovich Pacey (profesi&oacute;n, cargo en la empresa) ambos domiciliados en________________________________ en adelante "el empleador" o la "empresa" por una parte y por la otra don <b>${laborerConstruction.laborer.fullname}</b> de nacionalidad <b>${laborerConstruction.laborer.nationality}</b> nacido el <b>$tools.format('dd MMMM yyyy',${laborerConstruction.laborer.dateBirth})</b> domicilio en calle <b>${laborerConstruction.laborer.address}</b> Comuna <b>${laborerConstruction.laborer.commune}</b> C&eacute;dula de identidad N&deg; <b>$numberTools.integer(${laborerConstruction.laborer.rut.split("-").get(0)})-${laborerConstruction.laborer.rut.split("-").get(1)}</b> y procedente de esta ciudad, en adelante el "trabajador", se ha convenido el siguiente contrato de trabajo:
+                <p style="text-align:justify;"><span id="fecha_contrato"><b>$tools.format('dd MMMM yyyy', $tools.date)</b></span> <span class="print-hidden" >entre la empresa </span><span id="nombre_constructora"><b> #if (${laborerConstruction.constructionsite.constructionCompany.name}) ${laborerConstruction.constructionsite.constructionCompany.name} #else ____________________________________ #end </b> <span class="print-hidden" >R.U.T.:</span> <b></span> <span id="rut_constructora">#if(${laborerConstruction.constructionsite.constructionCompany.rut}) $numberTools.integer(${laborerConstruction.constructionsite.constructionCompany.rut.split("-").get(0)})-${laborerConstruction.constructionsite.constructionCompany.rut.split("-").get(1)} #else ____________________________________ #end </b></span> <span class="print-hidden" >direcci&oacute;n:</span> <span id="direccion_constructora"><b>#if(${laborerConstruction.constructionsite.constructionCompany.address}) ${laborerConstruction.constructionsite.constructionCompany.address} #else ____________________________________ #end </b></span><span class="print-hidden" >, comuna de </span><span id="comuna_constructora"><b>#if(${laborerConstruction.constructionsite.constructionCompany.commune}) ${laborerConstruction.constructionsite.constructionCompany.commune} #else ____________________________________ #end</b></span> <span class="print-hidden" >representada por don Cristian Marinovich Pacey (profesi&oacute;n, cargo en la empresa) ambos domiciliados en</span>________________________________ <span class="print-hidden" >en adelante "el empleador" o la "empresa" por una parte y por la otra don </span><span id="nombre_trabajador"><b>${laborerConstruction.laborer.fullname}</b></span> <span class="print-hidden" >de nacionalidad </span><span id="nacionalidad_trabajador"><b>${laborerConstruction.laborer.nationality}</b></span> <span class="print-hidden" >nacido el</span> <span id="fecha_nac_trabajador"><b>$tools.format('dd MMMM yyyy',${laborerConstruction.laborer.dateBirth})</b></span> <span class="print-hidden" >domicilio en calle</span> <span id="direccion_trabajador"><b>${laborerConstruction.laborer.address}</b></span> <span class="print-hidden" >Comuna </span><span id="comuna_trabajador"><b>${laborerConstruction.laborer.commune}</b></span> <span class="print-hidden" >C&eacute;dula de identidad N&deg; </span><span id="rut_trabajador"><b>$numberTools.integer(${laborerConstruction.laborer.rut.split("-").get(0)})-${laborerConstruction.laborer.rut.split("-").get(1)}</b></span> <span class="print-hidden" >y procedente de esta ciudad, en adelante el "trabajador", se ha convenido el siguiente contrato de trabajo:</span>
 					<br />
 					<br />
-				PRIMERO: El trabajador se obliga a prestar servicios personales para el empleador como <b>${laborerConstruction.activeContract.job}</b>, funciones que se encuentran descritas al dorso del presente contrato y que se consideran como parte integral del mismo. Estas funciones del trabajador se realizar&aacute;n en la obra que el empleador se encuentra realizando en la calle <b>${laborerConstruction.constructionsite.address}</b> "de igual forma, el trabajador ejecutar&aacute; labores ocasionales que le pueda se&ntilde;alar el empleador, relacionadas con las que son inherentes a su trabajo y que puedan presentarse fuera de la obra". 
+                <span class="print-hidden" >PRIMERO: El trabajador se obliga a prestar servicios personales para el empleador como </span><span id="oficio_trabajador"><b>${laborerConstruction.activeContract.job}</b></span><span class="print-hidden" >, funciones que se encuentran descritas al dorso del presente contrato y que se consideran como parte integral del mismo. Estas funciones del trabajador se realizar&aacute;n en la obra que el empleador se encuentra realizando en la calle </span><span id="direccion_obra"><b>${laborerConstruction.constructionsite.address}</b></span> <span class="print-hidden" >"de igual forma, el trabajador ejecutar&aacute; labores ocasionales que le pueda se&ntilde;alar el empleador, relacionadas con las que son inherentes a su trabajo y que puedan presentarse fuera de la obra". </span>
 				<br />
-				SEGUNDO: El trabajador cumplir&aacute; una jornada semanal de trabajado de 45 horas distribuida en 5 d&iacute;as de la siguiente manera:</p>
+                <span class="print-hidden" >SEGUNDO: El trabajador cumplir&aacute; una jornada semanal de trabajado de 45 horas distribuida en 5 d&iacute;as de la siguiente manera:</span></p>
 					
-				<p style="text-align:center;"> LUNES A VIERNES: 08:00 horas a 12:00 horas <br/>
+				<p style="text-align:center;" class="print-hidden" > LUNES A VIERNES: 08:00 horas a 12:00 horas <br/>
 				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;12:45 horas a 17:45 horas</p>
 				
-				<p style="text-align:justify;">TERCERO: El empleador pagar&aacute; al trabajador la siguiente remuneraci&oacute;n: <br />
-				a) La suma que resulte de los tratos realizados en obra para distintos trabajos en relaci&oacute;n  a su funci&oacute;n de <b>${laborerConstruction.activeContract.job}</b> Estos tratos se calcular&aacute;n tomando como base los valores establecidos en el Tarifado Nacional de la Construcci&oacute;n de fecha 12 Septiembre de 1978, aprobado por el Ministerio de Econom&iacute;a y del Trabajo y Previsi&oacute;n social, que en el art&iacute;culo 34 fij&oacute; las remuneraciones variables para efecto de los tratos, debidamente reajustados seg&uacute;n variaci&oacute;n experimentada por el &iacute;ndice de Precios al Consumidor fijado por el Instituto Nacional de Estad&iacute;sticas o el organismo que lo reemplace e incrementados en un 25%. Este tarifado referencial se considera como parte integrante del presente contrato.<br />
-				b) Cuando por el desarrollo de la obra el trabajador estuviese impedido de realizar labores a trato o cuando el resultado mensual de los trabajos realizados a trato fuera inferior al monto de ingreso m&iacute;nimo mensual legal, imput&aacute;ndose en este caso su monto, cualquier remuneraci&oacute;n inferior que reciba el trabajador con motivo de su prestaci&oacute;n de servicios.
+                <p style="text-align:justify;"><span class="print-hidden" >TERCERO: El empleador pagar&aacute; al trabajador la siguiente remuneraci&oacute;n: </span><br />
+                <span class="print-hidden" >a) La suma que resulte de los tratos realizados en obra para distintos trabajos en relaci&oacute;n  a su funci&oacute;n de </span><span id="oficio_trabajador2"><b>${laborerConstruction.activeContract.job}</b></span> <span class="print-hidden" >Estos tratos se calcular&aacute;n tomando como base los valores establecidos en el Tarifado Nacional de la Construcci&oacute;n de fecha 12 Septiembre de 1978, aprobado por el Ministerio de Econom&iacute;a y del Trabajo y Previsi&oacute;n social, que en el art&iacute;culo 34 fij&oacute; las remuneraciones variables para efecto de los tratos, debidamente reajustados seg&uacute;n variaci&oacute;n experimentada por el &iacute;ndice de Precios al Consumidor fijado por el Instituto Nacional de Estad&iacute;sticas o el organismo que lo reemplace e incrementados en un 25%. Este tarifado referencial se considera como parte integrante del presente contrato.</span><br />
+                <span class="print-hidden" >b) Cuando por el desarrollo de la obra el trabajador estuviese impedido de realizar labores a trato o cuando el resultado mensual de los trabajos realizados a trato fuera inferior al monto de ingreso m&iacute;nimo mensual legal, imput&aacute;ndose en este caso su monto, cualquier remuneraci&oacute;n inferior que reciba el trabajador con motivo de su prestaci&oacute;n de servicios.</span>
 					<br />
 					<br />
-				CUARTO: Por concepto de gratificaci&oacute;n legal anual, el empleador pagar&aacute; este beneficio de conformidad con el sistema establecido en el art&iacute;culo 50 del C&oacute;digo del Trabajo. Cualquier gratificaci&oacute;n convencional que pacte deber&aacute; imputarse al resultado final del c&aacute;lculo hecho de conformidad con el art&iacute;culo 50 ya citado.
+                <span class="print-hidden" >CUARTO: Por concepto de gratificaci&oacute;n legal anual, el empleador pagar&aacute; este beneficio de conformidad con el sistema establecido en el art&iacute;culo 50 del C&oacute;digo del Trabajo. Cualquier gratificaci&oacute;n convencional que pacte deber&aacute; imputarse al resultado final del c&aacute;lculo hecho de conformidad con el art&iacute;culo 50 ya citado.</span>
 					<br />
-				QUINTO: El presente contrato durar&aacute; hasta el t&eacute;rmino de los trabajos de <b>${laborerConstruction.activeContract.step}</b> que el empleador realiza en la obra referida en la cl&aacute;usula primera, labores especificas y transitorias para las cuales fue contratado el trabajador, todo de conformidad con los requerimientos en cuanto a dotaci&oacute;n de trabajadores que el avance de las obras determine, circunstancias que el empleador deber&aacute; en cada caso calificar.<br />
-				SEXTO: Las partes dejan expreso testimonio que constituyen obligaciones esenciales del presente contrato, cuya infracci&oacute;n se considerar&aacute; como "incumplimiento grave de las obligaciones que impone el contrato", dando lugar a la caducidad, expiraci&oacute;n y terminaci&oacute;n inmediata del mismo, entre otras las siguientes.<br />
+                <span class="print-hidden" >QUINTO: El presente contrato durar&aacute; hasta el t&eacute;rmino de los trabajos de </span><span id="etapa_obra"><b>${laborerConstruction.activeContract.step}</b></span><span class="print-hidden" > que el empleador realiza en la obra referida en la cl&aacute;usula primera, labores especificas y transitorias para las cuales fue contratado el trabajador, todo de conformidad con los requerimientos en cuanto a dotaci&oacute;n de trabajadores que el avance de las obras determine, circunstancias que el empleador deber&aacute; en cada caso calificar.</span><br />
+                <span class="print-hidden" >SEXTO: Las partes dejan expreso testimonio que constituyen obligaciones esenciales del presente contrato, cuya infracci&oacute;n se considerar&aacute; como "incumplimiento grave de las obligaciones que impone el contrato", dando lugar a la caducidad, expiraci&oacute;n y terminaci&oacute;n inmediata del mismo, entre otras las siguientes.</span><br />
 					<br />
-				a) Concurrir diariamente al trabajo y dar estricto cumplimiento al horario de la jornada de trabajo.<br />
-				b) Desempe&ntilde;ar las labores convenidas en forma fiel y eficiente, debiendo cumplir estrictamente las ordenes que le den sus jefes directo, t&eacute;cnicos y ejecutivos de la empresa.<br />
-				c) Utilizar los implementos de seguridad que corresponden en relaci&oacute;n a la naturaleza del trabajo convenido.<br />
-				d) Dar estricto cumplimiento al Reglamento Interno de Seguridad e Higiene de la empresa como asimismo a las normas e instructivos de car&aacute;cter general o personal que de la empresa.<br />
-				e) Mantener con el resto de los trabajadores y en general con todo el personal, jefes y ejecutivos de la empresa, relaciones de convivencia y respeto mutuo, que permitan a cada uno el normal desempe&ntilde;o en sus labores.<br />
-				f) En general, cumplir con todas las obligaciones que emanan de su condici&oacute;n de trabajador, las que impone el presente contrato y la legislaci&oacute;n vigente.
+                <span class="print-hidden" >a) Concurrir diariamente al trabajo y dar estricto cumplimiento al horario de la jornada de trabajo.</span><br />
+                <span class="print-hidden" >b) Desempe&ntilde;ar las labores convenidas en forma fiel y eficiente, debiendo cumplir estrictamente las ordenes que le den sus jefes directo, t&eacute;cnicos y ejecutivos de la empresa.</span><br />
+                <span class="print-hidden" >c) Utilizar los implementos de seguridad que corresponden en relaci&oacute;n a la naturaleza del trabajo convenido.</span><br />
+                <span class="print-hidden" >d) Dar estricto cumplimiento al Reglamento Interno de Seguridad e Higiene de la empresa como asimismo a las normas e instructivos de car&aacute;cter general o personal que de la empresa.</span><br />
+                <span class="print-hidden" >e) Mantener con el resto de los trabajadores y en general con todo el personal, jefes y ejecutivos de la empresa, relaciones de convivencia y respeto mutuo, que permitan a cada uno el normal desempe&ntilde;o en sus labores.</span><br />
+                <span class="print-hidden" >f) En general, cumplir con todas las obligaciones que emanan de su condici&oacute;n de trabajador, las que impone el presente contrato y la legislaci&oacute;n vigente.</span>
 					<br />
 					<br />
-				SEPTIMO: La conclusi&oacute;n del contrato por la causal establecida en el articulo 159 N&deg;5 del C&oacute;digo del Trabajo, seg&uacute;n se establece en la cl&aacute;usula quinta del presente contrato, no obsta a la terminaci&oacute;n del mismo por cualquiera de las otras causales establecidas en los art&iacute;culos 159 y aquellas del articulo 160 del C&oacute;digo del Trabajo.<br />
-				OCTAVO: Se entienden incorporadas al presente contrato todas las disposiciones legales que se dicten con posterioridad a la fecha de su suscripci&oacute;n y que tengan relaci&oacute;n con &eacute;l.<br />
-				NOVENO: El trabajador deja expresa constancia, que para los efectos "Previsionales" se encuentra afiliado al momento de su contrataci&oacute;n a: <b>${laborerConstruction.laborer.afp}</b> y para lo de "salud" en: <b>${laborerConstruction.laborer.isapre}</b>. Reconociendo que es de su total y exclusiva responsabilidad dar al empleador aviso oportuno y por escrito, de cualquier cambio o modificaci&oacute;n de su situaci&oacute;n Previsional o se Salud.<br />
-				DECIMO: Para todos los efectos legales las partes fijan su domicilio en la ciudad de Santiago y dejan expresa constancia al momento de la suscripci&oacute;n del presente contrato , que el trabajador tiene ya fijado para todos los efectos legales su domicilio en dicha ciudad.
+                <span class="print-hidden" >SEPTIMO: La conclusi&oacute;n del contrato por la causal establecida en el articulo 159 N&deg;5 del C&oacute;digo del Trabajo, seg&uacute;n se establece en la cl&aacute;usula quinta del presente contrato, no obsta a la terminaci&oacute;n del mismo por cualquiera de las otras causales establecidas en los art&iacute;culos 159 y aquellas del articulo 160 del C&oacute;digo del Trabajo.</span><br />
+                <span class="print-hidden" >OCTAVO: Se entienden incorporadas al presente contrato todas las disposiciones legales que se dicten con posterioridad a la fecha de su suscripci&oacute;n y que tengan relaci&oacute;n con &eacute;l.</span><br />
+                <span class="print-hidden" >NOVENO: El trabajador deja expresa constancia, que para los efectos "Previsionales" se encuentra afiliado al momento de su contrataci&oacute;n a: </span><span id="afp_trabajador"><b>${laborerConstruction.laborer.afp}</b></span> <span class="print-hidden" >y para lo de "salud" en: </span><span id="isapre_trabajador"><b>${laborerConstruction.laborer.isapre}</b></span><span class="print-hidden" >. Reconociendo que es de su total y exclusiva responsabilidad dar al empleador aviso oportuno y por escrito, de cualquier cambio o modificaci&oacute;n de su situaci&oacute;n Previsional o se Salud.</span><br />
+                <span class="print-hidden" >DECIMO: Para todos los efectos legales las partes fijan su domicilio en la ciudad de Santiago y dejan expresa constancia al momento de la suscripci&oacute;n del presente contrato , que el trabajador tiene ya fijado para todos los efectos legales su domicilio en dicha ciudad.</span>
 					<br />
-				DECIMO PRIMERO: Se deja constancia que don <b>${laborerConstruction.laborer.fullname}</b> ingreso a prestar servicios para la empresa el <b>$tools.format('dd MMMM yyyy',${laborerConstruction.activeContract.startDate})</b>.
+                <span class="print-hidden" >DECIMO PRIMERO: Se deja constancia que don </span><span id="nombre_trabajador2"><b>${laborerConstruction.laborer.fullname}</b></span> <span class="print-hidden" >ingreso a prestar servicios para la empresa el </span><span id="inicio_contrato_trabajador"><b>$tools.format('dd MMMM yyyy',${laborerConstruction.activeContract.startDate})</b></span><span class="print-hidden" >.</span>
 					<br />
-				DECIMO SEGUNDO: De toda modificaci&oacute;n al presente contrato se dejar&aacute; constancia escrita en &eacute;l, debidamente firmada por el trabajador y el empleador. Para constancia firman las partes el contrato en dos ejemplares, quedando uno en poder de cada una.
+                <span class="print-hidden" >DECIMO SEGUNDO: De toda modificaci&oacute;n al presente contrato se dejar&aacute; constancia escrita en &eacute;l, debidamente firmada por el trabajador y el empleador. Para constancia firman las partes el contrato en dos ejemplares, quedando uno en poder de cada una.</span>
 					<br />
-				DECIMO TERCERO: Este contrato reemplaza cualquier otro suscrito entre las partes antes de esta fecha.
+                <span class="print-hidden" >DECIMO TERCERO: Este contrato reemplaza cualquier otro suscrito entre las partes antes de esta fecha.</span>
 					<br />
 					<div class="page-break"></div>
 					<br />
-					<h2 style="margin:1px;text-align:center;left;">TIPO DE TRABAJO</h2>
+					<h2 style="margin:1px;text-align:center;left;" class="print-hidden" >TIPO DE TRABAJO</h2>
+					<div class="print-hidden">
 						<br />
 						<br />
 						<p style="font-weight: bold;">1.- <u>EXCAVADORES</u></p>
@@ -116,6 +138,7 @@
 							<br />
 						10.- Declaro recibir en este acto, un ejemplar del Reglamento Interno de Orden, Higiene y Seguridad de la empresa.</p>
 							<br /><br /><br /><br />
+						<table cellpadding="0" cellspacing="0" border="0" style="width:100%">
 				            <tr>
 				                <th><hr size=1 width="150"></th>
 				                <th><hr size=1 width="150"></th>
@@ -124,9 +147,9 @@
 				                <th>TRABAJADOR</th>
 				                <th>EMPRESA</th>
            					 </tr>
-        		</table>
-        		<div class="page-break"></div>
-        		
+							 </table>
+				</div>
+				<div class="page-break"></div>
 #end
 		</body>
 </html>
