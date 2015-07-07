@@ -43,6 +43,7 @@ import cl.magal.asistencia.entities.enums.MaritalStatus;
 import cl.magal.asistencia.entities.enums.Nationality;
 import cl.magal.asistencia.entities.validator.AgeMax;
 import cl.magal.asistencia.entities.validator.RutDigit;
+import cl.magal.asistencia.util.Utils;
 
 /**
  *
@@ -306,6 +307,10 @@ public class Laborer implements Serializable {
 
     public void setRut(String rut) {
         this.rut = rut;
+    }
+    
+    public String getDateBirthString() {
+        return Utils.date2String(dateBirth);
     }
 
     public Date getDateBirth() {

@@ -31,6 +31,7 @@ import cl.magal.asistencia.entities.LaborerConstructionsite;
 import cl.magal.asistencia.entities.License;
 import cl.magal.asistencia.entities.Loan;
 import cl.magal.asistencia.entities.ProgressiveVacation;
+import cl.magal.asistencia.entities.Speciality;
 import cl.magal.asistencia.entities.Tool;
 import cl.magal.asistencia.entities.User;
 import cl.magal.asistencia.entities.Vacation;
@@ -269,9 +270,12 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 				//gl.setComponentAlignment(hl, Alignment.MIDDLE_CENTER);
 
 				gl.addComponent(new Label("Rol :   "));gl.addComponent(new Label(getItem().getItemProperty("activeContract.jobCode")));
+				gl.addComponent(new Label("Oficio :   "));gl.addComponent(new Label(getItem().getItemProperty("activeContract.job")));
+				Speciality speciality = (Speciality)getItem().getItemProperty("activeContract.speciality").getValue();
+				gl.addComponent(new Label("Especialidad :   "));gl.addComponent(new Label( speciality != null ? speciality.getName(): ""));
 				gl.addComponent(new Label("Nombre :   "));gl.addComponent(new Label(getItem().getItemProperty("laborer.fullname")));
 				gl.addComponent(new Label("Rut :   "));gl.addComponent(new Label(getItem().getItemProperty("laborer.rut")));
-				gl.addComponent(new Label("Fecha Nacimiento :   "));gl.addComponent(new Label(getItem().getItemProperty("laborer.dateBirth")));
+				gl.addComponent(new Label("Fecha Nacimiento :   "));gl.addComponent(new Label( getItem().getItemProperty("laborer.dateBirthString") ));
 				String marital = MaritalStatus.CASADO.toString();
 				try{
 					marital = ((MaritalStatus)getItem().getItemProperty("laborer.maritalStatus").getValue()).toString();
@@ -289,7 +293,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 
 				if(getItem().getItemProperty("activeContract.startDate").getValue() != null){
 					gl.addComponent(new Label("Fecha Ingreso : "));
-					gl.addComponent(new Label(getItem().getItemProperty("activeContract.startDate")));
+					gl.addComponent(new Label(getItem().getItemProperty("activeContract.startDateString")));
 				}
 				gl.addComponent(new Label("Premio : "));gl.addComponent(new Label(getItem().getItemProperty("reward").getValue()+""));
 

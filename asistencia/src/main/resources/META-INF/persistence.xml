@@ -32,6 +32,7 @@
 	    <class>cl.magal.asistencia.entities.ProgressiveVacation</class>
 	    <class>cl.magal.asistencia.entities.Role</class>
 	    <class>cl.magal.asistencia.entities.Salary</class>
+	    <class>cl.magal.asistencia.entities.Speciality</class>
 	    <class>cl.magal.asistencia.entities.TaxationConfigurations</class>
 	    <class>cl.magal.asistencia.entities.Team</class>
 	    <class>cl.magal.asistencia.entities.Tool</class>

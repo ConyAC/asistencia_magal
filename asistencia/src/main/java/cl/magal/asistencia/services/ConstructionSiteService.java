@@ -2,6 +2,7 @@ package cl.magal.asistencia.services;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -35,6 +36,7 @@ import cl.magal.asistencia.entities.License;
 import cl.magal.asistencia.entities.Loan;
 import cl.magal.asistencia.entities.Overtime;
 import cl.magal.asistencia.entities.Salary;
+import cl.magal.asistencia.entities.Speciality;
 import cl.magal.asistencia.entities.TaxationConfigurations;
 import cl.magal.asistencia.entities.Team;
 import cl.magal.asistencia.entities.Tool;
@@ -57,6 +59,7 @@ import cl.magal.asistencia.repositories.LicenseRepositoy;
 import cl.magal.asistencia.repositories.LoanRepository;
 import cl.magal.asistencia.repositories.OvertimeRepository;
 import cl.magal.asistencia.repositories.SalaryRepository;
+import cl.magal.asistencia.repositories.SpecialityRepository;
 import cl.magal.asistencia.repositories.TeamRepository;
 import cl.magal.asistencia.repositories.ToolRepository;
 import cl.magal.asistencia.repositories.UserRepository;
@@ -107,6 +110,8 @@ public class ConstructionSiteService {
 	ToolRepository toolRepo;
 	@Autowired
 	ContractRepository contractRepo;
+	@Autowired
+	SpecialityRepository specialityRepo;
 	
 	//SERVICES
 	@Autowired
@@ -991,6 +996,51 @@ public class ConstructionSiteService {
 	 */
 	public boolean checkStepInUse(ConstructionSite bean, String step) {
 		return contractRepo.existsWithStep(bean,step) != null;
+	}
+
+	/**
+	 * Guarda una especialidad
+	 * @param speciality
+	 */
+	public void save(Speciality speciality) {
+		Speciality db = specialityRepo.save(speciality);
+		//se asegura se setear el id
+		speciality.setId(db.getId());
+	}
+
+	/**
+	 * Verifica si la especialidad dada está siendo utlizada por algún trabajador de la obra dada
+	 * @param bean
+	 * @param speciality
+	 * @return
+	 */
+	public boolean checkSpecialityInUse(ConstructionSite bean,Speciality speciality) {
+		return contractRepo.existsWithSpeciality(bean,speciality) != null;
+	}
+
+	/**
+	 * Busca las especialidades de una obra
+	 * @param bean
+	 * @return
+	 */
+	public Collection<? extends Speciality> findSpecialitiesByConstructionSite(ConstructionSite bean) {
+		return specialityRepo.findByConstructionSite(bean);
+	}
+
+	/**
+	 * Elimina una especialidad
+	 * @param speciality
+	 */
+	public void removeSpeciality(Speciality speciality) {
+		specialityRepo.delete(speciality);
+	}
+
+	/**
+	 * 
+	 * @param specialities
+	 */
+	public void save(List<Speciality> specialities) {
+		specialityRepo.save(specialities);
 	}
 	
 }
