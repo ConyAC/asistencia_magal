@@ -6,20 +6,26 @@
 	
 	@media all {
 	.page-break	{ display: none; }
+	.p-justify	{ align:justify; }
 	.print-hidden	{  }
      body {font-size : 10pt;}
 	}
 	
 	@media print {
 		@page {
-            size: Legal portrait;
+            size: 21.4cm 55.5cm portrait;
 		}
 		.page-break	{ display: block; page-break-before: always; }
+		.p-justify	{ }
 		.print-hidden	{ display: none; }
   		body {font-size : 10pt;}
 		header:after { content: "1"; }
-		#fecha_contrato { position : absolute ; top : 2.5cm; left: 4.1cm; }
-        #nombre_constructora { position : absolute ; top : 2.5cm; left: 12.9cm; }
+		
+		#fecha_contrato_dia { position : fixed ; top : 2.5cm; left: 4.1cm; }
+		#fecha_contrato_mes { position : fixed ; top : 2.5cm; left: 5.5cm; }
+		#fecha_contrato_ano { position : fixed ; top : 2.5cm; left: 9cm; }
+        #nombre_constructora { position : fixed ; top : 2.5cm; left: 13cm; }
+		
         #rut_constructora { position : absolute ; top : 3cm; left: 2.2cm; }
         #direccion_constructora { display: none; /* FIXME */ } 
         #comuna_constructora { display: none; /* FIXME */ }
@@ -43,17 +49,13 @@
 	</style>
 	</head> 
 	<body>
-		
 		<div class="print-hidden"  style="text-align:center;">
-			<input type="button" onclick="javascript:print()" value="Imprimir" /> <br /><br />
+			<input type="button" onclick="javascript:print()" value="Imprimir" />
 		</div>
-		
-		<br />
-		6
 #foreach( $laborerConstruction in $laborerConstructions )
-			<h2 style="margin:1px;text-align:center;left;" class="print-hidden">CONTRATO DE TRABAJO PARA OBRA TRANSITORIA</h2>		
+			<h2 style="margin:1px;text-align:center;" class="print-hidden">CONTRATO DE TRABAJO PARA OBRA TRANSITORIA</h2>		
 
-                <p style="text-align:justify;"><span id="fecha_contrato"><b>$tools.format('dd MMMM yyyy', $tools.date)</b></span> <span class="print-hidden" >entre la empresa </span><span id="nombre_constructora"><b> #if (${laborerConstruction.constructionsite.constructionCompany.name}) ${laborerConstruction.constructionsite.constructionCompany.name} #else ____________________________________ #end </b> <span class="print-hidden" >R.U.T.:</span> <b></span> <span id="rut_constructora">#if(${laborerConstruction.constructionsite.constructionCompany.rut}) $numberTools.integer(${laborerConstruction.constructionsite.constructionCompany.rut.split("-").get(0)})-${laborerConstruction.constructionsite.constructionCompany.rut.split("-").get(1)} #else ____________________________________ #end </b></span> <span class="print-hidden" >direcci&oacute;n:</span> <span id="direccion_constructora"><b>#if(${laborerConstruction.constructionsite.constructionCompany.address}) ${laborerConstruction.constructionsite.constructionCompany.address} #else ____________________________________ #end </b></span><span class="print-hidden" >, comuna de </span><span id="comuna_constructora"><b>#if(${laborerConstruction.constructionsite.constructionCompany.commune}) ${laborerConstruction.constructionsite.constructionCompany.commune} #else ____________________________________ #end</b></span> <span class="print-hidden" >representada por don Cristian Marinovich Pacey (profesi&oacute;n, cargo en la empresa) ambos domiciliados en</span>________________________________ <span class="print-hidden" >en adelante "el empleador" o la "empresa" por una parte y por la otra don </span><span id="nombre_trabajador"><b>${laborerConstruction.laborer.fullname}</b></span> <span class="print-hidden" >de nacionalidad </span><span id="nacionalidad_trabajador"><b>${laborerConstruction.laborer.nationality}</b></span> <span class="print-hidden" >nacido el</span> <span id="fecha_nac_trabajador"><b>$tools.format('dd MMMM yyyy',${laborerConstruction.laborer.dateBirth})</b></span> <span class="print-hidden" >domicilio en calle</span> <span id="direccion_trabajador"><b>${laborerConstruction.laborer.address}</b></span> <span class="print-hidden" >Comuna </span><span id="comuna_trabajador"><b>${laborerConstruction.laborer.commune}</b></span> <span class="print-hidden" >C&eacute;dula de identidad N&deg; </span><span id="rut_trabajador"><b>$numberTools.integer(${laborerConstruction.laborer.rut.split("-").get(0)})-${laborerConstruction.laborer.rut.split("-").get(1)}</b></span> <span class="print-hidden" >y procedente de esta ciudad, en adelante el "trabajador", se ha convenido el siguiente contrato de trabajo:</span>
+                <p class="p-justify"><span class="print-hidden" >En Santiago,</span> <span id="fecha_contrato_dia"><b>$tools.format('dd', $tools.date)</b></span> <span class="print-hidden" >de</span> <span id="fecha_contrato_mes"><b>$tools.format('MMMM', $tools.date)</b></span> <span class="print-hidden" >de</span> <span id="fecha_contrato_ano"><b>$tools.format('yyyy', $tools.date)</b></span> <span class="print-hidden" >entre la empresa </span><span id="nombre_constructora"><b> #if (${laborerConstruction.constructionsite.constructionCompany.name}) ${laborerConstruction.constructionsite.constructionCompany.name} #else ____________________________________ #end </b> <span class="print-hidden" >R.U.T.:</span> <b></span> <span id="rut_constructora">#if(${laborerConstruction.constructionsite.constructionCompany.rut}) $numberTools.integer(${laborerConstruction.constructionsite.constructionCompany.rut.split("-").get(0)})-${laborerConstruction.constructionsite.constructionCompany.rut.split("-").get(1)} #else ____________________________________ #end </b></span> <span class="print-hidden" >direcci&oacute;n:</span> <span id="direccion_constructora"><b>#if(${laborerConstruction.constructionsite.constructionCompany.address}) ${laborerConstruction.constructionsite.constructionCompany.address} #else ____________________________________ #end </b></span><span class="print-hidden" >, comuna de </span><span id="comuna_constructora"><b>#if(${laborerConstruction.constructionsite.constructionCompany.commune}) ${laborerConstruction.constructionsite.constructionCompany.commune} #else ____________________________________ #end</b></span> <span class="print-hidden" >representada por don Cristian Marinovich Pacey (profesi&oacute;n, cargo en la empresa) ambos domiciliados en</span>________________________________ <span class="print-hidden" >en adelante "el empleador" o la "empresa" por una parte y por la otra don </span><span id="nombre_trabajador"><b>${laborerConstruction.laborer.fullname}</b></span> <span class="print-hidden" >de nacionalidad </span><span id="nacionalidad_trabajador"><b>${laborerConstruction.laborer.nationality}</b></span> <span class="print-hidden" >nacido el</span> <span id="fecha_nac_trabajador"><b>$tools.format('dd MMMM yyyy',${laborerConstruction.laborer.dateBirth})</b></span> <span class="print-hidden" >domicilio en calle</span> <span id="direccion_trabajador"><b>${laborerConstruction.laborer.address}</b></span> <span class="print-hidden" >Comuna </span><span id="comuna_trabajador"><b>${laborerConstruction.laborer.commune}</b></span> <span class="print-hidden" >C&eacute;dula de identidad N&deg; </span><span id="rut_trabajador"><b>$numberTools.integer(${laborerConstruction.laborer.rut.split("-").get(0)})-${laborerConstruction.laborer.rut.split("-").get(1)}</b></span> <span class="print-hidden" >y procedente de esta ciudad, en adelante el "trabajador", se ha convenido el siguiente contrato de trabajo:</span>
 					<br />
 					<br />
                 <span class="print-hidden" >PRIMERO: El trabajador se obliga a prestar servicios personales para el empleador como </span><span id="oficio_trabajador"><b>${laborerConstruction.activeContract.job}</b></span><span class="print-hidden" >, funciones que se encuentran descritas al dorso del presente contrato y que se consideran como parte integral del mismo. Estas funciones del trabajador se realizar&aacute;n en la obra que el empleador se encuentra realizando en la calle </span><span id="direccion_obra"><b>${laborerConstruction.constructionsite.address}</b></span> <span class="print-hidden" >"de igual forma, el trabajador ejecutar&aacute; labores ocasionales que le pueda se&ntilde;alar el empleador, relacionadas con las que son inherentes a su trabajo y que puedan presentarse fuera de la obra". </span>
@@ -63,7 +65,7 @@
 				<p style="text-align:center;" class="print-hidden" > LUNES A VIERNES: 08:00 horas a 12:00 horas <br/>
 				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;12:45 horas a 17:45 horas</p>
 				
-                <p style="text-align:justify;"><span class="print-hidden" >TERCERO: El empleador pagar&aacute; al trabajador la siguiente remuneraci&oacute;n: </span><br />
+                <p class="p-justify"><span class="print-hidden" >TERCERO: El empleador pagar&aacute; al trabajador la siguiente remuneraci&oacute;n: </span><br />
                 <span class="print-hidden" >a) La suma que resulte de los tratos realizados en obra para distintos trabajos en relaci&oacute;n  a su funci&oacute;n de </span><span id="oficio_trabajador2"><b>${laborerConstruction.activeContract.job}</b></span> <span class="print-hidden" >Estos tratos se calcular&aacute;n tomando como base los valores establecidos en el Tarifado Nacional de la Construcci&oacute;n de fecha 12 Septiembre de 1978, aprobado por el Ministerio de Econom&iacute;a y del Trabajo y Previsi&oacute;n social, que en el art&iacute;culo 34 fij&oacute; las remuneraciones variables para efecto de los tratos, debidamente reajustados seg&uacute;n variaci&oacute;n experimentada por el &iacute;ndice de Precios al Consumidor fijado por el Instituto Nacional de Estad&iacute;sticas o el organismo que lo reemplace e incrementados en un 25%. Este tarifado referencial se considera como parte integrante del presente contrato.</span><br />
                 <span class="print-hidden" >b) Cuando por el desarrollo de la obra el trabajador estuviese impedido de realizar labores a trato o cuando el resultado mensual de los trabajos realizados a trato fuera inferior al monto de ingreso m&iacute;nimo mensual legal, imput&aacute;ndose en este caso su monto, cualquier remuneraci&oacute;n inferior que reciba el trabajador con motivo de su prestaci&oacute;n de servicios.</span>
 					<br />
@@ -99,41 +101,41 @@
 						<br />
 						<br />
 						<p style="font-weight: bold;">1.- <u>EXCAVADORES</u></p>
-						<p style="text-align:justify;">a) Excavadores para cimientos que aparece en los planos de estructura de obra.<br />
+						<p class="p-justify">a) Excavadores para cimientos que aparece en los planos de estructura de obra.<br />
 						b) Rellenos de excedentes de excavaciones de los cimientos o para ejecutar los radieres.<br />
 						c) Trabajos provisorios varios, durante el tiempo que por razones de faena, este interrumpidos, temporalmente, los trabajos de las letras a y b.</p>
 
 						<p style="font-weight: bold;">2.- <u>CONCRETEROS</u></p>
-						<p style="text-align:justify;">a) Confecci&oacute;n y colocaci&oacute;n de concreto, indicado en los planos de estructura.<br />
+						<p class="p-justify">a) Confecci&oacute;n y colocaci&oacute;n de concreto, indicado en los planos de estructura.<br />
 						b) Confecci&oacute;n de radieres.<br />
 						c) Confecci&oacute;n de carreras para el efecto de colocaci&oacute;n de concreto.<br />
 						d) Trabajos provisorios varios, durante el tiempo que por razones de faena, est&eacute;n interrumpidos, temporalmente, los trabajos de las letras a, b, y c.</p>
 						
 						<p style="font-weight: bold;">3.- <u>JORNALEROS</u></p>
-						<p style="text-align:justify;">a) Ayudante de carpinteros, alba&ntilde;iles, estucadores, g&aacute;sfiter y enfierradores.<br />
+						<p class="p-justify">a) Ayudante de carpinteros, alba&ntilde;iles, estucadores, g&aacute;sfiter y enfierradores.<br />
 						b) En su calidad de ayudantes, desarrollar&aacute;n labores de aprendices del oficio de sus maestros ayudando en la ejecuci&oacute;n de los trabajos respectivos, trasladando los materiales de sus respectivos maestros.</p>
 						
 						<p style="font-weight: bold;">4.- <u>PORTEROS, LLAVEROS, RONDINES, ASEADORES</u></p>
-						<p style="text-align:justify;">Deber&aacute;n desempe&ntilde;ar en forma indistinta cualquiera de cada una de estas labores que se le asigne...</p>
+						<p class="p-justify">Deber&aacute;n desempe&ntilde;ar en forma indistinta cualquiera de cada una de estas labores que se le asigne...</p>
 						
 						<p style="font-weight: bold;">5.- <u>ENFIERRADORES</u></p>
-						<p style="text-align:justify;">Confecci&oacute;n y colocaci&oacute;n de fierros de acuerdo a lo dispuesto en plano de estructura de la obra.</p>
+						<p class="p-justify">Confecci&oacute;n y colocaci&oacute;n de fierros de acuerdo a lo dispuesto en plano de estructura de la obra.</p>
 						
 						<p style="font-weight: bold;">6.- <u>CARPINTEROS</u></p>
-						<p style="text-align:justify;">Se contemplan las siguientes categor&iacute;as:
+						<p class="p-justify">Se contemplan las siguientes categor&iacute;as:
 							<br />
 						a) Confecci&oacute;n, colocaci&oacute;n y descimbre de moldaje para concreto de acuerdo a los planos de estructura de la obra, confecci&oacute;n de carreras para colocaci&oacute;n de concreto.
 							<br />
 						b) Confecci&oacute;n de estructura de techumbre, confecci&oacute;n de tabiques de estructura de madera, colocaci&oacute;n de marcos de puertas, colocaci&oacute;n de guardapolvos, pilastra y junquillos, colocaci&oacute;n de puertas, confecci&oacute;n de cielos falsos. Adem&aacute;s, en caso que por razones de faenas, est&eacute;n interrumpidos los trabajos de las letras a y b, deber&aacute;n efectuar trabajos provisorios varios, como ser por ejemplo:  instalaci&oacute;n de accesorios, instalaci&oacute;n de celos&iacute;as de ventilaci&oacute;n, etc.</p>
 						
 						<p style="font-weight: bold;">7.- <u>ALBA&Ntilde;ILES - ESTUCADORES</u></p>
-						<p style="text-align:justify;">Desarrollar&aacute;n el trabajo propio des su respectivo oficio en aquellas &aacute;reas de la obra que justifique la presencia de esos maestros, por lo cual, no se incluye en sus contratos la ejecuci&oacute;n de muros menores de dos m2. Y pa&ntilde;os o estucos menos de dos m2. Ya que esos trabajos corresponde ejecutarlos a los ayudantes.</p>
+						<p class="p-justify">Desarrollar&aacute;n el trabajo propio des su respectivo oficio en aquellas &aacute;reas de la obra que justifique la presencia de esos maestros, por lo cual, no se incluye en sus contratos la ejecuci&oacute;n de muros menores de dos m2. Y pa&ntilde;os o estucos menos de dos m2. Ya que esos trabajos corresponde ejecutarlos a los ayudantes.</p>
 						
 						<p style="font-weight: bold;">9.- <u>YESEROS</u></p>
-						<p style="text-align:justify;">Realizar&aacute;n, como su nombre lo indica, los trabajadores de estucos y afinados en yeso, tanto en muros como en cielos de la obra respectiva </p>
+						<p class="p-justify">Realizar&aacute;n, como su nombre lo indica, los trabajadores de estucos y afinados en yeso, tanto en muros como en cielos de la obra respectiva </p>
 						
 						<p style="font-weight: bold;">7.- <u>GENERAL</u></p>
-						<p style="text-align:justify;">Lo dispuesto en esta cl&aacute;usula sobre descripci&oacute;n de los trabajados se entiende sin perjuicio de la facultad que el c&oacute;digo del trabajo otorga al empleador bajo el art&iacute;culo 12 por alterar la naturaleza del trabajo o el sitio o recinto en que debe prestarse.
+						<p class="p-justify">Lo dispuesto en esta cl&aacute;usula sobre descripci&oacute;n de los trabajados se entiende sin perjuicio de la facultad que el c&oacute;digo del trabajo otorga al empleador bajo el art&iacute;culo 12 por alterar la naturaleza del trabajo o el sitio o recinto en que debe prestarse.
 							<br />
 							<br />
 						10.- Declaro recibir en este acto, un ejemplar del Reglamento Interno de Orden, Higiene y Seguridad de la empresa.</p>
