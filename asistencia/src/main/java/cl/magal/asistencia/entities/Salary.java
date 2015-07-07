@@ -124,11 +124,12 @@ public class Salary implements Serializable {
 		getForceSalary();
 	}
 	
-	public void setAdvancePayment(Attendance attendance){
+	public void setAdvancePaymentConfiguration(Attendance attendance){logger.debug("INGRESO A LA FUNCIÓN DE PRUEBA");
 		if(this.supleCalculator == null || this.salaryCalculator == null )
 			throw new RuntimeException("Es necesario que el objeto de calculo sea distinto a null");
 		supleCalculator.setAttendance(attendance);
 		salaryCalculator.setAttendance(attendance);
+		getForceSalary();
 		getForceSuple();
 	}
 	

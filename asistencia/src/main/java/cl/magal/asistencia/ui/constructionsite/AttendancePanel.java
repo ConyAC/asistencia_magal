@@ -148,6 +148,8 @@ public class AttendancePanel extends VerticalLayout implements View {
 	BeanContainer<Long,Salary> salaryContainer = new BeanContainer<Long,Salary>(Salary.class);
 	BeanItemContainer<AbsenceVO> absenceContainer = new BeanItemContainer<AbsenceVO>(AbsenceVO.class);
 	BeanItemContainer<ConstructionSite> constructionContainer = new BeanItemContainer<ConstructionSite>(ConstructionSite.class);
+	BeanItemContainer<AdvancePaymentItem> container = new BeanItemContainer<AdvancePaymentItem>(AdvancePaymentItem.class);
+
 
 	/** COMPONENTES **/
 	ProgressBar progress;
@@ -1559,10 +1561,9 @@ public class AttendancePanel extends VerticalLayout implements View {
 																				addComponent(failureDiscount);
 																			}
 																		});
-																		
-																		
-																		final BeanItemContainer<AdvancePaymentItem> container = new BeanItemContainer<AdvancePaymentItem>(AdvancePaymentItem.class,advancepayment.getAdvancePaymentTable());
-																		
+
+																		container = new BeanItemContainer<AdvancePaymentItem>(AdvancePaymentItem.class,advancepayment.getAdvancePaymentTable());
+
 																		HorizontalLayout hl = new HorizontalLayout(){
 																			{
 																				setSpacing(true);
@@ -1665,13 +1666,7 @@ public class AttendancePanel extends VerticalLayout implements View {
 																		table.setEditable(true);
 																		
 																		addComponent(table);
-
-																		for(AdvancePaymentItem api : container.getItemIds()){
-																			logger.debug("VER: "+api.getSupleCode());
-																			logger.debug("VER: "+api.getSupleTotalAmount());
-																			logger.debug("VERll: "+container.getItem(api).getItemProperty("supleTotalAmount").getValue());																		
-																		}
-
+																		
 																		if(!SecurityHelper.hasPermission(Permission.DEFINIR_VARIABLE_GLOBAL)){
 																			setEnabled(false);
 																		}else{
@@ -1696,17 +1691,34 @@ public class AttendancePanel extends VerticalLayout implements View {
 
 													@Override
 													public void buttonClick(ClickEvent event) {
-														try {
-															fg.commit();
+														for(AdvancePaymentItem api : container.getItemIds()){
+															api.setSupleCode((Integer) container.getContainerProperty(api, "supleCode").getValue());
+															api.setSupleIncreaseAmount((Double) container.getContainerProperty(api, "supleIncreaseAmount").getValue());
+															api.setSupleNormalAmount((Double) container.getContainerProperty(api, "supleNormalAmount").getValue());
 															
-															
-															
-															
-														} catch (CommitException e) {
-															// TODO Auto-generated catch block
-															e.printStackTrace();
+															logger.debug("VER total: "+api.getSupleTotalAmount());
+															logger.debug("VER increase: "+api.getSupleIncreaseAmount());
+															logger.debug("VER normal: "+api.getSupleNormalAmount());
 														}
 														
+														for(Object itemId : salaryContainer.getItemIds()){
+															BeanItem<Attendance> attendanceItem = attendanceContainer.getItem(itemId);
+															logger.debug("VER attendance item: "+attendanceItem.getItemPropertyIds());
+															
+															BeanItem<Salary> salaryItem = salaryContainer.getItem(itemId);		
+															logger.debug("VER salary item: "+salaryItem.getItemPropertyIds());
+															
+															Salary salary = salaryItem.getBean();
+															logger.debug("VER salary: "+salary.getAttendance());
+															
+															Attendance attendance = attendanceItem.getBean();
+															logger.debug("VER attendance: "+attendance.getId());
+															
+															salary.setAdvancePaymentConfiguration(attendance);														
+															
+														}
+														
+														supleTable.refreshRowCache();
 														window.close();
 
 													}
