@@ -98,7 +98,7 @@ public class Contract implements Serializable {
     @Column(name = "job",nullable = false)
     private Job job;
     
-    @JoinColumn(name="specialityId",nullable = false)
+    @JoinColumn(name="specialityId")
     Speciality speciality;
     
     @Column(name="job_code",nullable = false)
