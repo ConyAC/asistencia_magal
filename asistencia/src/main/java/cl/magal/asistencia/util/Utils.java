@@ -26,6 +26,7 @@ import cl.magal.asistencia.entities.Vacation;
 import com.vaadin.data.Validator.InvalidValueException;
 import com.vaadin.data.fieldgroup.FieldGroup.CommitException;
 import com.vaadin.data.util.BeanItem;
+import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.data.util.MethodProperty;
 import com.vaadin.ui.Field;
 import com.vaadin.ui.Notification;
@@ -227,6 +228,59 @@ public class Utils {
 			 calA.add(Calendar.DATE, 1);
 			}	
 		}		
+		return false;
+	}
+
+	/**
+	 * Permite buscar en el container si existe un item con la propiedad dada
+	 * @param container
+	 * @param propertyId
+	 * @param value
+	 * @return Verdadero si el contenedor contiene el valor dado en la propiedad dada, y falso si no.
+	 */
+	public static boolean containsContainer(BeanItemContainer container, String propertyId,String value) {
+		if(!container.getContainerPropertyIds().contains(propertyId) )
+			throw new RuntimeException("El contenedor no tiene la propiedad \""+propertyId+"\" dada.");
+		for(Object itemId : container.getItemIds()){
+			BeanItem item = container.getItem(itemId);
+			if(item.getItemProperty(propertyId).getValue().equals(value))
+				return true;
+		}
+		return false;
+	}
+	
+	/**
+	 * Permite buscar en el container si existe un item con la propiedad dada
+	 * @param container
+	 * @param propertyId
+	 * @param value
+	 * @return Verdadero si el contenedor contiene el valor dado en la propiedad dada, y falso si no.
+	 */
+	public static boolean containsTwoContainer(BeanItemContainer container, String[] propertyIds,Object[] values) {
+		//los arreglos deben ser distintos de null
+		if(propertyIds == null || values == null )
+			throw new RuntimeException("Los arreglos de propiedades y valores deben ser distintos de null");
+		
+		//el contenedor debe las propiedades
+		for(String propertyId : propertyIds)
+			if(!container.getContainerPropertyIds().contains(propertyId) )
+				throw new RuntimeException("El contenedor no tiene la propiedad \""+propertyId+"\" dada.");
+		// los largos de los arreglos deben coincidir
+		if(propertyIds.length != values.length)
+			throw new RuntimeException("Los arreglos de propiedades y valores deben tener el mismo largo.");
+		int counts = 0;
+		for(Object itemId : container.getItemIds()){
+			BeanItem item = container.getItem(itemId);
+			boolean isEquals = true;
+			for(int i = 0 ; i < propertyIds.length ; i++){
+				isEquals &= item.getItemProperty(propertyIds[i]).getValue().equals(values[i]); 
+			}
+			if(isEquals){
+				counts++;
+				if(counts > 1)
+					return true;
+			}
+		}
 		return false;
 	}
 }

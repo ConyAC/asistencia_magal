@@ -19,8 +19,8 @@ import org.joda.time.DateTime;
 import org.joda.time.Days;
 
 @Entity
-@Table(name="vacation")
-public class Vacation implements Serializable {
+@Table(name="progressive_vacation")
+public class ProgressiveVacation implements Serializable {
 	/**
 	 * 
 	 */
@@ -28,7 +28,7 @@ public class Vacation implements Serializable {
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name="vacationId")
+	@Column(name="progressive_vacationId")
 	Long id;
 	
 	@NotNull(message="La fecha inicial es necesaria.")
@@ -41,6 +41,9 @@ public class Vacation implements Serializable {
 	@Column(name = "to_date" )
 	Date toDate;
 	
+	@Column(name = "progressive" )
+	int progressive;
+	
 	@ManyToOne
 	@JoinColumn(name ="laborer_constructionsiteId",updatable=false,nullable=false)
 	LaborerConstructionsite laborerConstructionSite;
@@ -48,6 +51,14 @@ public class Vacation implements Serializable {
 	@Column(name = "confirmed" )
 	boolean confirmed = false;
 	
+	public int getProgressive() {
+		return progressive;
+	}
+
+	public void setProgressive(int progressive) {
+		this.progressive = progressive;
+	}
+
 	public Long getId() {
 		return id;
 	}

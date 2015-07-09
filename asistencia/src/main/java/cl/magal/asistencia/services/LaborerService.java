@@ -225,5 +225,14 @@ public class LaborerService {
 			throw new RuntimeException("La fecha de termino de contrato es necesario");
 		Double avg = salaryRepo.calculateJornalPromedioAvg(lc,date);
 		return avg != null ? avg : 0;
+	}
+
+	/**
+	 * Busca un trabajador por su rut
+	 * @param rut
+	 * @return
+	 */
+	public Laborer findByRut(String rut) {
+		return laborerRepo.findByRut(rut);
 	}	
 }

@@ -20,6 +20,7 @@ import cl.magal.asistencia.entities.ConstructionSite;
 import cl.magal.asistencia.entities.Contract;
 import cl.magal.asistencia.entities.Laborer;
 import cl.magal.asistencia.entities.LaborerConstructionsite;
+import cl.magal.asistencia.entities.Speciality;
 import cl.magal.asistencia.entities.enums.Job;
 import cl.magal.asistencia.entities.enums.Permission;
 import cl.magal.asistencia.entities.validator.RutDigitValidator;
@@ -33,10 +34,12 @@ import cl.magal.asistencia.util.SecurityHelper;
 import cl.magal.asistencia.util.Utils;
 import cl.magal.asistencia.util.VelocityHelper;
 
+import com.vaadin.data.Container.Filter;
 import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.util.BeanItem;
 import com.vaadin.data.util.BeanItemContainer;
+import com.vaadin.data.util.filter.Compare;
 import com.vaadin.data.validator.BeanValidator;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.StreamResource;
@@ -72,10 +75,11 @@ public class AddLaborerContractDialog extends AbstractWindowEditor implements Ne
 	transient ConstructionSiteService constructionSiteService;
 	transient ConfigurationService configurationService;
 	BeanItemContainer<Laborer> laborersBC = new BeanItemContainer<Laborer>(Laborer.class);
+	BeanItemContainer<Speciality> specialityBC = new BeanItemContainer<Speciality>(Speciality.class);
 	boolean addLaborer = false;
 	transient private VelocityEngine velocityEngine;
 	
-	ComboBox cbRut,cbJob,cbStep;
+	ComboBox cbRut,cbJob,cbSpeciality,cbStep;
 	TextField lbCodJob;
 	DateField dfAdmissionDate;
 	
@@ -101,6 +105,8 @@ public class AddLaborerContractDialog extends AbstractWindowEditor implements Ne
 		}else {
 			laborersBC.addBean(((LaborerConstructionsite) getItem().getBean()).getLaborer());
 		}
+		//agrega las especialidad
+		specialityBC.addAll( constructionSiteService.findSpecialitiesByConstructionSite(((LaborerConstructionsite) getItem().getBean()).getConstructionsite()) );
 		//cambia el texto del guardar
 		if(addLaborer)
 			getBtnGuardar().setCaption("Guardar");
@@ -173,23 +179,37 @@ public class AddLaborerContractDialog extends AbstractWindowEditor implements Ne
 		cbJob.setRequired(true);
 		cbJob.setRequiredError("Debe definir un oficio");
 		
-		for(Job j : Job.values()){
-			cbJob.addItem(j);
+		for(Job job : Job.values()){
+			cbJob.addItem(job);
 		}
 		
 		gl.addComponent(cbJob,0,rows);
 		gl.setComponentAlignment(cbJob, Alignment.MIDDLE_CENTER);	
 		
+		//campos asociados a la obra/contrato
+		cbSpeciality = new ComboBox("Especialidad");
+		cbSpeciality.setEnabled(false);
+		cbSpeciality.setTabIndex(3);
+		cbSpeciality.setRequired(true);
+		cbSpeciality.setRequiredError("Debe definir una especialidad");
+		cbSpeciality.setItemCaptionMode(ItemCaptionMode.PROPERTY);
+		cbSpeciality.setItemCaptionPropertyId("name");
+		
+		cbSpeciality.setContainerDataSource(specialityBC);
+		
+		gl.addComponent(cbSpeciality,1,rows);
+		gl.setComponentAlignment(cbSpeciality, Alignment.MIDDLE_CENTER);	
+		
 		// codigo por asignar
 		lbCodJob = new TextField("Rol asignado a Trabajador");
 		lbCodJob.setReadOnly(true);
-		gl.addComponent(lbCodJob,1,rows);
+		gl.addComponent(lbCodJob,2,rows++);
 		gl.setComponentAlignment(lbCodJob, Alignment.MIDDLE_CENTER);	
 		
 		// codigo por asignar
 		ComboBox cbSupleCode = new ComboBox("Código Suple");
 		cbSupleCode.setRequired(true);
-		gl.addComponent(cbSupleCode,2,rows++);
+		gl.addComponent(cbSupleCode,0,rows++);
 		gl.setComponentAlignment(cbSupleCode, Alignment.MIDDLE_CENTER);
 		AdvancePaymentConfigurations supleConfigurations = configurationService.getSupleTableByCs(((BeanItem<LaborerConstructionsite>) getItem()).getBean().getConstructionsite());
 		Map<Integer, AdvancePaymentItem> paymentTable = supleConfigurations.getMapTable();
@@ -202,8 +222,14 @@ public class AddLaborerContractDialog extends AbstractWindowEditor implements Ne
 			
 			@Override
 			public void valueChange(ValueChangeEvent event) {
-				String newCode = laborerService.getNextJobCode((Job) event.getProperty().getValue() ,((BeanItem<LaborerConstructionsite>) getItem()).getBean().getConstructionsite() )+"";
+				Job job = (Job) event.getProperty().getValue();
+				String newCode = laborerService.getNextJobCode( job,((BeanItem<LaborerConstructionsite>) getItem()).getBean().getConstructionsite() )+"";
 				Utils.setLabelValue(lbCodJob,newCode);
+				//filtra la lista de especialidades
+				specialityBC.removeAllContainerFilters();
+				Filter filter = new Compare.Equal("job",job);
+				specialityBC.addContainerFilter(filter);
+				cbSpeciality.setEnabled(true);
 			}
 		});
 		
@@ -280,6 +306,17 @@ public class AddLaborerContractDialog extends AbstractWindowEditor implements Ne
 				laborersBC.removeItem(itemId);
 			}
 		}
+		
+		//si el rut no tiene guion, lo agrega al final
+		if(newItemCaption != null && !newItemCaption.contains("-"))
+			newItemCaption = new StringBuilder(newItemCaption).insert(newItemCaption.length() - 1, "-").toString();
+		//busca si ya existia en el combobox
+		Laborer l = laborerService.findByRut(newItemCaption);
+		if(l != null){
+			cbRut.select(l);
+			return ;
+		}
+		//si no existe hace todo el proceso de nuevo trabajador
 		Laborer laborer = new Laborer();
 		laborer.setRut(newItemCaption);
 		//por defecto el nuevo trabajador tiene al menos 18 años
@@ -293,7 +330,6 @@ public class AddLaborerContractDialog extends AbstractWindowEditor implements Ne
 		String msj = null;
 		//valida que el trabajador seleccionado éste creado
 		Laborer laborer = (Laborer) cbRut.getValue();
-		Job job = (Job) cbJob.getValue();
 		
 		if( !cbRut.isValid() )
 			msj = cbRut.getRequiredError();
@@ -323,10 +359,11 @@ public class AddLaborerContractDialog extends AbstractWindowEditor implements Ne
 				msj = cbStep.getRequiredError();
 			else if( !dfAdmissionDate.isValid() )
 				msj = dfAdmissionDate.getRequiredError();
-			
+			else if( !cbSpeciality.isValid() )
+				msj = cbSpeciality.getRequiredError();
 		}
 		
-		
+		Speciality speciality = (Speciality) cbSpeciality.getValue();
 		if(msj != null)
 			Notification.show(msj,Type.ERROR_MESSAGE);
 		else{ //si pasa todas las validaciones, lo agrega al item para guardar
@@ -335,11 +372,14 @@ public class AddLaborerContractDialog extends AbstractWindowEditor implements Ne
 				((BeanItem<LaborerConstructionsite>) getItem()).getBean().setConfirmed( SecurityHelper.hasPermission(Permission.CONFIRMAR_OBREROS) );
 				((BeanItem<LaborerConstructionsite>) getItem()).getBean().setLaborer(laborer);
 			}
+
+			Job job = speciality.getJob();
 			
 			//crea el contrato
 			Contract contract = new Contract();
 			contract.setStartDate(dfAdmissionDate.getValue());
 			contract.setName(laborer.getFullname());
+			contract.setSpeciality(speciality);
 			contract.setJob(job);
 			contract.setJobCode(Integer.valueOf(lbCodJob.getValue()));
 			contract.setStep((String) cbStep.getValue());

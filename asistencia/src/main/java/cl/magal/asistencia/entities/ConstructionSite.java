@@ -224,7 +224,7 @@ public class ConstructionSite implements Serializable {
 //	public void setTeams(List<Team> teams) {
 //		this.teams = teams;
 //	}
-	
+
 	public List<User> getUsers() {
 		if(users == null)
 			users = new ArrayList<User>();

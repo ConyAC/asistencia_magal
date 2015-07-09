@@ -30,6 +30,8 @@ import cl.magal.asistencia.entities.Contract;
 import cl.magal.asistencia.entities.LaborerConstructionsite;
 import cl.magal.asistencia.entities.License;
 import cl.magal.asistencia.entities.Loan;
+import cl.magal.asistencia.entities.ProgressiveVacation;
+import cl.magal.asistencia.entities.Speciality;
 import cl.magal.asistencia.entities.Tool;
 import cl.magal.asistencia.entities.User;
 import cl.magal.asistencia.entities.Vacation;
@@ -108,7 +110,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 	LaborerConstructionsite laborerConstructionSite;
 
 	private Validator validator;
-	
+
 	boolean readOnly = false;
 
 	public LaborerConstructionDialog(BeanItem<LaborerConstructionsite> item,boolean readOnly){
@@ -175,18 +177,18 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 	}
 
 	private Component drawInformation() {
-		
+
 		GridLayout gl  = new GridLayout(3,8);
 		gl.setWidth("100%");
 		gl.setSpacing(true);
-		
+
 		gl.addComponent(new Label("<h2>Información de Obra : </h2>",ContentMode.HTML),0,0,2,0);
 
 		final DateField startDate = new DateField("Fecha Inicial",getItem().getItemProperty("rewardStartDate"));
 		startDate.setImmediate(true);
 		final DateField endDate = new DateField("Fecha Final",getItem().getItemProperty("rewardEndDate"));
 		endDate.setImmediate(true);
-		
+
 		TextField tfSuple = new TextField("Código Suple", getItem().getItemProperty("supleCode"));
 		tfSuple.setNullRepresentation("");
 
@@ -219,7 +221,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 
 			}
 		};
-		
+
 		gl.addComponent( vl,0,1);
 		gl.setComponentAlignment(vl, Alignment.MIDDLE_CENTER);
 		gl.addComponent(startDate,1,1);
@@ -228,9 +230,9 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 		gl.setComponentAlignment(endDate, Alignment.TOP_CENTER);
 		gl.addComponent(tfSuple,0,2);
 		gl.setComponentAlignment(tfSuple, Alignment.TOP_CENTER);
-		
+
 		gl.addComponent(new LaborerBaseInformation(getBinder(),"laborer",true),0,3,2,3);
-		
+
 		return gl;
 	}
 
@@ -268,9 +270,12 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 				//gl.setComponentAlignment(hl, Alignment.MIDDLE_CENTER);
 
 				gl.addComponent(new Label("Rol :   "));gl.addComponent(new Label(getItem().getItemProperty("activeContract.jobCode")));
+				gl.addComponent(new Label("Oficio :   "));gl.addComponent(new Label(getItem().getItemProperty("activeContract.job")));
+				Speciality speciality = (Speciality)getItem().getItemProperty("activeContract.speciality").getValue();
+				gl.addComponent(new Label("Especialidad :   "));gl.addComponent(new Label( speciality != null ? speciality.getName(): ""));
 				gl.addComponent(new Label("Nombre :   "));gl.addComponent(new Label(getItem().getItemProperty("laborer.fullname")));
 				gl.addComponent(new Label("Rut :   "));gl.addComponent(new Label(getItem().getItemProperty("laborer.rut")));
-				gl.addComponent(new Label("Fecha Nacimiento :   "));gl.addComponent(new Label(getItem().getItemProperty("laborer.dateBirth")));
+				gl.addComponent(new Label("Fecha Nacimiento :   "));gl.addComponent(new Label( getItem().getItemProperty("laborer.dateBirthString") ));
 				String marital = MaritalStatus.CASADO.toString();
 				try{
 					marital = ((MaritalStatus)getItem().getItemProperty("laborer.maritalStatus").getValue()).toString();
@@ -288,10 +293,10 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 
 				if(getItem().getItemProperty("activeContract.startDate").getValue() != null){
 					gl.addComponent(new Label("Fecha Ingreso : "));
-					gl.addComponent(new Label(getItem().getItemProperty("activeContract.startDate")));
+					gl.addComponent(new Label(getItem().getItemProperty("activeContract.startDateString")));
 				}
 				gl.addComponent(new Label("Premio : "));gl.addComponent(new Label(getItem().getItemProperty("reward").getValue()+""));
-				
+
 				if(getItem().getItemProperty("laborer.dependents").getValue() != null){
 					gl.addComponent(new Label("Cargas : "));gl.addComponent(new Label(getItem().getItemProperty("laborer.dependents").getValue()+""));
 				}
@@ -439,19 +444,19 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 			@Override
 			public Component generateCell(Table source, final Object itemId, Object columnId) {
 				BeanItem<Tool> toolBean = beanItemTool.getItem(itemId);
-                final CheckBox tcb = new CheckBox("",toolBean.getItemProperty("postponed"));
-                tcb.setImmediate(true);
-                Date firstDayOfCurrentMonth = new DateTime().dayOfMonth().withMinimumValue().toDate();
-                if(  Utils.containsMonth(toolBean.getBean().getDatePostponed(), firstDayOfCurrentMonth) ){                
-                   	 tcb.setValue(true);
-                }else{
-                	 tcb.setValue(false);
-                }
-                return tcb;
+				final CheckBox tcb = new CheckBox("",toolBean.getItemProperty("postponed"));
+				tcb.setImmediate(true);
+				Date firstDayOfCurrentMonth = new DateTime().dayOfMonth().withMinimumValue().toDate();
+				if(  Utils.containsMonth(toolBean.getBean().getDatePostponed(), firstDayOfCurrentMonth) ){                
+					tcb.setValue(true);
+				}else{
+					tcb.setValue(false);
+				}
+				return tcb;
 
 			}
 		});
-		
+
 		tableTool.addGeneratedColumn("eliminar", new Table.ColumnGenerator() {
 
 			@Override
@@ -498,7 +503,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 			btnAddP = new Button(null,FontAwesome.PLUS);
 			hl2.addComponent(btnAddP);
 			hl2.setComponentAlignment(btnAddP, Alignment.MIDDLE_RIGHT);
-			
+
 			btnAddP.addClickListener(new Button.ClickListener() {
 
 				@Override
@@ -541,24 +546,24 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 				return field;
 			}
 		});
-		
+
 		tableLoan.addGeneratedColumn("selected", new Table.ColumnGenerator() {
 
 			@Override
 			public Component generateCell(Table source, Object itemId, Object columnId) {
 				BeanItem<Loan> loanBean = beanItemLoan.getItem(itemId);
-                final CheckBox lcb = new CheckBox("", loanBean.getItemProperty("postponed"));
-                lcb.setImmediate(true);
-                Date firstDayOfCurrentMonth = new DateTime().dayOfMonth().withMinimumValue().toDate();
-                if(  Utils.containsMonth(loanBean.getBean().getDatePostponed(), firstDayOfCurrentMonth) ){                
-                	lcb.setValue(true);
-                }else{
-                	lcb.setValue(false);
-                }
-                return lcb;
+				final CheckBox lcb = new CheckBox("", loanBean.getItemProperty("postponed"));
+				lcb.setImmediate(true);
+				Date firstDayOfCurrentMonth = new DateTime().dayOfMonth().withMinimumValue().toDate();
+				if(  Utils.containsMonth(loanBean.getBean().getDatePostponed(), firstDayOfCurrentMonth) ){                
+					lcb.setValue(true);
+				}else{
+					lcb.setValue(false);
+				}
+				return lcb;
 			}
 		});
-		
+
 		tableLoan.addGeneratedColumn("eliminar", new Table.ColumnGenerator() {
 
 			@Override
@@ -833,35 +838,35 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 			gl2.addComponent( new HorizontalLayout(){
 				{
 					setWidth("100%");
-//					Button AgregarAnexo = new Button(null,new Button.ClickListener() {
-//
-//						@Override
-//						public void buttonClick(ClickEvent event) {
-//
-//							AddAnnexedContractDialog userWindow = new AddAnnexedContractDialog(new BeanItem<Contract>(((LaborerConstructionsite)getItem().getBean()).getActiveContract()));
-//							userWindow.addListener(new AbstractWindowEditor.EditorSavedListener() {
-//
-//								@Override
-//								public void editorSaved(EditorSavedEvent event) {
-//									try {
-//										//TODO definir si guardará o no el estado del laborer en esta etapa
-//										BeanItem<Contract>	newBeanItem = (BeanItem<Contract>) event.getSavedItem();
-//
-//										beanContainerAnnexeds.removeAllItems();
-//										beanContainerAnnexeds.addAll((Collection<? extends Annexed>) newBeanItem.getItemProperty("annexeds").getValue());
-//
-//									} catch (Exception e) {
-//										logger.error("Error al guardar la información del obrero",e);
-//										Notification.show("Es necesario agregar todos los campos obligatorios", Type.ERROR_MESSAGE);
-//									}
-//								}
-//							});
-//
-//							UI.getCurrent().addWindow(userWindow);
-//						}
-//					}){{setIcon(FontAwesome.PLUS);}};
-//					addComponent(AgregarAnexo);
-//					setComponentAlignment(AgregarAnexo, Alignment.MIDDLE_CENTER);
+					//					Button AgregarAnexo = new Button(null,new Button.ClickListener() {
+					//
+					//						@Override
+					//						public void buttonClick(ClickEvent event) {
+					//
+					//							AddAnnexedContractDialog userWindow = new AddAnnexedContractDialog(new BeanItem<Contract>(((LaborerConstructionsite)getItem().getBean()).getActiveContract()));
+					//							userWindow.addListener(new AbstractWindowEditor.EditorSavedListener() {
+					//
+					//								@Override
+					//								public void editorSaved(EditorSavedEvent event) {
+					//									try {
+					//										//TODO definir si guardará o no el estado del laborer en esta etapa
+					//										BeanItem<Contract>	newBeanItem = (BeanItem<Contract>) event.getSavedItem();
+					//
+					//										beanContainerAnnexeds.removeAllItems();
+					//										beanContainerAnnexeds.addAll((Collection<? extends Annexed>) newBeanItem.getItemProperty("annexeds").getValue());
+					//
+					//									} catch (Exception e) {
+					//										logger.error("Error al guardar la información del obrero",e);
+					//										Notification.show("Es necesario agregar todos los campos obligatorios", Type.ERROR_MESSAGE);
+					//									}
+					//								}
+					//							});
+					//
+					//							UI.getCurrent().addWindow(userWindow);
+					//						}
+					//					}){{setIcon(FontAwesome.PLUS);}};
+					//					addComponent(AgregarAnexo);
+					//					setComponentAlignment(AgregarAnexo, Alignment.MIDDLE_CENTER);
 				}
 			},columna--,fila++);
 		else{ columna--;fila++;}
@@ -939,11 +944,11 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 	 * @return
 	 */
 	protected double calculateSettlement(LaborerConstructionsite lc) {
-		
+
 		//TODO
 		double JornalPromedio = service.getJornalPromedioLastThreeMonth(lc,lc.getActiveContract().getTerminationDate());
 		logger.debug("JornalPromedio {}",JornalPromedio);
-		
+
 		double MesPorAnoCod = 1,MesPorAnoCant = 1;
 		double DesahucioCod = 1,DesahucioCant = 1;
 		Period period = new Period(new DateTime(lc.getActiveContract().getStartDate()), new DateTime(lc.getActiveContract().getTerminationDate()));
@@ -952,7 +957,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 		logger.debug("AnoDuracionContrato {}",AnoDuracionContrato);
 		double vacacionesTomadas = calcularUsadas(vacationContainer.getItemIds());
 		logger.debug("vacacionesTomadas {}",vacacionesTomadas);
-		
+
 		double MesPorAno = 30 * JornalPromedio * MesPorAnoCod * MesPorAnoCant;
 		double Desahucio = 30 * JornalPromedio * DesahucioCod * DesahucioCant;
 		double Vacaciones = AnoDuracionContrato * 12 * 1.75 * JornalPromedio;
@@ -962,7 +967,9 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 	}
 
 	Label lbJob ,lbJobCode,lbStep ,lbStarting, lbEnding,lbSettlement,lbStatus;
-	BeanItemContainer<Vacation> vacationContainer;BeanItemContainer<License> absenceContainer;BeanItemContainer<Accident> accidentContainer;
+	BeanItemContainer<Vacation> vacationContainer;
+	BeanItemContainer<License> absenceContainer;BeanItemContainer<Accident> accidentContainer;
+	BeanItemContainer<ProgressiveVacation> progressiveVacationContainer;
 
 	private void setContractGl(final Contract activeContract) {
 
@@ -996,7 +1003,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 			}
 		});
 		table.setCellStyleGenerator(new Table.CellStyleGenerator() {
-			
+
 			@Override
 			public String getStyle(Table source, Object itemId, Object propertyId) {
 				if(propertyId == null ){ //estilo para la fila
@@ -1329,6 +1336,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 
 					}
 				});
+
 				vacationTable.setPageLength(5);
 				vacationTable.setReadOnly(readOnly);
 				vacationTable.setWidth("100%");
@@ -1432,13 +1440,137 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 
 				});
 
-				vacationTable.setVisibleColumns("fromDate","toDate","total","progressive","print");
-				vacationTable.setColumnHeaders("Desde","Hasta","Total","Progresivas","Acciones");
+				vacationTable.setVisibleColumns("fromDate","toDate","total","print");
+				vacationTable.setColumnHeaders("Desde","Hasta","Total","Acciones");
 				vacationTable.setEditable(!readOnly);
-
 				vacationTable.setColumnWidth("print", 130);
 
 				addComponent(vacationTable);
+
+				progressiveVacationContainer = new BeanItemContainer<ProgressiveVacation>(ProgressiveVacation.class);
+				progressiveVacationContainer.addAll(new ArrayList<ProgressiveVacation>((Collection<? extends ProgressiveVacation>) getItem().getItemProperty("progressiveVacation").getValue()));
+
+
+				if(!readOnly){
+					Button addVacation = new Button(null,new Button.ClickListener() {
+
+						@Override
+						public void buttonClick(ClickEvent event) {
+							ProgressiveVacation vacation = new ProgressiveVacation();
+							vacation.setLaborerConstructionSite(laborerConstructionSite);
+							progressiveVacationContainer.addBean(vacation);
+
+						}
+					}){{setIcon(FontAwesome.PLUS);}};
+					addComponent(addVacation);
+					setComponentAlignment(addVacation, Alignment.MIDDLE_RIGHT);
+				}
+
+				Table vacationProgressiveTable = new Table("Vacaciones Progresivas");
+				vacationProgressiveTable.setPageLength(2);
+				vacationProgressiveTable.setReadOnly(readOnly);
+				vacationProgressiveTable.setWidth("100%");
+				vacationProgressiveTable.setContainerDataSource(progressiveVacationContainer);
+
+				vacationProgressiveTable.addGeneratedColumn("total", new Table.ColumnGenerator() {
+
+					@Override
+					public Object generateCell(Table source, Object itemId, Object columnId) {
+
+						final BeanItem<?> item = (BeanItem<?>) source.getItem(itemId);
+						final Label label  = new Label(""+ source.getContainerProperty(itemId, columnId).getValue());
+						Property.ValueChangeListener listener = new Property.ValueChangeListener() {
+							@Override
+							public void valueChange(Property.ValueChangeEvent event) {
+								label.setValue(((ProgressiveVacation) item.getBean()).getTotal()+"");
+							}
+						};
+						for (String pid: new String[]{"fromDate", "toDate"})
+							((ValueChangeNotifier)item.getItemProperty(pid)).addValueChangeListener(listener);
+
+						return label; 
+					}
+				});
+
+				vacationProgressiveTable.setTableFieldFactory(new OnValueChangeFieldFactory(2));
+
+				vacationProgressiveTable.addGeneratedColumn("print", new Table.ColumnGenerator() {
+
+					@Override
+					public Object generateCell(Table source, final Object itemId, Object columnId) {
+
+						HorizontalLayout hl = new HorizontalLayout();
+						hl.setSpacing(true);
+
+						Button btnPrint = new Button(null,FontAwesome.PRINT);
+
+						btnPrint.addClickListener(new Button.ClickListener() {
+
+							@Override
+							public void buttonClick(ClickEvent event) {
+
+								final Map<String, Object> input = new HashMap<String, Object>();
+								input.put("laborerConstructions", new LaborerConstructionsite[] {(LaborerConstructionsite)getItem().getBean()});
+								VelocityHelper.addTools(input);
+
+								final String body = VelocityEngineUtils.mergeTemplateIntoString(velocityEngine, "templates/progressive_vacation_doc.vm", "UTF-8", input);
+
+								StreamResource.StreamSource source2 = new StreamResource.StreamSource() {
+
+									public InputStream getStream() {
+										//throw new UnsupportedOperationException("Not supported yet.");
+										return new ByteArrayInputStream(body.getBytes());
+									}
+								};
+								StreamResource resource = new StreamResource(source2, "vacaciones_progressivas.html");
+
+								Window window = new Window();
+								window.setResizable(true);
+								window.setWidth("60%");
+								window.setHeight("60%");
+								window.center();
+								BrowserFrame e = new BrowserFrame();
+								e.setSizeFull();
+
+								resource.setMIMEType("text/html");
+
+								e.setSource(resource);
+								window.setContent(e);
+								UI.getCurrent().addWindow(window);
+
+							}
+
+						});
+
+						hl.addComponent(btnPrint);
+
+						hl.addComponent(new Button(null,new Button.ClickListener() {
+
+							@Override
+							public void buttonClick(ClickEvent event) {
+								ConfirmDialog.show(UI.getCurrent(), "Confirmar Acción:", "¿Está seguro de eliminar la vacación seleccionada?",
+										"Eliminar", "Cancelar", new ConfirmDialog.Listener() {
+
+									public void onClose(ConfirmDialog dialog) {
+										if (dialog.isConfirmed()) {
+											progressiveVacationContainer.removeItem(itemId);
+										}
+									}
+								});
+							}
+						}){{setIcon(FontAwesome.TRASH_O);}});
+
+						return hl;
+					}
+
+				});
+
+				vacationProgressiveTable.setVisibleColumns("fromDate","toDate","total","print");
+				vacationProgressiveTable.setColumnHeaders("Desde","Hasta","Total","Acciones");
+				vacationProgressiveTable.setEditable(!readOnly);
+				vacationProgressiveTable.setColumnWidth("print", 130);
+
+				addComponent(vacationProgressiveTable);
 			}
 		};
 	}
@@ -1460,6 +1592,20 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 			laborer.addVacation(vacation);
 		}
 		getItem().getItemProperty("vacations").setValue(laborer.getVacations()); // no se si esto es necesario
+		
+		//vacaciones progresivas
+		laborer.getProgressiveVacation().clear();
+		for(ProgressiveVacation vacation : progressiveVacationContainer.getItemIds()){
+			// valida las vacaciones
+			Set<ConstraintViolation<ProgressiveVacation>> constraintViolations = validator.validate(vacation);
+			if(constraintViolations.size() > 0 ){
+				Notification.show("Una vacación progresiva es inválida \""+ constraintViolations.iterator().next().getMessage()+"\"",Type.ERROR_MESSAGE);
+				tab.setSelectedTab(2);
+				return false;
+			}
+			laborer.addProgressiveVacation(vacation);
+		}
+		getItem().getItemProperty("progressiveVacation").setValue(laborer.getProgressiveVacation()); // no se si esto es necesario
 
 		//accidentes
 		laborer.getAccidents().clear();
@@ -1498,26 +1644,26 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 				tab.setSelectedTab(3);
 				return false;
 			}
-            firstDayOfCurrentMonth = new DateTime().dayOfMonth().withMinimumValue().toDate();
-            //si está marcado como pospuesto, verifica que exista la fecha, si no la tiene la agrega
-            if(t.isPostponed()){
-                if(!Utils.containsMonth(t.getDatePostponed(), firstDayOfCurrentMonth)){
-                    // agrega el primero del mes actual
-                	if(firstDayOfCurrentMonth != null)
-                		t.getDatePostponed().add(firstDayOfCurrentMonth);
-                }
-            } else {
-                // si no está pospuesto y tiene la fecha actual, la quita
-                if(Utils.containsMonth(t.getDatePostponed(), firstDayOfCurrentMonth)){
-                	if(firstDayOfCurrentMonth != null)
-                		t.getDatePostponed().remove(firstDayOfCurrentMonth);
-                }
-            }                
-        laborer.addTool(t);
-    }
+			firstDayOfCurrentMonth = new DateTime().dayOfMonth().withMinimumValue().toDate();
+			//si está marcado como pospuesto, verifica que exista la fecha, si no la tiene la agrega
+			if(t.isPostponed()){
+				if(!Utils.containsMonth(t.getDatePostponed(), firstDayOfCurrentMonth)){
+					// agrega el primero del mes actual
+					if(firstDayOfCurrentMonth != null)
+						t.getDatePostponed().add(firstDayOfCurrentMonth);
+				}
+			} else {
+				// si no está pospuesto y tiene la fecha actual, la quita
+				if(Utils.containsMonth(t.getDatePostponed(), firstDayOfCurrentMonth)){
+					if(firstDayOfCurrentMonth != null)
+						t.getDatePostponed().remove(firstDayOfCurrentMonth);
+				}
+			}                
+			laborer.addTool(t);
+		}
 		getItem().getItemProperty("tool").setValue(laborer.getTool());
 
-		
+
 		laborer.getLoan().clear();		
 		for(Loan l : beanItemLoan.getItemIds()){
 			// valida los préstamos
@@ -1527,25 +1673,25 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 				tab.setSelectedTab(3);
 				return false;
 			}
-            firstDayOfCurrentMonth = new DateTime().dayOfMonth().withMinimumValue().toDate();
-            //si está marcado como pospuesto, verifica que exista la fecha, si no la tiene la agrega
-            if(l.isPostponed()){
-                if(!Utils.containsMonth(l.getDatePostponed(), firstDayOfCurrentMonth)){
-                    // agrega el primero del mes actual
-                	if(firstDayOfCurrentMonth != null)
-                		l.getDatePostponed().add(firstDayOfCurrentMonth);
-                }
-            } else {
-                // si no está pospuesto y tiene la fecha actual, la quita
-                if(Utils.containsMonth(l.getDatePostponed(), firstDayOfCurrentMonth)){
-                	if(firstDayOfCurrentMonth != null)
-                		l.getDatePostponed().remove(firstDayOfCurrentMonth);
-                }
-            }                
-        laborer.addLoan(l);
-    }
+			firstDayOfCurrentMonth = new DateTime().dayOfMonth().withMinimumValue().toDate();
+			//si está marcado como pospuesto, verifica que exista la fecha, si no la tiene la agrega
+			if(l.isPostponed()){
+				if(!Utils.containsMonth(l.getDatePostponed(), firstDayOfCurrentMonth)){
+					// agrega el primero del mes actual
+					if(firstDayOfCurrentMonth != null)
+						l.getDatePostponed().add(firstDayOfCurrentMonth);
+				}
+			} else {
+				// si no está pospuesto y tiene la fecha actual, la quita
+				if(Utils.containsMonth(l.getDatePostponed(), firstDayOfCurrentMonth)){
+					if(firstDayOfCurrentMonth != null)
+						l.getDatePostponed().remove(firstDayOfCurrentMonth);
+				}
+			}                
+			laborer.addLoan(l);
+		}
 		getItem().getItemProperty("loan").setValue(laborer.getLoan());
-		
+
 		return super.preCommit();
 	}
 
