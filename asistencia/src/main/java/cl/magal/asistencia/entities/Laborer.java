@@ -25,6 +25,7 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.UniqueConstraint;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 
@@ -42,6 +43,7 @@ import cl.magal.asistencia.entities.enums.MaritalStatus;
 import cl.magal.asistencia.entities.enums.Nationality;
 import cl.magal.asistencia.entities.validator.AgeMax;
 import cl.magal.asistencia.entities.validator.RutDigit;
+import cl.magal.asistencia.util.Utils;
 
 /**
  *
@@ -123,8 +125,13 @@ public class Laborer implements Serializable {
 //    @Column(name = "contractId")
 //    private Integer contractId;
     
+    @Column(name = "validity_pension_review")
+    @Temporal(TemporalType.DATE)
+    private Date validityPensionReview;
+    
     @Column(name="dependents")
-    private int dependents;
+    @Min(value=0,message="No puede tener menos de 0 cargas")
+    private Integer dependents;
     
     @Column(name="town")
     private String town;
@@ -247,10 +254,10 @@ public class Laborer implements Serializable {
 	}
 
 	public Integer getDependents() {
-		return dependents;
+		return dependents == null ? 0 : dependents;
 	}
 
-	public void setDependents(int dependents) {
+	public void setDependents(Integer dependents) {
 		this.dependents = dependents;
 	}
 
@@ -300,6 +307,10 @@ public class Laborer implements Serializable {
 
     public void setRut(String rut) {
         this.rut = rut;
+    }
+    
+    public String getDateBirthString() {
+        return Utils.date2String(dateBirth);
     }
 
     public Date getDateBirth() {
@@ -408,7 +419,15 @@ public class Laborer implements Serializable {
 
 	public void setBank(Bank bank) {
 		this.bank = bank;
-	}    
+	}
+
+	public Date getValidityPensionReview() {
+		return validityPensionReview;
+	}
+
+	public void setValidityPensionReview(Date validityPensionReview) {
+		this.validityPensionReview = validityPensionReview;
+	}
 
 	@Override
     public boolean equals(Object object) {

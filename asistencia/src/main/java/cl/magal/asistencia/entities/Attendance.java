@@ -337,7 +337,7 @@ public class Attendance implements Serializable {
 	}
 	
 //	public Integer getJornalPromedio() {
-//		return jornalPromedio;
+//		return jornalPromedio == null ? 0 : jornalPromedio;
 //	}
 //
 //	public void setJornalPromedio(Integer jornalPromedio) {

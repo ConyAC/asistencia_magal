@@ -201,7 +201,7 @@ public class AddTeamDialog extends AbstractWindowEditor {
 		});
 
 		laborersTeamTable.setVisibleColumns("jobCode","laborer.fullname","my_select");
-		laborersTeamTable.setColumnHeaders("Oficio","Nombre", "Eliminar");
+		laborersTeamTable.setColumnHeaders("Rol","Nombre", "Eliminar");
 		laborersTeamTable.setColumnWidth("my_select", 100);
 		laborersTeamTable.setSelectable(true);
 		return new Panel(hl){{setSizeFull();}};

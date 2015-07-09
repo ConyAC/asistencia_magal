@@ -18,7 +18,6 @@ import org.springframework.context.annotation.Scope;
 
 import ru.xpoft.vaadin.DiscoveryNavigator;
 import ru.xpoft.vaadin.SpringVaadinServlet;
-import cl.magal.asistencia.entities.enums.Permission;
 import cl.magal.asistencia.ui.config.ConfigView;
 import cl.magal.asistencia.ui.constructionsite.ConstructionSitesView;
 import cl.magal.asistencia.ui.login.LoginView;
@@ -56,7 +55,6 @@ import com.vaadin.ui.MenuBar.Command;
 import com.vaadin.ui.MenuBar.MenuItem;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Notification.Type;
-import com.vaadin.ui.Panel;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 
@@ -104,8 +102,10 @@ public class MagalUI extends UI implements ErrorHandler {
 
 		//raiz
 		root = new VerticalLayout();
+		setSizeFull();
 		setContent(root);
 		root.setSpacing(true);
+//		root.setMargin(true);
 		root.addStyleName("root");
 		root.setSizeFull();
 
@@ -130,7 +130,8 @@ public class MagalUI extends UI implements ErrorHandler {
 		top.setComponentAlignment(title,Alignment.TOP_LEFT);
 		top.setExpandRatio(title, 0.7F);
 
-		Panel content = new Panel();
+//		Panel content = new Panel();
+		VerticalLayout content = new VerticalLayout();
 		content.setSizeFull();
 		content.addStyleName("view-content");
 

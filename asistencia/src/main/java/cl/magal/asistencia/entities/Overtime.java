@@ -197,6 +197,27 @@ public class Overtime implements Serializable {
 	@Column(name = "dma31")
 	Integer dma31;
 	
+	public Integer getTotal(){
+		return sumIntegers(dma1,dma2,dma3,dma4
+		,dma5,dma6,dma7,dma8,dma9,dma10
+		,dma11,dma12,dma13,dma14,dma15,dma16
+		,dma17,dma18,dma19,dma20,dma21,dma22
+		,dma23,dma24,dma25,dma26,dma27,dma28
+		,dma29,dma30,dma31,dmp1,dmp2,dmp3,dmp4
+		,dmp5,dmp6,dmp7,dmp8,dmp9,dmp10,dmp11,dmp12
+		,dmp13,dmp14,dmp15,dmp16,dmp17,dmp18
+		,dmp19,dmp20,dmp21,dmp22,dmp23,dmp24
+		,dmp25,dmp26,dmp27,dmp28,dmp29,dmp30,dmp31);
+	}
+	
+	private Integer sumIntegers(Integer... values){
+		int i = 0;
+		for(Integer v : values)
+			if(v != null )
+				i += v;
+		return i;
+	}
+	
 	public List<Integer> getOvertimeAsList() {
 		ArrayList<Integer> tmp = new ArrayList<Integer>();
 		tmp.add(dma1);tmp.add(dma2);

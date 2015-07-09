@@ -8,10 +8,34 @@
   @include magaltheme;
   
   //permite quitarle el margen a un componente h1
-  .no-margin h1{
+  .no-margin, .no-margin h1{
   	margin : 0 !important;
   }
   
+  .no-padding {
+  	padding : 0 !important;
+  }
+  
+  .v-grid-cell {
+  	padding : 2px !important;
+  	text-align : center;
+  }
+  
+  .textalignCenter {
+  	text-align : center;
+  }
+  
+  .textalignLeft {
+  	text-align : left;
+  }
+  
+  .v-grid-editor-cells .v-filterselect .v-filterselect-button{
+	height  : 10px;  
+  }
+  
+  .v-grid-editor-cells .v-textfield {
+  	padding : 0;
+  }
   
   .grid-attendace .v-filterselect [class$="button"], .grid-attendace .v-filterselect [class$="button"]:before{
   	width : 20px !important;
@@ -37,4 +61,9 @@
    .bold {
    		font-weight: bold;
    }
+   
+   .v-table-column-selector {
+		opacity : 1 !important;
+		font-size : 15pt;
+	}
 }

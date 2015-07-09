@@ -27,4 +27,7 @@ public interface LaborerRepository extends PagingAndSortingRepository<Laborer, L
 
 	@Query(value="SELECT l FROM Laborer l where l not in ( select lc.laborer from LaborerConstructionsite lc where lc.constructionsite = ?1) ")
 	List<Laborer> findAllExceptThisConstruction(ConstructionSite constructionsite);
+
+	@Query(value="SELECT l FROM Laborer l where l.rut = ?1 ")
+	Laborer findByRut(String newItemCaption);
 }
