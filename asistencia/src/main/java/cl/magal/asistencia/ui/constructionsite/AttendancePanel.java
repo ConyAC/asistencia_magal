@@ -101,6 +101,7 @@ import com.vaadin.ui.InlineDateField;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Notification.Type;
+import com.vaadin.ui.AbstractField;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.ProgressBar;
 import com.vaadin.ui.TabSheet;
@@ -149,7 +150,7 @@ public class AttendancePanel extends VerticalLayout implements View {
 	BeanContainer<Long,Salary> salaryContainer = new BeanContainer<Long,Salary>(Salary.class);
 	BeanItemContainer<AbsenceVO> absenceContainer = new BeanItemContainer<AbsenceVO>(AbsenceVO.class);
 	BeanItemContainer<ConstructionSite> constructionContainer = new BeanItemContainer<ConstructionSite>(ConstructionSite.class);
-	BeanItemContainer<AdvancePaymentItem> container;
+
 
 
 	/** COMPONENTES **/
@@ -1532,6 +1533,7 @@ public class AttendancePanel extends VerticalLayout implements View {
 
 									@Override
 									public void buttonClick(ClickEvent event) {
+										final BeanItemContainer<AdvancePaymentItem> container = new BeanItemContainer<AdvancePaymentItem>(AdvancePaymentItem.class);
 										final Window window = new Window();
 										final FieldGroup fg = new FieldGroup();
 
@@ -1589,29 +1591,31 @@ public class AttendancePanel extends VerticalLayout implements View {
 																				addComponent(failureDiscount);
 																			}
 																		});
-
-																		container = new BeanItemContainer<AdvancePaymentItem>(AdvancePaymentItem.class,advancepayment.getAdvancePaymentTable());
+																		
+																		container.removeAllItems();
+																		container.addAll(advancepayment.getAdvancePaymentTable());
 
 																		HorizontalLayout hl = new HorizontalLayout(){
 																			{
 																				setSpacing(true);
 																				final TextField supleCode = new TextField("Código Suple");
+																				supleCode.setImmediate(true);
 																				addComponent(new FormLayout(supleCode));
 																				Button add = new Button(null,new Button.ClickListener() {
 																					
 																					@Override
 																					public void buttonClick(ClickEvent event) {
-																						try{
-																							
-																							AdvancePaymentItem advancePaymentItem = new AdvancePaymentItem();
+																						AdvancePaymentItem advancePaymentItem = new AdvancePaymentItem();		
+																						
+																						try{																							
 																							advancePaymentItem.setSupleCode(Integer.valueOf(supleCode.getValue()));
 																							advancepayment.setConstructionSite(cs);
 																							advancepayment.addAdvancePaymentItem(advancePaymentItem);
 																							confService.save(advancepayment);
-																							
 																							container.addBean(advancePaymentItem);
 																						}catch(Exception e){
-																							Notification.show("Error al agregar el nuevo suple",Type.ERROR_MESSAGE);
+																							advancepayment.removeAdvancePaymentItem(advancePaymentItem);
+																							Notification.show("El código ingresado ya existe, ingrese uno diferente.",Type.ERROR_MESSAGE);
 																							logger.error("Error al agregar el nuevo suple",e);
 																						}
 																					}
@@ -1719,31 +1723,22 @@ public class AttendancePanel extends VerticalLayout implements View {
 
 													@Override
 													public void buttonClick(ClickEvent event) {
-														for(AdvancePaymentItem api : container.getItemIds()){
-															api.setSupleCode((Integer) container.getContainerProperty(api, "supleCode").getValue());
-															api.setSupleIncreaseAmount((Double) container.getContainerProperty(api, "supleIncreaseAmount").getValue());
-															api.setSupleNormalAmount((Double) container.getContainerProperty(api, "supleNormalAmount").getValue());
-															
-															logger.debug("VER total: "+api.getSupleTotalAmount());
-															logger.debug("VER increase: "+api.getSupleIncreaseAmount());
-															logger.debug("VER normal: "+api.getSupleNormalAmount());
+														try {
+															fg.commit();
+														} catch (CommitException e) {
+															Notification.show("No pudo realizarse el commit", Type.ERROR_MESSAGE);
+															logger.error("CommitException", e);
+															return;
 														}
 														
-														for(Object itemId : salaryContainer.getItemIds()){
-															BeanItem<Attendance> attendanceItem = attendanceContainer.getItem(itemId);
-															logger.debug("VER attendance item: "+attendanceItem.getItemPropertyIds());
-															
-															BeanItem<Salary> salaryItem = salaryContainer.getItem(itemId);		
-															logger.debug("VER salary item: "+salaryItem.getItemPropertyIds());
-															
+														AdvancePaymentConfigurations apc = ((BeanItem<AdvancePaymentConfigurations>) fg.getItemDataSource()).getBean();
+														apc.setAdvancePaymentTable(container.getItemIds());												
+														
+														for(Object itemId : salaryContainer.getItemIds()){															
+															BeanItem<Salary> salaryItem = salaryContainer.getItem(itemId);			
 															Salary salary = salaryItem.getBean();
-															logger.debug("VER salary: "+salary.getAttendance());
-															
-															Attendance attendance = attendanceItem.getBean();
-															logger.debug("VER attendance: "+attendance.getId());
-															
-															salary.setAdvancePaymentConfiguration(attendance);														
-															
+																													
+															salary.setAdvancePaymentConfiguration(apc);														
 														}
 														
 														supleTable.refreshRowCache();
@@ -1760,8 +1755,8 @@ public class AttendancePanel extends VerticalLayout implements View {
 
 													@Override
 													public void buttonClick(ClickEvent event) {
+														fg.discard();
 														window.close();
-
 													}
 												});
 												btnCancelar.addStyleName("link");
