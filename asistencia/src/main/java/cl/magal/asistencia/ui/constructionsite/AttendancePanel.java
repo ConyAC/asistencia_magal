@@ -1605,14 +1605,25 @@ public class AttendancePanel extends VerticalLayout implements View {
 																					
 																					@Override
 																					public void buttonClick(ClickEvent event) {
-																						AdvancePaymentItem advancePaymentItem = new AdvancePaymentItem();		
-																						
-																						try{																							
-																							advancePaymentItem.setSupleCode(Integer.valueOf(supleCode.getValue()));
-																							advancepayment.setConstructionSite(cs);
-																							advancepayment.addAdvancePaymentItem(advancePaymentItem);
-																							confService.save(advancepayment);
-																							container.addBean(advancePaymentItem);
+																						AdvancePaymentItem advancePaymentItem = new AdvancePaymentItem();	
+																						AdvancePaymentConfigurations apItem = confService.findAdvancePaymentConfigurationsByCS(cs);
+																						boolean check = false;																				
+																						try{
+																							advancePaymentItem.setSupleCode(Integer.valueOf(supleCode.getValue()));																							
+																							for(AdvancePaymentItem i : apItem.getAdvancePaymentTable()){
+																								if(i.getSupleCode() == advancePaymentItem.getSupleCode())
+																									check = true;
+																							}		
+																							
+																							if(!check){
+																								advancepayment.setConstructionSite(cs);
+																								advancepayment.addAdvancePaymentItem(advancePaymentItem);
+																								confService.save(advancepayment);
+																								container.addBean(advancePaymentItem);
+																							}else{
+																								Notification.show("El código ingresado ya existe, ingrese uno diferente.",Type.ERROR_MESSAGE);
+																								return;
+																							}
 																						}catch(Exception e){
 																							advancepayment.removeAdvancePaymentItem(advancePaymentItem);
 																							Notification.show("El código ingresado ya existe, ingrese uno diferente.",Type.ERROR_MESSAGE);
