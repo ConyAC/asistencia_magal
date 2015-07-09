@@ -21,6 +21,7 @@ import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.velocity.app.VelocityEngine;
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -838,11 +839,11 @@ public class AttendancePanel extends VerticalLayout implements View {
 							@Override
 							public void buttonClick(ClickEvent event) {
 								Object itemId = null;
-								if( (itemId = checkHasNegativeOrNull(salaryContainer,"salary","jornalPromedio")) == null ) {
+								if( (itemId = checkHasNegativeOrNull(salaryContainer,"salary","vtrato","valorSabado","vsCorrd","glegal","afecto","colacion","mov","mov2")) == null ) {
 									Notification.show("La lista de trabajadores no tiene valores negativos en el sueldo ni en el jornal promedio.",Type.HUMANIZED_MESSAGE);
 								}else{
 									BeanItem<Salary> item = salaryContainer.getItem(itemId);
-									Notification.show("El trabajador "+item.getBean().getLaborerConstructionSite().getJobCode()+" tiene un sueldo o jornal promedio negativo."
+									Notification.show("El trabajador "+item.getBean().getLaborerConstructionSite().getJobCode()+" tiene uno de sus valores negativos."
 											,Type.ERROR_MESSAGE);
 								}
 								btnValidate.setEnabled(true);
@@ -1217,7 +1218,7 @@ public class AttendancePanel extends VerticalLayout implements View {
 
 		overtimeGrid.addStyleName("grid-attendace");
 		overtimeGrid.setEditorEnabled(true);
-		overtimeGrid.setFrozenColumnCount(2);
+		overtimeGrid.setFrozenColumnCount(3);
 		if(overtimeGrid.getColumn("laborerConstructionSite") != null )
 			overtimeGrid.removeColumn("laborerConstructionSite");
 		if(overtimeGrid.getColumn("laborerConstructionSite.id") != null )
@@ -1234,6 +1235,7 @@ public class AttendancePanel extends VerticalLayout implements View {
 		overtimeContainer.sort(new Object[]{"laborerConstructionSite.activeContract.jobCode"}, new boolean[]{true});
 		overtimeGrid.getColumn("laborerConstructionSite.activeContract.jobCode").setHeaderCaption("Rol").setEditorField(new TextField(){{setReadOnly(true);}}).setWidth(50);
 		overtimeGrid.getColumn("laborerConstructionSite.laborer.fullname").setHeaderCaption("Nombre").setEditorField(new TextField(){{setReadOnly(true);}});
+		overtimeGrid.getColumn("total").setHeaderCaption("Total");
          
 		createHeaders(overtimeGrid);
 		setOvertimeOrders();
@@ -1242,7 +1244,7 @@ public class AttendancePanel extends VerticalLayout implements View {
 	}
 
 	private void setOvertimeOrders() {
-		String[] s = new String[]{ "laborerConstructionSite.activeContract.jobCode","laborerConstructionSite.laborer.fullname",
+		String[] s = new String[]{ "laborerConstructionSite.activeContract.jobCode","laborerConstructionSite.laborer.fullname","total",
 				"dmp1","dmp2","dmp3","dmp4","dmp5","dmp6","dmp7","dmp8","dmp9","dmp10","dmp11","dmp12","dmp13","dmp14","dmp15","dmp16"
 				,"dmp17","dmp18","dmp19","dmp20","dmp21","dmp22","dmp23","dmp24","dmp25","dmp26","dmp27","dmp28","dmp29","dmp30","dmp31",
 				"dma1","dma2","dma3","dma4","dma5","dma6","dma7","dma8","dma9","dma10","dma11","dma12","dma13","dma14","dma15","dma16"
@@ -1354,17 +1356,22 @@ public class AttendancePanel extends VerticalLayout implements View {
 			footer = grid.getFooterRow(0);
 		else
 			footer = grid.appendFooterRow();
-				
 		//por cada variable
 		int[] counts = new int[grid.getContainerDataSource().getContainerPropertyIds().size()];
 		for(Object attendanceId : grid.getContainerDataSource().getItemIds() ) {
 			BeanItem attendanceItem = (BeanItem) grid.getContainerDataSource().getItem(attendanceId);
 			int i = 0;
 			for(Object propertyId : grid.getContainerDataSource().getContainerPropertyIds() ){
+				if(propertyId.equals("laborerConstructionSite.activeContract.jobCode")||
+						propertyId.equals("laborerConstructionSite.laborer.fullname"))
+							continue;
 				//cuenta las X
 				if( attendanceItem.getBean() instanceof Attendance ){
 					if( attendanceItem.getItemProperty(propertyId).getValue() instanceof AttendanceMark &&
-						(AttendanceMark)attendanceItem.getItemProperty(propertyId).getValue()  == AttendanceMark.ATTEND )
+						( (AttendanceMark)attendanceItem.getItemProperty(propertyId).getValue()  == AttendanceMark.ATTEND ||
+						  (AttendanceMark)attendanceItem.getItemProperty(propertyId).getValue()  == AttendanceMark.SATURDAY ||
+						  (AttendanceMark)attendanceItem.getItemProperty(propertyId).getValue()  == AttendanceMark.SUNDAY
+						))
 						counts[i] ++;
 				}else if( attendanceItem.getBean() instanceof Overtime ){
 					if( attendanceItem.getItemProperty(propertyId).getValue() instanceof Integer  )
@@ -1374,10 +1381,31 @@ public class AttendancePanel extends VerticalLayout implements View {
 			}
 		}
 		int i = 0;
+		final DateTime dt = getAttendanceDate();
 		for(Object propertyId : grid.getContainerDataSource().getContainerPropertyIds() ){
+			if(propertyId.equals("laborerConstructionSite.activeContract.jobCode")||
+					propertyId.equals("laborerConstructionSite.laborer.fullname"))
+						continue;
 			FooterCell cell = footer.getCell(propertyId);
-			if(cell != null )
+			if(cell != null ) {
 				cell.setText(counts[i]+"");
+//				//calculo de la semana
+//				if(((String) propertyId).startsWith("dmp") || ((String) propertyId).startsWith("dma")  ){
+//					//calcula el numero del mes
+//					int monthDay = Integer.parseInt(((String) propertyId).replace("dmp","").replace("dma",""));
+//					DateTime dt2 = dt;
+//					if ( ((String) propertyId).startsWith("dmp") )
+//						dt2 = dt2.minusMonths(1);
+//					dt2.withDayOfMonth(monthDay);
+//					//el número de mes no es un número válido de mes o si es un día a la fecha de cierre del mes pasado, oculta la columna
+//					if(dt2.getDayOfWeek() == DateTimeConstants.SATURDAY || dt2.getDayOfWeek() == DateTimeConstants.SUNDAY ){
+						cell.setStyleName("red-color bold");
+//					}else{ //solo lo setea si el número es mayor a la cantidad de dias del mes
+//						cell.setStyleName("");
+//					}
+//				}
+				
+			}
 			i++;
 		}
 	}

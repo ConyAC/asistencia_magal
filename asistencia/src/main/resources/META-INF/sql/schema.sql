@@ -554,7 +554,8 @@ CREATE TABLE IF NOT EXISTS contract
 	terminationdate timestamp, 
 	timeduration double, 
 	value_treatment integer, 
-	laborer_constructionsiteId bigint not null -- no puede ser nulo
+	laborer_constructionsiteId bigint not null, -- no puede ser nulo
+	specialityId bigint
 )
 ;
 CREATE UNIQUE INDEX IF NOT EXISTS PK_CONTRACT ON contract(contractId)
@@ -881,4 +882,22 @@ CREATE TABLE IF NOT EXISTS holiday
 )
 ;
 CREATE UNIQUE INDEX IF NOT EXISTS PK_HOLIDAY ON holiday(holidayId)
+;
+
+CREATE TABLE IF NOT EXISTS speciality
+(
+   specialityId bigint PRIMARY KEY NOT NULL,
+   job integer NOT NULL,
+   name varchar(2147483647),
+   constructionsiteId bigint NOT NULL
+)
+;
+ALTER TABLE speciality
+ADD CONSTRAINT IF NOT EXISTS FK_SPECIALITY_CONSTRUCTIONSITEID
+FOREIGN KEY (constructionsiteId)
+REFERENCES construction_site(constructionsiteId)
+;
+CREATE UNIQUE INDEX IF NOT EXISTS PRIMARY_KEY_E1 ON speciality(specialityId)
+;
+CREATE INDEX IF NOT EXISTS FK_SPECIALITY_CONSTRUCTIONSITEID_INDEX_E ON speciality(constructionsiteId)
 ;
