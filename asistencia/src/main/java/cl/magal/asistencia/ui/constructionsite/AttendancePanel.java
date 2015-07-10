@@ -103,6 +103,7 @@ import com.vaadin.ui.InlineDateField;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Notification.Type;
+import com.vaadin.ui.AbstractField;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.ProgressBar;
 import com.vaadin.ui.TabSheet;
@@ -153,6 +154,8 @@ public class AttendancePanel extends VerticalLayout implements View {
 	BeanContainer<Long,Salary> salaryContainer = new BeanContainer<Long,Salary>(Salary.class);
 	BeanItemContainer<AbsenceVO> absenceContainer = new BeanItemContainer<AbsenceVO>(AbsenceVO.class);
 	BeanItemContainer<ConstructionSite> constructionContainer = new BeanItemContainer<ConstructionSite>(ConstructionSite.class);
+
+
 
 	/** COMPONENTES **/
 	ProgressBar progress;
@@ -1534,7 +1537,9 @@ public class AttendancePanel extends VerticalLayout implements View {
 
 									@Override
 									public void buttonClick(ClickEvent event) {
+										final BeanItemContainer<AdvancePaymentItem> container = new BeanItemContainer<AdvancePaymentItem>(AdvancePaymentItem.class);
 										final Window window = new Window();
+										final FieldGroup fg = new FieldGroup();
 
 										window.center();
 										window.setModal(true);
@@ -1547,8 +1552,6 @@ public class AttendancePanel extends VerticalLayout implements View {
 														setWidth("980px");
 														setHeight("610px");
 														setSpacing(true);
-
-														final FieldGroup fg = new FieldGroup();
 														
 														if( advancepayment  == null ){
 															advancepayment = confService.findAdvancePaymentConfigurationsByCS(cs);
@@ -1593,29 +1596,41 @@ public class AttendancePanel extends VerticalLayout implements View {
 																			}
 																		});
 																		
-																		
-																		final BeanItemContainer<AdvancePaymentItem> container = new BeanItemContainer<AdvancePaymentItem>(AdvancePaymentItem.class,advancepayment.getAdvancePaymentTable());
-																		
+																		container.removeAllItems();
+																		container.addAll(advancepayment.getAdvancePaymentTable());
+
 																		HorizontalLayout hl = new HorizontalLayout(){
 																			{
 																				setSpacing(true);
 																				final TextField supleCode = new TextField("Código Suple");
+																				supleCode.setImmediate(true);
 																				addComponent(new FormLayout(supleCode));
 																				Button add = new Button(null,new Button.ClickListener() {
 																					
 																					@Override
 																					public void buttonClick(ClickEvent event) {
+																						AdvancePaymentItem advancePaymentItem = new AdvancePaymentItem();	
+																						AdvancePaymentConfigurations apItem = confService.findAdvancePaymentConfigurationsByCS(cs);
+																						boolean check = false;																				
 																						try{
+																							advancePaymentItem.setSupleCode(Integer.valueOf(supleCode.getValue()));																							
+																							for(AdvancePaymentItem i : apItem.getAdvancePaymentTable()){
+																								if(i.getSupleCode() == advancePaymentItem.getSupleCode())
+																									check = true;
+																							}		
 																							
-																							AdvancePaymentItem advancePaymentItem = new AdvancePaymentItem();
-																							advancePaymentItem.setSupleCode(Integer.valueOf(supleCode.getValue()));
-																							advancepayment.setConstructionSite(cs);
-																							advancepayment.addAdvancePaymentItem(advancePaymentItem);
-																							confService.save(advancepayment);
-																							
-																							container.addBean(advancePaymentItem);
+																							if(!check){
+																								advancepayment.setConstructionSite(cs);
+																								advancepayment.addAdvancePaymentItem(advancePaymentItem);
+																								confService.save(advancepayment);
+																								container.addBean(advancePaymentItem);
+																							}else{
+																								Notification.show("El código ingresado ya existe, ingrese uno diferente.",Type.ERROR_MESSAGE);
+																								return;
+																							}
 																						}catch(Exception e){
-																							Notification.show("Error al agregar el nuevo suple",Type.ERROR_MESSAGE);
+																							advancepayment.removeAdvancePaymentItem(advancePaymentItem);
+																							Notification.show("El código ingresado ya existe, ingrese uno diferente.",Type.ERROR_MESSAGE);
 																							logger.error("Error al agregar el nuevo suple",e);
 																						}
 																					}
@@ -1711,7 +1726,7 @@ public class AttendancePanel extends VerticalLayout implements View {
 																		table.setEditable(true);
 																		
 																		addComponent(table);
-
+																		
 																		if(!SecurityHelper.hasPermission(Permission.DEFINIR_VARIABLE_GLOBAL)){
 																			setEnabled(false);
 																		}else{
@@ -1736,6 +1751,25 @@ public class AttendancePanel extends VerticalLayout implements View {
 
 													@Override
 													public void buttonClick(ClickEvent event) {
+														try {
+															fg.commit();
+														} catch (CommitException e) {
+															Notification.show("No pudo realizarse el commit", Type.ERROR_MESSAGE);
+															logger.error("CommitException", e);
+															return;
+														}
+														
+														AdvancePaymentConfigurations apc = ((BeanItem<AdvancePaymentConfigurations>) fg.getItemDataSource()).getBean();
+														apc.setAdvancePaymentTable(container.getItemIds());												
+														
+														for(Object itemId : salaryContainer.getItemIds()){															
+															BeanItem<Salary> salaryItem = salaryContainer.getItem(itemId);			
+															Salary salary = salaryItem.getBean();
+																													
+															salary.setAdvancePaymentConfiguration(apc);														
+														}
+														
+														supleTable.refreshRowCache();
 														window.close();
 
 													}
@@ -1749,8 +1783,8 @@ public class AttendancePanel extends VerticalLayout implements View {
 
 													@Override
 													public void buttonClick(ClickEvent event) {
+														fg.discard();
 														window.close();
-
 													}
 												});
 												btnCancelar.addStyleName("link");

@@ -1,6 +1,7 @@
 package cl.magal.asistencia.entities;
 
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -16,10 +17,14 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
+import javax.validation.Constraint;
 import javax.validation.constraints.Digits;
 
 @Entity
-@Table(name="advance_payment_configurations")
+@Table(name="advance_payment_configurations", 
+uniqueConstraints={@UniqueConstraint(columnNames={"SUPLE_CODE","ADVANCE_PAYMENT_CONFIGURATIONSID"})}
+)
 public class AdvancePaymentConfigurations implements Serializable {
 	
 	/**
@@ -92,6 +97,12 @@ public class AdvancePaymentConfigurations implements Serializable {
 
 	public void setAdvancePaymentTable(List<AdvancePaymentItem> advancePaymentTable) {
 		this.advancePaymentTable = advancePaymentTable;
+		
+		Map<Integer,AdvancePaymentItem> map = new HashMap<Integer,AdvancePaymentItem>();
+		for(AdvancePaymentItem advancePaymentItem : advancePaymentTable ){
+			map.put(advancePaymentItem.getSupleCode(), advancePaymentItem);
+		}
+		setMapTable(map);
 	}
 
 	public ConstructionSite getConstructionSite() {
