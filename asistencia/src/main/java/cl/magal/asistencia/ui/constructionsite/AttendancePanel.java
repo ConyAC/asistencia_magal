@@ -720,21 +720,8 @@ public class AttendancePanel extends VerticalLayout implements View {
 						}
 						cb.setPropertyDataSource(beanItem.getItemProperty("laborerConstructionSite.supleCode"));
 						cb.setReadOnly(true);
-						
 						hl.addComponent(cb);		
-						
-						return hl;
-					}
-				});				
-				
-				supleTable.addGeneratedColumn("supleManual", new Table.ColumnGenerator() {
-					
-					@Override
-					public Object generateCell(Table source, Object itemId, Object columnId) {
-						HorizontalLayout hl = new HorizontalLayout();
-						hl.setSizeFull();
-						
-						final BeanItem<Salary> beanItem = salaryContainer.getItem(itemId);
+
 						Button btnSuple = new Button(FontAwesome.ARROW_CIRCLE_O_RIGHT);
 						btnSuple.addClickListener(new Button.ClickListener() {
 							
@@ -756,7 +743,6 @@ public class AttendancePanel extends VerticalLayout implements View {
 								service.save(beanItem.getBean());								
 							}							
 						});
-						hl.addComponent(btnSuple);
 						btnSuple.setVisible(!(Boolean) beanItem.getItemProperty("calculatedSuple").getValue());
 
 						if(!ids.isEmpty()){
@@ -766,13 +752,15 @@ public class AttendancePanel extends VerticalLayout implements View {
 								if( ids.get(key) && key == beanItem.getBean().getLaborerConstructionSite().getLaborer().getId() && !beanItem.getItemProperty("calculatedSuple").equals(false))
 									btnSuple.setVisible(false);
 							}
-						}
+						}						
+						hl.addComponent(btnSuple);
+						
 						return hl;
 					}
 				});
 
-				supleTable.setVisibleColumns("laborerConstructionSite.activeContract.jobCode","laborerConstructionSite.laborer.fullname","supleSection","supleManual","suple");
-				supleTable.setColumnHeaders("Rol","Nombre","Código suple","","Suple");
+				supleTable.setVisibleColumns("laborerConstructionSite.activeContract.jobCode","laborerConstructionSite.laborer.fullname","supleSection","suple");
+				supleTable.setColumnHeaders("Rol","Nombre","Código suple","Suple");
 				supleTable.setEditable(true);
 				supleTable.setFooterVisible(true);
 				supleTable.setTableFieldFactory(new TableFieldFactory() {
