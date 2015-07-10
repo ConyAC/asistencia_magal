@@ -124,6 +124,14 @@ public class Salary implements Serializable {
 		getForceSalary();
 	}
 	
+	public void setAdvancePaymentConfiguration(AdvancePaymentConfigurations api){
+		if(this.supleCalculator == null || this.salaryCalculator == null )
+			throw new RuntimeException("Es necesario que el objeto de calculo sea distinto a null");
+		supleCalculator.setSupleTable(api);
+		getForceSuple();
+		getForceSalary();
+	}
+	
 	public Long getId() {
 		return id;
 	}

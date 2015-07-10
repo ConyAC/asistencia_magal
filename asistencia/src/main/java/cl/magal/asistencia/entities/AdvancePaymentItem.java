@@ -22,7 +22,7 @@ public class AdvancePaymentItem implements Serializable{
 	@NotEmpty(message="El código de suple es obligatorio")
 	@NotNull(message="El código de suple es obligatorio")
 	@Basic(optional = false)
-    @Column(name = "suple_code",unique=true)
+    @Column(name = "suple_code")
 	Integer supleCode;
 	
 	@Digits(fraction = 0, integer = 6)
