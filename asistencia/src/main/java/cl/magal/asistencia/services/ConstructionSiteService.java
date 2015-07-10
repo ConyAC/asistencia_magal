@@ -2,7 +2,7 @@ package cl.magal.asistencia.services;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -36,7 +36,6 @@ import cl.magal.asistencia.entities.License;
 import cl.magal.asistencia.entities.Loan;
 import cl.magal.asistencia.entities.Overtime;
 import cl.magal.asistencia.entities.Salary;
-import cl.magal.asistencia.entities.Speciality;
 import cl.magal.asistencia.entities.TaxationConfigurations;
 import cl.magal.asistencia.entities.Team;
 import cl.magal.asistencia.entities.Tool;
@@ -50,7 +49,6 @@ import cl.magal.asistencia.repositories.AttendanceRepository;
 import cl.magal.asistencia.repositories.ConfirmationsRepository;
 import cl.magal.asistencia.repositories.ConstructionCompanyRepository;
 import cl.magal.asistencia.repositories.ConstructionSiteRepository;
-import cl.magal.asistencia.repositories.ContractRepository;
 import cl.magal.asistencia.repositories.ExtraParamsRepository;
 import cl.magal.asistencia.repositories.HolidayRepository;
 import cl.magal.asistencia.repositories.LaborerConstructionsiteRepository;
@@ -59,7 +57,6 @@ import cl.magal.asistencia.repositories.LicenseRepositoy;
 import cl.magal.asistencia.repositories.LoanRepository;
 import cl.magal.asistencia.repositories.OvertimeRepository;
 import cl.magal.asistencia.repositories.SalaryRepository;
-import cl.magal.asistencia.repositories.SpecialityRepository;
 import cl.magal.asistencia.repositories.TeamRepository;
 import cl.magal.asistencia.repositories.ToolRepository;
 import cl.magal.asistencia.repositories.UserRepository;
@@ -108,15 +105,10 @@ public class ConstructionSiteService {
 	LoanRepository loanRepo;
 	@Autowired
 	ToolRepository toolRepo;
-	@Autowired
-	ContractRepository contractRepo;
-	@Autowired
-	SpecialityRepository specialityRepo;
 	
 	//SERVICES
 	@Autowired
 	ConfigurationService configurationService;
-	
 
 	@PostConstruct
 	public void init(){
@@ -400,6 +392,7 @@ public class ConstructionSiteService {
 					}
 				}
 			}
+			attendanceRepo.save(attendance);
 			attendanceResult.add(attendance);
 		}
 		//optimización para hacerlo en una transacción
@@ -994,97 +987,47 @@ public class ConstructionSiteService {
 		salaryRepo.save(bean);
 	}
 
-	/**
-	 * 
-	 * @param holiday
-	 */
 	public void delete(Holiday holiday) {
 		holidayRepo.delete(holiday);
 		
 	}
 
-	/**
-	 * 
-	 * @param holiday
-	 */
 	public void save(Holiday holiday) {
 		holidayRepo.save(holiday);
 		
 	}
 
-	/**
-	 * 
-	 * @return
-	 */
 	public List<Holiday> findAllHoliday() {
 		return (List<Holiday>) holidayRepo.findAll();
 	}
 
-	/**
-	 * 
-	 * @param fecha
-	 * @return
-	 */
 	public Long findExistingDate(Date fecha) {
 		List<Long> h = (List<Long>)holidayRepo.findExistingDate(fecha);
 		if(h.isEmpty())
 			return null;
 		return h.get(0);
 	}
-
-	/**
-	 * Verifica si la etapa entregada esta siendo utilizada por algún contrato de la obra o no.
-	 * @param bean
-	 * @param step
-	 * @return
-	 */
-	public boolean checkStepInUse(ConstructionSite bean, String step) {
-		return contractRepo.existsWithStep(bean,step) != null;
-	}
-
-	/**
-	 * Guarda una especialidad
-	 * @param speciality
-	 */
-	public void save(Speciality speciality) {
-		Speciality db = specialityRepo.save(speciality);
-		//se asegura se setear el id
-		speciality.setId(db.getId());
-	}
-
-	/**
-	 * Verifica si la especialidad dada está siendo utlizada por algún trabajador de la obra dada
-	 * @param bean
-	 * @param speciality
-	 * @return
-	 */
-	public boolean checkSpecialityInUse(ConstructionSite bean,Speciality speciality) {
-		return contractRepo.existsWithSpeciality(bean,speciality) != null;
-	}
-
-	/**
-	 * Busca las especialidades de una obra
-	 * @param bean
-	 * @return
-	 */
-	public Collection<? extends Speciality> findSpecialitiesByConstructionSite(ConstructionSite bean) {
-		return specialityRepo.findByConstructionSite(bean);
-	}
-
-	/**
-	 * Elimina una especialidad
-	 * @param speciality
-	 */
-	public void removeSpeciality(Speciality speciality) {
-		specialityRepo.delete(speciality);
-	}
-
-	/**
-	 * 
-	 * @param specialities
-	 */
-	public void save(List<Speciality> specialities) {
-		specialityRepo.save(specialities);
-	}
 	
+//	/**
+//	 * Cuenta las marcas hasta el dia dada, si el dia dado es nulo, entonces cuenta todos los dias
+//	 * @param supleCloseDay
+//	 * @param attendance
+//	 * @param marks
+//	 * @return
+//	 */
+//	private Integer countMarks(Integer supleCloseDay,Attendance attendance, AttendanceMark ... marks) {
+//		if(attendance == null )
+//			throw new RuntimeException("El objeto de asistencia no puede ser nulo.");
+//
+//		int i = 0,count = 0;
+//		for(AttendanceMark mark : attendance.getMarksAsList()){
+//			if(supleCloseDay != null && i >= supleCloseDay)
+//				break;
+//			if(ArrayUtils.contains(marks, mark))
+//				count++;
+//			i++;
+//		}
+//		return count;
+//	}
+
 }

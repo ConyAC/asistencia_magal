@@ -20,7 +20,6 @@ import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.velocity.app.VelocityEngine;
 import org.joda.time.DateTime;
-import org.joda.time.DateTimeConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,7 +36,6 @@ import cl.magal.asistencia.entities.ConstructionSite;
 import cl.magal.asistencia.entities.DateConfigurations;
 import cl.magal.asistencia.entities.Overtime;
 import cl.magal.asistencia.entities.Salary;
-import cl.magal.asistencia.entities.User;
 import cl.magal.asistencia.entities.enums.AttendanceMark;
 import cl.magal.asistencia.entities.enums.Permission;
 import cl.magal.asistencia.services.ConfigurationService;
@@ -47,8 +45,6 @@ import cl.magal.asistencia.services.MailService;
 import cl.magal.asistencia.services.UserService;
 import cl.magal.asistencia.ui.ListenerFieldFactory;
 import cl.magal.asistencia.ui.MagalUI;
-import cl.magal.asistencia.ui.components.ColumnCollapsedObservableTable;
-import cl.magal.asistencia.ui.components.ColumnCollapsedObservableTable.ColumnCollapsedEvent;
 import cl.magal.asistencia.ui.vo.AbsenceVO;
 import cl.magal.asistencia.util.Constants;
 import cl.magal.asistencia.util.SecurityHelper;
@@ -91,8 +87,6 @@ import com.vaadin.ui.Field;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.Grid;
 import com.vaadin.ui.Grid.CellReference;
-import com.vaadin.ui.Grid.FooterCell;
-import com.vaadin.ui.Grid.FooterRow;
 import com.vaadin.ui.Grid.HeaderCell;
 import com.vaadin.ui.Grid.HeaderRow;
 import com.vaadin.ui.Grid.SelectionMode;
@@ -114,8 +108,7 @@ import com.vaadin.ui.Window;
 
 @Component
 @Scope("prototype")
-//public class AttendancePanel extends Panel implements View {
-public class AttendancePanel extends VerticalLayout implements View {
+public class AttendancePanel extends Panel implements View {
 
 	/**
 	 * 
@@ -144,6 +137,7 @@ public class AttendancePanel extends VerticalLayout implements View {
 	
 	AdvancePaymentConfigurations advancepayment;
 	/** CONTAINERS **/
+//	BeanItemContainer<ExtraParams> extraParamContainer = new BeanItemContainer<ExtraParams>(ExtraParams.class);
 	BeanContainer<Long,Attendance> attendanceContainer = new BeanContainer<Long,Attendance>(Attendance.class);
 	BeanContainer<Long,Overtime> overtimeContainer = new BeanContainer<Long,Overtime>(Overtime.class);
 	BeanContainer<Long,Salary> salaryContainer = new BeanContainer<Long,Salary>(Salary.class);
@@ -153,26 +147,17 @@ public class AttendancePanel extends VerticalLayout implements View {
 	/** COMPONENTES **/
 	ProgressBar progress;
 	Label status;
-	Grid attendanceGrid, overtimeGrid;
+	Grid attendanceGrid, overtimeGrid/*,extraGrid*/;
 	Window progressDialog;
 	InlineDateField attendanceDate;
 	Button btnExportSoftland,btnExportSupleSoftland,btnConstructionSiteConfirm,btnCentralConfirm,btnSupleObraConfirm,btnSupleCentralConfirm;
 	Table confirmTable;
-//	VerticalLayout root;
-	Table supleTable;
-	ColumnCollapsedObservableTable salaryTable;
+	VerticalLayout root;
+	Table supleTable,salaryTable;
 
 	/** ATRIBUTOS **/
 	Confirmations confirmations;
 	ConstructionSite cs;
-	
-	final static String[] defaultSalaryTableVisibleTable = new String[]{"laborerConstructionSite.activeContract.jobCode",
-		"laborerConstructionSite.laborer.fullname","lastJornalPromedio","jornalPromedio","specialBond","bondMov2","loanBond","sobreTiempo","descHours","loan","tools","totalLiquido"
-	};
-	final static String[] salaryTableVisibleTable = new String[]{"laborerConstructionSite.activeContract.jobCode",
-			"laborerConstructionSite.laborer.fullname","lastJornalPromedio","jornalPromedio","specialBond","bondMov2","loanBond","sobreTiempo","descHours","loan","tools","totalLiquido"
-			,"jornalBaseMes","vtrato","valorSabado","vsCorrd","descHoras","bonifImpo","glegal","afecto","sobreAfecto","cargas","asigFamiliar","colacion","mov","mov2","tnoAfecto"
-	};
 
 	public Confirmations getConfirmations() {
 		if(confirmations == null )
@@ -227,20 +212,28 @@ public class AttendancePanel extends VerticalLayout implements View {
 	@PostConstruct
 	private void init(){
 		
+		setSizeFull();
+
 		//crea la parte superior de la interfaz de asistencia
 		final HorizontalLayout topAsistencia = drawTopAttendance();
 		//crea las tabs que contienen la información de asistencia
 		final TabSheet detalleAsistencia = drawAttendanceDetail();
-		
-		setSizeFull();
-		setSpacing(true);
 
-		topAsistencia.setSizeFull();
-		addComponent(topAsistencia);
-		setExpandRatio(topAsistencia, 0.1F);
-		detalleAsistencia.setSizeFull();
-		addComponent(detalleAsistencia);
-		setExpandRatio(detalleAsistencia, 0.9F);
+		root = new VerticalLayout(){
+			{
+				setSizeFull();
+				setSpacing(true);
+				setMargin(true);
+
+				topAsistencia.setSizeFull();
+				addComponent(topAsistencia);
+				setExpandRatio(topAsistencia, 0.1F);
+				detalleAsistencia.setSizeFull();
+				addComponent(detalleAsistencia);
+				setExpandRatio(detalleAsistencia, 0.9F);
+			}
+		};
+		setContent(root);
 
 		progressDialog = new Window();
 		progressDialog.setModal(true);
@@ -308,8 +301,7 @@ public class AttendancePanel extends VerticalLayout implements View {
 		Notification.show("Debe seleccionar una obra ",Type.ERROR_MESSAGE);
 		//setea el titulo como vacio
 		((MagalUI)UI.getCurrent()).getTitle().setValue("");
-//		root.setEnabled(false);		
-		setEnabled(false);
+		root.setEnabled(false);		
 	}
 
 	private void clearGrids(){
@@ -318,12 +310,10 @@ public class AttendancePanel extends VerticalLayout implements View {
 		absenceContainer.removeAllItems();
 		salaryContainer.removeAllItems();
 	}
-	
-	TabSheet tab;
 
 	private TabSheet drawAttendanceDetail() {
 		logger.debug("PRIMERO");
-		tab = new TabSheet();
+		TabSheet tab = new TabSheet();
 
 		Grid attendanceGrid = drawAttendanceGrid();
 		tab.addTab(attendanceGrid,"Asistencia");
@@ -331,9 +321,11 @@ public class AttendancePanel extends VerticalLayout implements View {
 		Grid overtimeGrid = drawOvertimeGrid();		
 		tab.addTab(overtimeGrid,"Horas Extras");
 		
-		//agrega las confirmaciones solo si se tiene permiso para confirmar central
+//		Grid extraParamsTable = drawExtraParamsGrid();		
+//		tab.addTab(extraParamsTable,"Parámetros Extra");
+
 		Table confirmTable = drawAbsenceConfirmTable();
-		tab.addTab(confirmTable,"Licencias y Accidentes");
+		tab.addTab(confirmTable,"Confirmar Licencias y Accidentes");
 
 		VerticalLayout vl = drawSupleLayout();
 		tab.addTab(vl,"Suple");		
@@ -391,8 +383,6 @@ public class AttendancePanel extends VerticalLayout implements View {
 				SecurityHelper.hasPermission(Permission.CONFIRMAR_ASISTENCIA_OBRA )||
 				( SecurityHelper.hasPermission(Permission.CONFIRMAR_ASISTENCIA_CENTRAL ) && getConfirmations().isSupleObraCheck() ));
 		btnSupleCentralConfirm.setVisible(showOnCentral);
-		
-		tab.getTab(2).setVisible(showOnCentral);
 		
 	}
 
@@ -487,10 +477,8 @@ public class AttendancePanel extends VerticalLayout implements View {
 
 			if(pid.equals("laborerConstructionSite.activeContract.jobCode")||
 					pid.equals("laborerConstructionSite.laborer.fullname")){
-				
 				// Have an input field to use for filter
 				TextField filterField = new TextField();
-				filterField.setStyleName("no-padding");
 				filterField.setWidth("100%");
 				filterField.setHeight("90%");
 
@@ -559,9 +547,6 @@ public class AttendancePanel extends VerticalLayout implements View {
 					if(cellReference.getValue() instanceof AttendanceMark && !AttendanceMark.ATTEND.equals(cellReference.getValue()))
 						post += " bold";
 					String pid = (String) cellReference.getPropertyId();
-					
-					if(pid.equals("laborerConstructionSite.laborer.fullname"))
-						return "textalignLeft";
 
 					if( pid.startsWith("dmp") || pid.startsWith("dma") ){
 						//calcula el numero del mes
@@ -604,33 +589,12 @@ public class AttendancePanel extends VerticalLayout implements View {
 				setMargin(true);
 
 				supleTable = new Table();
-				supleTable.setSizeFull();
+				supleTable.setWidth("100%");
 				supleTable.setContainerDataSource(salaryContainer);
 				
 				HorizontalLayout hl = new HorizontalLayout(){
 					{
 						setSpacing(true);
-						
-						final Button btnValidate = new Button("Validar Negativos",FontAwesome.CHECK_CIRCLE_O);
-						btnValidate.setDisableOnClick(true);
-						btnValidate.addClickListener(new Button.ClickListener() {
-							
-							@Override
-							public void buttonClick(ClickEvent event) {
-								Object itemId = null;
-								if( (itemId = checkHasNegativeOrNull(salaryContainer,"suple")) == null ) {
-									Notification.show("La lista de trabajadores no tiene valores negativos en el suple.",Type.HUMANIZED_MESSAGE);
-								}else{
-									BeanItem<Salary> item = salaryContainer.getItem(itemId);
-									Notification.show("El trabajador "+item.getBean().getLaborerConstructionSite().getJobCode()+" tiene un suple negativo."
-											,Type.ERROR_MESSAGE);
-								}
-								btnValidate.setEnabled(true);
-							}
-
-						});
-						addComponent(btnValidate);
-						
 						btnSupleObraConfirm = new Button("Confirmación Obra",FontAwesome.CHECK);
 						btnSupleObraConfirm.setDisableOnClick(true);						
 						addComponent(btnSupleObraConfirm);			
@@ -690,9 +654,18 @@ public class AttendancePanel extends VerticalLayout implements View {
 						});
 						
 						btnExportSupleSoftland = new Button("Exportar a Softland",FontAwesome.FILE_EXCEL_O);
+//						btnExportSupleSoftland.setDisableOnClick(true);
 						addComponent(btnExportSupleSoftland);
 						setComponentAlignment(btnExportSupleSoftland, Alignment.TOP_RIGHT);
 						generateSupleSoftlandFile(btnExportSupleSoftland);
+//						btnExportSupleSoftland.addClickListener(new Button.ClickListener() {
+//
+//							@Override
+//							public void buttonClick(ClickEvent event) {
+//								
+//							}
+//
+//						});
 					}					
 				};
 				
@@ -748,9 +721,8 @@ public class AttendancePanel extends VerticalLayout implements View {
 				});
 
 				supleTable.setVisibleColumns("laborerConstructionSite.activeContract.jobCode","laborerConstructionSite.laborer.fullname","supleSection","suple");
-				supleTable.setColumnHeaders("Rol","Nombre","Código suple","Suple");
+				supleTable.setColumnHeaders("Oficio","Nombre","Código suple","Suple");
 				supleTable.setEditable(true);
-				supleTable.setFooterVisible(true);
 				supleTable.setTableFieldFactory(new TableFieldFactory() {
 
 					@Override
@@ -813,26 +785,6 @@ public class AttendancePanel extends VerticalLayout implements View {
 					{
 
 						setSpacing(true);
-						
-						final Button btnValidate = new Button("Validar Negativos",FontAwesome.CHECK_CIRCLE_O);
-						btnValidate.setDisableOnClick(true);
-						btnValidate.addClickListener(new Button.ClickListener() {
-							
-							@Override
-							public void buttonClick(ClickEvent event) {
-								Object itemId = null;
-								if( (itemId = checkHasNegativeOrNull(salaryContainer,"salary","vtrato","valorSabado","vsCorrd","glegal","afecto","colacion","mov","mov2")) == null ) {
-									Notification.show("La lista de trabajadores no tiene valores negativos en el sueldo ni en el jornal promedio.",Type.HUMANIZED_MESSAGE);
-								}else{
-									BeanItem<Salary> item = salaryContainer.getItem(itemId);
-									Notification.show("El trabajador "+item.getBean().getLaborerConstructionSite().getJobCode()+" tiene uno de sus valores negativos."
-											,Type.ERROR_MESSAGE);
-								}
-								btnValidate.setEnabled(true);
-							}
-
-						});
-						addComponent(btnValidate);
 
 						btnConstructionSiteConfirm = new Button("Confirmación Obra",FontAwesome.CHECK);
 						btnConstructionSiteConfirm.setDisableOnClick(true);
@@ -902,7 +854,7 @@ public class AttendancePanel extends VerticalLayout implements View {
 
 				addComponent(hl);
 				setComponentAlignment(hl, Alignment.TOP_RIGHT);
-				salaryTable = new ColumnCollapsedObservableTable();
+				salaryTable = new Table();
 //				salaryTable.setWidth("100%");
 				salaryTable.setSizeFull();
 				salaryTable.setContainerDataSource(salaryContainer);
@@ -928,7 +880,6 @@ public class AttendancePanel extends VerticalLayout implements View {
 									label.setValue( "<b>"+Utils.formatInteger((Integer) salaryContainer.getContainerProperty(itemId, columnId).getValue())+"</b>"+
 											"  ("+Utils.formatInteger((Integer) salaryContainer.getContainerProperty(itemId, "roundSalary").getValue())+")");
 									Utils.notifyPropertyValueChanged(item,"jornalBaseMes","vtrato","valorSabado","vsCorrd","sobreTiempo","descHoras","bonifImpo","glegal","afecto","sobreAfecto","cargas","asigFamiliar","colacion","mov","mov2","tnoAfecto");
-									createTableFooter(salaryTable);
 								}
 							});
 						return label;
@@ -936,19 +887,20 @@ public class AttendancePanel extends VerticalLayout implements View {
 					
 				});
 				
-				salaryTable.setVisibleColumns(salaryTableVisibleTable);
-				
-				salaryTable.setColumnHeaders("Rol","Nombre","Último<br />Jornal Prom","Jornal Prom","Bono Imp.","Bono no Imp.","Bono Prest.", "Sobre Tiempo","H Desc","V Cuota<br />Prestamo","V Cuota<br />Herramienta","Total Líquido<br />(A Pagar)"
-						,"Jornal Base", " V Trato", "Valor Sábado" , "V S Corrd", "Desc Horas","Bonif Imp","G Legal","Afecto","Sobre Afecto","Cargas","A Familiar","Colación","Mov","Movi 2","T No Afecto"
+				salaryTable.setVisibleColumns("laborerConstructionSite.activeContract.jobCode",
+						"laborerConstructionSite.laborer.fullname","lastJornalPromedio","jornalPromedio","descHours","bondMov2","loanBond","specialBond","totalLiquido"
+						,"jornalBaseMes","vtrato","valorSabado","vsCorrd","sobreTiempo","descHoras","bonifImpo","glegal","afecto","sobreAfecto","cargas","asigFamiliar","colacion","mov","mov2","tnoAfecto"
 						);
 				
-				salaryTable.setColumnWidth("jornalPromedio", 100);
+				salaryTable.setColumnHeaders("Oficio","Nombre","Último Jornal Promedio","Jornal Promedio","H Desc","Adicional Locomoción 2","Bono Prest.","Bono Imp.","Total Líquido (A Pagar)"
+						,"Jornal Base", " V Trato", "Valor Sábado" , "V S Corrd", "Sobre Tiempo", "Desc Horas","Bonif Imp","G Legal","Afecto","Sobre Afecto","Cargas","A Familiar","Colación","Mov","Movi 2","T No Afecto"
+						);
 				
 				salaryTable.setColumnCollapsed("jornalBaseMes", true);
 				salaryTable.setColumnCollapsed("vtrato", true);
 				salaryTable.setColumnCollapsed("valorSabado", true);
 				salaryTable.setColumnCollapsed("vsCorrd", true);
-//				salaryTable.setColumnCollapsed("sobreTiempo", true);
+				salaryTable.setColumnCollapsed("sobreTiempo", true);
 				salaryTable.setColumnCollapsed("descHoras", true);
 				salaryTable.setColumnCollapsed("bonifImpo", true);
 				salaryTable.setColumnCollapsed("glegal", true);
@@ -960,22 +912,6 @@ public class AttendancePanel extends VerticalLayout implements View {
 				salaryTable.setColumnCollapsed("mov", true);
 				salaryTable.setColumnCollapsed("mov2", true);
 				salaryTable.setColumnCollapsed("tnoAfecto", true);
-				
-				salaryTable.addColumnCollapsedListener(new ColumnCollapsedObservableTable.ColumnCollapsedListener() {
-					
-					@Override
-					public void colapseColumn(ColumnCollapsedEvent event) {
-						User user = SecurityHelper.getCredentials();
-						//agrega la columna al usuario si es que se setea como no colapsada
-						if(!event.isCollapsed()){
-							user.getSalaryColumns().add((String) event.getPropertyId());
-						}else{ //si no lo quita
-							user.getSalaryColumns().remove((String) event.getPropertyId());
-						}
-						user.setPassword(null);
-						userService.saveUser(user);
-					}
-				});
 				
 				salaryTable.setEditable(true);
 				salaryTable.setTableFieldFactory(new TableFieldFactory() {
@@ -989,7 +925,6 @@ public class AttendancePanel extends VerticalLayout implements View {
 								propertyId.equals("suple") )
 							return null;
 						TextField tf = new TextField();
-						tf.setWidth("100%");
 						tf.setNullRepresentation("");
 						tf.setImmediate(true);
 						if(propertyId.equals("jornalPromedio")||
@@ -1015,68 +950,12 @@ public class AttendancePanel extends VerticalLayout implements View {
 				p.getContent().setSizeFull();
 				addComponent(salaryTable);
 				setExpandRatio(salaryTable, 1.0f);
-				
-				salaryTable.setFooterVisible(true);
 			}
 		};
 		vl.setSizeFull();
 		return vl;
 	}
-	
-	/**
-	 * Permite verificar si un contenedor tiene valores nulos o menores a 0 para las propiedades dadas. 
-	 * @param container
-	 * @param propertyIds
-	 * @return El primer itemId del item que tiene una propiedad nula o menor a 0
-	 */
-	private Object checkHasNegativeOrNull(BeanContainer container,String... propertyIds ) {
-		for(Object itemId : container.getItemIds())
-			for(String propertyId : propertyIds){
-				Property property = container.getContainerProperty(itemId, propertyId);
-				if( property == null || 
-					property.getValue() == null || 
-					((Number)property.getValue()).intValue() < 0 )
-					return itemId;
-			}
-		return null;
-	}
-	
-	/**
-	 * Permite crear el footer de la tabla dada, sumando las propiedades de las columnas de tipo double o integer.
-	 * Ignora las columnas de jobCode o fullname si las tuviera.
-	 * @param table
-	 */
-	private void createTableFooter(Table table){
-		int[] counts = new int[table.getContainerPropertyIds().size()];
-		int i = 0;
-		for(Object itemId : table.getContainerDataSource().getItemIds()){
-			i = 0;
-			for(Object propertyId : table.getContainerPropertyIds()){
-				if(propertyId.equals("laborerConstructionSite.activeContract.jobCode")||
-				propertyId.equals("laborerConstructionSite.laborer.fullname"))
-					continue;
-				if( table.getContainerProperty(itemId, propertyId).getValue() instanceof Double )
-					counts[i] +=  (Double)table.getContainerProperty(itemId, propertyId).getValue();
-				else if( table.getContainerProperty(itemId, propertyId).getValue() instanceof Integer )
-					counts[i] +=  (Integer)table.getContainerProperty(itemId, propertyId).getValue();
-				i++;
-			}
-		}
-		i = 0;
-		for(Object propertyId : table.getContainerPropertyIds()){
-			if(propertyId.equals("laborerConstructionSite.activeContract.jobCode")||
-					propertyId.equals("laborerConstructionSite.laborer.fullname"))
-						continue;
-			table.setColumnFooter(propertyId, Utils.formatInteger( counts[i] ) );
-			i++;
-		}	
-	}
 
-	/**
-	 * Tabla que contiene un listado de todas las posibles ausencias en el sistema (enfermedad, vacaciones, accidentes, etc) y las lista dando la posibilidad
-	 * de modificar sus fechas de inicio/final o marcarla como confirmada en el caso que corresponda.
-	 * @return
-	 */
 	private Table drawAbsenceConfirmTable() {
 		
 		absenceContainer.addNestedContainerProperty("laborerConstructionsite.activeContract.jobCode");
@@ -1157,7 +1036,7 @@ public class AttendancePanel extends VerticalLayout implements View {
 		});
 		
 		confirmTable.setVisibleColumns("laborerConstructionsite.activeContract.jobCode","laborerConstructionsite.laborer.fullname","type","description","fromDate","toDate","confirm");
-		confirmTable.setColumnHeaders("Rol","Nombre","Tipo","Descripción","Fecha inicio","Fecha Fin","Acción");
+		confirmTable.setColumnHeaders("Oficio","Nombre","Tipo","Descripción","Fecha inicio","Fecha Fin","Acción");
 		return confirmTable;
 	}
 
@@ -1192,15 +1071,12 @@ public class AttendancePanel extends VerticalLayout implements View {
 				Overtime overtime = ((BeanItem<Overtime>) commitEvent.getFieldBinder().getItemDataSource()).getBean();
 				service.save(overtime);
 				overtimeContainer.sort(new Object[]{"laborerConstructionSite.activeContract.jobCode"}, new boolean[]{true});
-				
-				//por cada variable
-				createGridFooters(overtimeGrid);
 			}
 		});
 
 		overtimeGrid.addStyleName("grid-attendace");
 		overtimeGrid.setEditorEnabled(true);
-		overtimeGrid.setFrozenColumnCount(3);
+		overtimeGrid.setFrozenColumnCount(2);
 		if(overtimeGrid.getColumn("laborerConstructionSite") != null )
 			overtimeGrid.removeColumn("laborerConstructionSite");
 		if(overtimeGrid.getColumn("laborerConstructionSite.id") != null )
@@ -1215,9 +1091,8 @@ public class AttendancePanel extends VerticalLayout implements View {
 			overtimeGrid.removeColumn("lastMonthOvertimeAsList");
 
 		overtimeContainer.sort(new Object[]{"laborerConstructionSite.activeContract.jobCode"}, new boolean[]{true});
-		overtimeGrid.getColumn("laborerConstructionSite.activeContract.jobCode").setHeaderCaption("Rol").setEditorField(new TextField(){{setReadOnly(true);}}).setWidth(50);
+		overtimeGrid.getColumn("laborerConstructionSite.activeContract.jobCode").setHeaderCaption("Oficio").setEditorField(new TextField(){{setReadOnly(true);}}).setWidth(100);
 		overtimeGrid.getColumn("laborerConstructionSite.laborer.fullname").setHeaderCaption("Nombre").setEditorField(new TextField(){{setReadOnly(true);}});
-		overtimeGrid.getColumn("total").setHeaderCaption("Total");
          
 		createHeaders(overtimeGrid);
 		setOvertimeOrders();
@@ -1226,7 +1101,7 @@ public class AttendancePanel extends VerticalLayout implements View {
 	}
 
 	private void setOvertimeOrders() {
-		String[] s = new String[]{ "laborerConstructionSite.activeContract.jobCode","laborerConstructionSite.laborer.fullname","total",
+		String[] s = new String[]{ "laborerConstructionSite.activeContract.jobCode","laborerConstructionSite.laborer.fullname",
 				"dmp1","dmp2","dmp3","dmp4","dmp5","dmp6","dmp7","dmp8","dmp9","dmp10","dmp11","dmp12","dmp13","dmp14","dmp15","dmp16"
 				,"dmp17","dmp18","dmp19","dmp20","dmp21","dmp22","dmp23","dmp24","dmp25","dmp26","dmp27","dmp28","dmp29","dmp30","dmp31",
 				"dma1","dma2","dma3","dma4","dma5","dma6","dma7","dma8","dma9","dma10","dma11","dma12","dma13","dma14","dma15","dma16"
@@ -1299,8 +1174,6 @@ public class AttendancePanel extends VerticalLayout implements View {
 				Attendance attedance = ((BeanItem<Attendance>) commitEvent.getFieldBinder().getItemDataSource()).getBean();
 				service.save(attedance);
 				attendanceContainer.sort(new Object[]{"laborerConstructionSite.activeContract.jobCode"}, new boolean[]{true});
-				//por cada variable
-				createGridFooters(attendanceGrid);
 			}
 		});
 
@@ -1321,84 +1194,23 @@ public class AttendancePanel extends VerticalLayout implements View {
 			attendanceGrid.removeColumn("lastMarksAsList");
 
 		attendanceContainer.sort(new Object[]{"laborerConstructionSite.activeContract.jobCode"}, new boolean[]{true});
-		attendanceGrid.getColumn("laborerConstructionSite.activeContract.jobCode").setHeaderCaption("Rol").setWidth(50).setEditorField(new TextField(){{setReadOnly(true);}});
-		attendanceGrid.getColumn("laborerConstructionSite.laborer.fullname").setHeaderCaption("Nombre").setWidth(120).setEditorField(new TextField(){{setReadOnly(true);}});
+		attendanceGrid.getColumn("laborerConstructionSite.activeContract.jobCode").setHeaderCaption("Oficio").setWidth(100).setEditorField(new TextField(){{setReadOnly(true);}});
+		attendanceGrid.getColumn("laborerConstructionSite.laborer.fullname").setHeaderCaption("Nombre").setEditorField(new TextField(){{setReadOnly(true);}});
 
 		createHeaders(attendanceGrid);
 		setAttendanceOrder();
 		
 		return attendanceGrid;
 	}
-	
-	private void createGridFooters(Grid grid){
-		FooterRow footer = null;
-		if( grid.getFooterRowCount() == 1 )
-			footer = grid.getFooterRow(0);
-		else
-			footer = grid.appendFooterRow();
-		//por cada variable
-		int[] counts = new int[grid.getContainerDataSource().getContainerPropertyIds().size()];
-		for(Object attendanceId : grid.getContainerDataSource().getItemIds() ) {
-			BeanItem attendanceItem = (BeanItem) grid.getContainerDataSource().getItem(attendanceId);
-			int i = 0;
-			for(Object propertyId : grid.getContainerDataSource().getContainerPropertyIds() ){
-				if(propertyId.equals("laborerConstructionSite.activeContract.jobCode")||
-						propertyId.equals("laborerConstructionSite.laborer.fullname"))
-							continue;
-				//cuenta las X
-				if( attendanceItem.getBean() instanceof Attendance ){
-					if( attendanceItem.getItemProperty(propertyId).getValue() instanceof AttendanceMark &&
-						( (AttendanceMark)attendanceItem.getItemProperty(propertyId).getValue()  == AttendanceMark.ATTEND ||
-						  (AttendanceMark)attendanceItem.getItemProperty(propertyId).getValue()  == AttendanceMark.SATURDAY ||
-						  (AttendanceMark)attendanceItem.getItemProperty(propertyId).getValue()  == AttendanceMark.SUNDAY
-						))
-						counts[i] ++;
-				}else if( attendanceItem.getBean() instanceof Overtime ){
-					if( attendanceItem.getItemProperty(propertyId).getValue() instanceof Integer  )
-						counts[i] += (Integer)attendanceItem.getItemProperty(propertyId).getValue();
-				}
-				i++;
-			}
-		}
-		int i = 0;
-		final DateTime dt = getAttendanceDate();
-		for(Object propertyId : grid.getContainerDataSource().getContainerPropertyIds() ){
-			if(propertyId.equals("laborerConstructionSite.activeContract.jobCode")||
-					propertyId.equals("laborerConstructionSite.laborer.fullname"))
-						continue;
-			FooterCell cell = footer.getCell(propertyId);
-			if(cell != null ) {
-				cell.setText(counts[i]+"");
-//				//calculo de la semana
-//				if(((String) propertyId).startsWith("dmp") || ((String) propertyId).startsWith("dma")  ){
-//					//calcula el numero del mes
-//					int monthDay = Integer.parseInt(((String) propertyId).replace("dmp","").replace("dma",""));
-//					DateTime dt2 = dt;
-//					if ( ((String) propertyId).startsWith("dmp") )
-//						dt2 = dt2.minusMonths(1);
-//					dt2.withDayOfMonth(monthDay);
-//					//el número de mes no es un número válido de mes o si es un día a la fecha de cierre del mes pasado, oculta la columna
-//					if(dt2.getDayOfWeek() == DateTimeConstants.SATURDAY || dt2.getDayOfWeek() == DateTimeConstants.SUNDAY ){
-						cell.setStyleName("red-color bold");
-//					}else{ //solo lo setea si el número es mayor a la cantidad de dias del mes
-//						cell.setStyleName("");
-//					}
-//				}
-				
-			}
-			i++;
-		}
-	}
-	String[] attendanceOrder = new String[]{"laborerConstructionSite.activeContract.jobCode","laborerConstructionSite.laborer.fullname",
-			"dmp1","dmp2","dmp3","dmp4","dmp5","dmp6","dmp7","dmp8","dmp9","dmp10","dmp11","dmp12","dmp13","dmp14","dmp15","dmp16"
-			,"dmp17","dmp18","dmp19","dmp20","dmp21","dmp22","dmp23","dmp24","dmp25","dmp26","dmp27","dmp28","dmp29","dmp30","dmp31",
-			"dma1","dma2","dma3","dma4","dma5","dma6","dma7","dma8","dma9","dma10","dma11","dma12","dma13","dma14","dma15","dma16"
-			,"dma17","dma18","dma19","dma20","dma21","dma22","dma23","dma24","dma25","dma26","dma27","dma28","dma29","dma30","dma31"};
 
 	private void setAttendanceOrder() {
-		
-		List<String> sList = new ArrayList<String>(attendanceOrder.length);
-		for(String ss : attendanceOrder){
+		String[] s = new String[]{"laborerConstructionSite.activeContract.jobCode","laborerConstructionSite.laborer.fullname",
+				"dmp1","dmp2","dmp3","dmp4","dmp5","dmp6","dmp7","dmp8","dmp9","dmp10","dmp11","dmp12","dmp13","dmp14","dmp15","dmp16"
+				,"dmp17","dmp18","dmp19","dmp20","dmp21","dmp22","dmp23","dmp24","dmp25","dmp26","dmp27","dmp28","dmp29","dmp30","dmp31",
+				"dma1","dma2","dma3","dma4","dma5","dma6","dma7","dma8","dma9","dma10","dma11","dma12","dma13","dma14","dma15","dma16"
+				,"dma17","dma18","dma19","dma20","dma21","dma22","dma23","dma24","dma25","dma26","dma27","dma28","dma29","dma30","dma31"};
+		List<String> sList = new ArrayList<String>(s.length);
+		for(String ss : s){
 			if(attendanceGrid.getColumn(ss) != null)
 				sList.add(ss);
 		}
@@ -1672,27 +1484,6 @@ public class AttendancePanel extends VerticalLayout implements View {
 																			}
 																		});
 																		
-																		table.addGeneratedColumn("supleTotalAmount", new Table.ColumnGenerator() {
-
-																			@Override
-																			public Object generateCell(Table source, Object itemId, Object columnId) {
-
-																				final BeanItem<?> item = (BeanItem<?>) source.getItem(itemId);
-																				Double value = (Double) source.getContainerProperty(itemId, columnId).getValue();																				
-																				final Label label  = new Label(""+value.intValue());
-																				Property.ValueChangeListener listener = new Property.ValueChangeListener() {
-																					@Override
-																					public void valueChange(Property.ValueChangeEvent event) {
-																						label.setValue(((AdvancePaymentItem) item.getBean()).getSupleTotalAmount().intValue()+"");
-																					}
-																				};
-																				for (String pid: new String[]{"supleIncreaseAmount", "supleNormalAmount"})
-																					((ValueChangeNotifier)item.getItemProperty(pid)).addValueChangeListener(listener);
-
-																				return label; 
-																			}
-																		});
-																		
 																		table.setVisibleColumns("supleCode","supleTotalAmount","supleNormalAmount","supleIncreaseAmount","eliminar");
 																		table.setColumnHeaders("Código Suple","Monto Suple","Normal","Aumento Anticipo","Eliminar");
 																		table.setEditable(true);
@@ -1873,6 +1664,91 @@ public class AttendancePanel extends VerticalLayout implements View {
 		};
 	}
 	
+//	private void CopyRow(XSSFWorkbook workbook, XSSFSheet worksheet, int sourceRowNum, int destinationRowNum)
+//	{
+//	    // Get the source / new row
+//		XSSFRow newRow = worksheet.getRow(destinationRowNum);
+//		XSSFRow sourceRow = worksheet.getRow(sourceRowNum);
+//	 
+//	    // If the row exist in destination, push down all rows by 1 else create a new row
+//	    if (newRow != null)
+//	    {
+//	        worksheet.shiftRows(destinationRowNum, worksheet.getLastRowNum(), 1);
+//	    }
+//	    else
+//	    {
+//	        newRow = worksheet.createRow(destinationRowNum);
+//	    }
+//	 
+//	    // Loop through source columns to add to new row
+//	    for (int i = 0; i < sourceRow.getLastCellNum(); i++)
+//	    {
+//	        // Grab a copy of the old/new cell
+//	    	XSSFCell oldCell = sourceRow.getCell(i);
+//	    	XSSFCell newCell = newRow.createCell(i);
+//	 
+//	        // If the old cell is null jump to next cell
+//	        if (oldCell == null)
+//	        {
+//	            newCell = null;
+//	            continue;
+//	        }
+//	        
+//	        // Set the cell data type
+//	        newCell.setCellType(oldCell.getCellType());
+//	 
+//	        // Set the cell data value
+//	        switch (oldCell.getCellType()) {
+//	        case Cell.CELL_TYPE_BLANK:
+//	          break;
+//	        case Cell.CELL_TYPE_BOOLEAN:
+//	          newCell.setCellValue(oldCell.getBooleanCellValue());
+//	          break;
+//	        case Cell.CELL_TYPE_ERROR:
+//	          newCell.setCellErrorValue(oldCell.getErrorCellValue());
+//	          break;
+//	        case Cell.CELL_TYPE_FORMULA:
+//	          newCell.setCellFormula(oldCell.getCellFormula());
+//	          break;
+//	        case Cell.CELL_TYPE_NUMERIC:
+//	          newCell.setCellValue(oldCell.getNumericCellValue());
+//	          break;
+//	        case Cell.CELL_TYPE_STRING:
+//	          newCell.setCellValue(oldCell.getRichStringCellValue());
+//	          break;
+//	        }
+//	 
+//	        // Copy style from old cell and apply to new cell
+//	        XSSFCellStyle newCellStyle = workbook.createCellStyle();
+//	        newCellStyle.cloneStyleFrom(oldCell.getCellStyle()); ;
+//	        newCell.setCellStyle(newCellStyle);
+//	 
+//	        // If there is a cell comment, copy
+//	        if (newCell.getCellComment() != null) newCell.setCellComment(oldCell.getCellComment());
+//	 
+//	        // If there is a cell hyperlink, copy
+//	        if (oldCell.getHyperlink() != null) newCell.setHyperlink( oldCell.getHyperlink() );
+//	 
+//
+//	    }
+//	 
+//	    // If there are are any merged regions in the source row, copy to new row
+//	    for (int i = 0; i < worksheet.getNumMergedRegions(); i++)
+//	    {
+//	        CellRangeAddress cellRangeAddress = worksheet.getMergedRegion(i);
+//	        if (cellRangeAddress.getFirstRow() == sourceRow.getRowNum())
+//	        {
+//	            CellRangeAddress newCellRangeAddress = new CellRangeAddress(newRow.getRowNum(),
+//	                                                                        (newRow.getRowNum() +
+//	                                                                         (cellRangeAddress.getFirstRow() -
+//	                                                                          cellRangeAddress.getLastRow())),
+//	                                                                        cellRangeAddress.getFirstColumn(),
+//	                                                                        cellRangeAddress.getLastColumn());
+//	            worksheet.addMergedRegion(newCellRangeAddress);
+//	        }
+//	    }
+//	 
+//	}
 
 	private void generateSoftlandFile(final Button btnExportSoftland) {
 		
@@ -1981,28 +1857,6 @@ public class AttendancePanel extends VerticalLayout implements View {
 		reloadMonthAttendanceData(dt);
 		
 		configureInterface();
-		
-		createGridFooters(attendanceGrid);
-		
-		createGridFooters(overtimeGrid);
-		
-		createTableFooter(salaryTable);
-		
-		createTableFooter(supleTable);
-		
-		//recupera las columnas de la tabla de sueldos seleccionadas del usuario
-		User user = SecurityHelper.getCredentials();
-		//si no tiene ninguna columna seleccionada, le agrega las por defecto
-		if( user.getSalaryColumns().isEmpty() ){
-			for(String s : defaultSalaryTableVisibleTable){
-				user.getSalaryColumns().add(s);
-			}
-			user.setPassword(null);
-			userService.saveUser(user);
-		}
-		for(String column : salaryTableVisibleTable ){
-			salaryTable.setColumnCollapsed(column, !user.getSalaryColumns().contains(column));
-		}
 
 		// Enable polling and set frequency to 1 seconds
 		//		UI.getCurrent().setPollInterval(1000);
@@ -2041,6 +1895,11 @@ public class AttendancePanel extends VerticalLayout implements View {
 			List<Salary> salaries = service.getSalariesByConstructionAndMonth(cs,dt);
 			salaryContainer.addAll(salaries);
 			salaryContainer.sort(new String[]{"laborerConstructionsite.activeContract.jobCode"},new boolean[]{ true });
+
+//			List<ExtraParams> params = service.getExtraParamsByConstructionAndMonth(cs,dt);
+//			//limpia
+//			extraParamContainer.addAll(params);
+//			extraParamContainer.sort(new String[]{"laborerConstructionsite.activeContract.jobCode"},new boolean[]{ true });
 
 		}catch(Exception e){
 			logger.error("Error al calcular los sueldos",e);
@@ -2105,5 +1964,80 @@ public class AttendancePanel extends VerticalLayout implements View {
 		}
 
 	}
+
+
+	//	private void configAttendanceColumns(DateTime initialDate, DateTime lastDate){
+	//
+	//		//cuenta la cantidad de dias entre ambas fechas
+	//		int days = Days.daysBetween(initialDate, lastDate).getDays() + 1;
+	//		logger.debug("cantidad de dias {}",days);
+	//		//oculta las columnas que no se usarán
+	//		for(int i = 29 ; i <= 31 ; i++){
+	//			String propertyId = "d"+i;
+	//			//si el dia es menor o igual la cantidad de dias, lo agrega si no está
+	//			if( i <= days && attendanceGrid.getColumn(propertyId) == null ){
+	//				logger.debug("agregando la columna {} ",i);
+	//				attendanceGrid.addColumn(propertyId);//.setSortable(false).setWidth(50);
+	//			}else if ( i > days && attendanceGrid.getColumn(propertyId) != null ){ // si no , la quita
+	//				logger.debug("quitando la columna {} ",i);
+	//				attendanceGrid.removeColumn(propertyId);
+	//			}else{
+	//				logger.debug("la columna {} se deja como está",i);
+	//			}
+	//		}
+	//
+	////		logger.debug("se van a generar {} columnas",days);
+	////		
+	////		table1.addStyleName("grid-attendace");
+	////		table1.setEditorEnabled(true);
+	////		table1.setFrozenColumnCount(1);
+	////		if(table1.getColumn("laborerConstructionSite") != null )
+	////			table1.removeColumn("laborerConstructionSite");
+	////		if(table1.getColumn("attendanceId") != null )
+	////			table1.removeColumn("attendanceId");
+	////		if(table1.getColumn("date") != null )
+	////			table1.removeColumn("date");
+	////		
+	//
+	//		//si las columnas no están cargadas, las carga
+	////		if( table1.getColumns().size() == 0 ){
+	//
+	//			//crea 31 columnas y luego oculta las ultimas según sea necesario
+	////			Object[] visibleColumns = new Object[ days + 1];
+	////			visibleColumns[0] = "activeContract.jobCode";
+	////
+	////			if( table1.getColumn("activeContract.jobCode") == null ){
+	////				table1.addColumn("activeContract.jobCode",Integer.class).setHeaderCaption("Código").setEditable(false).setWidth(100);
+	////			}
+	////			table1.addStyleName("grid-attendace");
+	////			table1.setEditorEnabled(true);
+	////			table1.setFrozenColumnCount(1);
+	////
+	////			for(int i = 1 ; i <= days ; i++){
+	////				String propertyId = "day"+i;
+	////				if( table1.getColumn(propertyId) == null ){
+	////					table1.addColumn("day"+i,AttendanceMark.class).setHeaderCaption( initialDate.plusDays(i - 1).getDayOfMonth()+"" ).setSortable(false).setWidth(50);
+	////					visibleColumns[i] = "day"+i; 
+	////				}
+	////			}
+	//		
+	////			table1.getColumn("laborerConstructionSite.activeContract.jobCode").setHeaderCas
+	////		}
+	////		//oculta las columnas que no se usarán
+	////		for(int i = 29 ; i <= 31 ; i++){
+	////			String propertyId = "day"+i;
+	////			//si el dia es menor o igual la cantidad de dias, lo agrega si no está
+	////			if( i <= days && table1.getColumn(propertyId) == null ){
+	////				logger.debug("agregando la columna {} ",i);
+	////				table1.addColumn(propertyId,AttendanceMark.class).setHeaderCaption( initialDate.plusDays(i - 1).getDayOfMonth()+"" ).setSortable(false).setWidth(50);
+	////			}else if ( i > days && table1.getColumn(propertyId) != null ){ // si no , la quita
+	////				logger.debug("quitando la columna {} ",i);
+	////				table1.removeColumn(propertyId);
+	////			}else{
+	////				logger.debug("la columna {} se deja como está",i);
+	////			}
+	////		}
+	//
+	//	}
 
 }
