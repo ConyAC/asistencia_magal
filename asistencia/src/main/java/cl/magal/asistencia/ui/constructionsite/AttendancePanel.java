@@ -9,6 +9,7 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -651,13 +652,26 @@ public class AttendancePanel extends VerticalLayout implements View {
 							
 							@Override
 							public void buttonClick(ClickEvent event) {
-								Object itemId = null;
-								if( (itemId = checkHasNegativeOrNull(salaryContainer,"suple")) == null ) {
+								List<Object> itemIds = null;
+								if( (itemIds = checkHasNegativeOrNull(salaryContainer,"suple")).size() == 0 ) {
 									Notification.show("La lista de trabajadores no tiene valores negativos en el suple.",Type.HUMANIZED_MESSAGE);
 								}else{
-									BeanItem<Salary> item = salaryContainer.getItem(itemId);
-									Notification.show("El trabajador "+item.getBean().getLaborerConstructionSite().getJobCode()+" tiene un suple negativo."
-											,Type.ERROR_MESSAGE);
+									//crea el mensaje
+									StringBuilder sb = new StringBuilder("Hay "+itemIds.size()+" trabajadores con valores negativos y son:\n");
+									int i = 0;
+									for(Object itemId : itemIds ){
+										BeanItem<Salary> item = salaryContainer.getItem(itemId);
+										sb.append(item.getBean().getLaborerConstructionSite().getJobCode());
+										
+										i++;
+										if( i < itemIds.size() )
+											sb.append(",");
+										if( i % 8 == 0) //para mostrar de a grupo de 8 maximo
+											sb.append("\n");
+									}
+									
+									
+									Notification.show(sb.toString(),Type.ERROR_MESSAGE);
 								}
 								btnValidate.setEnabled(true);
 							}
@@ -854,13 +868,26 @@ public class AttendancePanel extends VerticalLayout implements View {
 							
 							@Override
 							public void buttonClick(ClickEvent event) {
-								Object itemId = null;
-								if( (itemId = checkHasNegativeOrNull(salaryContainer,"salary","vtrato","valorSabado","vsCorrd","glegal","afecto","colacion","mov","mov2")) == null ) {
+								List<Object> itemIds = null;
+								if( (itemIds = checkHasNegativeOrNull(salaryContainer,"salary","vtrato","valorSabado","vsCorrd","glegal","afecto","colacion","mov","mov2")).size() == 0 ) {
 									Notification.show("La lista de trabajadores no tiene valores negativos en el sueldo ni en el jornal promedio.",Type.HUMANIZED_MESSAGE);
 								}else{
-									BeanItem<Salary> item = salaryContainer.getItem(itemId);
-									Notification.show("El trabajador "+item.getBean().getLaborerConstructionSite().getJobCode()+" tiene uno de sus valores negativos."
-											,Type.ERROR_MESSAGE);
+									//crea el mensaje
+									StringBuilder sb = new StringBuilder("Hay "+itemIds.size()+" trabajadores con valores negativos y son:\n");
+									int i = 0;
+									for(Object itemId : itemIds ){
+										BeanItem<Salary> item = salaryContainer.getItem(itemId);
+										sb.append(item.getBean().getLaborerConstructionSite().getJobCode());
+										
+										i++;
+										if( i < itemIds.size() )
+											sb.append(",");
+										if( i % 8 == 0) //para mostrar de a grupo de 8 maximo
+											sb.append("\n");
+									}
+									
+									
+									Notification.show(sb.toString(),Type.ERROR_MESSAGE);
 								}
 								btnValidate.setEnabled(true);
 							}
@@ -1063,16 +1090,17 @@ public class AttendancePanel extends VerticalLayout implements View {
 	 * @param propertyIds
 	 * @return El primer itemId del item que tiene una propiedad nula o menor a 0
 	 */
-	private Object checkHasNegativeOrNull(BeanContainer container,String... propertyIds ) {
+	private List<Object> checkHasNegativeOrNull(BeanContainer<Long, Salary> container,String... propertyIds ) {
+		List<Object> itemdIds = new LinkedList<Object>();
 		for(Object itemId : container.getItemIds())
 			for(String propertyId : propertyIds){
 				Property property = container.getContainerProperty(itemId, propertyId);
 				if( property == null || 
 					property.getValue() == null || 
 					((Number)property.getValue()).intValue() < 0 )
-					return itemId;
+					itemdIds.add(itemId);
 			}
-		return null;
+		return itemdIds;
 	}
 	
 	/**
@@ -1209,7 +1237,7 @@ public class AttendancePanel extends VerticalLayout implements View {
 		overtimeGrid.setWidth("100%");
 		//overtimeGrid.setEditorFieldGroup(new BeanFieldGroup<Overtime>(Overtime.class));
 		
-		BeanFieldGroup binder = new BeanFieldGroup<Overtime>(Overtime.class);
+		BeanFieldGroup<Overtime> binder = new BeanFieldGroup<Overtime>(Overtime.class);
 		binder.setFieldFactory(new EnhancedFieldGroupFieldFactory());
 		overtimeGrid.setEditorFieldGroup(binder);
 		//overtimeGrid.setEditorFieldGroup(new BeanFieldGroup<EnhancedFieldGroupFieldFactory>(EnhancedFieldGroupFieldFactory.class));
@@ -1297,7 +1325,7 @@ public class AttendancePanel extends VerticalLayout implements View {
 				Item salaryItem = salaryContainer.getItem(attendance.getLaborerConstructionSite().getId());
 				if(salaryItem == null )
 					return;
-				Property prop = salaryItem.getItemProperty("attendance");
+				Property<Attendance> prop = salaryItem.getItemProperty("attendance");
 				prop.setValue(attendance);
 				
 				salaryItem.getItemProperty("forceSalary").getValue();
