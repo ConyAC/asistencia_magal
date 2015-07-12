@@ -213,6 +213,10 @@ public class Salary implements Serializable {
 	public void setOvertimeHours(Integer overtimeHours) {
 		this.overtimeHours = overtimeHours;
 	}
+	/**
+	 * Número de horas de descuento
+	 * @return
+	 */
 	public Integer getDescHours() {
 		return descHours == null ? 0 : descHours;
 	}
