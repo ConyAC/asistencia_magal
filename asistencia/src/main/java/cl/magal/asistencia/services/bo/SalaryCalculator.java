@@ -9,15 +9,18 @@ import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import cl.magal.asistencia.entities.AfpAndInsuranceConfigurations;
+import cl.magal.asistencia.entities.AfpItem;
 import cl.magal.asistencia.entities.Attendance;
 import cl.magal.asistencia.entities.DateConfigurations;
 import cl.magal.asistencia.entities.FamilyAllowanceConfigurations;
-import cl.magal.asistencia.entities.Mobilization2;
+import cl.magal.asistencia.entities.Laborer;
 import cl.magal.asistencia.entities.Overtime;
 import cl.magal.asistencia.entities.Salary;
 import cl.magal.asistencia.entities.TaxationConfigurations;
 import cl.magal.asistencia.entities.WageConfigurations;
 import cl.magal.asistencia.entities.enums.AttendanceMark;
+import cl.magal.asistencia.util.Utils;
 
 public class SalaryCalculator {
 	
@@ -29,6 +32,7 @@ public class SalaryCalculator {
 	DateTime closingDateLastMonth;
 	Double suple, toolFee, loanFee,
 		   sueldoMinimo;
+	int holidays;
 	
 	public Double getLoanFee(){
 		return loanFee;
@@ -43,6 +47,7 @@ public class SalaryCalculator {
 	List<FamilyAllowanceConfigurations> famillyTable;
 	List<TaxationConfigurations> taxTable;
 	WageConfigurations wageConfigurations;
+	AfpAndInsuranceConfigurations afpConfig;
 	Integer jornalPromedio;
 	int loans;
 
@@ -105,7 +110,7 @@ public class SalaryCalculator {
 	Integer diasHabiles ;
 	Integer getDiasHabiles(){
 		if( diasHabiles == null )
-			diasHabiles  = calculateDiasHabilesMes(date);
+			diasHabiles  = calculateDiasHabilesMes(date, holidays);
 		return diasHabiles ;
 	}
 	
@@ -226,7 +231,7 @@ public class SalaryCalculator {
 	}
 	
 	public Double getMov2Export(){
-		return getMov2() / getMov2ConstructionSite();
+		return getMov2() / Utils.getMov2ConstructionSite(wageConfigurations.getMobilizations2(),attendance.getLaborerConstructionSite().getConstructionsite());
 	}
 	public Double getMov2DayExport(){
 		return getMov2() / getDiaTrab();
@@ -318,11 +323,13 @@ public class SalaryCalculator {
 			                DateConfigurations dateConfigurations,
 			                List<FamilyAllowanceConfigurations> famillyTable,
 			                List<TaxationConfigurations> taxTable,
-			                int loans){
+			                int loans,
+			                int holidays,
+			                AfpAndInsuranceConfigurations afpConfig){
 		
 		
 		setInformation(suple, tool, loan, attendance, lastMonthAttendance, overtime, loans);
-		init(closingDateLastMonth, wageConfigurations, dateConfigurations, famillyTable, taxTable);
+		init(closingDateLastMonth, wageConfigurations, dateConfigurations, famillyTable, taxTable,holidays,afpConfig);
 		
 	}
 	
@@ -389,8 +396,8 @@ public class SalaryCalculator {
             WageConfigurations wageConfigurations,
             DateConfigurations dateConfigurations,
             List<FamilyAllowanceConfigurations> famillyTable,
-            List<TaxationConfigurations> taxTable){
-		init(closingDateLastMonth, wageConfigurations, dateConfigurations, famillyTable, taxTable);
+            List<TaxationConfigurations> taxTable,int holidays,AfpAndInsuranceConfigurations afpConfig){
+		init(closingDateLastMonth, wageConfigurations, dateConfigurations, famillyTable, taxTable,holidays,afpConfig);
 	}
 	
 	/**
@@ -444,8 +451,8 @@ public class SalaryCalculator {
             WageConfigurations wageConfigurations,
             DateConfigurations dateConfigurations,
             List<FamilyAllowanceConfigurations> famillyTable,
-            List<TaxationConfigurations> taxTable){
-		init(closingDateLastMonth, wageConfigurations, dateConfigurations, famillyTable, taxTable);
+            List<TaxationConfigurations> taxTable,int holidays,AfpAndInsuranceConfigurations afpConfig){
+		init(closingDateLastMonth, wageConfigurations, dateConfigurations, famillyTable, taxTable,holidays,afpConfig);
 	}
 	
 	/**
@@ -460,7 +467,7 @@ public class SalaryCalculator {
             WageConfigurations wageConfigurations,
             DateConfigurations dateConfigurations,
             List<FamilyAllowanceConfigurations> famillyTable,
-            List<TaxationConfigurations> taxTable){
+            List<TaxationConfigurations> taxTable, int holidays,AfpAndInsuranceConfigurations afpConfig){
 		
 		if(closingDateLastMonth == null )
 			throw new RuntimeException("Aún no se define una fecha de cierre del mes anterior, no se puede calcular el sueldo.");
@@ -488,6 +495,8 @@ public class SalaryCalculator {
 		
 //		this.bencina = dateConfigurations.getBenzine();
 		this.ufMes = dateConfigurations.getUf();
+		this.holidays = holidays;
+		this.afpConfig = afpConfig;
 	}
 
 	/**
@@ -552,20 +561,11 @@ public class SalaryCalculator {
 	 * DONE
 	 * @return
 	 */
-	private int calculateDiasHabilesMes(Date date) {
+	private int calculateDiasHabilesMes(Date date,int holidays) {
 		DateTime dt = new DateTime(date);
-		DateTime firstDayOfMonth = dt.withDayOfMonth(1);
-		DateTime lastDayOfMonth = dt.withDayOfMonth(dt.dayOfMonth().getMaximumValue());
-		int days = 0;
-		//cuenta los dias habiles
-		while(!firstDayOfMonth.equals(lastDayOfMonth.plusDays(1))){
-			int indexOfWeek = firstDayOfMonth.dayOfWeek().get();
-			if( indexOfWeek > 0 && indexOfWeek < 6 )
-				days ++;
-			firstDayOfMonth = firstDayOfMonth.plusDays(1);
-		}
+		int days = Utils.countLaborerDays(dt);
 		logger.debug("date {} , days {}",date,days);
-		return days;
+		return days - holidays;
 	}
 
 	/**
@@ -844,20 +844,11 @@ public class SalaryCalculator {
 	 */
 	private double calculateMov2(DateTime closingDateLastMonth,Attendance attendance,Attendance lastMonthAttendance) {
 		
-		double mov2 = getMov2ConstructionSite();
+		double mov2 = Utils.getMov2ConstructionSite(wageConfigurations.getMobilizations2(),attendance.getLaborerConstructionSite().getConstructionsite());
 		return getCol()*mov2;
 	}
 	
-	private double getMov2ConstructionSite(){
-		double mov2 = 0;
-		for(Mobilization2 m2 : wageConfigurations.getMobilizations2()){
-			if(m2.getConstructionSite().equals(attendance.getLaborerConstructionSite().getConstructionsite())){
-				mov2 = m2.getAmount();
-				break;
-			}
-		}
-		return mov2;
-	}
+
 
 	/**
 	 * DONE
@@ -1013,11 +1004,13 @@ public class SalaryCalculator {
 	}
 
 	/**
-	 * TODO Busca el % de la afp asociado al trabajador, si éste no es pensionado. 
+	 * Busca el % de la afp asociado al trabajador, si éste no es pensionado. 
 	 * @return
 	 */
 	private double calculateAFPPorcentaje() {
-		return 0.1127;
+		List<AfpItem> afpList = afpConfig.getAfpTable();
+		Laborer laborer = attendance.getLaborerConstructionSite().getLaborer();
+		return Utils.getAfpRate(afpList, laborer.getAfp());
 	}
 
 	/**
