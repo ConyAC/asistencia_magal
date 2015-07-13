@@ -2221,6 +2221,7 @@ public class AttendancePanel extends VerticalLayout implements View {
 		
 		createTableFooter(supleTable);
 		
+		disabledHours(attendanceGrid);
 		//recupera las columnas de la tabla de sueldos seleccionadas del usuario
 		User user = SecurityHelper.getCredentials();
 		//si no tiene ninguna columna seleccionada, le agrega las por defecto
@@ -2337,4 +2338,33 @@ public class AttendancePanel extends VerticalLayout implements View {
 
 	}
 
+	private void disabledHours(Grid grid){		
+		for(Object itemId : grid.getContainerDataSource().getItemIds()){
+			BeanItem attendanceItem = (BeanItem) grid.getContainerDataSource().getItem(itemId);
+			BeanItem<Overtime> overtimeItem = overtimeContainer.getItem(itemId);
+			
+			for(Object propertyId : grid.getContainerDataSource().getContainerPropertyIds()){
+				if( attendanceItem.getBean() instanceof Attendance ){
+					if( attendanceItem.getItemProperty(propertyId).getValue() instanceof AttendanceMark &&
+						( (AttendanceMark)attendanceItem.getItemProperty(propertyId).getValue()  == AttendanceMark.ATTEND ||
+						  (AttendanceMark)attendanceItem.getItemProperty(propertyId).getValue()  == AttendanceMark.SATURDAY ||
+						  (AttendanceMark)attendanceItem.getItemProperty(propertyId).getValue()  == AttendanceMark.SUNDAY
+						)){
+						final String l = attendanceItem.getItemProperty(propertyId).toString();
+						overtimeGrid.setCellStyleGenerator(new Grid.CellStyleGenerator() {
+
+							@Override
+							public String getStyle(CellReference cellReference) {
+								String pid = (String) cellReference.getPropertyId();
+								//if(l == pid)
+									cellReference.getProperty().setReadOnly(true);
+								
+								return null;
+							}
+						});						
+					}
+				}
+			}
+		}
+	}
 }
