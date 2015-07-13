@@ -1334,6 +1334,8 @@ public class AttendancePanel extends VerticalLayout implements View {
 				
 				salaryItem.getItemProperty("forceSalary").getValue();
 				salaryItem.getItemProperty("forceSuple").getValue();
+				
+				disabledHours(attendanceGrid);
 			}
 		});
 		attendanceGrid.setEditorFieldGroup(bfg);
@@ -2346,22 +2348,11 @@ public class AttendancePanel extends VerticalLayout implements View {
 			for(Object propertyId : grid.getContainerDataSource().getContainerPropertyIds()){
 				if( attendanceItem.getBean() instanceof Attendance ){
 					if( attendanceItem.getItemProperty(propertyId).getValue() instanceof AttendanceMark &&
-						( (AttendanceMark)attendanceItem.getItemProperty(propertyId).getValue()  == AttendanceMark.ATTEND ||
-						  (AttendanceMark)attendanceItem.getItemProperty(propertyId).getValue()  == AttendanceMark.SATURDAY ||
-						  (AttendanceMark)attendanceItem.getItemProperty(propertyId).getValue()  == AttendanceMark.SUNDAY
+						( (AttendanceMark)attendanceItem.getItemProperty(propertyId).getValue()  == AttendanceMark.VACATION ||
+						  (AttendanceMark)attendanceItem.getItemProperty(propertyId).getValue()  == AttendanceMark.ACCIDENT ||
+						  (AttendanceMark)attendanceItem.getItemProperty(propertyId).getValue()  == AttendanceMark.SICK
 						)){
-						final String l = attendanceItem.getItemProperty(propertyId).toString();
-						overtimeGrid.setCellStyleGenerator(new Grid.CellStyleGenerator() {
-
-							@Override
-							public String getStyle(CellReference cellReference) {
-								String pid = (String) cellReference.getPropertyId();
-								//if(l == pid)
-									cellReference.getProperty().setReadOnly(true);
-								
-								return null;
-							}
-						});						
+						overtimeItem.getItemProperty(propertyId).setReadOnly(true);				
 					}
 				}
 			}
