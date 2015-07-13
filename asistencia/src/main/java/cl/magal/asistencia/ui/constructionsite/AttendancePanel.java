@@ -2340,6 +2340,7 @@ public class AttendancePanel extends VerticalLayout implements View {
 
 	}
 
+	//Permite bloquear el ingreso de horas extras en caso de vacaciones, accidente, licencia.
 	private void disabledHours(Grid grid){		
 		for(Object itemId : grid.getContainerDataSource().getItemIds()){
 			BeanItem attendanceItem = (BeanItem) grid.getContainerDataSource().getItem(itemId);
