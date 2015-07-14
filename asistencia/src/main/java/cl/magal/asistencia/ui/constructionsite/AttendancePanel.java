@@ -588,10 +588,6 @@ public class AttendancePanel extends VerticalLayout implements View {
 				@Override
 				public String getStyle(CellReference cellReference) {
 					String post = "";
-					if( cellReference.getValue() instanceof Integer ){
-						if((Integer)cellReference.getValue() == 0)
-							cellReference.getProperty().setReadOnly(true);
-					}
 					if( (cellReference.getValue() instanceof AttendanceMark && !AttendanceMark.ATTEND.equals(cellReference.getValue())) ||
 							(cellReference.getValue() instanceof Integer && 0 != (Integer)cellReference.getValue()))
 						post = " red-color";
@@ -2340,7 +2336,7 @@ public class AttendancePanel extends VerticalLayout implements View {
 
 	}
 
-	//Permite bloquear el ingreso de horas extras en caso de vacaciones, accidente, licencia.
+	//Permite bloquear el ingreso de horas extras en caso de que un obrero registre vacaciones, accidente y/o licencia.
 	private void disabledHours(Grid grid){		
 		for(Object itemId : grid.getContainerDataSource().getItemIds()){
 			BeanItem attendanceItem = (BeanItem) grid.getContainerDataSource().getItem(itemId);
