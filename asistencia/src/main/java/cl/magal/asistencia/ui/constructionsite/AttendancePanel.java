@@ -1330,6 +1330,8 @@ public class AttendancePanel extends VerticalLayout implements View {
 				
 				salaryItem.getItemProperty("forceSalary").getValue();
 				salaryItem.getItemProperty("forceSuple").getValue();
+				
+				disabledHours(attendanceGrid);
 			}
 		});
 		attendanceGrid.setEditorFieldGroup(bfg);
@@ -2217,6 +2219,8 @@ public class AttendancePanel extends VerticalLayout implements View {
 		
 		createTableFooter(supleTable);
 		
+		disabledHours(attendanceGrid);
+		
 		//recupera las columnas de la tabla de sueldos seleccionadas del usuario
 		User user = SecurityHelper.getCredentials();
 		//si no tiene ninguna columna seleccionada, le agrega las por defecto
@@ -2332,5 +2336,25 @@ public class AttendancePanel extends VerticalLayout implements View {
 		}
 
 	}
-
+	
+	//Permite bloquear el ingreso de horas extras en caso de que un obrero registre vacaciones, accidente y/o licencia.
+	private void disabledHours(Grid grid){
+		for(Object itemId : grid.getContainerDataSource().getItemIds()){
+			BeanItem attendanceItem = (BeanItem) grid.getContainerDataSource().getItem(itemId);
+			BeanItem<Overtime> overtimeItem = overtimeContainer.getItem(itemId);				
+	
+			for(Object propertyId : grid.getContainerDataSource().getContainerPropertyIds()){
+				if( attendanceItem.getBean() instanceof Attendance ){
+					if( attendanceItem.getItemProperty(propertyId).getValue() instanceof AttendanceMark &&
+						( (AttendanceMark)attendanceItem.getItemProperty(propertyId).getValue()  == AttendanceMark.VACATION ||
+						  (AttendanceMark)attendanceItem.getItemProperty(propertyId).getValue()  == AttendanceMark.ACCIDENT ||
+						  (AttendanceMark)attendanceItem.getItemProperty(propertyId).getValue()  == AttendanceMark.SICK
+						)){
+						
+						overtimeItem.getItemProperty(propertyId).setReadOnly(true);
+					}
+				}
+			}
+		}
+	}
 }
