@@ -21,6 +21,7 @@ import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.velocity.app.VelocityEngine;
 import org.joda.time.DateTime;
+import org.joda.time.Interval;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -511,7 +512,9 @@ public class AttendancePanel extends VerticalLayout implements View {
 	}
 
 	private void createHeaders(final Grid grid) {
-
+		
+		boolean isAttendanceGrid = grid.equals(attendanceGrid);
+		
 		HeaderRow filterRow = null;
 
 		if(grid.getHeaderRowCount() == 1)
@@ -558,20 +561,42 @@ public class AttendancePanel extends VerticalLayout implements View {
 				if(((String) pid).startsWith("dmp") || ((String) pid).startsWith("dma")  ){
 					//calcula el numero del mes
 					int monthDay = Integer.parseInt(((String) pid).replace("dmp","").replace("dma",""));
+					//crea una fecha con el año y mes seleccionado y con el dia recuperado del property actual
 					DateTime dt2 = dt;
-					if ( ((String) pid).startsWith("dmp") )
-						dt2 = dt2.minusMonths(1);
-					//el número de mes no es un número válido de mes o si es un día a la fecha de cierre del mes pasado, oculta la columna
-					if( monthDay > dt2.dayOfMonth().getMaximumValue() || 
-						( ((String) pid).startsWith("dmp") && monthDay <= getPastMonthClosingDate().getDayOfMonth())){
+					try{
+						//si el property es dmp(dia mes pasado, entonces retrocede un mes
+						if ( ((String) pid).startsWith("dmp") )
+							dt2 = dt2.minusMonths(1);
+						dt2 = dt2.withDayOfMonth(monthDay);
+					}catch(Exception e){ //si no es un mes válida lo ocula 
 						if(grid.getColumn(pid) != null)
 							grid.removeColumn(pid);
-					}else{ //solo lo setea si el número es mayor a la cantidad de dias del mes
-						if(grid.getColumn(pid) == null)
-							grid.addColumn(pid);
-						label.setValue( dt2.withDayOfMonth(monthDay).dayOfWeek().getAsShortText() );
-						grid.getColumn(pid).setHeaderCaption(((String) pid).replace("dmp","").replace("dma","")).setSortable(false);
 					}
+					if(dt2 != null ){ //continua solo si el día es válido
+						
+						//si la grid es de asistencia, calcula el rango con el dia de cierre del mes pasado y el ultimo dia del mes seleccionado
+						DateTime startDate,endDate;
+						if(isAttendanceGrid){
+							startDate = getPastMonthClosingDate();
+							endDate = getAttendanceDate().withDayOfMonth(getAttendanceDate().dayOfMonth().getMaximumValue());
+						}else{//si la grid es de sobretiempos, calcula el rango con el dia de inicio del trato y el fin de trato
+							startDate = new DateTime( getDateConfigurations().getBeginDeal());
+							endDate = new DateTime( getDateConfigurations().getFinishDeal());
+						}
+						//define el rango
+						Interval interval = new Interval(startDate, endDate.plusDays(1)); //le suma un dia, dado que el contains del interval es exclusivo para el final
+						//si la fecha que representa el property está dentro del rango, se preocupa de mostrarla y definir sus header y subheader
+						if(interval.contains(dt2)){
+							if(grid.getColumn(pid) == null)
+								grid.addColumn(pid);
+							label.setValue( dt2.dayOfWeek().getAsShortText() );
+							grid.getColumn(pid).setHeaderCaption(((String) pid).replace("dmp","").replace("dma","")).setSortable(false);
+						}else{ //si no la contiene, la oculta
+							if(grid.getColumn(pid) != null)
+								grid.removeColumn(pid);
+						}
+					}
+					
 					if(cell == null){
 						cell = filterRow.getCell(pid);
 					}
