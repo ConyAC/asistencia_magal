@@ -157,8 +157,6 @@ public class AttendancePanel extends VerticalLayout implements View {
 	BeanItemContainer<AbsenceVO> absenceContainer = new BeanItemContainer<AbsenceVO>(AbsenceVO.class);
 	BeanItemContainer<ConstructionSite> constructionContainer = new BeanItemContainer<ConstructionSite>(ConstructionSite.class);
 
-
-
 	/** COMPONENTES **/
 	ProgressBar progress;
 	Label status;
@@ -167,6 +165,7 @@ public class AttendancePanel extends VerticalLayout implements View {
 	InlineDateField attendanceDate;
 	Button btnExportSoftland,btnExportSupleSoftland,btnConstructionSiteConfirm,btnCentralConfirm,btnSupleObraConfirm,btnSupleCentralConfirm;
 	Table confirmTable;
+	TabSheet tab;
 //	VerticalLayout root;
 	Table supleTable;
 	ColumnCollapsedObservableTable salaryTable;
@@ -179,7 +178,8 @@ public class AttendancePanel extends VerticalLayout implements View {
 		"laborerConstructionSite.laborer.fullname","lastJornalPromedio","jornalPromedio","specialBond","bondMov2","loanBond","sobreTiempo","descHours","loan","tools","totalLiquido"
 	};
 	final static String[] salaryTableVisibleTable = new String[]{"laborerConstructionSite.activeContract.jobCode",
-			"laborerConstructionSite.laborer.fullname","lastJornalPromedio","jornalPromedio","specialBond","bondMov2","loanBond","sobreTiempo","descHours","loan","tools","totalLiquido"
+			"laborerConstructionSite.laborer.fullname","lastJornalPromedio","jornalPromedio","specialBond","bondMov2","loanBond","sobreTiempo","descHours","loan","tools","totalLiquido",
+			"salaryCalculator.diaTrab","salaryCalculator.sab","salaryCalculator.sep","salaryCalculator.dps","salaryCalculator.dpd","salaryCalculator.col","salaryCalculator.mov"
 			,"jornalBaseMes","vtrato","valorSabado","vsCorrd","descHoras","bonifImpo","glegal","afecto","sobreAfecto","cargas","asigFamiliar","colacion","mov","mov2","tnoAfecto"
 	};
 
@@ -359,8 +359,6 @@ public class AttendancePanel extends VerticalLayout implements View {
 		salaryContainer.removeAllItems();
 	}
 	
-	TabSheet tab;
-
 	private TabSheet drawAttendanceDetail() {
 		logger.debug("PRIMERO");
 		tab = new TabSheet();
@@ -878,6 +876,14 @@ public class AttendancePanel extends VerticalLayout implements View {
 		salaryContainer.addNestedContainerProperty("laborerConstructionSite.activeContract.jobCode");
 		salaryContainer.addNestedContainerProperty("laborerConstructionSite.laborer.fullname");
 		salaryContainer.addNestedContainerProperty("laborerConstructionSite.supleCode");
+		salaryContainer.addNestedContainerProperty("salaryCalculator.diaTrab");
+		salaryContainer.addNestedContainerProperty("salaryCalculator.sab");
+		salaryContainer.addNestedContainerProperty("salaryCalculator.sep");
+		salaryContainer.addNestedContainerProperty("salaryCalculator.dps");
+		salaryContainer.addNestedContainerProperty("salaryCalculator.dpd");
+		salaryContainer.addNestedContainerProperty("salaryCalculator.col");
+		salaryContainer.addNestedContainerProperty("salaryCalculator.mov");
+		
 		VerticalLayout vl = new VerticalLayout(){
 			{
 				setSpacing(true);
@@ -993,6 +999,7 @@ public class AttendancePanel extends VerticalLayout implements View {
 				salaryTable.setSizeFull();
 				salaryTable.setContainerDataSource(salaryContainer);
 				salaryTable.setColumnCollapsingAllowed(true);
+				salaryTable.setColumnReorderingAllowed(true);
 				
 				salaryTable.addGeneratedColumn("totalLiquido", new Table.ColumnGenerator(){
 
@@ -1024,7 +1031,9 @@ public class AttendancePanel extends VerticalLayout implements View {
 				
 				salaryTable.setVisibleColumns(salaryTableVisibleTable);
 				
-				salaryTable.setColumnHeaders("Rol","Nombre","Último<br />Jornal Prom","Jornal Prom","Bono Imp.","Bono no Imp.","Bono Prest.", "Sobre Tiempo","H Desc","V Cuota<br />Prestamo","V Cuota<br />Herramienta","Total Líquido<br />(A Pagar)"
+				salaryTable.setColumnHeaders("Rol","Nombre","Último<br />Jornal Prom","Jornal Prom","Bono Imp.","Bono no Imp.","Bono Prest.", "Sobre Tiempo","H Desc","V Cuota<br />Prestamo",
+						"V Cuota<br />Herramienta","Total Líquido<br />(A Pagar)",
+						"Día<br />Trab","Sab","Sep","DPS","DPD","Col","Mov"
 						,"Jornal Base", " V Trato", "Valor Sábado" , "V S Corrd", "Desc Horas","Bonif Imp","G Legal","Afecto","Sobre Afecto","Cargas","A Familiar","Colación","Mov","Movi 2","T No Afecto"
 						);
 				
@@ -1046,6 +1055,13 @@ public class AttendancePanel extends VerticalLayout implements View {
 				salaryTable.setColumnCollapsed("mov", true);
 				salaryTable.setColumnCollapsed("mov2", true);
 				salaryTable.setColumnCollapsed("tnoAfecto", true);
+				salaryTable.setColumnCollapsed("salaryCalculator.diaTrab",true);
+				salaryTable.setColumnCollapsed("salaryCalculator.sab",true);
+				salaryTable.setColumnCollapsed("salaryCalculator.sep",true);
+				salaryTable.setColumnCollapsed("salaryCalculator.dps",true);
+				salaryTable.setColumnCollapsed("salaryCalculator.dpd",true);
+				salaryTable.setColumnCollapsed("salaryCalculator.col",true);
+				salaryTable.setColumnCollapsed("salaryCalculator.mov",true);
 				
 				salaryTable.addColumnCollapsedListener(new ColumnCollapsedObservableTable.ColumnCollapsedListener() {
 					
