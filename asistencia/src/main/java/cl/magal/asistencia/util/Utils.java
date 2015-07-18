@@ -27,6 +27,7 @@ import cl.magal.asistencia.entities.LaborerConstructionsite;
 import cl.magal.asistencia.entities.License;
 import cl.magal.asistencia.entities.Mobilization2;
 import cl.magal.asistencia.entities.Vacation;
+import cl.magal.asistencia.entities.WithdrawalSettlement;
 import cl.magal.asistencia.entities.enums.Afp;
 
 import com.vaadin.data.Validator.InvalidValueException;
@@ -386,6 +387,18 @@ public class Utils {
 		for(Double d : list )
 			sum += (d == null ? 0 : d);
 		return sum/(list.size() == 0 ? 1 : list.size());
+	}
+
+	/**
+	 * 
+	 * @param withdrawalSettlements
+	 * @return
+	 */
+	public static int sum(List<WithdrawalSettlement> withdrawalSettlements) {
+		int sum = 0;
+		for(WithdrawalSettlement w : withdrawalSettlements)
+			sum += w.getPrice();
+		return sum;
 	}
 }
 

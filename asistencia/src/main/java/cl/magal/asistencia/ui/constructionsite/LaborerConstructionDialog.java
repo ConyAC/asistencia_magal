@@ -35,6 +35,7 @@ import cl.magal.asistencia.entities.Speciality;
 import cl.magal.asistencia.entities.Tool;
 import cl.magal.asistencia.entities.User;
 import cl.magal.asistencia.entities.Vacation;
+import cl.magal.asistencia.entities.WithdrawalSettlement;
 import cl.magal.asistencia.entities.enums.AccidentLevel;
 import cl.magal.asistencia.entities.enums.LicenseType;
 import cl.magal.asistencia.entities.enums.LoanToolStatus;
@@ -161,8 +162,10 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 			tab.addTab(drawInformation(),"Información");
 		//tab de vacaciones
 		tab.addTab(drawVacations(),"Vacaciones");
-		//tab de perstamos y herramientas
+		//tab de prestamos y herramientas
 		tab.addTab(drawPyH(),"Préstamos/Herramientas");
+		//tab de retiros de finiquito
+		tab.addTab(drawW(),"Retiro de finiquito");
 		//tab de accidentes y licencias
 		tab.addTab(drawAccidents(),"Accidentes");
 		//tab de accidentes y licencias
@@ -598,6 +601,98 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 
 		return vl;
 	}
+	
+	BeanItemContainer<WithdrawalSettlement> beanItemWithdrawalSettlement;
+	protected VerticalLayout drawW() {
+
+		VerticalLayout vl = new VerticalLayout();
+		vl.setSpacing(true);
+		vl.setMargin(true);
+		vl.setWidth("100%");
+
+		/********** Herramientas **********/
+		VerticalLayout vh = new VerticalLayout();
+		vh.setWidth("100%");
+
+		HorizontalLayout hl = new HorizontalLayout();
+		hl.setWidth("100%");
+		hl.setSpacing(true);		
+		vh.addComponent(hl);
+
+		beanItemWithdrawalSettlement = new BeanItemContainer<WithdrawalSettlement>(WithdrawalSettlement.class);
+		List<WithdrawalSettlement> tools = (List<WithdrawalSettlement>)getItem().getItemProperty("withdrawalSettlements").getValue();
+		beanItemWithdrawalSettlement.addAll(tools);
+
+		if(!readOnly){
+			Button btnAddH = new Button(null,FontAwesome.PLUS);
+			hl.addComponent(btnAddH);
+			hl.setComponentAlignment(btnAddH, Alignment.MIDDLE_RIGHT);
+
+			btnAddH.addClickListener(new Button.ClickListener() {
+
+				@Override
+				public void buttonClick(ClickEvent event) {
+
+					LaborerConstructionsite laborer = (LaborerConstructionsite) getItem().getBean();
+					if(laborer == null ) throw new RuntimeException("El trabajador no es válido.");
+					WithdrawalSettlement tool = new WithdrawalSettlement();
+					laborer.addWithdrawalSettlement(tool);
+					beanItemWithdrawalSettlement.addBean(tool);
+				}
+			});	
+		}
+
+		final Table tableTool = new Table("Retiros");
+		tableTool.setPageLength(3);
+		tableTool.setWidth("100%");
+		tableTool.setContainerDataSource(beanItemWithdrawalSettlement);
+		tableTool.setImmediate(true);
+		tableTool.setTableFieldFactory(new DefaultFieldFactory(){
+
+			public Field<?> createField(final Container container,
+					final Object itemId, Object propertyId, com.vaadin.ui.Component uiContext) {
+				Field<?> field = null; 
+				if( propertyId.equals("price") ){
+					field = new TextField();
+					((TextField)field).setNullRepresentation("");
+					((TextField)field).setImmediate(true);
+				}
+
+				return field;
+			}
+		});
+
+		tableTool.addGeneratedColumn("eliminar", new Table.ColumnGenerator() {
+
+			@Override
+			public Object generateCell(Table source, final Object itemId, Object columnId) {
+				return new Button(null,new Button.ClickListener() {
+
+					@Override
+					public void buttonClick(ClickEvent event) {
+						ConfirmDialog.show(UI.getCurrent(), "Confirmar Acción:", "¿Está seguro de eliminar el retiro seleccionado?",
+								"Eliminar", "Cancelar", new ConfirmDialog.Listener() {
+
+							public void onClose(ConfirmDialog dialog) {
+								if (dialog.isConfirmed()) {
+									beanItemWithdrawalSettlement.removeItem(itemId);
+								}
+							}
+						});
+					}
+				}){{setIcon(FontAwesome.TRASH_O);}};
+			}
+		});
+
+		tableTool.setVisibleColumns("price","eliminar");
+		tableTool.setColumnHeaders("Monto","Acciones");
+		tableTool.setEditable(true);				
+		vh.addComponent(tableTool);
+		vh.setComponentAlignment(hl, Alignment.TOP_RIGHT);
+
+		vl.addComponent(vh);
+		return vl;
+	}
 
 	protected Component drawCyF() {
 
@@ -993,8 +1088,6 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 		
 		logger.debug("JornalPromedio {}",JornalPromedio);
 		
-		double MesPorAnoCod = 1,MesPorAnoCant = 1;
-		double DesahucioCod = 1,DesahucioCant = 1;
 		Period period = new Period(new DateTime(lc.getActiveContract().getStartDate()), new DateTime(lc.getActiveContract().getTerminationDate()));
 		//TODO
 		double AnoDuracionContrato = period.getYears() + (period.getMonths() - (period.getYears() * 12)) / 12;
@@ -1006,20 +1099,22 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 		
 		double vacacionesTomadas = calcularUsadas(vacationContainer.getItemIds());
 		input.put("vacacionesTomadas", vacacionesTomadas);
-
-		input.put("totalPremio", lc.getReward() * period.getMonths() );
-		
 		logger.debug("vacacionesTomadas {}",vacacionesTomadas);
-		double MesPorAno = 30 * JornalPromedio * MesPorAnoCod * MesPorAnoCant;
-		double Desahucio = 30 * JornalPromedio * DesahucioCod * DesahucioCant;
+		
+		double totalPremio = lc.getReward() * period.getMonths();
+		input.put("totalPremio", totalPremio );
 		
 		double Vacaciones = vacacionesTotales * JornalPromedio;
 		input.put("Vacaciones", Vacaciones);
 		double VacacionesEfectivas = -1 * vacacionesTomadas * JornalPromedio * 1.4;
 		input.put("VacacionesEfectivas", VacacionesEfectivas);
 		
-		logger.debug("MesPorAno + Desahucio + Vacaciones + VacacionesEfectivas {} + {} + {} + {}",MesPorAno , Desahucio , Vacaciones , VacacionesEfectivas);
-		return Math.round( MesPorAno + Desahucio + Vacaciones + VacacionesEfectivas);
+		//retiro de finiquito
+		double retiros = -1 * Utils.sum(laborerConstructionSite.getWithdrawalSettlements());
+		input.put("retiros", retiros);
+		
+		logger.debug("Total Premio + Vacaciones + VacacionesEfectivas + retiros = {} + {} + {} + {}",totalPremio , Vacaciones , VacacionesEfectivas,retiros);
+		return Math.round( totalPremio + Vacaciones + VacacionesEfectivas);
 	}
 
 	Label lbJob ,lbJobCode,lbStep ,lbStarting, lbEnding,lbSettlement,lbStatus;
@@ -1719,7 +1814,6 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 		}
 		getItem().getItemProperty("tool").setValue(laborer.getTool());
 
-
 		laborer.getLoan().clear();		
 		for(Loan l : beanItemLoan.getItemIds()){
 			// valida los préstamos
@@ -1747,6 +1841,20 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 			laborer.addLoan(l);
 		}
 		getItem().getItemProperty("loan").setValue(laborer.getLoan());
+		
+		//retiros
+		laborer.getWithdrawalSettlements().clear();	
+		for(WithdrawalSettlement l : beanItemWithdrawalSettlement.getItemIds()){
+			// valida los préstamos
+			Set<ConstraintViolation<WithdrawalSettlement>> constraintViolations = validator.validate(l);
+			if(constraintViolations.size() > 0 ){
+				Notification.show("Una retención es inválida \""+ constraintViolations.iterator().next().getMessage()+"\"",Type.ERROR_MESSAGE);
+				tab.setSelectedTab(4);
+				return false;
+			}
+			laborer.addWithdrawalSettlement(l);
+		}
+		getItem().getItemProperty("withdrawalSettlements").setValue(laborer.getLoan());
 
 		return super.preCommit();
 	}

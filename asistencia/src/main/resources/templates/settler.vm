@@ -61,7 +61,7 @@
 			<tr><td>Total Premio</td><td></td><td></td><td>${totalPremio}</td></tr>
 			<tr><td>Calculo Vacaciones</td><td></td><td>${vacacionesTotales}</td><td>${Vacaciones}</td></tr>
 			<tr><td>Vacaciones Efectivas</td><td></td><td>${vacacionesTomadas}</td><td>${VacacionesEfectivas}</td></tr>
-			<tr><td>Retiro Finiquito</td><td></td><td></td><td></td></tr>
+			<tr><td>Retiro Finiquito</td><td></td><td></td><td>${retiros}</td></tr>
 			<tr><td>Celda Para descuento fallas</td><td></td><td></td><td><input style="width:100px;" /></td></tr>
 			<tr><td>Celdas para otros descuentos</td><td></td><td></td><td><input style="width:100px;" /></td></tr>
 			<tr><td><br /><br /></td><td></td><td></td><td></td></tr>
