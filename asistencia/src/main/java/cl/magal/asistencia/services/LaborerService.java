@@ -211,6 +211,21 @@ public class LaborerService {
 	public List<Integer> findPriceLoan( Long id ) {
 		return loanRepo.findPriceLoan(id);
 	}
+	
+	/**
+	 * Busca los jornales promedios de los últimos 3 meses desde la fecha dada
+	 * @param lc
+	 * @param date
+	 * @return
+	 */
+	public List<Double> getJornalPromedioLastThreeMonth(LaborerConstructionsite lc, Date date) {
+		if( lc == null )
+			throw new RuntimeException("El obrero es necesario");
+		if( lc.getActiveContract().getTerminationDate() == null )
+			throw new RuntimeException("La fecha de termino de contrato es necesario");
+		List<Double> jornales = salaryRepo.get3LastJornalPromedio(lc,date);
+		return jornales;
+	}
 
 	/**
 	 * Busca el promedio de los jornales promedios de los últimos 3 meses desde la fecha de termino de contrato desde la fecha dada
@@ -218,7 +233,7 @@ public class LaborerService {
 	 * @param date
 	 * @return
 	 */
-	public double getJornalPromedioLastThreeMonth(LaborerConstructionsite lc, Date date) {
+	public double getJornalAVGPromedioLastThreeMonth(LaborerConstructionsite lc, Date date) {
 		if( lc == null )
 			throw new RuntimeException("El obrero es necesario");
 		if( lc.getActiveContract().getTerminationDate() == null )

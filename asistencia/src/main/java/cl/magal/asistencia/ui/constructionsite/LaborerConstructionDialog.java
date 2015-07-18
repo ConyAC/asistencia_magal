@@ -738,13 +738,11 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 										final StringBuilder sb = new StringBuilder();
 										if(((String) og.getValue()).compareTo("Voluntaria") == 0){
 											sb.append( VelocityEngineUtils.mergeTemplateIntoString(velocityEngine, "templates/voluntary_resignation_letter.vm", "UTF-8", input) );
-										}else
-											if(((String) og.getValue()).compareTo("Término de Contrato") == 0){
-												sb.append( VelocityEngineUtils.mergeTemplateIntoString(velocityEngine, "templates/dismissal_letter_for_completion_of_work.vm", "UTF-8", input) );
-											}else
-												if(((String) og.getValue()).compareTo("Ausencia Reiterada") == 0){
-													sb.append( VelocityEngineUtils.mergeTemplateIntoString(velocityEngine, "templates/dismissal_letter_for_absence.vm", "UTF-8", input) );
-												}
+										}else if(((String) og.getValue()).compareTo("Término de Contrato") == 0){
+											sb.append( VelocityEngineUtils.mergeTemplateIntoString(velocityEngine, "templates/dismissal_letter_for_completion_of_work.vm", "UTF-8", input) );
+										}else if(((String) og.getValue()).compareTo("Ausencia Reiterada") == 0){
+											sb.append( VelocityEngineUtils.mergeTemplateIntoString(velocityEngine, "templates/dismissal_letter_for_absence.vm", "UTF-8", input) );
+										}
 
 										StreamResource.StreamSource source2 = new StreamResource.StreamSource() {
 
@@ -807,14 +805,50 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 					Notification.show("El contrato debe estár terminado para calcular el finiquito",Type.HUMANIZED_MESSAGE);
 					return;
 				}
-
+				//agrega el finiquito
 				LaborerConstructionsite lc = (LaborerConstructionsite)getItem().getBean();
 				//deja desactivo tanto el contrato como el laborer constructionsite
 				activeContract.setActive(false);
 				lc.setActive(false);
-				//setea un finiquito
-				activeContract.setSettlement(calculateSettlement(lc));
+				//setea un finiquito calculado
+				final Map<String, Object> input = new HashMap<String, Object>();
+				input.put("laborerConstructions", new LaborerConstructionsite[] { lc });
+				VelocityHelper.addTools(input);
+
+				activeContract.setSettlement(calculateSettlement(lc,input));
 				setContractGl(activeContract);
+				
+				final Window w = new Window("Finiquito");
+				w.center();
+				w.setModal(true);
+				//muestra el finiquito
+				final StringBuilder sb = new StringBuilder();
+				sb.append( VelocityEngineUtils.mergeTemplateIntoString(velocityEngine, "templates/settler.vm", "UTF-8", input) );
+				
+				StreamResource.StreamSource source2 = new StreamResource.StreamSource() {
+
+					public InputStream getStream() {
+						//throw new UnsupportedOperationException("Not supported yet.");
+						return new ByteArrayInputStream(sb.toString().getBytes());
+					}
+				};
+				StreamResource resource = new StreamResource(source2, "Finiquito.txt");
+
+				BrowserFrame e = new BrowserFrame();
+				e.setSizeFull();
+
+				// Here we create a new StreamResource which downloads our StreamSource,
+				// which is our pdf.
+				// Set the right mime type
+				//						        resource.setMIMEType("application/pdf");
+				resource.setMIMEType("text/html");
+
+				e.setSource(resource);
+				w.setContent(e);
+				w.setWidth("60%");
+				w.setHeight("60%");
+				
+				UI.getCurrent().addWindow(w);
 
 			}
 		});
@@ -941,27 +975,49 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 	 * Vacaciones Efectivas = -1 *  vacaciones tomadas * Promedio Jornal * 1.4
 	 *
 	 * @param lc
+	 * @param input
 	 * @return
 	 */
-	protected double calculateSettlement(LaborerConstructionsite lc) {
+	protected double calculateSettlement(LaborerConstructionsite lc,Map<String, Object> input) {
 
 		//TODO
-		double JornalPromedio = service.getJornalPromedioLastThreeMonth(lc,lc.getActiveContract().getTerminationDate());
+		List<Double> last3JornalPromedio = service.getJornalPromedioLastThreeMonth(lc,lc.getActiveContract().getTerminationDate());
+		input.put("ultimosJornales", last3JornalPromedio );
+		DateTime dt = new DateTime(lc.getActiveContract().getTerminationDate());
+		input.put("firstmonth", dt.toDate() );
+		input.put("secondmonth", dt.minusMonths(1).toDate() );
+		input.put("threemonth", dt.minusMonths(2).toDate() );
+		
+		double JornalPromedio = Utils.avg( last3JornalPromedio ) ;
+		input.put("promedioJornales", JornalPromedio);
+		
 		logger.debug("JornalPromedio {}",JornalPromedio);
-
+		
 		double MesPorAnoCod = 1,MesPorAnoCant = 1;
 		double DesahucioCod = 1,DesahucioCant = 1;
 		Period period = new Period(new DateTime(lc.getActiveContract().getStartDate()), new DateTime(lc.getActiveContract().getTerminationDate()));
 		//TODO
 		double AnoDuracionContrato = period.getYears() + (period.getMonths() - (period.getYears() * 12)) / 12;
+		input.put("duracionContrato", AnoDuracionContrato);
+		
 		logger.debug("AnoDuracionContrato {}",AnoDuracionContrato);
+		double vacacionesTotales = AnoDuracionContrato * 12 * 1.75;
+		input.put("vacacionesTotales", vacacionesTotales);
+		
 		double vacacionesTomadas = calcularUsadas(vacationContainer.getItemIds());
-		logger.debug("vacacionesTomadas {}",vacacionesTomadas);
+		input.put("vacacionesTomadas", vacacionesTomadas);
 
+		input.put("totalPremio", lc.getReward() * period.getMonths() );
+		
+		logger.debug("vacacionesTomadas {}",vacacionesTomadas);
 		double MesPorAno = 30 * JornalPromedio * MesPorAnoCod * MesPorAnoCant;
 		double Desahucio = 30 * JornalPromedio * DesahucioCod * DesahucioCant;
-		double Vacaciones = AnoDuracionContrato * 12 * 1.75 * JornalPromedio;
+		
+		double Vacaciones = vacacionesTotales * JornalPromedio;
+		input.put("Vacaciones", Vacaciones);
 		double VacacionesEfectivas = -1 * vacacionesTomadas * JornalPromedio * 1.4;
+		input.put("VacacionesEfectivas", VacacionesEfectivas);
+		
 		logger.debug("MesPorAno + Desahucio + Vacaciones + VacacionesEfectivas {} + {} + {} + {}",MesPorAno , Desahucio , Vacaciones , VacacionesEfectivas);
 		return Math.round( MesPorAno + Desahucio + Vacaciones + VacacionesEfectivas);
 	}

@@ -36,8 +36,8 @@ import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.data.util.MethodProperty;
 import com.vaadin.ui.Field;
 import com.vaadin.ui.Notification;
-import com.vaadin.ui.TextField;
 import com.vaadin.ui.Notification.Type;
+import com.vaadin.ui.TextField;
 
 public class Utils {
 	
@@ -374,6 +374,18 @@ public class Utils {
 			if(item.getAfp() == afp )
 				return item.getRate()/100;
 		return 0.1144;//FIX si no encuentra, retorna una por defecto?
+	}
+
+	/**
+	 * Calcula el promedio de la lista
+	 * @param list
+	 * @return
+	 */
+	public static double avg(List<Double> list) {
+		double sum = 0;
+		for(Double d : list )
+			sum += (d == null ? 0 : d);
+		return sum/(list.size() == 0 ? 1 : list.size());
 	}
 }
 

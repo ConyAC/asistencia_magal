@@ -1,0 +1,74 @@
+<?xml version='1.0'?>
+<html>
+	 <head>
+		<meta charset="UTF-8">
+		<style>
+	
+	@media all {
+	.page-break	{ display: none; }
+	.print-hidden	{  }
+	}
+	
+	@media print {
+		.page-break	{ display: block; page-break-before: always; }
+		.print-hidden	{ display: none; }
+	}
+	
+	</style>
+	</head>
+	<body style="margin:25px;" >
+	
+	<div class="print-hidden" style="text-align:center;">
+			<input type="button" onclick="javascript:print()" value="Imprimir" /> <br /><br />
+		</div>
+	
+#foreach( $laborerConstruction in $laborerConstructions )
+
+		<img src=""></img>
+		<br />		
+		<h2 style="text-align:left;text-decoration: underline;">OBRA: <b>${laborerConstruction.constructionsite.name}</b></h2>
+		<br />
+		<div style="margin:1px;text-align:center;left;line-height: 0.2;text-decoration: underline;">
+		    <h3>Calculo Finiquito</h3>
+		</div>
+		<br />
+		<!-- información del trabajador -->
+		<table style="width:100%;" >
+			<tr><td>N&uacute;mero</td><td><b>${laborerConstruction.activeContract.jobCode}</b></td><td></td><td></td></tr>
+			<tr><td>Nombre</td><td><b>${laborerConstruction.laborer.lastname}</b></td><td><b>${laborerConstruction.laborer.secondlastname}</b></td><td><b>${laborerConstruction.laborer.firstname} ${laborerConstruction.laborer.secondname}</b></td></tr>
+			<tr><td>Comit&eacute; Paritario</td><td><b>Secretario</b></td><td></td><td></td></tr>
+		</table>
+		<br/>
+		<table style="width:100%;" >
+			<tr><td>Fecha Ingreso</td><td>$tools.format('d-M-yy',${laborerConstruction.activeContract.startDate})</td><td></td></tr>
+			<tr><td>Fecha Finiquito</td><td>$tools.format('d-M-yy',${laborerConstruction.activeContract.terminationDate})</td><td></td></tr>
+			<tr><td>A&ntilde;os Duraci&oacute;n Contrato</td><td>${duracionContrato}</td><td></td></tr>
+			<tr><td><br /></td><td></td><td></td></tr>
+			<tr><td>Jornal $tools.format('MMM yyyy',${firstmonth})</td><td>#if($ultimosJornales.size()>0) ${ultimosJornales.get(0)} #end</td><td>&nbsp</td></tr>
+			<tr><td>Jornal $tools.format('MMM yyyy',${secondmonth})</td><td>#if($ultimosJornales.size()>1)${ultimosJornales.get(1)}#end</td><td>&nbsp</td></tr>
+			<tr><td>Jornal $tools.format('MMM yyyy',${threemonth})</td><td>#if($ultimosJornales.size()>2)${ultimosJornales.get(2)}#end</td><td>&nbsp</td></tr>
+			<tr><td>Promedio Jornal</td><td>${promedioJornales}</td><td></td></tr>
+			<tr><td><br /></td><td></td><td></td></tr>
+			<tr><td>Premio Mensual</td><td><b>${laborerConstruction.reward}</b></td><td></td></tr>
+			<tr><td><br /></td><td></td><td></td></tr>
+		</table>
+		<table style="width:100%;" >
+			<tr><td></td><td><b>Finiquito</b></td><td></td><td></td></tr>
+		</table>
+		<table style="width:100%;" border="1" >
+			<tr><td>Descripci&oacute;n</td><td></td><td>Cantidad</td><td>Monto</td></tr>
+			<tr><td><br /></td><td></td><td></td><td></td></tr>
+			<tr><td>Total Premio</td><td></td><td></td><td>${totalPremio}</td></tr>
+			<tr><td>Calculo Vacaciones</td><td></td><td>${vacacionesTotales}</td><td>${Vacaciones}</td></tr>
+			<tr><td>Vacaciones Efectivas</td><td></td><td>${vacacionesTomadas}</td><td>${VacacionesEfectivas}</td></tr>
+			<tr><td>Retiro Finiquito</td><td></td><td></td><td></td></tr>
+			<tr><td>Celda Para descuento fallas</td><td></td><td></td><td><input style="width:100px;" /></td></tr>
+			<tr><td>Celdas para otros descuentos</td><td></td><td></td><td><input style="width:100px;" /></td></tr>
+			<tr><td><br /><br /></td><td></td><td></td><td></td></tr>
+			<tr><td>Total</td><td></td><td></td><td><b><span id="total"></span></b></td></tr>
+		</table>
+		<div class="page-break"></div>
+#end
+	</body>
+</html>
+
