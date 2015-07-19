@@ -1031,10 +1031,10 @@ public class AttendancePanel extends VerticalLayout implements View {
 				
 				salaryTable.setVisibleColumns(salaryTableVisibleTable);
 				
-				salaryTable.setColumnHeaders("Rol","Nombre","Último<br />Jornal Prom","Jornal Prom","Bono Imp.","Bono no Imp.","Bono Prest.", "Sobre Tiempo","H Desc","V Cuota<br />Prestamo",
+				salaryTable.setColumnHeaders("Rol","Nombre","Último<br />Jornal Prom","Jornal Prom","Bono Imp.","Bono No Imp.","Bono Prest.", "Sobretpo","H Desc","V Cuota<br />Prestamo",
 						"V Cuota<br />Herramienta","Total Líquido<br />(A Pagar)",
 						"Día<br />Trab","Sab","Sep","DPS","DPD","Col","Mov"
-						,"Jornal Base", " V Trato", "Valor Sábado" , "V S Corrd", "Desc Horas","Bonif Imp","G Legal","Afecto","Sobre Afecto","Cargas","A Familiar","Colación","Mov","Movi 2","T No Afecto"
+						,"Jornal Base", " V Trato", "Valor Sábado" , "V S Corrida", "Desc Horas","Total<br />Bonos<br />Imponibles","G Legal","Afecto","Sobre Afecto","Cargas","A Familiar","Colación","Mov","Movi 2","T No Afecto"
 						);
 				
 				salaryTable.setColumnWidth("jornalPromedio", 100);

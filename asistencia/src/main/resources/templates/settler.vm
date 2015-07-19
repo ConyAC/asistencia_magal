@@ -7,11 +7,13 @@
 	@media all {
 	.page-break	{ display: none; }
 	.print-hidden	{  }
+	table {border-collapse: collapse;}
 	}
 	
 	@media print {
 		.page-break	{ display: block; page-break-before: always; }
 		.print-hidden	{ display: none; }
+		table {}
 	}
 	
 	</style>
@@ -55,17 +57,17 @@
 		<table style="width:100%;" >
 			<tr><td></td><td><b>Finiquito</b></td><td></td><td></td></tr>
 		</table>
-		<table style="width:100%;" border="1" >
-			<tr><td>Descripci&oacute;n</td><td></td><td>Cantidad</td><td>Monto</td></tr>
+		<table style="width:100%;border: 2px solid black;" >
+			<tr style="border: 2px solid black;" ><td>Descripci&oacute;n</td><td></td><td>Cantidad</td><td>Monto</td></tr>
 			<tr><td><br /></td><td></td><td></td><td></td></tr>
 			<tr><td>Total Premio</td><td></td><td></td><td>${totalPremio}</td></tr>
-			<tr><td>Calculo Vacaciones</td><td></td><td>${vacacionesTotales}</td><td>${Vacaciones}</td></tr>
-			<tr><td>Vacaciones Efectivas</td><td></td><td>${vacacionesTomadas}</td><td>${VacacionesEfectivas}</td></tr>
-			<tr><td>Retiro Finiquito</td><td></td><td></td><td>${retiros}</td></tr>
-			<tr><td>Celda Para descuento fallas</td><td></td><td></td><td><input style="width:100px;" /></td></tr>
-			<tr><td>Celdas para otros descuentos</td><td></td><td></td><td><input style="width:100px;" /></td></tr>
+			<tr><td>Calculo Vacaciones</td><td></td><td>${vacacionesTotales}</td><td>$numberTools.integer(${Vacaciones})</td></tr>
+			<tr><td>Vacaciones Efectivas</td><td></td><td>${vacacionesTomadas}</td><td>$numberTools.integer(${VacacionesEfectivas})</td></tr>
+			<tr><td>Retiro Finiquito</td><td></td><td></td><td>$numberTools.integer(${retiros})</td></tr>
+			<tr><td>Descuento fallas</td><td></td><td></td><td>-$numberTools.integer(${laborerConstruction.failureDiscount})</td></tr>
+			<tr><td>Otros descuentos</td><td></td><td></td><td>-$numberTools.integer(${laborerConstruction.othersDiscount})</td></tr>
 			<tr><td><br /><br /></td><td></td><td></td><td></td></tr>
-			<tr><td>Total</td><td></td><td></td><td><b><span id="total"></span></b></td></tr>
+			<tr style="border: 2px solid black;" ><td>Total</td><td></td><td></td><td><b><span id="total">${total}</span></b></td></tr>
 		</table>
 		<div class="page-break"></div>
 #end

@@ -395,6 +395,9 @@ public class Utils {
 	 * @return
 	 */
 	public static int sum(List<WithdrawalSettlement> withdrawalSettlements) {
+		if(withdrawalSettlements == null )
+			return 0;
+		
 		int sum = 0;
 		for(WithdrawalSettlement w : withdrawalSettlements)
 			sum += w.getPrice();

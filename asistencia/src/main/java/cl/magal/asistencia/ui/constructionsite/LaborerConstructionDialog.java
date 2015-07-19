@@ -900,48 +900,95 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 					Notification.show("El contrato debe estár terminado para calcular el finiquito",Type.HUMANIZED_MESSAGE);
 					return;
 				}
-				//agrega el finiquito
-				LaborerConstructionsite lc = (LaborerConstructionsite)getItem().getBean();
-				//deja desactivo tanto el contrato como el laborer constructionsite
-				activeContract.setActive(false);
-				lc.setActive(false);
-				//setea un finiquito calculado
-				final Map<String, Object> input = new HashMap<String, Object>();
-				input.put("laborerConstructions", new LaborerConstructionsite[] { lc });
-				VelocityHelper.addTools(input);
 
-				activeContract.setSettlement(calculateSettlement(lc,input));
-				setContractGl(activeContract);
-				
 				final Window w = new Window("Finiquito");
 				w.center();
 				w.setModal(true);
-				//muestra el finiquito
-				final StringBuilder sb = new StringBuilder();
-				sb.append( VelocityEngineUtils.mergeTemplateIntoString(velocityEngine, "templates/settler.vm", "UTF-8", input) );
 				
-				StreamResource.StreamSource source2 = new StreamResource.StreamSource() {
-
-					public InputStream getStream() {
-						//throw new UnsupportedOperationException("Not supported yet.");
-						return new ByteArrayInputStream(sb.toString().getBytes());
-					}
-				};
-				StreamResource resource = new StreamResource(source2, "Finiquito.txt");
-
-				BrowserFrame e = new BrowserFrame();
-				e.setSizeFull();
-
-				// Here we create a new StreamResource which downloads our StreamSource,
-				// which is our pdf.
-				// Set the right mime type
-				//						        resource.setMIMEType("application/pdf");
-				resource.setMIMEType("text/html");
-
-				e.setSource(resource);
-				w.setContent(e);
 				w.setWidth("60%");
 				w.setHeight("60%");
+				
+				w.setContent(new VerticalLayout(){
+					{
+
+						setSpacing(true);
+						setMargin(true);
+						final TextField tfFailureDiscount = new TextField("Descuento por Falla",getItem().getItemProperty("failureDiscount"));
+						tfFailureDiscount.setImmediate(true);
+						addComponent(tfFailureDiscount);
+						
+						final TextField tfOtherDiscount = new TextField("Otros descuentos",getItem().getItemProperty("othersDiscount"));
+						tfOtherDiscount.setImmediate(true);
+						addComponent(tfOtherDiscount);
+
+						addComponent(new HorizontalLayout(){
+							{
+								// boton aceptar
+								addComponent(new Button("Aceptar",new Button.ClickListener() {
+
+									@Override
+									public void buttonClick(ClickEvent event) {
+
+										if( !Utils.NotNullOrEmpty(tfFailureDiscount.getValue()) || 
+											!Utils.NotNullOrEmpty(tfOtherDiscount.getValue()) ){
+											Notification.show("Debe ingresar los montos de descuentos.",Type.WARNING_MESSAGE);
+											return;
+										}
+
+										//agrega el finiquito
+										LaborerConstructionsite lc = (LaborerConstructionsite)getItem().getBean();
+										//deja desactivo tanto el contrato como el laborer constructionsite
+										activeContract.setActive(false);
+										lc.setActive(false);
+										
+										//setea un finiquito calculado
+										final Map<String, Object> input = new HashMap<String, Object>();
+										input.put("laborerConstructions", new LaborerConstructionsite[] { lc });
+										VelocityHelper.addTools(input);
+										
+
+										activeContract.setSettlement(calculateSettlement(lc,input));
+										setContractGl(activeContract);
+
+										//muestra el finiquito
+										final StringBuilder sb = new StringBuilder();
+										sb.append( VelocityEngineUtils.mergeTemplateIntoString(velocityEngine, "templates/settler.vm", "UTF-8", input) );
+										
+										StreamResource.StreamSource source2 = new StreamResource.StreamSource() {
+
+											public InputStream getStream() {
+												//throw new UnsupportedOperationException("Not supported yet.");
+												return new ByteArrayInputStream(sb.toString().getBytes());
+											}
+										};
+										StreamResource resource = new StreamResource(source2, "Finiquito.txt");
+
+										BrowserFrame e = new BrowserFrame();
+										e.setSizeFull();
+
+										// Here we create a new StreamResource which downloads our StreamSource,
+										// which is our pdf.
+										// Set the right mime type
+										//						        resource.setMIMEType("application/pdf");
+										resource.setMIMEType("text/html");
+
+										e.setSource(resource);
+										w.setContent(e);
+									}
+								}){ {setIcon(FontAwesome.CHECK_CIRCLE_O);} } );
+
+								// boton aceptar
+								addComponent(new Button("Cancelar",new Button.ClickListener() {
+
+									@Override
+									public void buttonClick(ClickEvent event) {
+										w.close();
+									}
+								}){{addStyleName("link");}});
+							}
+						});
+					}
+				});
 				
 				UI.getCurrent().addWindow(w);
 
@@ -1110,11 +1157,13 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 		input.put("VacacionesEfectivas", VacacionesEfectivas);
 		
 		//retiro de finiquito
-		double retiros = -1 * Utils.sum(laborerConstructionSite.getWithdrawalSettlements());
+		double retiros = -1 * Utils.sum(lc.getWithdrawalSettlements());
 		input.put("retiros", retiros);
 		
 		logger.debug("Total Premio + Vacaciones + VacacionesEfectivas + retiros = {} + {} + {} + {}",totalPremio , Vacaciones , VacacionesEfectivas,retiros);
-		return Math.round( totalPremio + Vacaciones + VacacionesEfectivas);
+		long total =  Math.round( totalPremio + Vacaciones + VacacionesEfectivas + retiros - lc.getFailureDiscount() - lc.getOthersDiscount() );
+		input.put("total", total);
+		return total;
 	}
 
 	Label lbJob ,lbJobCode,lbStep ,lbStarting, lbEnding,lbSettlement,lbStatus;
