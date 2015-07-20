@@ -68,6 +68,11 @@ public class ConstructionSite implements Serializable {
     @Column(name = "address",nullable=false)
     private String address;
     
+    @NotNull(message="La comuna es necesaria")
+    @NotEmpty(message="La comuna es necesaria")
+    @Column(name="commune", nullable=false)
+    private String commune;
+    
     @Column(name = "deleted")
     private Boolean deleted = Boolean.FALSE;
     
@@ -144,7 +149,13 @@ public class ConstructionSite implements Serializable {
 		return costCenter;
 	}
 
+	public String getCommune() {
+		return commune;
+	}
 
+	public void setCommune(String commune) {
+		this.commune = commune;
+	}
 
 	public void setCostCenter(Integer costCenter) {
 		this.costCenter = costCenter;

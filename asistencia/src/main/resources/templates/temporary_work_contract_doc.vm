@@ -26,23 +26,40 @@
 		#fecha_contrato_ano { position : fixed ; top : 2.5cm; left: 9cm; }
         #nombre_constructora { position : fixed ; top : 2.5cm; left: 13cm; }
 		
-        #rut_constructora { position : absolute ; top : 3cm; left: 2.2cm; }
-        #direccion_constructora { display: none;  } 
-        #comuna_constructora { display: none;  }
-        #nombre_trabajador { position : absolute ; top : 4cm; left: 12.1cm; }
-        #nacionalidad_trabajador { position : absolute ; top : 4.3cm; left: 3.5cm;}
-        #fecha_nac_trabajador { position : absolute ; top : 4.3cm; left: 8cm; }
-        #direccion_trabajador { position : absolute ; top : 4.3cm; left: 15cm; }
-        #comuna_trabajador { position : absolute ; top : 4.8cm; left: 10.3cm; }
-        #rut_trabajador {position : absolute ; top : 4.8cm; left: 17.3cm;}
-        #oficio_trabajador {position : absolute ; top : 6cm; left: 14.2cm; }
-        #direccion_obra {position : absolute ; top : 7cm; left: 13.5cm;}
-        #oficio_trabajador2 { position : absolute ; top : 11.2cm; left: 16.8cm;}
-        #etapa_obra { position : absolute ; top : 16.9cm; left: 11.8cm; }
-        #afp_trabajador { position : absolute ; top : 27.1cm; left: 3.4cm; }
-        #isapre_trabajador { position : absolute ; top : 27.1cm; left: 15cm; }
-        #nombre_trabajador2 { position : absolute ; top : 29.9cm; left: 8.5cm; }
-        #inicio_contrato_trabajador { position : absolute ; top : 30.3cm; left: 8cm;}
+        #rut_constructora { position : fixed ; top : 3cm; left: 2.5cm; }
+        #nombre_representante_constructora { position : fixed ; top : 3cm; left: 9.3cm; }
+        
+        #direccion_constructora { position : fixed ; top : 3.5cm; left: 8cm;  } 
+        #comuna_constructora { position : fixed ; top : 3.5cm; left: 17cm;  }
+        
+        #nombre_trabajador { position : fixed ; top : 3.9cm; left: 12.5cm; }
+        
+        #nacionalidad_trabajador { position : fixed ; top : 4.3cm; left: 3.6cm;}
+        #fecha_nac_trabajador { position : fixed ; top : 4.3cm; left: 8cm; }
+        #direccion_trabajador { position : fixed ; top : 4.3cm; left: 15cm; }
+        
+        #poblacion_trabajador{ position : fixed ; top : 4.8cm; left: 1.5cm; }
+        #comuna_trabajador { position : fixed ; top : 4.8cm; left: 10.3cm; }
+        #rut_trabajador {position : fixed ; top : 4.8cm; left: 17.3cm;}
+        
+        #oficio_trabajador {position : fixed ; top : 6cm; left: 14.2cm; }
+        
+        #direccion_obra {position : fixed ; top : 6.8cm; left: 14cm;}
+        
+        #comuna_obra {position : fixed ; top : 7.2cm; left: 2.5cm;}
+        
+        #sueldo_diario{position : fixed ; top : 10.8cm; left: 12cm;}
+        
+        #oficio_trabajador2 { position : fixed ; top : 11cm; left: 17cm;}
+        
+        #etapa_obra { position : fixed ; top : 16.8cm; left: 12cm; }
+        
+        #afp_trabajador { position : fixed ; top : 27cm; left: 3.5cm; }
+        #isapre_trabajador { position : fixed ; top : 27cm; left: 15cm; }
+        
+        #nombre_trabajador2 { position : fixed ; top : 29.9cm; left: 8.5cm; }
+        
+        #inicio_contrato_trabajador { position : fixed ; top : 30.3cm; left: 8cm;}
 		
 	}
 	
@@ -55,17 +72,25 @@
 #foreach( $laborerConstruction in $laborerConstructions )
 			<h2 style="margin:1px;text-align:center;" class="print-hidden">CONTRATO DE TRABAJO PARA OBRA TRANSITORIA</h2>		
 
-                <p class="p-justify"><span class="print-hidden" >En Santiago,</span> <span id="fecha_contrato_dia"><b>$tools.format('dd', $tools.date)</b></span> <span class="print-hidden" >de</span> <span id="fecha_contrato_mes"><b>$tools.format('MMMM', $tools.date)</b></span> <span class="print-hidden" >de</span> <span id="fecha_contrato_ano"><b>$tools.format('yyyy', $tools.date)</b></span> <span class="print-hidden" >entre la empresa </span><span id="nombre_constructora"><b> #if (${laborerConstruction.constructionsite.constructionCompany.name}) ${laborerConstruction.constructionsite.constructionCompany.name} #else ____________________________________ #end </b> <span class="print-hidden" >R.U.T.:</span> <b></span> <span id="rut_constructora">#if(${laborerConstruction.constructionsite.constructionCompany.rut}) $numberTools.integer(${laborerConstruction.constructionsite.constructionCompany.rut.split("-").get(0)})-${laborerConstruction.constructionsite.constructionCompany.rut.split("-").get(1)} #else ____________________________________ #end </b></span> <span class="print-hidden" >direcci&oacute;n:</span> <span id="direccion_constructora"><b>#if(${laborerConstruction.constructionsite.constructionCompany.address}) ${laborerConstruction.constructionsite.constructionCompany.address} #else ____________________________________ #end </b></span><span class="print-hidden" >, comuna de </span><span id="comuna_constructora"><b>#if(${laborerConstruction.constructionsite.constructionCompany.commune}) ${laborerConstruction.constructionsite.constructionCompany.commune} #else ____________________________________ #end</b></span> <span class="print-hidden" >representada por don Cristian Marinovich Pacey (profesi&oacute;n, cargo en la empresa) ambos domiciliados en ________________________________</span> <span class="print-hidden" >en adelante "el empleador" o la "empresa" por una parte y por la otra don </span><span id="nombre_trabajador"><b>${laborerConstruction.laborer.fullname}</b></span> <span class="print-hidden" >de nacionalidad </span><span id="nacionalidad_trabajador"><b>${laborerConstruction.laborer.nationality}</b></span> <span class="print-hidden" >nacido el</span> <span id="fecha_nac_trabajador"><b>$tools.format('dd MMMM yyyy',${laborerConstruction.laborer.dateBirth})</b></span> <span class="print-hidden" >domicilio en calle</span> <span id="direccion_trabajador"><b>${laborerConstruction.laborer.address}</b></span> <span class="print-hidden" >Comuna </span><span id="comuna_trabajador"><b>${laborerConstruction.laborer.commune}</b></span> <span class="print-hidden" >C&eacute;dula de identidad N&deg; </span><span id="rut_trabajador"><b>$numberTools.integer(${laborerConstruction.laborer.rut.split("-").get(0)})-${laborerConstruction.laborer.rut.split("-").get(1)}</b></span> <span class="print-hidden" >y procedente de esta ciudad, en adelante el "trabajador", se ha convenido el siguiente contrato de trabajo:</span>
+                <p class="p-justify">
+                <span class="print-hidden" >En Santiago,</span> <span id="fecha_contrato_dia"><b>$tools.format('dd', $tools.date)</b></span> <span class="print-hidden" >de</span> <span id="fecha_contrato_mes"><b>$tools.format('MMMM', $tools.date)</b></span> <span class="print-hidden" >de</span> <span id="fecha_contrato_ano"><b>$tools.format('yyyy', $tools.date)</b></span> <span class="print-hidden" >entre la empresa </span><span id="nombre_constructora"><b> #if (${laborerConstruction.constructionsite.constructionCompany.name}) ${laborerConstruction.constructionsite.constructionCompany.name} #else ____________________________________ #end </b> 
+                <span class="print-hidden" >R.U.T.:</span><b></span> <span id="rut_constructora">#if(${laborerConstruction.constructionsite.constructionCompany.rut}) $numberTools.integer(${laborerConstruction.constructionsite.constructionCompany.rut.split("-").get(0)})-${laborerConstruction.constructionsite.constructionCompany.rut.split("-").get(1)} #else ____________________________________ #end </b></span> <span class="print-hidden" >representada por don </span><b> #if (${laborerConstruction.constructionsite.constructionCompany.chiefExecutive}) ${laborerConstruction.constructionsite.constructionCompany.chiefExecutive} #else ____________________________________ #end </b> <span class="print-hidden" >(profesi&oacute;n,
+                cargo en la empresa) ambos domiciliados en </span> <span id="direccion_constructora"><b>#if(${laborerConstruction.constructionsite.constructionCompany.address}) ${laborerConstruction.constructionsite.constructionCompany.address} #else ____________________________________ #end </b></span> <span class="print-hidden" >, comuna de </span><span id="comuna_constructora"><b>#if(${laborerConstruction.constructionsite.constructionCompany.commune}) ${laborerConstruction.constructionsite.constructionCompany.commune} #else ____________________________________ #end</b></span> 
+                <span class="print-hidden" >en adelante "el empleador" o la "empresa" por una parte y por la otra don </span><span id="nombre_trabajador"><b>${laborerConstruction.laborer.fullname}</b></span> 
+                <span class="print-hidden" >de nacionalidad </span><span id="nacionalidad_trabajador"><b>${laborerConstruction.laborer.nationality}</b></span> <span class="print-hidden" >nacido el</span> <span id="fecha_nac_trabajador"><b>$tools.format('dd MMMM yyyy',${laborerConstruction.laborer.dateBirth})</b></span> <span class="print-hidden" >domicilio en calle</span> <span id="direccion_trabajador"><b>${laborerConstruction.laborer.address}</b></span> 
+                <span id="poblacion_trabajador"><b>${laborerConstruction.laborer.address}</b></span><span class="print-hidden" >Comuna </span><span id="comuna_trabajador"><b>${laborerConstruction.laborer.commune}</b></span> <span class="print-hidden" >C&eacute;dula de identidad N&deg; </span><span id="rut_trabajador"><b>$numberTools.integer(${laborerConstruction.laborer.rut.split("-").get(0)})-${laborerConstruction.laborer.rut.split("-").get(1)}</b></span> 
+                <span class="print-hidden" >y procedente de esta ciudad, en adelante el "trabajador", se ha convenido el siguiente contrato de trabajo:</span>
 					<br />
 					<br />
-                <span class="print-hidden" >PRIMERO: El trabajador se obliga a prestar servicios personales para el empleador como </span><span id="oficio_trabajador"><b>${laborerConstruction.activeContract.job}</b></span><span class="print-hidden" >, funciones que se encuentran descritas al dorso del presente contrato y que se consideran como parte integral del mismo. Estas funciones del trabajador se realizar&aacute;n en la obra que el empleador se encuentra realizando en la calle </span><span id="direccion_obra"><b>${laborerConstruction.constructionsite.address}</b></span> <span class="print-hidden" >"de igual forma, el trabajador ejecutar&aacute; labores ocasionales que le pueda se&ntilde;alar el empleador, relacionadas con las que son inherentes a su trabajo y que puedan presentarse fuera de la obra". </span>
+                <span class="print-hidden" >PRIMERO: El trabajador se obliga a prestar servicios personales para el empleador como </span><span id="oficio_trabajador"><b>${laborerConstruction.activeContract.job}</b></span><span class="print-hidden" >, funciones que se encuentran descritas al dorso del presente contrato y que se consideran como parte integral del mismo. Estas funciones del trabajador se realizar&aacute;n en la obra que el empleador se encuentra realizando en la calle </span><span id="direccion_obra"><b>${laborerConstruction.constructionsite.address}</b></span>
+                <span class="print-hidden" >comuna </span><span id="comuna_obra"><b>${laborerConstruction.constructionsite.commune}</b></span> <span class="print-hidden" >"de igual forma, el trabajador ejecutar&aacute; labores ocasionales que le pueda se&ntilde;alar el empleador, relacionadas con las que son inherentes a su trabajo y que puedan presentarse fuera de la obra". </span>
 				<br />
                 <span class="print-hidden" >SEGUNDO: El trabajador cumplir&aacute; una jornada semanal de trabajado de 45 horas distribuida en 5 d&iacute;as de la siguiente manera:</span></p>
 					
 				<p style="text-align:center;" class="print-hidden" > LUNES A VIERNES: 08:00 horas a 12:00 horas <br/>
 				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;12:45 horas a 17:45 horas</p>
 				
-                <p class="p-justify"><span class="print-hidden" >TERCERO: El empleador pagar&aacute; al trabajador la siguiente remuneraci&oacute;n: </span><br />
+                <p class="p-justify"><span class="print-hidden" >TERCERO: El empleador pagar&aacute; al trabajador la siguiente remuneraci&oacute;n: </span><span id="sueldo_diario">$7.000 MINIMO DIARIO</span><br />
                 <span class="print-hidden" >a) La suma que resulte de los tratos realizados en obra para distintos trabajos en relaci&oacute;n  a su funci&oacute;n de </span><span id="oficio_trabajador2"><b>${laborerConstruction.activeContract.job}</b></span> <span class="print-hidden" >Estos tratos se calcular&aacute;n tomando como base los valores establecidos en el Tarifado Nacional de la Construcci&oacute;n de fecha 12 Septiembre de 1978, aprobado por el Ministerio de Econom&iacute;a y del Trabajo y Previsi&oacute;n social, que en el art&iacute;culo 34 fij&oacute; las remuneraciones variables para efecto de los tratos, debidamente reajustados seg&uacute;n variaci&oacute;n experimentada por el &iacute;ndice de Precios al Consumidor fijado por el Instituto Nacional de Estad&iacute;sticas o el organismo que lo reemplace e incrementados en un 25%. Este tarifado referencial se considera como parte integrante del presente contrato.</span><br />
                 <span class="print-hidden" >b) Cuando por el desarrollo de la obra el trabajador estuviese impedido de realizar labores a trato o cuando el resultado mensual de los trabajos realizados a trato fuera inferior al monto de ingreso m&iacute;nimo mensual legal, imput&aacute;ndose en este caso su monto, cualquier remuneraci&oacute;n inferior que reciba el trabajador con motivo de su prestaci&oacute;n de servicios.</span>
 					<br />
