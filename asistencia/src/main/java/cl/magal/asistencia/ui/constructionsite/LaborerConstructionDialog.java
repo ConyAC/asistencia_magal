@@ -195,7 +195,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 
 		//TextField tfSuple = new TextField("Código Suple", getItem().getItemProperty("supleCode"));
 		//tfSuple.setNullRepresentation("");
-		
+		logger.debug("LALA: "+((BeanItem<LaborerConstructionsite>) getItem()).getBean().getConstructionsite());
 		// codigo por asignar
 		ComboBox cbSupleCode = new ComboBox("Código Suple");
 		cbSupleCode.setRequired(true);
