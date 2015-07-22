@@ -21,6 +21,7 @@ import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.velocity.app.VelocityEngine;
 import org.joda.time.DateTime;
+import org.joda.time.Interval;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -156,8 +157,6 @@ public class AttendancePanel extends VerticalLayout implements View {
 	BeanItemContainer<AbsenceVO> absenceContainer = new BeanItemContainer<AbsenceVO>(AbsenceVO.class);
 	BeanItemContainer<ConstructionSite> constructionContainer = new BeanItemContainer<ConstructionSite>(ConstructionSite.class);
 
-
-
 	/** COMPONENTES **/
 	ProgressBar progress;
 	Label status;
@@ -166,6 +165,7 @@ public class AttendancePanel extends VerticalLayout implements View {
 	InlineDateField attendanceDate;
 	Button btnExportSoftland,btnExportSupleSoftland,btnConstructionSiteConfirm,btnCentralConfirm,btnSupleObraConfirm,btnSupleCentralConfirm;
 	Table confirmTable;
+	TabSheet tab;
 //	VerticalLayout root;
 	Table supleTable;
 	ColumnCollapsedObservableTable salaryTable;
@@ -178,7 +178,8 @@ public class AttendancePanel extends VerticalLayout implements View {
 		"laborerConstructionSite.laborer.fullname","lastJornalPromedio","jornalPromedio","specialBond","bondMov2","loanBond","sobreTiempo","descHours","loan","tools","totalLiquido"
 	};
 	final static String[] salaryTableVisibleTable = new String[]{"laborerConstructionSite.activeContract.jobCode",
-			"laborerConstructionSite.laborer.fullname","lastJornalPromedio","jornalPromedio","specialBond","bondMov2","loanBond","sobreTiempo","descHours","loan","tools","totalLiquido"
+			"laborerConstructionSite.laborer.fullname","lastJornalPromedio","jornalPromedio","specialBond","bondMov2","loanBond","sobreTiempo","descHours","loan","tools","totalLiquido",
+			"salaryCalculator.diaTrab","salaryCalculator.sab","salaryCalculator.sep","salaryCalculator.dps","salaryCalculator.dpd","salaryCalculator.col","salaryCalculator.mov"
 			,"jornalBaseMes","vtrato","valorSabado","vsCorrd","descHoras","bonifImpo","glegal","afecto","sobreAfecto","cargas","asigFamiliar","colacion","mov","mov2","tnoAfecto"
 	};
 
@@ -358,8 +359,6 @@ public class AttendancePanel extends VerticalLayout implements View {
 		salaryContainer.removeAllItems();
 	}
 	
-	TabSheet tab;
-
 	private TabSheet drawAttendanceDetail() {
 		logger.debug("PRIMERO");
 		tab = new TabSheet();
@@ -511,7 +510,9 @@ public class AttendancePanel extends VerticalLayout implements View {
 	}
 
 	private void createHeaders(final Grid grid) {
-
+		
+		boolean isAttendanceGrid = grid.equals(attendanceGrid);
+		
 		HeaderRow filterRow = null;
 
 		if(grid.getHeaderRowCount() == 1)
@@ -558,20 +559,42 @@ public class AttendancePanel extends VerticalLayout implements View {
 				if(((String) pid).startsWith("dmp") || ((String) pid).startsWith("dma")  ){
 					//calcula el numero del mes
 					int monthDay = Integer.parseInt(((String) pid).replace("dmp","").replace("dma",""));
+					//crea una fecha con el año y mes seleccionado y con el dia recuperado del property actual
 					DateTime dt2 = dt;
-					if ( ((String) pid).startsWith("dmp") )
-						dt2 = dt2.minusMonths(1);
-					//el número de mes no es un número válido de mes o si es un día a la fecha de cierre del mes pasado, oculta la columna
-					if( monthDay > dt2.dayOfMonth().getMaximumValue() || 
-						( ((String) pid).startsWith("dmp") && monthDay <= getPastMonthClosingDate().getDayOfMonth())){
+					try{
+						//si el property es dmp(dia mes pasado, entonces retrocede un mes
+						if ( ((String) pid).startsWith("dmp") )
+							dt2 = dt2.minusMonths(1);
+						dt2 = dt2.withDayOfMonth(monthDay);
+					}catch(Exception e){ //si no es un mes válida lo ocula 
 						if(grid.getColumn(pid) != null)
 							grid.removeColumn(pid);
-					}else{ //solo lo setea si el número es mayor a la cantidad de dias del mes
-						if(grid.getColumn(pid) == null)
-							grid.addColumn(pid);
-						label.setValue( dt2.withDayOfMonth(monthDay).dayOfWeek().getAsShortText() );
-						grid.getColumn(pid).setHeaderCaption(((String) pid).replace("dmp","").replace("dma","")).setSortable(false);
 					}
+					if(dt2 != null ){ //continua solo si el día es válido
+						
+						//si la grid es de asistencia, calcula el rango con el dia de cierre del mes pasado y el ultimo dia del mes seleccionado
+						DateTime startDate,endDate;
+						if(isAttendanceGrid){
+							startDate = getPastMonthClosingDate();
+							endDate = getAttendanceDate().withDayOfMonth(getAttendanceDate().dayOfMonth().getMaximumValue());
+						}else{//si la grid es de sobretiempos, calcula el rango con el dia de inicio del trato y el fin de trato
+							startDate = new DateTime( getDateConfigurations().getBeginDeal());
+							endDate = new DateTime( getDateConfigurations().getFinishDeal());
+						}
+						//define el rango
+						Interval interval = new Interval(startDate, endDate.plusDays(1)); //le suma un dia, dado que el contains del interval es exclusivo para el final
+						//si la fecha que representa el property está dentro del rango, se preocupa de mostrarla y definir sus header y subheader
+						if(interval.contains(dt2)){
+							if(grid.getColumn(pid) == null)
+								grid.addColumn(pid);
+							label.setValue( dt2.dayOfWeek().getAsShortText() );
+							grid.getColumn(pid).setHeaderCaption(((String) pid).replace("dmp","").replace("dma","")).setSortable(false);
+						}else{ //si no la contiene, la oculta
+							if(grid.getColumn(pid) != null)
+								grid.removeColumn(pid);
+						}
+					}
+					
 					if(cell == null){
 						cell = filterRow.getCell(pid);
 					}
@@ -853,6 +876,14 @@ public class AttendancePanel extends VerticalLayout implements View {
 		salaryContainer.addNestedContainerProperty("laborerConstructionSite.activeContract.jobCode");
 		salaryContainer.addNestedContainerProperty("laborerConstructionSite.laborer.fullname");
 		salaryContainer.addNestedContainerProperty("laborerConstructionSite.supleCode");
+		salaryContainer.addNestedContainerProperty("salaryCalculator.diaTrab");
+		salaryContainer.addNestedContainerProperty("salaryCalculator.sab");
+		salaryContainer.addNestedContainerProperty("salaryCalculator.sep");
+		salaryContainer.addNestedContainerProperty("salaryCalculator.dps");
+		salaryContainer.addNestedContainerProperty("salaryCalculator.dpd");
+		salaryContainer.addNestedContainerProperty("salaryCalculator.col");
+		salaryContainer.addNestedContainerProperty("salaryCalculator.mov");
+		
 		VerticalLayout vl = new VerticalLayout(){
 			{
 				setSpacing(true);
@@ -968,6 +999,7 @@ public class AttendancePanel extends VerticalLayout implements View {
 				salaryTable.setSizeFull();
 				salaryTable.setContainerDataSource(salaryContainer);
 				salaryTable.setColumnCollapsingAllowed(true);
+				salaryTable.setColumnReorderingAllowed(true);
 				
 				salaryTable.addGeneratedColumn("totalLiquido", new Table.ColumnGenerator(){
 
@@ -999,8 +1031,10 @@ public class AttendancePanel extends VerticalLayout implements View {
 				
 				salaryTable.setVisibleColumns(salaryTableVisibleTable);
 				
-				salaryTable.setColumnHeaders("Rol","Nombre","Último<br />Jornal Prom","Jornal Prom","Bono Imp.","Bono no Imp.","Bono Prest.", "Sobre Tiempo","H Desc","V Cuota<br />Prestamo","V Cuota<br />Herramienta","Total Líquido<br />(A Pagar)"
-						,"Jornal Base", " V Trato", "Valor Sábado" , "V S Corrd", "Desc Horas","Bonif Imp","G Legal","Afecto","Sobre Afecto","Cargas","A Familiar","Colación","Mov","Movi 2","T No Afecto"
+				salaryTable.setColumnHeaders("Rol","Nombre","Último<br />Jornal Prom","Jornal Prom","Bono Imp.","Bono No Imp.","Bono Prest.", "Sobretpo","H Desc","V Cuota<br />Prestamo",
+						"V Cuota<br />Herramienta","Total Líquido<br />(A Pagar)",
+						"Día<br />Trab","Sab","Sep","DPS","DPD","Col","Mov"
+						,"Jornal Base", " V Trato", "Valor Sábado" , "V S Corrida", "Desc Horas","Total<br />Bonos<br />Imponibles","G Legal","Afecto","Sobre Afecto","Cargas","A Familiar","Colación","Mov","Movi 2","T No Afecto"
 						);
 				
 				salaryTable.setColumnWidth("jornalPromedio", 100);
@@ -1021,6 +1055,13 @@ public class AttendancePanel extends VerticalLayout implements View {
 				salaryTable.setColumnCollapsed("mov", true);
 				salaryTable.setColumnCollapsed("mov2", true);
 				salaryTable.setColumnCollapsed("tnoAfecto", true);
+				salaryTable.setColumnCollapsed("salaryCalculator.diaTrab",true);
+				salaryTable.setColumnCollapsed("salaryCalculator.sab",true);
+				salaryTable.setColumnCollapsed("salaryCalculator.sep",true);
+				salaryTable.setColumnCollapsed("salaryCalculator.dps",true);
+				salaryTable.setColumnCollapsed("salaryCalculator.dpd",true);
+				salaryTable.setColumnCollapsed("salaryCalculator.col",true);
+				salaryTable.setColumnCollapsed("salaryCalculator.mov",true);
 				
 				salaryTable.addColumnCollapsedListener(new ColumnCollapsedObservableTable.ColumnCollapsedListener() {
 					
@@ -1330,6 +1371,8 @@ public class AttendancePanel extends VerticalLayout implements View {
 				
 				salaryItem.getItemProperty("forceSalary").getValue();
 				salaryItem.getItemProperty("forceSuple").getValue();
+				
+				disabledHours(attendanceGrid);
 			}
 		});
 		attendanceGrid.setEditorFieldGroup(bfg);
@@ -2217,6 +2260,8 @@ public class AttendancePanel extends VerticalLayout implements View {
 		
 		createTableFooter(supleTable);
 		
+		disabledHours(attendanceGrid);
+		
 		//recupera las columnas de la tabla de sueldos seleccionadas del usuario
 		User user = SecurityHelper.getCredentials();
 		//si no tiene ninguna columna seleccionada, le agrega las por defecto
@@ -2332,5 +2377,25 @@ public class AttendancePanel extends VerticalLayout implements View {
 		}
 
 	}
-
+	
+	//Permite bloquear el ingreso de horas extras en caso de que un obrero registre vacaciones, accidente y/o licencia.
+	private void disabledHours(Grid grid){
+		for(Object itemId : grid.getContainerDataSource().getItemIds()){
+			BeanItem attendanceItem = (BeanItem) grid.getContainerDataSource().getItem(itemId);
+			BeanItem<Overtime> overtimeItem = overtimeContainer.getItem(itemId);				
+	
+			for(Object propertyId : grid.getContainerDataSource().getContainerPropertyIds()){
+				if( attendanceItem.getBean() instanceof Attendance ){
+					if( attendanceItem.getItemProperty(propertyId).getValue() instanceof AttendanceMark &&
+						( (AttendanceMark)attendanceItem.getItemProperty(propertyId).getValue()  == AttendanceMark.VACATION ||
+						  (AttendanceMark)attendanceItem.getItemProperty(propertyId).getValue()  == AttendanceMark.ACCIDENT ||
+						  (AttendanceMark)attendanceItem.getItemProperty(propertyId).getValue()  == AttendanceMark.SICK
+						)){
+						
+						overtimeItem.getItemProperty(propertyId).setReadOnly(true);
+					}
+				}
+			}
+		}
+	}
 }

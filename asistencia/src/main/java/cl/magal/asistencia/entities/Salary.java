@@ -86,6 +86,9 @@ public class Salary implements Serializable {
 	transient SalaryCalculator salaryCalculator;
 	transient SupleCalculator supleCalculator;
 	
+	public SalaryCalculator getSalaryCalculator() {
+		return salaryCalculator;
+	}
 	public void setSalaryCalculator(SalaryCalculator calculator) {
 		this.salaryCalculator = calculator;
 	}
@@ -327,7 +330,7 @@ public class Salary implements Serializable {
 	public List<AttendanceMark> getAjusteMesAnterior(){
 		return salaryCalculator.getAjusteMesAnterior();
 	}
-	
+		
 	@Override
 	public int hashCode() {
 		final int prime = 31;
