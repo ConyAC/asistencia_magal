@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -170,6 +171,8 @@ public class AttendancePanel extends VerticalLayout implements View {
 	Table supleTable;
 	ColumnCollapsedObservableTable salaryTable;
 
+	Map<Long, Boolean> ids = new HashMap<Long, Boolean>();
+	
 	/** ATRIBUTOS **/
 	Confirmations confirmations;
 	ConstructionSite cs;
@@ -788,10 +791,10 @@ public class AttendancePanel extends VerticalLayout implements View {
 						}
 						cb.setPropertyDataSource(beanItem.getItemProperty("laborerConstructionSite.supleCode"));
 						cb.setReadOnly(true);
-						
-						hl.addComponent(cb);
-						
-						hl.addComponent(new Button(null, new Button.ClickListener() {
+						hl.addComponent(cb);		
+
+						Button btnSuple = new Button(FontAwesome.ARROW_CIRCLE_O_RIGHT);
+						btnSuple.addClickListener(new Button.ClickListener() {
 							
 							@Override
 							public void buttonClick(ClickEvent event) {
@@ -808,14 +811,20 @@ public class AttendancePanel extends VerticalLayout implements View {
 								//guarda el trabajador, para guardar el codigo de suple
 								laborerService.save(beanItem.getBean().getLaborerConstructionSite());
 								//guarda el salario
-								constructionSiteService.save(beanItem.getBean());
-							}
-						}){
-							{
-								setIcon(FontAwesome.ARROW_CIRCLE_O_RIGHT);
-								setEnabled(supleTable.isEditable());
-							}
+								constructionSiteService.save(beanItem.getBean());				
+							}							
 						});
+						btnSuple.setVisible(!(Boolean) beanItem.getItemProperty("calculatedSuple").getValue());
+
+						if(!ids.isEmpty()){
+							Iterator it = ids.keySet().iterator();
+							while(it.hasNext()){
+							  Long key = (Long) it.next();
+								if( ids.get(key) && key == beanItem.getBean().getLaborerConstructionSite().getLaborer().getId() && !beanItem.getItemProperty("calculatedSuple").equals(false))
+									btnSuple.setVisible(false);
+							}
+						}						
+						hl.addComponent(btnSuple);
 						
 						return hl;
 					}
@@ -1376,6 +1385,8 @@ public class AttendancePanel extends VerticalLayout implements View {
 				salaryItem.getItemProperty("forceSuple").getValue();
 				
 				disabledHours(attendanceGrid);
+				
+				ids.put(attendance.getLaborerConstructionSite().getLaborer().getId(), true);
 			}
 		});
 		attendanceGrid.setEditorFieldGroup(bfg);
