@@ -39,6 +39,7 @@
 	    <class>cl.magal.asistencia.entities.User</class>
 	    <class>cl.magal.asistencia.entities.Vacation</class>
 	    <class>cl.magal.asistencia.entities.WageConfigurations</class>
+	    <class>cl.magal.asistencia.entities.WithdrawalSettlement</class>
 	    <class>cl.magal.asistencia.entities.converter.AccidentLevelConverter</class>
 	    <class>cl.magal.asistencia.entities.converter.AfpConverter</class>
 	    <class>cl.magal.asistencia.entities.converter.AttendanceMarkConverter</class>

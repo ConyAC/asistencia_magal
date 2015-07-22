@@ -12,16 +12,23 @@ import java.util.Set;
 import javax.validation.ConstraintViolation;
 
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeConstants;
+import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import cl.magal.asistencia.entities.Accident;
+import cl.magal.asistencia.entities.AfpItem;
+import cl.magal.asistencia.entities.ConstructionSite;
 import cl.magal.asistencia.entities.Holiday;
 import cl.magal.asistencia.entities.Laborer;
 import cl.magal.asistencia.entities.LaborerConstructionsite;
 import cl.magal.asistencia.entities.License;
+import cl.magal.asistencia.entities.Mobilization2;
 import cl.magal.asistencia.entities.Vacation;
+import cl.magal.asistencia.entities.WithdrawalSettlement;
+import cl.magal.asistencia.entities.enums.Afp;
 
 import com.vaadin.data.Validator.InvalidValueException;
 import com.vaadin.data.fieldgroup.FieldGroup.CommitException;
@@ -282,6 +289,119 @@ public class Utils {
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * Función que retorna el número de sabados del mes
+	 * @param date
+	 * @return
+	 */
+	public static Integer countSat(DateTime date) {
+	    return countDays(date,DateTimeConstants.SATURDAY);
+	}
+
+	/**
+	 * cuenta los dias de lunes a viernes del mes dado
+	 * @param date
+	 * @return
+	 */
+	public static int countLaborerDays(DateTime date) {
+	    return countDays(date,DateTimeConstants.MONDAY,DateTimeConstants.TUESDAY,DateTimeConstants.WEDNESDAY,DateTimeConstants.THURSDAY,DateTimeConstants.FRIDAY);
+	}
+
+	/**
+	 * cuenta los domingos del mes de la fecha dada
+	 * @param attendanceDate
+	 * @return
+	 */
+	public static int countSun(DateTime date) {
+	    return countDays(date,DateTimeConstants.SUNDAY);
+	}
+	
+	/**
+	 * Permite contar los dias de los tipos entregados como parametros de todo el mes asociado al date 
+	 * @param date
+	 * @param datetime
+	 * @return
+	 */
+	private static int countDays(DateTime date,int... datetime){
+		if(date == null )
+			throw new RuntimeException("El valor de la fecha no puede ser nulo.");
+		if(datetime == null )
+			throw new RuntimeException("es necesario la lista de DateTimeConstants");
+		final LocalDate start = date.withDayOfMonth(1).toLocalDate();
+	    final LocalDate end = date.withDayOfMonth(date.dayOfMonth().getMaximumValue()).toLocalDate();
+	    int saturdays = 0;
+	    LocalDate current = start;
+	    while (current.isBefore(end) || current.equals(end)) {
+	    	boolean cond = false;
+	    	for(int dtc : datetime ){
+	    		cond |= (current.getDayOfWeek() == dtc); 
+	    	}
+
+	        if (cond)
+	        	saturdays++;
+	        
+	        current = current.plusDays(1);
+	    }
+	    return saturdays;
+	}
+	
+	
+	/**
+	 * Obtiene la movilización 2 de la empresa dada
+	 * @return
+	 */
+	public static Double getMov2ConstructionSite(List<Mobilization2> mobilizacion2 , ConstructionSite cs){
+		double mov2 = 0;
+		for(Mobilization2 m2 : mobilizacion2){
+			if(m2.getConstructionSite().equals(cs)){
+				mov2 = m2.getAmount();
+				break;
+			}
+		}
+		return mov2;
+	}
+	
+	/**
+	 * Permite buscar el rate dependiendo de la afp dada
+	 * @param afpList
+	 * @param afp
+	 * @return
+	 */
+	public static Double getAfpRate(List<AfpItem> afpList,Afp afp){
+		
+		for(AfpItem item : afpList)
+			if(item.getAfp() == afp )
+				return item.getRate()/100;
+		return 0.1144;//FIX si no encuentra, retorna una por defecto?
+	}
+
+	/**
+	 * Calcula el promedio de la lista
+	 * @param list
+	 * @return
+	 */
+	public static double avg(List<Double> list) {
+		double sum = 0;
+		for(Double d : list )
+			sum += (d == null ? 0 : d);
+		return sum/(list.size() == 0 ? 1 : list.size());
+	}
+
+	/**
+	 * 
+	 * @param withdrawalSettlements
+	 * @return
+	 */
+	public static int sum(List<WithdrawalSettlement> withdrawalSettlements) {
+		if(withdrawalSettlements == null )
+			return 0;
+		
+		int sum = 0;
+		for(WithdrawalSettlement w : withdrawalSettlements)
+			sum += w.getPrice();
+		return sum;
 	}
 }
 

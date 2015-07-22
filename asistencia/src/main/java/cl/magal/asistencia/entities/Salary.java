@@ -86,6 +86,9 @@ public class Salary implements Serializable {
 	transient SalaryCalculator salaryCalculator;
 	transient SupleCalculator supleCalculator;
 	
+	public SalaryCalculator getSalaryCalculator() {
+		return salaryCalculator;
+	}
 	public void setSalaryCalculator(SalaryCalculator calculator) {
 		this.salaryCalculator = calculator;
 	}
@@ -121,6 +124,14 @@ public class Salary implements Serializable {
 			throw new RuntimeException("Es necesario que el objeto de calculo sea distinto a null");
 		supleCalculator.setAttendance(attendance);
 		salaryCalculator.setAttendance(attendance);
+		getForceSalary();
+	}
+	
+	public void setAdvancePaymentConfiguration(AdvancePaymentConfigurations api){
+		if(this.supleCalculator == null || this.salaryCalculator == null )
+			throw new RuntimeException("Es necesario que el objeto de calculo sea distinto a null");
+		supleCalculator.setSupleTable(api);
+		getForceSuple();
 		getForceSalary();
 	}
 	
@@ -205,6 +216,10 @@ public class Salary implements Serializable {
 	public void setOvertimeHours(Integer overtimeHours) {
 		this.overtimeHours = overtimeHours;
 	}
+	/**
+	 * Número de horas de descuento
+	 * @return
+	 */
 	public Integer getDescHours() {
 		return descHours == null ? 0 : descHours;
 	}
@@ -315,7 +330,7 @@ public class Salary implements Serializable {
 	public List<AttendanceMark> getAjusteMesAnterior(){
 		return salaryCalculator.getAjusteMesAnterior();
 	}
-	
+		
 	@Override
 	public int hashCode() {
 		final int prime = 31;

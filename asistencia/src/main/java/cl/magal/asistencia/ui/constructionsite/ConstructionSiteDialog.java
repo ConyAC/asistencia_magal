@@ -1,5 +1,6 @@
 package cl.magal.asistencia.ui.constructionsite;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -375,7 +376,9 @@ public class ConstructionSiteDialog extends AbstractWindowEditor {
 			}
 			steps.add(etapa);
 		}
-		
+		//quita los filtros para recorrerlos todos
+		List<Filter> filters = new ArrayList<Filter>(specialitiesContainer.getContainerFilters());
+		specialitiesContainer.removeAllContainerFilters();
 		for(Object itemId : specialitiesContainer.getItemIds()){
 			Item item = specialitiesContainer.getItem(itemId);
 			String etapa = (String)item.getItemProperty("name").getValue();
@@ -383,11 +386,19 @@ public class ConstructionSiteDialog extends AbstractWindowEditor {
 			//verfica que no sea nulo
 			if(!Utils.NotNullOrEmpty(etapa)){
 				Notification.show("No se permiten especialidades vacias",Type.ERROR_MESSAGE);
+				//recupera los filtros
+				for(Filter filter : filters){
+					specialitiesContainer.addContainerFilter(filter);
+				}
 				return false;
 			}
 			//verifica que ya no exista el mismo nombre
 			if(Utils.containsTwoContainer(specialitiesContainer,new String[]{"name","job"},new Object[]{ etapa , job})){
 				Notification.show("No se permiten especialidades con nombres repetidos (\""+etapa+"\")",Type.ERROR_MESSAGE);
+				//recupera los filtros
+				for(Filter filter : filters){
+					specialitiesContainer.addContainerFilter(filter);
+				}
 				return false;
 			}
 		}

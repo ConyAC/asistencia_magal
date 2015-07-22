@@ -136,5 +136,12 @@ public class SupleCalculator {
 	public void resetCal() {
 		
 	}
+	
+	/*
+	 * Seteamos el contenido de la tabla de suple
+	 */
+	public void setSupleTable(AdvancePaymentConfigurations supleTable){
+		this.supleTable = supleTable;
+	}
 
 }

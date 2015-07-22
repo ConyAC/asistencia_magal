@@ -128,12 +128,6 @@ public class ConstructionSite implements Serializable {
     @Column(name="step")
 	List<String> steps = new LinkedList<String>();
     
-    @ElementCollection(targetClass=Speciality.class)
-	@CollectionTable(name="constructionsite_speciality",
-			joinColumns=@JoinColumn(name="constructionsiteId"))
-    @Column(name="speciality")
-	List<String> specialities = new LinkedList<String>();
-    
     /**
      * Obliga a que status sea activo, si no viene uno seteado
      */
@@ -241,14 +235,6 @@ public class ConstructionSite implements Serializable {
 //	public void setTeams(List<Team> teams) {
 //		this.teams = teams;
 //	}
-	
-	public List<String> getSpecialities() {
-		return specialities;
-	}
-
-	public void setSpecialities(List<String> specialities) {
-		this.specialities = specialities;
-	}
 
 	public List<User> getUsers() {
 		if(users == null)

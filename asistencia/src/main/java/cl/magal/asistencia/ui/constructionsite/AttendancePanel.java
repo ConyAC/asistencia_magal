@@ -9,6 +9,7 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -20,6 +21,7 @@ import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.velocity.app.VelocityEngine;
 import org.joda.time.DateTime;
+import org.joda.time.Interval;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,15 +32,19 @@ import org.vaadin.dialogs.ConfirmDialog;
 
 import cl.magal.asistencia.entities.AdvancePaymentConfigurations;
 import cl.magal.asistencia.entities.AdvancePaymentItem;
+import cl.magal.asistencia.entities.AfpAndInsuranceConfigurations;
 import cl.magal.asistencia.entities.Attendance;
 import cl.magal.asistencia.entities.Confirmations;
 import cl.magal.asistencia.entities.ConstructionSite;
 import cl.magal.asistencia.entities.DateConfigurations;
+import cl.magal.asistencia.entities.LaborerConstructionsite;
 import cl.magal.asistencia.entities.Overtime;
 import cl.magal.asistencia.entities.Salary;
 import cl.magal.asistencia.entities.User;
+import cl.magal.asistencia.entities.WageConfigurations;
 import cl.magal.asistencia.entities.enums.AttendanceMark;
 import cl.magal.asistencia.entities.enums.Permission;
+import cl.magal.asistencia.repositories.LaborerConstructionsiteRepository;
 import cl.magal.asistencia.services.ConfigurationService;
 import cl.magal.asistencia.services.ConstructionSiteService;
 import cl.magal.asistencia.services.LaborerService;
@@ -50,6 +56,8 @@ import cl.magal.asistencia.ui.components.ColumnCollapsedObservableTable;
 import cl.magal.asistencia.ui.components.ColumnCollapsedObservableTable.ColumnCollapsedEvent;
 import cl.magal.asistencia.ui.vo.AbsenceVO;
 import cl.magal.asistencia.util.Constants;
+import cl.magal.asistencia.util.OnDemandFileDownloader;
+import cl.magal.asistencia.util.OnDemandFileDownloader.OnDemandStreamResource;
 import cl.magal.asistencia.util.SecurityHelper;
 import cl.magal.asistencia.util.Utils;
 import cl.magal.asistencia.util.VelocityHelper;
@@ -77,9 +85,7 @@ import com.vaadin.event.FieldEvents.TextChangeEvent;
 import com.vaadin.event.FieldEvents.TextChangeListener;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
-import com.vaadin.server.FileDownloader;
 import com.vaadin.server.FontAwesome;
-import com.vaadin.server.StreamResource;
 import com.vaadin.shared.ui.datefield.Resolution;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Alignment;
@@ -127,7 +133,7 @@ public class AttendancePanel extends VerticalLayout implements View {
 
 	/** SERVICIOS **/
 	@Autowired
-	private transient ConstructionSiteService service;
+	private transient ConstructionSiteService constructionSiteService;
 	@Autowired
 	private transient LaborerService laborerService;
 	@Autowired
@@ -140,6 +146,8 @@ public class AttendancePanel extends VerticalLayout implements View {
 	private transient MailService mailService;
 	@Autowired
 	private transient VelocityEngine velocityEngine;
+	@Autowired
+	LaborerConstructionsiteRepository labcsRepo;
 	
 	AdvancePaymentConfigurations advancepayment;
 	/** CONTAINERS **/
@@ -157,6 +165,7 @@ public class AttendancePanel extends VerticalLayout implements View {
 	InlineDateField attendanceDate;
 	Button btnExportSoftland,btnExportSupleSoftland,btnConstructionSiteConfirm,btnCentralConfirm,btnSupleObraConfirm,btnSupleCentralConfirm;
 	Table confirmTable;
+	TabSheet tab;
 //	VerticalLayout root;
 	Table supleTable;
 	ColumnCollapsedObservableTable salaryTable;
@@ -169,7 +178,8 @@ public class AttendancePanel extends VerticalLayout implements View {
 		"laborerConstructionSite.laborer.fullname","lastJornalPromedio","jornalPromedio","specialBond","bondMov2","loanBond","sobreTiempo","descHours","loan","tools","totalLiquido"
 	};
 	final static String[] salaryTableVisibleTable = new String[]{"laborerConstructionSite.activeContract.jobCode",
-			"laborerConstructionSite.laborer.fullname","lastJornalPromedio","jornalPromedio","specialBond","bondMov2","loanBond","sobreTiempo","descHours","loan","tools","totalLiquido"
+			"laborerConstructionSite.laborer.fullname","lastJornalPromedio","jornalPromedio","specialBond","bondMov2","loanBond","sobreTiempo","descHours","loan","tools","totalLiquido",
+			"salaryCalculator.diaTrab","salaryCalculator.sab","salaryCalculator.sep","salaryCalculator.dps","salaryCalculator.dpd","salaryCalculator.col","salaryCalculator.mov"
 			,"jornalBaseMes","vtrato","valorSabado","vsCorrd","descHoras","bonifImpo","glegal","afecto","sobreAfecto","cargas","asigFamiliar","colacion","mov","mov2","tnoAfecto"
 	};
 
@@ -202,6 +212,37 @@ public class AttendancePanel extends VerticalLayout implements View {
 			dateConfig.setAssistance(dt.withDayOfMonth(dt.dayOfMonth().getMaximumValue()).toDate());
 		}
 		return new DateTime(dateConfig.getAssistance());
+	}
+	
+	/**
+	 * 
+	 * obtiene las configuraciones del mes seleccionado
+	 * @return
+	 */
+	private AfpAndInsuranceConfigurations getAfpAndInsuranceConfigurations(){
+		AfpAndInsuranceConfigurations dateConfig = configurationService.findAfpAndInsuranceConfiguration();
+		return dateConfig;
+	}
+	
+	/**
+	 * 
+	 * obtiene las configuraciones del mes seleccionado
+	 * @return
+	 */
+	private DateConfigurations getDateConfigurations(){
+		DateTime dt = getAttendanceDate();
+		DateConfigurations dateConfig = configurationService.getDateConfigurationByCsAndMonth(cs,dt);
+		return dateConfig;
+	}
+	
+	/**
+	 * 
+	 * obtiene las configuraciones del mes seleccionado
+	 * @return
+	 */
+	private WageConfigurations getWageConfigurations(){
+		WageConfigurations dateConfig = configurationService.findWageConfigurations();
+		return dateConfig;
 	}
 
 	/**
@@ -286,7 +327,7 @@ public class AttendancePanel extends VerticalLayout implements View {
 				//verifica los parametros de la url
 				if( msgs.length >= 1 ){
 					//si todo va bien, carga la información de la obra si es necesaria
-					cs = service.findConstructionSite(id);
+					cs = constructionSiteService.findConstructionSite(id);
 				}else if( msgs.length >= 2 ){
 
 				}else {
@@ -318,8 +359,6 @@ public class AttendancePanel extends VerticalLayout implements View {
 		salaryContainer.removeAllItems();
 	}
 	
-	TabSheet tab;
-
 	private TabSheet drawAttendanceDetail() {
 		logger.debug("PRIMERO");
 		tab = new TabSheet();
@@ -471,7 +510,9 @@ public class AttendancePanel extends VerticalLayout implements View {
 	}
 
 	private void createHeaders(final Grid grid) {
-
+		
+		boolean isAttendanceGrid = grid.equals(attendanceGrid);
+		
 		HeaderRow filterRow = null;
 
 		if(grid.getHeaderRowCount() == 1)
@@ -521,20 +562,42 @@ public class AttendancePanel extends VerticalLayout implements View {
 				if(((String) pid).startsWith("dmp") || ((String) pid).startsWith("dma")  ){
 					//calcula el numero del mes
 					int monthDay = Integer.parseInt(((String) pid).replace("dmp","").replace("dma",""));
+					//crea una fecha con el año y mes seleccionado y con el dia recuperado del property actual
 					DateTime dt2 = dt;
-					if ( ((String) pid).startsWith("dmp") )
-						dt2 = dt2.minusMonths(1);
-					//el número de mes no es un número válido de mes o si es un día a la fecha de cierre del mes pasado, oculta la columna
-					if( monthDay > dt2.dayOfMonth().getMaximumValue() || 
-						( ((String) pid).startsWith("dmp") && monthDay <= maxDay )){
+					try{
+						//si el property es dmp(dia mes pasado, entonces retrocede un mes
+						if ( ((String) pid).startsWith("dmp") )
+							dt2 = dt2.minusMonths(1);
+						dt2 = dt2.withDayOfMonth(monthDay);
+					}catch(Exception e){ //si no es un mes válida lo ocula 
 						if(grid.getColumn(pid) != null)
 							grid.removeColumn(pid);
-					}else{ //solo lo setea si el número es mayor a la cantidad de dias del mes
-						if(grid.getColumn(pid) == null)
-							grid.addColumn(pid);
-						label.setValue( dt2.withDayOfMonth(monthDay).dayOfWeek().getAsShortText() );
-						grid.getColumn(pid).setHeaderCaption(((String) pid).replace("dmp","").replace("dma","")).setSortable(false);
 					}
+					if(dt2 != null ){ //continua solo si el día es válido
+						
+						//si la grid es de asistencia, calcula el rango con el dia de cierre del mes pasado y el ultimo dia del mes seleccionado
+						DateTime startDate,endDate;
+						if(isAttendanceGrid){
+							startDate = getPastMonthClosingDate();
+							endDate = getAttendanceDate().withDayOfMonth(getAttendanceDate().dayOfMonth().getMaximumValue());
+						}else{//si la grid es de sobretiempos, calcula el rango con el dia de inicio del trato y el fin de trato
+							startDate = new DateTime( getDateConfigurations().getBeginDeal());
+							endDate = new DateTime( getDateConfigurations().getFinishDeal());
+						}
+						//define el rango
+						Interval interval = new Interval(startDate, endDate.plusDays(1)); //le suma un dia, dado que el contains del interval es exclusivo para el final
+						//si la fecha que representa el property está dentro del rango, se preocupa de mostrarla y definir sus header y subheader
+						if(interval.contains(dt2)){
+							if(grid.getColumn(pid) == null)
+								grid.addColumn(pid);
+							label.setValue( dt2.dayOfWeek().getAsShortText() );
+							grid.getColumn(pid).setHeaderCaption(((String) pid).replace("dmp","").replace("dma","")).setSortable(false);
+						}else{ //si no la contiene, la oculta
+							if(grid.getColumn(pid) != null)
+								grid.removeColumn(pid);
+						}
+					}
+					
 					if(cell == null){
 						cell = filterRow.getCell(pid);
 					}
@@ -615,13 +678,26 @@ public class AttendancePanel extends VerticalLayout implements View {
 							
 							@Override
 							public void buttonClick(ClickEvent event) {
-								Object itemId = null;
-								if( (itemId = checkHasNegativeOrNull(salaryContainer,"suple")) == null ) {
+								List<Object> itemIds = null;
+								if( (itemIds = checkHasNegativeOrNull(salaryContainer,"suple")).size() == 0 ) {
 									Notification.show("La lista de trabajadores no tiene valores negativos en el suple.",Type.HUMANIZED_MESSAGE);
 								}else{
-									BeanItem<Salary> item = salaryContainer.getItem(itemId);
-									Notification.show("El trabajador "+item.getBean().getLaborerConstructionSite().getJobCode()+" tiene un suple negativo."
-											,Type.ERROR_MESSAGE);
+									//crea el mensaje
+									StringBuilder sb = new StringBuilder("Hay "+itemIds.size()+" trabajadores con valores negativos y son:\n");
+									int i = 0;
+									for(Object itemId : itemIds ){
+										BeanItem<Salary> item = salaryContainer.getItem(itemId);
+										sb.append(item.getBean().getLaborerConstructionSite().getJobCode());
+										
+										i++;
+										if( i < itemIds.size() )
+											sb.append(",");
+										if( i % 8 == 0) //para mostrar de a grupo de 8 maximo
+											sb.append("\n");
+									}
+									
+									
+									Notification.show(sb.toString(),Type.ERROR_MESSAGE);
 								}
 								btnValidate.setEnabled(true);
 							}
@@ -647,7 +723,7 @@ public class AttendancePanel extends VerticalLayout implements View {
 									public void onClose(ConfirmDialog dialog) {
 										if (dialog.isConfirmed()) {
 											confirmations.setSupleObraCheck(!confirmations.isSupleObraCheck());
-											service.save(confirmations);
+											constructionSiteService.save(confirmations);
 											configureInterface();
 
 											//si todo sale bien, manda un email a los centrales
@@ -677,7 +753,7 @@ public class AttendancePanel extends VerticalLayout implements View {
 									public void onClose(ConfirmDialog dialog) {
 										if (dialog.isConfirmed()) {
 											confirmations.setSupleCentralCheck(!confirmations.isSupleCentralCheck());
-											service.save(confirmations);
+											constructionSiteService.save(confirmations);
 											toogleButtonState(btnSupleCentralConfirm, confirmations.isSupleCentralCheck());
 											//actualiza el estado del boton exportar
 											configureInterface();
@@ -732,7 +808,7 @@ public class AttendancePanel extends VerticalLayout implements View {
 								//guarda el trabajador, para guardar el codigo de suple
 								laborerService.save(beanItem.getBean().getLaborerConstructionSite());
 								//guarda el salario
-								service.save(beanItem.getBean());
+								constructionSiteService.save(beanItem.getBean());
 							}
 						}){
 							{
@@ -767,7 +843,7 @@ public class AttendancePanel extends VerticalLayout implements View {
 									BeanItem<Salary> beanItem = salaryContainer.getItem(itemId);
 									beanItem.getItemProperty("calculatedSuple").setValue(false);
 									//guarda el salario
-									service.save(beanItem.getBean());
+									constructionSiteService.save(beanItem.getBean());
 								}
 							});
 							tf.addValueChangeListener(new Property.ValueChangeListener() {
@@ -803,6 +879,14 @@ public class AttendancePanel extends VerticalLayout implements View {
 		salaryContainer.addNestedContainerProperty("laborerConstructionSite.activeContract.jobCode");
 		salaryContainer.addNestedContainerProperty("laborerConstructionSite.laborer.fullname");
 		salaryContainer.addNestedContainerProperty("laborerConstructionSite.supleCode");
+		salaryContainer.addNestedContainerProperty("salaryCalculator.diaTrab");
+		salaryContainer.addNestedContainerProperty("salaryCalculator.sab");
+		salaryContainer.addNestedContainerProperty("salaryCalculator.sep");
+		salaryContainer.addNestedContainerProperty("salaryCalculator.dps");
+		salaryContainer.addNestedContainerProperty("salaryCalculator.dpd");
+		salaryContainer.addNestedContainerProperty("salaryCalculator.col");
+		salaryContainer.addNestedContainerProperty("salaryCalculator.mov");
+		
 		VerticalLayout vl = new VerticalLayout(){
 			{
 				setSpacing(true);
@@ -818,13 +902,26 @@ public class AttendancePanel extends VerticalLayout implements View {
 							
 							@Override
 							public void buttonClick(ClickEvent event) {
-								Object itemId = null;
-								if( (itemId = checkHasNegativeOrNull(salaryContainer,"salary","vtrato","valorSabado","vsCorrd","glegal","afecto","colacion","mov","mov2")) == null ) {
+								List<Object> itemIds = null;
+								if( (itemIds = checkHasNegativeOrNull(salaryContainer,"salary","vtrato","valorSabado","vsCorrd","glegal","afecto","colacion","mov","mov2")).size() == 0 ) {
 									Notification.show("La lista de trabajadores no tiene valores negativos en el sueldo ni en el jornal promedio.",Type.HUMANIZED_MESSAGE);
 								}else{
-									BeanItem<Salary> item = salaryContainer.getItem(itemId);
-									Notification.show("El trabajador "+item.getBean().getLaborerConstructionSite().getJobCode()+" tiene uno de sus valores negativos."
-											,Type.ERROR_MESSAGE);
+									//crea el mensaje
+									StringBuilder sb = new StringBuilder("Hay "+itemIds.size()+" trabajadores con valores negativos y son:\n");
+									int i = 0;
+									for(Object itemId : itemIds ){
+										BeanItem<Salary> item = salaryContainer.getItem(itemId);
+										sb.append(item.getBean().getLaborerConstructionSite().getJobCode());
+										
+										i++;
+										if( i < itemIds.size() )
+											sb.append(",");
+										if( i % 8 == 0) //para mostrar de a grupo de 8 maximo
+											sb.append("\n");
+									}
+									
+									
+									Notification.show(sb.toString(),Type.ERROR_MESSAGE);
 								}
 								btnValidate.setEnabled(true);
 							}
@@ -850,7 +947,7 @@ public class AttendancePanel extends VerticalLayout implements View {
 									public void onClose(ConfirmDialog dialog) {
 										if (dialog.isConfirmed()) {
 											confirmations.setConstructionSiteCheck(!confirmations.isConstructionSiteCheck());
-											service.save(confirmations);
+											constructionSiteService.save(confirmations);
 											configureInterface();
 											//si todo sale bien, envia el mail a los centrales
 											if(confirmations.isConstructionSiteCheck())
@@ -880,7 +977,7 @@ public class AttendancePanel extends VerticalLayout implements View {
 									public void onClose(ConfirmDialog dialog) {
 										if (dialog.isConfirmed()) {
 											confirmations.setCentralCheck(!confirmations.isCentralCheck());
-											service.save(confirmations);
+											constructionSiteService.save(confirmations);
 											configureInterface();
 										}
 									}
@@ -905,6 +1002,7 @@ public class AttendancePanel extends VerticalLayout implements View {
 				salaryTable.setSizeFull();
 				salaryTable.setContainerDataSource(salaryContainer);
 				salaryTable.setColumnCollapsingAllowed(true);
+				salaryTable.setColumnReorderingAllowed(true);
 				
 				salaryTable.addGeneratedColumn("totalLiquido", new Table.ColumnGenerator(){
 
@@ -936,8 +1034,10 @@ public class AttendancePanel extends VerticalLayout implements View {
 				
 				salaryTable.setVisibleColumns(salaryTableVisibleTable);
 				
-				salaryTable.setColumnHeaders("Rol","Nombre","Último<br />Jornal Prom","Jornal Prom","Bono Imp.","Bono no Imp.","Bono Prest.", "Sobre Tiempo","H Desc","V Cuota<br />Prestamo","V Cuota<br />Herramienta","Total Líquido<br />(A Pagar)"
-						,"Jornal Base", " V Trato", "Valor Sábado" , "V S Corrd", "Desc Horas","Bonif Imp","G Legal","Afecto","Sobre Afecto","Cargas","A Familiar","Colación","Mov","Movi 2","T No Afecto"
+				salaryTable.setColumnHeaders("Rol","Nombre","Último<br />Jornal Prom","Jornal Prom","Bono Imp.","Bono No Imp.","Bono Prest.", "Sobretpo","H Desc","V Cuota<br />Prestamo",
+						"V Cuota<br />Herramienta","Total Líquido<br />(A Pagar)",
+						"Día<br />Trab","Sab","Sep","DPS","DPD","Col","Mov"
+						,"Jornal Base", " V Trato", "Valor Sábado" , "V S Corrida", "Desc Horas","Total<br />Bonos<br />Imponibles","G Legal","Afecto","Sobre Afecto","Cargas","A Familiar","Colación","Mov","Movi 2","T No Afecto"
 						);
 				
 				salaryTable.setColumnWidth("jornalPromedio", 100);
@@ -958,6 +1058,13 @@ public class AttendancePanel extends VerticalLayout implements View {
 				salaryTable.setColumnCollapsed("mov", true);
 				salaryTable.setColumnCollapsed("mov2", true);
 				salaryTable.setColumnCollapsed("tnoAfecto", true);
+				salaryTable.setColumnCollapsed("salaryCalculator.diaTrab",true);
+				salaryTable.setColumnCollapsed("salaryCalculator.sab",true);
+				salaryTable.setColumnCollapsed("salaryCalculator.sep",true);
+				salaryTable.setColumnCollapsed("salaryCalculator.dps",true);
+				salaryTable.setColumnCollapsed("salaryCalculator.dpd",true);
+				salaryTable.setColumnCollapsed("salaryCalculator.col",true);
+				salaryTable.setColumnCollapsed("salaryCalculator.mov",true);
 				
 				salaryTable.addColumnCollapsedListener(new ColumnCollapsedObservableTable.ColumnCollapsedListener() {
 					
@@ -1001,7 +1108,7 @@ public class AttendancePanel extends VerticalLayout implements View {
 								public void blur(BlurEvent event) {
 									BeanItem<Salary> beanItem = salaryContainer.getItem(itemId);
 									//guarda el salario
-									service.save(beanItem.getBean());
+									constructionSiteService.save(beanItem.getBean());
 								}
 							});
 						}
@@ -1027,16 +1134,17 @@ public class AttendancePanel extends VerticalLayout implements View {
 	 * @param propertyIds
 	 * @return El primer itemId del item que tiene una propiedad nula o menor a 0
 	 */
-	private Object checkHasNegativeOrNull(BeanContainer container,String... propertyIds ) {
+	private List<Object> checkHasNegativeOrNull(BeanContainer<Long, Salary> container,String... propertyIds ) {
+		List<Object> itemdIds = new LinkedList<Object>();
 		for(Object itemId : container.getItemIds())
 			for(String propertyId : propertyIds){
 				Property property = container.getContainerProperty(itemId, propertyId);
 				if( property == null || 
 					property.getValue() == null || 
 					((Number)property.getValue()).intValue() < 0 )
-					return itemId;
+					itemdIds.add(itemId);
 			}
-		return null;
+		return itemdIds;
 	}
 	
 	/**
@@ -1132,7 +1240,7 @@ public class AttendancePanel extends VerticalLayout implements View {
 					public void buttonClick(ClickEvent event) {
 						absence.setConfirmed(!absence.isConfirmed());
 						toogleButtonState(btn,absence);
-						service.confirmAbsence(absence);
+						constructionSiteService.confirmAbsence(absence);
 					}
 				});
 				
@@ -1173,7 +1281,7 @@ public class AttendancePanel extends VerticalLayout implements View {
 		overtimeGrid.setWidth("100%");
 		//overtimeGrid.setEditorFieldGroup(new BeanFieldGroup<Overtime>(Overtime.class));
 		
-		BeanFieldGroup binder = new BeanFieldGroup<Overtime>(Overtime.class);
+		BeanFieldGroup<Overtime> binder = new BeanFieldGroup<Overtime>(Overtime.class);
 		binder.setFieldFactory(new EnhancedFieldGroupFieldFactory());
 		overtimeGrid.setEditorFieldGroup(binder);
 		//overtimeGrid.setEditorFieldGroup(new BeanFieldGroup<EnhancedFieldGroupFieldFactory>(EnhancedFieldGroupFieldFactory.class));
@@ -1188,7 +1296,7 @@ public class AttendancePanel extends VerticalLayout implements View {
 			public void postCommit(CommitEvent commitEvent) throws CommitException {
 				//guarda el elmento
 				Overtime overtime = ((BeanItem<Overtime>) commitEvent.getFieldBinder().getItemDataSource()).getBean();
-				service.save(overtime);
+				constructionSiteService.save(overtime);
 				overtimeContainer.sort(new Object[]{"laborerConstructionSite.activeContract.jobCode"}, new boolean[]{true});
 				
 				//por cada variable
@@ -1261,11 +1369,13 @@ public class AttendancePanel extends VerticalLayout implements View {
 				Item salaryItem = salaryContainer.getItem(attendance.getLaborerConstructionSite().getId());
 				if(salaryItem == null )
 					return;
-				Property prop = salaryItem.getItemProperty("attendance");
+				Property<Attendance> prop = salaryItem.getItemProperty("attendance");
 				prop.setValue(attendance);
 				
 				salaryItem.getItemProperty("forceSalary").getValue();
 				salaryItem.getItemProperty("forceSuple").getValue();
+				
+				disabledHours(attendanceGrid);
 			}
 		});
 		attendanceGrid.setEditorFieldGroup(bfg);
@@ -1295,7 +1405,7 @@ public class AttendancePanel extends VerticalLayout implements View {
 			public void postCommit(CommitEvent commitEvent) throws CommitException {
 				//guarda el elmento
 				Attendance attedance = ((BeanItem<Attendance>) commitEvent.getFieldBinder().getItemDataSource()).getBean();
-				service.save(attedance);
+				constructionSiteService.save(attedance);
 				attendanceContainer.sort(new Object[]{"laborerConstructionSite.activeContract.jobCode"}, new boolean[]{true});
 				//por cada variable
 				createGridFooters(attendanceGrid);
@@ -1532,7 +1642,9 @@ public class AttendancePanel extends VerticalLayout implements View {
 
 									@Override
 									public void buttonClick(ClickEvent event) {
+										final BeanItemContainer<AdvancePaymentItem> container = new BeanItemContainer<AdvancePaymentItem>(AdvancePaymentItem.class);
 										final Window window = new Window();
+										final FieldGroup fg = new FieldGroup();
 
 										window.center();
 										window.setModal(true);
@@ -1545,8 +1657,6 @@ public class AttendancePanel extends VerticalLayout implements View {
 														setWidth("980px");
 														setHeight("610px");
 														setSpacing(true);
-
-														final FieldGroup fg = new FieldGroup();
 														
 														if( advancepayment  == null ){
 															advancepayment = confService.findAdvancePaymentConfigurationsByCS(cs);
@@ -1591,29 +1701,41 @@ public class AttendancePanel extends VerticalLayout implements View {
 																			}
 																		});
 																		
-																		
-																		final BeanItemContainer<AdvancePaymentItem> container = new BeanItemContainer<AdvancePaymentItem>(AdvancePaymentItem.class,advancepayment.getAdvancePaymentTable());
-																		
+																		container.removeAllItems();
+																		container.addAll(advancepayment.getAdvancePaymentTable());
+
 																		HorizontalLayout hl = new HorizontalLayout(){
 																			{
 																				setSpacing(true);
 																				final TextField supleCode = new TextField("Código Suple");
+																				supleCode.setImmediate(true);
 																				addComponent(new FormLayout(supleCode));
 																				Button add = new Button(null,new Button.ClickListener() {
 																					
 																					@Override
 																					public void buttonClick(ClickEvent event) {
+																						AdvancePaymentItem advancePaymentItem = new AdvancePaymentItem();	
+																						AdvancePaymentConfigurations apItem = confService.findAdvancePaymentConfigurationsByCS(cs);
+																						boolean check = false;	
 																						try{
-																							
-																							AdvancePaymentItem advancePaymentItem = new AdvancePaymentItem();
-																							advancePaymentItem.setSupleCode(Integer.valueOf(supleCode.getValue()));
-																							advancepayment.setConstructionSite(cs);
-																							advancepayment.addAdvancePaymentItem(advancePaymentItem);
-																							confService.save(advancepayment);
-																							
-																							container.addBean(advancePaymentItem);
+																							advancePaymentItem.setSupleCode(Integer.valueOf(supleCode.getValue()));																							
+																							for(AdvancePaymentItem i : apItem.getAdvancePaymentTable()){
+																								if(i.getSupleCode() == advancePaymentItem.getSupleCode())
+																									check = true;
+																							}
+																									
+																							if(!check){
+																								advancepayment.setConstructionSite(cs);
+																								advancepayment.addAdvancePaymentItem(advancePaymentItem);
+																								confService.save(advancepayment);
+																								container.addBean(advancePaymentItem);
+																							}else{
+																								Notification.show("El código ingresado ya existe, ingrese uno diferente.",Type.ERROR_MESSAGE);
+																								return;
+																							}
 																						}catch(Exception e){
-																							Notification.show("Error al agregar el nuevo suple",Type.ERROR_MESSAGE);
+																							advancepayment.removeAdvancePaymentItem(advancePaymentItem);
+																							Notification.show("El código ingresado ya existe, ingrese uno diferente.",Type.ERROR_MESSAGE);
 																							logger.error("Error al agregar el nuevo suple",e);
 																						}
 																					}
@@ -1647,22 +1769,35 @@ public class AttendancePanel extends VerticalLayout implements View {
 																					final AdvancePaymentItem advancePaymentItem = container.getItem(itemId).getBean();
 																					@Override
 																					public void buttonClick(ClickEvent event) {
-																						ConfirmDialog.show(UI.getCurrent(), "Confirmar Acción:", "¿Está seguro de eliminar el suple seleccionado?",
-																								"Eliminar", "Cancelar", new ConfirmDialog.Listener() {
-
-																							public void onClose(ConfirmDialog dialog) {
-																								if (dialog.isConfirmed()) {
-																									try{
-																										advancepayment.removeAdvancePaymentItem(advancePaymentItem);
-																										confService.save(advancepayment);
-																										container.removeItem(itemId);
-																									}catch(Exception e){
-																										Notification.show("Error al quitar elemento",Type.ERROR_MESSAGE);
-																										logger.error("Error al eliminar un suple",e);
+																						List<LaborerConstructionsite> lcs =  labcsRepo.findByConstructionsiteAndIsActive(cs);
+																						boolean verify = false;
+																						for(LaborerConstructionsite lcsItem : lcs){
+																							if(lcsItem.getSupleCode() == advancePaymentItem.getSupleCode()){
+																								verify = true;
+																							}
+																						}
+																						
+																						// No se permitirá eliminar un suple que esta siendo utilizado por algún trabajador de la obra.
+																						if(verify){
+																							Notification.show("El suple seleccionado no puede ser eliminado ya que está siendo utilizado.", Type.ERROR_MESSAGE);
+																						}else{
+																							ConfirmDialog.show(UI.getCurrent(), "Confirmar Acción:", "¿Está seguro de eliminar el suple seleccionado?",
+																									"Eliminar", "Cancelar", new ConfirmDialog.Listener() {
+	
+																								public void onClose(ConfirmDialog dialog) {
+																									if (dialog.isConfirmed()) {
+																										try{
+																											advancepayment.removeAdvancePaymentItem(advancePaymentItem);
+																											confService.save(advancepayment);
+																											container.removeItem(itemId);
+																										}catch(Exception e){
+																											Notification.show("Error al quitar elemento",Type.ERROR_MESSAGE);
+																											logger.error("Error al eliminar un suple",e);
+																										}
 																									}
 																								}
-																							}
-																						});
+																							});
+																						}
 																					}
 																				}){
 																					{setIcon(FontAwesome.TRASH_O);}
@@ -1696,7 +1831,7 @@ public class AttendancePanel extends VerticalLayout implements View {
 																		table.setEditable(true);
 																		
 																		addComponent(table);
-
+																		
 																		if(!SecurityHelper.hasPermission(Permission.DEFINIR_VARIABLE_GLOBAL)){
 																			setEnabled(false);
 																		}else{
@@ -1721,6 +1856,25 @@ public class AttendancePanel extends VerticalLayout implements View {
 
 													@Override
 													public void buttonClick(ClickEvent event) {
+														try {
+															fg.commit();
+														} catch (CommitException e) {
+															Notification.show("No pudo realizarse el commit", Type.ERROR_MESSAGE);
+															logger.error("CommitException", e);
+															return;
+														}
+														
+														AdvancePaymentConfigurations apc = ((BeanItem<AdvancePaymentConfigurations>) fg.getItemDataSource()).getBean();
+														apc.setAdvancePaymentTable(container.getItemIds());												
+														
+														for(Object itemId : salaryContainer.getItemIds()){															
+															BeanItem<Salary> salaryItem = salaryContainer.getItem(itemId);			
+															Salary salary = salaryItem.getBean();
+																													
+															salary.setAdvancePaymentConfiguration(apc);														
+														}
+														
+														supleTable.refreshRowCache();
 														window.close();
 
 													}
@@ -1734,8 +1888,8 @@ public class AttendancePanel extends VerticalLayout implements View {
 
 													@Override
 													public void buttonClick(ClickEvent event) {
+														fg.discard();
 														window.close();
-
 													}
 												});
 												btnCancelar.addStyleName("link");
@@ -1766,15 +1920,75 @@ public class AttendancePanel extends VerticalLayout implements View {
 								Button btnExportAttendance = new Button("Exportar a Excel",FontAwesome.FILE_ARCHIVE_O);
 								addComponent(btnExportAttendance);
 								//recupera la lista de sueldos
-								StreamResource.StreamSource myResource = new StreamResource.StreamSource() {
+								OnDemandStreamResource myResource = new OnDemandFileDownloader.OnDemandStreamResource() {
 
 									public InputStream getStream() {
+										
+										AfpAndInsuranceConfigurations afpTable = getAfpAndInsuranceConfigurations();
+										
+										//verifica que se tengan bien las configuraciones del mes
+										DateConfigurations dc = getDateConfigurations();
+										if(!validDateConfiguration(dc))
+											return null;
+											
 										XSSFWorkbook wb = null;
 
 										//1. Open the file
 										try {
 											wb = new XSSFWorkbook(new FileInputStream(new File(AttendancePanel.class.getResource("/templates/asistencia/planilla_asistencia.xlsx").toURI())));
+											//setea la configuración de la primera pestaña
+											XSSFSheet sheet0 = wb.getSheetAt(0);
+											//celda B1 Centro de costo
+											Row row1 = sheet0.getRow(0);
+											row1.getCell(1).setCellValue(cs.getCostCenter());
+											//celda B2 nombre del clave para el doc
+											Row row2 = sheet0.getRow(1);
+											row2.getCell(1).setCellValue(cs.getCode());
+											//celda B3 fecha (primer dia del mes)
+											Row row3 = sheet0.getRow(2);
+//											row3.getCell(1).setCellValue(getAttendanceDate().withDayOfMonth(1).toString("dd/MM/yyyy"));
+											row3.getCell(1).setCellValue(getAttendanceDate().withDayOfMonth(1).toDate());
+											//celda B13 cuenta la cantidad de sabados del mes
+											Row row13 = sheet0.getRow(12);
+											row13.getCell(1).setCellValue(Utils.countSat(getAttendanceDate()));
+											//celda B14 cuenta la cantidad dias de lunes a viernes trabajados
+											int holidays = constructionSiteService.countHolidaysMonth(getAttendanceDate());
+											Row row14 = sheet0.getRow(13);
+											row14.getCell(1).setCellValue(Utils.countLaborerDays(getAttendanceDate())-holidays);
+											//celda B15 cuenta los domingos y festivos
+											Row row15 = sheet0.getRow(14);
+											row15.getCell(1).setCellValue(Utils.countSun(getAttendanceDate())+holidays);
+											//celda B16 inicio trato
+											Row row16 = sheet0.getRow(15);
+											row16.getCell(1).setCellValue(new DateTime(dc.getBeginDeal()).toDate());
+											//celda B17 fin trato
+											Row row17 = sheet0.getRow(16);
+											row17.getCell(1).setCellValue(new DateTime(dc.getFinishDeal()).toDate());
+											//celda B18 dia de cierre de anticipo
+											Row row18 = sheet0.getRow(17);
+											row18.getCell(1).setCellValue(new DateTime(dc.getAdvance()).getDayOfMonth());
+											//celda B19 uf del mes
+											Row row19 = sheet0.getRow(18);
+											row19.getCell(1).setCellValue(dc.getUf());
+											
+											WageConfigurations wageConfiguration = getWageConfigurations();
+											
+											//celda C23 sueldo minimo
+											Row row23 = sheet0.getRow(22);
+											row23.getCell(2).setCellValue(getWageConfigurations().getMinimumWage());
+											
+											//celda B25 colacion
+											Row row25 = sheet0.getRow(24);
+											row25.getCell(1).setCellValue(wageConfiguration.getCollation());
+											//celda B26 movilización
+											Row row26 = sheet0.getRow(25);
+											row26.getCell(1).setCellValue(wageConfiguration.getMobilization());
+											//celda B27 movilización2
+											Row row27 = sheet0.getRow(26);
+											row27.getCell(1).setCellValue(Utils.getMov2ConstructionSite(wageConfiguration.getMobilizations2(), cs));
+											
 											//pone la asistencia en la segunda pestaña
+											wb.setSheetName(1,getAttendanceDate().toString("MMMM yyyy").toUpperCase());
 											XSSFSheet sheet = wb.getSheetAt(1);
 											int i = 11;
 											for(Object itemId : attendanceContainer.getItemIds()){
@@ -1795,15 +2009,21 @@ public class AttendancePanel extends VerticalLayout implements View {
 												//asistencia
 												int j = 3;
 												for(AttendanceMark mark : attendance.getMarksAsList()){
-													if(j == 17)
+													if(j == 17){
+														//setea el suple ingresado manualmente
+														row.getCell(j).setCellValue(salary.getSuple());
 														j++;
+													}
 													row.getCell(j).setCellValue(mark.toString());
+													//ingresa hasta el fin de mes solamente
+													if(j - 3 == getAttendanceDate().dayOfMonth().getMaximumValue() )
+														break;
 													j++;
 												}
 												//jornal promedio
 												row.getCell(44).setCellValue(salary.getJornalPromedio());
 												//horas desc TODO
-												row.getCell(46).setCellValue(salary.getDescHoras());
+												row.getCell(46).setCellValue(salary.getDescHours());
 												//herramientas TODO
 												row.getCell(48).setCellValue(salary.getTools());
 												//prestamos TODO
@@ -1841,7 +2061,9 @@ public class AttendancePanel extends VerticalLayout implements View {
 //												row.getCell(153).setCellValue(salary.getLaborerConstructionSite().getLaborer().getIsapre().toString());
 												// TODO afp y espacio?= 156 157
 												row.getCell(156).setCellValue(salary.getLaborerConstructionSite().getLaborer().getAfp().toString());
-//												row.getCell(157).setCellValue(salary.getLaborerConstructionSite().getLaborer().getIsapre().toString()); 
+//												row.getCell(157).setCellValue(salary.getLaborerConstructionSite().getLaborer().getIsapre().toString());
+												//copia el % de afp asociado
+												row.getCell(158).setCellValue(Utils.getAfpRate(afpTable.getAfpTable(), salary.getLaborerConstructionSite().getLaborer().getAfp()));
 												
 											}
 											try { HSSFFormulaEvaluator.evaluateAllFormulaCells(wb); }catch(Exception e){}
@@ -1857,9 +2079,51 @@ public class AttendancePanel extends VerticalLayout implements View {
 										return null;
 										
 									}
+
+									private boolean validDateConfiguration(DateConfigurations dc) {
+										if(dc == null ){
+											Notification.show("No se puede generar el Excel si no se han definido las configuraciones del mes");
+											return false;
+										}
+										
+										if(dc.getAdvance() == null ){
+											Notification.show("No se puede generar el Excel si no se ha definido la fecha de fin del adelanto del mes");
+											return false;
+										}
+										
+										if(dc.getAssistance() == null ){
+											Notification.show("No se puede generar el Excel si no se ha definido la fecha de fin de asistencia del mes");
+											return false;
+										}
+										
+										if(dc.getBeginDeal() == null ){
+											Notification.show("No se puede generar el Excel si no se ha definido la fecha de inicio de trato del mes");
+											return false;
+										}
+										
+										if(dc.getFinishDeal() == null ){
+											Notification.show("No se puede generar el Excel si no se ha definido la fecha de fin de trato del mes");
+											return false;
+										}
+										
+										if(dc.getUf() == null ){
+											Notification.show("No se puede generar el Excel si no se han definido la uf del mes");
+											return false;
+										}
+										
+										return true;
+									}
+									
+									public String getFilename() {
+										return  cs.getCode()+ "_Asistencia_"+getAttendanceDate().toString("MMMM_yyyy").toUpperCase()+".xlsx";
+									};
 								};
-								StreamResource resource = new StreamResource(myResource, "pruebaAsistencia.xlsx"); //TODO mes_año_codobra_ant/liq.txt
-								 FileDownloader fileDownloader = new FileDownloader(resource);
+//								OnDemandStreamResource resource = new OnDemandFileDownloader.OnDemandStreamResource(myResource){
+//									public String getFilename() {
+//										return  cs.getCode()+ "_Asistencia_"+getAttendanceDate().toString("MMMM_yyyy")+".xlsx";
+//									};
+//								}; //TODO mes_año_codobra_ant/liq.txt
+								OnDemandFileDownloader fileDownloader = new OnDemandFileDownloader(myResource);
 							     fileDownloader.extend(btnExportAttendance);
 							}});
 					}
@@ -1875,7 +2139,8 @@ public class AttendancePanel extends VerticalLayout implements View {
 	private void generateSoftlandFile(final Button btnExportSoftland) {
 		
 		//recupera la lista de sueldos
-		StreamResource.StreamSource myResource = new StreamResource.StreamSource() {
+//		StreamResource.StreamSource myResource = new StreamResource.StreamSource() {
+		OnDemandStreamResource myResource = new OnDemandFileDownloader.OnDemandStreamResource() {
 
 			public InputStream getStream() {
 				//recupera la lista de sueldos
@@ -1897,17 +2162,22 @@ public class AttendancePanel extends VerticalLayout implements View {
 //				btnExportSoftland.setEnabled(true);
 				return stream;
 			}
+
+			@Override
+			public String getFilename() {
+				return getAttendanceDate().toString("YYYY_M_").toUpperCase()+cs.getCode()+"_LIQ.txt";
+			}
 		};
-		StreamResource resource = new StreamResource(myResource, "pruebaSalary.txt"); //TODO mes_año_codobra_ant/liq.txt
+//		StreamResource resource = new StreamResource(myResource, getAttendanceDate().toString("YYYY_M_")+cs.getCode()+"_LIQ.txt"); 
 		
-        FileDownloader fileDownloader = new FileDownloader(resource);
+		OnDemandFileDownloader fileDownloader = new OnDemandFileDownloader(myResource);
         fileDownloader.extend(btnExportSoftland);
 	}
 	
 	private void generateSupleSoftlandFile(final Button btnExportSoftland) {
 		
 		
-		StreamResource.StreamSource myResource = new StreamResource.StreamSource() {
+		OnDemandStreamResource myResource = new OnDemandFileDownloader.OnDemandStreamResource() {
 
 			public InputStream getStream() {
 				//recupera la lista de sueldos
@@ -1929,10 +2199,15 @@ public class AttendancePanel extends VerticalLayout implements View {
 //				btnExportSoftland.setEnabled(true);
 				return stream;
 			}
+
+			@Override
+			public String getFilename() {
+				return getAttendanceDate().toString("YYYY_M_").toUpperCase()+cs.getCode()+"_ANT.txt";
+			}
 		};
-		StreamResource resource = new StreamResource(myResource, "pruebaSuple.txt"); //mes_año_codobra_ant/liq.txt
+//		StreamResource resource = new StreamResource(myResource, getAttendanceDate().toString("YYYY_M_")+cs.getCode()+"_ANT.txt"); 
 		
-        FileDownloader fileDownloader = new FileDownloader(resource);
+		OnDemandFileDownloader fileDownloader = new OnDemandFileDownloader(myResource);
         fileDownloader.extend(btnExportSoftland);
         
 	}
@@ -1988,6 +2263,8 @@ public class AttendancePanel extends VerticalLayout implements View {
 		
 		createTableFooter(supleTable);
 		
+		disabledHours(attendanceGrid);
+		
 		//recupera las columnas de la tabla de sueldos seleccionadas del usuario
 		User user = SecurityHelper.getCredentials();
 		//si no tiene ninguna columna seleccionada, le agrega las por defecto
@@ -2024,19 +2301,19 @@ public class AttendancePanel extends VerticalLayout implements View {
 			if(advancepayment ==  null )
 				advancepayment  = new AdvancePaymentConfigurations();
 
-			List<Overtime> overtime = service.getOvertimeByConstruction(cs,dt);
+			List<Overtime> overtime = constructionSiteService.getOvertimeByConstruction(cs,dt);
 			overtimeContainer.addAll(overtime);
 			overtimeContainer.sort(new Object[]{"laborerConstructionSite.activeContract.jobCode"}, new boolean[]{true});
 
-			List<Attendance> attendance = service.getAttendanceByConstruction(cs,dt);
+			List<Attendance> attendance = constructionSiteService.getAttendanceByConstruction(cs,dt);
 			attendanceContainer.addAll(attendance);
 			attendanceContainer.sort(new Object[]{"laborerConstructionSite.activeContract.jobCode"}, new boolean[]{true});
 
-			List<AbsenceVO> absences = service.getAbsencesByConstructionAndMonth(cs,dt);
+			List<AbsenceVO> absences = constructionSiteService.getAbsencesByConstructionAndMonth(cs,dt);
 			absenceContainer.addAll(absences);
 			absenceContainer.sort(new String[]{"laborerConstructionsite.activeContract.jobCode"},new boolean[]{ true });
 
-			List<Salary> salaries = service.getSalariesByConstructionAndMonth(cs,dt);
+			List<Salary> salaries = constructionSiteService.getSalariesByConstructionAndMonth(cs,dt);
 			salaryContainer.addAll(salaries);
 			salaryContainer.sort(new String[]{"laborerConstructionsite.activeContract.jobCode"},new boolean[]{ true });
 
@@ -2054,7 +2331,7 @@ public class AttendancePanel extends VerticalLayout implements View {
 	private void reloadMonthAttendanceData(DateTime dt){
 		//obteniendo fechas de confirmación
 		logger.debug("obteniendo fecha de confirmación");
-		confirmations = service.getConfirmationsByConstructionsiteAndMonth(cs,dt);
+		confirmations = constructionSiteService.getConfirmationsByConstructionsiteAndMonth(cs,dt);
 		logger.debug("end");
 	}
 
@@ -2103,5 +2380,25 @@ public class AttendancePanel extends VerticalLayout implements View {
 		}
 
 	}
-
+	
+	//Permite bloquear el ingreso de horas extras en caso de que un obrero registre vacaciones, accidente y/o licencia.
+	private void disabledHours(Grid grid){
+		for(Object itemId : grid.getContainerDataSource().getItemIds()){
+			BeanItem attendanceItem = (BeanItem) grid.getContainerDataSource().getItem(itemId);
+			BeanItem<Overtime> overtimeItem = overtimeContainer.getItem(itemId);				
+	
+			for(Object propertyId : grid.getContainerDataSource().getContainerPropertyIds()){
+				if( attendanceItem.getBean() instanceof Attendance ){
+					if( attendanceItem.getItemProperty(propertyId).getValue() instanceof AttendanceMark &&
+						( (AttendanceMark)attendanceItem.getItemProperty(propertyId).getValue()  == AttendanceMark.VACATION ||
+						  (AttendanceMark)attendanceItem.getItemProperty(propertyId).getValue()  == AttendanceMark.ACCIDENT ||
+						  (AttendanceMark)attendanceItem.getItemProperty(propertyId).getValue()  == AttendanceMark.SICK
+						)){
+						
+						overtimeItem.getItemProperty(propertyId).setReadOnly(true);
+					}
+				}
+			}
+		}
+	}
 }

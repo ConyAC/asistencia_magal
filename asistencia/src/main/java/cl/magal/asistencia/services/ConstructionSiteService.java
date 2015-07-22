@@ -22,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import cl.magal.asistencia.entities.Accident;
 import cl.magal.asistencia.entities.AdvancePaymentConfigurations;
+import cl.magal.asistencia.entities.AfpAndInsuranceConfigurations;
 import cl.magal.asistencia.entities.Attendance;
 import cl.magal.asistencia.entities.Confirmations;
 import cl.magal.asistencia.entities.ConstructionCompany;
@@ -765,6 +766,8 @@ public class ConstructionSiteService {
 		if(taxTable == null )
 			throw new RuntimeException("Aún no se definen la tabla de impuestos. Ésta es necesaria para cálcular el sueldo.");
 		
+		int holydays = countHolidaysMonth(date);
+		
 		//busca la asistencia del mes 
 		Map<Integer,Attendance> attendance = getAttendanceMapByConstructionAndMonth(cs, date);
 		//busca la asistencia del mes anterior 
@@ -775,9 +778,11 @@ public class ConstructionSiteService {
 //		Map<Integer,ExtraParams> extraParams = getExtraParamsMapByConstructionAndMonth(cs,date);
 		
 		Map<Integer,Integer> loans = getLoanMapByConstructionAndMonth(cs, date);
+		
+		AfpAndInsuranceConfigurations afpConfig = configurationService.findAfpAndInsuranceConfiguration();
 
 		//crea el objeto que calculará los sueldos 
-		SalaryCalculator sc =  new SalaryCalculator(assistanceClose,wageConfiguration, dateConfiguration, famillyTable, taxTable);
+		SalaryCalculator sc =  new SalaryCalculator(assistanceClose,wageConfiguration, dateConfiguration, famillyTable, taxTable,holydays,afpConfig);
 		//acumulador de trabajadores sin codigo de suple
 		List<LaborerConstructionsite> withoutSupleCode = new ArrayList<LaborerConstructionsite>(lcs.size()); 
 		//para cada trabajador activo en el mes calcula su asistencia
@@ -861,6 +866,10 @@ public class ConstructionSiteService {
 		
 		List<Salary> salaries = new ArrayList<Salary>(lcs.size());
 		
+		int holydays = countHolidaysMonth(date);
+		
+		AfpAndInsuranceConfigurations afpConfig = configurationService.findAfpAndInsuranceConfiguration();
+		
 		Salary tmp = new Salary(); 
 		//verifica que exista una asistencia para cada elemento, si no existe la crea
 		for(LaborerConstructionsite lc : lcs ){
@@ -897,8 +906,10 @@ public class ConstructionSiteService {
 			suc.setInformation(attendance.get(lc.getJobCode()), lc.getSupleCode());
 			salary.setSupleCalculator(suc);
 			
+			
+			
 			//crea el objeto que calculará los sueldos 
-			SalaryCalculator sc =  new SalaryCalculator(assistanceClose,wageConfiguration, dateConfiguration, famillyTable, taxTable);
+			SalaryCalculator sc =  new SalaryCalculator(assistanceClose,wageConfiguration, dateConfiguration, famillyTable, taxTable,holydays,afpConfig);
 			sc.setInformation( salary.getSuple(), 
 							   toolFees.get(lc.getJobCode()), 
 							   loanFees.get(lc.getJobCode()), 
@@ -931,9 +942,9 @@ public class ConstructionSiteService {
 			DateConfigurations dateConfigurations,
 			List<FamilyAllowanceConfigurations> famillyTable,
 			List<TaxationConfigurations> taxTable,
-			int loans) {
+			int loans, int holidays,AfpAndInsuranceConfigurations afpConfig) {
 
-		SalaryCalculator sc = new SalaryCalculator(closingDateLastMonth, suple, tool, loan, attendance, lastMonthAttendance, overtime,wageConfiguration, dateConfigurations, famillyTable, taxTable, loans);
+		SalaryCalculator sc = new SalaryCalculator(closingDateLastMonth, suple, tool, loan, attendance, lastMonthAttendance, overtime,wageConfiguration, dateConfigurations, famillyTable, taxTable, loans,holidays,afpConfig);
 //		return (int) sc.calculateSalary();
 		if(true)
 			throw new RuntimeException("No implementado");
@@ -1041,6 +1052,15 @@ public class ConstructionSiteService {
 	 */
 	public void save(List<Speciality> specialities) {
 		specialityRepo.save(specialities);
+	}
+
+	/**
+	 * Cuenta la cantidad de feriados del mes
+	 * @param attendanceDate
+	 * @return
+	 */
+	public int countHolidaysMonth(DateTime attendanceDate) {
+		return holidayRepo.countByMonth(attendanceDate.toDate());
 	}
 	
 }
