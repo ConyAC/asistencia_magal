@@ -136,7 +136,7 @@ public class Laborer implements Serializable {
     @Column(name="town")
     private String town;
     
-    @Column(name="town")
+    @Column(name="dwellers")
     private String dwellers;
     
     @NotNull(message="La comuna es necesaria")

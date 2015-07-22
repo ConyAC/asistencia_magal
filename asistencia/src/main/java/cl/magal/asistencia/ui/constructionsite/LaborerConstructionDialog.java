@@ -40,6 +40,7 @@ import cl.magal.asistencia.entities.enums.LicenseType;
 import cl.magal.asistencia.entities.enums.LoanToolStatus;
 import cl.magal.asistencia.entities.enums.MaritalStatus;
 import cl.magal.asistencia.entities.enums.Permission;
+import cl.magal.asistencia.services.ConfigurationService;
 import cl.magal.asistencia.services.LaborerService;
 import cl.magal.asistencia.services.UserService;
 import cl.magal.asistencia.ui.AbstractWindowEditor;
@@ -108,6 +109,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 	transient LaborerService service;
 	transient private VelocityEngine velocityEngine;
 	LaborerConstructionsite laborerConstructionSite;
+	ConfigurationService configurationService;
 
 	private Validator validator;
 
@@ -128,6 +130,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 
 		this.velocityEngine = (VelocityEngine) ((MagalUI)UI.getCurrent()).getSpringBean(Constants.VELOCITY_ENGINE_BEAN);
 		this.service = (LaborerService) ((MagalUI)UI.getCurrent()).getSpringBean(Constants.LABORER_SERVICE_BEAN);
+		this.configurationService = (ConfigurationService) ((MagalUI)UI.getCurrent()).getSpringBean(Constants.CONFIGURATION_SERVICE_BEAN);
 		this.validator = (Validator) ((MagalUI)UI.getCurrent()).getSpringBean(Constants.BEANVALIDATOR_BEAN);
 		if(service == null )
 			throw new RuntimeException("Error al crear el dialgo, el servicio de trabajadores no puede ser nulo.");
@@ -635,6 +638,8 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 
 						final Map<String, Object> input = new HashMap<String, Object>();
 						input.put("laborerConstructions", new LaborerConstructionsite[] {(LaborerConstructionsite)getItem().getBean()});
+						String jornalBase = Utils.getDecimalFormatSinDecimal().format(configurationService.findWageConfigurations().getMinimumWage() / 30);
+						input.put("jornalBase", jornalBase);
 						VelocityHelper.addTools(input);
 
 						final StringBuilder sb = new StringBuilder();
