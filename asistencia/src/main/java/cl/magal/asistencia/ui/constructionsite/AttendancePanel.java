@@ -65,7 +65,6 @@ import cl.magal.asistencia.util.VelocityHelper;
 import com.vaadin.data.Container;
 import com.vaadin.data.Container.Filterable;
 import com.vaadin.data.Container.SimpleFilterable;
-import com.vaadin.data.Item;
 import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeNotifier;
@@ -312,6 +311,7 @@ public class AttendancePanel extends VerticalLayout implements View {
 
 		//obtiene los parametros de url
 		else if( event != null && event.getParameters() != null && cs == null ){
+			logger.debug("recuperando parametros de la url");
 			// split at "/", add each part as a label
 			String[] msgs = event.getParameters().split("/");
 			//si no trae parametros, entonces avisa y deshabilita la interfaz
@@ -555,6 +555,9 @@ public class AttendancePanel extends VerticalLayout implements View {
 				Label label = new Label();
 				if(grid.getColumn(pid) != null )
 					grid.getColumn(pid).setSortable(false);//.setWidth(50);
+				
+				//TODO si hay que cambiar la fecha de sobretiempo, aqui se deberia discriminar
+				int maxDay = getPastMonthClosingDate().getDayOfMonth();
 				//calculo de la semana
 				if(((String) pid).startsWith("dmp") || ((String) pid).startsWith("dma")  ){
 					//calcula el numero del mes
@@ -566,7 +569,8 @@ public class AttendancePanel extends VerticalLayout implements View {
 						if ( ((String) pid).startsWith("dmp") )
 							dt2 = dt2.minusMonths(1);
 						dt2 = dt2.withDayOfMonth(monthDay);
-					}catch(Exception e){ //si no es un mes válida lo ocula 
+					}catch(Exception e){ //si no es un día válido del mes válida lo ocula
+						dt2 = null;
 						if(grid.getColumn(pid) != null)
 							grid.removeColumn(pid);
 					}
@@ -771,12 +775,12 @@ public class AttendancePanel extends VerticalLayout implements View {
 				setComponentAlignment(hl, Alignment.TOP_RIGHT);
 				
 				supleTable.addGeneratedColumn("supleSection", new Table.ColumnGenerator() {
-					
+
 					@Override
 					public Object generateCell(Table source, Object itemId, Object columnId) {
 						HorizontalLayout hl = new HorizontalLayout();
 						hl.setSizeFull();
-						
+
 						final BeanItem<Salary> beanItem = salaryContainer.getItem(itemId);
 						// recuperar posibles codigos de suple
 						final ComboBox cb = new ComboBox();
@@ -785,11 +789,11 @@ public class AttendancePanel extends VerticalLayout implements View {
 						}
 						cb.setPropertyDataSource(beanItem.getItemProperty("laborerConstructionSite.supleCode"));
 						cb.setReadOnly(true);
-						
-						hl.addComponent(cb);
-						
-						hl.addComponent(new Button(null, new Button.ClickListener() {
-							
+						hl.addComponent(cb);		
+
+						final Button btnSuple = new Button(FontAwesome.ARROW_CIRCLE_O_RIGHT);
+						btnSuple.addClickListener(new Button.ClickListener() {
+
 							@Override
 							public void buttonClick(ClickEvent event) {
 								logger.debug(" suple value calculated ");
@@ -806,14 +810,57 @@ public class AttendancePanel extends VerticalLayout implements View {
 								laborerService.save(beanItem.getBean().getLaborerConstructionSite());
 								//guarda el salario
 								constructionSiteService.save(beanItem.getBean());
-							}
-						}){
-							{
-								setIcon(FontAwesome.ARROW_CIRCLE_O_RIGHT);
-								setEnabled(supleTable.isEditable());
+								
+								btnSuple.setVisible(false);
+							}							
+						});
+						btnSuple.setVisible(!(Boolean) beanItem.getItemProperty("calculatedSuple").getValue());
+						
+						((ValueChangeNotifier)beanItem.getItemProperty("suple")).addValueChangeListener(new Property.ValueChangeListener() {
+							
+							@Override
+							public void valueChange(ValueChangeEvent event) {
+								//si el valor es distinto al suple que le corresponde, entonces lo marca como no calculado
+								// y muestra el botón para volverlo al por defecto
+								
+								//primero intenta transformarlo
+//								Double value = (Double) event.getProperty().getValue();	
+//								//luego busca el valor que le corresponderia
+//								Integer supleCode = (Integer) beanItem.getItemProperty("laborerConstructionSite.supleCode").getValue();
+//								if(supleCode == null ) // si aún no se define el codigo de suple, se retorna
+//									return;
+//								Double supleAmount = null;
+//								for(AdvancePaymentItem item : advancepayment.getAdvancePaymentTable() ){
+//									if(item.getSupleCode() == supleCode );
+//										supleAmount = item.getSupleTotalAmount(); 
+//								}
+//								
+//								//si no son iguales los valores
+//								boolean sameValues = supleAmount != null && value != null && supleAmount.doubleValue() == value.doubleValue();
+								boolean sameValues = false;
+										
+								beanItem.getItemProperty("calculatedSuple").setValue(sameValues);
+								
+								btnSuple.setVisible(!sameValues);
+								//independiente de lo que pase, guarda el nuevo suple
+								constructionSiteService.save(beanItem.getBean());
+								
+								createTableFooter(supleTable);
 							}
 						});
-						
+
+//						if(!ids.isEmpty()){
+//							Iterator it = ids.keySet().iterator();
+//							while(it.hasNext()){
+//								Long key = (Long) it.next();
+//								if( ids.get(key) && 
+//										key == beanItem.getBean().getLaborerConstructionSite().getLaborer().getId() && 
+//										!beanItem.getItemProperty("calculatedSuple").equals(false))
+//									btnSuple.setVisible(false);
+//							}
+//						}						
+						hl.addComponent(btnSuple);
+
 						return hl;
 					}
 				});
@@ -833,16 +880,6 @@ public class AttendancePanel extends VerticalLayout implements View {
 						tf.setNullRepresentation("");
 						tf.setImmediate(true);
 						if(propertyId.equals("suple")){
-							tf.addBlurListener(new FieldEvents.BlurListener() {
-								
-								@Override
-								public void blur(BlurEvent event) {
-									BeanItem<Salary> beanItem = salaryContainer.getItem(itemId);
-									beanItem.getItemProperty("calculatedSuple").setValue(false);
-									//guarda el salario
-									constructionSiteService.save(beanItem.getBean());
-								}
-							});
 							tf.addValueChangeListener(new Property.ValueChangeListener() {
 								
 								@Override
@@ -1156,6 +1193,8 @@ public class AttendancePanel extends VerticalLayout implements View {
 			i = 0;
 			for(Object propertyId : table.getContainerPropertyIds()){
 				if(propertyId.equals("laborerConstructionSite.activeContract.jobCode")||
+						propertyId.equals("forceSalary")||
+						propertyId.equals("forceSuple")||
 				propertyId.equals("laborerConstructionSite.laborer.fullname"))
 					continue;
 				if( table.getContainerProperty(itemId, propertyId).getValue() instanceof Double )
@@ -1168,6 +1207,8 @@ public class AttendancePanel extends VerticalLayout implements View {
 		i = 0;
 		for(Object propertyId : table.getContainerPropertyIds()){
 			if(propertyId.equals("laborerConstructionSite.activeContract.jobCode")||
+					propertyId.equals("forceSalary")||
+					propertyId.equals("forceSuple")||
 					propertyId.equals("laborerConstructionSite.laborer.fullname"))
 						continue;
 			table.setColumnFooter(propertyId, Utils.formatInteger( counts[i] ) );
@@ -1363,16 +1404,23 @@ public class AttendancePanel extends VerticalLayout implements View {
 				BeanItem<Attendance> item = (BeanItem<Attendance>) commitEvent.getFieldBinder().getItemDataSource();
 				Attendance attendance = item.getBean(); 
 				
-				Item salaryItem = salaryContainer.getItem(attendance.getLaborerConstructionSite().getId());
+				BeanItem<Salary> salaryItem = salaryContainer.getItem(attendance.getLaborerConstructionSite().getId());
 				if(salaryItem == null )
 					return;
 				Property<Attendance> prop = salaryItem.getItemProperty("attendance");
 				prop.setValue(attendance);
 				
+				//obliga al suple a ser calculado
+				salaryItem.getItemProperty("calculatedSuple").setValue(true);
+				
 				salaryItem.getItemProperty("forceSalary").getValue();
 				salaryItem.getItemProperty("forceSuple").getValue();
 				
+				//guarda el valor
+				constructionSiteService.save(salaryItem.getBean());
+				
 				disabledHours(attendanceGrid);
+				
 			}
 		});
 		attendanceGrid.setEditorFieldGroup(bfg);
@@ -1713,14 +1761,14 @@ public class AttendancePanel extends VerticalLayout implements View {
 																					public void buttonClick(ClickEvent event) {
 																						AdvancePaymentItem advancePaymentItem = new AdvancePaymentItem();	
 																						AdvancePaymentConfigurations apItem = confService.findAdvancePaymentConfigurationsByCS(cs);
-																						boolean check = false;																				
+																						boolean check = false;	
 																						try{
 																							advancePaymentItem.setSupleCode(Integer.valueOf(supleCode.getValue()));																							
 																							for(AdvancePaymentItem i : apItem.getAdvancePaymentTable()){
 																								if(i.getSupleCode() == advancePaymentItem.getSupleCode())
 																									check = true;
-																							}		
-																							
+																							}
+																									
 																							if(!check){
 																								advancepayment.setConstructionSite(cs);
 																								advancepayment.addAdvancePaymentItem(advancePaymentItem);
@@ -2227,7 +2275,6 @@ public class AttendancePanel extends VerticalLayout implements View {
 		//se preocupa de deshabilitar o habilitar los botones de confirmación
 		enableOrDisableButtons();
 	}
-
 
 	private void populateAttendanceGrid(){
 

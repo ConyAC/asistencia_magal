@@ -48,6 +48,12 @@ public class ConstructionCompany implements Serializable {
 	@NotEmpty(message="El nombre es necesario")
 	@Column(name = "name", nullable=false)
 	private String name;
+	
+	@Basic(optional = false)
+	@NotNull(message="El nombre del representante es necesario")
+	@NotEmpty(message="El nombre del representante es necesario")
+	@Column(name = "chief_executive", nullable=false)
+	private String chiefExecutive;
 	 
 	@JoinTable(name="constructioncompany_constructionsite",
 		    joinColumns = { 
@@ -96,6 +102,14 @@ public class ConstructionCompany implements Serializable {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+	
+	public String getChiefExecutive() {
+		return chiefExecutive;
+	}
+
+	public void setChiefExecutive(String chiefExecutive) {
+		this.chiefExecutive = chiefExecutive;
 	}
 
 	@Override

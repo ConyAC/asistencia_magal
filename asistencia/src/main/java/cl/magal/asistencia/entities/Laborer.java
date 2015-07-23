@@ -136,6 +136,9 @@ public class Laborer implements Serializable {
     @Column(name="town")
     private String town;
     
+    @Column(name="dwellers")
+    private String dwellers = "";
+    
     @NotNull(message="La comuna es necesaria")
     @NotEmpty(message="La comuna es necesaria")
     @Column(name="commune", nullable=false)
@@ -427,6 +430,14 @@ public class Laborer implements Serializable {
 
 	public void setValidityPensionReview(Date validityPensionReview) {
 		this.validityPensionReview = validityPensionReview;
+	}
+	
+	public String getDwellers() {
+		return dwellers;
+	}
+
+	public void setDwellers(String dwellers) {
+		this.dwellers = dwellers;
 	}
 
 	@Override

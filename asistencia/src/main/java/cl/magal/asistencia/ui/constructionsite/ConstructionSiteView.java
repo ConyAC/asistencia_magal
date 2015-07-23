@@ -139,6 +139,7 @@ public class ConstructionSiteView extends BaseView  implements View {
 					reloadData(id);
 				}else if( msgs.length == 2 ){
 					String function = msgs[1];
+					reloadData(id);
 					if(function.equals("asistencia")){
 						switchPanels(event);
 					}else{

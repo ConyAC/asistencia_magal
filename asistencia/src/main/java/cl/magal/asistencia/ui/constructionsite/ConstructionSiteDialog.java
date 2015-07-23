@@ -17,6 +17,7 @@ import cl.magal.asistencia.entities.enums.Status;
 import cl.magal.asistencia.services.ConstructionSiteService;
 import cl.magal.asistencia.services.UserService;
 import cl.magal.asistencia.ui.AbstractWindowEditor;
+import cl.magal.asistencia.util.Constants;
 import cl.magal.asistencia.util.SecurityHelper;
 import cl.magal.asistencia.util.Utils;
 
@@ -108,7 +109,7 @@ public class ConstructionSiteDialog extends AbstractWindowEditor {
 		hl.setComponentAlignment(fl, Alignment.MIDDLE_CENTER);
 		fl.setSpacing(true);
 
-		for (Object propertyId : new String[]{"name","costCenter" ,"code", "address","status"}) {
+		for (Object propertyId : new String[]{"name","costCenter" ,"code", "address","commune","status"}) {
 			if(propertyId.equals("constructionsiteId") || propertyId.equals("deleted"))
 				;
 			else if(propertyId.equals("status")){
@@ -120,7 +121,16 @@ public class ConstructionSiteDialog extends AbstractWindowEditor {
 				fl.addComponent(statusField);
 				bind(statusField, "status");    
 				fl.setComponentAlignment(statusField, Alignment.MIDDLE_LEFT);
-			}else{        		
+			}else if(propertyId.equals("commune")){
+				ComboBox statusField = new ComboBox("Comuna");
+				statusField.setNullSelectionAllowed(false);
+				for(String ms : Constants.COMUNAS){
+					statusField.addItem(ms);
+				}
+				fl.addComponent(statusField);
+				bind(statusField, "commune");    
+				fl.setComponentAlignment(statusField, Alignment.MIDDLE_LEFT);
+			}else {        		
 				String t = tradProperty(propertyId);
 				Field field = buildAndBind(t+" : ", propertyId);
 				field.setWidth("100%");
