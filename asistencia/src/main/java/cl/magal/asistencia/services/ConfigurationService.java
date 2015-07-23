@@ -158,7 +158,7 @@ public class ConfigurationService {
 		logger.debug("obteniendo tabla de suple");
 		List<AdvancePaymentConfigurations> configurations = (List<AdvancePaymentConfigurations>)advancePaymentRepo.findAdvancePaymentConfigurationsByCS(cs);
 		if(configurations.isEmpty())
-			return null;
+			return new AdvancePaymentConfigurations();
 		return configurations.get(0);
 	}
 
