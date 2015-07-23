@@ -299,7 +299,7 @@ public class LaborerBaseInformation extends VerticalLayout {
 		else if(propertyId.equals("reward"))
 			return "Premio";
 		else if(propertyId.equals("dwellers"))
-			return "Ciudad";
+			return "Población";
 		else if(propertyId.equals("town"))
 			return "Ciudad";
 		else if(propertyId.equals("commune"))
