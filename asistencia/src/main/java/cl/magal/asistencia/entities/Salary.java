@@ -86,6 +86,9 @@ public class Salary implements Serializable {
 	transient SalaryCalculator salaryCalculator;
 	transient SupleCalculator supleCalculator;
 	
+	public SalaryCalculator getSalaryCalculator() {
+		return salaryCalculator;
+	}
 	public void setSalaryCalculator(SalaryCalculator calculator) {
 		this.salaryCalculator = calculator;
 	}
@@ -152,11 +155,12 @@ public class Salary implements Serializable {
 		this.jornalPromedio = jornalPromedio;
 	}
 	public double getSuple() {
-		if(suple == null && isCalculatedSuple() ){
+		boolean calculated = isCalculatedSuple();
+		if(suple == null && calculated ){
 			if(supleCalculator == null )
 				throw new RuntimeException("El calculador de anticipos no puede ser nulo.");
 			suple = supleCalculator.calculateSuple(getLaborerConstructionSite().getSupleCode());
-		}else if( suple == null && !isCalculatedSuple() )
+		}else if( suple == null && !calculated )
 			suple = 0d;
 		return suple;
 	}
@@ -196,7 +200,9 @@ public class Salary implements Serializable {
 	}
 	
 	public boolean getForceSuple(){
-		suple = null;
+		//lo resetea sólo si es calculado
+		if(isCalculatedSuple())
+			suple = null;
 		supleCalculator.resetCal();
 		return suple == null;
 	}
@@ -327,7 +333,7 @@ public class Salary implements Serializable {
 	public List<AttendanceMark> getAjusteMesAnterior(){
 		return salaryCalculator.getAjusteMesAnterior();
 	}
-	
+		
 	@Override
 	public int hashCode() {
 		final int prime = 31;

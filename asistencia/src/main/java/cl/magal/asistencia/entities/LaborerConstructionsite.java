@@ -121,6 +121,9 @@ public class LaborerConstructionsite implements Serializable {
     
     @OneToMany(mappedBy="laborerConstructionSite",fetch=FetchType.LAZY,cascade = { CascadeType.PERSIST, CascadeType.MERGE },orphanRemoval=true )
     List<Loan> loan = new ArrayList<Loan>();
+    
+    @OneToMany(mappedBy="laborerConstructionSite",fetch=FetchType.LAZY,cascade = { CascadeType.PERSIST, CascadeType.MERGE },orphanRemoval=true )
+    List<WithdrawalSettlement> withdrawalSettlements = new ArrayList<WithdrawalSettlement>();
    
     @ManyToMany(mappedBy="laborerConstructionsites",cascade = { CascadeType.PERSIST, CascadeType.MERGE })
     List<Team> teams = new ArrayList<Team>();
@@ -129,6 +132,9 @@ public class LaborerConstructionsite implements Serializable {
      * Define la etapa para la cual está contratado el trabajador actual
      */
     transient private String step;
+    transient private double failureDiscount;
+    transient private double othersDiscount;
+    
     /**
      * define el contrato activo o el primero
      */
@@ -137,9 +143,20 @@ public class LaborerConstructionsite implements Serializable {
     
     @Column(name = "suple_code")
   	Integer supleCode = 1;
-	
     
-    @PreUpdate
+    public double getFailureDiscount() {
+		return failureDiscount;
+	}
+	public void setFailureDiscount(double failureDiscount) {
+		this.failureDiscount = failureDiscount;
+	}
+	public double getOthersDiscount() {
+		return othersDiscount;
+	}
+	public void setOthersDiscount(double othersDiscount) {
+		this.othersDiscount = othersDiscount;
+	}
+	@PreUpdate
     public void preUpdate(){
     	defineRequired();
     }
@@ -402,6 +419,21 @@ public class LaborerConstructionsite implements Serializable {
 		if (!getLoan().contains(loan)) {
         	getLoan().add(loan);
         	loan.setLaborerConstructionSite(this);
+        }
+	}
+	
+	public List<WithdrawalSettlement> getWithdrawalSettlements() {
+		return withdrawalSettlements;
+	}
+	public void setWithdrawalSettlements(
+			List<WithdrawalSettlement> withdrawalSettlements) {
+		this.withdrawalSettlements = withdrawalSettlements;
+	}
+	
+	public void addWithdrawalSettlement(WithdrawalSettlement withdrawalSettlement) {
+		if (!getWithdrawalSettlements().contains(withdrawalSettlement)) {
+			getWithdrawalSettlements().add(withdrawalSettlement);
+			withdrawalSettlement.setLaborerConstructionSite(this);
         }
 	}
 	

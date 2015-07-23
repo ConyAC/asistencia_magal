@@ -399,6 +399,8 @@ public class AddLaborerContractDialog extends AbstractWindowEditor implements Ne
 		// imprime el contrato, el pacto horas extras y el acuse de recivo para ser impresos
 		final Map<String, Object> input = new HashMap<String, Object>();
 		input.put("laborerConstructions", new LaborerConstructionsite[] {(LaborerConstructionsite)getItem().getBean()});
+		String jornalBase = Utils.getDecimalFormatSinDecimal().format(configurationService.findWageConfigurations().getMinimumWage() / 30);
+		input.put("jornalBase", jornalBase);
 		VelocityHelper.addTools(input);
 		
 		final StringBuilder sb = new StringBuilder();

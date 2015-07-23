@@ -35,11 +35,13 @@ import cl.magal.asistencia.entities.Speciality;
 import cl.magal.asistencia.entities.Tool;
 import cl.magal.asistencia.entities.User;
 import cl.magal.asistencia.entities.Vacation;
+import cl.magal.asistencia.entities.WithdrawalSettlement;
 import cl.magal.asistencia.entities.enums.AccidentLevel;
 import cl.magal.asistencia.entities.enums.LicenseType;
 import cl.magal.asistencia.entities.enums.LoanToolStatus;
 import cl.magal.asistencia.entities.enums.MaritalStatus;
 import cl.magal.asistencia.entities.enums.Permission;
+import cl.magal.asistencia.services.ConfigurationService;
 import cl.magal.asistencia.services.LaborerService;
 import cl.magal.asistencia.services.UserService;
 import cl.magal.asistencia.ui.AbstractWindowEditor;
@@ -108,6 +110,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 	transient LaborerService service;
 	transient private VelocityEngine velocityEngine;
 	LaborerConstructionsite laborerConstructionSite;
+	ConfigurationService configurationService;
 
 	private Validator validator;
 
@@ -128,6 +131,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 
 		this.velocityEngine = (VelocityEngine) ((MagalUI)UI.getCurrent()).getSpringBean(Constants.VELOCITY_ENGINE_BEAN);
 		this.service = (LaborerService) ((MagalUI)UI.getCurrent()).getSpringBean(Constants.LABORER_SERVICE_BEAN);
+		this.configurationService = (ConfigurationService) ((MagalUI)UI.getCurrent()).getSpringBean(Constants.CONFIGURATION_SERVICE_BEAN);
 		this.validator = (Validator) ((MagalUI)UI.getCurrent()).getSpringBean(Constants.BEANVALIDATOR_BEAN);
 		if(service == null )
 			throw new RuntimeException("Error al crear el dialgo, el servicio de trabajadores no puede ser nulo.");
@@ -161,8 +165,10 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 			tab.addTab(drawInformation(),"Información");
 		//tab de vacaciones
 		tab.addTab(drawVacations(),"Vacaciones");
-		//tab de perstamos y herramientas
+		//tab de prestamos y herramientas
 		tab.addTab(drawPyH(),"Préstamos/Herramientas");
+		//tab de retiros de finiquito
+		tab.addTab(drawW(),"Retiro de finiquito");
 		//tab de accidentes y licencias
 		tab.addTab(drawAccidents(),"Accidentes");
 		//tab de accidentes y licencias
@@ -598,6 +604,98 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 
 		return vl;
 	}
+	
+	BeanItemContainer<WithdrawalSettlement> beanItemWithdrawalSettlement;
+	protected VerticalLayout drawW() {
+
+		VerticalLayout vl = new VerticalLayout();
+		vl.setSpacing(true);
+		vl.setMargin(true);
+		vl.setWidth("100%");
+
+		/********** Herramientas **********/
+		VerticalLayout vh = new VerticalLayout();
+		vh.setWidth("100%");
+
+		HorizontalLayout hl = new HorizontalLayout();
+		hl.setWidth("100%");
+		hl.setSpacing(true);		
+		vh.addComponent(hl);
+
+		beanItemWithdrawalSettlement = new BeanItemContainer<WithdrawalSettlement>(WithdrawalSettlement.class);
+		List<WithdrawalSettlement> tools = (List<WithdrawalSettlement>)getItem().getItemProperty("withdrawalSettlements").getValue();
+		beanItemWithdrawalSettlement.addAll(tools);
+
+		if(!readOnly){
+			Button btnAddH = new Button(null,FontAwesome.PLUS);
+			hl.addComponent(btnAddH);
+			hl.setComponentAlignment(btnAddH, Alignment.MIDDLE_RIGHT);
+
+			btnAddH.addClickListener(new Button.ClickListener() {
+
+				@Override
+				public void buttonClick(ClickEvent event) {
+
+					LaborerConstructionsite laborer = (LaborerConstructionsite) getItem().getBean();
+					if(laborer == null ) throw new RuntimeException("El trabajador no es válido.");
+					WithdrawalSettlement tool = new WithdrawalSettlement();
+					laborer.addWithdrawalSettlement(tool);
+					beanItemWithdrawalSettlement.addBean(tool);
+				}
+			});	
+		}
+
+		final Table tableTool = new Table("Retiros");
+		tableTool.setPageLength(3);
+		tableTool.setWidth("100%");
+		tableTool.setContainerDataSource(beanItemWithdrawalSettlement);
+		tableTool.setImmediate(true);
+		tableTool.setTableFieldFactory(new DefaultFieldFactory(){
+
+			public Field<?> createField(final Container container,
+					final Object itemId, Object propertyId, com.vaadin.ui.Component uiContext) {
+				Field<?> field = null; 
+				if( propertyId.equals("price") ){
+					field = new TextField();
+					((TextField)field).setNullRepresentation("");
+					((TextField)field).setImmediate(true);
+				}
+
+				return field;
+			}
+		});
+
+		tableTool.addGeneratedColumn("eliminar", new Table.ColumnGenerator() {
+
+			@Override
+			public Object generateCell(Table source, final Object itemId, Object columnId) {
+				return new Button(null,new Button.ClickListener() {
+
+					@Override
+					public void buttonClick(ClickEvent event) {
+						ConfirmDialog.show(UI.getCurrent(), "Confirmar Acción:", "¿Está seguro de eliminar el retiro seleccionado?",
+								"Eliminar", "Cancelar", new ConfirmDialog.Listener() {
+
+							public void onClose(ConfirmDialog dialog) {
+								if (dialog.isConfirmed()) {
+									beanItemWithdrawalSettlement.removeItem(itemId);
+								}
+							}
+						});
+					}
+				}){{setIcon(FontAwesome.TRASH_O);}};
+			}
+		});
+
+		tableTool.setVisibleColumns("price","eliminar");
+		tableTool.setColumnHeaders("Monto","Acciones");
+		tableTool.setEditable(true);				
+		vh.addComponent(tableTool);
+		vh.setComponentAlignment(hl, Alignment.TOP_RIGHT);
+
+		vl.addComponent(vh);
+		return vl;
+	}
 
 	protected Component drawCyF() {
 
@@ -635,6 +733,8 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 
 						final Map<String, Object> input = new HashMap<String, Object>();
 						input.put("laborerConstructions", new LaborerConstructionsite[] {(LaborerConstructionsite)getItem().getBean()});
+						String jornalBase = Utils.getDecimalFormatSinDecimal().format(configurationService.findWageConfigurations().getMinimumWage() / 30);
+						input.put("jornalBase", jornalBase);
 						VelocityHelper.addTools(input);
 
 						final StringBuilder sb = new StringBuilder();
@@ -738,13 +838,11 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 										final StringBuilder sb = new StringBuilder();
 										if(((String) og.getValue()).compareTo("Voluntaria") == 0){
 											sb.append( VelocityEngineUtils.mergeTemplateIntoString(velocityEngine, "templates/voluntary_resignation_letter.vm", "UTF-8", input) );
-										}else
-											if(((String) og.getValue()).compareTo("Término de Contrato") == 0){
-												sb.append( VelocityEngineUtils.mergeTemplateIntoString(velocityEngine, "templates/dismissal_letter_for_completion_of_work.vm", "UTF-8", input) );
-											}else
-												if(((String) og.getValue()).compareTo("Ausencia Reiterada") == 0){
-													sb.append( VelocityEngineUtils.mergeTemplateIntoString(velocityEngine, "templates/dismissal_letter_for_absence.vm", "UTF-8", input) );
-												}
+										}else if(((String) og.getValue()).compareTo("Término de Contrato") == 0){
+											sb.append( VelocityEngineUtils.mergeTemplateIntoString(velocityEngine, "templates/dismissal_letter_for_completion_of_work.vm", "UTF-8", input) );
+										}else if(((String) og.getValue()).compareTo("Ausencia Reiterada") == 0){
+											sb.append( VelocityEngineUtils.mergeTemplateIntoString(velocityEngine, "templates/dismissal_letter_for_absence.vm", "UTF-8", input) );
+										}
 
 										StreamResource.StreamSource source2 = new StreamResource.StreamSource() {
 
@@ -808,13 +906,96 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 					return;
 				}
 
-				LaborerConstructionsite lc = (LaborerConstructionsite)getItem().getBean();
-				//deja desactivo tanto el contrato como el laborer constructionsite
-				activeContract.setActive(false);
-				lc.setActive(false);
-				//setea un finiquito
-				activeContract.setSettlement(calculateSettlement(lc));
-				setContractGl(activeContract);
+				final Window w = new Window("Finiquito");
+				w.center();
+				w.setModal(true);
+				
+				w.setWidth("60%");
+				w.setHeight("60%");
+				
+				w.setContent(new VerticalLayout(){
+					{
+
+						setSpacing(true);
+						setMargin(true);
+						final TextField tfFailureDiscount = new TextField("Descuento por Falla",getItem().getItemProperty("failureDiscount"));
+						tfFailureDiscount.setImmediate(true);
+						addComponent(tfFailureDiscount);
+						
+						final TextField tfOtherDiscount = new TextField("Otros descuentos",getItem().getItemProperty("othersDiscount"));
+						tfOtherDiscount.setImmediate(true);
+						addComponent(tfOtherDiscount);
+
+						addComponent(new HorizontalLayout(){
+							{
+								// boton aceptar
+								addComponent(new Button("Aceptar",new Button.ClickListener() {
+
+									@Override
+									public void buttonClick(ClickEvent event) {
+
+										if( !Utils.NotNullOrEmpty(tfFailureDiscount.getValue()) || 
+											!Utils.NotNullOrEmpty(tfOtherDiscount.getValue()) ){
+											Notification.show("Debe ingresar los montos de descuentos.",Type.WARNING_MESSAGE);
+											return;
+										}
+
+										//agrega el finiquito
+										LaborerConstructionsite lc = (LaborerConstructionsite)getItem().getBean();
+										//deja desactivo tanto el contrato como el laborer constructionsite
+										activeContract.setActive(false);
+										lc.setActive(false);
+										
+										//setea un finiquito calculado
+										final Map<String, Object> input = new HashMap<String, Object>();
+										input.put("laborerConstructions", new LaborerConstructionsite[] { lc });
+										VelocityHelper.addTools(input);
+										
+
+										activeContract.setSettlement(calculateSettlement(lc,input));
+										setContractGl(activeContract);
+
+										//muestra el finiquito
+										final StringBuilder sb = new StringBuilder();
+										sb.append( VelocityEngineUtils.mergeTemplateIntoString(velocityEngine, "templates/settler.vm", "UTF-8", input) );
+										
+										StreamResource.StreamSource source2 = new StreamResource.StreamSource() {
+
+											public InputStream getStream() {
+												//throw new UnsupportedOperationException("Not supported yet.");
+												return new ByteArrayInputStream(sb.toString().getBytes());
+											}
+										};
+										StreamResource resource = new StreamResource(source2, "Finiquito.txt");
+
+										BrowserFrame e = new BrowserFrame();
+										e.setSizeFull();
+
+										// Here we create a new StreamResource which downloads our StreamSource,
+										// which is our pdf.
+										// Set the right mime type
+										//						        resource.setMIMEType("application/pdf");
+										resource.setMIMEType("text/html");
+
+										e.setSource(resource);
+										w.setContent(e);
+									}
+								}){ {setIcon(FontAwesome.CHECK_CIRCLE_O);} } );
+
+								// boton aceptar
+								addComponent(new Button("Cancelar",new Button.ClickListener() {
+
+									@Override
+									public void buttonClick(ClickEvent event) {
+										w.close();
+									}
+								}){{addStyleName("link");}});
+							}
+						});
+					}
+				});
+				
+				UI.getCurrent().addWindow(w);
 
 			}
 		});
@@ -941,29 +1122,53 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 	 * Vacaciones Efectivas = -1 *  vacaciones tomadas * Promedio Jornal * 1.4
 	 *
 	 * @param lc
+	 * @param input
 	 * @return
 	 */
-	protected double calculateSettlement(LaborerConstructionsite lc) {
+	protected double calculateSettlement(LaborerConstructionsite lc,Map<String, Object> input) {
 
 		//TODO
-		double JornalPromedio = service.getJornalPromedioLastThreeMonth(lc,lc.getActiveContract().getTerminationDate());
+		List<Double> last3JornalPromedio = service.getJornalPromedioLastThreeMonth(lc,lc.getActiveContract().getTerminationDate());
+		input.put("ultimosJornales", last3JornalPromedio );
+		DateTime dt = new DateTime(lc.getActiveContract().getTerminationDate());
+		input.put("firstmonth", dt.toDate() );
+		input.put("secondmonth", dt.minusMonths(1).toDate() );
+		input.put("threemonth", dt.minusMonths(2).toDate() );
+		
+		double JornalPromedio = Utils.avg( last3JornalPromedio ) ;
+		input.put("promedioJornales", JornalPromedio);
+		
 		logger.debug("JornalPromedio {}",JornalPromedio);
-
-		double MesPorAnoCod = 1,MesPorAnoCant = 1;
-		double DesahucioCod = 1,DesahucioCant = 1;
+		
 		Period period = new Period(new DateTime(lc.getActiveContract().getStartDate()), new DateTime(lc.getActiveContract().getTerminationDate()));
 		//TODO
 		double AnoDuracionContrato = period.getYears() + (period.getMonths() - (period.getYears() * 12)) / 12;
+		input.put("duracionContrato", AnoDuracionContrato);
+		
 		logger.debug("AnoDuracionContrato {}",AnoDuracionContrato);
+		double vacacionesTotales = AnoDuracionContrato * 12 * 1.75;
+		input.put("vacacionesTotales", vacacionesTotales);
+		
 		double vacacionesTomadas = calcularUsadas(vacationContainer.getItemIds());
+		input.put("vacacionesTomadas", vacacionesTomadas);
 		logger.debug("vacacionesTomadas {}",vacacionesTomadas);
-
-		double MesPorAno = 30 * JornalPromedio * MesPorAnoCod * MesPorAnoCant;
-		double Desahucio = 30 * JornalPromedio * DesahucioCod * DesahucioCant;
-		double Vacaciones = AnoDuracionContrato * 12 * 1.75 * JornalPromedio;
+		
+		double totalPremio = lc.getReward() * period.getMonths();
+		input.put("totalPremio", totalPremio );
+		
+		double Vacaciones = vacacionesTotales * JornalPromedio;
+		input.put("Vacaciones", Vacaciones);
 		double VacacionesEfectivas = -1 * vacacionesTomadas * JornalPromedio * 1.4;
-		logger.debug("MesPorAno + Desahucio + Vacaciones + VacacionesEfectivas {} + {} + {} + {}",MesPorAno , Desahucio , Vacaciones , VacacionesEfectivas);
-		return Math.round( MesPorAno + Desahucio + Vacaciones + VacacionesEfectivas);
+		input.put("VacacionesEfectivas", VacacionesEfectivas);
+		
+		//retiro de finiquito
+		double retiros = -1 * Utils.sum(lc.getWithdrawalSettlements());
+		input.put("retiros", retiros);
+		
+		logger.debug("Total Premio + Vacaciones + VacacionesEfectivas + retiros = {} + {} + {} + {}",totalPremio , Vacaciones , VacacionesEfectivas,retiros);
+		long total =  Math.round( totalPremio + Vacaciones + VacacionesEfectivas + retiros - lc.getFailureDiscount() - lc.getOthersDiscount() );
+		input.put("total", total);
+		return total;
 	}
 
 	Label lbJob ,lbJobCode,lbStep ,lbStarting, lbEnding,lbSettlement,lbStatus;
@@ -1663,7 +1868,6 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 		}
 		getItem().getItemProperty("tool").setValue(laborer.getTool());
 
-
 		laborer.getLoan().clear();		
 		for(Loan l : beanItemLoan.getItemIds()){
 			// valida los préstamos
@@ -1691,6 +1895,20 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 			laborer.addLoan(l);
 		}
 		getItem().getItemProperty("loan").setValue(laborer.getLoan());
+		
+		//retiros
+		laborer.getWithdrawalSettlements().clear();	
+		for(WithdrawalSettlement l : beanItemWithdrawalSettlement.getItemIds()){
+			// valida los préstamos
+			Set<ConstraintViolation<WithdrawalSettlement>> constraintViolations = validator.validate(l);
+			if(constraintViolations.size() > 0 ){
+				Notification.show("Una retención es inválida \""+ constraintViolations.iterator().next().getMessage()+"\"",Type.ERROR_MESSAGE);
+				tab.setSelectedTab(4);
+				return false;
+			}
+			laborer.addWithdrawalSettlement(l);
+		}
+		getItem().getItemProperty("withdrawalSettlements").setValue(laborer.getLoan());
 
 		return super.preCommit();
 	}

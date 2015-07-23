@@ -27,6 +27,7 @@ import cl.magal.asistencia.entities.LaborerConstructionsite;
 import cl.magal.asistencia.entities.License;
 import cl.magal.asistencia.entities.Mobilization2;
 import cl.magal.asistencia.entities.Vacation;
+import cl.magal.asistencia.entities.WithdrawalSettlement;
 import cl.magal.asistencia.entities.enums.Afp;
 
 import com.vaadin.data.Validator.InvalidValueException;
@@ -36,8 +37,8 @@ import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.data.util.MethodProperty;
 import com.vaadin.ui.Field;
 import com.vaadin.ui.Notification;
-import com.vaadin.ui.TextField;
 import com.vaadin.ui.Notification.Type;
+import com.vaadin.ui.TextField;
 
 public class Utils {
 	
@@ -374,6 +375,33 @@ public class Utils {
 			if(item.getAfp() == afp )
 				return item.getRate()/100;
 		return 0.1144;//FIX si no encuentra, retorna una por defecto?
+	}
+
+	/**
+	 * Calcula el promedio de la lista
+	 * @param list
+	 * @return
+	 */
+	public static double avg(List<Double> list) {
+		double sum = 0;
+		for(Double d : list )
+			sum += (d == null ? 0 : d);
+		return sum/(list.size() == 0 ? 1 : list.size());
+	}
+
+	/**
+	 * 
+	 * @param withdrawalSettlements
+	 * @return
+	 */
+	public static int sum(List<WithdrawalSettlement> withdrawalSettlements) {
+		if(withdrawalSettlements == null )
+			return 0;
+		
+		int sum = 0;
+		for(WithdrawalSettlement w : withdrawalSettlements)
+			sum += w.getPrice();
+		return sum;
 	}
 }
 

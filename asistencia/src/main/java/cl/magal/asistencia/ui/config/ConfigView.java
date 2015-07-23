@@ -572,18 +572,22 @@ public class ConfigView extends VerticalLayout implements View {
 								
 								advance.setRangeStart(null);advance.setRangeEnd(null);
 								assistance.setRangeEnd(null);assistance.setRangeStart(null);
-//								beginDeal.setRangeEnd(null);beginDeal.setRangeStart(null);
+								beginDeal.setRangeEnd(null);beginDeal.setRangeStart(null);
 								finishDeal.setRangeEnd(null);finishDeal.setRangeStart(null);
 								
 								fg.setItemDataSource(new BeanItem<DateConfigurations>(config));
 								
 								//calcula el inicio y final del mes
 								Date current = config.getDate();
-								Date endDate = new DateTime(current).dayOfMonth().withMaximumValue().toDate();
-								Date startDate = new DateTime(current).withDayOfMonth(1).toDate();
+								DateTime endDatetime = new DateTime(current).dayOfMonth().withMaximumValue(); 
+								Date endDate = endDatetime.toDate();
+								DateTime startDatetime = new DateTime(current).withDayOfMonth(1); 
+								Date startDate = startDatetime.toDate();
+								
 								advance.setRangeStart(startDate);advance.setRangeEnd(endDate);
 								assistance.setRangeEnd(endDate);assistance.setRangeStart(startDate);
-//								beginDeal.setRangeEnd(endDate);beginDeal.setRangeStart(startDate);
+								//el principio del trato puede ser desde el primero del mes anterior hasta el primero del mes actual
+								beginDeal.setRangeEnd(startDate);beginDeal.setRangeStart(startDatetime.minusMonths(1).toDate());
 								finishDeal.setRangeEnd(endDate);finishDeal.setRangeStart(startDate);
 							}
 						});

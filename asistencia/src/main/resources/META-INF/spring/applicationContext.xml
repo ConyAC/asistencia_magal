@@ -40,7 +40,7 @@
 	    <jdbc:script location="classpath:/META-INF/sql/data.sql"/>
 	</jdbc:initialize-database>
 	-->
-		<bean id="datasource"
+		<bean id="datasource" 
 		class="org.springframework.jdbc.datasource.DriverManagerDataSource">
  
 		<property name="driverClassName" value="com.mysql.jdbc.Driver" />
