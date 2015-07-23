@@ -114,7 +114,6 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 	transient LaborerService service;
 	transient private VelocityEngine velocityEngine;
 	LaborerConstructionsite laborerConstructionSite;
-	ConfigurationService configurationService;
 
 	private Validator validator;
 
@@ -203,11 +202,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 		// codigo por asignar
 		ComboBox cbSupleCode = new ComboBox("Código Suple");
 		cbSupleCode.setRequired(true);
-		//gl.addComponent(cbSupleCode);
-		//gl.setComponentAlignment(cbSupleCode, Alignment.MIDDLE_CENTER);
-		ConstructionSite c = new ConstructionSite();
-		c.setId(2L);
-		AdvancePaymentConfigurations supleConfigurations = configurationService.getSupleTableByCs(c);
+		AdvancePaymentConfigurations supleConfigurations = configurationService.getSupleTableByCs(((BeanItem<LaborerConstructionsite>) getItem()).getBean().getConstructionsite());
 		Map<Integer, AdvancePaymentItem> paymentTable = supleConfigurations.getMapTable();
 		for(Integer key : paymentTable.keySet()){
 			cbSupleCode.addItem(key);
