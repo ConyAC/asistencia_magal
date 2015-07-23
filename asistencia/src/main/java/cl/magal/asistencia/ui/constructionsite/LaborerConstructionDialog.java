@@ -28,6 +28,7 @@ import cl.magal.asistencia.entities.Accident;
 import cl.magal.asistencia.entities.AdvancePaymentConfigurations;
 import cl.magal.asistencia.entities.AdvancePaymentItem;
 import cl.magal.asistencia.entities.Annexed;
+import cl.magal.asistencia.entities.ConstructionSite;
 import cl.magal.asistencia.entities.Contract;
 import cl.magal.asistencia.entities.LaborerConstructionsite;
 import cl.magal.asistencia.entities.License;
@@ -130,7 +131,8 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 	}
 
 	public void init(){
-
+		
+		this.configurationService = (ConfigurationService) ((MagalUI)UI.getCurrent()).getSpringBean(Constants.CONFIGURATION_SERVICE_BEAN);
 		this.velocityEngine = (VelocityEngine) ((MagalUI)UI.getCurrent()).getSpringBean(Constants.VELOCITY_ENGINE_BEAN);
 		this.service = (LaborerService) ((MagalUI)UI.getCurrent()).getSpringBean(Constants.LABORER_SERVICE_BEAN);
 		this.validator = (Validator) ((MagalUI)UI.getCurrent()).getSpringBean(Constants.BEANVALIDATOR_BEAN);
@@ -196,18 +198,19 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 		final DateField endDate = new DateField("Fecha Final",getItem().getItemProperty("rewardEndDate"));
 		endDate.setImmediate(true);
 
-		//TextField tfSuple = new TextField("Código Suple", getItem().getItemProperty("supleCode"));
-		//tfSuple.setNullRepresentation("");
-		logger.debug("LALA: "+((BeanItem<LaborerConstructionsite>) getItem()).getBean().getConstructionsite());
 		// codigo por asignar
 		ComboBox cbSupleCode = new ComboBox("Código Suple");
 		cbSupleCode.setRequired(true);
-		AdvancePaymentConfigurations supleConfigurations = configurationService.getSupleTableByCs(((BeanItem<LaborerConstructionsite>) getItem()).getBean().getConstructionsite());
+		//gl.addComponent(cbSupleCode);
+		//gl.setComponentAlignment(cbSupleCode, Alignment.MIDDLE_CENTER);
+		ConstructionSite c = new ConstructionSite();
+		c.setId(2L);
+		AdvancePaymentConfigurations supleConfigurations = configurationService.getSupleTableByCs(c);
 		Map<Integer, AdvancePaymentItem> paymentTable = supleConfigurations.getMapTable();
 		for(Integer key : paymentTable.keySet()){
 			cbSupleCode.addItem(key);
 		}
-		cbSupleCode.select(getItem().getItemProperty("supleCode"));
+		cbSupleCode.select(getItem().getItemProperty("supleCode").getValue());
 
 		VerticalLayout vl = new VerticalLayout(){
 			{

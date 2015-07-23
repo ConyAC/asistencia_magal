@@ -211,6 +211,7 @@ public class AddLaborerContractDialog extends AbstractWindowEditor implements Ne
 		cbSupleCode.setRequired(true);
 		gl.addComponent(cbSupleCode,0,rows++);
 		gl.setComponentAlignment(cbSupleCode, Alignment.MIDDLE_CENTER);
+		logger.debug("kkk: "+((BeanItem<LaborerConstructionsite>) getItem()).getBean().getConstructionsite());
 		AdvancePaymentConfigurations supleConfigurations = configurationService.getSupleTableByCs(((BeanItem<LaborerConstructionsite>) getItem()).getBean().getConstructionsite());
 		Map<Integer, AdvancePaymentItem> paymentTable = supleConfigurations.getMapTable();
 		for(Integer key : paymentTable.keySet()){
