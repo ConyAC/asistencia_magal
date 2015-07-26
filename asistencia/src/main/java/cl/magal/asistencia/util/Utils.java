@@ -382,10 +382,12 @@ public class Utils {
 	 * @param list
 	 * @return
 	 */
-	public static double avg(List<Double> list) {
+	public static double avg(List<? extends Number> list) {
 		double sum = 0;
-		for(Double d : list )
-			sum += (d == null ? 0 : d);
+		for(Number d : list ){
+			if( d != null )
+			sum += d.doubleValue();
+		}
 		return sum/(list.size() == 0 ? 1 : list.size());
 	}
 
