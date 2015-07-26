@@ -12,54 +12,51 @@
 	}
 	
 	@media print {
-		@page {
-            size: 21.4cm 32.5cm portrait;
-		}
 		.page-break	{ display: block; page-break-before: always; }
 		.p-justify	{ }
 		.print-hidden	{ display: none; }
   		body {font-size : 10pt;}
 		header:after { content: "1"; }
 		
-		#fecha_contrato_dia { position : absolute ; top : 2.5cm; left: 4.1cm; }
-		#fecha_contrato_mes { position : absolute ; top : 2.5cm; left: 5.5cm; }
-		#fecha_contrato_ano { position : absolute ; top : 2.5cm; left: 9cm; }
-        #nombre_constructora { position : absolute ; top : 2.5cm; left: 13cm; }
+		#fecha_contrato_dia { position : absolute ; top : 2.1cm; left: 4.1cm; }
+		#fecha_contrato_mes { position : absolute ; top : 2.1cm; left: 5.5cm; }
+		#fecha_contrato_ano { position : absolute ; top : 2.1cm; left: 8.7cm; }
+        #nombre_constructora { position : absolute ; top : 2.1cm; left: 13cm; }
 		
-        #rut_constructora { position : absolute ; top : 3cm; left: 2.5cm; }
-        #nombre_representante_constructora { position : absolute ; top : 3cm; left: 9.3cm; }
+        #rut_constructora { position : absolute ; top : 2.55cm; left: 2.5cm; }
+        #nombre_representante_constructora { position : absolute ; top : 2.55cm; left: 9.3cm; }
         
-        #direccion_constructora { position : absolute ; top : 3.5cm; left: 8cm;  } 
-        #comuna_constructora { position : absolute ; top : 3.5cm; left: 17cm;  }
+        #direccion_constructora { position : absolute ; top : 2.9cm; left: 8cm;  } 
+        #comuna_constructora { position : absolute ; top : 2.9cm; left: 16cm;  }
         
-        #nombre_trabajador { position : absolute ; top : 3.9cm; left: 12.5cm; }
+        #nombre_trabajador { position : absolute ; top : 3.35cm; left: 12.5cm; }
         
-        #nacionalidad_trabajador { position : absolute ; top : 4.3cm; left: 3.6cm;}
-        #fecha_nac_trabajador { position : absolute ; top : 4.3cm; left: 8cm; }
-        #direccion_trabajador { position : absolute ; top : 4.3cm; left: 15cm; }
+        #nacionalidad_trabajador { position : absolute ; top : 3.78cm; left: 3.6cm;}
+        #fecha_nac_trabajador { position : absolute ; top : 3.78cm; left: 8cm; }
+        #direccion_trabajador { position : absolute ; top : 3.78cm; left: 14.5cm; }
         
-        #poblacion_trabajador{ position : absolute ; top : 4.8cm; left: 1.5cm; }
-        #comuna_trabajador { position : absolute ; top : 4.8cm; left: 10.3cm; }
-        #rut_trabajador {position : absolute ; top : 4.8cm; left: 17.3cm;}
+        #poblacion_trabajador{ position : absolute ; top : 4.2cm; left: 1.5cm; }
+        #comuna_trabajador { position : absolute ; top : 4.2cm; left: 10.3cm; }
+        #rut_trabajador {position : absolute ; top : 4.2cm; left: 17cm;}
         
-        #oficio_trabajador {position : absolute ; top : 6cm; left: 14.2cm; }
+        #oficio_trabajador {position : absolute ; top : 5.33cm; left: 14.2cm; }
         
-        #direccion_obra {position : absolute ; top : 6.8cm; left: 14cm;}
+        #direccion_obra {position : absolute ; top : 6.13cm; left: 14cm;}
         
-        #comuna_obra {position : absolute ; top : 7.2cm; left: 2.5cm;}
+        #comuna_obra {position : absolute ; top : 6.45cm; left: 2.8cm;}
         
-        #sueldo_diario{position : absolute ; top : 10.8cm; left: 12cm;}
+        #sueldo_diario{position : absolute ; top : 10cm; left: 11.3cm;}
         
-        #oficio_trabajador2 { position : absolute ; top : 11cm; left: 17cm;}
+        #oficio_trabajador2 { position : absolute ; top : 10.29cm; left: 16.2cm;}
         
-        #etapa_obra { position : absolute ; top : 16.8cm; left: 12cm; }
+        #etapa_obra { position : absolute ; top : 15.58cm; left: 12cm; }
         
-        #afp_trabajador { position : absolute ; top : 27cm; left: 3.5cm; }
-        #isapre_trabajador { position : absolute ; top : 27cm; left: 15cm; }
+        #afp_trabajador { position : absolute ; top : 25.2cm; left: 3.5cm; }
+        #isapre_trabajador { position : absolute ; top : 25.2cm; left: 15cm; }
         
-        #nombre_trabajador2 { position : absolute ; top : 29.9cm; left: 8.5cm; }
+        #nombre_trabajador2 { position : absolute ; top : 27.85cm; left: 8.5cm; }
         
-        #inicio_contrato_trabajador { position : absolute ; top : 30.3cm; left: 8cm;}
+        #inicio_contrato_trabajador { position : absolute ; top : 28.25cm; left: 8cm;}
 		
 	}
 	
