@@ -25,7 +25,10 @@ import org.springframework.ui.velocity.VelocityEngineUtils;
 import org.vaadin.dialogs.ConfirmDialog;
 
 import cl.magal.asistencia.entities.Accident;
+import cl.magal.asistencia.entities.AdvancePaymentConfigurations;
+import cl.magal.asistencia.entities.AdvancePaymentItem;
 import cl.magal.asistencia.entities.Annexed;
+import cl.magal.asistencia.entities.ConstructionSite;
 import cl.magal.asistencia.entities.Contract;
 import cl.magal.asistencia.entities.LaborerConstructionsite;
 import cl.magal.asistencia.entities.License;
@@ -106,11 +109,11 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 	BeanItemContainer<LaborerConstructionsite> constructionContainer = new BeanItemContainer<LaborerConstructionsite>(LaborerConstructionsite.class);
 	BeanItemContainer<User> itemUser = new BeanItemContainer<User>(User.class);
 
+	transient ConfigurationService configurationService;
 	transient UserService serviceUser;
 	transient LaborerService service;
 	transient private VelocityEngine velocityEngine;
 	LaborerConstructionsite laborerConstructionSite;
-	ConfigurationService configurationService;
 
 	private Validator validator;
 
@@ -128,7 +131,8 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 	}
 
 	public void init(){
-
+		
+		this.configurationService = (ConfigurationService) ((MagalUI)UI.getCurrent()).getSpringBean(Constants.CONFIGURATION_SERVICE_BEAN);
 		this.velocityEngine = (VelocityEngine) ((MagalUI)UI.getCurrent()).getSpringBean(Constants.VELOCITY_ENGINE_BEAN);
 		this.service = (LaborerService) ((MagalUI)UI.getCurrent()).getSpringBean(Constants.LABORER_SERVICE_BEAN);
 		this.configurationService = (ConfigurationService) ((MagalUI)UI.getCurrent()).getSpringBean(Constants.CONFIGURATION_SERVICE_BEAN);
@@ -195,9 +199,23 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 		final DateField endDate = new DateField("Fecha Final",getItem().getItemProperty("rewardEndDate"));
 		endDate.setImmediate(true);
 
-		TextField tfSuple = new TextField("Código Suple", getItem().getItemProperty("supleCode"));
-		tfSuple.setNullRepresentation("");
+		// codigo por asignar
+		final ComboBox cbSupleCode = new ComboBox("Código Suple");
+		cbSupleCode.setRequired(true);
+		AdvancePaymentConfigurations supleConfigurations = configurationService.getSupleTableByCs(((BeanItem<LaborerConstructionsite>) getItem()).getBean().getConstructionsite());
+		Map<Integer, AdvancePaymentItem> paymentTable = supleConfigurations.getMapTable();
+		for(Integer key : paymentTable.keySet()){
+			cbSupleCode.addItem(key);
+		}
+		cbSupleCode.select(getItem().getItemProperty("supleCode").getValue());		
+		cbSupleCode.addValueChangeListener(new Property.ValueChangeListener() {
 
+			@Override
+			public void valueChange(ValueChangeEvent event) {
+				getItem().getItemProperty("supleCode").setValue(cbSupleCode.getValue());
+			}
+		});
+				
 		VerticalLayout vl = new VerticalLayout(){
 			{
 				setSpacing(true);
@@ -234,8 +252,8 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 		gl.setComponentAlignment(startDate, Alignment.TOP_CENTER);
 		gl.addComponent(endDate,2,1);
 		gl.setComponentAlignment(endDate, Alignment.TOP_CENTER);
-		gl.addComponent(tfSuple,0,2);
-		gl.setComponentAlignment(tfSuple, Alignment.TOP_CENTER);
+		gl.addComponent(cbSupleCode,0,2);
+		gl.setComponentAlignment(cbSupleCode, Alignment.TOP_CENTER);
 
 		gl.addComponent(new LaborerBaseInformation(getBinder(),"laborer",true),0,3,2,3);
 

@@ -69,7 +69,7 @@ public class UserServiceTest {
 		
 		User u = UserHelper.newUser();
 		service.saveUser(u);
-		UserHelper.verify(u);				
+		UserHelper.verify(u);		
 		User dbu = service.findUser(u.getId());
 		UserHelper.verify(dbu);		
 		UserHelper.verify(u, dbu);				
