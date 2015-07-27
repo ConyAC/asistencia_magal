@@ -200,13 +200,13 @@ MERGE INTO laborer ( laborerId,address,afp,commune,date_birth,dependents,firstna
 
 -- Construction Company
 
-MERGE INTO construction_company (construction_companyId,address,commune,rut,name) VALUES (1,'Av. Las Condes 8798','Las condes','80.800.800.777-8','Constructora 1');
-MERGE INTO construction_company (construction_companyId,address,commune,rut,name) VALUES (2,'Av. Pajaritos 9934','Maipú','90.345.567-8','Constructora 2');
+MERGE INTO construction_company (construction_companyId,address,chief_executive,commune,rut,name) VALUES (1,'Av. Las Condes 8798','Las condes','l','80.800.800.777-8','Constructora 1');
+MERGE INTO construction_company (construction_companyId,address,chief_executive,commune,rut,name) VALUES (2,'Av. Pajaritos 9934','Maipú','l','90.345.567-8','Constructora 2');
 
 --Construction SITE
 
-MERGE INTO construction_site (constructionsiteId,address,code,cost_center,deleted,name,status,person_in_chargeId,construction_companyId) VALUES (1,'Av. Las Condes 8798','CR4B',8,0,'Carolina Rabat 4 Etapa B',1,null,1);
-MERGE INTO construction_site (constructionsiteId,address,code,cost_center,deleted,name,status,person_in_chargeId,construction_companyId) VALUES (2,'Av. Pajaritos 9934','EJO',1,0,'Edificio Jardines de Olivares',1,null,2);
+MERGE INTO construction_site (constructionsiteId,address,code,commune,cost_center,deleted,name,status,person_in_chargeId,construction_companyId) VALUES (1,'Av. Las Condes 8798','CR4B','comuna',8,0,'Carolina Rabat 4 Etapa B',1,null,1);
+MERGE INTO construction_site (constructionsiteId,address,code,commune,cost_center,deleted,name,status,person_in_chargeId,construction_companyId) VALUES (2,'Av. Pajaritos 9934','EJO','comuna',1,0,'Edificio Jardines de Olivares',1,null,2);
 
 -- agrega los trabajadores a la obra Carolina Rabat 4 Etapa B
 

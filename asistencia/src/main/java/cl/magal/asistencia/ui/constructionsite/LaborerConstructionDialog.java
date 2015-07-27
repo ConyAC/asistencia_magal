@@ -200,15 +200,22 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 		endDate.setImmediate(true);
 
 		// codigo por asignar
-		ComboBox cbSupleCode = new ComboBox("Código Suple");
+		final ComboBox cbSupleCode = new ComboBox("Código Suple");
 		cbSupleCode.setRequired(true);
 		AdvancePaymentConfigurations supleConfigurations = configurationService.getSupleTableByCs(((BeanItem<LaborerConstructionsite>) getItem()).getBean().getConstructionsite());
 		Map<Integer, AdvancePaymentItem> paymentTable = supleConfigurations.getMapTable();
 		for(Integer key : paymentTable.keySet()){
 			cbSupleCode.addItem(key);
 		}
-		cbSupleCode.select(getItem().getItemProperty("supleCode").getValue());
+		cbSupleCode.select(getItem().getItemProperty("supleCode").getValue());		
+		cbSupleCode.addValueChangeListener(new Property.ValueChangeListener() {
 
+			@Override
+			public void valueChange(ValueChangeEvent event) {
+				getItem().getItemProperty("supleCode").setValue(cbSupleCode.getValue());
+			}
+		});
+				
 		VerticalLayout vl = new VerticalLayout(){
 			{
 				setSpacing(true);

@@ -207,16 +207,23 @@ public class AddLaborerContractDialog extends AbstractWindowEditor implements Ne
 		gl.setComponentAlignment(lbCodJob, Alignment.MIDDLE_CENTER);	
 		
 		// codigo por asignar
-		ComboBox cbSupleCode = new ComboBox("Código Suple");
+		final ComboBox cbSupleCode = new ComboBox("Código Suple");
 		cbSupleCode.setRequired(true);
 		gl.addComponent(cbSupleCode,0,rows++);
 		gl.setComponentAlignment(cbSupleCode, Alignment.MIDDLE_CENTER);
-		logger.debug("kkk: "+((BeanItem<LaborerConstructionsite>) getItem()).getBean().getConstructionsite());
 		AdvancePaymentConfigurations supleConfigurations = configurationService.getSupleTableByCs(((BeanItem<LaborerConstructionsite>) getItem()).getBean().getConstructionsite());
 		Map<Integer, AdvancePaymentItem> paymentTable = supleConfigurations.getMapTable();
 		for(Integer key : paymentTable.keySet()){
 			cbSupleCode.addItem(key);
 		}
+		
+		cbSupleCode.addValueChangeListener(new Property.ValueChangeListener() {
+
+			@Override
+			public void valueChange(ValueChangeEvent event) {
+				getItem().getItemProperty("supleCode").setValue(cbSupleCode.getValue());
+			}
+		});
 		
 		//cada vez que cambia el job, calcula el siguiente codigo
 		cbJob.addValueChangeListener(new Property.ValueChangeListener() {
