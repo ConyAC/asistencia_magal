@@ -291,7 +291,7 @@ public class ConstructionSiteService {
 	public Map<Integer,Attendance> getAttendanceMapByConstructionAndMonth(ConstructionSite cs,DateTime date) {
 		//obtiene la lista de trabajadores de la obra
 		List<LaborerConstructionsite> lcs =  labcsRepo.findByConstructionsiteAndIsActive(cs);
-//		logger.debug("trabajadores activos {} ",lcs);
+		logger.debug("trabajadores activos {} ",lcs);
 //		logger.debug("date {} ",date);
 
 		List<Attendance> attendanceResultList =  attendanceRepo.findByConstructionsiteAndMonth(cs,date.toDate());
@@ -310,7 +310,9 @@ public class ConstructionSiteService {
 				attendance.setLaborerConstructionSite(lc);
 				attendance.setDate(date.toDate());	
 				attendanceResult.put(lc.getJobCode(),attendance);
+				logger.debug("Encontró la asistencia {}",attendance);
 			}else{
+				logger.debug("No encontró la asistencia");
 				Attendance attendance = new Attendance();
 				attendance.setLaborerConstructionSite(lc);
 				attendance.setDate(date.toDate());
@@ -924,8 +926,7 @@ public class ConstructionSiteService {
 	}
 
 	/**
-	 * @deprecated ya no se usa extraparams
-	 * Calcula el sueldo asociado a la asistencia dada
+	 * Calcula el sueldo asociado a la asistencia dada, se usa principalmente para test
 	 * @param closingDateLastMonth
 	 * @param suple
 	 * @param tool
@@ -936,20 +937,16 @@ public class ConstructionSiteService {
 	 * @param wageConfiguration 
 	 * @return
 	 */
-	public int calculateSalary(DateTime closingDateLastMonth, int suple , int tool , int loan,
-			Attendance attendance,Attendance lastMonthAttendance,Overtime overtime,ExtraParams extraParams,
+	public int calculateSalary(DateTime closingDateLastMonth, double suple , int tool , int loan,
+			Attendance attendance,Attendance lastMonthAttendance,Overtime overtime,
 			WageConfigurations wageConfiguration,
 			DateConfigurations dateConfigurations,
 			List<FamilyAllowanceConfigurations> famillyTable,
 			List<TaxationConfigurations> taxTable,
-			int loans, int holidays,AfpAndInsuranceConfigurations afpConfig) {
+			int loans, int holidays,AfpAndInsuranceConfigurations afpConfig, int jornalPromedio, Salary salary) {
 
 		SalaryCalculator sc = new SalaryCalculator(closingDateLastMonth, suple, tool, loan, attendance, lastMonthAttendance, overtime,wageConfiguration, dateConfigurations, famillyTable, taxTable, loans,holidays,afpConfig);
-//		return (int) sc.calculateSalary();
-		if(true)
-			throw new RuntimeException("No implementado");
-		return 1;
-		
+		return (int) sc.calculateSalary(jornalPromedio,suple,salary);
 		
 	}
 
@@ -1061,6 +1058,15 @@ public class ConstructionSiteService {
 	 */
 	public int countHolidaysMonth(DateTime attendanceDate) {
 		return holidayRepo.countByMonth(attendanceDate.toDate());
+	}
+
+	/***
+	 * Permite buscar todas las asistencias de una obra
+	 * @param cs
+	 * @return
+	 */
+	public List<Attendance> findAllAttendances(ConstructionSite cs) {
+		return attendanceRepo.findByConstructionsite(cs);
 	}
 	
 }
