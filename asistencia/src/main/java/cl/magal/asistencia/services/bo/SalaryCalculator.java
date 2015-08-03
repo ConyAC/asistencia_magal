@@ -60,6 +60,77 @@ public class SalaryCalculator {
 		return mov1;
 	}
 	
+	Double impto;
+	public Double getImpto(){
+		if(impto == null ){
+			impto = calculateImpuesto(getAfecto(),getSobreAfecto());
+			logger.debug("impto {}",impto);
+		}
+		return impto;
+	}
+	
+	Double aDescontar;
+	public Double getADescontar(){
+		if(aDescontar == null ){
+			aDescontar = calculateADescontar(getTTribut());
+			logger.debug("aDescontar {}",aDescontar);
+		}
+		return aDescontar;
+	}
+	
+	Double impto2Cat;
+	public Double getImpto2Cat(){
+		if(impto2Cat == null ){
+			impto2Cat = calculateImpuesto2Cat(getTTribut());
+			logger.debug("impto2Cat {}",impto2Cat);
+		}
+		return impto2Cat;
+	}
+	
+	Double tTribut;
+	public Double getTTribut(){
+		if(tTribut == null ){
+			tTribut = calculateTTribut(getAfecto(),getSobreAfecto());
+			logger.debug("tTribut {}",tTribut);
+		}
+		return tTribut;
+	}
+	
+	Double descImposicion;
+	public Double getDescImposicion(){
+		if(descImposicion == null ){
+			descImposicion = calculateDescImposiciones(getAfecto());
+			logger.debug("descImposicion {}",descImposicion);
+		}
+		return descImposicion;
+	}
+
+	Double afp;
+	public Double getAfp(){
+		if(afp == null ){
+			afp = calculateAFP(getAfecto());
+			logger.debug("afp {}",afp);
+		}
+		return afp;
+	}
+	
+	Double saludAdicional;
+	public Double getSaludAdicional(){
+		if(saludAdicional == null ){
+			saludAdicional = calculateAdicionalSalud(getAfecto());
+			logger.debug("saludAdicional {}",saludAdicional);
+		}
+		return saludAdicional;
+	}
+	
+	Double salud7;
+	public Double get7Salud(){
+		if(salud7 == null ){
+			salud7 = calculate7Salud(getAfecto());
+			logger.debug("salud7 {}",salud7);
+		}
+		return salud7;
+	}
 	
 	/**
 	 * CALCULOS
@@ -193,7 +264,7 @@ public class SalaryCalculator {
 	Double gLegal;
 	public Double getGLegal(){
 		if(gLegal == null ){
-			gLegal = calculateGLegal(closingDateLastMonth, getDiasHabiles(), attendance, lastMonthAttendance);
+			gLegal = calculateGLegal(getDiasHabiles());
 		}
 		return gLegal;
 	}
@@ -494,7 +565,10 @@ public class SalaryCalculator {
 			throw new RuntimeException("Aún no se definen los valores de fecha de cierres, uf, bencina, petroleo, etc., no se puede calcular el sueldo.");
 		
 //		this.bencina = dateConfigurations.getBenzine();
+		if(dateConfigurations.getUf() == null || dateConfigurations.getUf().intValue() == 0 )
+			throw new RuntimeException("Aún no se define la uf del mes, no se puede calcular el sueldo.");
 		this.ufMes = dateConfigurations.getUf();
+		
 		this.holidays = holidays;
 		this.afpConfig = afpConfig;
 	}
@@ -545,7 +619,7 @@ public class SalaryCalculator {
 	 * DONE
 	 * @return
 	 */
-	private double calculateGLegal(DateTime closingDateLastMonth,int diasHabilesMes,Attendance attendance,Attendance lastMonthAttendance) {
+	private double calculateGLegal(int diasHabilesMes) {
 		return calculateGratificacionLegalMes(diasHabilesMes) * getDiaTrab();
 	}
 
@@ -573,6 +647,7 @@ public class SalaryCalculator {
 	 * @return
 	 */
 	private double calculateBonifImpo(DateTime closingDate,Attendance attendance,Attendance lastMonthAttendance,double jornalBaseMes) {
+		logger.debug("BonifImpo {},{},{},{}",bonoImponibleEspecial , calculateLLuvia(attendance,jornalBaseMes) , calculateLLuviaMesAnterior(closingDate,attendance,lastMonthAttendance,jornalBaseMes) , calculateAjusteAsistenciaMesAnterior(closingDate,attendance,lastMonthAttendance));
 		return /*calculateBonoBencina() +*/ bonoImponibleEspecial + calculateLLuvia(attendance,jornalBaseMes) + calculateLLuviaMesAnterior(closingDate,attendance,lastMonthAttendance,jornalBaseMes) + calculateAjusteAsistenciaMesAnterior(closingDate,attendance,lastMonthAttendance);
 	}
 
@@ -583,7 +658,8 @@ public class SalaryCalculator {
 	private int calculateAjusteAsistenciaMesAnterior(DateTime closingDate,Attendance attendance,Attendance lastMonthAttendance) {
 		//TODO validar que sean meses consecutivos
 		//desde la fecha de cierre del mes anterior, verifica si hay diferencias en la asistencia en cuanto 
-		int sumAsistenciaAjustadaMesAnterior = countDiffMarksFromDate(closingDate,attendance,lastMonthAttendance,AttendanceMark.ATTEND); 
+		int sumAsistenciaAjustadaMesAnterior = countDiffMarksFromDate(closingDate,attendance,lastMonthAttendance,AttendanceMark.ATTEND);
+		logger.debug("sumAsistenciaAjustadaMesAnterior {}",sumAsistenciaAjustadaMesAnterior);
 		return sumAsistenciaAjustadaMesAnterior * getJPromedio();
 	}
 
@@ -750,7 +826,7 @@ public class SalaryCalculator {
 	 * @return
 	 */
 	private double calculateVSCorrd(DateTime closingDateLastMonth,Attendance attendance,Attendance lastMonthAttendance,Overtime overtime) {
-		return ( getVTrato() + getValorSabado() + getSobreTiempo() )/ getDpd() * getSep();
+		return ( getVTrato() + getValorSabado() + getSobreTiempo() +  getDescHoras())/ getDpd() * getSep();
 	}
 
 	/**
@@ -819,7 +895,8 @@ public class SalaryCalculator {
 	 * @return
 	 */
 	private double calculateMaxImponible() {
-		return 70.3*ufMes;
+		logger.debug("ufMes {}",ufMes);
+		return 72.3*ufMes;
 	}
 
 	/**
@@ -921,7 +998,7 @@ public class SalaryCalculator {
 	 * TODO obtiene las cargas del trabajador
 	 * @return
 	 */
-	private int getCargas() {
+	public int getCargas() {
 		return attendance.getLaborerConstructionSite().getLaborer().getDependents();
 	}
 
@@ -930,9 +1007,9 @@ public class SalaryCalculator {
 	 * @return
 	 */
 	private double calculateTDesc(double afecto,double sobreAfecto,double suple , double tool , double loan) {
-		double descImposiciones = calculateDescImposiciones(afecto);
+		double descImposiciones = getDescImposicion();
 		logger.debug("descImposiciones {}",descImposiciones);
-		double impuesto = calculateImpuesto(afecto,sobreAfecto);
+		double impuesto = getImpto();
 		logger.debug("impuesto {}",impuesto);
 		logger.debug("suple {}, tool {}, loan {}",suple,tool,loan);
 		return descImposiciones + impuesto + suple - tool - loan;
@@ -942,9 +1019,9 @@ public class SalaryCalculator {
 	 * DONE
 	 * @return
 	 */
-	private double calculateImpuesto(double afecto,double sobreAfecto) {
-		double tTribut = calculateTTribut(afecto,sobreAfecto);
-		return tTribut *calculateImpuesto2Cat(tTribut)-calculateADescontar(tTribut);
+	public double calculateImpuesto(double afecto,double sobreAfecto) {
+		double tTribut = getTTribut();
+		return tTribut * getImpto2Cat() - getADescontar();
 	}
 
 	/**
@@ -952,7 +1029,7 @@ public class SalaryCalculator {
 	 * @return
 	 */
 	private double calculateTTribut(double afecto,double sobreAfecto) {
-		return afecto + sobreAfecto - calculateDescImposiciones(afecto);
+		return afecto + sobreAfecto - getDescImposicion();
 	}
 
 	/**
@@ -963,7 +1040,7 @@ public class SalaryCalculator {
 		//busca en que rango está el calculo del impuesto
 		Double result = 0D;
 		for( TaxationConfigurations tax : taxTable 	){
-			if( tax.getFrom() >= tTribut && tax.getTo() <= tTribut ){
+			if( tTribut >= tax.getFrom() &&  tTribut <= tax.getTo() ){
 				result = tax.getFactor();
 				break;
 			}
@@ -979,7 +1056,7 @@ public class SalaryCalculator {
 		//busca en que rango está el calculo del impuesto
 		Double result = 0D;
 		for( TaxationConfigurations tax : taxTable 	){
-			if( tax.getFrom() >= tTribut && tax.getTo() <= tTribut ){
+			if( tTribut >= tax.getFrom()  &&  tTribut <= tax.getTo() ){
 				result = tax.getReduction();
 				break;
 			}
@@ -992,7 +1069,7 @@ public class SalaryCalculator {
 	 * @return
 	 */
 	private double calculateDescImposiciones(double afecto) {
-		return calculate7Salud(afecto) + calculateAdicionalSalud(afecto) + calculateAFP(afecto);
+		return get7Salud() + getSaludAdicional() + getAfp();
 	}
 
 	/**
@@ -1018,7 +1095,7 @@ public class SalaryCalculator {
 	 * @return
 	 */
 	private double calculateAdicionalSalud(double afecto) {
-		double result = calculateMontoCtoUF() * ufMes - calculate7Salud(afecto);
+		double result = calculateMontoCtoUF() * ufMes - get7Salud();
 		return result > 0 ? result : 0 ;
 	}
 

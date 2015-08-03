@@ -31,6 +31,7 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.validation.constraints.Digits;
+import javax.validation.constraints.NotNull;
 
 import cl.magal.asistencia.entities.enums.Job;
 
@@ -138,6 +139,7 @@ public class LaborerConstructionsite implements Serializable {
     /**
      * define el contrato activo o el primero
      */
+    @NotNull
     @OneToOne(mappedBy="laborerConstructionSite",fetch =FetchType.EAGER, cascade = {CascadeType.PERSIST,CascadeType.MERGE},optional=false)
     Contract activeContract;
     

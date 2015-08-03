@@ -23,12 +23,14 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import cl.magal.asistencia.entities.AdvancePaymentConfigurations;
+import cl.magal.asistencia.entities.AfpAndInsuranceConfigurations;
 import cl.magal.asistencia.entities.Attendance;
 import cl.magal.asistencia.entities.ConstructionSite;
 import cl.magal.asistencia.entities.DateConfigurations;
 import cl.magal.asistencia.entities.FamilyAllowanceConfigurations;
 import cl.magal.asistencia.entities.Laborer;
 import cl.magal.asistencia.entities.Overtime;
+import cl.magal.asistencia.entities.Salary;
 import cl.magal.asistencia.entities.TaxationConfigurations;
 import cl.magal.asistencia.entities.User;
 import cl.magal.asistencia.entities.WageConfigurations;
@@ -515,6 +517,57 @@ public class ConstructionSiteServiceTest {
 //				,attendanceJune.get(lcCode),overtimeJuly.get(lcCode), extraParams.get(lcCode), wageConfiguration, dateConfiguration, famillyTable, taxTable);
 //		//el suple es conocido
 //		assertEquals(expectedSalay,salary,1d);
+	}
+	
+	@Test
+	public void testCalculateSalary4(){
+		//se usa una construcción de la cual se save el resultado
+		Long constructionId = 1L;
+		//se usa un codigo de suple conocido
+		Integer supleCode = 1;
+		Double supleAmount = 105000D;
+		Integer lcCode  = 16;
+		Integer jornalPromedio = 13500;
+		
+		int tool = 0, loan = 0; 
+		//se usa una asistencia conocida
+//		int expectedSalay = 45336;
+		int expectedSalay = 435091;
+		DateTime monthDate = DateTime.parse("2015-07-08");
+		DateTime closingSupleDate = DateTime.parse("2015-07-13");
+		DateTime closingDateLastMonth = DateTime.parse("2015-06-23");
+		
+		List<TaxationConfigurations> taxTable = configurationService.findTaxationConfigurations();
+		List<FamilyAllowanceConfigurations> famillyTable = configurationService.findFamylyAllowanceConfigurations();
+		WageConfigurations wageConfiguration = configurationService.findWageConfigurations();
+		
+		//busca una asistencia completa
+		ConstructionSite cs = csService.findConstructionSite(constructionId);
+		
+		DateConfigurations dateConfiguration = configurationService.getDateConfigurationByCsAndMonth(cs,monthDate);
+		Map<Integer,Attendance> attendanceJuly = csService.getAttendanceMapByConstructionAndMonth(cs, monthDate);
+		Map<Integer,Attendance> attendanceJune = csService.getAttendanceMapByConstructionAndMonth(cs, monthDate.minusMonths(1));
+		Map<Integer,Overtime> overtimeJuly = csService.getOvertimeMapByConstructionAndMonth(cs, monthDate);
+		AfpAndInsuranceConfigurations afpConfig = configurationService.findAfpAndInsuranceConfiguration();
+		//busca la asistencia del mes anterior 
+		//se obtiene su tabla de suple
+		AdvancePaymentConfigurations supleTable = configurationService.getSupleTableByCs(cs);
+//		Double suple = csService.calculateSuple(supleCode,supleTable,closingSupleDate.toDate(),attendanceJuly.get(lcCode));
+//		//se obtiene la fecha de cierre del mes
+		Salary salary = new Salary();
+		salary.setSpecialBond(0);
+		salary.setBondMov2(0);
+		salary.setDescHours(6);
+		salary.setOvertimeHours(0);
+		int salaryValue = csService.calculateSalary(
+				closingDateLastMonth,supleAmount,tool,loan,
+				attendanceJuly.get(lcCode),attendanceJune.get(lcCode),overtimeJuly.get(lcCode), 
+				wageConfiguration,
+				dateConfiguration,
+				famillyTable, 
+				taxTable,0,0,afpConfig,jornalPromedio,salary);
+//		//el suple es conocido
+		assertEquals(expectedSalay,salaryValue,1d);
 	}
 
 	private void fakeLogin(User user) {
