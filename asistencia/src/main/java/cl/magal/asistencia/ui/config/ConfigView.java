@@ -388,6 +388,11 @@ public class ConfigView extends VerticalLayout implements View {
 						addComponent(jornaBase);
 						addComponent(gratificacion);
 						
+						Field maxImponibleFactor = fg.buildAndBind("Máxima Imponible", "maxImponibleFactor");
+						((TextField)maxImponibleFactor).setNullRepresentation("");
+						addComponent(maxImponibleFactor);
+						maxImponibleFactor.addValueChangeListener(listener);
+						
 						addComponent(new Label("<hr />",ContentMode.HTML){
 							{
 								setWidth("100%");
