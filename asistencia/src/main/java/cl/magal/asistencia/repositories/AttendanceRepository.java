@@ -16,5 +16,8 @@ public interface AttendanceRepository extends PagingAndSortingRepository<Attenda
 
 	@Query(value = "select a from Attendance a where a.laborerConstructionSite.constructionsite = ?1 " )
 	List<Attendance> findByConstructionsite(ConstructionSite cs);
+	
+	@Query(value = "select a from Attendance a where extract( month from a.date ) = extract ( month from ?1 ) and extract( year from a.date ) = extract ( year from ?1 )" )
+	List<Attendance> findBydMonth(Date date);
 
 }
