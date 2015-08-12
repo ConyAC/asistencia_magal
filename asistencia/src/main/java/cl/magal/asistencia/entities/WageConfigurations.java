@@ -42,6 +42,10 @@ public class WageConfigurations implements Serializable{
 	@Column(name ="mobilization")
 	Double mobilization = 0D;
 	
+	@Digits(fraction = 6 , integer = 6 )
+	@Column(name = "max_imponible_factor")
+	Double maxImponibleFactor;
+	
 	@ElementCollection(targetClass=Mobilization2.class)
 	@CollectionTable(
 	        name="mobilization2",
@@ -104,6 +108,14 @@ public class WageConfigurations implements Serializable{
 		if(getMobilizations2().contains(mobilizations2)){
 			getMobilizations2().remove(mobilizations2);
 		}
+	}
+	
+	public Double getMaxImponibleFactor() {
+		return maxImponibleFactor;
+	}
+
+	public void setMaxImponibleFactor(Double maxImponibleFactor) {
+		this.maxImponibleFactor = maxImponibleFactor;
 	}
 
 	@Override
