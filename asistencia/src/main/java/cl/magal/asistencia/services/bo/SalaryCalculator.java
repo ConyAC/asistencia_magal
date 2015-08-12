@@ -692,7 +692,7 @@ public class SalaryCalculator {
 		List<AttendanceMark> lastRealMarks = attendance.getLastMarksAsList();
 		List<AttendanceMark> projectionsMarks = lastMonthAttendance.getMarksAsList();
 		int count = 0;
-		for(int i = lastClosingDate != null ? lastClosingDate : 0 ; i < maxDays ; i ++){
+		for(int i = lastClosingDate != null && 0 < lastClosingDate  ? lastClosingDate - 1 : 0 ; i < maxDays ; i ++){
 			//si son distintos, lo contabiliza
 			if(lastRealMarks.get(i) != projectionsMarks.get(i)){
 				//lo cuenta solo si está dentro del grupo a contabilizar
@@ -784,6 +784,7 @@ public class SalaryCalculator {
 	 * @return
 	 */
 	private double calculateDescHoras(DateTime closingDateLastMonth,Attendance attendance,Attendance lastMonthAttendance) {
+		logger.debug("getJPromedio() : {}, horasDescuento {}, getDiasNoConsideradosMesAnterior() {}",getJPromedio(),horasDescuento,getDiasNoConsideradosMesAnterior());
 		return -1 * (getJPromedio() / 7.5 * horasDescuento + getDiasNoConsideradosMesAnterior() * 0.2 * getJPromedio() );
 	}
 
