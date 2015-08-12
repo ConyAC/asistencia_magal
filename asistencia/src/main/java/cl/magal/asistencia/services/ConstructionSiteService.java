@@ -826,12 +826,20 @@ public class ConstructionSiteService {
 		AdvancePaymentConfigurations advancePaymentConfig = configurationService.getSupleTableByCs(cs);
 		if(advancePaymentConfig == null )
 			throw new RuntimeException("Aún no se define la tabla de suples. Ésta es necesaria para cálcular el sueldo.");
+		
 		//fechas 
 		DateConfigurations dateConfiguration = configurationService.getDateConfigurationByCsAndMonth(cs,date);
 		if(dateConfiguration == null )
 			throw new RuntimeException("Aún no se definen las fechas de cierre de anticipo y cierre de asistencia. Ambas son necesarias para cálcular el sueldo.");
-		DateTime assistanceClose = new DateTime(dateConfiguration.getAssistance());
+
 		Date supleClose = dateConfiguration.getAdvance();
+		
+		DateTime assistanceClose = new DateTime(dateConfiguration.getAssistance()).withDayOfMonth(1);
+		//fecha cierre mes anterio
+		DateConfigurations dateConfigurationLastMonth = configurationService.getDateConfigurationByCsAndMonth(cs,date.minusMonths(1));
+		if(dateConfigurationLastMonth != null )
+			assistanceClose = new DateTime(dateConfigurationLastMonth.getAssistance());
+		
 		if(supleClose == null )
 			throw new RuntimeException("Aún no se definen las fechas de cierre de anticipo. Ésta es necesaria para cálcular el sueldo.");
 		

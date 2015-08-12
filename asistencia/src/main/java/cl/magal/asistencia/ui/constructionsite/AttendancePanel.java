@@ -1733,11 +1733,11 @@ public class AttendancePanel extends VerticalLayout implements View {
 																		setMargin(true);
 																		addComponent(new FormLayout(){
 																			{
-																				Field permissionDiscount = fg.buildAndBind("Descuento por Permiso", "permissionDiscount");
+																				Field permissionDiscount = fg.buildAndBind("Descuento por Falla", "failureDiscount");
 																				((TextField)permissionDiscount).setNullRepresentation("");
 																				permissionDiscount.addValueChangeListener(listener);
 																				
-																				Field failureDiscount = fg.buildAndBind("Descuento por Falla", "failureDiscount");
+																				Field failureDiscount = fg.buildAndBind("Descuento Adicional por Falla", "permissionDiscount");
 																				((TextField)failureDiscount).setNullRepresentation("");
 																				failureDiscount.addValueChangeListener(listener);
 																				
