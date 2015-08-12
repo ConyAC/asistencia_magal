@@ -409,6 +409,49 @@ public class ConstructionSiteService {
 		attendanceRepo.save(attendanceResult);
 		return attendanceResult;
 	}
+	
+	
+	public void resetHoliday(DateTime date) {
+		List<LaborerConstructionsite> lcs =  labcsRepo.findConstructionsiteActive();
+		List<Attendance> attendanceList =  attendanceRepo.findBydMonth(date.toDate());
+		
+		List<Attendance> attendanceResult = new ArrayList<Attendance>(lcs.size());
+		Attendance tmp = new Attendance();
+		
+		for(LaborerConstructionsite lc : lcs ){			
+			tmp.setLaborerConstructionSite(lc);
+			
+			int index = attendanceList.indexOf(tmp);
+			Attendance attendance ;
+			if(index >= 0){
+				attendance = attendanceList.remove(index);
+			}else{
+				attendance = new Attendance();
+				attendance.setLaborerConstructionSite(lc);
+				attendance.setDate(date.toDate());
+			}
+
+			for (int i = 0; i < 31; i++){
+				if( i + 1 <= date.dayOfMonth().getMaximumValue() ){		
+					int day = date.withDayOfMonth(i+1).dayOfWeek().get();
+					DateTime dt = new DateTime(date.toDate());					 
+					if( dt.getDayOfMonth() == (i+1) && day != 6 && day != 7 ){						 
+						attendance.setMark(AttendanceMark.ATTEND, i);
+					}
+				}
+				
+				if( i + 1 <= date.minusMonths(1).dayOfMonth().getMaximumValue()){
+					int day_p = date.minusMonths(1).withDayOfMonth(i+1).dayOfWeek().get();
+					DateTime dt = new DateTime(date.toDate());					 
+					if( dt.getDayOfMonth() == (i+1) && day_p != 6 && day_p != 7 ){						 
+						attendance.setLastMark(AttendanceMark.ATTEND, i);
+					}
+				}
+			}
+			attendanceResult.add(attendance);
+		}
+		attendanceRepo.save(attendanceResult);
+	}
 
 	/**
 	 * 

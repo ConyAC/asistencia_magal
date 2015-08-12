@@ -657,13 +657,14 @@ public class ConfigView extends VerticalLayout implements View {
 
 							@Override
 							public void buttonClick(ClickEvent event) {
-								ConfirmDialog.show(UI.getCurrent(), "Confirmar Acción:", "¿Está seguro de eliminar el feriado seleccionado?",
+								ConfirmDialog.show(UI.getCurrent(), "Confirmar Acción:", "¿Está seguro de eliminar de la asistencia el feriado seleccionado?",
 										"Eliminar", "Cancelar", new ConfirmDialog.Listener() {
 
 									public void onClose(ConfirmDialog dialog) {
 										if (dialog.isConfirmed()) {
 											Holiday holiday = ((BeanItem<Holiday>)holidayContainer.getItem(itemId)).getBean();
-											service.delete(holiday);
+											service.delete(holiday);											
+											service.resetHoliday(new DateTime(holiday.getDate()));
 											holidayContainer.removeItem(itemId);
 										}
 									}
