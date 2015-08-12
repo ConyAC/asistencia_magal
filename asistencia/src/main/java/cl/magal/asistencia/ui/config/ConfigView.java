@@ -670,8 +670,8 @@ public class ConfigView extends VerticalLayout implements View {
 									public void onClose(ConfirmDialog dialog) {
 										if (dialog.isConfirmed()) {
 											Holiday holiday = ((BeanItem<Holiday>)holidayContainer.getItem(itemId)).getBean();
-											service.delete(holiday);											
 											service.resetHoliday(new DateTime(holiday.getDate()));
+											service.delete(holiday);																			
 											holidayContainer.removeItem(itemId);
 										}
 									}
