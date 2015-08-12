@@ -1,5 +1,7 @@
 package cl.magal.asistencia.ui.config;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
@@ -689,7 +691,9 @@ public class ConfigView extends VerticalLayout implements View {
 		            Object colId, Property property) {
 		        // Format by property type
 		        if (property.getType() == Date.class) {
-		            return new DateTime((Date)property.getValue()).toString("dd-MMM-yyyy");
+		        	DateFormat formatter = new SimpleDateFormat("dd-MMM-yyyy");
+		        	String d = formatter.format(property.getValue());
+		        	return d;		        	
 		        }
 
 		        return super.formatPropertyValue(rowId, colId, property);
