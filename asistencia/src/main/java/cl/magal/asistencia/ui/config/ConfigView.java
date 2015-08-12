@@ -1,5 +1,7 @@
 package cl.magal.asistencia.ui.config;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
@@ -662,13 +664,14 @@ public class ConfigView extends VerticalLayout implements View {
 
 							@Override
 							public void buttonClick(ClickEvent event) {
-								ConfirmDialog.show(UI.getCurrent(), "Confirmar Acción:", "¿Está seguro de eliminar el feriado seleccionado?",
+								ConfirmDialog.show(UI.getCurrent(), "Confirmar Acción:", "¿Está seguro de eliminar de la asistencia el feriado seleccionado?",
 										"Eliminar", "Cancelar", new ConfirmDialog.Listener() {
 
 									public void onClose(ConfirmDialog dialog) {
 										if (dialog.isConfirmed()) {
 											Holiday holiday = ((BeanItem<Holiday>)holidayContainer.getItem(itemId)).getBean();
-											service.delete(holiday);
+											service.delete(holiday);											
+											service.resetHoliday(new DateTime(holiday.getDate()));
 											holidayContainer.removeItem(itemId);
 										}
 									}
@@ -688,7 +691,9 @@ public class ConfigView extends VerticalLayout implements View {
 		            Object colId, Property property) {
 		        // Format by property type
 		        if (property.getType() == Date.class) {
-		            return new DateTime((Date)property.getValue()).toString("dd-MMM-yyyy");
+		        	DateFormat formatter = new SimpleDateFormat("dd-MMM-yyyy");
+		        	String d = formatter.format(property.getValue());
+		        	return d;		        	
 		        }
 
 		        return super.formatPropertyValue(rowId, colId, property);

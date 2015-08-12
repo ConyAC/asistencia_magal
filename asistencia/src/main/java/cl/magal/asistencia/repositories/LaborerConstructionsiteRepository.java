@@ -25,5 +25,8 @@ public interface LaborerConstructionsiteRepository extends
 
 	@Query(value="select lcs.constructionsite from LaborerConstructionsite lcs where lcs.laborer = ?1 and lcs.active = 1 ")
 	ConstructionSite findConstructionsiteByLaborer(Laborer laborer);
+	
+	@Query(value="select lc from LaborerConstructionsite lc join fetch lc.activeContract where lc.active != 0 ")
+	List<LaborerConstructionsite> findConstructionsiteActive();
 
 }
