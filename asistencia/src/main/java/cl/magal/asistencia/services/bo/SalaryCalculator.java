@@ -365,6 +365,17 @@ public class SalaryCalculator {
 		colacion = null;
 		mov = null;
 		mov2 = null;
+		sab = null;
+		dps = null;
+		dpd = null;
+		sep = null;
+		salud7 = null;
+		saludAdicional = null;
+		afp = null;
+		descImposicion = null;
+		tTribut = null;
+		impto2Cat = null;
+		aDescontar = null; impto = null;
 		return true;
 	}
 	
@@ -1080,7 +1091,9 @@ public class SalaryCalculator {
 	 * @return
 	 */
 	private double calculateAFP(double afecto) {
-		return afecto * calculateAFPPorcentaje();
+		double porcentaje = calculateAFPPorcentaje();
+		logger.debug("afecto {}, porcentaje {} ",afecto,porcentaje);
+		return afecto * porcentaje;
 	}
 
 	/**
