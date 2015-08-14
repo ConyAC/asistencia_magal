@@ -22,7 +22,7 @@ public class AfpItem implements Serializable {
 	@Column(name="afp")
 	Afp afp;
 	
-	@Digits(fraction=2,integer=3,message="Solo es posible definir 2 decimales")
+	@Digits(fraction=4,integer=3,message="Solo es posible definir 4 decimales")
 	@Column(name="rate")
 	Double rate;
 
