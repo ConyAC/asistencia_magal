@@ -502,8 +502,8 @@ public class SalaryCalculator {
 		if(attendance.getDate() == null )
 			throw new RuntimeException("La asistencia tiene una fecha definida(null)");
 		
-		if(lastMonthAttendance == null )
-			throw new RuntimeException("La asistencia del mes anterior no está definida(null)");
+//		if(lastMonthAttendance == null )
+//			throw new RuntimeException("La asistencia del mes anterior no está definida(null)");
 		
 		if(overtime == null )
 			throw new RuntimeException("Las horas de sobre tiempo, no están definidas(null)");
@@ -697,8 +697,12 @@ public class SalaryCalculator {
 	 * @return
 	 */
 	private int countDiffMarksFromDay(Integer lastClosingDate,int maxDays, Attendance attendance,Attendance lastMonthAttendance, AttendanceMark ... marks) {
-		if(attendance == null || lastMonthAttendance == null )
-			throw new RuntimeException("Los objeto de asistencia no pueden ser nulo.");
+		if(attendance == null  )
+			throw new RuntimeException("El objeto de asistencia no pueden ser nulo.");
+		
+		//si no hay asistencia anterior, retorna 0 diferencias
+		if( lastMonthAttendance == null )
+			return 0;
 
 		List<AttendanceMark> lastRealMarks = attendance.getLastMarksAsList();
 		List<AttendanceMark> projectionsMarks = lastMonthAttendance.getMarksAsList();
@@ -741,13 +745,17 @@ public class SalaryCalculator {
 	 * @return
 	 */
 	private List<AttendanceMark> getDiffMarksFromDay(Integer lastClosingDate,int maxDays, Attendance attendance,Attendance lastMonthAttendance) {
-		if(attendance == null || lastMonthAttendance == null )
-			throw new RuntimeException("Los objeto de asistencia no pueden ser nulo.");
+		if(attendance == null )
+			throw new RuntimeException("El objeto de asistencia no pueden ser nulo.");
+		
+		List<AttendanceMark> resultMarks = new ArrayList<AttendanceMark>();
+		//si el objeto del mes anterior es nulo, retorna la lista vacia
+		if(lastMonthAttendance == null )
+			return resultMarks;
 
 		List<AttendanceMark> lastRealMarks = attendance.getLastMarksAsList();
 		List<AttendanceMark> projectionsMarks = lastMonthAttendance.getMarksAsList();
 		
-		List<AttendanceMark> resultMarks = new ArrayList<AttendanceMark>();
 		for(int i = lastClosingDate != null ? lastClosingDate : 0 ; i < maxDays ; i ++){
 			//si son distintos, lo contabiliza
 			if(lastRealMarks.get(i) != projectionsMarks.get(i)){

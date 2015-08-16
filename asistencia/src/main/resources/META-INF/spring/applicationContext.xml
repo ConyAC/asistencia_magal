@@ -15,6 +15,7 @@
 					   	http://www.springframework.org/schema/context/spring-context-3.1.xsd">
 
 	<context:annotation-config />
+	<context:load-time-weaver/>
 	
 	<!-- escanea las clases del package services buscando componentes -->
 	<context:component-scan base-package="cl.magal.asistencia.services" />
@@ -49,8 +50,11 @@
 		<property name="password" value="mdbuser" />
 	</bean>
 		
-	<bean id="jpaDialect" class="org.springframework.orm.jpa.vendor.EclipseLinkJpaDialect" />
-	
+	<bean id="jpaDialect" class="org.springframework.orm.jpa.vendor.EclipseLinkJpaDialect" >
+		<!-- org.eclipse.persistence.platform.database.MySQLPlatform  -->
+		<!--  <property name="databasePlatform" value="org.eclipse.persistence.platform.database.H2Platform" /> -->
+   		<!-- <property name="showSql" value="true" />  -->
+	</bean> 
 	<!--  Entity Manager Factory -->
 	<bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean" >
 		<property name="dataSource" ref="datasource"></property>
@@ -59,11 +63,13 @@
     	<property name="jpaVendorAdapter">
         	<bean class="org.springframework.orm.jpa.vendor.EclipseLinkJpaVendorAdapter" />
          </property>
+         <!-- 
 		<property name="jpaPropertyMap">
 			<map>
 				<entry key="eclipselink.weaving" value="false" />
 			</map>
 		</property>
+		 -->
 	</bean>
 	
 	<!--  Transacción manager -->

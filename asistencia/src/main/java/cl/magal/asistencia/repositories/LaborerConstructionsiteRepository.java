@@ -1,5 +1,6 @@
 package cl.magal.asistencia.repositories;
 
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.Query;
@@ -28,5 +29,10 @@ public interface LaborerConstructionsiteRepository extends
 	
 	@Query(value="select lc from LaborerConstructionsite lc join fetch lc.activeContract where lc.active != 0 ")
 	List<LaborerConstructionsite> findConstructionsiteActive();
+
+	@Query(value="select lc from LaborerConstructionsite lc join fetch lc.activeContract ac where lc.constructionsite = ?1 "
+			+ " and ( extract( year from ac.startDate) + extract( month from ac.startDate) ) <= (extract( year from ?2) + extract( month from ?2)) "
+			+ " and ( ac.terminationDate is null or (extract( year from ac.terminationDate ) + extract( month from ac.terminationDate )) >= (extract( year from  ?2 ) + extract( month from  ?2 )) ) ")
+	List<LaborerConstructionsite> findByConstructionsiteAndIsActiveThisMonth(ConstructionSite cs, Date date);
 
 }

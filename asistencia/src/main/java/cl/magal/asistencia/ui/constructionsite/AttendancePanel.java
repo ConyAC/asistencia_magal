@@ -79,8 +79,6 @@ import com.vaadin.data.util.BeanContainer;
 import com.vaadin.data.util.BeanItem;
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.data.util.filter.SimpleStringFilter;
-import com.vaadin.event.FieldEvents;
-import com.vaadin.event.FieldEvents.BlurEvent;
 import com.vaadin.event.FieldEvents.TextChangeEvent;
 import com.vaadin.event.FieldEvents.TextChangeListener;
 import com.vaadin.navigator.View;
@@ -224,6 +222,7 @@ public class AttendancePanel extends VerticalLayout implements View {
 		return dateConfig;
 	}
 	
+	DateConfigurations dateConfig = null;
 	/**
 	 * 
 	 * obtiene las configuraciones del mes seleccionado
@@ -231,8 +230,18 @@ public class AttendancePanel extends VerticalLayout implements View {
 	 */
 	private DateConfigurations getDateConfigurations(){
 		DateTime dt = getAttendanceDate();
-		DateConfigurations dateConfig = configurationService.getDateConfigurationByCsAndMonth(cs,dt);
+		if(dateConfig == null)
+			dateConfig = configurationService.getDateConfigurationByCsAndMonth(cs,dt);
 		return dateConfig;
+	}
+	
+	DateConfigurations dateConfigPastMonth = null;
+	
+	private DateConfigurations getDateConfigurationsPastMonth(){
+		DateTime dt = getAttendanceDate();
+		if(dateConfigPastMonth == null)
+			dateConfigPastMonth = configurationService.getDateConfigurationByCsAndMonth(cs,dt.minusMonths(1));
+		return dateConfigPastMonth;
 	}
 	
 	/**
@@ -251,7 +260,7 @@ public class AttendancePanel extends VerticalLayout implements View {
 	 */
 	private DateTime getPastMonthClosingDate(){
 		DateTime dt = getAttendanceDate();
-		DateConfigurations dateConfig = configurationService.getDateConfigurationByCsAndMonth(cs,dt.minusMonths(1));
+		DateConfigurations dateConfig = getDateConfigurationsPastMonth();
 		
 		if( dateConfig.getAssistance() == null ){
 			
@@ -557,7 +566,7 @@ public class AttendancePanel extends VerticalLayout implements View {
 					grid.getColumn(pid).setSortable(false);//.setWidth(50);
 				
 				//TODO si hay que cambiar la fecha de sobretiempo, aqui se deberia discriminar
-				int maxDay = getPastMonthClosingDate().getDayOfMonth();
+//				int maxDay = getPastMonthClosingDate().getDayOfMonth();
 				//calculo de la semana
 				if(((String) pid).startsWith("dmp") || ((String) pid).startsWith("dma")  ){
 					//calcula el numero del mes
@@ -1099,20 +1108,24 @@ public class AttendancePanel extends VerticalLayout implements View {
 				salaryTable.setColumnCollapsed("salaryCalculator.dpd",true);
 				salaryTable.setColumnCollapsed("salaryCalculator.col",true);
 				salaryTable.setColumnCollapsed("salaryCalculator.mov",true);
-				
+
 				salaryTable.addColumnCollapsedListener(new ColumnCollapsedObservableTable.ColumnCollapsedListener() {
 					
 					@Override
 					public void colapseColumn(ColumnCollapsedEvent event) {
 						User user = SecurityHelper.getCredentials();
+						String propertyId = (String) event.getPropertyId();
 						//agrega la columna al usuario si es que se setea como no colapsada
-						if(!event.isCollapsed()){
-							user.getSalaryColumns().add((String) event.getPropertyId());
-						}else{ //si no lo quita
-							user.getSalaryColumns().remove((String) event.getPropertyId());
+						if(!event.isCollapsed() && !user.getSalaryColumns().contains(propertyId) ){
+							user.getSalaryColumns().add(propertyId);
+							user.setPassword(null);
+							userService.saveUser(user);
+						}else if(event.isCollapsed() && user.getSalaryColumns().contains(propertyId) ){ //si no lo quita
+							user.getSalaryColumns().remove(propertyId);
+							user.setPassword(null);
+							userService.saveUser(user);
 						}
-						user.setPassword(null);
-						userService.saveUser(user);
+
 					}
 				});
 				
@@ -1576,6 +1589,8 @@ public class AttendancePanel extends VerticalLayout implements View {
 		@Override
 		public void valueChange(ValueChangeEvent event) {
 			attendanceDate.removeValueChangeListener(listener);
+			dateConfig = null;
+			dateConfigPastMonth = null;
 			populateAttendanceGrid();
 			attendanceDate.addValueChangeListener(listener);
 		}
@@ -1985,6 +2000,7 @@ public class AttendancePanel extends VerticalLayout implements View {
 										AfpAndInsuranceConfigurations afpTable = getAfpAndInsuranceConfigurations();
 										
 										//verifica que se tengan bien las configuraciones del mes
+										logger.debug("TERCERO");
 										DateConfigurations dc = getDateConfigurations();
 										if(!validDateConfiguration(dc))
 											return null;
@@ -2371,7 +2387,6 @@ public class AttendancePanel extends VerticalLayout implements View {
 			salaryContainer.addAll(salaries);
 			salaryContainer.sort(new String[]{"laborerConstructionsite.activeContract.jobCode"},new boolean[]{ true });
 
-			salaryTable.refreshRowCache();
 		}catch(Exception e){
 			logger.error("Error al calcular los sueldos",e);
 			String mensaje = "Error al calcular los sueldos.";
