@@ -127,7 +127,7 @@ public class Accident implements Serializable {
 	}
 	
 	public int getTotal(){
-		return Days.daysBetween(new DateTime(fromDate), new DateTime(toDate)).getDays();
+		return Days.daysBetween(new DateTime(fromDate), new DateTime(toDate)).getDays() + 1;
 	}
 
 	public boolean isConfirmed() {
