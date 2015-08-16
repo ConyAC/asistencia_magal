@@ -1,0 +1,4 @@
+<Context path="/asistencia" docBase="/asistencia">
+    <Loader
+        loaderClass="org.springframework.instrument.classloading.tomcat.TomcatInstrumentableClassLoader"/>
+</Context>
