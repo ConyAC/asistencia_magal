@@ -79,8 +79,6 @@ import com.vaadin.data.util.BeanContainer;
 import com.vaadin.data.util.BeanItem;
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.data.util.filter.SimpleStringFilter;
-import com.vaadin.event.FieldEvents;
-import com.vaadin.event.FieldEvents.BlurEvent;
 import com.vaadin.event.FieldEvents.TextChangeEvent;
 import com.vaadin.event.FieldEvents.TextChangeListener;
 import com.vaadin.navigator.View;
@@ -2371,7 +2369,6 @@ public class AttendancePanel extends VerticalLayout implements View {
 			salaryContainer.addAll(salaries);
 			salaryContainer.sort(new String[]{"laborerConstructionsite.activeContract.jobCode"},new boolean[]{ true });
 
-			salaryTable.refreshRowCache();
 		}catch(Exception e){
 			logger.error("Error al calcular los sueldos",e);
 			String mensaje = "Error al calcular los sueldos.";

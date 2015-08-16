@@ -77,6 +77,8 @@
             <property name="eclipselink.logging.level" value="OFF"/>
             <property name="eclipselink.logging.level.sql" value="OFF"/>
             <property name="eclipselink.logging.parameters" value="false"/>
+            
+            <property name="eclipselink.weaving" value="true" />
         </properties>
 	</persistence-unit>
 </persistence>

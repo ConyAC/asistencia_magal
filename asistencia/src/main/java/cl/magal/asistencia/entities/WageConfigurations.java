@@ -111,7 +111,7 @@ public class WageConfigurations implements Serializable{
 	}
 	
 	public Double getMaxImponibleFactor() {
-		return maxImponibleFactor;
+		return maxImponibleFactor == null ? 0 : maxImponibleFactor;
 	}
 
 	public void setMaxImponibleFactor(Double maxImponibleFactor) {

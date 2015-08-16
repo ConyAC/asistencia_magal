@@ -332,7 +332,7 @@ public class ConstructionSiteService {
 	public List<Attendance> getAttendanceByConstruction(ConstructionSite cs,DateTime date) {
 		//obtiene la lista de trabajadores de la obra
 		logger.debug("Obteniendo Trabajadores");
-		List<LaborerConstructionsite> lcs =  labcsRepo.findByConstructionsiteAndIsActive(cs);
+		List<LaborerConstructionsite> lcs =  labcsRepo.findByConstructionsiteAndIsActiveThisMonth(cs,date.toDate());
 		logger.debug("Asistencia");
 		List<Attendance> attendanceList =  attendanceRepo.findByConstructionsiteAndMonth(cs,date.toDate());
 		
@@ -565,7 +565,7 @@ public class ConstructionSiteService {
 	public List<Overtime> getOvertimeByConstruction(ConstructionSite cs,DateTime date) {
 		//obtiene la lista de trabajadores de la obra
 		logger.debug("obteniendo trabajadores");
-		List<LaborerConstructionsite> lcs =  labcsRepo.findByConstructionsiteAndIsActive(cs);
+		List<LaborerConstructionsite> lcs =  labcsRepo.findByConstructionsiteAndIsActiveThisMonth(cs,date.toDate());
 		logger.debug("oteniendo sobretiempos");
 		List<Overtime> overtimeResult =  overtimeRepo.findByConstructionsiteAndMonth(cs,date.toDate());
 		Overtime tmp = new Overtime();
@@ -905,7 +905,7 @@ public class ConstructionSiteService {
 		//busca las cuotas de las herramientas
 		Map<Integer,Integer> toolFees = getToolFeesMapByConstructionAndMonth(cs,date);
 
-		List<LaborerConstructionsite> lcs =  labcsRepo.findByConstructionsiteAndIsActive(cs);
+		List<LaborerConstructionsite> lcs =  labcsRepo.findByConstructionsiteAndIsActiveThisMonth(cs,date.toDate());
 		
 		List<Salary> salariesList =  salaryRepo.findByConstructionsiteAndMonth(cs,date.toDate());
 		//busca el salario del mes anterior, para mostrar el ultimo jornal promedio
