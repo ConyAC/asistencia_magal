@@ -81,6 +81,10 @@
             <property name="eclipselink.logging.level.sql" value="OFF"/>
             <property name="eclipselink.logging.parameters" value="false"/>
             
+            <!-- optimización de escritura en batch -->
+            <property name="eclipselink.jdbc.batch-writing" value="JDBC"/>           
+            <property name="eclipselink.jdbc.batch-writing.size" value="500" />
+             <!-- optimización de weaving que permite el uso de listas lazy y varias otras optimizaciones -->
             <property name="eclipselink.weaving" value="true" />
         </properties>
 	</persistence-unit>

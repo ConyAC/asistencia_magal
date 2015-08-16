@@ -112,7 +112,7 @@ public class User implements Serializable {
             @JoinColumn(name = "constructionsiteId", referencedColumnName = "constructionsiteId")
      }
 	)
-     @ManyToMany(targetEntity=ConstructionSite.class,fetch=FetchType.EAGER)
+     @ManyToMany
      List<ConstructionSite> cs = new LinkedList<ConstructionSite>();
     
     /**
