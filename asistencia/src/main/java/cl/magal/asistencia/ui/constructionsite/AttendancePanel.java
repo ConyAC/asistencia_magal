@@ -67,6 +67,7 @@ import com.vaadin.data.Container.Filterable;
 import com.vaadin.data.Container.SimpleFilterable;
 import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeEvent;
+import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.data.Property.ValueChangeNotifier;
 import com.vaadin.data.fieldgroup.BeanFieldGroup;
 import com.vaadin.data.fieldgroup.DefaultFieldGroupFieldFactory;
@@ -341,7 +342,6 @@ public class AttendancePanel extends VerticalLayout implements View {
 		}
 
 		populateAttendanceGrid();
-		configureInterface();
 	}
 
 	private void showErrorParam() {
@@ -1136,15 +1136,25 @@ public class AttendancePanel extends VerticalLayout implements View {
 						   propertyId.equals("specialBond")||
 						   propertyId.equals("loanBond")||
 						   propertyId.equals("bondMov2")){
-							tf.addBlurListener(new FieldEvents.BlurListener() {
-								
-								@Override
-								public void blur(BlurEvent event) {
-									BeanItem<Salary> beanItem = salaryContainer.getItem(itemId);
-									//guarda el salario
-									constructionSiteService.save(beanItem.getBean());
-								}
-							});
+							
+						tf.addValueChangeListener(new ValueChangeListener() {
+							
+							@Override
+							public void valueChange(ValueChangeEvent event) {
+								BeanItem<Salary> beanItem = salaryContainer.getItem(itemId);
+								//guarda el salario
+								constructionSiteService.save(beanItem.getBean());
+							}
+						});
+//							tf.addBlurListener(new FieldEvents.BlurListener() {
+//								
+//								@Override
+//								public void blur(BlurEvent event) {
+//									BeanItem<Salary> beanItem = salaryContainer.getItem(itemId);
+//									//guarda el salario
+//									constructionSiteService.save(beanItem.getBean());
+//								}
+//							});
 						}
 						return tf;
 					}
@@ -1214,6 +1224,9 @@ public class AttendancePanel extends VerticalLayout implements View {
 			table.setColumnFooter(propertyId, Utils.formatInteger( counts[i] ) );
 			i++;
 		}	
+		
+		//ordena las tablas por rol
+		table.sort(new Object[]{"laborerConstructionSite.activeContract.jobCode"}, new boolean[]{true});
 	}
 
 	/**
@@ -2283,19 +2296,16 @@ public class AttendancePanel extends VerticalLayout implements View {
 		//		final WorkThread thread = new WorkThread();
 		//		thread.start();
 		DateTime dt = getAttendanceDate();
-		
+
+		reloadMonthGridData(dt);
+
+		reloadMonthAttendanceData(dt);
 		
 		createHeaders(attendanceGrid);
 		setAttendanceOrder();
 		
 		createHeaders(overtimeGrid);
 		setOvertimeOrders();
-		
-		//		DateTime attendanceDate = dt.withDayOfMonth(dt.dayOfMonth().getMinimumValue());
-		//		DateTime date2 = attendanceDate.withDayOfMonth( attendanceDate.dayOfMonth().getMaximumValue() );
-		reloadMonthGridData(dt);
-
-		reloadMonthAttendanceData(dt);
 		
 		configureInterface();
 		
@@ -2361,6 +2371,7 @@ public class AttendancePanel extends VerticalLayout implements View {
 			salaryContainer.addAll(salaries);
 			salaryContainer.sort(new String[]{"laborerConstructionsite.activeContract.jobCode"},new boolean[]{ true });
 
+			salaryTable.refreshRowCache();
 		}catch(Exception e){
 			logger.error("Error al calcular los sueldos",e);
 			String mensaje = "Error al calcular los sueldos.";
