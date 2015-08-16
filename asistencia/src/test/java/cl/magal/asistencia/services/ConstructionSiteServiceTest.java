@@ -1,7 +1,6 @@
 package cl.magal.asistencia.services;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -28,7 +27,6 @@ import cl.magal.asistencia.entities.Attendance;
 import cl.magal.asistencia.entities.ConstructionSite;
 import cl.magal.asistencia.entities.DateConfigurations;
 import cl.magal.asistencia.entities.FamilyAllowanceConfigurations;
-import cl.magal.asistencia.entities.Laborer;
 import cl.magal.asistencia.entities.Overtime;
 import cl.magal.asistencia.entities.Salary;
 import cl.magal.asistencia.entities.TaxationConfigurations;
@@ -36,11 +34,10 @@ import cl.magal.asistencia.entities.User;
 import cl.magal.asistencia.entities.WageConfigurations;
 import cl.magal.asistencia.entities.enums.Status;
 import cl.magal.asistencia.helpers.ConstructionSiteHelper;
-import cl.magal.asistencia.helpers.LaborerHelper;
 import cl.magal.asistencia.util.SecurityHelper;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(locations = { "/META-INF/spring/testApplicationContext.xml" })
+@ContextConfiguration(locations = { "/META-INF/spring/testApplicationContext3.xml" })
 public class ConstructionSiteServiceTest {
 
 	Logger logger = LoggerFactory.getLogger(ConstructionSiteServiceTest.class);
@@ -285,47 +282,47 @@ public class ConstructionSiteServiceTest {
 		assertTrue("La pagina debe contener el segundo elemento",page.getContent().contains(segunda));
 	}
 	
-	@Test
-	public void testAddLaborer(){
-		//crea una obra
-		ConstructionSite cs = ConstructionSiteHelper.newConstrutionSite();
-		// lo guarda
-		csService.save(cs);		
-		//verifica
-		
-		//agrega un trabajador a la obra
-		Laborer laborer1 = LaborerHelper.newLaborer();
-		csService.addLaborerToConstructionSite(laborer1,cs);
-		
-		//verifica que el trabajador tiene un id válido
-		LaborerHelper.verify(laborer1);
-		
-		ConstructionSite dbcs = csService.findConstructionSite(cs.getId());
-		
-		//verifica que al recuperar la obra, se obtenga el trabajador guardado
-		assertNotNull("El objeto guardado no puede ser nulo",dbcs);
-		assertTrue("El objeto guardado debe contener trabajadores",!dbcs.getLaborers().isEmpty());
-		assertEquals("El objeto guardado debe contener el trabajador agregado",dbcs.getLaborers().get(0),laborer1 );
-		
-		//agrega otro mas
-		//agrega un trabajador a la obra
-		Laborer laborer2 = LaborerHelper.newLaborer();
-		csService.addLaborerToConstructionSite(laborer2,cs);
-		
-		//verifica que el trabajador tiene un id válido
-		LaborerHelper.verify(laborer2);
-		
-		dbcs = csService.findConstructionSite(cs.getId());
-		
-		//los ids de los laborer no pueden ser iguales
-		assertNotEquals("los ids de los laborer no pueden ser iguales",laborer2.getId(),laborer1.getId());
-		
-		//verifica que al recuperar la obra, se obtenga el trabajador guardado
-		assertNotNull("El objeto guardado no puede ser nulo",dbcs);
-		assertTrue("El objeto guardado debe contener trabajadores",!dbcs.getLaborers().isEmpty());
-		assertEquals("El objeto guardado debe contener el trabajador agregado",dbcs.getLaborers().get(1),laborer2 );
-		
-	}
+//	@Test
+//	public void testAddLaborer(){
+//		//crea una obra
+//		ConstructionSite cs = ConstructionSiteHelper.newConstrutionSite();
+//		// lo guarda
+//		csService.save(cs);		
+//		//verifica
+//		
+//		//agrega un trabajador a la obra
+//		Laborer laborer1 = LaborerHelper.newLaborer();
+//		csService.addLaborerToConstructionSite(laborer1,cs);
+//		
+//		//verifica que el trabajador tiene un id válido
+//		LaborerHelper.verify(laborer1);
+//		
+//		ConstructionSite dbcs = csService.findConstructionSite(cs.getId());
+//		
+//		//verifica que al recuperar la obra, se obtenga el trabajador guardado
+//		assertNotNull("El objeto guardado no puede ser nulo",dbcs);
+//		assertTrue("El objeto guardado debe contener trabajadores",!dbcs.getLaborers().isEmpty());
+//		assertEquals("El objeto guardado debe contener el trabajador agregado",dbcs.getLaborers().get(0),laborer1 );
+//		
+//		//agrega otro mas
+//		//agrega un trabajador a la obra
+//		Laborer laborer2 = LaborerHelper.newLaborer();
+//		csService.addLaborerToConstructionSite(laborer2,cs);
+//		
+//		//verifica que el trabajador tiene un id válido
+//		LaborerHelper.verify(laborer2);
+//		
+//		dbcs = csService.findConstructionSite(cs.getId());
+//		
+//		//los ids de los laborer no pueden ser iguales
+//		assertNotEquals("los ids de los laborer no pueden ser iguales",laborer2.getId(),laborer1.getId());
+//		
+//		//verifica que al recuperar la obra, se obtenga el trabajador guardado
+//		assertNotNull("El objeto guardado no puede ser nulo",dbcs);
+//		assertTrue("El objeto guardado debe contener trabajadores",!dbcs.getLaborers().isEmpty());
+//		assertEquals("El objeto guardado debe contener el trabajador agregado",dbcs.getLaborers().get(1),laborer2 );
+//		
+//	}
 	
 	/**
 	 * Test que permite probar el orden en el que trae las obras de un usuario en particular, el orden es el siguiente
@@ -572,5 +569,18 @@ public class ConstructionSiteServiceTest {
 
 	private void fakeLogin(User user) {
 		SecurityHelper.setUser(user);
+	}
+	
+	@Test
+	public void getAttendanceByConstructionTest(){
+		
+		logger.debug("iniciando test\n\n");
+		
+		Long constructionId = 10L;
+		//busca una asistencia completa
+		ConstructionSite cs = csService.findConstructionSite(constructionId);
+		cs.setId(constructionId);
+		DateTime monthDate = DateTime.parse("2015-08-01");
+		csService.getAttendanceByConstruction(cs,monthDate);
 	}
 }

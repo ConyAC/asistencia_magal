@@ -134,12 +134,6 @@ public class ConstructionSiteService {
 	public ConstructionSite findConstructionSite(Long id) {
 		logger.debug("recuperando la información de la obra ");
 		ConstructionSite cs =constructionSiterepo.findOneNotDeleted(id);
-		if(cs != null){
-			//recupera la lista de trabajadores
-			logger.debug("recuperando lista de trabajadores ");
-			List<Laborer> lbs = labRepo.findByConstructionSite(id);
-			cs.setLaborers(lbs);
-		}
 		return cs;
 	}
 
@@ -230,7 +224,7 @@ public class ConstructionSiteService {
 		//		laborer.addConstructionSite(dbcs);
 		labRepo.save(laborer); //FIXME
 		//		dbcs.addLaborer(laborer);
-		logger.debug("dbcs.getLaborer( ) "+dbcs.getLaborers() );
+//		logger.debug("dbcs.getLaborer( ) "+dbcs.getLaborers() );
 		constructionSiterepo.save(dbcs);
 	}
 
@@ -359,8 +353,10 @@ public class ConstructionSiteService {
 			Attendance attendance ;
 			if(index >= 0){
 				attendance = attendanceList.remove(index);
+				logger.debug("encontró el attendance, {} laborer {}, cs {}",attendance.getLaborerConstructionSite().getId(),lc.getLaborer(),lc.getConstructionsite());
 			}else{
 				attendance = new Attendance();
+				logger.debug("no encontró el attendance, laborer {}, cs {}",lc.getLaborer(),lc.getConstructionsite());
 				attendance.setLaborerConstructionSite(lc);
 				attendance.setDate(date.toDate());
 			}
@@ -401,10 +397,13 @@ public class ConstructionSiteService {
 					}
 				}
 			}
+			
 			attendanceResult.add(attendance);
 		}
 		//optimización para hacerlo en una transacción
+		logger.debug("guardando attendances {}",attendanceResult);
 		attendanceRepo.save(attendanceResult);
+		logger.debug("attendances guardados");
 		return attendanceResult;
 	}
 	
@@ -1110,6 +1109,10 @@ public class ConstructionSiteService {
 	 */
 	public List<Attendance> findAllAttendances(ConstructionSite cs) {
 		return attendanceRepo.findByConstructionsite(cs);
+	}
+
+	public void saveSalaries(List<Salary> salaries) {
+		salaryRepo.save(salaries);
 	}
 	
 }

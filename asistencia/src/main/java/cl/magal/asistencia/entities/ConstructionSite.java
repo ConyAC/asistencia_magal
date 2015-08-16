@@ -11,18 +11,15 @@ import java.util.LinkedList;
 import java.util.List;
 
 import javax.persistence.Basic;
-import javax.persistence.CascadeType;
 import javax.persistence.CollectionTable;
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
@@ -105,21 +102,7 @@ public class ConstructionSite implements Serializable {
     @Column(name = "status",nullable=false)
     private Status status = Status.ACTIVE;
     
-    @JoinTable(name="laborer_constructionsite",
-    joinColumns = { 
-    		@JoinColumn(name = "constructionsiteId", referencedColumnName = "constructionsiteId")
-     }, 
-     inverseJoinColumns = { 	
-            @JoinColumn(name = "laborerId", referencedColumnName = "laborerId")
-     }
-	)
-    @ManyToMany(targetEntity=Laborer.class,fetch=FetchType.EAGER,cascade = { CascadeType.PERSIST, CascadeType.MERGE })
-    List<Laborer> laborers = new LinkedList<Laborer>();
-    
-//    @OneToMany(targetEntity=Team.class,fetch=FetchType.EAGER)
-//    List<Team> teams = new LinkedList<Team>();
-    
-    @ManyToMany(mappedBy="cs",cascade = { CascadeType.PERSIST, CascadeType.MERGE })
+    @ManyToMany(mappedBy="cs")
     List<User> users;
     
     @ElementCollection(targetClass=String.class)
@@ -210,16 +193,6 @@ public class ConstructionSite implements Serializable {
 		this.name = name;
 	}
 	
-	public List<Laborer> getLaborers() {
-		if(laborers == null )
-			laborers = new LinkedList<Laborer>();
-		return laborers;
-	}
-
-	public void setLaborers(List<Laborer> laborers) {
-		this.laborers = laborers;
-	}
-
 	public User getPersonInCharge() {
 		return personInCharge;
 	}
@@ -228,14 +201,6 @@ public class ConstructionSite implements Serializable {
 		this.personInCharge = personInCharge;
 	}
 	
-//	public List<Team> getTeams() {
-//		return teams;
-//	}
-//
-//	public void setTeams(List<Team> teams) {
-//		this.teams = teams;
-//	}
-
 	public List<User> getUsers() {
 		if(users == null)
 			users = new ArrayList<User>();
@@ -297,19 +262,4 @@ public class ConstructionSite implements Serializable {
 		this.constructionCompany = constructionCompany;
 	}
 
-//    public void addLaborer(Laborer laborer) {
-//        if (!getLaborers().contains(laborer)) {
-//        	logger.debug("agregando laborer "+laborer);
-//        	getLaborers().add(laborer);
-//        }
-//        if (!laborer.getConstructionSites().contains(this)) {
-//            laborer.getConstructionSites().add(this);
-//        }
-//    }
-//    
-//    public void addTeam(Team team) {
-//        if (!getTeams().contains(team)) {
-//        	getTeams().add(team);
-//        }
-//    }
 }

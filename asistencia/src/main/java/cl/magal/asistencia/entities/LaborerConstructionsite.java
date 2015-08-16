@@ -140,10 +140,10 @@ public class LaborerConstructionsite implements Serializable {
      * define el contrato activo o el primero
      */
     @NotNull
-    @OneToOne(mappedBy="laborerConstructionSite",fetch =FetchType.EAGER, cascade = {CascadeType.PERSIST,CascadeType.MERGE},optional=false)
+    @OneToOne(mappedBy="laborerConstructionSite",optional=false)
     Contract activeContract;
     
-    @Column(name = "suple_code")
+    @Column(name = "suple_code",nullable=false)
   	Integer supleCode = 1;
     
     public double getFailureDiscount() {
@@ -493,7 +493,7 @@ public class LaborerConstructionsite implements Serializable {
 
 	@Override
     public String toString() {
-        return "jpa.magal.entities.LaborerConstructionsite[ laborerId=" + (laborer != null ? laborer.getId() : "laborer nulo") + " ]";
+        return "jpa.magal.entities.LaborerConstructionsite[ id = "+id+", laborerId=" + (laborer != null ? laborer.getId() : "laborer nulo") + " ]";
     }
     
 }
