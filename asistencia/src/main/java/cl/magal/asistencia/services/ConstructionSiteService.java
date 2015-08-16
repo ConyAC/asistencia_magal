@@ -290,7 +290,7 @@ public class ConstructionSiteService {
 	 */
 	public Map<Integer,Attendance> getAttendanceMapByConstructionAndMonth(ConstructionSite cs,DateTime date) {
 		//obtiene la lista de trabajadores de la obra
-		List<LaborerConstructionsite> lcs =  labcsRepo.findByConstructionsiteAndIsActive(cs);
+		List<LaborerConstructionsite> lcs =  labcsRepo.findByConstructionsiteAndIsActiveThisMonth(cs,date.toDate());
 		logger.debug("trabajadores activos {} ",lcs);
 //		logger.debug("date {} ",date);
 
