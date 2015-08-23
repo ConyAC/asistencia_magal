@@ -135,10 +135,8 @@ public class LaborerService {
 			throw new RuntimeException("El trabajador no puede ser nula");
 		
 		//si el trabajador es nuevo, lo guarda primero
-		laborerRepo.save(laborerConstructionSite.getLaborer());
-		
-		//guarda los contratos
-		laborerConstructionsiteRepo.save(laborerConstructionSite);		
+		if(laborerConstructionSite.getLaborer().getId() == null )
+			laborerRepo.save(laborerConstructionSite.getLaborer());
 		
 		//si el contrato es nuevo, lo guarda primero
 		if(laborerConstructionSite.getActiveContract().getId() == null ){
@@ -146,7 +144,10 @@ public class LaborerService {
 				laborerConstructionSite.getActiveContract().setLaborerConstructionSite(laborerConstructionSite);
 			contractRepo.save(laborerConstructionSite.getActiveContract());
 		}
-
+		
+		//guarda 
+		laborerConstructionsiteRepo.save(laborerConstructionSite);		
+		
 	}
 
 	public List<Laborer> findAllLaborer() {
