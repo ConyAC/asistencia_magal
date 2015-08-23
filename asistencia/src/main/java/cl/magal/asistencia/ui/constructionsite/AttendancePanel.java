@@ -67,7 +67,6 @@ import com.vaadin.data.Container.Filterable;
 import com.vaadin.data.Container.SimpleFilterable;
 import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeEvent;
-import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.data.Property.ValueChangeNotifier;
 import com.vaadin.data.fieldgroup.BeanFieldGroup;
 import com.vaadin.data.fieldgroup.DefaultFieldGroupFieldFactory;
@@ -681,6 +680,27 @@ public class AttendancePanel extends VerticalLayout implements View {
 				HorizontalLayout hl = new HorizontalLayout(){
 					{
 						setSpacing(true);
+						
+						final Button btnGuardar = new Button("Calcular y Guardar",FontAwesome.FLOPPY_O);
+						btnGuardar.setDisableOnClick(true);
+						btnGuardar.addClickListener(new Button.ClickListener() {
+							@Override
+							public void buttonClick(ClickEvent event) {
+								
+								try{
+									List<Salary> salaries = new ArrayList<Salary>(salaryContainer.size());
+									for(Long itemId : salaryContainer.getItemIds()){
+										salaries.add(salaryContainer.getItem(itemId).getBean());
+									}
+									constructionSiteService.saveSalaries(salaries);
+									supleTable.refreshRowCache();
+									createTableFooter(supleTable);
+								}finally{
+									btnGuardar.setEnabled(true);
+								}
+							}
+						});
+						addComponent(btnGuardar);
 
 						final Button btnValidate = new Button("Validar Negativos",FontAwesome.CHECK_CIRCLE_O);
 						btnValidate.setDisableOnClick(true);
@@ -786,7 +806,7 @@ public class AttendancePanel extends VerticalLayout implements View {
 				supleTable.addGeneratedColumn("supleSection", new Table.ColumnGenerator() {
 
 					@Override
-					public Object generateCell(Table source, Object itemId, Object columnId) {
+					public Object generateCell(Table source,final Object itemId, Object columnId) {
 						HorizontalLayout hl = new HorizontalLayout();
 						hl.setSizeFull();
 
@@ -798,29 +818,38 @@ public class AttendancePanel extends VerticalLayout implements View {
 						}
 						cb.setPropertyDataSource(beanItem.getItemProperty("laborerConstructionSite.supleCode"));
 						cb.setReadOnly(true);
-						hl.addComponent(cb);		
-
+						hl.addComponent(cb);	
+						
 						final Button btnSuple = new Button(FontAwesome.ARROW_CIRCLE_O_RIGHT);
+						btnSuple.setData(false);
 						btnSuple.addClickListener(new Button.ClickListener() {
 
 							@Override
 							public void buttonClick(ClickEvent event) {
-								logger.debug(" suple value calculated ");
 								//obliga a calcular el suple con la tabla
 								//define el suple como calculado
-								beanItem.getItemProperty("calculatedSuple").setValue(true);
-								//obliga a que se recalcule el suple
-								beanItem.getItemProperty("forceSuple").getValue();
-								//lo pide explicitamente para obligar a recalcular el suple
-								double suple = (Double) beanItem.getItemProperty("suple").getValue();
-								//recupera monto suple de la tabla
-								beanItem.getItemProperty("suple").setValue(suple);
-								//guarda el trabajador, para guardar el codigo de suple
-								laborerService.save(beanItem.getBean().getLaborerConstructionSite());
-								//guarda el salario
-								constructionSiteService.save(beanItem.getBean());
 
+								synchronized(btnSuple){
+									
+									beanItem.getItemProperty("calculatedSuple").setValue(true);
+									//obliga a que se recalcule el suple
+									beanItem.getItemProperty("forceSuple").getValue();
+									//lo pide explicitamente para obligar a recalcular el suple
+									double suple = (Double) beanItem.getItemProperty("suple").getValue();
+									btnSuple.setData(true);
+									Boolean b = (Boolean) btnSuple.getData();
+									logger.debug("suple calculado {} {}",b,itemId);
+									//recupera monto suple de la tabla
+									beanItem.getItemProperty("suple").setValue(suple);
+								}
+								//guarda el trabajador, para guardar el codigo de suple
+//								laborerService.save(beanItem.getBean().getLaborerConstructionSite());
+								//guarda el salario
+//								constructionSiteService.save(beanItem.getBean());
+								
 								btnSuple.setVisible(false);
+								
+								
 							}							
 						});
 						btnSuple.setVisible(!(Boolean) beanItem.getItemProperty("calculatedSuple").getValue());
@@ -846,15 +875,17 @@ public class AttendancePanel extends VerticalLayout implements View {
 								//								
 								//								//si no son iguales los valores
 								//								boolean sameValues = supleAmount != null && value != null && supleAmount.doubleValue() == value.doubleValue();
-								boolean sameValues = false;
-
-								beanItem.getItemProperty("calculatedSuple").setValue(sameValues);
-
-								btnSuple.setVisible(!sameValues);
+								synchronized(btnSuple){
+									Boolean b = (Boolean) btnSuple.getData();
+									boolean sameValues = false;
+									beanItem.getItemProperty("calculatedSuple").setValue(b);
+									btnSuple.setVisible(!b);
+									btnSuple.setData(false);
+								}
 								//independiente de lo que pase, guarda el nuevo suple
-								constructionSiteService.save(beanItem.getBean());
+//								constructionSiteService.save(beanItem.getBean());
 
-								createTableFooter(supleTable);
+//								createTableFooter(supleTable);
 							}
 						});
 
@@ -889,17 +920,17 @@ public class AttendancePanel extends VerticalLayout implements View {
 						tf.setNullRepresentation("");
 						tf.setImmediate(true);
 						if(propertyId.equals("suple")){
-							tf.addValueChangeListener(new Property.ValueChangeListener() {
-
-								@Override
-								public void valueChange(ValueChangeEvent event) {
-									//									logger.debug(" suple value changed ");
-									//									BeanItem<Salary> beanItem = salaryContainer.getItem(itemId);
-									//									beanItem.getItemProperty("calculatedSuple").setValue(false);
-									//									//guarda el salario
-									//									service.save(beanItem.getBean());
-								}
-							});
+//							tf.addValueChangeListener(new Property.ValueChangeListener() {
+//
+//								@Override
+//								public void valueChange(ValueChangeEvent event) {
+//									//									logger.debug(" suple value changed ");
+//									//									BeanItem<Salary> beanItem = salaryContainer.getItem(itemId);
+//									//									beanItem.getItemProperty("calculatedSuple").setValue(false);
+//									//									//guarda el salario
+//									//									service.save(beanItem.getBean());
+//								}
+//							});
 						}
 						return tf;
 					}
@@ -938,6 +969,23 @@ public class AttendancePanel extends VerticalLayout implements View {
 					{
 
 						setSpacing(true);
+						
+						final Button btnGuardar = new Button("Calcular y Guardar",FontAwesome.FLOPPY_O);
+						btnGuardar.setDisableOnClick(true);
+						btnGuardar.addClickListener(new Button.ClickListener() {
+							@Override
+							public void buttonClick(ClickEvent event) {
+								salaryTable.refreshRowCache();
+								createTableFooter(salaryTable);
+								List<Salary> salaries = new ArrayList<Salary>(salaryContainer.size());
+								for(Long itemId : salaryContainer.getItemIds()){
+									salaries.add(salaryContainer.getItem(itemId).getBean());
+								}
+								constructionSiteService.saveSalaries(salaries);
+								btnGuardar.setEnabled(true);
+							}
+						});
+						addComponent(btnGuardar);
 
 						final Button btnValidate = new Button("Validar Negativos",FontAwesome.CHECK_CIRCLE_O);
 						btnValidate.setDisableOnClick(true);
@@ -1052,6 +1100,7 @@ public class AttendancePanel extends VerticalLayout implements View {
 					@Override
 					public Object generateCell(final Table source, final Object itemId,final Object columnId) {
 						final BeanItem<Salary> item = (BeanItem<Salary>) salaryContainer.getItem(itemId);
+						salaryContainer.getItem(itemId).getItemProperty("forceSalary").getValue();
 						final Label label  = new Label("<b>"+Utils.formatInteger((Integer) salaryContainer.getContainerProperty(itemId, columnId).getValue())+"</b>"+
 								"  ("+Utils.formatInteger((Integer) salaryContainer.getContainerProperty(itemId, "roundSalary").getValue())+")");
 						label.setContentMode(ContentMode.HTML);
@@ -1063,11 +1112,11 @@ public class AttendancePanel extends VerticalLayout implements View {
 									if("jornalPromedio".equals(pid)){
 									}else if("suple".equals(pid)){
 									}
-									Object result = salaryContainer.getItem(itemId).getItemProperty("forceSalary").getValue();
+									salaryContainer.getItem(itemId).getItemProperty("forceSalary").getValue();
+									//forza actualizar el item
 									label.setValue( "<b>"+Utils.formatInteger((Integer) salaryContainer.getContainerProperty(itemId, columnId).getValue())+"</b>"+
 											"  ("+Utils.formatInteger((Integer) salaryContainer.getContainerProperty(itemId, "roundSalary").getValue())+")");
-									Utils.notifyPropertyValueChanged(item,"jornalBaseMes","vtrato","valorSabado","vsCorrd","sobreTiempo","descHoras","bonifImpo","glegal","afecto","sobreAfecto","cargas","asigFamiliar","colacion","mov","mov2","tnoAfecto");
-									createTableFooter(salaryTable);
+									
 								}
 							});
 						return label;
@@ -1140,31 +1189,32 @@ public class AttendancePanel extends VerticalLayout implements View {
 								propertyId.equals("lastJornalPromedio") ||
 								propertyId.equals("suple") )
 							return null;
-						TextField tf = new TextField();
-						tf.setWidth("100%");
-						tf.setNullRepresentation("");
-						tf.setImmediate(true);
 						if(propertyId.equals("jornalPromedio")||
 								propertyId.equals("descHours")||
 								propertyId.equals("specialBond")||
-								propertyId.equals("loanBond")||
+//								propertyId.equals("loanBond")||
 								propertyId.equals("bondMov2")){
 
-							tf.addValueChangeListener(new ValueChangeListener() {
-
-								@Override
-								public void valueChange(ValueChangeEvent event) {
-									//
-									if(!loadingData){
-										BeanItem<Salary> beanItem = salaryContainer.getItem(itemId);
-										//guarda el salario
-										logger.debug("Guardando salary");
-										constructionSiteService.save(beanItem.getBean());
-									}
-								}
-							});
+							TextField tf = new TextField();
+							tf.setWidth("100%");
+							tf.setNullRepresentation("");
+							tf.setImmediate(true);
+//							tf.addValueChangeListener(new ValueChangeListener() {
+//
+//								@Override
+//								public void valueChange(ValueChangeEvent event) {
+//									//
+//									if(!loadingData){
+////										BeanItem<Salary> beanItem = salaryContainer.getItem(itemId);
+//										//guarda el salario
+////										logger.debug("Guardando salary");
+////										constructionSiteService.save(beanItem.getBean());
+//									}
+//								}
+//							});
+							return tf;
 						}
-						return tf;
+						return null;
 					}
 				});
 
@@ -2359,7 +2409,7 @@ public class AttendancePanel extends VerticalLayout implements View {
 		}
 		
 		loadingData = false;
-
+		
 		// Enable polling and set frequency to 1 seconds
 		//		UI.getCurrent().setPollInterval(1000);
 	}
@@ -2401,6 +2451,7 @@ public class AttendancePanel extends VerticalLayout implements View {
 			logger.debug("salarios cargados");
 			salaryContainer.sort(new String[]{"laborerConstructionsite.activeContract.jobCode"},new boolean[]{ true });
 			logger.debug("cambio de orden");
+			salaryTable.refreshRowCache();
 
 		}catch(Exception e){
 			logger.error("Error al calcular los sueldos",e);

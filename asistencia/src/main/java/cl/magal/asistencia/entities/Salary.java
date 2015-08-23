@@ -124,6 +124,7 @@ public class Salary implements Serializable {
 			throw new RuntimeException("Es necesario que el objeto de calculo sea distinto a null");
 		supleCalculator.setAttendance(attendance);
 		salaryCalculator.setAttendance(attendance);
+		getForceSuple();
 		getForceSalary();
 	}
 	

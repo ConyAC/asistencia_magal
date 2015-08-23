@@ -9,7 +9,6 @@ import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 
 import cl.magal.asistencia.entities.ConstructionSite;
-import cl.magal.asistencia.entities.Laborer;
 import cl.magal.asistencia.entities.User;
 
 public interface ConstructionSiteRepository extends PagingAndSortingRepository<ConstructionSite, Long> {
@@ -64,9 +63,6 @@ public interface ConstructionSiteRepository extends PagingAndSortingRepository<C
 	
 	@Query(value="SELECT cs FROM ConstructionSite cs WHERE :user MEMBER OF cs.users " )
 	List<ConstructionSite> findByUser(@Param("user")User user);
-
-	@Query(value="SELECT cs FROM ConstructionSite cs WHERE :laborer MEMBER OF cs.laborers " )
-	List<ConstructionSite> findByLaborers(@Param("laborer")Laborer laborer);
 
 	@Query(value="select cs FROM User u join u.cs cs WHERE u = ?1 and cs.status = cl.magal.asistencia.entities.enums.Status.ACTIVE and cs.deleted = false ") //activos usuario
 	List<ConstructionSite> findActiveByUser(User user);

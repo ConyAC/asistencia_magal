@@ -17,7 +17,6 @@ import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -112,13 +111,13 @@ public class User implements Serializable {
             @JoinColumn(name = "constructionsiteId", referencedColumnName = "constructionsiteId")
      }
 	)
-     @ManyToMany
+     @ManyToMany(targetEntity=ConstructionSite.class)
      List<ConstructionSite> cs = new LinkedList<ConstructionSite>();
     
     /**
      * Tabla que guarda los propertyId seleccionadas por el usuario de la tabla de sueldos
      */
-    @ElementCollection(targetClass= String.class,fetch=FetchType.EAGER )
+    @ElementCollection(targetClass= String.class)
     @CollectionTable(name="user_salarycolumns", joinColumns = @JoinColumn(name = "userId"))
     @Column(name="salary_column")
     Set<String> salaryColumns = new HashSet<String>(); 
