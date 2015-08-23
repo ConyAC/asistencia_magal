@@ -2450,7 +2450,7 @@ public class AttendancePanel extends VerticalLayout implements View {
 			salaryContainer.addAll(salaries);
 			logger.debug("salarios cargados");
 			salaryContainer.sort(new String[]{"laborerConstructionsite.activeContract.jobCode"},new boolean[]{ true });
-			logger.debug("cambio de orden");
+			logger.debug("cambio de orden"); 
 			salaryTable.refreshRowCache();
 
 		}catch(Exception e){
