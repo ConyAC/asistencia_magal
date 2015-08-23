@@ -140,7 +140,7 @@ public class LaborerConstructionsite implements Serializable {
      * define el contrato activo o el primero
      */
     @NotNull
-    @OneToOne(mappedBy="laborerConstructionSite",optional=false)
+    @OneToOne(mappedBy="laborerConstructionSite",cascade = {CascadeType.PERSIST,CascadeType.MERGE},optional=false)
     Contract activeContract;
     
     @Column(name = "suple_code",nullable=false)
