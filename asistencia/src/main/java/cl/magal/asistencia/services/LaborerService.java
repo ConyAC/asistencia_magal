@@ -138,13 +138,6 @@ public class LaborerService {
 		if(laborerConstructionSite.getLaborer().getId() == null )
 			laborerRepo.save(laborerConstructionSite.getLaborer());
 		
-		//si el contrato es nuevo, lo guarda primero
-//		if(laborerConstructionSite.getActiveContract().getId() == null ){
-//			if(laborerConstructionSite.getActiveContract().getLaborerConstructionSite() == null )
-//				laborerConstructionSite.getActiveContract().setLaborerConstructionSite(laborerConstructionSite);
-//			contractRepo.save(laborerConstructionSite.getActiveContract());
-//		}
-		
 		//guarda 
 		laborerConstructionsiteRepo.save(laborerConstructionSite);		
 		

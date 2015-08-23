@@ -703,7 +703,7 @@ public class SalaryCalculator {
 		//si no hay asistencia anterior, retorna 0 diferencias
 		if( lastMonthAttendance == null )
 			return 0;
-		
+
 		List<AttendanceMark> lastRealMarks = attendance.getLastMarksAsList();
 		List<AttendanceMark> projectionsMarks = lastMonthAttendance.getMarksAsList();
 		int count = 0;

@@ -16,7 +16,6 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import javax.persistence.TableGenerator;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.validation.constraints.NotNull;
@@ -34,14 +33,9 @@ public class Attendance implements Serializable {
 	private static final long serialVersionUID = 2755191834377196594L;
 	
 	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
 	@Column(name="attendanceId")
-	@GeneratedValue(strategy = GenerationType.TABLE, generator = "attendance_gen")
-	@TableGenerator(name = "attendance_gen",
-	    table = "jpagen_generators",
-	    pkColumnName = "name",
-	    pkColumnValue = "JPAGEN_ATTENDANCE",
-	    valueColumnName = "value",allocationSize=500)
 	Long id;
 	
 	@NotNull(message="La fecha es necesaria.")
