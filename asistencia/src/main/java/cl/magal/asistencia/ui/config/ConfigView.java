@@ -289,22 +289,89 @@ public class ConfigView extends VerticalLayout implements View {
 				final BeanItemContainer<AfpItem> container = new BeanItemContainer<AfpItem>(AfpItem.class,afpAndInsurance.getAfpTable());
 				container.addNestedContainerProperty("afp.description");
 				
-				final Table table = new Table("Tabla AFP"){
+				final Table table = new Table(){
 					{
 						setWidth("100%");
 						setPageLength(6);
 					}
 				};
-				
+
+				HorizontalLayout hl = new HorizontalLayout();
+				hl.setWidth("100%");
+				hl.setSpacing(true);		
+				addComponent(hl);
+
+				final TextField nombre = new TextField("Nombre AFP");
+				hl.addComponent(nombre);
+				final TextField porc = new TextField("Porcentaje");
+				hl.addComponent(porc);
 				
 				//agrega el listener a los field creados
 				table.setTableFieldFactory(new ListenerFieldFactory(listener));
 				
 				table.setContainerDataSource(container);
 				
-				table.setVisibleColumns("afp.description","rate");
-				table.setColumnHeaders("Afp","Tasa");
+				table.addGeneratedColumn("delete", new Table.ColumnGenerator() {
+					
+					@Override
+					public Object generateCell(Table source, final Object itemId, Object columnId) {
+						return new Button(null,new Button.ClickListener() {
+
+							@Override
+							public void buttonClick(ClickEvent event) {
+								ConfirmDialog.show(UI.getCurrent(), "Confirmar Acción:", "¿Está seguro de eliminar la AFP seleccionada?",
+										"Eliminar", "Cancelar", new ConfirmDialog.Listener() {
+
+									public void onClose(ConfirmDialog dialog) {
+										if (dialog.isConfirmed()) {
+//											Holiday holiday = ((BeanItem<Holiday>)holidayContainer.getItem(itemId)).getBean();
+//											service.resetHoliday(new DateTime(holiday.getDate()));
+//											service.delete(holiday);																			
+//											holidayContainer.removeItem(itemId);
+										}
+									}
+								});
+							}
+						}){{setIcon(FontAwesome.TRASH_O);}};
+					}
+				});
+				
+				table.setVisibleColumns("afp.description","rate","delete");
+				table.setColumnHeaders("Afp","Tasa","Eliminar");
 				table.setEditable(true);
+				
+				Button btnAdd = new Button(null,FontAwesome.PLUS);
+				hl.addComponent(btnAdd);
+				btnAdd.addClickListener(new Button.ClickListener() {
+
+					@Override
+					public void buttonClick(ClickEvent event) {
+						try{
+							if(nombre.getValue() == "" || porc.getValue() == null){
+								Notification.show("Debe ingresar tanto el nombre como el porcentaje de la nueva AFP.",Type.ERROR_MESSAGE);
+								return;
+//							}else if(service.findExistingDate(fecha.getValue()) != null){
+//								logger.debug("DDD: "+service.findExistingDate(fecha.getValue()).toString());
+//								Notification.show("La fecha ya ha sido registrada.",Type.ERROR_MESSAGE);
+//								return;
+							}else{
+//								Holiday h = new Holiday();
+//								h.setName(nombre.getValue());
+//								h.setDate(fecha.getValue());
+//								service.save(h);
+//								holidayContainer.addBean(h);
+								
+								nombre.setValue("");
+								porc.setValue(null);						
+							}
+						}catch(Exception e){
+							Notification.show("Error al quitar elemento",Type.ERROR_MESSAGE);
+							logger.error("Error al quitar elemento",e);
+						}
+					}
+				});		
+				
+				setComponentAlignment(hl, Alignment.TOP_RIGHT);
 				
 				addComponent(table);
 				if(!SecurityHelper.hasPermission(Permission.DEFINIR_VARIABLE_GLOBAL)){
