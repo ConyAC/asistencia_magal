@@ -910,7 +910,7 @@ public class ConstructionSiteService {
 		
 		List<Salary> salaries = new ArrayList<Salary>(lcs.size());
 		
-		int holydays = countHolidaysMonth(date);
+		int holydays = countHolidaysMonthOnLaborerDays(date);
 		
 		AfpAndInsuranceConfigurations afpConfig = configurationService.findAfpAndInsuranceConfiguration();
 		
