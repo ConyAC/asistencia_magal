@@ -802,7 +802,7 @@ public class ConstructionSiteService {
 		if(taxTable == null )
 			throw new RuntimeException("Aún no se definen la tabla de impuestos. Ésta es necesaria para cálcular el sueldo.");
 		
-		int holydays = countHolidaysMonth(date);
+		int holydays = countHolidaysMonthOnLaborerDays(date);
 		
 		//busca la asistencia del mes 
 		Map<Integer,Attendance> attendance = getAttendanceMapByConstructionAndMonth(cs, date);
@@ -1100,6 +1100,21 @@ public class ConstructionSiteService {
 	 */
 	public int countHolidaysMonth(DateTime attendanceDate) {
 		return holidayRepo.countByMonth(attendanceDate.toDate());
+	}
+	
+	/**
+	 * Cuenta la cantidad de feriados del mes en días habiles
+	 * @param attendanceDate
+	 * @return
+	 */
+	public int countHolidaysMonthOnLaborerDays(DateTime attendanceDate) {
+		List<Holiday> holidays = holidayRepo.findByMonth(attendanceDate.toDate());
+		int count = 0;
+		for(Holiday h : holidays){
+			if(Utils.isLaborerDay(new DateTime(h.getDate())))
+				count++;
+		}
+		return count;
 	}
 
 	/***
