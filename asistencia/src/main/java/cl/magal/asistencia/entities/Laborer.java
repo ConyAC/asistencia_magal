@@ -17,9 +17,11 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.PrePersist;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
@@ -153,9 +155,9 @@ public class Laborer implements Serializable {
     @Column(name="bank_account")
     private String bankAccount;
 
-    @Column(name = "afp" , nullable = false)
-    @Convert(converter = AfpConverter.class)
-    private Afp afp;
+    @JoinColumn(name="afp")
+    @OneToOne
+    private AfpItem afp;
     
     @Column(name="isapre" , nullable = false)
     @Convert(converter = IsapreConverter.class)
@@ -184,8 +186,6 @@ public class Laborer implements Serializable {
     public void prePersist(){
     	if(firstname == null)
     		firstname = "Nuevo trabajador";
-    	if(afp == null)
-    		afp = Afp.MODELO;
     	if(maritalStatus == null )
     		maritalStatus = MaritalStatus.SOLTERO;
     	if(isapre == null)
@@ -372,11 +372,11 @@ public class Laborer implements Serializable {
 //        this.contractId = contractId;
 //    }
 
-    public Afp getAfp() {
+    public AfpItem getAfp() {
 		return afp;
 	}
 
-	public void setAfp(Afp afp) {
+	public void setAfp(AfpItem afp) {
 		this.afp = afp;
 	}
 

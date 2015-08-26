@@ -3,6 +3,7 @@ package cl.magal.asistencia.ui.config;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
@@ -21,6 +22,7 @@ import org.vaadin.dialogs.ConfirmDialog;
 import ru.xpoft.vaadin.VaadinView;
 import cl.magal.asistencia.entities.AfpAndInsuranceConfigurations;
 import cl.magal.asistencia.entities.AfpItem;
+import cl.magal.asistencia.entities.Bank;
 import cl.magal.asistencia.entities.ConstructionSite;
 import cl.magal.asistencia.entities.DateConfigurations;
 import cl.magal.asistencia.entities.FamilyAllowanceConfigurations;
@@ -116,6 +118,8 @@ public class ConfigView extends VerticalLayout implements View {
 		ts.addTab(drawAsignacion(),"Tabla de Asignación Familiar",FontAwesome.GROUP);
 		//agrega cada tab
 		ts.addTab(drawFeriados(), "Feriados", FontAwesome.CALENDAR);
+		
+		ts.addTab(drawBancos(),"Bancos",FontAwesome.DOLLAR);
 		
 
 	}
@@ -285,9 +289,8 @@ public class ConfigView extends VerticalLayout implements View {
 						addComponent(sis);
 					}
 				});
-				
-				final BeanItemContainer<AfpItem> container = new BeanItemContainer<AfpItem>(AfpItem.class,afpAndInsurance.getAfpTable());
-				container.addNestedContainerProperty("afp.description");
+							
+				final BeanItemContainer<AfpItem> container = new BeanItemContainer<AfpItem>(AfpItem.class, afpAndInsurance.getAfpTable());
 				
 				final Table table = new Table(){
 					{
@@ -303,14 +306,12 @@ public class ConfigView extends VerticalLayout implements View {
 
 				final TextField nombre = new TextField("Nombre AFP");
 				hl.addComponent(nombre);
-				final TextField porc = new TextField("Porcentaje");
-				hl.addComponent(porc);
+				final TextField tasa = new TextField("Tasa");
+				hl.addComponent(tasa);
 				
 				//agrega el listener a los field creados
-				table.setTableFieldFactory(new ListenerFieldFactory(listener));
-				
-				table.setContainerDataSource(container);
-				
+				table.setTableFieldFactory(new ListenerFieldFactory(listener));				
+				table.setContainerDataSource(container);				
 				table.addGeneratedColumn("delete", new Table.ColumnGenerator() {
 					
 					@Override
@@ -324,10 +325,9 @@ public class ConfigView extends VerticalLayout implements View {
 
 									public void onClose(ConfirmDialog dialog) {
 										if (dialog.isConfirmed()) {
-//											Holiday holiday = ((BeanItem<Holiday>)holidayContainer.getItem(itemId)).getBean();
-//											service.resetHoliday(new DateTime(holiday.getDate()));
-//											service.delete(holiday);																			
-//											holidayContainer.removeItem(itemId);
+											AfpItem afp = ((BeanItem<AfpItem>)container.getItem(itemId)).getBean();
+											confService.delete(afp);
+											container.removeItem(itemId);
 										}
 									}
 								});
@@ -336,7 +336,7 @@ public class ConfigView extends VerticalLayout implements View {
 					}
 				});
 				
-				table.setVisibleColumns("afp.description","rate","delete");
+				table.setVisibleColumns("name","rate","delete");
 				table.setColumnHeaders("Afp","Tasa","Eliminar");
 				table.setEditable(true);
 				
@@ -347,26 +347,22 @@ public class ConfigView extends VerticalLayout implements View {
 					@Override
 					public void buttonClick(ClickEvent event) {
 						try{
-							if(nombre.getValue() == "" || porc.getValue() == null){
-								Notification.show("Debe ingresar tanto el nombre como el porcentaje de la nueva AFP.",Type.ERROR_MESSAGE);
+							if(nombre.getValue() == "" || tasa.getValue() == null){
+								Notification.show("Debe ingresar tanto el nombre como la tasa de la nueva AFP.",Type.ERROR_MESSAGE);
 								return;
-//							}else if(service.findExistingDate(fecha.getValue()) != null){
-//								logger.debug("DDD: "+service.findExistingDate(fecha.getValue()).toString());
-//								Notification.show("La fecha ya ha sido registrada.",Type.ERROR_MESSAGE);
-//								return;
 							}else{
-//								Holiday h = new Holiday();
-//								h.setName(nombre.getValue());
-//								h.setDate(fecha.getValue());
-//								service.save(h);
-//								holidayContainer.addBean(h);
+								AfpItem a = new AfpItem();
+								a.setName(nombre.getValue());
+								a.setRate(Double.valueOf(tasa.getValue()));
+								confService.save(a);
+								container.addBean(a);
 								
 								nombre.setValue("");
-								porc.setValue(null);						
+								tasa.setValue(null);						
 							}
 						}catch(Exception e){
-							Notification.show("Error al quitar elemento",Type.ERROR_MESSAGE);
-							logger.error("Error al quitar elemento",e);
+							Notification.show("Error al añadir la afp.",Type.ERROR_MESSAGE);
+							logger.error("Error al añadir elemento",e);
 						}
 					}
 				});		
@@ -689,6 +685,131 @@ public class ConfigView extends VerticalLayout implements View {
 		
 		List<Holiday> h = service.findAllHoliday();
 		holidayContainer = new BeanItemContainer<Holiday>(Holiday.class, h);
+
+		HorizontalLayout hl = new HorizontalLayout();
+		hl.setWidth("100%");
+		hl.setSpacing(true);		
+		vl.addComponent(hl);
+
+		final TextField nombre = new TextField("Nombre Feriado");
+		hl.addComponent(nombre);
+		final DateField fecha = new DateField("Fecha");
+		hl.addComponent(fecha);
+
+		final Table table = new Table(){
+			{
+				setWidth("100%");
+				setContainerDataSource(holidayContainer);
+				setTableFieldFactory(new DefaultFieldFactory(){
+
+					public Field<?> createField(final Container container,
+							final Object itemId,Object propertyId,com.vaadin.ui.Component uiContext) {
+						Field<?> field = null; 
+						if( propertyId.equals("name")){
+							field = new TextField();
+							((TextField)field).setNullRepresentation("");
+						}
+						else if(  propertyId.equals("date") ){
+							field = new DateField();
+						}
+						else {
+							return null;
+						}
+						return field;
+					}
+				});
+				
+				addGeneratedColumn("delete", new Table.ColumnGenerator() {
+					
+					@Override
+					public Object generateCell(Table source, final Object itemId, Object columnId) {
+						return new Button(null,new Button.ClickListener() {
+
+							@Override
+							public void buttonClick(ClickEvent event) {
+								ConfirmDialog.show(UI.getCurrent(), "Confirmar Acción:", "¿Está seguro de eliminar de la asistencia el feriado seleccionado?",
+										"Eliminar", "Cancelar", new ConfirmDialog.Listener() {
+
+									public void onClose(ConfirmDialog dialog) {
+										if (dialog.isConfirmed()) {
+											Holiday holiday = ((BeanItem<Holiday>)holidayContainer.getItem(itemId)).getBean();
+											service.resetHoliday(new DateTime(holiday.getDate()));
+											service.delete(holiday);																			
+											holidayContainer.removeItem(itemId);
+										}
+									}
+								});
+							}
+						}){{setIcon(FontAwesome.TRASH_O);}};
+					}
+				});
+				
+				setVisibleColumns("name","date","delete");
+				setColumnHeaders("Nombre","Fecha","Eliminar");
+				setPageLength(4);
+			}
+			
+			@Override
+		    protected String formatPropertyValue(Object rowId,
+		            Object colId, Property property) {
+		        // Format by property type
+		        if (property.getType() == Date.class) {
+		        	DateFormat formatter = new SimpleDateFormat("dd-MMM-yyyy");
+		        	String d = formatter.format(property.getValue());
+		        	return d;		        	
+		        }
+
+		        return super.formatPropertyValue(rowId, colId, property);
+		    }
+		};	
+		
+		vl.addComponent(table);
+
+		Button btnAdd = new Button(null,FontAwesome.PLUS);
+		hl.addComponent(btnAdd);
+		btnAdd.addClickListener(new Button.ClickListener() {
+
+			@Override
+			public void buttonClick(ClickEvent event) {
+				try{
+					if(nombre.getValue() == "" || fecha.getValue() == null){
+						Notification.show("Debe ingresar tanto el nombre como la fecha del nuevo feriado.",Type.ERROR_MESSAGE);
+						return;
+					}else if(service.findExistingDate(fecha.getValue()) != null){
+						logger.debug("DDD: "+service.findExistingDate(fecha.getValue()).toString());
+						Notification.show("La fecha ya ha sido registrada.",Type.ERROR_MESSAGE);
+						return;
+					}else{
+						Holiday h = new Holiday();
+						h.setName(nombre.getValue());
+						h.setDate(fecha.getValue());
+						service.save(h);
+						holidayContainer.addBean(h);
+						
+						nombre.setValue("");
+						fecha.setValue(null);						
+					}
+				}catch(Exception e){
+					Notification.show("Error al quitar elemento",Type.ERROR_MESSAGE);
+					logger.error("Error al quitar elemento",e);
+				}
+			}
+		});		
+		
+		vl.setComponentAlignment(hl, Alignment.TOP_RIGHT);
+
+		return vl;
+	}
+	
+	
+	protected VerticalLayout drawBancos() {
+		VerticalLayout vl = new VerticalLayout();
+		vl.setSpacing(true);
+		vl.setMargin(true);
+		vl.setSizeFull();
+		
+//		List<Bank> b = service.findAllHoliday();
+//		holidayContainer = new BeanItemContainer<Holiday>(Holiday.class, h);
 
 		HorizontalLayout hl = new HorizontalLayout();
 		hl.setWidth("100%");

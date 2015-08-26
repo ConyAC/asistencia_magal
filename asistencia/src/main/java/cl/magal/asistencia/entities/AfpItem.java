@@ -2,15 +2,20 @@ package cl.magal.asistencia.entities;
 
 import java.io.Serializable;
 
+import javax.persistence.Basic;
 import javax.persistence.Column;
-import javax.persistence.Convert;
-import javax.persistence.Embeddable;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
 import javax.validation.constraints.Digits;
+import javax.validation.constraints.NotNull;
 
-import cl.magal.asistencia.entities.converter.AfpConverter;
-import cl.magal.asistencia.entities.enums.Afp;
-
-@Embeddable
+@Entity
+@Table(name = "afp_item")
 public class AfpItem implements Serializable {
 
 	/**
@@ -18,20 +23,30 @@ public class AfpItem implements Serializable {
 	 */
 	private static final long serialVersionUID = 1881942842723477339L;
 	
-	@Convert(converter = AfpConverter.class)
-	@Column(name="afp")
-	Afp afp;
+	@Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "afp_itemId")
+    private Long id;
+	
+    @Basic(optional = false)
+    @NotNull(message="El nombre es necesario")
+    @Column(name = "name")
+    private String name;
 	
 	@Digits(fraction=4,integer=3,message="Solo es posible definir 4 decimales")
 	@Column(name="rate")
 	Double rate;
-
-	public Afp getAfp() {
-		return afp;
+	
+	@ManyToOne
+	@JoinColumn(name ="afp_and_insuranceId",updatable=false,nullable=false)
+	AfpAndInsuranceConfigurations afpAndInsuranceConfigurations;
+	
+	public String getName() {
+		return name;
 	}
 
-	public void setAfp(Afp afp) {
-		this.afp = afp;
+	public void setName(String name) {
+		this.name = name;
 	}
 
 	public Double getRate() {
@@ -44,30 +59,6 @@ public class AfpItem implements Serializable {
 
 	@Override
 	public String toString() {
-		return "AfpItem [" + (afp != null ? "afp=" + afp + ", " : "")
-				+ (rate != null ? "rate=" + rate : "") + "]";
-	}
-
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((afp == null) ? 0 : afp.hashCode());
-		return result;
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		AfpItem other = (AfpItem) obj;
-		if (afp != other.afp)
-			return false;
-		return true;
-	}
-	
+		return "AfpItem [id=" + id + ", name=" + name + ", rate=" + rate + "]";
+	}	
 }

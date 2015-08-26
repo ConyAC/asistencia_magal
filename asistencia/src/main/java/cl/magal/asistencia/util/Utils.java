@@ -369,10 +369,10 @@ public class Utils {
 	 * @param afp
 	 * @return
 	 */
-	public static Double getAfpRate(List<AfpItem> afpList,Afp afp){
+	public static Double getAfpRate(List<AfpItem> afpList, AfpItem afp){
 		
 		for(AfpItem item : afpList)
-			if(item.getAfp() == afp )
+			if(item == afp )
 				return item.getRate()/100;
 		return 0.1144;//FIX si no encuentra, retorna una por defecto?
 	}
