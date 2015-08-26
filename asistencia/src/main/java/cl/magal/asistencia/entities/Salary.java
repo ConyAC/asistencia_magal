@@ -75,7 +75,7 @@ public class Salary implements Serializable {
 	Integer overtimeHours = 0;
 	
 	@Column(name="desc_hours")
-	Integer descHours = 0;
+	Double descHours = 0D;
 	
 	@Column(name="loan_bond")
 	Integer loanBond = 0;
@@ -224,10 +224,10 @@ public class Salary implements Serializable {
 	 * Número de horas de descuento
 	 * @return
 	 */
-	public Integer getDescHours() {
-		return descHours == null ? 0 : descHours;
+	public Double getDescHours() {
+		return descHours == null ? 0D : descHours;
 	}
-	public void setDescHours(Integer descHours) {
+	public void setDescHours(Double descHours) {
 		this.descHours = descHours;
 	}
 	public boolean isCalculatedSuple() {

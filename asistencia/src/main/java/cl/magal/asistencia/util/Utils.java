@@ -347,6 +347,14 @@ public class Utils {
 	    return saturdays;
 	}
 	
+	public static boolean isLaborerDay(DateTime date){
+		return date.getDayOfWeek() == DateTimeConstants.MONDAY ||
+				date.getDayOfWeek() == DateTimeConstants.TUESDAY || 
+						date.getDayOfWeek() == DateTimeConstants.WEDNESDAY ||
+								date.getDayOfWeek() == DateTimeConstants.THURSDAY ||
+										date.getDayOfWeek() == DateTimeConstants.FRIDAY;
+	}
+	
 	
 	/**
 	 * Obtiene la movilización 2 de la empresa dada
