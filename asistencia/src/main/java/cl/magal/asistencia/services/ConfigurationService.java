@@ -16,14 +16,17 @@ import cl.magal.asistencia.entities.AdvancePaymentConfigurations;
 import cl.magal.asistencia.entities.AdvancePaymentItem;
 import cl.magal.asistencia.entities.AfpAndInsuranceConfigurations;
 import cl.magal.asistencia.entities.AfpItem;
+import cl.magal.asistencia.entities.Bank;
 import cl.magal.asistencia.entities.ConstructionSite;
 import cl.magal.asistencia.entities.DateConfigurations;
 import cl.magal.asistencia.entities.FamilyAllowanceConfigurations;
+import cl.magal.asistencia.entities.Holiday;
 import cl.magal.asistencia.entities.TaxationConfigurations;
 import cl.magal.asistencia.entities.WageConfigurations;
 import cl.magal.asistencia.repositories.AdvancePaymentRepository;
 import cl.magal.asistencia.repositories.AfpAndInsuranceRepository;
 import cl.magal.asistencia.repositories.AfpItemRepository;
+import cl.magal.asistencia.repositories.BankRepository;
 import cl.magal.asistencia.repositories.DateConfigurationsRepository;
 import cl.magal.asistencia.repositories.FamilyAllowanceRepository;
 import cl.magal.asistencia.repositories.TaxationRepository;
@@ -48,6 +51,8 @@ public class ConfigurationService {
 	FamilyAllowanceRepository familyAllowanceRepo;
 	@Autowired
 	AfpItemRepository afpItemRepo;
+	@Autowired
+	BankRepository bankRepo;
 
 
 	public WageConfigurations findWageConfigurations() {
@@ -172,5 +177,17 @@ public class ConfigurationService {
 	
 	public void save(AfpItem afpItem) {
 		afpItemRepo.save(afpItem);
+	}
+	
+	public void delete(Bank bank) {
+		bankRepo.delete(bank);
+	}
+	
+	public void save(Bank bank) {
+		bankRepo.save(bank);
+	}
+	
+	public List<Bank> findBank() {
+		return (List<Bank>) bankRepo.findAll();
 	}
 }

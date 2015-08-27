@@ -917,3 +917,9 @@ ADD PRIMARY KEY (`afp_itemId`)  COMMENT '';
 
 ALTER TABLE `magal_asistencia`.`afp_item` 
 CHANGE COLUMN `afp_itemId` `afp_itemId` INT(11) NOT NULL AUTO_INCREMENT COMMENT '' ;
+
+CREATE TABLE `bank` (
+  `bankId` bigint(20) NOT NULL AUTO_INCREMENT,
+  `name` varchar(512) DEFAULT NULL,
+  PRIMARY KEY (`bankId`)
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=latin1;

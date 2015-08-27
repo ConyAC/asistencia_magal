@@ -26,7 +26,7 @@ public class AfpItem implements Serializable {
 	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "afp_itemId")
-    private Long id;
+    Long id;
 	
     @Basic(optional = false)
     @NotNull(message="El nombre es necesario")
@@ -55,6 +55,15 @@ public class AfpItem implements Serializable {
 
 	public void setRate(Double rate) {
 		this.rate = rate;
+	}
+	
+	public AfpAndInsuranceConfigurations getAfpAndInsuranceConfigurations() {
+		return afpAndInsuranceConfigurations;
+	}
+
+	public void setAfpAndInsuranceConfigurations(
+			AfpAndInsuranceConfigurations afpAndInsuranceConfigurations) {
+		this.afpAndInsuranceConfigurations = afpAndInsuranceConfigurations;
 	}
 
 	@Override

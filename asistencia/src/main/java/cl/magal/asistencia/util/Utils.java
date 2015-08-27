@@ -45,7 +45,7 @@ public class Utils {
 	static Logger logger = LoggerFactory.getLogger(Utils.class);
 
 	static DecimalFormatSymbols decimalFormatSymbols;
-	static DecimalFormat decimalFormatSinDecimal;
+	static DecimalFormat decimalFormatSinDecimal,decimalFormat;
 	
 	public static DecimalFormatSymbols getDecimalFormatSymbols(){
 		if(decimalFormatSymbols == null){
@@ -404,6 +404,13 @@ public class Utils {
 		for(WithdrawalSettlement w : withdrawalSettlements)
 			sum += w.getPrice();
 		return sum;
+	}
+
+	public static DecimalFormat getDecimalFormat(){
+	if(decimalFormat == null){
+		decimalFormat = new DecimalFormat("#,###.####", getDecimalFormatSymbols());
+	}
+		return decimalFormat;
 	}
 }
 

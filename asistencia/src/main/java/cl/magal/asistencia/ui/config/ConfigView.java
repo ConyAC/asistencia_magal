@@ -86,6 +86,7 @@ public class ConfigView extends VerticalLayout implements View {
 	public static final String NAME = "configuraciones";
 	BeanItemContainer<ConstructionSite> constructionContainer = new BeanItemContainer<ConstructionSite>(ConstructionSite.class);
 	BeanItemContainer<Holiday> holidayContainer = new BeanItemContainer<Holiday>(Holiday.class);
+	BeanItemContainer<Bank> bankContainer = new BeanItemContainer<Bank>(Bank.class);
 	BeanItem<Holiday> item;
 	
 	@Autowired
@@ -352,13 +353,15 @@ public class ConfigView extends VerticalLayout implements View {
 								return;
 							}else{
 								AfpItem a = new AfpItem();
+								AfpAndInsuranceConfigurations bean = ((BeanItem<AfpAndInsuranceConfigurations>)fg.getItemDataSource()).getBean();
+								a.getAfpAndInsuranceConfigurations().setId(bean.getId());
 								a.setName(nombre.getValue());
-								a.setRate(Double.valueOf(tasa.getValue()));
+								a.setRate((Double) Utils.getDecimalFormat().parse(tasa.getValue()));
 								confService.save(a);
 								container.addBean(a);
 								
 								nombre.setValue("");
-								tasa.setValue(null);						
+								tasa.setValue("");						
 							}
 						}catch(Exception e){
 							Notification.show("Error al añadir la afp.",Type.ERROR_MESSAGE);
@@ -803,28 +806,27 @@ public class ConfigView extends VerticalLayout implements View {
 	
 	
 	protected VerticalLayout drawBancos() {
+		
 		VerticalLayout vl = new VerticalLayout();
 		vl.setSpacing(true);
 		vl.setMargin(true);
 		vl.setSizeFull();
 		
-//		List<Bank> b = service.findAllHoliday();
-//		holidayContainer = new BeanItemContainer<Holiday>(Holiday.class, h);
+		List<Bank> b = confService.findBank();
+		bankContainer = new BeanItemContainer<Bank>(Bank.class, b);
 
 		HorizontalLayout hl = new HorizontalLayout();
 		hl.setWidth("100%");
 		hl.setSpacing(true);		
 		vl.addComponent(hl);
 
-		final TextField nombre = new TextField("Nombre Feriado");
+		final TextField nombre = new TextField("Nombre Banco");
 		hl.addComponent(nombre);
-		final DateField fecha = new DateField("Fecha");
-		hl.addComponent(fecha);
 
 		final Table table = new Table(){
 			{
 				setWidth("100%");
-				setContainerDataSource(holidayContainer);
+				setContainerDataSource(bankContainer);
 				setTableFieldFactory(new DefaultFieldFactory(){
 
 					public Field<?> createField(final Container container,
@@ -833,9 +835,6 @@ public class ConfigView extends VerticalLayout implements View {
 						if( propertyId.equals("name")){
 							field = new TextField();
 							((TextField)field).setNullRepresentation("");
-						}
-						else if(  propertyId.equals("date") ){
-							field = new DateField();
 						}
 						else {
 							return null;
@@ -852,15 +851,14 @@ public class ConfigView extends VerticalLayout implements View {
 
 							@Override
 							public void buttonClick(ClickEvent event) {
-								ConfirmDialog.show(UI.getCurrent(), "Confirmar Acción:", "¿Está seguro de eliminar de la asistencia el feriado seleccionado?",
+								ConfirmDialog.show(UI.getCurrent(), "Confirmar Acción:", "¿Está seguro de eliminar el banco seleccionado?",
 										"Eliminar", "Cancelar", new ConfirmDialog.Listener() {
 
 									public void onClose(ConfirmDialog dialog) {
 										if (dialog.isConfirmed()) {
-											Holiday holiday = ((BeanItem<Holiday>)holidayContainer.getItem(itemId)).getBean();
-											service.resetHoliday(new DateTime(holiday.getDate()));
-											service.delete(holiday);																			
-											holidayContainer.removeItem(itemId);
+											Bank banco = ((BeanItem<Bank>)bankContainer.getItem(itemId)).getBean();
+											confService.delete(banco);																			
+											bankContainer.removeItem(itemId);
 										}
 									}
 								});
@@ -869,8 +867,8 @@ public class ConfigView extends VerticalLayout implements View {
 					}
 				});
 				
-				setVisibleColumns("name","date","delete");
-				setColumnHeaders("Nombre","Fecha","Eliminar");
+				setVisibleColumns("name","delete");
+				setColumnHeaders("Nombre","Eliminar");
 				setPageLength(4);
 			}
 			
@@ -897,25 +895,19 @@ public class ConfigView extends VerticalLayout implements View {
 			@Override
 			public void buttonClick(ClickEvent event) {
 				try{
-					if(nombre.getValue() == "" || fecha.getValue() == null){
-						Notification.show("Debe ingresar tanto el nombre como la fecha del nuevo feriado.",Type.ERROR_MESSAGE);
-						return;
-					}else if(service.findExistingDate(fecha.getValue()) != null){
-						logger.debug("DDD: "+service.findExistingDate(fecha.getValue()).toString());
-						Notification.show("La fecha ya ha sido registrada.",Type.ERROR_MESSAGE);
+					if(nombre.getValue() == ""){
+						Notification.show("Debe ingresar el nombre del nuevo banco.",Type.ERROR_MESSAGE);
 						return;
 					}else{
-						Holiday h = new Holiday();
-						h.setName(nombre.getValue());
-						h.setDate(fecha.getValue());
-						service.save(h);
-						holidayContainer.addBean(h);
+						Bank b = new Bank();
+						b.setName(nombre.getValue());
+						confService.save(b);
+						bankContainer.addBean(b);
 						
 						nombre.setValue("");
-						fecha.setValue(null);						
 					}
 				}catch(Exception e){
-					Notification.show("Error al quitar elemento",Type.ERROR_MESSAGE);
+					Notification.show("Error al quitar elemento.",Type.ERROR_MESSAGE);
 					logger.error("Error al quitar elemento",e);
 				}
 			}
