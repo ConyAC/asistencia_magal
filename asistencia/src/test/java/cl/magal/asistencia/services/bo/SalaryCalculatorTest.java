@@ -74,7 +74,7 @@ public class SalaryCalculatorTest {
 		Salary salary = new Salary();
 		salary.setSpecialBond(0);
 		salary.setBondMov2(0);
-		salary.setDescHours(6);
+		salary.setDescHours(6D);
 		salary.setOvertimeHours(0);
 		
 		int tool = 0, loan = 0; 
@@ -135,7 +135,7 @@ public class SalaryCalculatorTest {
 		Salary salary = new Salary();
 		salary.setSpecialBond(0);
 		salary.setBondMov2(0);
-		salary.setDescHours(6);
+		salary.setDescHours(6D);
 		salary.setOvertimeHours(0);
 		
 		int tool = 0, loan = 0; 

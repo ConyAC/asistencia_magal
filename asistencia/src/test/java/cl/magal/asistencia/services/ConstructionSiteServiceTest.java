@@ -554,7 +554,7 @@ public class ConstructionSiteServiceTest {
 		Salary salary = new Salary();
 		salary.setSpecialBond(0);
 		salary.setBondMov2(0);
-		salary.setDescHours(6);
+		salary.setDescHours(6D);
 		salary.setOvertimeHours(0);
 		int salaryValue = csService.calculateSalary(
 				closingDateLastMonth,supleAmount,tool,loan,

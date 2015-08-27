@@ -2073,12 +2073,13 @@ public class AttendancePanel extends VerticalLayout implements View {
 											Row row13 = sheet0.getRow(12);
 											row13.getCell(1).setCellValue(Utils.countSat(getAttendanceDate()));
 											//celda B14 cuenta la cantidad dias de lunes a viernes trabajados
-											int holidays = constructionSiteService.countHolidaysMonth(getAttendanceDate());
+											int holidays = constructionSiteService.countHolidaysMonthOnLaborerDays(getAttendanceDate());
 											Row row14 = sheet0.getRow(13);
 											row14.getCell(1).setCellValue(Utils.countLaborerDays(getAttendanceDate())-holidays);
+											int holidays2 = constructionSiteService.countHolidaysMonth(getAttendanceDate());
 											//celda B15 cuenta los domingos y festivos
 											Row row15 = sheet0.getRow(14);
-											row15.getCell(1).setCellValue(Utils.countSun(getAttendanceDate())+holidays);
+											row15.getCell(1).setCellValue(Utils.countSun(getAttendanceDate())+holidays2);
 											//celda B16 inicio trato
 											Row row16 = sheet0.getRow(15);
 											row16.getCell(1).setCellValue(new DateTime(dc.getBeginDeal()).toDate());
