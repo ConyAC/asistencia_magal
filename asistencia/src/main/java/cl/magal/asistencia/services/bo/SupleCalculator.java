@@ -91,8 +91,15 @@ public class SupleCalculator {
 		Map<Integer,AdvancePaymentItem> supleItemTable = supleTable.getMapTable();
 		//primero obtiene el monto de anticipo que le corresponde por tabla
 		Double maxAmount = supleItemTable.get(supleCode).getSupleTotalAmount();
+		
+		DateTime fechaCierreSuple = new DateTime(supleCloseDate); 
 		//obtiene el día en que se cierra el suple
-		Integer supleCloseDay = new DateTime(supleCloseDate).dayOfMonth().get();
+		Integer supleCloseDay = fechaCierreSuple.dayOfMonth().get();
+		//si la fecha de inicio de contrato es luego de la fecha cierre de suple, entonces le corresponde suple 0
+		DateTime inicioContrato = new DateTime(attendance.getLaborerConstructionSite().getActiveContract().getStartDate());
+		if(inicioContrato.isAfter(fechaCierreSuple)){
+			return 0;
+		}
 		//luego descuenta por cada X S V D LL 
 		Integer countNotAttendance = Utils.countMarks(supleCloseDay,attendance,AttendanceMark.SATURDAY,AttendanceMark.ATTEND,AttendanceMark.VACATION,AttendanceMark.SUNDAY,AttendanceMark.RAIN);
 		logger.debug("{} -- (supleCloseDay {} - countNotAttendance {} ) * supleTable.getFailureDiscount() {}",attendance.getLaborerConstructionSite().getJobCode(),supleCloseDay,countNotAttendance,supleTable.getFailureDiscount());
