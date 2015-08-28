@@ -255,10 +255,11 @@ public class ConfigView extends VerticalLayout implements View {
 
 	private com.vaadin.ui.Component drawAFP() {
 		
-		final FieldGroup fg = new FieldGroup();
 		afpAndInsurance = confService.findAfpAndInsuranceConfiguration();
 		if( afpAndInsurance  == null )
 			afpAndInsurance  = new AfpAndInsuranceConfigurations();
+		
+		final FieldGroup fg = new FieldGroup();
 		fg.setItemDataSource(new BeanItem<AfpAndInsuranceConfigurations>(afpAndInsurance));
 		
 		final Property.ValueChangeListener listener = new Property.ValueChangeListener() {
@@ -340,7 +341,7 @@ public class ConfigView extends VerticalLayout implements View {
 				table.setVisibleColumns("name","rate","delete");
 				table.setColumnHeaders("Afp","Tasa","Eliminar");
 				table.setEditable(true);
-				
+
 				Button btnAdd = new Button(null,FontAwesome.PLUS);
 				hl.addComponent(btnAdd);
 				btnAdd.addClickListener(new Button.ClickListener() {
@@ -353,8 +354,7 @@ public class ConfigView extends VerticalLayout implements View {
 								return;
 							}else{
 								AfpItem a = new AfpItem();
-								AfpAndInsuranceConfigurations bean = ((BeanItem<AfpAndInsuranceConfigurations>)fg.getItemDataSource()).getBean();
-								a.getAfpAndInsuranceConfigurations().setId(bean.getId());
+								a.setAfpAndInsuranceConfigurations(afpAndInsurance);
 								a.setName(nombre.getValue());
 								a.setRate((Double) Utils.getDecimalFormat().parse(tasa.getValue()));
 								confService.save(a);
