@@ -707,7 +707,14 @@ public class SalaryCalculator {
 		List<AttendanceMark> lastRealMarks = attendance.getLastMarksAsList();
 		List<AttendanceMark> projectionsMarks = lastMonthAttendance.getMarksAsList();
 		int count = 0;
-		for(int i = lastClosingDate != null && 0 < lastClosingDate  ? lastClosingDate - 1 : 0 ; i < maxDays ; i ++){
+		
+		int i = lastClosingDate != null && 0 < lastClosingDate  ? lastClosingDate - 1 : 0;
+		i = Utils.calcularDiaInicial(attendance,i);
+		maxDays = Utils.calcularDiaFinal(attendance,maxDays);
+		
+		for(; 
+			i < maxDays ; 
+			i ++){
 			//si son distintos, lo contabiliza
 			if(lastRealMarks.get(i) != projectionsMarks.get(i)){
 				//lo cuenta solo si está dentro del grupo a contabilizar
@@ -720,6 +727,10 @@ public class SalaryCalculator {
 		return count;
 	}
 	
+	/**
+	 * 
+	 * @return
+	 */
 	public List<AttendanceMark> getAjusteMesAnterior(){
 		return getDiffMarksFromDate(closingDateLastMonth,attendance,lastMonthAttendance);
 	}
@@ -756,7 +767,11 @@ public class SalaryCalculator {
 		List<AttendanceMark> lastRealMarks = attendance.getLastMarksAsList();
 		List<AttendanceMark> projectionsMarks = lastMonthAttendance.getMarksAsList();
 		
-		for(int i = lastClosingDate != null ? lastClosingDate : 0 ; i < maxDays ; i ++){
+		int i = lastClosingDate != null && 0 < lastClosingDate  ? lastClosingDate - 1 : 0;
+		i = Utils.calcularDiaInicial(attendance,i);
+		maxDays = Utils.calcularDiaFinal(attendance,maxDays);
+		
+		for( ; i < maxDays ; i ++){
 			//si son distintos, lo contabiliza
 			if(lastRealMarks.get(i) != projectionsMarks.get(i)){
 				//lo cuenta solo si está dentro del grupo a contabilizar
@@ -785,7 +800,7 @@ public class SalaryCalculator {
 	 * @return
 	 */
 	private double calculateLLuvia(Attendance attendance, double jornalBaseMes) {
-		int sumLluvia = countMarks(null,attendance,AttendanceMark.RAIN); 
+		int sumLluvia = Utils.countMarks(null,attendance,AttendanceMark.RAIN); 
 		return sumLluvia * jornalBaseMes * 1.2;
 	}
 
@@ -856,7 +871,7 @@ public class SalaryCalculator {
 	 * @return
 	 */
 	private double calculateSep(Attendance attendance) {
-		return countMarks(null,attendance,AttendanceMark.SUNDAY); 
+		return Utils.countMarks(null,attendance,AttendanceMark.SUNDAY); 
 	}
 
 	/**
@@ -864,7 +879,7 @@ public class SalaryCalculator {
 	 * @return
 	 */
 	private double calculateDPD(Attendance attendance) {
-		return countMarks(null,attendance,AttendanceMark.ATTEND,AttendanceMark.SATURDAY,AttendanceMark.RAIN,AttendanceMark.PERMISSION,
+		return Utils.countMarks(null,attendance,AttendanceMark.ATTEND,AttendanceMark.SATURDAY,AttendanceMark.RAIN,AttendanceMark.PERMISSION,
 				AttendanceMark.FILLER,AttendanceMark.FAIL);
 	}
 
@@ -882,7 +897,7 @@ public class SalaryCalculator {
 	 * @return
 	 */
 	private int calculateDPS(Attendance attendance) {
-		return countMarks(null,attendance,AttendanceMark.ATTEND,AttendanceMark.RAIN,AttendanceMark.PERMISSION,
+		return Utils.countMarks(null,attendance,AttendanceMark.ATTEND,AttendanceMark.RAIN,AttendanceMark.PERMISSION,
 				AttendanceMark.FILLER,AttendanceMark.FAIL,AttendanceMark.VACATION);
 	}
 
@@ -891,7 +906,7 @@ public class SalaryCalculator {
 	 * @return
 	 */
 	private int calculateSab(Attendance attendance) {
-		return countMarks(null,attendance,AttendanceMark.SATURDAY);
+		return Utils.countMarks(null,attendance,AttendanceMark.SATURDAY);
 	}
 
 	/**
@@ -955,7 +970,7 @@ public class SalaryCalculator {
 	 * @return
 	 */
 	private double calculateCol(DateTime closingDateLastMonth,Attendance attendance,Attendance lastMonthAttendance) {
-		int sum1 = countMarks(null,attendance,AttendanceMark.ATTEND,AttendanceMark.RAIN);
+		int sum1 = Utils.countMarks(null,attendance,AttendanceMark.ATTEND,AttendanceMark.RAIN);
 		logger.debug("sum1 {}",sum1);
 		int sumAsistenciaAjustadaMesAnterior = getDiasNoConsideradosMesAnterior();
 		int sum2 = countDiffMarksFromDate(closingDateLastMonth,attendance,lastMonthAttendance,AttendanceMark.SATURDAY,AttendanceMark.VACATION);
@@ -1009,7 +1024,7 @@ public class SalaryCalculator {
 	 * @return
 	 */
 	private int calculateDiaTrab(DateTime closingDateLastMonth,Attendance attendance,Attendance lastMonthAttendance) {
-		int diasTrabMesActual = countMarks(null,attendance,AttendanceMark.ATTEND,AttendanceMark.VACATION);
+		int diasTrabMesActual = Utils.countMarks(null,attendance,AttendanceMark.ATTEND,AttendanceMark.VACATION);
 		logger.debug("diasTrabMesActual {}",diasTrabMesActual);
 		int sumAsistenciaAjustadaMesAnterior = getDiasNoConsideradosMesAnterior();
 		
@@ -1147,29 +1162,5 @@ public class SalaryCalculator {
 		return 0.07D;
 	}
 	
-	/**
-	 * Cuenta las marcas hasta el dia dada, si el dia dado es nulo, entonces cuenta todos los dias
-	 * @param maxDay
-	 * @param attendance
-	 * @param marks
-	 * @return
-	 */
-	private Integer countMarks(Integer maxDay,Attendance attendance, AttendanceMark ... marks) {
-		if(attendance == null )
-			throw new RuntimeException("El objeto de asistencia no puede ser nulo.");
-
-		//si el número maximo es nulo, calcula el máximo según la fecha de la asistencia
-		if(maxDay == null )
-			maxDay = new DateTime(attendance.getDate()).dayOfMonth().getMaximumValue();
-		
-		int count = 0;
-		List<AttendanceMark> attendanceMarks = attendance.getMarksAsList();
-		for(int i = 0; i < maxDay ; i++){
-			AttendanceMark mark = attendanceMarks.get(i);
-			if(ArrayUtils.contains(marks, mark))
-				count++;
-		}
-		return count;
-	}
-
+	
 }
