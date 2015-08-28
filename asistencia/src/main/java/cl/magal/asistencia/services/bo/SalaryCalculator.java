@@ -712,6 +712,9 @@ public class SalaryCalculator {
 		i = Utils.calcularDiaInicial(attendance,i);
 		maxDays = Utils.calcularDiaFinal(attendance,maxDays);
 		
+		if( i >= maxDays )
+			return 0;
+		
 		for(; 
 			i < maxDays ; 
 			i ++){
@@ -770,6 +773,9 @@ public class SalaryCalculator {
 		int i = lastClosingDate != null && 0 < lastClosingDate  ? lastClosingDate - 1 : 0;
 		i = Utils.calcularDiaInicial(attendance,i);
 		maxDays = Utils.calcularDiaFinal(attendance,maxDays);
+		
+		if( i >= maxDays )
+			return resultMarks;
 		
 		for( ; i < maxDays ; i ++){
 			//si son distintos, lo contabiliza
