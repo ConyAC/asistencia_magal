@@ -10,13 +10,15 @@ public class AttendanceMarkConverter implements AttributeConverter<AttendanceMar
 
 	@Override
 	public Integer convertToDatabaseColumn(AttendanceMark arg0) {
+		if(arg0 == null)
+			return AttendanceMark.VACIO.getCorrelative();
 		return arg0.getCorrelative();
 	}
 
 	@Override
 	public AttendanceMark convertToEntityAttribute(Integer arg0) {
 		if(arg0 == null)
-			return AttendanceMark.ATTEND;
+			return AttendanceMark.VACIO;
 		return AttendanceMark.getAttendanceMark(arg0);
 	}
 }

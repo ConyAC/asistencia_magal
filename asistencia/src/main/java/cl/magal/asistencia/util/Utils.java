@@ -11,6 +11,7 @@ import java.util.Set;
 
 import javax.validation.ConstraintViolation;
 
+import org.apache.commons.lang.ArrayUtils;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeConstants;
 import org.joda.time.LocalDate;
@@ -20,6 +21,7 @@ import org.slf4j.LoggerFactory;
 
 import cl.magal.asistencia.entities.Accident;
 import cl.magal.asistencia.entities.AfpItem;
+import cl.magal.asistencia.entities.Attendance;
 import cl.magal.asistencia.entities.ConstructionSite;
 import cl.magal.asistencia.entities.Holiday;
 import cl.magal.asistencia.entities.Laborer;
@@ -29,6 +31,7 @@ import cl.magal.asistencia.entities.Mobilization2;
 import cl.magal.asistencia.entities.Vacation;
 import cl.magal.asistencia.entities.WithdrawalSettlement;
 import cl.magal.asistencia.entities.enums.Afp;
+import cl.magal.asistencia.entities.enums.AttendanceMark;
 
 import com.vaadin.data.Validator.InvalidValueException;
 import com.vaadin.data.fieldgroup.FieldGroup.CommitException;
@@ -412,6 +415,84 @@ public class Utils {
 		for(WithdrawalSettlement w : withdrawalSettlements)
 			sum += w.getPrice();
 		return sum;
+	}
+	
+	/**
+	 * 
+	 * @param attendance2
+	 * @return
+	 */
+	public static int calcularDiaFinal(Attendance attendance2, int maxDay){
+		if(attendance2.getLaborerConstructionSite()
+				.getActiveContract().getTerminationDate() == null )
+			return maxDay;
+		//obtiene el primer día del mes
+		DateTime finMes = new DateTime(attendance2.getDate())
+			.withDayOfMonth(new DateTime(attendance2.getDate())
+			.dayOfMonth().getMaximumValue());
+		//obtiene la fecha de ingreso
+		DateTime finContrato = new DateTime(attendance2.getLaborerConstructionSite()
+				.getActiveContract().getTerminationDate());
+		//si la fecha de ingreso es luego del inicio del mes, entonces comienza a contar desde ese día
+		if(finContrato.isBefore(finMes))
+			return finContrato.getDayOfMonth() - 1;
+		else
+			return maxDay;
+	}
+	
+	/**
+	 * 
+	 * @param attendance2
+	 * @return
+	 */
+	public static int calcularDiaInicial(Attendance attendance2,int minVal) {
+		//obtiene el primer día del mes
+		DateTime inicioMes = new DateTime(attendance2.getDate()).withDayOfMonth(1);
+		//obtiene la fecha de ingreso
+		DateTime inicioContrato = new DateTime(attendance2.getLaborerConstructionSite().getActiveContract().getStartDate());
+		//si la fecha de ingreso es luego del inicio del mes, entonces comienza a contar desde ese día
+		if(inicioContrato.isAfter(inicioMes)){
+			logger.debug("after");
+			return inicioContrato.getDayOfMonth() - 1;
+		}else {
+			logger.debug("before");
+			return minVal;
+		}
+	}
+	
+	/**
+	 * Cuenta las marcas hasta el dia dada, si el dia dado es nulo, entonces cuenta todos los dias
+	 * @param maxDay
+	 * @param attendance
+	 * @param marks
+	 * @return
+	 */
+	public static Integer countMarks(Integer maxDay,Attendance attendance, AttendanceMark ... marks) {
+		if(attendance == null )
+			throw new RuntimeException("El objeto de asistencia no puede ser nulo.");
+
+		logger.debug("maxDay  {}",maxDay);
+		//si el número maximo es nulo, calcula el máximo según la fecha de la asistencia
+		if(maxDay == null )
+			maxDay = new DateTime(attendance.getDate()).dayOfMonth().getMaximumValue();
+		
+		//que considere la fecha inicial de contrato para considerar el día inical y el final
+		int i = Utils.calcularDiaInicial(attendance,0);
+		maxDay = Utils.calcularDiaFinal(attendance,maxDay);
+		
+		if( i >= maxDay )
+			return 0;
+		
+		logger.debug("i : {} , maxDay  {}",i,maxDay);
+		
+		int count = 0;
+		List<AttendanceMark> attendanceMarks = attendance.getMarksAsList();
+		for( ; i < maxDay ; i++){
+			AttendanceMark mark = attendanceMarks.get(i);
+			if(ArrayUtils.contains(marks, mark))
+				count++;
+		}
+		return count;
 	}
 
 	public static DecimalFormat getDecimalFormat(){
