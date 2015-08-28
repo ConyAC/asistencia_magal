@@ -1,10 +1,8 @@
 package cl.magal.asistencia.services.bo;
 
 import java.util.Date;
-import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang.ArrayUtils;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,6 +11,7 @@ import cl.magal.asistencia.entities.AdvancePaymentConfigurations;
 import cl.magal.asistencia.entities.AdvancePaymentItem;
 import cl.magal.asistencia.entities.Attendance;
 import cl.magal.asistencia.entities.enums.AttendanceMark;
+import cl.magal.asistencia.util.Utils;
 
 public class SupleCalculator {
 	
@@ -95,39 +94,14 @@ public class SupleCalculator {
 		//obtiene el día en que se cierra el suple
 		Integer supleCloseDay = new DateTime(supleCloseDate).dayOfMonth().get();
 		//luego descuenta por cada X S V D LL 
-		Integer countNotAttendance = countMarks(supleCloseDay,attendance,AttendanceMark.SATURDAY,AttendanceMark.ATTEND,AttendanceMark.VACATION,AttendanceMark.SUNDAY,AttendanceMark.RAIN);
-		logger.debug("(supleCloseDay {} - countNotAttendance {} ) * supleTable.getFailureDiscount() ",supleCloseDay,countNotAttendance,supleTable.getFailureDiscount());
+		Integer countNotAttendance = Utils.countMarks(supleCloseDay,attendance,AttendanceMark.SATURDAY,AttendanceMark.ATTEND,AttendanceMark.VACATION,AttendanceMark.SUNDAY,AttendanceMark.RAIN);
+		logger.debug("{} -- (supleCloseDay {} - countNotAttendance {} ) * supleTable.getFailureDiscount() {}",attendance.getLaborerConstructionSite().getJobCode(),supleCloseDay,countNotAttendance,supleTable.getFailureDiscount());
 		Integer firstDiscount = (int) ((supleCloseDay - countNotAttendance)*supleTable.getFailureDiscount());
-		logger.debug("first discount {}",firstDiscount);		
-		Integer countFails = countMarks(supleCloseDay,attendance,AttendanceMark.FAIL);
+//		logger.debug("first discount {}",firstDiscount);		
+		Integer countFails = Utils.countMarks(supleCloseDay,attendance,AttendanceMark.FAIL);
 		Integer secondDiscount = (int) (countFails*supleTable.getPermissionDiscount());
-		logger.debug("second discount {}",secondDiscount);
+//		logger.debug("second discount {}",secondDiscount);
 		return maxAmount - firstDiscount - secondDiscount;
-	}
-	
-	/**
-	 * Cuenta las marcas hasta el dia dada, si el dia dado es nulo, entonces cuenta todos los dias
-	 * @param maxDay
-	 * @param attendance
-	 * @param marks
-	 * @return
-	 */
-	private Integer countMarks(Integer maxDay,Attendance attendance, AttendanceMark ... marks) {
-		if(attendance == null )
-			throw new RuntimeException("El objeto de asistencia no puede ser nulo.");
-
-		//si el número maximo es nulo, calcula el máximo según la fecha de la asistencia
-		if(maxDay == null )
-			maxDay = new DateTime(attendance.getDate()).dayOfMonth().getMaximumValue();
-		
-		int count = 0;
-		List<AttendanceMark> attendanceMarks = attendance.getMarksAsList();
-		for(int i = 0; i < maxDay ; i++){
-			AttendanceMark mark = attendanceMarks.get(i);
-			if(ArrayUtils.contains(marks, mark))
-				count++;
-		}
-		return count;
 	}
 
 	/**
