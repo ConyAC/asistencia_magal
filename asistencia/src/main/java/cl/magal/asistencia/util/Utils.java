@@ -480,6 +480,9 @@ public class Utils {
 		int i = Utils.calcularDiaInicial(attendance,0);
 		maxDay = Utils.calcularDiaFinal(attendance,maxDay);
 		
+		if( i >= maxDay )
+			return 0;
+		
 		logger.debug("i : {} , maxDay  {}",i,maxDay);
 		
 		int count = 0;
