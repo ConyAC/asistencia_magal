@@ -30,7 +30,6 @@ import cl.magal.asistencia.entities.License;
 import cl.magal.asistencia.entities.Mobilization2;
 import cl.magal.asistencia.entities.Vacation;
 import cl.magal.asistencia.entities.WithdrawalSettlement;
-import cl.magal.asistencia.entities.enums.Afp;
 import cl.magal.asistencia.entities.enums.AttendanceMark;
 
 import com.vaadin.data.Validator.InvalidValueException;
@@ -48,7 +47,7 @@ public class Utils {
 	static Logger logger = LoggerFactory.getLogger(Utils.class);
 
 	static DecimalFormatSymbols decimalFormatSymbols;
-	static DecimalFormat decimalFormatSinDecimal;
+	static DecimalFormat decimalFormatSinDecimal,decimalFormat;
 	
 	public static DecimalFormatSymbols getDecimalFormatSymbols(){
 		if(decimalFormatSymbols == null){
@@ -380,10 +379,10 @@ public class Utils {
 	 * @param afp
 	 * @return
 	 */
-	public static Double getAfpRate(List<AfpItem> afpList,Afp afp){
+	public static Double getAfpRate(List<AfpItem> afpList, AfpItem afp){
 		
 		for(AfpItem item : afpList)
-			if(item.getAfp() == afp )
+			if(item.getId() == afp.getId() )
 				return item.getRate()/100;
 		return 0.1144;//FIX si no encuentra, retorna una por defecto?
 	}
@@ -493,6 +492,13 @@ public class Utils {
 				count++;
 		}
 		return count;
+	}
+
+	public static DecimalFormat getDecimalFormat(){
+	if(decimalFormat == null){
+		decimalFormat = new DecimalFormat("#,###.####", getDecimalFormatSymbols());
+	}
+		return decimalFormat;
 	}
 }
 

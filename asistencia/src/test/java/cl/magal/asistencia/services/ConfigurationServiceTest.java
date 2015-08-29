@@ -329,15 +329,12 @@ public class ConfigurationServiceTest {
 	@Test
 	public void testAddAfpItem(){
 		
-		Afp afp = Afp.CAPITAL;
-		Double rate = 11.44D;
+		AfpItem afpItem = new AfpItem();
+		afpItem.setName("Capital");
+		afpItem.setRate(11.44D);
 		
 		AfpAndInsuranceConfigurations afpAndInsuranceConfiguration = AfpAndInsuranceConfigurationsHelper.newAfpAndInsuranceConfigurations();
-		
-		AfpItem afpItem = new AfpItem();
-		afpItem.setAfp(afp);
-		afpItem.setRate(rate);
-		
+
 		afpAndInsuranceConfiguration.addAfpAndInsurance(afpItem);
 		service.save(afpAndInsuranceConfiguration);
 		AfpAndInsuranceConfigurationsHelper.verify(afpAndInsuranceConfiguration);
@@ -357,8 +354,9 @@ public class ConfigurationServiceTest {
 	@Test
 	public void testAddAfpItemOnExisting(){
 		
-		Afp afp = Afp.CAPITAL;
-		Double rate = 11.44D;
+		AfpItem afpItem = new AfpItem();
+		afpItem.setName("Capital");
+		afpItem.setRate(11.44D);
 		
 		AfpAndInsuranceConfigurations afpAndInsuranceConfiguration = AfpAndInsuranceConfigurationsHelper.newAfpAndInsuranceConfigurations();
 		service.save(afpAndInsuranceConfiguration);
@@ -368,10 +366,6 @@ public class ConfigurationServiceTest {
 		AfpAndInsuranceConfigurationsHelper.verify(dbafpAndInsuranceConfiguration);
 		
 		assertEquals("Las configuraciones de anticipo deben ser iguales",dbafpAndInsuranceConfiguration.getId(),afpAndInsuranceConfiguration.getId());
-		
-		AfpItem afpItem = new AfpItem();
-		afpItem.setAfp(afp);
-		afpItem.setRate(rate);
 		
 		dbafpAndInsuranceConfiguration.addAfpAndInsurance(afpItem);
 		service.save(dbafpAndInsuranceConfiguration);

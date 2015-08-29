@@ -17,9 +17,11 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.PrePersist;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
@@ -31,13 +33,9 @@ import javax.validation.constraints.Pattern;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
-import cl.magal.asistencia.entities.converter.AfpConverter;
-import cl.magal.asistencia.entities.converter.BankConverter;
 import cl.magal.asistencia.entities.converter.IsapreConverter;
 import cl.magal.asistencia.entities.converter.MaritalStatusConverter;
 import cl.magal.asistencia.entities.converter.NationalityConverter;
-import cl.magal.asistencia.entities.enums.Afp;
-import cl.magal.asistencia.entities.enums.Bank;
 import cl.magal.asistencia.entities.enums.Isapre;
 import cl.magal.asistencia.entities.enums.MaritalStatus;
 import cl.magal.asistencia.entities.enums.Nationality;
@@ -153,9 +151,8 @@ public class Laborer implements Serializable {
     @Column(name="bank_account")
     private String bankAccount;
 
-    @Column(name = "afp" , nullable = false)
-    @Convert(converter = AfpConverter.class)
-    private Afp afp;
+    @JoinColumn(name="afp")
+    private AfpItem afp;
     
     @Column(name="isapre" , nullable = false)
     @Convert(converter = IsapreConverter.class)
@@ -170,8 +167,7 @@ public class Laborer implements Serializable {
     @Column(name="nationality", nullable = false)
     private Nationality nationality;
     
-    @Convert(converter = BankConverter.class)
-    @Column(name="bank")
+    @JoinColumn(name="bank")
     private Bank bank;
     
     @Column(name="photo")
@@ -184,16 +180,12 @@ public class Laborer implements Serializable {
     public void prePersist(){
     	if(firstname == null)
     		firstname = "Nuevo trabajador";
-    	if(afp == null)
-    		afp = Afp.MODELO;
     	if(maritalStatus == null )
     		maritalStatus = MaritalStatus.SOLTERO;
     	if(isapre == null)
     		isapre = Isapre.FONASA;
     	if(nationality == null)
     		nationality = Nationality.CHILENA;
-    	if(bank == null)
-    		bank = Bank.ESTADO;		
     }
     
     public Laborer() {
@@ -372,11 +364,11 @@ public class Laborer implements Serializable {
 //        this.contractId = contractId;
 //    }
 
-    public Afp getAfp() {
+    public AfpItem getAfp() {
 		return afp;
 	}
 
-	public void setAfp(Afp afp) {
+	public void setAfp(AfpItem afp) {
 		this.afp = afp;
 	}
 

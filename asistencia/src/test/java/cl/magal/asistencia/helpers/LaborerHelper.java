@@ -20,7 +20,7 @@ public final class LaborerHelper {
 		laborer.setFirstname(NOMBRE+Utils.random());
 		laborer.setLastname(APELLIDO+Utils.random());
 //		laborer.setJob(Job.ALBAÑIL);
-		laborer.setAfp(Afp.MODELO);
+		laborer.getAfp().setName("Modelo");
 		laborer.setMaritalStatus(MaritalStatus.CASADO);
 		laborer.setRut("16627054-5");
 		laborer.setMobileNumber("11223311");

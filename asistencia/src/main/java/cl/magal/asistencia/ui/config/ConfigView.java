@@ -21,6 +21,7 @@ import org.vaadin.dialogs.ConfirmDialog;
 import ru.xpoft.vaadin.VaadinView;
 import cl.magal.asistencia.entities.AfpAndInsuranceConfigurations;
 import cl.magal.asistencia.entities.AfpItem;
+import cl.magal.asistencia.entities.Bank;
 import cl.magal.asistencia.entities.ConstructionSite;
 import cl.magal.asistencia.entities.DateConfigurations;
 import cl.magal.asistencia.entities.FamilyAllowanceConfigurations;
@@ -84,6 +85,7 @@ public class ConfigView extends VerticalLayout implements View {
 	public static final String NAME = "configuraciones";
 	BeanItemContainer<ConstructionSite> constructionContainer = new BeanItemContainer<ConstructionSite>(ConstructionSite.class);
 	BeanItemContainer<Holiday> holidayContainer = new BeanItemContainer<Holiday>(Holiday.class);
+	BeanItemContainer<Bank> bankContainer = new BeanItemContainer<Bank>(Bank.class);
 	BeanItem<Holiday> item;
 	
 	@Autowired
@@ -116,6 +118,8 @@ public class ConfigView extends VerticalLayout implements View {
 		ts.addTab(drawAsignacion(),"Tabla de Asignación Familiar",FontAwesome.GROUP);
 		//agrega cada tab
 		ts.addTab(drawFeriados(), "Feriados", FontAwesome.CALENDAR);
+		
+		ts.addTab(drawBancos(),"Bancos",FontAwesome.DOLLAR);
 		
 
 	}
@@ -250,10 +254,11 @@ public class ConfigView extends VerticalLayout implements View {
 
 	private com.vaadin.ui.Component drawAFP() {
 		
-		final FieldGroup fg = new FieldGroup();
 		afpAndInsurance = confService.findAfpAndInsuranceConfiguration();
 		if( afpAndInsurance  == null )
 			afpAndInsurance  = new AfpAndInsuranceConfigurations();
+		
+		final FieldGroup fg = new FieldGroup();
 		fg.setItemDataSource(new BeanItem<AfpAndInsuranceConfigurations>(afpAndInsurance));
 		
 		final Property.ValueChangeListener listener = new Property.ValueChangeListener() {
@@ -285,26 +290,86 @@ public class ConfigView extends VerticalLayout implements View {
 						addComponent(sis);
 					}
 				});
+							
+				final BeanItemContainer<AfpItem> container = new BeanItemContainer<AfpItem>(AfpItem.class, afpAndInsurance.getAfpTable());
 				
-				final BeanItemContainer<AfpItem> container = new BeanItemContainer<AfpItem>(AfpItem.class,afpAndInsurance.getAfpTable());
-				container.addNestedContainerProperty("afp.description");
-				
-				final Table table = new Table("Tabla AFP"){
+				final Table table = new Table(){
 					{
 						setWidth("100%");
 						setPageLength(6);
 					}
 				};
-				
+
+				HorizontalLayout hl = new HorizontalLayout();
+				hl.setWidth("100%");
+				hl.setSpacing(true);		
+				addComponent(hl);
+
+				final TextField nombre = new TextField("Nombre AFP");
+				hl.addComponent(nombre);
+				final TextField tasa = new TextField("Tasa");
+				hl.addComponent(tasa);
 				
 				//agrega el listener a los field creados
-				table.setTableFieldFactory(new ListenerFieldFactory(listener));
+				table.setTableFieldFactory(new ListenerFieldFactory(listener));				
+				table.setContainerDataSource(container);				
+				table.addGeneratedColumn("delete", new Table.ColumnGenerator() {
+					
+					@Override
+					public Object generateCell(Table source, final Object itemId, Object columnId) {
+						return new Button(null,new Button.ClickListener() {
+
+							@Override
+							public void buttonClick(ClickEvent event) {
+								ConfirmDialog.show(UI.getCurrent(), "Confirmar Acción:", "¿Está seguro de eliminar la AFP seleccionada?",
+										"Eliminar", "Cancelar", new ConfirmDialog.Listener() {
+
+									public void onClose(ConfirmDialog dialog) {
+										if (dialog.isConfirmed()) {
+											AfpItem afp = ((BeanItem<AfpItem>)container.getItem(itemId)).getBean();
+											confService.delete(afp);
+											container.removeItem(itemId);
+										}
+									}
+								});
+							}
+						}){{setIcon(FontAwesome.TRASH_O);}};
+					}
+				});
 				
-				table.setContainerDataSource(container);
-				
-				table.setVisibleColumns("afp.description","rate");
-				table.setColumnHeaders("Afp","Tasa");
+				table.setVisibleColumns("name","rate","delete");
+				table.setColumnHeaders("Afp","Tasa","Eliminar");
 				table.setEditable(true);
+
+				Button btnAdd = new Button(null,FontAwesome.PLUS);
+				hl.addComponent(btnAdd);
+				btnAdd.addClickListener(new Button.ClickListener() {
+
+					@Override
+					public void buttonClick(ClickEvent event) {
+						try{
+							if(nombre.getValue() == "" || tasa.getValue() == null){
+								Notification.show("Debe ingresar tanto el nombre como la tasa de la nueva AFP.",Type.ERROR_MESSAGE);
+								return;
+							}else{
+								AfpItem a = new AfpItem();
+								a.setAfpAndInsuranceConfigurations(afpAndInsurance);
+								a.setName(nombre.getValue());
+								a.setRate((Double) Utils.getDecimalFormat().parse(tasa.getValue()));
+								confService.save(a);
+								container.addBean(a);
+								
+								nombre.setValue("");
+								tasa.setValue("");						
+							}
+						}catch(Exception e){
+							Notification.show("Error al añadir la afp.",Type.ERROR_MESSAGE);
+							logger.error("Error al añadir elemento",e);
+						}
+					}
+				});		
+				
+				setComponentAlignment(hl, Alignment.TOP_RIGHT);
 				
 				addComponent(table);
 				if(!SecurityHelper.hasPermission(Permission.DEFINIR_VARIABLE_GLOBAL)){
@@ -728,6 +793,120 @@ public class ConfigView extends VerticalLayout implements View {
 					}
 				}catch(Exception e){
 					Notification.show("Error al quitar elemento",Type.ERROR_MESSAGE);
+					logger.error("Error al quitar elemento",e);
+				}
+			}
+		});		
+		
+		vl.setComponentAlignment(hl, Alignment.TOP_RIGHT);
+
+		return vl;
+	}
+	
+	
+	protected VerticalLayout drawBancos() {
+		
+		VerticalLayout vl = new VerticalLayout();
+		vl.setSpacing(true);
+		vl.setMargin(true);
+		vl.setSizeFull();
+		
+		List<Bank> b = confService.findBank();
+		bankContainer = new BeanItemContainer<Bank>(Bank.class, b);
+
+		HorizontalLayout hl = new HorizontalLayout();
+		hl.setWidth("100%");
+		hl.setSpacing(true);		
+		vl.addComponent(hl);
+
+		final TextField nombre = new TextField("Nombre Banco");
+		hl.addComponent(nombre);
+
+		final Table table = new Table(){
+			{
+				setWidth("100%");
+				setContainerDataSource(bankContainer);
+				setTableFieldFactory(new DefaultFieldFactory(){
+
+					public Field<?> createField(final Container container,
+							final Object itemId,Object propertyId,com.vaadin.ui.Component uiContext) {
+						Field<?> field = null; 
+						if( propertyId.equals("name")){
+							field = new TextField();
+							((TextField)field).setNullRepresentation("");
+						}
+						else {
+							return null;
+						}
+						return field;
+					}
+				});
+				
+				addGeneratedColumn("delete", new Table.ColumnGenerator() {
+					
+					@Override
+					public Object generateCell(Table source, final Object itemId, Object columnId) {
+						return new Button(null,new Button.ClickListener() {
+
+							@Override
+							public void buttonClick(ClickEvent event) {
+								ConfirmDialog.show(UI.getCurrent(), "Confirmar Acción:", "¿Está seguro de eliminar el banco seleccionado?",
+										"Eliminar", "Cancelar", new ConfirmDialog.Listener() {
+
+									public void onClose(ConfirmDialog dialog) {
+										if (dialog.isConfirmed()) {
+											Bank banco = ((BeanItem<Bank>)bankContainer.getItem(itemId)).getBean();
+											confService.delete(banco);																			
+											bankContainer.removeItem(itemId);
+										}
+									}
+								});
+							}
+						}){{setIcon(FontAwesome.TRASH_O);}};
+					}
+				});
+				
+				setVisibleColumns("name","delete");
+				setColumnHeaders("Nombre","Eliminar");
+				setPageLength(6);
+			}
+			
+			@Override
+		    protected String formatPropertyValue(Object rowId,
+		            Object colId, Property property) {
+		        // Format by property type
+		        if (property.getType() == Date.class) {
+		        	DateFormat formatter = new SimpleDateFormat("dd-MMM-yyyy");
+		        	String d = formatter.format(property.getValue());
+		        	return d;		        	
+		        }
+
+		        return super.formatPropertyValue(rowId, colId, property);
+		    }
+		};	
+		
+		vl.addComponent(table);
+
+		Button btnAdd = new Button(null,FontAwesome.PLUS);
+		hl.addComponent(btnAdd);
+		btnAdd.addClickListener(new Button.ClickListener() {
+
+			@Override
+			public void buttonClick(ClickEvent event) {
+				try{
+					if(nombre.getValue() == ""){
+						Notification.show("Debe ingresar el nombre del nuevo banco.",Type.ERROR_MESSAGE);
+						return;
+					}else{
+						Bank b = new Bank();
+						b.setName(nombre.getValue());
+						confService.save(b);
+						bankContainer.addBean(b);
+						
+						nombre.setValue("");
+					}
+				}catch(Exception e){
+					Notification.show("Error al quitar elemento.",Type.ERROR_MESSAGE);
 					logger.error("Error al quitar elemento",e);
 				}
 			}

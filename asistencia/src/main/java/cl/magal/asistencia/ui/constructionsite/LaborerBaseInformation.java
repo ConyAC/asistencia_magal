@@ -3,26 +3,32 @@ package cl.magal.asistencia.ui.constructionsite;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import cl.magal.asistencia.entities.AfpAndInsuranceConfigurations;
+import cl.magal.asistencia.entities.AfpItem;
+import cl.magal.asistencia.entities.Bank;
 import cl.magal.asistencia.entities.Laborer;
-import cl.magal.asistencia.entities.enums.Afp;
-import cl.magal.asistencia.entities.enums.Bank;
 import cl.magal.asistencia.entities.enums.Isapre;
 import cl.magal.asistencia.entities.enums.MaritalStatus;
 import cl.magal.asistencia.entities.enums.Nationality;
+import cl.magal.asistencia.services.ConfigurationService;
+import cl.magal.asistencia.ui.MagalUI;
 import cl.magal.asistencia.util.Constants;
 
 import com.vaadin.data.fieldgroup.BeanFieldGroup;
 import com.vaadin.data.util.BeanItem;
+import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.data.util.NestedMethodProperty;
 import com.vaadin.data.validator.BeanValidator;
 import com.vaadin.server.FileResource;
 import com.vaadin.server.VaadinService;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.AbstractSelect;
+import com.vaadin.ui.AbstractSelect.ItemCaptionMode;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Embedded;
@@ -32,6 +38,7 @@ import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.TextField;
+import com.vaadin.ui.UI;
 import com.vaadin.ui.Upload;
 import com.vaadin.ui.Upload.Receiver;
 import com.vaadin.ui.Upload.SucceededEvent;
@@ -45,6 +52,9 @@ public class LaborerBaseInformation extends VerticalLayout {
 	 */
 	private static final long serialVersionUID = 453082527742097304L;
 	transient Logger logger = LoggerFactory.getLogger(LaborerBaseInformation.class);
+	BeanItemContainer<Bank> bankContainer = new BeanItemContainer<Bank>(Bank.class);
+	BeanItemContainer<AfpItem> afpContainer = new BeanItemContainer<AfpItem>(AfpItem.class);
+	private transient ConfigurationService confService;
 	
 	String prefix = "";
 	boolean viewElement;
@@ -70,6 +80,8 @@ public class LaborerBaseInformation extends VerticalLayout {
 	}
 		
 	private void init(){
+		
+		confService = (ConfigurationService) ((MagalUI)UI.getCurrent()).getSpringBean(Constants.CONFIGURATION_SERVICE_BEAN);
 		setSpacing(true);
 		setWidth("100%");
 
@@ -143,15 +155,9 @@ public class LaborerBaseInformation extends VerticalLayout {
 		// to this UI
 		for (Object propertyId : new String[]{"rut","firstname","secondname","lastname", "secondlastname", "dateBirth", "commune", "town", "address", "mobileNumber", "phone","afp", "maritalStatus", "isapre", "nationality", "provenance", "wedge", "bank", "bankAccount","dependents","validityPensionReview"}) {
 			Field<?> field = null;
-			if(propertyId.equals("laborerId") || propertyId.equals("constructionSites") || propertyId.equals("contractId") || propertyId.equals("teamId") || (propertyId.equals("rut") && !viewElement))
+			if(propertyId.equals("afp") || propertyId.equals("bank") || propertyId.equals("laborerId") || propertyId.equals("constructionSites") || propertyId.equals("contractId") || propertyId.equals("teamId") || (propertyId.equals("rut") && !viewElement))
 				;
-			else if(propertyId.equals("afp")){
-				field = new ComboBox("AFP");
-				((AbstractSelect) field).setNullSelectionAllowed(false);
-				for(Afp a : Afp.values()){
-					((AbstractSelect) field).addItem(a);
-				}
-			}else if(propertyId.equals("commune")){
+			else if(propertyId.equals("commune")){
 				field = new ComboBox("Comuna");
 				((AbstractSelect) field).setNullSelectionAllowed(false);
 				for(String ms : Constants.COMUNAS ){
@@ -180,13 +186,7 @@ public class LaborerBaseInformation extends VerticalLayout {
 				((AbstractSelect) field).setNullSelectionAllowed(false);
 				for(Isapre i : Isapre.values()){
 					((AbstractSelect) field).addItem(i);
-				}
-			}else if(propertyId.equals("bank")){
-				field = new ComboBox("Banco");
-				((AbstractSelect) field).setNullSelectionAllowed(false);
-				for(Bank b : Bank.values()){
-					((AbstractSelect) field).addItem(b);
-				}
+				}				
 			}else{        		
 				String t = tradProperty(propertyId);
 				field = buildAndBind(t, prefix+propertyId);
@@ -200,6 +200,7 @@ public class LaborerBaseInformation extends VerticalLayout {
 					}
 				}
 			}
+			
 			// agrega el campo
 			if( field != null ){
 				
@@ -209,6 +210,26 @@ public class LaborerBaseInformation extends VerticalLayout {
 				detalleObrero.setComponentAlignment(field, Alignment.MIDDLE_CENTER);
 			}
 		}
+
+		List<Bank> b = confService.findBank();
+		bankContainer = new BeanItemContainer<Bank>(Bank.class, b);		
+		ComboBox b_name =  new ComboBox("Banco", bankContainer);
+		b_name.setItemCaptionMode(ItemCaptionMode.PROPERTY);
+		b_name.setItemCaptionPropertyId("name");
+		b_name.addValidator(new BeanValidator(Laborer.class, (String) "bank"));
+		bind(b_name, prefix+"bank");
+		detalleObrero.addComponent(b_name);
+		detalleObrero.setComponentAlignment(b_name, Alignment.MIDDLE_CENTER);
+		
+		AfpAndInsuranceConfigurations afpAndInsurance = confService.findAfpAndInsuranceConfiguration();
+		afpContainer = new BeanItemContainer<AfpItem>(AfpItem.class, afpAndInsurance.getAfpTable());
+		ComboBox a_name =  new ComboBox("AFP", afpContainer);
+		a_name.setItemCaptionMode(ItemCaptionMode.PROPERTY);
+		a_name.setItemCaptionPropertyId("name");
+		a_name.addValidator(new BeanValidator(Laborer.class, (String) "bank"));
+		bind(a_name, prefix+"afp");
+		detalleObrero.addComponent(a_name);
+		detalleObrero.setComponentAlignment(a_name, Alignment.MIDDLE_CENTER);
 		
 //		if(viewElement){		
 ////			HorizontalLayout hl = new HorizontalLayout();

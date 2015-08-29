@@ -96,7 +96,8 @@ CREATE TABLE IF NOT EXISTS construction_company
    address varchar(255),
    commune varchar(255), 
    name varchar(255) NOT NULL,
-   rut varchar(255) NOT NULL
+   rut varchar(255) NOT NULL,
+   chief_executive varchar(512) DEFAULT NULL
 )
 ;
 CREATE UNIQUE INDEX IF NOT EXISTS PK_CONSTRUCTIONCOMPANY ON construction_company(construction_companyId)
@@ -118,7 +119,8 @@ CREATE TABLE IF NOT EXISTS construction_site
    name varchar(255) NOT NULL,
    status integer NOT NULL,
    person_in_chargeId bigint,
-   construction_companyId bigint
+   construction_companyId bigint,
+   commune varchar(512) DEFAULT NULL
 )
 ;
 ALTER TABLE construction_site
@@ -901,3 +903,26 @@ CREATE UNIQUE INDEX IF NOT EXISTS PRIMARY_KEY_E1 ON speciality(specialityId)
 ;
 CREATE INDEX IF NOT EXISTS FK_SPECIALITY_CONSTRUCTIONSITEID_INDEX_E ON speciality(constructionsiteId)
 ;
+
+
+-- AFP
+ALTER TABLE `afp_item` 
+ADD COLUMN `name` VARCHAR(512) NULL DEFAULT NULL COMMENT '' AFTER `afp`;
+
+ALTER TABLE `afp_item` 
+CHANGE COLUMN `afp` `afp_itemId` INT(11) NULL DEFAULT NULL COMMENT '' ;
+
+ALTER TABLE `afp_item` 
+CHANGE COLUMN `afp_itemId` `afp_itemId` INT(11) NOT NULL COMMENT '' ,
+ADD PRIMARY KEY (`afp_itemId`)  COMMENT '';
+
+ALTER TABLE `afp_item` 
+CHANGE COLUMN `afp_itemId` `afp_itemId` INT(11) NOT NULL AUTO_INCREMENT COMMENT '' ;
+
+
+-- BANCO
+CREATE TABLE `bank` (
+  `bankId` bigint(20) NOT NULL AUTO_INCREMENT,
+  `name` varchar(512) DEFAULT NULL,
+  PRIMARY KEY (`bankId`)
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=latin1;
