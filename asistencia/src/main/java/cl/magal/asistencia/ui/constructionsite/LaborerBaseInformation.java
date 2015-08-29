@@ -8,6 +8,8 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import cl.magal.asistencia.entities.AfpAndInsuranceConfigurations;
+import cl.magal.asistencia.entities.AfpItem;
 import cl.magal.asistencia.entities.Bank;
 import cl.magal.asistencia.entities.Laborer;
 import cl.magal.asistencia.entities.enums.Afp;
@@ -52,8 +54,8 @@ public class LaborerBaseInformation extends VerticalLayout {
 	private static final long serialVersionUID = 453082527742097304L;
 	transient Logger logger = LoggerFactory.getLogger(LaborerBaseInformation.class);
 	BeanItemContainer<Bank> bankContainer = new BeanItemContainer<Bank>(Bank.class);
+	BeanItemContainer<AfpItem> afpContainer = new BeanItemContainer<AfpItem>(AfpItem.class);
 	private transient ConfigurationService confService;
-
 	
 	String prefix = "";
 	boolean viewElement;
@@ -154,15 +156,9 @@ public class LaborerBaseInformation extends VerticalLayout {
 		// to this UI
 		for (Object propertyId : new String[]{"rut","firstname","secondname","lastname", "secondlastname", "dateBirth", "commune", "town", "address", "mobileNumber", "phone","afp", "maritalStatus", "isapre", "nationality", "provenance", "wedge", "bank", "bankAccount","dependents","validityPensionReview"}) {
 			Field<?> field = null;
-			if(propertyId.equals("bank") || propertyId.equals("laborerId") || propertyId.equals("constructionSites") || propertyId.equals("contractId") || propertyId.equals("teamId") || (propertyId.equals("rut") && !viewElement))
+			if(propertyId.equals("afp") || propertyId.equals("bank") || propertyId.equals("laborerId") || propertyId.equals("constructionSites") || propertyId.equals("contractId") || propertyId.equals("teamId") || (propertyId.equals("rut") && !viewElement))
 				;
-			else if(propertyId.equals("afp")){
-				field = new ComboBox("AFP");
-				((AbstractSelect) field).setNullSelectionAllowed(false);
-				for(Afp a : Afp.values()){
-					((AbstractSelect) field).addItem(a);
-				}
-			}else if(propertyId.equals("commune")){
+			else if(propertyId.equals("commune")){
 				field = new ComboBox("Comuna");
 				((AbstractSelect) field).setNullSelectionAllowed(false);
 				for(String ms : Constants.COMUNAS ){
@@ -191,14 +187,7 @@ public class LaborerBaseInformation extends VerticalLayout {
 				((AbstractSelect) field).setNullSelectionAllowed(false);
 				for(Isapre i : Isapre.values()){
 					((AbstractSelect) field).addItem(i);
-				}
-			//}else if(propertyId.equals("bank")){
-				/*field = new ComboBox("Banco");
-				((AbstractSelect) field).setNullSelectionAllowed(false);
-				for(Bank b : Bank.values()){
-					((AbstractSelect) field).addItem(b);
-				}*/
-				
+				}				
 			}else{        		
 				String t = tradProperty(propertyId);
 				field = buildAndBind(t, prefix+propertyId);
@@ -222,16 +211,28 @@ public class LaborerBaseInformation extends VerticalLayout {
 				detalleObrero.setComponentAlignment(field, Alignment.MIDDLE_CENTER);
 			}
 		}
-		
 
+		//logger.debug("KKK: "+getBinder().getItemDataSource().getItemProperty(prefix+"bank.id").getValue());
 		List<Bank> b = confService.findBank();
-		bankContainer = new BeanItemContainer<Bank>(Bank.class, b);
+		bankContainer = new BeanItemContainer<Bank>(Bank.class, b);		
+		ComboBox b_name =  new ComboBox("Banco", bankContainer);
+		b_name.setItemCaptionMode(ItemCaptionMode.PROPERTY);
+		b_name.setItemCaptionPropertyId("name");
+		//b_name.select(bankContainer.getItem("laborer.bank").getItemProperty("id").getValue());
+		b_name.addValidator(new BeanValidator(Laborer.class, (String) "bank"));
+		bind(b_name, prefix+"bank");
+		detalleObrero.addComponent(b_name);
+		detalleObrero.setComponentAlignment(b_name, Alignment.MIDDLE_CENTER);
 		
-		ComboBox nombre =  new ComboBox("Banco", bankContainer);
-		nombre.setItemCaptionMode(ItemCaptionMode.PROPERTY);
-		nombre.setItemCaptionPropertyId("name");
-		detalleObrero.addComponent(nombre);
-		detalleObrero.setComponentAlignment(nombre, Alignment.MIDDLE_CENTER);
+		AfpAndInsuranceConfigurations afpAndInsurance = confService.findAfpAndInsuranceConfiguration();
+		afpContainer = new BeanItemContainer<AfpItem>(AfpItem.class, afpAndInsurance.getAfpTable());
+		ComboBox a_name =  new ComboBox("AFP", afpContainer);
+		a_name.setItemCaptionMode(ItemCaptionMode.PROPERTY);
+		a_name.setItemCaptionPropertyId("name");
+		a_name.addValidator(new BeanValidator(Laborer.class, (String) "bank"));
+		bind(a_name, prefix+"afp");
+		detalleObrero.addComponent(a_name);
+		detalleObrero.setComponentAlignment(a_name, Alignment.MIDDLE_CENTER);
 		
 //		if(viewElement){		
 ////			HorizontalLayout hl = new HorizontalLayout();

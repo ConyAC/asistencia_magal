@@ -33,13 +33,9 @@ import javax.validation.constraints.Pattern;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
-import cl.magal.asistencia.entities.converter.AfpConverter;
-import cl.magal.asistencia.entities.converter.BankConverter;
 import cl.magal.asistencia.entities.converter.IsapreConverter;
 import cl.magal.asistencia.entities.converter.MaritalStatusConverter;
 import cl.magal.asistencia.entities.converter.NationalityConverter;
-import cl.magal.asistencia.entities.enums.Afp;
-import cl.magal.asistencia.entities.enums.Bank;
 import cl.magal.asistencia.entities.enums.Isapre;
 import cl.magal.asistencia.entities.enums.MaritalStatus;
 import cl.magal.asistencia.entities.enums.Nationality;
@@ -156,7 +152,6 @@ public class Laborer implements Serializable {
     private String bankAccount;
 
     @JoinColumn(name="afp")
-    @OneToOne
     private AfpItem afp;
     
     @Column(name="isapre" , nullable = false)
@@ -172,8 +167,8 @@ public class Laborer implements Serializable {
     @Column(name="nationality", nullable = false)
     private Nationality nationality;
     
-    @Convert(converter = BankConverter.class)
-    @Column(name="bank")
+    @JoinColumn(name="bank")
+    @OneToOne
     private Bank bank;
     
     @Column(name="photo")
@@ -192,8 +187,6 @@ public class Laborer implements Serializable {
     		isapre = Isapre.FONASA;
     	if(nationality == null)
     		nationality = Nationality.CHILENA;
-    	if(bank == null)
-    		bank = Bank.ESTADO;		
     }
     
     public Laborer() {
