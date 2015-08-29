@@ -5,15 +5,14 @@ import java.util.LinkedList;
 import java.util.List;
 
 import javax.persistence.Basic;
-import javax.persistence.CollectionTable;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
-import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.validation.constraints.Digits;
 
@@ -36,11 +35,7 @@ public class AfpAndInsuranceConfigurations implements Serializable {
 	@Column(name="sis")
 	Double sis;
 	
-	@ElementCollection(fetch=FetchType.EAGER)
-	@CollectionTable(
-	        name="afp_item",
-	        joinColumns=@JoinColumn(name="afp_and_insuranceId")
-	  )
+	@OneToMany(mappedBy="afpAndInsuranceConfigurations",fetch=FetchType.LAZY,cascade={CascadeType.PERSIST,CascadeType.MERGE},orphanRemoval=true )
 	List<AfpItem> afpTable = new LinkedList<AfpItem>();
 
 	public Long getId() {
