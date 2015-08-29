@@ -888,13 +888,10 @@ public class LaborerAndTeamPanel extends VerticalLayout implements View {
 							return ;
 						}
 						try {
-							LaborerConstructionsite laborer = ((BeanItem<LaborerConstructionsite>) event.getSavedItem()).getBean();
-							//LaborerConstructionsite laborer = beanItem.getBean();
-							logger.debug("HHH: "+laborer.getLaborer().getBank());
-							logger.debug("AAA: "+laborer.getLaborer().getAfp());
+							//			    			LaborerConstructionsite laborer = ((BeanItem<LaborerConstructionsite>) event.getSavedItem()).getBean();
+							LaborerConstructionsite laborer = beanItem.getBean();
 							logger.debug("laborer constructionsite {}, rut {}, photo {} postcommit ",laborer,laborer.getLaborer().getRut(),laborer.getLaborer().getPhoto());
 							laborerService.save(laborer);	
-							laborerConstructionContainer.addBean(laborer);
 							//si el elemento no esta activo, lo quita de la lista
 							if( !laborer.isActive() ){
 								laborerConstructionContainer.removeItem(laborer);

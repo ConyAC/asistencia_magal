@@ -869,7 +869,7 @@ public class ConfigView extends VerticalLayout implements View {
 				
 				setVisibleColumns("name","delete");
 				setColumnHeaders("Nombre","Eliminar");
-				setPageLength(4);
+				setPageLength(6);
 			}
 			
 			@Override

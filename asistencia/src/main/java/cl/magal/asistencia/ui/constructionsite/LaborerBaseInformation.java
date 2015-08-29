@@ -212,13 +212,11 @@ public class LaborerBaseInformation extends VerticalLayout {
 			}
 		}
 
-		//logger.debug("KKK: "+getBinder().getItemDataSource().getItemProperty(prefix+"bank.id").getValue());
 		List<Bank> b = confService.findBank();
 		bankContainer = new BeanItemContainer<Bank>(Bank.class, b);		
 		ComboBox b_name =  new ComboBox("Banco", bankContainer);
 		b_name.setItemCaptionMode(ItemCaptionMode.PROPERTY);
 		b_name.setItemCaptionPropertyId("name");
-		//b_name.select(bankContainer.getItem("laborer.bank").getItemProperty("id").getValue());
 		b_name.addValidator(new BeanValidator(Laborer.class, (String) "bank"));
 		bind(b_name, prefix+"bank");
 		detalleObrero.addComponent(b_name);

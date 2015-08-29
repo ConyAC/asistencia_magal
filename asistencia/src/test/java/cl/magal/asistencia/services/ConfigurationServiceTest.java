@@ -334,7 +334,7 @@ public class ConfigurationServiceTest {
 		afpItem.setRate(11.44D);
 		
 		AfpAndInsuranceConfigurations afpAndInsuranceConfiguration = AfpAndInsuranceConfigurationsHelper.newAfpAndInsuranceConfigurations();
-		
+
 		afpAndInsuranceConfiguration.addAfpAndInsurance(afpItem);
 		service.save(afpAndInsuranceConfiguration);
 		AfpAndInsuranceConfigurationsHelper.verify(afpAndInsuranceConfiguration);

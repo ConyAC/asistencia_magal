@@ -291,7 +291,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 				addComponent(gl);
 				setComponentAlignment(gl, Alignment.MIDDLE_CENTER);
 				//gl.setComponentAlignment(hl, Alignment.MIDDLE_CENTER);
-logger.debug("LALA: "+getItem().getItemProperty("laborer.afp").getValue());
+
 				gl.addComponent(new Label("Rol :   "));gl.addComponent(new Label(getItem().getItemProperty("activeContract.jobCode")));
 				gl.addComponent(new Label("Oficio :   "));gl.addComponent(new Label(getItem().getItemProperty("activeContract.job")));
 				Speciality speciality = (Speciality)getItem().getItemProperty("activeContract.speciality").getValue();

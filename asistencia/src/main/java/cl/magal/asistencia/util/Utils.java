@@ -30,7 +30,6 @@ import cl.magal.asistencia.entities.License;
 import cl.magal.asistencia.entities.Mobilization2;
 import cl.magal.asistencia.entities.Vacation;
 import cl.magal.asistencia.entities.WithdrawalSettlement;
-import cl.magal.asistencia.entities.enums.Afp;
 import cl.magal.asistencia.entities.enums.AttendanceMark;
 
 import com.vaadin.data.Validator.InvalidValueException;
@@ -383,7 +382,7 @@ public class Utils {
 	public static Double getAfpRate(List<AfpItem> afpList, AfpItem afp){
 		
 		for(AfpItem item : afpList)
-			if(item == afp )
+			if(item.getId() == afp.getId() )
 				return item.getRate()/100;
 		return 0.1144;//FIX si no encuentra, retorna una por defecto?
 	}
