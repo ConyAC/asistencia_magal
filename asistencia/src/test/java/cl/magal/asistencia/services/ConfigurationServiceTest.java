@@ -335,7 +335,7 @@ public class ConfigurationServiceTest {
 		AfpAndInsuranceConfigurations afpAndInsuranceConfiguration = AfpAndInsuranceConfigurationsHelper.newAfpAndInsuranceConfigurations();
 		
 		AfpItem afpItem = new AfpItem();
-		afpItem.setAfp(afp);
+		afpItem.setName("Capital");
 		afpItem.setRate(rate);
 		
 		afpAndInsuranceConfiguration.addAfpAndInsurance(afpItem);
@@ -370,7 +370,7 @@ public class ConfigurationServiceTest {
 		assertEquals("Las configuraciones de anticipo deben ser iguales",dbafpAndInsuranceConfiguration.getId(),afpAndInsuranceConfiguration.getId());
 		
 		AfpItem afpItem = new AfpItem();
-		afpItem.setAfp(afp);
+		afpItem.setName("Capital");
 		afpItem.setRate(rate);
 		
 		dbafpAndInsuranceConfiguration.addAfpAndInsurance(afpItem);

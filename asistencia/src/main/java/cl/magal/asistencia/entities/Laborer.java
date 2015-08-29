@@ -168,7 +168,6 @@ public class Laborer implements Serializable {
     private Nationality nationality;
     
     @JoinColumn(name="bank")
-    @OneToOne
     private Bank bank;
     
     @Column(name="photo")
