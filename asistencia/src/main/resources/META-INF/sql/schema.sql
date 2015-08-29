@@ -905,19 +905,22 @@ CREATE INDEX IF NOT EXISTS FK_SPECIALITY_CONSTRUCTIONSITEID_INDEX_E ON specialit
 ;
 
 
+-- AFP
 ALTER TABLE `afp_item` 
 ADD COLUMN `name` VARCHAR(512) NULL DEFAULT NULL COMMENT '' AFTER `afp`;
 
 ALTER TABLE `afp_item` 
 CHANGE COLUMN `afp` `afp_itemId` INT(11) NULL DEFAULT NULL COMMENT '' ;
 
-ALTER TABLE `magal_asistencia`.`afp_item` 
+ALTER TABLE `afp_item` 
 CHANGE COLUMN `afp_itemId` `afp_itemId` INT(11) NOT NULL COMMENT '' ,
 ADD PRIMARY KEY (`afp_itemId`)  COMMENT '';
 
-ALTER TABLE `magal_asistencia`.`afp_item` 
+ALTER TABLE `afp_item` 
 CHANGE COLUMN `afp_itemId` `afp_itemId` INT(11) NOT NULL AUTO_INCREMENT COMMENT '' ;
 
+
+-- BANCO
 CREATE TABLE `bank` (
   `bankId` bigint(20) NOT NULL AUTO_INCREMENT,
   `name` varchar(512) DEFAULT NULL,
