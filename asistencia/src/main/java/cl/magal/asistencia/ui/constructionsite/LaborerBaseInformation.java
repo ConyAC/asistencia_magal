@@ -12,7 +12,6 @@ import cl.magal.asistencia.entities.AfpAndInsuranceConfigurations;
 import cl.magal.asistencia.entities.AfpItem;
 import cl.magal.asistencia.entities.Bank;
 import cl.magal.asistencia.entities.Laborer;
-import cl.magal.asistencia.entities.enums.Afp;
 import cl.magal.asistencia.entities.enums.Isapre;
 import cl.magal.asistencia.entities.enums.MaritalStatus;
 import cl.magal.asistencia.entities.enums.Nationality;

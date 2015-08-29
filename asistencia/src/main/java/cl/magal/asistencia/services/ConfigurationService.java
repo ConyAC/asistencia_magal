@@ -20,7 +20,6 @@ import cl.magal.asistencia.entities.Bank;
 import cl.magal.asistencia.entities.ConstructionSite;
 import cl.magal.asistencia.entities.DateConfigurations;
 import cl.magal.asistencia.entities.FamilyAllowanceConfigurations;
-import cl.magal.asistencia.entities.Holiday;
 import cl.magal.asistencia.entities.TaxationConfigurations;
 import cl.magal.asistencia.entities.WageConfigurations;
 import cl.magal.asistencia.repositories.AdvancePaymentRepository;
