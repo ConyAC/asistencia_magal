@@ -355,7 +355,7 @@ public class ConfigView extends VerticalLayout implements View {
 								AfpItem a = new AfpItem();
 								a.setAfpAndInsuranceConfigurations(afpAndInsurance);
 								a.setName(nombre.getValue());
-								a.setRate((Double) Utils.getDecimalFormat().parse(tasa.getValue()));
+								a.setRate( Utils.getDecimalFormat().parse(tasa.getValue()).doubleValue());
 								confService.save(a);
 								container.addBean(a);
 								
