@@ -52,8 +52,6 @@ public class LaborerBaseInformation extends VerticalLayout {
 	 */
 	private static final long serialVersionUID = 453082527742097304L;
 	transient Logger logger = LoggerFactory.getLogger(LaborerBaseInformation.class);
-	BeanItemContainer<Bank> bankContainer = new BeanItemContainer<Bank>(Bank.class);
-	BeanItemContainer<AfpItem> afpContainer = new BeanItemContainer<AfpItem>(AfpItem.class);
 	private transient ConfigurationService confService;
 	
 	String prefix = "";
@@ -212,7 +210,7 @@ public class LaborerBaseInformation extends VerticalLayout {
 		}
 
 		List<Bank> b = confService.findBank();
-		bankContainer = new BeanItemContainer<Bank>(Bank.class, b);		
+		BeanItemContainer<Bank> bankContainer = new BeanItemContainer<Bank>(Bank.class, b);		
 		ComboBox b_name =  new ComboBox("Banco", bankContainer);
 		b_name.setItemCaptionMode(ItemCaptionMode.PROPERTY);
 		b_name.setItemCaptionPropertyId("name");
@@ -222,7 +220,7 @@ public class LaborerBaseInformation extends VerticalLayout {
 		detalleObrero.setComponentAlignment(b_name, Alignment.MIDDLE_CENTER);
 		
 		AfpAndInsuranceConfigurations afpAndInsurance = confService.findAfpAndInsuranceConfiguration();
-		afpContainer = new BeanItemContainer<AfpItem>(AfpItem.class, afpAndInsurance.getAfpTable());
+		BeanItemContainer<AfpItem> afpContainer = new BeanItemContainer<AfpItem>(AfpItem.class, afpAndInsurance.getAfpTable());
 		ComboBox a_name =  new ComboBox("AFP", afpContainer);
 		a_name.setItemCaptionMode(ItemCaptionMode.PROPERTY);
 		a_name.setItemCaptionPropertyId("name");
