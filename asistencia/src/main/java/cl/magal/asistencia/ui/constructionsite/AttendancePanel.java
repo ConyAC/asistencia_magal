@@ -37,6 +37,7 @@ import cl.magal.asistencia.entities.Attendance;
 import cl.magal.asistencia.entities.Confirmations;
 import cl.magal.asistencia.entities.ConstructionSite;
 import cl.magal.asistencia.entities.DateConfigurations;
+import cl.magal.asistencia.entities.HistoricalSalary;
 import cl.magal.asistencia.entities.LaborerConstructionsite;
 import cl.magal.asistencia.entities.Overtime;
 import cl.magal.asistencia.entities.Salary;
@@ -178,6 +179,12 @@ public class AttendancePanel extends VerticalLayout implements View {
 		"laborerConstructionSite.laborer.fullname","lastJornalPromedio","jornalPromedio","specialBond","bondMov2","loanBond","sobreTiempo","descHours","loan","tools","totalLiquido",
 		"salaryCalculator.diaTrab","salaryCalculator.sab","salaryCalculator.sep","salaryCalculator.dps","salaryCalculator.dpd","salaryCalculator.col","salaryCalculator.mov"
 		,"jornalBaseMes","vtrato","valorSabado","vsCorrd","descHoras","bonifImpo","glegal","afecto","sobreAfecto","cargas","asigFamiliar","colacion","mov","mov2","tnoAfecto"
+	};
+	
+	final static String[] historicalSalaryTableVisibleTable = new String[]{"laborerConstructionSite.activeContract.jobCode",
+		"laborerConstructionSite.laborer.fullname","lastJornalPromedio","jornalPromedio","specialBond","bondMov2","loanBond","sobreTiempo","descHours","loan","tools","totalLiquido",
+		"diaTrab","sab","sep","dps","dpd","col","mov"
+		,"jornalBaseMes","vtrato","valorSabado","vsCorrd","descHoras","bonifImpo","glegal","afecto","sobreAfecto","cargas","asigFamiliar","colacion","mov2","tnoAfecto"
 	};
 
 	public Confirmations getConfirmations() {
@@ -1068,7 +1075,18 @@ public class AttendancePanel extends VerticalLayout implements View {
 									public void onClose(ConfirmDialog dialog) {
 										if (dialog.isConfirmed()) {
 											confirmations.setCentralCheck(!confirmations.isCentralCheck());
+											//copia los salarios y los pasa a históricos
+											List<HistoricalSalary> historicals = new ArrayList<HistoricalSalary>(salaryContainer.size());
+											for(Long itemId : salaryContainer.getItemIds()){
+												BeanItem<Salary> beanItem = salaryContainer.getItem(itemId);
+												HistoricalSalary historicalSalary = new HistoricalSalary(beanItem.getBean());
+												historicals.add(historicalSalary);
+											}
+											//guarda los historicos
+											constructionSiteService.saveHistoricalSalaries(historicals);
+											//marca la confirmación sólo si no hubo problemas
 											constructionSiteService.save(confirmations);
+											
 											configureInterface();
 										}
 									}
@@ -1099,27 +1117,33 @@ public class AttendancePanel extends VerticalLayout implements View {
 
 					@Override
 					public Object generateCell(final Table source, final Object itemId,final Object columnId) {
-						final BeanItem<Salary> item = (BeanItem<Salary>) salaryContainer.getItem(itemId);
-						salaryContainer.getItem(itemId).getItemProperty("forceSalary").getValue();
-						final Label label  = new Label("<b>"+Utils.formatInteger((Integer) salaryContainer.getContainerProperty(itemId, columnId).getValue())+"</b>"+
-								"  ("+Utils.formatInteger((Integer) salaryContainer.getContainerProperty(itemId, "roundSalary").getValue())+")");
-						label.setContentMode(ContentMode.HTML);
-						for(final String pid : new String[]{"jornalPromedio","suple","descHours","bondMov2","specialBond","loanBond"})
-							((ValueChangeNotifier)item.getItemProperty(pid)).addValueChangeListener(new Property.ValueChangeListener() {
-
-								@Override
-								public void valueChange(ValueChangeEvent event) {
-									if("jornalPromedio".equals(pid)){
-									}else if("suple".equals(pid)){
+						
+						if(((BeanContainer)source.getContainerDataSource()).getBeanType() == Salary.class){
+						
+							final BeanItem<Salary> item = (BeanItem<Salary>) salaryContainer.getItem(itemId);
+							salaryContainer.getItem(itemId).getItemProperty("forceSalary").getValue();
+							final Label label  = new Label("<b>"+Utils.formatInteger((Integer) salaryContainer.getContainerProperty(itemId, columnId).getValue())+"</b>"+
+									"  ("+Utils.formatInteger((Integer) salaryContainer.getContainerProperty(itemId, "roundSalary").getValue())+")");
+							label.setContentMode(ContentMode.HTML);
+							for(final String pid : new String[]{"jornalPromedio","suple","descHours","bondMov2","specialBond","loanBond"})
+								((ValueChangeNotifier)item.getItemProperty(pid)).addValueChangeListener(new Property.ValueChangeListener() {
+	
+									@Override
+									public void valueChange(ValueChangeEvent event) {
+										if("jornalPromedio".equals(pid)){
+										}else if("suple".equals(pid)){
+										}
+										salaryContainer.getItem(itemId).getItemProperty("forceSalary").getValue();
+										//forza actualizar el item
+										label.setValue( "<b>"+Utils.formatInteger((Integer) salaryContainer.getContainerProperty(itemId, columnId).getValue())+"</b>"+
+												"  ("+Utils.formatInteger((Integer) salaryContainer.getContainerProperty(itemId, "roundSalary").getValue())+")");
+										
 									}
-									salaryContainer.getItem(itemId).getItemProperty("forceSalary").getValue();
-									//forza actualizar el item
-									label.setValue( "<b>"+Utils.formatInteger((Integer) salaryContainer.getContainerProperty(itemId, columnId).getValue())+"</b>"+
-											"  ("+Utils.formatInteger((Integer) salaryContainer.getContainerProperty(itemId, "roundSalary").getValue())+")");
-									
-								}
-							});
-						return label;
+								});
+							return label;
+						}else {
+							return ((BeanItem<HistoricalSalary>) source.getContainerDataSource().getItem(itemId)).getItemProperty(columnId).getValue();
+						}
 					}
 
 				});
@@ -2345,7 +2369,9 @@ public class AttendancePanel extends VerticalLayout implements View {
 		setVisibilityOfButtons();
 		//define los estados de los botones
 		toogleButtonState(btnConstructionSiteConfirm,getConfirmations().isConstructionSiteCheck());
-		toogleButtonState(btnCentralConfirm,getConfirmations().isCentralCheck());
+		if(getConfirmations().isCentralCheck()) //solo deja confirmar una vez
+			toogleButtonState(btnCentralConfirm,getConfirmations().isCentralCheck());
+		
 		toogleButtonState(btnSupleObraConfirm, confirmations.isSupleObraCheck());
 		toogleButtonState(btnSupleCentralConfirm, confirmations.isSupleCentralCheck());
 
@@ -2360,10 +2386,13 @@ public class AttendancePanel extends VerticalLayout implements View {
 		//		final WorkThread thread = new WorkThread();
 		//		thread.start();
 		DateTime dt = getAttendanceDate();
-
-		reloadMonthGridData(dt);
+		
+		logger.debug("configureInterface();");
 
 		reloadMonthAttendanceData(dt);
+		configureInterface();
+
+		reloadMonthGridData(dt);
 
 		logger.debug("createHeaders(attendanceGrid);");
 		createHeaders(attendanceGrid);
@@ -2374,9 +2403,6 @@ public class AttendancePanel extends VerticalLayout implements View {
 		createHeaders(overtimeGrid);
 		logger.debug("setOvertimeOrders();");
 		setOvertimeOrders();
-
-		logger.debug("configureInterface();");
-		configureInterface();
 
 		logger.debug("createGridFooters(attendanceGrid);");
 		createGridFooters(attendanceGrid);
@@ -2446,12 +2472,32 @@ public class AttendancePanel extends VerticalLayout implements View {
 			absenceContainer.addAll(absences);
 			absenceContainer.sort(new String[]{"laborerConstructionsite.activeContract.jobCode"},new boolean[]{ true });
 
-			List<Salary> salaries = constructionSiteService.getSalariesByConstructionAndMonth(cs,dt);
-			logger.debug("Cargando salarios");
-			salaryContainer.addAll(salaries);
-			logger.debug("salarios cargados");
-			salaryContainer.sort(new String[]{"laborerConstructionsite.activeContract.jobCode"},new boolean[]{ true });
-			logger.debug("cambio de orden");
+			//dependiendo de si está o no confirmada por el central, carga los sueldos historicos u los otros
+			if( !getConfirmations().isCentralCheck() ){
+				List<Salary> salaries = constructionSiteService.getSalariesByConstructionAndMonth(cs,dt);
+				salaryContainer.addAll(salaries);
+				salaryContainer.sort(new String[]{"laborerConstructionsite.activeContract.jobCode"},new boolean[]{ true });
+				salaryTable.setContainerDataSource(salaryContainer);
+			}else{
+				List<HistoricalSalary> salaries = constructionSiteService.getHistoricalSalariesByConstructionAndMonth(cs,dt);
+				BeanContainer<Long,HistoricalSalary> historicalSalaryContainer = new BeanContainer<Long,HistoricalSalary>(HistoricalSalary.class);
+				historicalSalaryContainer.addNestedContainerProperty("laborerConstructionSite.activeContract.jobCode");
+				historicalSalaryContainer.addNestedContainerProperty("laborerConstructionSite.laborer.fullname");
+				historicalSalaryContainer.addNestedContainerProperty("laborerConstructionSite.supleCode");
+				historicalSalaryContainer.addNestedContainerProperty("laborerConstructionSite.id");
+				historicalSalaryContainer.setBeanIdProperty("laborerConstructionSite.id");
+				
+				historicalSalaryContainer.addAll(salaries);
+				historicalSalaryContainer.sort(new String[]{"laborerConstructionsite.activeContract.jobCode"},new boolean[]{ true });
+				salaryTable.setContainerDataSource(historicalSalaryContainer);
+				salaryTable.setVisibleColumns(historicalSalaryTableVisibleTable);
+
+				salaryTable.setColumnHeaders("Rol","Nombre","Último<br />Jornal Prom","Jornal Prom","Bono Imp.","Bono No Imp.","Bono Prest.", "Sobretpo","H Desc","V Cuota<br />Prestamo",
+						"V Cuota<br />Herramienta","Total Líquido<br />(A Pagar)",
+						"Día<br />Trab","Sab","Sep","DPS","DPD","Col","Mov"
+						,"Jornal Base", " V Trato", "Valor Sábado" , "V S Corrida", "Desc Horas","Total<br />Bonos<br />Imponibles","G Legal","Afecto","Sobre Afecto","Cargas","A Familiar","Colación","Movi 2","T No Afecto"
+						);
+			}
 			salaryTable.refreshRowCache();
 
 		}catch(Exception e){

@@ -227,6 +227,10 @@ public class Utils {
 	}
 	
 	public static boolean containsAccident(List<Accident> a, int day, LaborerConstructionsite lc, DateTime dt) {
+		if(lc == null )
+			throw new RuntimeException("La relación trabajador-obra no puede ser nula");
+		if(lc.getLaborer() == null )
+			throw new RuntimeException("El trabajador no puede ser nulo");
 		for(Accident accident : a){
 		 Calendar calA = Calendar.getInstance();
 		 calA.setTime(accident.getFromDate());
@@ -421,7 +425,7 @@ public class Utils {
 	 * @param attendance2
 	 * @return
 	 */
-	public static int calcularDiaFinal(Attendance attendance2, int maxDay){
+	public static int calcularDiaFinal(Attendance attendance2, int maxDay,boolean completarSemana){
 		if(attendance2.getLaborerConstructionSite()
 				.getActiveContract().getTerminationDate() == null )
 			return maxDay;
@@ -430,8 +434,13 @@ public class Utils {
 			.withDayOfMonth(new DateTime(attendance2.getDate())
 			.dayOfMonth().getMaximumValue());
 		//obtiene la fecha de ingreso
-		DateTime finContrato = new DateTime(attendance2.getLaborerConstructionSite()
-				.getActiveContract().getTerminationDate());
+		DateTime finContrato = new DateTime(attendance2.getLaborerConstructionSite().getActiveContract().getTerminationDate());
+		//si tiene que completar la semana, retorna el lunes más cercano
+		if(completarSemana){
+			//le resta dia hasta que sea el lunes
+			finContrato = calcularLunesMasCercano(finContrato);
+		}
+		
 		//si la fecha de ingreso es luego del inicio del mes, entonces comienza a contar desde ese día
 		if(finContrato.isBefore(finMes))
 			return finContrato.getDayOfMonth() - 1;
@@ -440,21 +449,36 @@ public class Utils {
 	}
 	
 	/**
+	 * Dada una fecha, retorna el lunes pasado más cercano
+	 * @param dt
+	 * @return
+	 */
+	private static DateTime calcularLunesMasCercano(DateTime dt){
+		while(dt.getDayOfWeek() != DateTimeConstants.MONDAY ){
+			dt = dt.minusDays(1);
+		}
+		return dt;
+	}
+	
+	/**
 	 * 
 	 * @param attendance2
 	 * @return
 	 */
-	public static int calcularDiaInicial(Attendance attendance2,int minVal) {
+	public static int calcularDiaInicial(Attendance attendance2,int minVal,boolean completarSemana) {
 		//obtiene el primer día del mes
 		DateTime inicioMes = new DateTime(attendance2.getDate()).withDayOfMonth(1);
 		//obtiene la fecha de ingreso
 		DateTime inicioContrato = new DateTime(attendance2.getLaborerConstructionSite().getActiveContract().getStartDate());
+		//si tiene que completar la semana, retorna el lunes más cercano
+		if(completarSemana){
+			//le resta dia hasta que sea el lunes
+			inicioContrato = calcularLunesMasCercano(inicioContrato);
+		}
 		//si la fecha de ingreso es luego del inicio del mes, entonces comienza a contar desde ese día
 		if(inicioContrato.isAfter(inicioMes)){
-			logger.debug("after");
 			return inicioContrato.getDayOfMonth() - 1;
 		}else {
-			logger.debug("before");
 			return minVal;
 		}
 	}
@@ -470,19 +494,19 @@ public class Utils {
 		if(attendance == null )
 			throw new RuntimeException("El objeto de asistencia no puede ser nulo.");
 
-		logger.debug("maxDay  {}",maxDay);
 		//si el número maximo es nulo, calcula el máximo según la fecha de la asistencia
 		if(maxDay == null )
 			maxDay = new DateTime(attendance.getDate()).dayOfMonth().getMaximumValue();
 		
+		//verifica si contiene relleno
+		boolean contieneRelleno = ArrayUtils.contains(marks, AttendanceMark.FILLER );
+		
 		//que considere la fecha inicial de contrato para considerar el día inical y el final
-		int i = Utils.calcularDiaInicial(attendance,0);
-		maxDay = Utils.calcularDiaFinal(attendance,maxDay);
+		int i = Utils.calcularDiaInicial(attendance,0,contieneRelleno);
+		maxDay = Utils.calcularDiaFinal(attendance,maxDay,contieneRelleno);
 		
 		if( i >= maxDay )
 			return 0;
-		
-		logger.debug("i : {} , maxDay  {}",i,maxDay);
 		
 		int count = 0;
 		List<AttendanceMark> attendanceMarks = attendance.getMarksAsList();

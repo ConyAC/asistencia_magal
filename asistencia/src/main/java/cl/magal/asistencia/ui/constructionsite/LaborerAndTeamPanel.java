@@ -875,7 +875,8 @@ public class LaborerAndTeamPanel extends VerticalLayout implements View {
 			public void itemClick(ItemClickEvent event) {
 
 				final BeanItem<LaborerConstructionsite> beanItem = (BeanItem<LaborerConstructionsite>) event.getItem();
-				logger.debug("laborer constructionsite click item {} rut {} ",beanItem.getBean(),beanItem.getBean().getLaborer().getRut());
+				logger.debug("laborer constructionsite {} {} ",beanItem.getBean(),beanItem.getBean().getLaborer());
+				logger.debug("laborer constructionsite rut {} ",beanItem.getBean().getLaborer().getRut());
 				LaborerConstructionDialog userWindow = new LaborerConstructionDialog(beanItem);
 
 				userWindow.addListener(new AbstractWindowEditor.EditorSavedListener() {

@@ -709,8 +709,8 @@ public class SalaryCalculator {
 		int count = 0;
 		
 		int i = lastClosingDate != null && 0 < lastClosingDate  ? lastClosingDate - 1 : 0;
-		i = Utils.calcularDiaInicial(attendance,i);
-		maxDays = Utils.calcularDiaFinal(attendance,maxDays);
+		i = Utils.calcularDiaInicial(attendance,i,false);
+		maxDays = Utils.calcularDiaFinal(attendance,maxDays,false);
 		
 		if( i >= maxDays )
 			return 0;
@@ -771,8 +771,8 @@ public class SalaryCalculator {
 		List<AttendanceMark> projectionsMarks = lastMonthAttendance.getMarksAsList();
 		
 		int i = lastClosingDate != null && 0 < lastClosingDate  ? lastClosingDate - 1 : 0;
-		i = Utils.calcularDiaInicial(attendance,i);
-		maxDays = Utils.calcularDiaFinal(attendance,maxDays);
+		i = Utils.calcularDiaInicial(attendance,i,false);
+		maxDays = Utils.calcularDiaFinal(attendance,maxDays,false);
 		
 		if( i >= maxDays )
 			return resultMarks;
@@ -886,7 +886,7 @@ public class SalaryCalculator {
 	 */
 	private double calculateDPD(Attendance attendance) {
 		return Utils.countMarks(null,attendance,AttendanceMark.ATTEND,AttendanceMark.SATURDAY,AttendanceMark.RAIN,AttendanceMark.PERMISSION,
-				AttendanceMark.FILLER,AttendanceMark.FAIL);
+				AttendanceMark.FILLER,AttendanceMark.FAIL,AttendanceMark.VACATION);
 	}
 
 	/**
