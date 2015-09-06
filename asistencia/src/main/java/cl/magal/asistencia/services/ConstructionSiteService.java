@@ -1141,6 +1141,16 @@ public class ConstructionSiteService {
 	}
 
 	public void saveHistoricalSalaries(List<HistoricalSalary> historicals) {
+		if(historicals == null || historicals.isEmpty() )
+			return; //no hace nada
+		//lo primero es borrar el histórico anterior
+		Date date = historicals.get(0).getDate();
+		ConstructionSite cs = historicals.get(0).getLaborerConstructionSite().getConstructionsite();
+		List<HistoricalSalary> hlcs = historicalSalaryRepo.findByConstructionsiteAndMonth(cs, date);
+		if(hlcs != null && !hlcs.isEmpty())
+			historicalSalaryRepo.delete(hlcs);
+		
+		//finalmente guarda la asistencia histórica
 		historicalSalaryRepo.save(historicals);
 	}
 	
