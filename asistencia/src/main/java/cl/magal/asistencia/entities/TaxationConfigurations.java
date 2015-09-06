@@ -36,7 +36,7 @@ public class TaxationConfigurations implements Serializable {
 	@Column(name ="tor")
 	Double to;
 	
-	@Digits(fraction = 2, integer = 12)
+	@Digits(fraction = 4, integer = 12)
 	@Column(name ="factor")
 	Double factor;
 	
@@ -44,7 +44,7 @@ public class TaxationConfigurations implements Serializable {
 	@Column(name ="reduction")
 	Double reduction;
 	
-	@Digits(fraction = 2, integer = 12)
+	@Digits(fraction = 4, integer = 12)
 	@Column(name ="exempt")
 	Double exempt;
 
