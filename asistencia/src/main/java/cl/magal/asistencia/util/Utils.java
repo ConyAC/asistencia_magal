@@ -199,13 +199,14 @@ public class Utils {
 		for(Vacation vacation : v){
 		 Calendar calV = Calendar.getInstance();
 		 calV.setTime(vacation.getFromDate());
-
+		 
 		 if(sabOrdom != 6  && sabOrdom != 7 ){
-				for (int i = 0; i <= vacation.getTotal();i++){
+				for (int i = 0; i < vacation.getTotal();i++){
 					 if(calV.get(Calendar.DAY_OF_MONTH) == day && new DateTime(calV.getTime()).getMonthOfYear() == dt.getMonthOfYear() && lc.getLaborer().getId() == vacation.getLaborerConstructionSite().getLaborer().getId()){
 						return true;
 					}
-					 calV.add(Calendar.DATE, 1);
+					
+						 calV.add(Calendar.DATE, 1);
 				}
 		 	}
 		}
@@ -216,7 +217,7 @@ public class Utils {
 		for(License license : l){
 		 Calendar calL = Calendar.getInstance();
 		 calL.setTime(license.getFromDate());
-		 for (int i = 0; i <= license.getTotal();i++){
+		 for (int i = 0; i < license.getTotal();i++){
 			 if(calL.get(Calendar.DAY_OF_MONTH) == day && new DateTime(calL.getTime()).getMonthOfYear() == dt.getMonthOfYear() && lc.getLaborer().getId() == license.getLaborerConstructionSite().getLaborer().getId()){
 					return true;
 				}
@@ -234,7 +235,7 @@ public class Utils {
 		for(Accident accident : a){
 		 Calendar calA = Calendar.getInstance();
 		 calA.setTime(accident.getFromDate());
-		 for (int i = 0; i <= accident.getTotal() ;i++){
+		 for (int i = 0; i < accident.getTotal() ;i++){
 			 if(calA.get(Calendar.DAY_OF_MONTH) == day && new DateTime(calA.getTime()).getMonthOfYear() == dt.getMonthOfYear() && lc.getLaborer().getId() == accident.getLaborerConstructionSite().getLaborer().getId()){
 					return true;
 				}

@@ -424,9 +424,10 @@ public class ConstructionSiteService {
                 if( i + 1 <= date.dayOfMonth().getMaximumValue() ){       
                     int day = date.withDayOfMonth(i+1).dayOfWeek().get();
                     DateTime dt = new DateTime(date.toDate());                     
-                    if( dt.getDayOfMonth() == (i+1) && day != 6 && day != 7 ){                         
+                    if( dt.getDayOfMonth() == (i+1) && day != 6 && day != 7 )                      
                         a.setMark(AttendanceMark.ATTEND, i);
-                    }
+                    else if(dt.getDayOfMonth() == (i+1) && day == 6)
+                        	a.setMark(AttendanceMark.SATURDAY, i);
                 }
             }
             attendanceResult.add(a);
@@ -437,9 +438,10 @@ public class ConstructionSiteService {
                 if( i + 1 <= date.dayOfMonth().getMaximumValue()){
                     int day_p = date.withDayOfMonth(i+1).dayOfWeek().get();
                     DateTime dt = new DateTime(date.toDate());                     
-                    if( dt.getDayOfMonth() == (i+1) && day_p != 6 && day_p != 7 ){                         
+                    if( dt.getDayOfMonth() == (i+1) && day_p != 6 && day_p != 7 )                      
                         a2.setLastMark(AttendanceMark.ATTEND, i);
-                    }
+                    else if(dt.getDayOfMonth() == (i+1) && day_p == 6)
+                    	a2.setMark(AttendanceMark.SATURDAY, i);
                 }
             }
             attendanceResult.add(a2);
