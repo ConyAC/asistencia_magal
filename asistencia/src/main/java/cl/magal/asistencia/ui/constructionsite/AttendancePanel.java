@@ -1113,74 +1113,7 @@ public class AttendancePanel extends VerticalLayout implements View {
 				salaryTable.setColumnCollapsingAllowed(true);
 				salaryTable.setColumnReorderingAllowed(true);
 
-				salaryTable.addGeneratedColumn("totalLiquido", new Table.ColumnGenerator(){
-
-					@Override
-					public Object generateCell(final Table source, final Object itemId,final Object columnId) {
-						
-						if(((BeanContainer)source.getContainerDataSource()).getBeanType() == Salary.class){
-						
-							final BeanItem<Salary> item = (BeanItem<Salary>) salaryContainer.getItem(itemId);
-							salaryContainer.getItem(itemId).getItemProperty("forceSalary").getValue();
-							final Label label  = new Label("<b>"+Utils.formatInteger((Integer) salaryContainer.getContainerProperty(itemId, columnId).getValue())+"</b>"+
-									"  ("+Utils.formatInteger((Integer) salaryContainer.getContainerProperty(itemId, "roundSalary").getValue())+")");
-							label.setContentMode(ContentMode.HTML);
-							for(final String pid : new String[]{"jornalPromedio","suple","descHours","bondMov2","specialBond","loanBond"})
-								((ValueChangeNotifier)item.getItemProperty(pid)).addValueChangeListener(new Property.ValueChangeListener() {
-	
-									@Override
-									public void valueChange(ValueChangeEvent event) {
-										if("jornalPromedio".equals(pid)){
-										}else if("suple".equals(pid)){
-										}
-										salaryContainer.getItem(itemId).getItemProperty("forceSalary").getValue();
-										//forza actualizar el item
-										label.setValue( "<b>"+Utils.formatInteger((Integer) salaryContainer.getContainerProperty(itemId, columnId).getValue())+"</b>"+
-												"  ("+Utils.formatInteger((Integer) salaryContainer.getContainerProperty(itemId, "roundSalary").getValue())+")");
-										
-									}
-								});
-							return label;
-						}else {
-							return ((BeanItem<HistoricalSalary>) source.getContainerDataSource().getItem(itemId)).getItemProperty(columnId).getValue();
-						}
-					}
-
-				});
-
-				salaryTable.setVisibleColumns(salaryTableVisibleTable);
-
-				salaryTable.setColumnHeaders("Rol","Nombre","Último<br />Jornal Prom","Jornal Prom","Bono Imp.","Bono No Imp.","Bono Prest.", "Sobretpo","H Desc","V Cuota<br />Prestamo",
-						"V Cuota<br />Herramienta","Total Líquido<br />(A Pagar)",
-						"Día<br />Trab","Sab","Sep","DPS","DPD","Col","Mov"
-						,"Jornal Base", " V Trato", "Valor Sábado" , "V S Corrida", "Desc Horas","Total<br />Bonos<br />Imponibles","G Legal","Afecto","Sobre Afecto","Cargas","A Familiar","Colación","Mov","Movi 2","T No Afecto"
-						);
-
-				salaryTable.setColumnWidth("jornalPromedio", 100);
-
-				salaryTable.setColumnCollapsed("jornalBaseMes", true);
-				salaryTable.setColumnCollapsed("vtrato", true);
-				salaryTable.setColumnCollapsed("valorSabado", true);
-				salaryTable.setColumnCollapsed("vsCorrd", true);
-				//				salaryTable.setColumnCollapsed("sobreTiempo", true);
-				salaryTable.setColumnCollapsed("descHoras", true);
-				salaryTable.setColumnCollapsed("bonifImpo", true);
-				salaryTable.setColumnCollapsed("glegal", true);
-				salaryTable.setColumnCollapsed("afecto", true);
-				salaryTable.setColumnCollapsed("sobreAfecto", true);
-				salaryTable.setColumnCollapsed("cargas", true);
-				salaryTable.setColumnCollapsed("asigFamiliar", true);
-				salaryTable.setColumnCollapsed("colacion", true);
-				salaryTable.setColumnCollapsed("mov", true);
-				salaryTable.setColumnCollapsed("mov2", true);
-				salaryTable.setColumnCollapsed("tnoAfecto", true);
-				salaryTable.setColumnCollapsed("salaryCalculator.diaTrab",true);
-				salaryTable.setColumnCollapsed("salaryCalculator.sab",true);
-				salaryTable.setColumnCollapsed("salaryCalculator.sep",true);
-				salaryTable.setColumnCollapsed("salaryCalculator.dps",true);
-				salaryTable.setColumnCollapsed("salaryCalculator.dpd",true);
-				salaryTable.setColumnCollapsed("salaryCalculator.col",true);
-				salaryTable.setColumnCollapsed("salaryCalculator.mov",true);
+				configureSalaryTable();
 
 				salaryTable.addColumnCollapsedListener(new ColumnCollapsedObservableTable.ColumnCollapsedListener() {
 
@@ -1202,7 +1135,6 @@ public class AttendancePanel extends VerticalLayout implements View {
 					}
 				});
 
-				salaryTable.setEditable(true);
 				salaryTable.setTableFieldFactory(new TableFieldFactory() {
 
 					@Override
@@ -2440,6 +2372,79 @@ public class AttendancePanel extends VerticalLayout implements View {
 		// Enable polling and set frequency to 1 seconds
 		//		UI.getCurrent().setPollInterval(1000);
 	}
+	
+	private void configureSalaryTable(){
+		salaryTable.addGeneratedColumn("totalLiquido", new Table.ColumnGenerator(){
+
+			@Override
+			public Object generateCell(final Table source, final Object itemId,final Object columnId) {
+				
+				if(((BeanContainer)source.getContainerDataSource()).getBeanType() == Salary.class){
+				
+					final BeanItem<Salary> item = (BeanItem<Salary>) salaryContainer.getItem(itemId);
+					salaryContainer.getItem(itemId).getItemProperty("forceSalary").getValue();
+					final Label label  = new Label("<b>"+Utils.formatInteger((Integer) salaryContainer.getContainerProperty(itemId, columnId).getValue())+"</b>"+
+							"  ("+Utils.formatInteger((Integer) salaryContainer.getContainerProperty(itemId, "roundSalary").getValue())+")");
+					label.setContentMode(ContentMode.HTML);
+					for(final String pid : new String[]{"jornalPromedio","suple","descHours","bondMov2","specialBond","loanBond"})
+						((ValueChangeNotifier)item.getItemProperty(pid)).addValueChangeListener(new Property.ValueChangeListener() {
+
+							@Override
+							public void valueChange(ValueChangeEvent event) {
+								if("jornalPromedio".equals(pid)){
+								}else if("suple".equals(pid)){
+								}
+								salaryContainer.getItem(itemId).getItemProperty("forceSalary").getValue();
+								//forza actualizar el item
+								label.setValue( "<b>"+Utils.formatInteger((Integer) salaryContainer.getContainerProperty(itemId, columnId).getValue())+"</b>"+
+										"  ("+Utils.formatInteger((Integer) salaryContainer.getContainerProperty(itemId, "roundSalary").getValue())+")");
+								
+							}
+						});
+					return label;
+				}else {
+					return ((BeanItem<HistoricalSalary>) source.getContainerDataSource().getItem(itemId)).getItemProperty(columnId).getValue();
+				}
+			}
+
+		});
+
+		salaryTable.setVisibleColumns(salaryTableVisibleTable);
+
+		salaryTable.setColumnHeaders("Rol","Nombre","Último<br />Jornal Prom","Jornal Prom","Bono Imp.","Bono No Imp.","Bono Prest.", "Sobretpo","H Desc","V Cuota<br />Prestamo",
+				"V Cuota<br />Herramienta","Total Líquido<br />(A Pagar)",
+				"Día<br />Trab","Sab","Sep","DPS","DPD","Col","Mov"
+				,"Jornal Base", " V Trato", "Valor Sábado" , "V S Corrida", "Desc Horas","Total<br />Bonos<br />Imponibles","G Legal","Afecto","Sobre Afecto","Cargas","A Familiar","Colación","Mov","Movi 2","T No Afecto"
+				);
+
+		salaryTable.setColumnWidth("jornalPromedio", 100);
+
+		salaryTable.setColumnCollapsed("jornalBaseMes", true);
+		salaryTable.setColumnCollapsed("vtrato", true);
+		salaryTable.setColumnCollapsed("valorSabado", true);
+		salaryTable.setColumnCollapsed("vsCorrd", true);
+		//				salaryTable.setColumnCollapsed("sobreTiempo", true);
+		salaryTable.setColumnCollapsed("descHoras", true);
+		salaryTable.setColumnCollapsed("bonifImpo", true);
+		salaryTable.setColumnCollapsed("glegal", true);
+		salaryTable.setColumnCollapsed("afecto", true);
+		salaryTable.setColumnCollapsed("sobreAfecto", true);
+		salaryTable.setColumnCollapsed("cargas", true);
+		salaryTable.setColumnCollapsed("asigFamiliar", true);
+		salaryTable.setColumnCollapsed("colacion", true);
+		salaryTable.setColumnCollapsed("mov", true);
+		salaryTable.setColumnCollapsed("mov2", true);
+		salaryTable.setColumnCollapsed("tnoAfecto", true);
+		salaryTable.setColumnCollapsed("salaryCalculator.diaTrab",true);
+		salaryTable.setColumnCollapsed("salaryCalculator.sab",true);
+		salaryTable.setColumnCollapsed("salaryCalculator.sep",true);
+		salaryTable.setColumnCollapsed("salaryCalculator.dps",true);
+		salaryTable.setColumnCollapsed("salaryCalculator.dpd",true);
+		salaryTable.setColumnCollapsed("salaryCalculator.col",true);
+		salaryTable.setColumnCollapsed("salaryCalculator.mov",true);
+		
+		salaryTable.setEditable(true);
+	}
 
 	private void reloadMonthGridData(DateTime dt) {
 
@@ -2478,6 +2483,7 @@ public class AttendancePanel extends VerticalLayout implements View {
 				salaryContainer.addAll(salaries);
 				salaryContainer.sort(new String[]{"laborerConstructionsite.activeContract.jobCode"},new boolean[]{ true });
 				salaryTable.setContainerDataSource(salaryContainer);
+				configureSalaryTable();
 			}else{
 				List<HistoricalSalary> salaries = constructionSiteService.getHistoricalSalariesByConstructionAndMonth(cs,dt);
 				BeanContainer<Long,HistoricalSalary> historicalSalaryContainer = new BeanContainer<Long,HistoricalSalary>(HistoricalSalary.class);
