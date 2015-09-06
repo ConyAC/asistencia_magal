@@ -10,10 +10,10 @@
 	    <class>cl.magal.asistencia.entities.AdvancePaymentItem</class>
 	    <class>cl.magal.asistencia.entities.AfpAndInsuranceConfigurations</class>
 	    <class>cl.magal.asistencia.entities.AfpItem</class>
-	    <class>cl.magal.asistencia.entities.Bank</class>
 	    <class>cl.magal.asistencia.entities.Annexed</class>
 	    <class>cl.magal.asistencia.entities.Attachment</class>
 	    <class>cl.magal.asistencia.entities.Attendance</class>
+	    <class>cl.magal.asistencia.entities.Bank</class>
 	    <class>cl.magal.asistencia.entities.Confirmations</class>
 	    <class>cl.magal.asistencia.entities.ConstructionCompany</class>
 	    <class>cl.magal.asistencia.entities.ConstructionSite</class>
@@ -21,6 +21,7 @@
 	    <class>cl.magal.asistencia.entities.DateConfigurations</class>
 	    <class>cl.magal.asistencia.entities.ExtraParams</class>
 	    <class>cl.magal.asistencia.entities.FamilyAllowanceConfigurations</class>
+	    <class>cl.magal.asistencia.entities.HistoricalSalary</class>
 	    <class>cl.magal.asistencia.entities.Holiday</class>
 	    <class>cl.magal.asistencia.entities.Laborer</class>
 	    <class>cl.magal.asistencia.entities.LaborerConstructionsite</class>
