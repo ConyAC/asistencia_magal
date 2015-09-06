@@ -2374,40 +2374,43 @@ public class AttendancePanel extends VerticalLayout implements View {
 	}
 	
 	private void configureSalaryTable(){
-		salaryTable.addGeneratedColumn("totalLiquido", new Table.ColumnGenerator(){
-
-			@Override
-			public Object generateCell(final Table source, final Object itemId,final Object columnId) {
-				
-				if(((BeanContainer)source.getContainerDataSource()).getBeanType() == Salary.class){
-				
-					final BeanItem<Salary> item = (BeanItem<Salary>) salaryContainer.getItem(itemId);
-					salaryContainer.getItem(itemId).getItemProperty("forceSalary").getValue();
-					final Label label  = new Label("<b>"+Utils.formatInteger((Integer) salaryContainer.getContainerProperty(itemId, columnId).getValue())+"</b>"+
-							"  ("+Utils.formatInteger((Integer) salaryContainer.getContainerProperty(itemId, "roundSalary").getValue())+")");
-					label.setContentMode(ContentMode.HTML);
-					for(final String pid : new String[]{"jornalPromedio","suple","descHours","bondMov2","specialBond","loanBond"})
-						((ValueChangeNotifier)item.getItemProperty(pid)).addValueChangeListener(new Property.ValueChangeListener() {
-
-							@Override
-							public void valueChange(ValueChangeEvent event) {
-								if("jornalPromedio".equals(pid)){
-								}else if("suple".equals(pid)){
+		
+		//crea la columna, solo si no existe
+		if(salaryTable.getColumnGenerator("totalLiquido") == null )
+			salaryTable.addGeneratedColumn("totalLiquido", new Table.ColumnGenerator(){
+	
+				@Override
+				public Object generateCell(final Table source, final Object itemId,final Object columnId) {
+					
+					if(((BeanContainer)source.getContainerDataSource()).getBeanType() == Salary.class){
+					
+						final BeanItem<Salary> item = (BeanItem<Salary>) salaryContainer.getItem(itemId);
+						salaryContainer.getItem(itemId).getItemProperty("forceSalary").getValue();
+						final Label label  = new Label("<b>"+Utils.formatInteger((Integer) salaryContainer.getContainerProperty(itemId, columnId).getValue())+"</b>"+
+								"  ("+Utils.formatInteger((Integer) salaryContainer.getContainerProperty(itemId, "roundSalary").getValue())+")");
+						label.setContentMode(ContentMode.HTML);
+						for(final String pid : new String[]{"jornalPromedio","suple","descHours","bondMov2","specialBond","loanBond"})
+							((ValueChangeNotifier)item.getItemProperty(pid)).addValueChangeListener(new Property.ValueChangeListener() {
+	
+								@Override
+								public void valueChange(ValueChangeEvent event) {
+									if("jornalPromedio".equals(pid)){
+									}else if("suple".equals(pid)){
+									}
+									salaryContainer.getItem(itemId).getItemProperty("forceSalary").getValue();
+									//forza actualizar el item
+									label.setValue( "<b>"+Utils.formatInteger((Integer) salaryContainer.getContainerProperty(itemId, columnId).getValue())+"</b>"+
+											"  ("+Utils.formatInteger((Integer) salaryContainer.getContainerProperty(itemId, "roundSalary").getValue())+")");
+									
 								}
-								salaryContainer.getItem(itemId).getItemProperty("forceSalary").getValue();
-								//forza actualizar el item
-								label.setValue( "<b>"+Utils.formatInteger((Integer) salaryContainer.getContainerProperty(itemId, columnId).getValue())+"</b>"+
-										"  ("+Utils.formatInteger((Integer) salaryContainer.getContainerProperty(itemId, "roundSalary").getValue())+")");
-								
-							}
-						});
-					return label;
-				}else {
-					return ((BeanItem<HistoricalSalary>) source.getContainerDataSource().getItem(itemId)).getItemProperty(columnId).getValue();
+							});
+						return label;
+					}else {
+						return ((BeanItem<HistoricalSalary>) source.getContainerDataSource().getItem(itemId)).getItemProperty(columnId).getValue();
+					}
 				}
-			}
-
-		});
+	
+			});
 
 		salaryTable.setVisibleColumns(salaryTableVisibleTable);
 
