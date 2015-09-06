@@ -35,6 +35,8 @@ public class MailService {
 	private UserRepository userRepo;
 	@Autowired
 	private TaskExecutor taskExecutor;
+	
+	boolean debugmode = false;
 
 
 	/**
@@ -43,6 +45,7 @@ public class MailService {
 	 */
 	public void sendSalaryConfirmationEmail(final ConstructionSite constructionsite){
 
+		if(debugmode)return;
 		//realiza las llamadas asincronicamente
 		taskExecutor.execute(new Runnable() {
 
@@ -76,6 +79,7 @@ public class MailService {
 
 	public void sendSupleConfirmationEmail(final ConstructionSite constructionsite){
 
+		if(debugmode)return;
 		//realiza las llamadas asincronicamente
 		taskExecutor.execute(new Runnable() {
 

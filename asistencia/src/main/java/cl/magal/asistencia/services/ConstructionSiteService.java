@@ -30,6 +30,7 @@ import cl.magal.asistencia.entities.ConstructionSite;
 import cl.magal.asistencia.entities.DateConfigurations;
 import cl.magal.asistencia.entities.ExtraParams;
 import cl.magal.asistencia.entities.FamilyAllowanceConfigurations;
+import cl.magal.asistencia.entities.HistoricalSalary;
 import cl.magal.asistencia.entities.Holiday;
 import cl.magal.asistencia.entities.Laborer;
 import cl.magal.asistencia.entities.LaborerConstructionsite;
@@ -53,6 +54,7 @@ import cl.magal.asistencia.repositories.ConstructionCompanyRepository;
 import cl.magal.asistencia.repositories.ConstructionSiteRepository;
 import cl.magal.asistencia.repositories.ContractRepository;
 import cl.magal.asistencia.repositories.ExtraParamsRepository;
+import cl.magal.asistencia.repositories.HistoricalSalaryRepository;
 import cl.magal.asistencia.repositories.HolidayRepository;
 import cl.magal.asistencia.repositories.LaborerConstructionsiteRepository;
 import cl.magal.asistencia.repositories.LaborerRepository;
@@ -101,6 +103,8 @@ public class ConstructionSiteService {
 	LicenseRepositoy licenseRepo;
 	@Autowired
 	SalaryRepository salaryRepo;
+	@Autowired
+	HistoricalSalaryRepository historicalSalaryRepo;
 	@Autowired
 	ExtraParamsRepository extraParamsRepo;
 	@Autowired
@@ -850,6 +854,10 @@ public class ConstructionSiteService {
 
 		return salaries;
 	}
+	
+	public List<HistoricalSalary> getHistoricalSalariesByConstructionAndMonth(ConstructionSite cs,DateTime date){
+		return historicalSalaryRepo.findByConstructionsiteAndMonth(cs,date.toDate());
+	}
 
 	/**
 	 * @param cs
@@ -1130,6 +1138,20 @@ public class ConstructionSiteService {
 
 	public void saveSalaries(List<Salary> salaries) {
 		salaryRepo.save(salaries);
+	}
+
+	public void saveHistoricalSalaries(List<HistoricalSalary> historicals) {
+		if(historicals == null || historicals.isEmpty() )
+			return; //no hace nada
+		//lo primero es borrar el histórico anterior
+		Date date = historicals.get(0).getDate();
+		ConstructionSite cs = historicals.get(0).getLaborerConstructionSite().getConstructionsite();
+		List<HistoricalSalary> hlcs = historicalSalaryRepo.findByConstructionsiteAndMonth(cs, date);
+		if(hlcs != null && !hlcs.isEmpty())
+			historicalSalaryRepo.delete(hlcs);
+		
+		//finalmente guarda la asistencia histórica
+		historicalSalaryRepo.save(historicals);
 	}
 	
 }

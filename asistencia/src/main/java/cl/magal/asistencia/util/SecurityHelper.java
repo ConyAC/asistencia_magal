@@ -54,6 +54,10 @@ public class SecurityHelper {
 	public static boolean hasPermission(Permission... permissions) {
 		if(permissions == null)
 			return true;
+		
+		//FIXME por ahora siempre se niega el desbloqueo de asistencia
+		if(permissions.length == 1 && permissions[0] == Permission.DESBLOQUEDAR_ASISTENCIA)
+			return false;
 
 		User usuario = getUser();
 		//si el usuario el nulo, lo rederidige al login
