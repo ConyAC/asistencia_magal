@@ -2012,7 +2012,7 @@ public class AttendancePanel extends VerticalLayout implements View {
 
 										//1. Open the file
 										try {
-											wb = new XSSFWorkbook(new FileInputStream(new File(AttendancePanel.class.getResource("/templates/asistencia/planilla_asistencia.xls").toURI())));
+											wb = new XSSFWorkbook(new FileInputStream(new File(AttendancePanel.class.getResource("/templates/asistencia/planilla_asistencia.xlsx").toURI())));
 											//setea la configuración de la primera pestaña
 											XSSFSheet sheet0 = wb.getSheetAt(0);
 											//celda B1 Centro de costo
