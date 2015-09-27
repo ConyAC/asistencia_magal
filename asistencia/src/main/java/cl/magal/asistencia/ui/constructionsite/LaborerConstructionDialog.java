@@ -67,7 +67,6 @@ import com.vaadin.data.validator.BeanValidator;
 import com.vaadin.server.FileResource;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.StreamResource;
-import com.vaadin.server.VaadinService;
 import com.vaadin.server.VaadinSession;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Alignment;
@@ -117,6 +116,8 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 	private Validator validator;
 
 	boolean readOnly = false;
+	
+	private String fullpath;
 
 	public LaborerConstructionDialog(BeanItem<LaborerConstructionsite> item,boolean readOnly){
 		super(item);
@@ -131,6 +132,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 
 	public void init(){
 		
+		fullpath = (String) ((MagalUI)UI.getCurrent()).getSpringBean("uploaded_images_path");
 		this.configurationService = (ConfigurationService) ((MagalUI)UI.getCurrent()).getSpringBean(Constants.CONFIGURATION_SERVICE_BEAN);
 		this.velocityEngine = (VelocityEngine) ((MagalUI)UI.getCurrent()).getSpringBean(Constants.VELOCITY_ENGINE_BEAN);
 		this.service = (LaborerService) ((MagalUI)UI.getCurrent()).getSpringBean(Constants.LABORER_SERVICE_BEAN);
@@ -272,10 +274,8 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 
 					String photoFileName = (String) getItem().getItemProperty("laborer.photo").getValue();
 					if(photoFileName != null && !photoFileName.trim().isEmpty() ){
-						// Find the application directory
-						String basepath = VaadinService.getCurrent().getBaseDirectory().getAbsolutePath();
 						// Image as a file resource
-						FileResource resource = new FileResource(new File(basepath + "/WEB-INF/images/" + getItem().getItemProperty("laborer.photo").getValue()));
+						FileResource resource = new FileResource(new File(fullpath + getItem().getItemProperty("laborer.photo").getValue()));
 
 						Embedded image = new Embedded("", resource);
 						image.setWidth("350");
