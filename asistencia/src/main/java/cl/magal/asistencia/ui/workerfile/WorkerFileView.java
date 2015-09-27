@@ -36,7 +36,9 @@ import com.vaadin.data.Container.Filter;
 import com.vaadin.data.Container.Filterable;
 import com.vaadin.data.Item;
 import com.vaadin.data.Property;
+import com.vaadin.data.Validator;
 import com.vaadin.data.Property.ValueChangeEvent;
+import com.vaadin.data.Validator.InvalidValueException;
 import com.vaadin.data.fieldgroup.BeanFieldGroup;
 import com.vaadin.data.fieldgroup.FieldGroup.CommitException;
 import com.vaadin.data.util.BeanItem;
@@ -61,6 +63,7 @@ import com.vaadin.ui.Notification;
 import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.TabSheet;
 import com.vaadin.ui.Table;
+import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 
@@ -117,34 +120,40 @@ public class WorkerFileView extends HorizontalLayout implements View {
 		vl.setComponentAlignment(hl, Alignment.TOP_RIGHT);
 		
 		//agrega un boton que hace el commit
-        Button btnSave = new Button("Guardar",new Button.ClickListener() {
+		Button btnSave = new Button("Guardar",new Button.ClickListener() {
 
-        	@Override
-        	public void buttonClick(ClickEvent event) {
-        		try {
-        			fieldGroup.commit();
-        			Laborer laborer = fieldGroup.getItemDataSource().getBean();
-        			boolean isNew = laborer.getId() == null;
-        			service.saveLaborer(laborer);
-        			
-        			if(isNew){
-	        			BeanItem<Laborer> item = laborerContainer.addBean(laborer);
-	        			setLaborer(item);
-        			}
-        			
-        			Notification.show("Trabajador guardado correctamente",Type.TRAY_NOTIFICATION);
-        		} catch (CommitException e) {
-        			
-        			Utils.catchCommitException(e);
-        			
-        		}
+			@Override
+			public void buttonClick(ClickEvent event) {
+				
+				try {
 
-        	}
-        }){{
-        	setIcon(FontAwesome.SAVE);
-        }};
-        
-        hl.addComponent(btnSave);
+					fieldGroup.commit();
+					Laborer laborer = fieldGroup.getItemDataSource().getBean();
+					boolean isNew = laborer.getId() == null;
+					service.saveLaborer(laborer);
+
+					BeanItem<Laborer> item = null;
+					if(isNew){
+						item = laborerContainer.addBean(laborer);
+					}else {
+						item = laborerContainer.getItem(laborer);
+					}
+					setLaborer(item);
+
+					Notification.show("Trabajador guardado correctamente",Type.TRAY_NOTIFICATION);
+				} catch (CommitException e) {
+					Utils.catchCommitException(e);
+				} catch(Exception e){
+					logger.error("Exception {}",e);
+					Notification.show("Error al validar los datos: "+e.getMessage(), Type.ERROR_MESSAGE);
+				}
+
+			}
+		}){{
+			setIcon(FontAwesome.SAVE);
+		}};
+
+		hl.addComponent(btnSave);
 		
 		Button agregaObrero = new Button(null,FontAwesome.PLUS);
 		agregaObrero.addClickListener(new Button.ClickListener() {
@@ -385,6 +394,24 @@ public class WorkerFileView extends HorizontalLayout implements View {
 		//crea un objeto vacio para que cree bien la interfaz
 		fieldGroup.setItemDataSource(new BeanItem<Laborer>(new Laborer()));
 		detalleObrero = new LaborerBaseInformation(fieldGroup, true);
+		//validación de rut
+		TextField tfRut = (TextField) fieldGroup.getField("rut");
+		tfRut.addValidator(new Validator() {
+			
+			@Override
+			public void validate(Object value) throws InvalidValueException {
+				//verifica que el rut no esté repetido
+				if(!value.equals(fieldGroup.getItemDataSource().getBean().getRut())){
+					//si es distinto al que tenia el objeto, ve si ya existe en la base de datos
+					Laborer laborer = service.findByRut((String)value);
+					if(laborer != null ){
+						throw new InvalidValueException("Ya existe un obrero con el rut "+value);
+					}
+				}
+				logger.debug("valor 2 {}",value);
+			}
+		});
+		
 		detalleObrero.setMargin(true);
 		return detalleObrero;
 	}

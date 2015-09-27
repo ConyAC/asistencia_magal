@@ -101,7 +101,7 @@ public class ConfigView extends VerticalLayout implements View {
 	@PostConstruct
 	public void init(){
 
-
+		setSizeFull();
 		//define tab para poner cada tipo de configuración
 		TabSheet ts = new TabSheet();
 		ts.setSizeFull();
@@ -283,6 +283,8 @@ public class ConfigView extends VerticalLayout implements View {
 				
 				addComponent(new FormLayout(){
 					{
+						setMargin(false);
+						setSpacing(false);
 						Field sis = fg.buildAndBind("SIS", "sis");
 						((TextField)sis).setNullRepresentation("");
 						sis.addValueChangeListener(listener);
@@ -302,7 +304,7 @@ public class ConfigView extends VerticalLayout implements View {
 
 				HorizontalLayout hl = new HorizontalLayout();
 				hl.setWidth("100%");
-				hl.setSpacing(true);		
+//				hl.setSpacing(true);		
 				addComponent(hl);
 
 				final TextField nombre = new TextField("Nombre AFP");
@@ -372,6 +374,7 @@ public class ConfigView extends VerticalLayout implements View {
 				setComponentAlignment(hl, Alignment.TOP_RIGHT);
 				
 				addComponent(table);
+				setExpandRatio(table, 1.0F);
 				if(!SecurityHelper.hasPermission(Permission.DEFINIR_VARIABLE_GLOBAL)){
 					setEnabled(false);
 				}else{
@@ -385,7 +388,6 @@ public class ConfigView extends VerticalLayout implements View {
 	private com.vaadin.ui.Component drawGlobales() {
 		return new VerticalLayout(){
 			{
-				setSizeFull();
 				setSpacing(true);
 				setMargin(true);
 				
@@ -397,13 +399,8 @@ public class ConfigView extends VerticalLayout implements View {
 				
 				FormLayout form = new FormLayout(){
 					{
-						setSizeUndefined();
 						
-						addComponent(new Label("<hr />",ContentMode.HTML){
-							{
-								setWidth("100%");
-							}
-						});
+//						addComponent(new Label("<hr style='width:100%'/>",ContentMode.HTML));
 						
 						Property.ValueChangeListener listener = new Property.ValueChangeListener() {
 							
@@ -460,7 +457,7 @@ public class ConfigView extends VerticalLayout implements View {
 						addComponent(maxImponibleFactor);
 						maxImponibleFactor.addValueChangeListener(listener);
 						
-						addComponent(new Label("<hr />",ContentMode.HTML){
+						addComponent(new Label("<hr style='width:100%'/>",ContentMode.HTML){
 							{
 								setWidth("100%");
 							}
@@ -576,7 +573,6 @@ public class ConfigView extends VerticalLayout implements View {
 	private com.vaadin.ui.Component drawMensuales() {
 		return new HorizontalLayout(){
 			{
-				setSizeFull();
 				setSpacing(true);
 				setMargin(true);
 				
@@ -683,7 +679,6 @@ public class ConfigView extends VerticalLayout implements View {
 		VerticalLayout vl = new VerticalLayout();
 		vl.setSpacing(true);
 		vl.setMargin(true);
-		vl.setSizeFull();
 		
 		List<Holiday> h = service.findAllHoliday();
 		holidayContainer = new BeanItemContainer<Holiday>(Holiday.class, h);
@@ -766,6 +761,7 @@ public class ConfigView extends VerticalLayout implements View {
 		};	
 		
 		vl.addComponent(table);
+		vl.setExpandRatio(table, 1.0F);
 
 		Button btnAdd = new Button(null,FontAwesome.PLUS);
 		hl.addComponent(btnAdd);
@@ -809,7 +805,6 @@ public class ConfigView extends VerticalLayout implements View {
 		VerticalLayout vl = new VerticalLayout();
 		vl.setSpacing(true);
 		vl.setMargin(true);
-		vl.setSizeFull();
 		
 		List<Bank> b = confService.findBank();
 		bankContainer = new BeanItemContainer<Bank>(Bank.class, b);
@@ -886,6 +881,7 @@ public class ConfigView extends VerticalLayout implements View {
 		};	
 		
 		vl.addComponent(table);
+		vl.setExpandRatio(table, 1.0F);
 
 		Button btnAdd = new Button(null,FontAwesome.PLUS);
 		hl.addComponent(btnAdd);

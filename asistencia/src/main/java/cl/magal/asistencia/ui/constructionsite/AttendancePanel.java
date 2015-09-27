@@ -1999,6 +1999,12 @@ public class AttendancePanel extends VerticalLayout implements View {
 								OnDemandStreamResource myResource = new OnDemandFileDownloader.OnDemandStreamResource() {
 
 									public InputStream getStream() {
+										if(salaryContainer.size() == 0 ){
+											logger.debug("Aún no se calculan los sueldos.");
+											Notification.show("Aún no se calculan los sueldos.");
+											return null;
+										}
+											
 
 										AfpAndInsuranceConfigurations afpTable = getAfpAndInsuranceConfigurations();
 
@@ -2138,7 +2144,7 @@ public class AttendancePanel extends VerticalLayout implements View {
 												row.getCell(152).setCellValue(salary.getLaborerConstructionSite().getLaborer().getIsapre().toString());
 												//												row.getCell(153).setCellValue(salary.getLaborerConstructionSite().getLaborer().getIsapre().toString());
 												// TODO afp y espacio?= 156 157
-												row.getCell(156).setCellValue(salary.getLaborerConstructionSite().getLaborer().getAfp().toString());
+												row.getCell(156).setCellValue(salary.getLaborerConstructionSite().getLaborer().getAfp().getName());
 												//												row.getCell(157).setCellValue(salary.getLaborerConstructionSite().getLaborer().getIsapre().toString());
 												//copia el % de afp asociado
 												row.getCell(158).setCellValue(Utils.getAfpRate(afpTable.getAfpTable(), salary.getLaborerConstructionSite().getLaborer().getAfp()));
