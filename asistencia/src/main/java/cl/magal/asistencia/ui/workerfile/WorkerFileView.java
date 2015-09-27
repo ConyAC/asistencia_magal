@@ -11,11 +11,13 @@ import org.apache.velocity.app.VelocityEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
 import org.tepi.filtertable.FilterTable;
+import org.vaadin.dialogs.ConfirmDialog;
 
 import ru.xpoft.vaadin.VaadinView;
 import cl.magal.asistencia.entities.Accident;
@@ -36,6 +38,7 @@ import com.vaadin.data.Item;
 import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.fieldgroup.BeanFieldGroup;
+import com.vaadin.data.fieldgroup.FieldGroup.CommitException;
 import com.vaadin.data.util.BeanItem;
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.event.ItemClickEvent;
@@ -44,7 +47,6 @@ import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.FileResource;
 import com.vaadin.server.FontAwesome;
-import com.vaadin.server.VaadinService;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.AbstractSelect.ItemCaptionMode;
 import com.vaadin.ui.Alignment;
@@ -56,6 +58,7 @@ import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
+import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.TabSheet;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.UI;
@@ -76,6 +79,8 @@ public class WorkerFileView extends HorizontalLayout implements View {
 	BeanItemContainer<Laborer> laborerContainer = new BeanItemContainer<Laborer>(Laborer.class);
 	BeanFieldGroup<Laborer> fieldGroup = new BeanFieldGroup<Laborer>(Laborer.class);
 	BeanItemContainer<LaborerConstructionsite> historyContainer = new BeanItemContainer<LaborerConstructionsite>(LaborerConstructionsite.class);
+	@Value("${ext.uploaded_images_path}")
+	private String fullpath;
 	
 	@Autowired
 	private transient LaborerService service;
@@ -87,7 +92,8 @@ public class WorkerFileView extends HorizontalLayout implements View {
 	LaborerBaseInformation detalleObrero;
 	FilterTable tableObrero;
 	Label label1,label2;
-	Label fullname, rut, job, photo;
+	Label fullname, rut, job;
+	Embedded image;
 
 	public WorkerFileView(){
 	}
@@ -109,8 +115,38 @@ public class WorkerFileView extends HorizontalLayout implements View {
 		hl.setSpacing(true);
 		vl.addComponent(hl);
 		vl.setComponentAlignment(hl, Alignment.TOP_RIGHT);
+		
+		//agrega un boton que hace el commit
+        Button btnSave = new Button("Guardar",new Button.ClickListener() {
+
+        	@Override
+        	public void buttonClick(ClickEvent event) {
+        		try {
+        			fieldGroup.commit();
+        			Laborer laborer = fieldGroup.getItemDataSource().getBean();
+        			boolean isNew = laborer.getId() == null;
+        			service.saveLaborer(laborer);
+        			
+        			if(isNew){
+	        			BeanItem<Laborer> item = laborerContainer.addBean(laborer);
+	        			setLaborer(item);
+        			}
+        			
+        			Notification.show("Trabajador guardado correctamente",Type.TRAY_NOTIFICATION);
+        		} catch (CommitException e) {
+        			
+        			Utils.catchCommitException(e);
+        			
+        		}
+
+        	}
+        }){{
+        	setIcon(FontAwesome.SAVE);
+        }};
+        
+        hl.addComponent(btnSave);
+		
 		Button agregaObrero = new Button(null,FontAwesome.PLUS);
-		//agregando obras dummy
 		agregaObrero.addClickListener(new Button.ClickListener() {
 
 			/**
@@ -121,25 +157,21 @@ public class WorkerFileView extends HorizontalLayout implements View {
 			@Override
 			public void buttonClick(ClickEvent event) {
 
-//						LaborerConstructionsite lc = new LaborerConstructionsite();
-//						Laborer l = new Laborer();
-//						l.setFirstname("Nuevo Trabajador");
-//						l.setLastname("");
-//						l.setRut("");
-//						//l.setAfp(Afp.CAPITAL);
-//						l.setAddress("");
-//						//l.setJob(Job.ALBAÑIL);
-//						//l.setMaritalStatus(MaritalStatus.CASADO);
-//						l.setPhone("");
-//						l.setMobileNumber("");
-//						l.setSecondlastname("");
-//						l.setSecondname("");
-//
-//						service.saveLaborer(l);
-//						//laborerContainer.addBean(l);
-//						lc.setLaborer(l);
-//						BeanItem<LaborerConstructionsite> item = laborerContainer.addBean(lc);
-//						setLaborer(item);
+						Laborer l = new Laborer();
+						l.setFirstname("Nuevo Trabajador");
+						l.setLastname("");
+						l.setRut("");
+						//l.setAfp(Afp.CAPITAL);
+						l.setAddress("");
+						//l.setJob(Job.ALBAÑIL);
+						//l.setMaritalStatus(MaritalStatus.CASADO);
+						l.setPhone("");
+						l.setMobileNumber("");
+						l.setSecondlastname("");
+						l.setSecondname("");
+
+						BeanItem<Laborer> item = new BeanItem<Laborer>(l);
+						setLaborer(item);
 			}
 		});
 
@@ -150,21 +182,34 @@ public class WorkerFileView extends HorizontalLayout implements View {
 			@Override
 			public void buttonClick(ClickEvent event) {
 				//recupera el elemento seleccionado
-				Laborer l = (Laborer) tableObrero.getValue();
+				final Laborer l = (Laborer) tableObrero.getValue();
 				if(l == null){
 					Notification.show("Debe seleccionar un obrero para eliminarlo");
 					return;
 				}
-				//TODO dialogo de confirmación
-				service.delete(l);
-				laborerContainer.removeItem(l);
+				ConfirmDialog.show(UI.getCurrent(), "Confirmar Acción:", "¿Está seguro de eliminar al obrero seleccionado?",
+		        "Eliminar", "Cancelar", new ConfirmDialog.Listener() {
 
-				setLaborer(null);
+		            public void onClose(ConfirmDialog dialog) {
+		                if (dialog.isConfirmed()) {
+		                	try{
+			                    // Confirmed to continue
+			                	service.delete(l);
+			    				laborerContainer.removeItem(l);
+			    				setLaborer(null);
+		                	}catch(Exception e){
+		                		Notification.show("No se puede eliminar el obrero dado que está o estuvo en una obra",Type.ERROR_MESSAGE);
+		                	}
+		                } 
+		            }
+		        });		
+				
 			}
 		});
 		hl.addComponent(borrarObrero);
 		
 		TabSheet tab = new TabSheet();
+		tab.setSizeFull();
 
 		tab.addTab(drawOverview(),"Resumen");
 		tab.addTab(drawDetalleObrero(),"Ficha");
@@ -183,7 +228,6 @@ public class WorkerFileView extends HorizontalLayout implements View {
 		fullname = new Label();
 		rut = new Label();
 		job = new Label();
-		photo = new Label();
 		
 		VerticalLayout vl = new VerticalLayout();
 		vl.setMargin(true);
@@ -212,10 +256,9 @@ public class WorkerFileView extends HorizontalLayout implements View {
 		fullname.addStyleName("title-summary");
 		vh.addComponent(fullname);
 		
-		String basepath = VaadinService.getCurrent().getBaseDirectory().getAbsolutePath();
 		// Image as a file resource
-		FileResource resource = new FileResource(new File(basepath + "/WEB-INF/images/1.JPG" /*+photo.getValue()*/));
-		Embedded image = new Embedded("", resource);
+		FileResource resource = new FileResource(new File(fullpath+"1.JPG"));
+		image = new Embedded("", resource);
 		image.setWidth("100");
 		image.setHeight("100");
 		image.addStyleName("image-laborer-h");
@@ -333,6 +376,7 @@ public class WorkerFileView extends HorizontalLayout implements View {
 		});
 		
 		vl.addComponent(table);
+		vl.setExpandRatio(table, 1.0F);
 
 		return vl;
 	}
@@ -340,7 +384,7 @@ public class WorkerFileView extends HorizontalLayout implements View {
 	private com.vaadin.ui.Component drawDetalleObrero() {
 		//crea un objeto vacio para que cree bien la interfaz
 		fieldGroup.setItemDataSource(new BeanItem<Laborer>(new Laborer()));
-		detalleObrero = new LaborerBaseInformation(fieldGroup, false);
+		detalleObrero = new LaborerBaseInformation(fieldGroup, true);
 		detalleObrero.setMargin(true);
 		return detalleObrero;
 	}
@@ -367,110 +411,9 @@ public class WorkerFileView extends HorizontalLayout implements View {
 		
 		fullname.setValue(laborerItem.getBean().getFullname());
 		rut.setValue(laborerItem.getBean().getRut());
-		photo.setValue(laborerItem.getBean().getPhoto());
+		FileResource resource = new FileResource(new File(fullpath+laborerItem.getBean().getPhoto()));
+		image.setSource(resource);
 
-		
-		//		//obtiene el vertical Layout
-		//		detalleObrero.removeAllComponents();
-		//		if(laborerItem == null){
-		//			detalleObrero.addComponent(new Label("Seleccione un obrero para ver su información"));
-		//			return;
-		//		}
-		//		
-		//		HorizontalLayout hl = new HorizontalLayout();
-		//		hl.setSpacing(true);
-		//		detalleObrero.addComponent(hl,0,0,1,0);
-		//		detalleObrero.setComponentAlignment(hl, Alignment.TOP_RIGHT);
-		//		
-		//		//define la información de resumen
-		//		LaborerConstructionsite lc = laborerItem.getBean();
-		//		Laborer laborer = lc.getLaborer();
-		//        //obtiene las obras historicas
-		//        List<HistoryVO> history = service.getLaborerHistory(laborer);
-		//        historyContainer.removeAllItems();
-		//        historyContainer.addAll(history);
-		//        
-		//		label1.setValue("<h1><b>"+laborer.getRut()+" : "+laborer.getFullname()+"</b></h1>");
-		////		label2.setValue("<h1 style='margin-bottom: 1px;' ><b>Activo </h1></b><span >"+laborer.getConstructionSites().get(0).getName()+"</span>");
-		//		
-		//		
-		//        fieldGroup.setItemDataSource(laborerItem);
-		//        
-		//
-		//        //agrega un boton que hace el commit
-		//        Button add = new Button(null,new Button.ClickListener() {
-		//
-		//        	@Override
-		//        	public void buttonClick(ClickEvent event) {
-		//        		try {
-		//        			fieldGroup.commit();
-		//        			service.saveLaborer(fieldGroup.getItemDataSource().getBean());
-		//        		} catch (CommitException e) {
-		//        			logger.error("Error al guardar la información del obrero");
-		//        			Notification.show("Error al guardar la información del obrero", Type.ERROR_MESSAGE);
-		//        		}
-		//
-		//        	}
-		//        }){{
-		//        	setIcon(FontAwesome.SAVE);
-		//        }};
-		//        hl.addComponent(add);
-		//        
-		//		//boton para imprimir
-		//		Button btnPrint = new Button(null,new Button.ClickListener() {
-		//			
-		//			@Override
-		//			public void buttonClick(ClickEvent event) {
-		//				Notification.show("Imprimiendo");
-		//				
-		//			}
-		//		}){{
-		//			setIcon(FontAwesome.PRINT);
-		//		}};
-		//		 hl.addComponent(btnPrint);
-		//		//detalleObrero.addComponent(btnPrint);
-		//		//detalleObrero.setComponentAlignment(btnPrint, Alignment.TOP_LEFT);        
-		//        // Loop through the properties, build fields for them and add the fields
-		//        // to this UI
-		//		 for (Object propertyId : new String[]{"rut","firstname","secondname","lastname", "secondlastname", "dateBirth", "address", "mobileNumber", "phone", "dateAdmission"}) {
-		//        	if(propertyId.equals("laborerId") || propertyId.equals("constructionSites") || propertyId.equals("contractId") || propertyId.equals("teamId"))
-		//        		;
-		//        	else if(propertyId.equals("afp")){
-		//        		ComboBox afpField = new ComboBox("AFP");
-		//        		afpField.setNullSelectionAllowed(false);
-		//    			for(Afp a : Afp.values()){
-		//    				afpField.addItem(a);
-		//    			}
-		//    			detalleObrero.addComponent(afpField);
-		//    			fieldGroup.bind(afpField, "laborer.afp");    			
-		//        	}else if(propertyId.equals("job")){
-		//        		ComboBox jobField = new ComboBox("Oficio");
-		//        		jobField.setNullSelectionAllowed(false);
-		//    			for(Job j : Job.values()){
-		//    				jobField.addItem(j);
-		//    			}
-		//    			detalleObrero.addComponent(jobField);
-		//    			fieldGroup.bind(jobField, "job");    
-		//        	}else if(propertyId.equals("maritalStatus")){
-		//        		ComboBox msField = new ComboBox("Estado Civil");
-		//        		msField.setNullSelectionAllowed(false);
-		//    			for(MaritalStatus ms : MaritalStatus.values()){
-		//    				msField.addItem(ms);
-		//    			}
-		//    			detalleObrero.addComponent(msField);
-		//    			fieldGroup.bind(msField, "laborer.maritalStatus");    
-		//        	}else{        		
-		//        		String t = tradProperty(propertyId);
-		//        		Field field = fieldGroup.buildAndBind(t, "laborer."+propertyId);
-		//        		if(field instanceof TextField){
-		//        			((TextField)field).setNullRepresentation("");
-		//        		}
-		//        		detalleObrero.addComponent(field);
-		//        		detalleObrero.setComponentAlignment(field, Alignment.MIDDLE_CENTER);
-		//        	}
-		//        }
-		//        
-		//        detalleObrero.setWidth("100%");
 	}
 
 	private FilterTable drawTablaObreros() {
