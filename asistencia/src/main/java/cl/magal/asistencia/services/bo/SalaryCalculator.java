@@ -608,12 +608,12 @@ public class SalaryCalculator {
 	private double calculateSobreAfecto(DateTime closingDateLastMonth,double afecto,int diasHabiles,
 			Attendance attendance,Attendance lastMonthAttendance,Overtime overtime,double jornalBaseMes, double factorMaxImponible) {
 		double maxImponible = calculateMaxImponible(factorMaxImponible);
-		if( maxImponible == afecto )
-			return 0;
-		else{
-			double sum = getVTrato() + getValorSabado() + getVSCorrd() + getSobreTiempo() + getDescHoras() 
-					+ getBonifImpo() + getGLegal();
+		double sum = getVTrato() + getValorSabado() + getVSCorrd() + getSobreTiempo() + getDescHoras() 
+				+ getBonifImpo() + getGLegal();
+		if( sum > maxImponible )
 			return sum - afecto;
+		else{
+			return 0;
 		}
 	}
 
