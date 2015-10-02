@@ -147,7 +147,7 @@ public class SalaryCalculator {
 	Double sobreAfecto;
 	public Double getSobreAfecto(){
 		if(sobreAfecto == null ){
-			sobreAfecto = calculateSobreAfecto(closingDateLastMonth,getAfecto(),getDiasHabiles(),attendance,lastMonthAttendance,overtime,getJornalBaseMes(),wageConfigurations.getMaxImponibleFactor());
+			sobreAfecto = calculateSobreAfecto(getAfecto(),wageConfigurations.getMaxImponibleFactor());
 			logger.debug("sobreAfecto {}",sobreAfecto);
 		}
 		return sobreAfecto;
@@ -605,11 +605,10 @@ public class SalaryCalculator {
 	 * Calcula el sobre afecto, si éste último fue mayor al maximo imponible 
 	 * @return
 	 */
-	private double calculateSobreAfecto(DateTime closingDateLastMonth,double afecto,int diasHabiles,
-			Attendance attendance,Attendance lastMonthAttendance,Overtime overtime,double jornalBaseMes, double factorMaxImponible) {
+	private double calculateSobreAfecto(double afecto, double factorMaxImponible) {
 		double maxImponible = calculateMaxImponible(factorMaxImponible);
-		double sum = getVTrato() + getValorSabado() + getVSCorrd() + getSobreTiempo() + getDescHoras() 
-				+ getBonifImpo() + getGLegal();
+		double sum = getVTrato() + getValorSabado() + getVSCorrd() + getSobreTiempo() + getDescHoras() + getBonifImpo() + getGLegal();
+		logger.debug("getVTrato() {} getValorSabado() {} getVSCorrd() {} getSobreTiempo() {} getDescHoras() {} getBonifImpo() {} getGLegal() {}",getVTrato() , getValorSabado() , getVSCorrd() , getSobreTiempo() , getDescHoras() , getBonifImpo() , getGLegal());
 		if( sum > maxImponible )
 			return sum - afecto;
 		else{

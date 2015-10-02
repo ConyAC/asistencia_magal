@@ -22,6 +22,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.velocity.app.VelocityEngine;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
+import org.joda.time.LocalDateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -2120,12 +2121,28 @@ public class AttendancePanel extends VerticalLayout implements View {
 												//codigo suple 
 												row.getCell(57).setCellValue(salary.getLaborerConstructionSite().getSupleCode());
 												//ajuste sobre tiempo 60 74
-
+												int k = 60;
+												List<Integer> overtimeLastMonth = overtime.getLastMonthOvertimeAsList();
+												LocalDateTime beginingDeal  = new LocalDateTime(dc.getBeginDeal());
+												LocalDateTime finishingDeal  = new LocalDateTime(dc.getFinishDeal());
+												//solo agrega el mes anterior, si la fecha de inicio es en el mes anterior a la fecha de fin de trato
+												if(beginingDeal.getMonthOfYear() == finishingDeal.getMonthOfYear() - 1 ){
+													int beginDeal = beginingDeal.getDayOfMonth();
+													int maxLasMonthDeal = beginingDeal.dayOfMonth().getMaximumValue();
+													for(int l =  beginDeal - 1 ; l < maxLasMonthDeal ;l++ ){
+														 if(overtimeLastMonth.get(l) != null )
+															 row.getCell(k).setCellValue(overtimeLastMonth.get(l));
+														 k++;													
+													}
+												}
+												
 												//sobre tiempo 75 103
-												int k = 75;
-												for(Integer o : overtime.getOvertimeAsList()){
-													if(o != null )
-														row.getCell(k).setCellValue(o);
+												k = 75;
+												List<Integer> overtimeMonth = overtime.getLastMonthOvertimeAsList();
+												int finishDeal = finishingDeal.getDayOfMonth();
+												for(int l =  0 ; l < finishDeal ;l++ ){
+													if(overtimeMonth.get(l) != null )
+														row.getCell(k).setCellValue(overtimeMonth.get(l));
 													k++;
 												}
 
