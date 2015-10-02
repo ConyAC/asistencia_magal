@@ -2149,7 +2149,7 @@ public class AttendancePanel extends VerticalLayout implements View {
 												//loc mov2 105
 												row.getCell(105).setCellValue(salary.getBondMov2());
 												//bono especial 108
-												row.getCell(108).setCellValue(salary.getBonifImpo());
+												row.getCell(108).setCellValue(salary.getSpecialBond());
 												//ajuste mes anterior 117 a 130
 												k = 117;
 												for(AttendanceMark m : salary.getAjusteMesAnterior()){
@@ -2162,9 +2162,13 @@ public class AttendancePanel extends VerticalLayout implements View {
 												//												row.getCell(153).setCellValue(salary.getLaborerConstructionSite().getLaborer().getIsapre().toString());
 												// TODO afp y espacio?= 156 157
 												row.getCell(156).setCellValue(salary.getLaborerConstructionSite().getLaborer().getAfp().getName());
-												//												row.getCell(157).setCellValue(salary.getLaborerConstructionSite().getLaborer().getIsapre().toString());
+												Double rate = Utils.getAfpRate(afpTable.getAfpTable(), salary.getLaborerConstructionSite().getLaborer().getAfp());
+												if(rate != 0 )
+													row.getCell(157).setCellValue("Activo");
+												else
+													row.getCell(157).setCellValue("Pensionado");
 												//copia el % de afp asociado
-												row.getCell(158).setCellValue(Utils.getAfpRate(afpTable.getAfpTable(), salary.getLaborerConstructionSite().getLaborer().getAfp()));
+												row.getCell(158).setCellValue(rate);
 
 											}
 											try { HSSFFormulaEvaluator.evaluateAllFormulaCells(wb); }catch(Exception e){}
