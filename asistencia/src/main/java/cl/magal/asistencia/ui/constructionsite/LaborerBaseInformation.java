@@ -56,6 +56,9 @@ public class LaborerBaseInformation extends VerticalLayout {
 	
 	String prefix = "";
 	boolean viewElement;
+	
+	private String fullpath;
+	
 	/**
 	 * BINDER
 	 */
@@ -79,6 +82,7 @@ public class LaborerBaseInformation extends VerticalLayout {
 		
 	private void init(){
 		
+		fullpath = (String) ((MagalUI)UI.getCurrent()).getSpringBean("uploaded_images_path");
 		confService = (ConfigurationService) ((MagalUI)UI.getCurrent()).getSpringBean(Constants.CONFIGURATION_SERVICE_BEAN);
 		setSpacing(true);
 		setWidth("100%");
@@ -116,7 +120,9 @@ public class LaborerBaseInformation extends VerticalLayout {
 		        	getBinder().getItemDataSource().getItemProperty(prefix+"photo").setValue(filename);
 		        	String basepath = VaadinService.getCurrent().getBaseDirectory().getAbsolutePath();
 		            // Open the file for writing.
-		            file = new File(basepath + "/WEB-INF/images/" + filename);
+//		        	String fullPath = basepath + "/WEB-INF/images/" + filename;
+		        	logger.debug("filename {}",fullpath);
+		            file = new File(fullpath+filename);
 		            fos = new FileOutputStream(file);
 		        } catch (final java.io.FileNotFoundException e) {
 		        	logger.error("Error al obtener el archivo ",e);

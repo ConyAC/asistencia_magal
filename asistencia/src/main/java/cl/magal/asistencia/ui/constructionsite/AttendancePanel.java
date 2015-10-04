@@ -22,6 +22,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.velocity.app.VelocityEngine;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
+import org.joda.time.LocalDateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -2002,6 +2003,12 @@ public class AttendancePanel extends VerticalLayout implements View {
 								OnDemandStreamResource myResource = new OnDemandFileDownloader.OnDemandStreamResource() {
 
 									public InputStream getStream() {
+										if(salaryContainer.size() == 0 ){
+											logger.debug("Aún no se calculan los sueldos.");
+											Notification.show("Aún no se calculan los sueldos.");
+											return null;
+										}
+											
 
 										AfpAndInsuranceConfigurations afpTable = getAfpAndInsuranceConfigurations();
 
@@ -2117,19 +2124,35 @@ public class AttendancePanel extends VerticalLayout implements View {
 												//codigo suple 
 												row.getCell(57).setCellValue(salary.getLaborerConstructionSite().getSupleCode());
 												//ajuste sobre tiempo 60 74
-
+												int k = 60;
+												List<Integer> overtimeLastMonth = overtime.getLastMonthOvertimeAsList();
+												LocalDateTime beginingDeal  = new LocalDateTime(dc.getBeginDeal());
+												LocalDateTime finishingDeal  = new LocalDateTime(dc.getFinishDeal());
+												//solo agrega el mes anterior, si la fecha de inicio es en el mes anterior a la fecha de fin de trato
+												if(beginingDeal.getMonthOfYear() == finishingDeal.getMonthOfYear() - 1 ){
+													int beginDeal = beginingDeal.getDayOfMonth();
+													int maxLasMonthDeal = beginingDeal.dayOfMonth().getMaximumValue();
+													for(int l =  beginDeal - 1 ; l < maxLasMonthDeal ;l++ ){
+														 if(overtimeLastMonth.get(l) != null )
+															 row.getCell(k).setCellValue(overtimeLastMonth.get(l));
+														 k++;													
+													}
+												}
+												
 												//sobre tiempo 75 103
-												int k = 75;
-												for(Integer o : overtime.getOvertimeAsList()){
-													if(o != null )
-														row.getCell(k).setCellValue(o);
+												k = 75;
+												List<Integer> overtimeMonth = overtime.getLastMonthOvertimeAsList();
+												int finishDeal = finishingDeal.getDayOfMonth();
+												for(int l =  0 ; l < finishDeal ;l++ ){
+													if(overtimeMonth.get(l) != null )
+														row.getCell(k).setCellValue(overtimeMonth.get(l));
 													k++;
 												}
 
 												//loc mov2 105
 												row.getCell(105).setCellValue(salary.getBondMov2());
 												//bono especial 108
-												row.getCell(108).setCellValue(salary.getBonifImpo());
+												row.getCell(108).setCellValue(salary.getSpecialBond());
 												//ajuste mes anterior 117 a 130
 												k = 117;
 												for(AttendanceMark m : salary.getAjusteMesAnterior()){
@@ -2141,10 +2164,14 @@ public class AttendancePanel extends VerticalLayout implements View {
 												row.getCell(152).setCellValue(salary.getLaborerConstructionSite().getLaborer().getIsapre().toString());
 												//												row.getCell(153).setCellValue(salary.getLaborerConstructionSite().getLaborer().getIsapre().toString());
 												// TODO afp y espacio?= 156 157
-												row.getCell(156).setCellValue(salary.getLaborerConstructionSite().getLaborer().getAfp().toString());
-												//												row.getCell(157).setCellValue(salary.getLaborerConstructionSite().getLaborer().getIsapre().toString());
+												row.getCell(156).setCellValue(salary.getLaborerConstructionSite().getLaborer().getAfp().getName());
+												Double rate = Utils.getAfpRate(afpTable.getAfpTable(), salary.getLaborerConstructionSite().getLaborer().getAfp());
+												if(rate != 0 )
+													row.getCell(157).setCellValue("Activo");
+												else
+													row.getCell(157).setCellValue("Pensionado");
 												//copia el % de afp asociado
-												row.getCell(158).setCellValue(Utils.getAfpRate(afpTable.getAfpTable(), salary.getLaborerConstructionSite().getLaborer().getAfp()));
+												row.getCell(158).setCellValue(rate);
 
 											}
 											try { HSSFFormulaEvaluator.evaluateAllFormulaCells(wb); }catch(Exception e){}
