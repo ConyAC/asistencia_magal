@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -28,7 +29,9 @@ import cl.magal.asistencia.entities.Accident;
 import cl.magal.asistencia.entities.AdvancePaymentConfigurations;
 import cl.magal.asistencia.entities.AdvancePaymentItem;
 import cl.magal.asistencia.entities.Annexed;
+import cl.magal.asistencia.entities.ConstructionSite;
 import cl.magal.asistencia.entities.Contract;
+import cl.magal.asistencia.entities.Laborer;
 import cl.magal.asistencia.entities.LaborerConstructionsite;
 import cl.magal.asistencia.entities.License;
 import cl.magal.asistencia.entities.Loan;
@@ -453,10 +456,10 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 					((TextField)field).setImmediate(true);
 					field.setEnabled(false);
 				}
-				else if(  propertyId.equals("dateBuy") ){
-					field = new DateField();
-					((DateField)field).setImmediate(true);
-				}
+//				else if(  propertyId.equals("dateBuy") ){
+//					field = new DateField();
+//					((DateField)field).setImmediate(true);
+//				}
 
 				return field;
 			}
@@ -502,6 +505,38 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 			}
 		});
 
+		tableTool.addGeneratedColumn("dateBuy", new Table.ColumnGenerator() {
+
+			@Override
+			public Object generateCell(Table source, Object itemId, Object columnId) {
+				BeanItem<Tool> toolBean = beanItemTool.getItem(itemId);
+				Date value = (Date) source.getContainerProperty(itemId, columnId).getValue();	
+				
+				final DateField fecha  = new DateField("Fecha"+value);		
+				fecha.setPropertyDataSource(toolBean.getItemProperty("dateBuy"));
+				fecha.addValueChangeListener(new Property.ValueChangeListener() {
+					
+					@Override
+					public void valueChange(ValueChangeEvent event) {
+						DateTime dateTime = new DateTime((Date)event.getProperty().getValue());
+						Integer month = dateTime.getMonthOfYear();
+						
+						DateTime today = new DateTime();
+						Integer month_today = today.getMonthOfYear();
+						
+						if(!month_today.equals(month)){
+							Notification.show("Solo puede seleccionar un día del mes actual.", Type.ERROR_MESSAGE);
+							
+							return;
+						}					
+					}
+				});
+
+				return fecha; 
+			}
+		});
+
+		
 		tableTool.setVisibleColumns("name","price","dateBuy","fee","selected","status.description", "eliminar");
 		tableTool.setColumnHeaders("Herramienta","Monto","Fecha","Cuota","Postergar pago","Estado", "Acciones");
 		tableTool.setEditable(true);				
@@ -609,6 +644,36 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 			}
 		});
 
+		tableLoan.addGeneratedColumn("dateBuy", new Table.ColumnGenerator() {
+
+			@Override
+			public Object generateCell(Table source, Object itemId, Object columnId) {
+				BeanItem<Loan> loanBean = beanItemLoan.getItem(itemId);
+				Date value = (Date) source.getContainerProperty(itemId, columnId).getValue();	
+				
+				final DateField fecha  = new DateField("Fecha"+value);		
+				fecha.setPropertyDataSource(loanBean.getItemProperty("dateBuy"));
+				fecha.addValueChangeListener(new Property.ValueChangeListener() {
+					
+					@Override
+					public void valueChange(ValueChangeEvent event) {
+						DateTime dateTime = new DateTime((Date)event.getProperty().getValue());
+						Integer month = dateTime.getMonthOfYear();
+						
+						DateTime today = new DateTime();
+						Integer month_today = today.getMonthOfYear();
+						
+						if(!month_today.equals(month)){
+							Notification.show("Solo puede seleccionar un día del mes actual.", Type.ERROR_MESSAGE);
+							
+							return;
+						}					
+					}
+				});
+
+				return fecha; 
+			}
+		});
 
 		tableLoan.setVisibleColumns("price","dateBuy", "fee", "selected","status.description", "eliminar");
 		tableLoan.setColumnHeaders("Monto","Fecha", "Cuota", "Postergar pago", "Estado", "Eliminar");

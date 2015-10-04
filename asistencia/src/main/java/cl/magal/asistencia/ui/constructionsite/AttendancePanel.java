@@ -78,6 +78,7 @@ import com.vaadin.data.fieldgroup.FieldGroup.CommitHandler;
 import com.vaadin.data.util.BeanContainer;
 import com.vaadin.data.util.BeanItem;
 import com.vaadin.data.util.BeanItemContainer;
+import com.vaadin.data.util.converter.StringToIntegerConverter;
 import com.vaadin.data.util.filter.SimpleStringFilter;
 import com.vaadin.event.FieldEvents.TextChangeEvent;
 import com.vaadin.event.FieldEvents.TextChangeListener;
@@ -1180,6 +1181,8 @@ public class AttendancePanel extends VerticalLayout implements View {
 				setExpandRatio(salaryTable, 1.0f);
 
 				salaryTable.setFooterVisible(true);
+				salaryTable.setConverter("salary", new StringToIntegerConverter());
+				salaryTable.setConverter("descHours", new StringToIntegerConverter());
 			}
 		};
 		vl.setSizeFull();
