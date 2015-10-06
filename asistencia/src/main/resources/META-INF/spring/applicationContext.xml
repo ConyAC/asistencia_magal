@@ -31,9 +31,9 @@
 	<tx:annotation-driven  transaction-manager="transactionManager"/>
 	    
 
-	   	<!--  Data Base 
+	<!--  Data Base 
 	<jdbc:embedded-database id="datasource" type="H2"></jdbc:embedded-database>
-	
+	-->
 	<bean id="datasource"
 		class="org.springframework.jdbc.datasource.DriverManagerDataSource">
  
@@ -46,15 +46,6 @@
 	    <jdbc:script location="classpath:/META-INF/sql/schema.sql"/>
 	    <jdbc:script location="classpath:/META-INF/sql/data.sql"/>
 	</jdbc:initialize-database>
-	-->
-	<bean id="datasource" 
-		class="org.springframework.jdbc.datasource.DriverManagerDataSource">
- 
-		<property name="driverClassName" value="com.mysql.jdbc.Driver" />
-		<property name="url" value="jdbc:mysql://localhost:3306/magal_asistencia" />
-		<property name="username" value="root" />
-		<property name="password" value="" />
-	</bean>
 	
 	<bean id="jpaDialect" class="org.springframework.orm.jpa.vendor.EclipseLinkJpaDialect" >
 		<!-- org.eclipse.persistence.platform.database.MySQLPlatform  -->
