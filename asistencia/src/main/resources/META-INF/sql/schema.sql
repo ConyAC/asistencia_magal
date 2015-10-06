@@ -926,3 +926,8 @@ CREATE TABLE `bank` (
   `name` varchar(512) DEFAULT NULL,
   PRIMARY KEY (`bankId`)
 ) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=latin1;
+
+
+-- afp plus
+ALTER TABLE `magal_asistencia`.`laborer` 
+ADD COLUMN `isapre_plus` DOUBLE NOT NULL DEFAULT 0 COMMENT '';

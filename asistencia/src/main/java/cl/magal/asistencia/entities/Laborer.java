@@ -26,6 +26,7 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.UniqueConstraint;
+import javax.validation.constraints.Digits;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
@@ -171,6 +172,11 @@ public class Laborer implements Serializable {
     
     @Column(name="photo")
     private String photo;
+    
+    
+    @Digits(fraction=4, integer=1000000 , message ="El adicional de Isapre debe ser un valor numérico.")
+    @Column(name="isapre_plus")
+    private Double isaprePlus;
     
     @OneToMany(mappedBy="laborer", orphanRemoval=true)//,fetch=FetchType.EAGER,cascade = { CascadeType.PERSIST, CascadeType.MERGE })
     List<LaborerConstructionsite> laborerConstructionSites = new ArrayList<LaborerConstructionsite>();
@@ -429,6 +435,14 @@ public class Laborer implements Serializable {
 
 	public void setDwellers(String dwellers) {
 		this.dwellers = dwellers;
+	}
+
+	public Double getIsaprePlus() {
+		return isaprePlus;
+	}
+
+	public void setIsaprePlus(Double isaprePlus) {
+		this.isaprePlus = isaprePlus;
 	}
 
 	@Override

@@ -1148,7 +1148,7 @@ public class SalaryCalculator {
 	 * @return
 	 */
 	private double calculateMontoCtoUF() {
-		return 0D;
+		return attendance.getLaborerConstructionSite().getLaborer().getIsaprePlus();
 	}
 	
 	/**
