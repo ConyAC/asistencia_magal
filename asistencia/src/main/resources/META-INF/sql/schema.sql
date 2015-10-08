@@ -931,3 +931,7 @@ CREATE TABLE `bank` (
 -- afp plus
 ALTER TABLE `magal_asistencia`.`laborer` 
 ADD COLUMN `isapre_plus` DOUBLE NOT NULL DEFAULT 0 COMMENT '';
+
+ALTER TABLE `magal_asistencia`.`laborer` 
+ADD COLUMN `otherAgreements` VARCHAR(1024) NULL AFTER `isapre_plus`,
+ADD COLUMN `villa` VARCHAR(1024) NULL AFTER `otherAgreements`;
