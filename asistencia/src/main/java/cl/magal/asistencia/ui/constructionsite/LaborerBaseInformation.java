@@ -157,7 +157,7 @@ public class LaborerBaseInformation extends VerticalLayout {
 
 		// Loop through the properties, build fields for them and add the fields
 		// to this UI
-		for (Object propertyId : new String[]{"rut","firstname","secondname","lastname", "secondlastname", "dateBirth", "commune", "town", "address", "mobileNumber", "phone","afp", "maritalStatus", "isapre", "isaprePlus","nationality", "provenance", "wedge", "bank", "bankAccount","dependents","validityPensionReview"}) {
+		for (Object propertyId : new String[]{"rut","firstname","secondname","lastname", "secondlastname", "dateBirth", "commune", "town", "address", "villa", "mobileNumber", "phone","afp", "maritalStatus", "isapre", "isaprePlus","nationality", "provenance", "wedge", "bank", "bankAccount","dependents","validityPensionReview","otherAgreements"}) {
 			Field<?> field = null;
 			if(propertyId.equals("afp") || propertyId.equals("bank") || propertyId.equals("laborerId") || propertyId.equals("constructionSites") || propertyId.equals("contractId") || propertyId.equals("teamId") || (propertyId.equals("rut") && !viewElement))
 				;
