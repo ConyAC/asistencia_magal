@@ -105,22 +105,22 @@ public class Laborer implements Serializable {
     @NotNull(message="La fecha de nacimiento es necesaria")
     private Date dateBirth;
     
-    @NotNull(message="La dirección es necesario")
-    @NotEmpty(message="La dirección es necesario")
+    @NotNull(message="La dirección es necesaria")
+    @NotEmpty(message="La dirección es necesaria")
     @Column(name = "address", nullable=false)
     private String address;
+    
+    @Column(name = "villa")
+    private String villa;
+    
+    @Column(name = "otherAgreements")
+    private String otherAgreements;
     
     @Column(name = "mobile_number")
     private String mobileNumber;
     
     @Column(name = "phone")
     private String phone;
-    
-//    @Column(name = "dateAdmission")
-//    @Temporal(TemporalType.TIMESTAMP)
-//    private Date dateAdmission;
-//    @Column(name = "contractId")
-//    private Integer contractId;
     
     @Column(name = "validity_pension_review")
     @Temporal(TemporalType.DATE)
@@ -347,22 +347,6 @@ public class Laborer implements Serializable {
         this.phone = phone;
     }
 
-//    public Date getDateAdmission() {
-//        return dateAdmission;
-//    }
-//
-//    public void setDateAdmission(Date dateAdmission) {
-//        this.dateAdmission = dateAdmission;
-//    }
-//
-//    public Integer getContractId() {
-//        return contractId;
-//    }
-//
-//    public void setContractId(Integer contractId) {
-//        this.contractId = contractId;
-//    }
-
     public AfpItem getAfp() {
 		return afp;
 	}
@@ -429,6 +413,22 @@ public class Laborer implements Serializable {
 
 	public void setDwellers(String dwellers) {
 		this.dwellers = dwellers;
+	}
+	
+	public String getVilla() {
+		return villa;
+	}
+
+	public void setVilla(String villa) {
+		this.villa = villa;
+	}
+	
+	public String getOtherAgreements() {
+		return otherAgreements;
+	}
+
+	public void setOtherAgreements(String otherAgreements) {
+		this.otherAgreements = otherAgreements;
 	}
 
 	@Override
