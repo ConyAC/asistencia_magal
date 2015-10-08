@@ -339,6 +339,10 @@ public class LaborerBaseInformation extends VerticalLayout {
 			return "Vigencia Examen Previsional";
 		else if(propertyId.equals("isaprePlus"))
 			return "Isapre Adicional";
+		else if(propertyId.equals("otherAgreements"))
+			return "Otros Acuerdos";
+		else if(propertyId.equals("villa"))
+			return "Villa";
 		else
 			return propertyId.toString();
 	}
