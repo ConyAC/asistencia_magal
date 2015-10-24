@@ -2040,7 +2040,7 @@ public class AttendancePanel extends VerticalLayout implements View {
 
 										//1. Open the file
 										try {
-											wb = new XSSFWorkbook(new FileInputStream(new File(AttendancePanel.class.getResource("/templates/asistencia/planilla_asistencia_cony.xlsx").toURI())));
+											wb = new XSSFWorkbook(new FileInputStream(new File(AttendancePanel.class.getResource("/templates/asistencia/planilla_asistencia.xlsx").toURI())));
 											//setea la configuración de la primera pestaña
 											XSSFSheet sheet0 = wb.getSheetAt(0);
 											//celda B1 Centro de costo
@@ -2118,19 +2118,19 @@ public class AttendancePanel extends VerticalLayout implements View {
 									        }
 									        
 									        //Importar datos Asignación Familiar
-									        XSSFRow row62, rowAF;
+									        XSSFRow row70, rowAF;
 									        int t_af = 0;
-									        for (int i=61; i<= (61 + (familyConfig.size() * 2) ); i += 2 ){
-									            row62 = sheet0.createRow(i);
+									        for (int i=70; i<= (70 + (familyConfig.size() * 2) ); i += 2 ){
+									            row70 = sheet0.createRow(i);
 							                	if(t_af < familyConfig.size()){
-							                		row62.createCell(1).setCellValue(familyConfig.get(t_af).getFrom());
-							                		row62.createCell(2).setCellValue(familyConfig.get(t_af).getAmount());
+							                		row70.createCell(1).setCellValue(familyConfig.get(t_af).getFrom());
+							                		row70.createCell(2).setCellValue(familyConfig.get(t_af).getAmount());
 							                	}
 									            t_af++;
 									        }
 									        
 									        int t_af_d = 0;
-									        for (int i=62; i<= (62 + (familyConfig.size() * 2) ); i += 2 ){
+									        for (int i=71; i<= (71 + (familyConfig.size() * 2) ); i += 2 ){
 									        	rowAF = sheet0.createRow(i);
 							                	if(t_af_d < familyConfig.size()){
 							                		rowAF.createCell(1).setCellValue(familyConfig.get(t_af_d).getTo());
@@ -2140,22 +2140,15 @@ public class AttendancePanel extends VerticalLayout implements View {
 									        }
 									        
 											//Importar datos de AFP
-									        XSSFRow row83;
-									        XSSFCell cell_afp;
+									        XSSFRow row101;
 									        int t = 0;
-									        for (int i=82; i<= (82 + afpTable.getAfpTable().size()); i++){
-									            row83 = sheet0.createRow(i);
-									            for(int j=1; j<4; j++) {
-									                cell_afp = row83.createCell(j);
-								                	if(t < afpTable.getAfpTable().size()){
-								                		if(j == 1)						                										                									                			
-								                			cell_afp.setCellValue(afpTable.getAfpTable().get(t).getName());							                		
-								                		else if (j == 2)
-								                			cell_afp.setCellValue(afpTable.getAfpTable().get(t).getRate());							                		
-								                		else if (j == 3)
-								                			cell_afp.setCellValue(afpTable.getAfpTable().get(t).getAfpAndInsuranceConfigurations().getSis());
+									        for (int i=101; i<= (101 + afpTable.getAfpTable().size()); i++){
+									            row101 = sheet0.createRow(i);
+							                	if(t < afpTable.getAfpTable().size()){
+							                		row101.createCell(1).setCellValue(afpTable.getAfpTable().get(t).getName());							                		
+							                		row101.createCell(2).setCellValue(afpTable.getAfpTable().get(t).getRate());							                		
+							                		row101.createCell(3).setCellValue(afpTable.getAfpTable().get(t).getAfpAndInsuranceConfigurations().getSis());
 								                	}
-									            }
 									            t++;
 									        }
 									        
