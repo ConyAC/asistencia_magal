@@ -17,18 +17,13 @@ import javax.annotation.PostConstruct;
 
 import org.apache.poi.hssf.usermodel.HSSFFormulaEvaluator;
 import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
-import org.apache.poi.xssf.usermodel.XSSFTable;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.velocity.app.VelocityEngine;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
 import org.joda.time.LocalDateTime;
-import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTTable;
-import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTTableColumn;
-import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTTableColumns;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -2100,7 +2095,7 @@ public class AttendancePanel extends VerticalLayout implements View {
 									            row41 = sheet0.createRow(i);									            
 							                	if(t_imp < taxationConfig.size()){
 							                		row41.createCell(1).setCellValue(taxationConfig.get(t_imp).getFrom());
-							                		row41.createCell(2).setCellValue(taxationConfig.get(t_imp).getFactor() * 100);
+							                		row41.createCell(2).setCellValue((taxationConfig.get(t_imp).getFactor()/100));
 							                		row41.createCell(4).setCellValue(taxationConfig.get(t_imp).getReduction());						                		
 							                	}
 							                	t_imp++;
@@ -2146,8 +2141,8 @@ public class AttendancePanel extends VerticalLayout implements View {
 									            row101 = sheet0.createRow(i);
 							                	if(t < afpTable.getAfpTable().size()){
 							                		row101.createCell(1).setCellValue(afpTable.getAfpTable().get(t).getName());							                		
-							                		row101.createCell(2).setCellValue(afpTable.getAfpTable().get(t).getRate());							                		
-							                		row101.createCell(3).setCellValue(afpTable.getAfpTable().get(t).getAfpAndInsuranceConfigurations().getSis());
+							                		row101.createCell(2).setCellValue((afpTable.getAfpTable().get(t).getRate()/100));							                		
+							                		row101.createCell(3).setCellValue((afpTable.getAfpTable().get(t).getAfpAndInsuranceConfigurations().getSis()/100));
 								                	}
 									            t++;
 									        }
