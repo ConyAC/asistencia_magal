@@ -141,8 +141,19 @@ public class ConfigView extends VerticalLayout implements View {
 
 					}
 				};
-				table.setEditable(true);
+				
+				HorizontalLayout hl = new HorizontalLayout();
+				hl.setWidth("100%");
+				addComponent(hl);
 
+				final TextField desde = new TextField("Desde");
+				hl.addComponent(desde);
+				final TextField hasta = new TextField("Hasta");
+				hl.addComponent(hasta);
+				final TextField monto = new TextField("Monto");
+				hl.addComponent(monto);
+				
+				table.setEditable(true);
 				table.addGeneratedColumn("delete", new Table.ColumnGenerator() {
 
 					@Override
@@ -194,6 +205,38 @@ public class ConfigView extends VerticalLayout implements View {
 				table.setContainerDataSource(container);
 				table.setVisibleColumns("from","to","amount","delete");
 				table.setColumnHeaders("Desde","Hasta","Monto","Quitar");
+				
+				Button btnAdd = new Button(null,FontAwesome.PLUS);
+				hl.addComponent(btnAdd);
+				btnAdd.addClickListener(new Button.ClickListener() {
+
+					@Override
+					public void buttonClick(ClickEvent event) {
+						try{
+							if(desde.getValue() == "" || hasta.getValue() == "" || monto.getValue() == ""){
+								Notification.show("Debe ingresar todos los valores del nuevo rango de asignación familiar.",Type.ERROR_MESSAGE);
+								return;
+							}else{
+								FamilyAllowanceConfigurations fac = new FamilyAllowanceConfigurations();
+								fac.setFrom(Double.parseDouble(desde.getValue()));
+								fac.setTo(Double.parseDouble(hasta.getValue()));
+								fac.setAmount(Double.parseDouble(monto.getValue()));							
+								confService.save(fac);
+								container.addBean(fac);			
+								
+								desde.setValue("");
+								hasta.setValue("");
+								monto.setValue("");
+							}
+						}catch(Exception e){
+							Notification.show("Error al añadir el rango de asignación familiar.",Type.ERROR_MESSAGE);
+							logger.error("Error al añadir el elemento",e);
+						}
+					}
+				});		
+				
+				setComponentAlignment(hl, Alignment.TOP_RIGHT);				
+				
 				addComponent(table);
 
 				if(!SecurityHelper.hasPermission(Permission.DEFINIR_VARIABLE_GLOBAL)){
@@ -223,9 +266,50 @@ public class ConfigView extends VerticalLayout implements View {
 
 					}
 				};
+				
+				HorizontalLayout hl = new HorizontalLayout();
+				hl.setWidth("100%");
+				addComponent(hl);
+
+				final TextField desde = new TextField("Desde");
+				hl.addComponent(desde);
+				final TextField hasta = new TextField("Hasta");
+				hl.addComponent(hasta);
+				final TextField factor = new TextField("Factor");
+				hl.addComponent(factor);
+				final TextField rebaja = new TextField("Rebaja");
+				hl.addComponent(rebaja);
+				final TextField exento = new TextField("Exento");
+				hl.addComponent(exento);
+				
 				table.setContainerDataSource(container);
-				table.setVisibleColumns("from","to","factor","reduction","exempt");
-				table.setColumnHeaders("Desde","Hasta","Factor","Rebaja","Exento");
+				table.addGeneratedColumn("delete", new Table.ColumnGenerator() {
+					
+					@Override
+					public Object generateCell(Table source, final Object itemId, Object columnId) {
+						return new Button(null,new Button.ClickListener() {
+
+							@Override
+							public void buttonClick(ClickEvent event) {
+								ConfirmDialog.show(UI.getCurrent(), "Confirmar Acción:", "¿Está seguro de eliminar el rango de impuesto seleccionado?",
+										"Eliminar", "Cancelar", new ConfirmDialog.Listener() {
+
+									public void onClose(ConfirmDialog dialog) {
+										if (dialog.isConfirmed()) {
+											
+											TaxationConfigurations tc = ((BeanItem<TaxationConfigurations>)container.getItem(itemId)).getBean();
+											confService.delete(tc);
+											container.removeItem(itemId);
+										}
+									}
+								});
+							}
+						}){{setIcon(FontAwesome.TRASH_O);}};
+					}
+				});
+				
+				table.setVisibleColumns("from","to","factor","reduction","exempt","delete");
+				table.setColumnHeaders("Desde","Hasta","Factor","Rebaja","Exento","Quitar");
 				table.setEditable(true);
 				
 				OnValueChangeListener listener = new OnValueChangeListener(){
@@ -241,6 +325,41 @@ public class ConfigView extends VerticalLayout implements View {
 				factory.addListener(listener);
 				
 				table.setTableFieldFactory(factory);
+				Button btnAdd = new Button(null,FontAwesome.PLUS);
+				hl.addComponent(btnAdd);
+				btnAdd.addClickListener(new Button.ClickListener() {
+
+					@Override
+					public void buttonClick(ClickEvent event) {
+						try{
+							if(desde.getValue() == "" || hasta.getValue() == "" || factor.getValue() == "" || exento.getValue() == "" || rebaja.getValue() == ""){
+								Notification.show("Debe ingresar todos los valores para generar el rango de impuesto.",Type.ERROR_MESSAGE);
+								return;
+							}else{
+								TaxationConfigurations tc = new TaxationConfigurations();
+								tc.setFrom(Double.parseDouble(desde.getValue()));
+								tc.setTo(Double.parseDouble(hasta.getValue()));
+								tc.setExempt(Double.parseDouble(exento.getValue()));
+								tc.setReduction(Double.parseDouble(rebaja.getValue()));
+								tc.setFactor(Double.parseDouble(factor.getValue()));
+								confService.save(tc);
+								container.addBean(tc);
+								
+								desde.setValue("");
+								hasta.setValue("");
+								factor.setValue("");
+								rebaja.setValue("");
+								exento.setValue("");
+							}
+						}catch(Exception e){
+							Notification.show("Error al añadir el rango de impuestos de segunda categoria.",Type.ERROR_MESSAGE);
+							logger.error("Error al añadir elemento",e);
+						}
+					}
+				});		
+				
+				setComponentAlignment(hl, Alignment.TOP_RIGHT);
+				
 				addComponent(table);
 
 				if(!SecurityHelper.hasPermission(Permission.DEFINIR_VARIABLE_GLOBAL)){
