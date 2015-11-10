@@ -87,6 +87,7 @@ public class ConfigView extends VerticalLayout implements View {
 	BeanItemContainer<Holiday> holidayContainer = new BeanItemContainer<Holiday>(Holiday.class);
 	BeanItemContainer<Bank> bankContainer = new BeanItemContainer<Bank>(Bank.class);
 	BeanItem<Holiday> item;
+	Integer limit = 10;
 	
 	@Autowired
 	private transient ConstructionSiteService service;
@@ -215,6 +216,9 @@ public class ConfigView extends VerticalLayout implements View {
 						try{
 							if(desde.getValue() == "" || hasta.getValue() == "" || monto.getValue() == ""){
 								Notification.show("Debe ingresar todos los valores del nuevo rango de asignación familiar.",Type.ERROR_MESSAGE);
+								return;	
+							}else if(container.size() > limit){
+								Notification.show("Se ha alcanzado el límite máximo de creación de rango de asignación familiar.",Type.ERROR_MESSAGE);
 								return;
 							}else{
 								FamilyAllowanceConfigurations fac = new FamilyAllowanceConfigurations();
@@ -334,6 +338,9 @@ public class ConfigView extends VerticalLayout implements View {
 						try{
 							if(desde.getValue() == "" || hasta.getValue() == "" || factor.getValue() == "" || exento.getValue() == "" || rebaja.getValue() == ""){
 								Notification.show("Debe ingresar todos los valores para generar el rango de impuesto.",Type.ERROR_MESSAGE);
+								return;
+							}else if(container.size() > limit){
+								Notification.show("Se ha alcanzado el límite máximo de creación de rango de impuestos de segunda categoría.",Type.ERROR_MESSAGE);
 								return;
 							}else{
 								TaxationConfigurations tc = new TaxationConfigurations();
