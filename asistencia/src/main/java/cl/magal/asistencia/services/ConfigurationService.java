@@ -191,4 +191,8 @@ public class ConfigurationService {
 	public List<Bank> findBank() {
 		return (List<Bank>) bankRepo.findAll();
 	}
+	
+	public void delete(TaxationConfigurations tcItem) {
+		taxationRepo.delete(tcItem);
+	}
 }

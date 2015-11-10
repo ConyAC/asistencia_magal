@@ -11,10 +11,12 @@ public enum Job {
 	ASEADOR(23, "Aseador",1,399),
 	ENFIERRADOR(5, "Enfierrador",600,699),
 	CARPINTERO(4, "Carpintero",400,599),
+	GASFITER(6, "Gasfiter",700,799),
 	ALBAÑIL(7, "Albañil",800,899),
 	ESTUCADOR(14, "Estucador",900,999),
 	YESERO(8, "Yesero",800,899),
 	GENERAL(24,"General",900,999),
+	
 	/**
 	 * @deprecated no es uno de los oficinales, cambiar los 3 por 1
 	 */
