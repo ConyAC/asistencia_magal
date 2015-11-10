@@ -176,7 +176,7 @@ public class Laborer implements Serializable {
     
     @Digits(fraction=4, integer=1000000 , message ="El adicional de Isapre debe ser un valor numérico.")
     @Column(name="isapre_plus")
-    private Double isaprePlus;
+    private Double isaprePlus = 0D;
     
     @OneToMany(mappedBy="laborer", orphanRemoval=true)//,fetch=FetchType.EAGER,cascade = { CascadeType.PERSIST, CascadeType.MERGE })
     List<LaborerConstructionsite> laborerConstructionSites = new ArrayList<LaborerConstructionsite>();
@@ -191,6 +191,8 @@ public class Laborer implements Serializable {
     		isapre = Isapre.FONASA;
     	if(nationality == null)
     		nationality = Nationality.CHILENA;
+    	if(isaprePlus == null)
+    		isaprePlus = 0D;
     }
     
     public Laborer() {
