@@ -17,6 +17,7 @@ import javax.annotation.PostConstruct;
 
 import org.apache.poi.hssf.usermodel.HSSFFormulaEvaluator;
 import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.velocity.app.VelocityEngine;
@@ -38,10 +39,12 @@ import cl.magal.asistencia.entities.Attendance;
 import cl.magal.asistencia.entities.Confirmations;
 import cl.magal.asistencia.entities.ConstructionSite;
 import cl.magal.asistencia.entities.DateConfigurations;
+import cl.magal.asistencia.entities.FamilyAllowanceConfigurations;
 import cl.magal.asistencia.entities.HistoricalSalary;
 import cl.magal.asistencia.entities.LaborerConstructionsite;
 import cl.magal.asistencia.entities.Overtime;
 import cl.magal.asistencia.entities.Salary;
+import cl.magal.asistencia.entities.TaxationConfigurations;
 import cl.magal.asistencia.entities.User;
 import cl.magal.asistencia.entities.WageConfigurations;
 import cl.magal.asistencia.entities.enums.AttendanceMark;
@@ -115,6 +118,7 @@ import com.vaadin.ui.UI;
 import com.vaadin.ui.Upload;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
+
 
 @Component
 @Scope("prototype")
@@ -226,6 +230,16 @@ public class AttendancePanel extends VerticalLayout implements View {
 	 */
 	private AfpAndInsuranceConfigurations getAfpAndInsuranceConfigurations(){
 		AfpAndInsuranceConfigurations dateConfig = configurationService.findAfpAndInsuranceConfiguration();
+		return dateConfig;
+	}
+	
+	private List<TaxationConfigurations> getTaxationConfigurations(){
+		List<TaxationConfigurations> dateConfig = configurationService.findTaxationConfigurations();
+		return dateConfig;
+	}
+	
+	private List<FamilyAllowanceConfigurations> getFamilyAllowanceConfigurations(){
+		List<FamilyAllowanceConfigurations> dateConfig = configurationService.findFamylyAllowanceConfigurations();
 		return dateConfig;
 	}
 
@@ -2008,6 +2022,8 @@ public class AttendancePanel extends VerticalLayout implements View {
 											
 
 										AfpAndInsuranceConfigurations afpTable = getAfpAndInsuranceConfigurations();
+										List<TaxationConfigurations> taxationConfig = getTaxationConfigurations();
+										List<FamilyAllowanceConfigurations> familyConfig = getFamilyAllowanceConfigurations();
 
 										//verifica que se tengan bien las configuraciones del mes
 										logger.debug("TERCERO");
@@ -2070,8 +2086,67 @@ public class AttendancePanel extends VerticalLayout implements View {
 											row26.getCell(1).setCellValue(wageConfiguration.getMobilization());
 											//celda B27 movilización2
 											Row row27 = sheet0.getRow(26);
-											row27.getCell(1).setCellValue(Utils.getMov2ConstructionSite(wageConfiguration.getMobilizations2(), cs));
-
+											row27.getCell(1).setCellValue(Utils.getMov2ConstructionSite(wageConfiguration.getMobilizations2(), cs));																		
+								
+											//Importar datos de Impuestos
+									        XSSFRow row41, rowE;
+									        int t_imp = 0;
+									        for (int i=40; i<= (40 + (taxationConfig.size() * 2) ); i += 2 ){
+									            row41 = sheet0.createRow(i);									            
+							                	if(t_imp < taxationConfig.size()){
+							                		row41.createCell(1).setCellValue(taxationConfig.get(t_imp).getFrom());
+							                		row41.createCell(2).setCellValue((taxationConfig.get(t_imp).getFactor()/100));
+							                		row41.createCell(4).setCellValue(taxationConfig.get(t_imp).getReduction());						                		
+							                	}
+							                	t_imp++;
+									        }
+									        
+									        int t_imp_d = 0;
+									        for (int i=41; i<= (41 + (taxationConfig.size() * 2) ); i += 2 ){
+									        	rowE = sheet0.createRow(i);									            
+							                	if(t_imp_d < taxationConfig.size()){
+							                		rowE.createCell(1).setCellValue(taxationConfig.get(t_imp_d).getTo());		
+							                		rowE.createCell(2).setCellValue(taxationConfig.get(t_imp_d).getFactor() * 100);
+							                		rowE.createCell(4).setCellValue(taxationConfig.get(t_imp_d).getReduction());		
+							                	}
+							                	t_imp_d++;
+									        }
+									        
+									        //Importar datos Asignación Familiar
+									        XSSFRow row70, rowAF;
+									        int t_af = 0;
+									        for (int i=70; i<= (70 + (familyConfig.size() * 2) ); i += 2 ){
+									            row70 = sheet0.createRow(i);
+							                	if(t_af < familyConfig.size()){
+							                		row70.createCell(1).setCellValue(familyConfig.get(t_af).getFrom());
+							                		row70.createCell(2).setCellValue(familyConfig.get(t_af).getAmount());
+							                	}
+									            t_af++;
+									        }
+									        
+									        int t_af_d = 0;
+									        for (int i=71; i<= (71 + (familyConfig.size() * 2) ); i += 2 ){
+									        	rowAF = sheet0.createRow(i);
+							                	if(t_af_d < familyConfig.size()){
+							                		rowAF.createCell(1).setCellValue(familyConfig.get(t_af_d).getTo());
+							                		rowAF.createCell(2).setCellValue(familyConfig.get(t_af_d).getAmount());
+							                	}
+							                	t_af_d++;
+									        }
+									        
+											//Importar datos de AFP
+									        XSSFRow row101;
+									        int t = 0;
+									        for (int i=101; i<= (101 + afpTable.getAfpTable().size()); i++){
+									            row101 = sheet0.createRow(i);
+							                	if(t < afpTable.getAfpTable().size()){
+							                		row101.createCell(1).setCellValue(afpTable.getAfpTable().get(t).getName());							                		
+							                		row101.createCell(2).setCellValue((afpTable.getAfpTable().get(t).getRate()/100));							                		
+							                		row101.createCell(3).setCellValue((afpTable.getAfpTable().get(t).getAfpAndInsuranceConfigurations().getSis()/100));
+								                	}
+									            t++;
+									        }
+									        
 											//pone la asistencia en la segunda pestaña
 											wb.setSheetName(1,getAttendanceDate().toString("MMMM yyyy").toUpperCase());
 											XSSFSheet sheet = wb.getSheetAt(1);
