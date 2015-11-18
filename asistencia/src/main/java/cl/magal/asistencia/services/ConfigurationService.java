@@ -82,7 +82,7 @@ public class ConfigurationService {
 
 	public AfpAndInsuranceConfigurations findAfpAndInsuranceConfiguration() {
 		List<AfpAndInsuranceConfigurations> configurations = (List<AfpAndInsuranceConfigurations>)afpInsuranceRepo.findAll();
-		List<AfpItem> item = (List<AfpItem>) afpItemRepo.findAll();
+		List<AfpItem> item = (List<AfpItem>) afpItemRepo.findAllOrderName();
 		configurations.get(0).setAfpTable(item);
 		if(configurations.isEmpty())
 			return null;
