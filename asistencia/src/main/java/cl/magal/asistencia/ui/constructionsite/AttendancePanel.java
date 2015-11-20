@@ -2167,14 +2167,14 @@ public class AttendancePanel extends VerticalLayout implements View {
 												row.getCell(0).setCellValue(attendance.getLaborerConstructionSite().getJobCode());
 												row.getCell(1).setCellValue(attendance.getLaborerConstructionSite().getLaborer().getFullname());
 												
-												int minDay = Utils.calcularDiaInicial(attendance,0,true);
+												int minDay = Utils.calcularDiaInicial(attendance,0,false);
 												int maxDay = Utils.calcularDiaFinal(attendance,getAttendanceDate().dayOfMonth().getMaximumValue(),false);
 												
 												//asistencia
 												int j = 3;
 												for(AttendanceMark mark : attendance.getMarksAsList()){
 													//continua hasta que no haya ingresado por contrato
-													if( j - 3 < (minDay + 1) ){
+													if( j - 3 < minDay ){
 														j++;
 														continue;
 													}
