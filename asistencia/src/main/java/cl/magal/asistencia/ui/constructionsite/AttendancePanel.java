@@ -2174,7 +2174,7 @@ public class AttendancePanel extends VerticalLayout implements View {
 												int j = 3;
 												for(AttendanceMark mark : attendance.getMarksAsList()){
 													//continua hasta que no haya ingresado por contrato
-													if( j - 3 < minDay ){
+													if( j - 3 < (minDay + 1) ){
 														j++;
 														continue;
 													}
