@@ -2174,6 +2174,9 @@ public class AttendancePanel extends VerticalLayout implements View {
 														row.getCell(j).setCellValue(salary.getSuple());
 														j++;
 													}
+													
+													if(mark == null)
+														mark = AttendanceMark.VACIO;
 													row.getCell(j).setCellValue(mark.toString());
 													//ingresa hasta el fin de mes solamente
 													if(j - 3 == getAttendanceDate().dayOfMonth().getMaximumValue() )
