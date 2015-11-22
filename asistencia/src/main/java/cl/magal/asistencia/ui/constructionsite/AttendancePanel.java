@@ -2226,7 +2226,7 @@ public class AttendancePanel extends VerticalLayout implements View {
 												
 												//sobre tiempo 75 103
 												k = 75;
-												List<Integer> overtimeMonth = overtime.getLastMonthOvertimeAsList();
+												List<Integer> overtimeMonth = overtime.getOvertimeAsList();
 												int finishDeal = finishingDeal.getDayOfMonth();
 												for(int l =  0 ; l < finishDeal ;l++ ){
 													if(overtimeMonth.get(l) != null )
