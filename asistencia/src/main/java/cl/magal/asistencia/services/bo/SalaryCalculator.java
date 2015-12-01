@@ -850,13 +850,13 @@ public class SalaryCalculator {
 	 * DONE Considera la suma de las horas por sobre tiempo
 	 * @return
 	 */
-	private int calculateHorasSobrtpo(Overtime overtime) {
-		int count = 0;
-		for(Integer i : overtime.getOvertimeAsList()){
+	private double calculateHorasSobrtpo(Overtime overtime) {
+		double count = 0;
+		for(Double i : overtime.getOvertimeAsList()){
 			if(i != null)
 				count += i;
 		}
-		for(Integer i : overtime.getLastMonthOvertimeAsList()){
+		for(Double i : overtime.getLastMonthOvertimeAsList()){
 			if(i != null)
 				count += i;
 		}
