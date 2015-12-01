@@ -2210,7 +2210,7 @@ public class AttendancePanel extends VerticalLayout implements View {
 												row.getCell(57).setCellValue(salary.getLaborerConstructionSite().getSupleCode());
 												//ajuste sobre tiempo 60 74
 												int k = 60;
-												List<Integer> overtimeLastMonth = overtime.getLastMonthOvertimeAsList();
+												List<Double> overtimeLastMonth = overtime.getLastMonthOvertimeAsList();
 												LocalDateTime beginingDeal  = new LocalDateTime(dc.getBeginDeal());
 												LocalDateTime finishingDeal  = new LocalDateTime(dc.getFinishDeal());
 												//solo agrega el mes anterior, si la fecha de inicio es en el mes anterior a la fecha de fin de trato
@@ -2226,7 +2226,7 @@ public class AttendancePanel extends VerticalLayout implements View {
 												
 												//sobre tiempo 75 103
 												k = 75;
-												List<Integer> overtimeMonth = overtime.getOvertimeAsList();
+												List<Double> overtimeMonth = overtime.getOvertimeAsList();
 												int finishDeal = finishingDeal.getDayOfMonth();
 												for(int l =  0 ; l < finishDeal ;l++ ){
 													if(overtimeMonth.get(l) != null )
