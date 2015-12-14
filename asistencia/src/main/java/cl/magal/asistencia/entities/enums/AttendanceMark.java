@@ -12,7 +12,7 @@ public enum AttendanceMark {
 	FAIL(8,"F","Falla"),
 	FILLER(9,"R","Relleno"), 
 	VACATION(10,"V","Vacación"),
-	VACIO(11," "," ");
+	EMPTY(11," "," ");
 	
 	Integer code;
 	String description;

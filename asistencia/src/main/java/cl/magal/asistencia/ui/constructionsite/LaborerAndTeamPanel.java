@@ -845,6 +845,15 @@ public class LaborerAndTeamPanel extends VerticalLayout implements View {
 				return cb;
 			}
 		});
+		
+		table.addGeneratedColumn("fechas", new CustomTable.ColumnGenerator() {
+
+			@Override
+			public Object generateCell(CustomTable source, final Object itemId,Object columnId) {
+				final BeanItem<LaborerConstructionsite> laborerConstruction = (BeanItem<LaborerConstructionsite>) laborerConstructionContainer.getItem(itemId);
+				return Utils.date2String( laborerConstruction.getBean().getActiveContract().getStartDate() ) + "-" + Utils.date2String(laborerConstruction.getBean().getActiveContract().getTerminationDate());
+			}
+		});
 
 		table.setContainerDataSource(laborerConstructionContainer);
 		table.setSizeFull();
@@ -863,8 +872,8 @@ public class LaborerAndTeamPanel extends VerticalLayout implements View {
 		//		});
 
 		//TODO estado
-		table.setVisibleColumns("selected","activeContract.jobCode","laborer.fullname","activeContract.step","actions"); //FIXME laborerId
-		table.setColumnHeaders("","Rol","Nombre","Etapa","Acciones");
+		table.setVisibleColumns("selected","activeContract.jobCode","laborer.fullname","activeContract.step","fechas","actions"); //FIXME laborerId
+		table.setColumnHeaders("","Rol","Nombre","Etapa","Fecha<br/>Contrato","Acciones");
 		table.setColumnWidth("selected", 40);
 
 		table.setSelectable(true);
@@ -1095,6 +1104,7 @@ public class LaborerAndTeamPanel extends VerticalLayout implements View {
 		List<LaborerConstructionsite> laborers = constructionSiteService.getLaborerActiveByConstruction(item.getBean());
 		laborerConstructionContainer.removeAllItems();
 		laborerConstructionContainer.addAll(laborers);
+		laborerConstructionContainer.sort(new Object[] { "activeContract.jobCode" }, new boolean[]{true}); 
 
 		List<Team> teams = constructionSiteService.getTeamsByConstruction(item.getBean());
 		teamContainer.removeAllItems();
