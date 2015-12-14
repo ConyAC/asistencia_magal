@@ -38,6 +38,7 @@ import cl.magal.asistencia.entities.AfpAndInsuranceConfigurations;
 import cl.magal.asistencia.entities.Attendance;
 import cl.magal.asistencia.entities.Confirmations;
 import cl.magal.asistencia.entities.ConstructionSite;
+import cl.magal.asistencia.entities.Contract;
 import cl.magal.asistencia.entities.DateConfigurations;
 import cl.magal.asistencia.entities.FamilyAllowanceConfigurations;
 import cl.magal.asistencia.entities.HistoricalSalary;
@@ -55,6 +56,7 @@ import cl.magal.asistencia.services.ConstructionSiteService;
 import cl.magal.asistencia.services.LaborerService;
 import cl.magal.asistencia.services.MailService;
 import cl.magal.asistencia.services.UserService;
+import cl.magal.asistencia.services.bo.SalaryCalculator.ProjectedAttendanceNotDefined;
 import cl.magal.asistencia.ui.ListenerFieldFactory;
 import cl.magal.asistencia.ui.MagalUI;
 import cl.magal.asistencia.ui.components.ColumnCollapsedObservableTable;
@@ -73,6 +75,7 @@ import com.vaadin.data.Container.SimpleFilterable;
 import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeNotifier;
+import com.vaadin.data.Validator.InvalidValueException;
 import com.vaadin.data.fieldgroup.BeanFieldGroup;
 import com.vaadin.data.fieldgroup.DefaultFieldGroupFieldFactory;
 import com.vaadin.data.fieldgroup.FieldGroup;
@@ -98,6 +101,8 @@ import com.vaadin.ui.Field;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.Grid;
 import com.vaadin.ui.Grid.CellReference;
+import com.vaadin.ui.Grid.CommitErrorEvent;
+import com.vaadin.ui.Grid.EditorErrorHandler;
 import com.vaadin.ui.Grid.FooterCell;
 import com.vaadin.ui.Grid.FooterRow;
 import com.vaadin.ui.Grid.HeaderCell;
@@ -180,10 +185,31 @@ public class AttendancePanel extends VerticalLayout implements View {
 	final static String[] defaultSalaryTableVisibleTable = new String[]{"laborerConstructionSite.activeContract.jobCode",
 		"laborerConstructionSite.laborer.fullname","lastJornalPromedio","jornalPromedio","specialBond","bondMov2","loanBond","sobreTiempo","descHours","loan","tools","totalLiquido"
 	};
-	final static String[] salaryTableVisibleTable = new String[]{"laborerConstructionSite.activeContract.jobCode",
-		"laborerConstructionSite.laborer.fullname","lastJornalPromedio","jornalPromedio","specialBond","bondMov2","loanBond","sobreTiempo","descHours","loan","tools","totalLiquido",
-		"salaryCalculator.diaTrab","salaryCalculator.sab","salaryCalculator.sep","salaryCalculator.dps","salaryCalculator.dpd","salaryCalculator.col","salaryCalculator.mov"
-		,"jornalBaseMes","vtrato","valorSabado","vsCorrd","descHoras","bonifImpo","glegal","afecto","sobreAfecto","cargas","asigFamiliar","colacion","mov","mov2","tnoAfecto"
+	final static String[] salaryTableVisibleTable = new String[]{
+		"laborerConstructionSite.activeContract.jobCode",//1
+		"laborerConstructionSite.laborer.fullname",//2
+		"lastJornalPromedio",//3
+		"jornalPromedio",//4
+		"specialBond",//5
+		"bondMov2",//6
+		"loanBond",//7
+		"sobreTiempo",//8
+		"descHours",//9
+		"loan",//10
+		"tools",//11
+		"totalLiquido",//12
+		"salaryCalculator.diaTrab",//13
+		"salaryCalculator.sab",//14
+		"salaryCalculator.sep",//15
+		"salaryCalculator.dps",//16
+		"salaryCalculator.dpd",//17
+		"salaryCalculator.col",//18
+		"salaryCalculator.mov",//19
+		"jornalBaseMes",//20
+		"vtrato",//21
+		"valorSabado",//22
+		"vsCorrd",//23
+		"descHoras","bonifImpo","glegal","afecto","sobreAfecto","cargas","asigFamiliar","colacion","mov","mov2","tnoAfecto"
 	};
 	
 	final static String[] historicalSalaryTableVisibleTable = new String[]{"laborerConstructionSite.activeContract.jobCode",
@@ -647,7 +673,10 @@ public class AttendancePanel extends VerticalLayout implements View {
 					String post = "";
 					if( (cellReference.getValue() instanceof AttendanceMark && !AttendanceMark.ATTEND.equals(cellReference.getValue())) ||
 							(cellReference.getValue() instanceof Integer && 0 != (Integer)cellReference.getValue()))
-						post = " red-color";
+						if(AttendanceMark.FILLER.equals(cellReference.getValue()))
+							post = " r-color";
+						else
+							post = " red-color";
 					if(cellReference.getValue() instanceof AttendanceMark && !AttendanceMark.ATTEND.equals(cellReference.getValue()))
 						post += " bold";
 					String pid = (String) cellReference.getPropertyId();
@@ -712,7 +741,8 @@ public class AttendancePanel extends VerticalLayout implements View {
 								try{
 									List<Salary> salaries = new ArrayList<Salary>(salaryContainer.size());
 									for(Long itemId : salaryContainer.getItemIds()){
-										salaries.add(salaryContainer.getItem(itemId).getBean());
+										Salary salary = salaryContainer.getItem(itemId).getBean();
+										salaries.add(salary);
 									}
 									constructionSiteService.saveSalaries(salaries);
 									supleTable.refreshRowCache();
@@ -1001,7 +1031,18 @@ public class AttendancePanel extends VerticalLayout implements View {
 								createTableFooter(salaryTable);
 								List<Salary> salaries = new ArrayList<Salary>(salaryContainer.size());
 								for(Long itemId : salaryContainer.getItemIds()){
-									salaries.add(salaryContainer.getItem(itemId).getBean());
+									Salary salary = salaryContainer.getItem(itemId).getBean();
+											
+									try {
+										
+										salary.getSalaryCalculator().getAjusteMesAnterior(true);
+									
+									}catch(ProjectedAttendanceNotDefined e){
+										Notification.show("Existe asistencia proyectada o real no definida, por lo que no se puede calcular el sueldo.",Type.ERROR_MESSAGE);
+										btnGuardar.setEnabled(true);
+										return;
+									}
+									salaries.add(salary);
 								}
 								constructionSiteService.saveSalaries(salaries);
 								btnGuardar.setEnabled(true);
@@ -1447,10 +1488,13 @@ public class AttendancePanel extends VerticalLayout implements View {
 			public void postCommit(CommitEvent commitEvent) throws CommitException {
 				BeanItem<Attendance> item = (BeanItem<Attendance>) commitEvent.getFieldBinder().getItemDataSource();
 				Attendance attendance = item.getBean(); 
+				//si el día está fuera del rango del contrato, no puede ser otra marca que R
+				checkR(attendance);
 
 				BeanItem<Salary> salaryItem = salaryContainer.getItem(attendance.getLaborerConstructionSite().getId());
-				if(salaryItem == null )
+				if(salaryItem == null ){
 					return;
+				}
 				Property<Attendance> prop = salaryItem.getItemProperty("attendance");
 				prop.setValue(attendance);
 
@@ -1466,7 +1510,89 @@ public class AttendancePanel extends VerticalLayout implements View {
 				disabledHours(attendanceGrid);
 
 			}
+
+			/**
+			 * Permite verificar si no se han seleccionado marcas distinas de R fuera de la fecha de contrato
+			 * @param attendance
+			 * @throws CommitException
+			 */
+			private void checkR(Attendance attendance) throws CommitException {
+				LaborerConstructionsite lc = attendance.getLaborerConstructionSite();
+				Contract contract = lc.getActiveContract();
+				LocalDateTime date = getAttendanceDate().toLocalDateTime().withTime(0, 0, 0, 0);
+				int current = date.dayOfMonth().getMinimumValue();
+				//mientras la fecha de inicio sea mayor a la fecha recorrida
+
+				while( Utils.isDateAfter( lc.getActiveContract().getStartDate(), date.toDate()) && current <= date.dayOfMonth().getMaximumValue() )
+				{
+					date = date.withDayOfMonth(current);
+					if( !Utils.isAttendanceMarkEmptyOrFilled ( attendance.getMarksAsList().get( current - 1) ) )
+						throw new  CommitException("El día "+Utils.date2String(date.toDate())+" está fuera del rango del contrato ("+Utils.date2String(contract.getStartDate())+"-"+Utils.date2String(contract.getTerminationDate())+") , no puede tener una marca distinta a R o vacio.");;
+					current++;
+				}
+				
+				//rellena con R, todo lo que este fuera de la fecha final de contrato
+				if( lc.getActiveContract().getTerminationDate() != null){
+					current = date.dayOfMonth().getMaximumValue();
+					
+					while( Utils.isDateBefore(lc.getActiveContract().getTerminationDate(),date.toDate()) && current >= date.dayOfMonth().getMinimumValue() ){
+						date = date.withDayOfMonth(current);
+						if( !Utils.isAttendanceMarkEmptyOrFilled (attendance.getMarksAsList().get( current - 1) ))
+							throw new  CommitException("El día "+Utils.date2String(date.toDate())+" está fuera del rango del contrato ("+Utils.date2String(contract.getStartDate())+"-"+Utils.date2String(contract.getTerminationDate())+") , no puede tener una marca distinta a R o vacio.");;
+						current-- ;
+					}
+				}
+				
+				//hace lo mismo para el mes pasado
+				LocalDateTime date2 = date.minusMonths(1);
+				//rellena con R, todo lo que este fuera de la fecha inicial 
+				current = date2.dayOfMonth().getMinimumValue();
+				date2 = date2.withDayOfMonth(current);
+				//mientras la fecha de inicio sea mayor a la fecha recorrida 
+				while(Utils.isDateAfter(lc.getActiveContract().getStartDate(),date2.toDate()) && current <= date2.dayOfMonth().getMaximumValue() )
+				{
+					date2 = date2.withDayOfMonth(current);
+					if( !Utils.isAttendanceMarkEmptyOrFilled (attendance.getLastMarksAsList().get( current - 1) ))
+						throw new  CommitException("El día "+Utils.date2String(date2.toDate())+" está fuera del rango del contrato ("+Utils.date2String(contract.getStartDate())+"-"+Utils.date2String(contract.getTerminationDate())+") , no puede tener una marca distinta a R o vacio.");;
+					current++;
+				}
+				//rellena con R, todo lo que este fuera de la fecha final de contrato
+				if( lc.getActiveContract().getTerminationDate() != null){
+					current = date2.dayOfMonth().getMaximumValue();
+
+					while( Utils.isDateBefore(lc.getActiveContract().getTerminationDate(), date2.toDate()) && current >= date2.dayOfMonth().getMinimumValue() ){
+						date2 = date2.withDayOfMonth(current);
+						if( !Utils.isAttendanceMarkEmptyOrFilled (attendance.getLastMarksAsList().get( current - 1) ))
+							throw new  CommitException("El día "+Utils.date2String(date2.toDate())+" está fuera del rango del contrato ("+Utils.date2String(contract.getStartDate())+"-"+Utils.date2String(contract.getTerminationDate())+") , no puede tener una marca distinta a R o vacio.");;
+						current-- ;
+					}
+				}
+			}
 		});
+		
+		attendanceGrid.setEditorErrorHandler(new EditorErrorHandler() {
+			
+			@Override
+			public void commitError(CommitErrorEvent event) {
+				List<InvalidValueException> invalidValues = new ArrayList<InvalidValueException>(event.getCause().getInvalidFields().values());
+				
+				String message = "";
+				if(!invalidValues.isEmpty())
+					message = invalidValues.get(0).getMessage();
+				else {
+					Exception e = event.getCause();
+					if( e.getCause() != null ){
+						message = e.getCause().getMessage();
+					}else {
+						message = e.getMessage();
+					}
+				}
+				
+				Notification.show(message,Type.ERROR_MESSAGE);
+				event.setUserErrorMessage(message);
+			}
+		});
+		
 		attendanceGrid.setEditorFieldGroup(bfg);
 		attendanceGrid.setEditorFieldFactory(new DefaultFieldGroupFieldFactory(){
 			@Override
@@ -2186,7 +2312,7 @@ public class AttendancePanel extends VerticalLayout implements View {
 													}
 													
 													if(mark == null)
-														mark = AttendanceMark.VACIO;
+														mark = AttendanceMark.EMPTY;
 													row.getCell(j).setCellValue(mark.toString());
 													//ingresa hasta el fin de mes solamente o hasta el fin de contrato
 													if(j - 3 == maxDay )
@@ -2529,10 +2655,31 @@ public class AttendancePanel extends VerticalLayout implements View {
 
 		salaryTable.setVisibleColumns(salaryTableVisibleTable);
 
-		salaryTable.setColumnHeaders("Rol","Nombre","Último<br />Jornal Prom","Jornal Prom","Bono Imp.","Bono No Imp.","Bono Prest.", "Sobretpo","H Desc","V Cuota<br />Prestamo",
-				"V Cuota<br />Herramienta","Total Líquido<br />(A Pagar)",
-				"Día<br />Trab","Sab","Sep","DPS","DPD","Col","Mov"
-				,"Jornal Base", " V Trato", "Valor Sábado" , "V S Corrida", "Desc Horas","Total<br />Bonos<br />Imponibles","G Legal","Afecto","Sobre Afecto","Cargas","A Familiar","Colación","Mov","Movi 2","T No Afecto"
+		salaryTable.setColumnHeaders(
+				"Rol",//1
+				"Nombre",//2
+				"Último<br />Jornal Prom",//3
+				"Jornal Prom",//4
+				"Bono Imp.",//5
+				"Bono No Imp.",//6
+				"Bono Prest.",//7
+				"Sobretpo",//8
+				"H Desc",//9
+				"V Cuota<br />Prestamo",//10
+				"V Cuota<br />Herramienta",//11
+				"Total Líquido<br />(A Pagar)",//12
+				"Día<br />Trab",//13
+				"Sab",//14
+				"Sep",//15
+				"DPS",//16
+				"DPD",//17
+				"Col",//18
+				"Mov",//19
+				"Jornal Base",//20
+				" V Trato",//21
+				"Valor Sábado" ,//22
+				"V S Corrida",//23
+				"Desc Horas","Total<br />Bonos<br />Imponibles","G Legal","Afecto","Sobre Afecto","Cargas","A Familiar","Colación","Mov","Movi 2","T No Afecto"
 				);
 
 		salaryTable.setColumnWidth("jornalPromedio", 100);
