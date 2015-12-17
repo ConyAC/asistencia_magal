@@ -22,6 +22,7 @@ import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.velocity.app.VelocityEngine;
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.joda.time.Interval;
 import org.joda.time.LocalDateTime;
 import org.slf4j.Logger;
@@ -230,9 +231,9 @@ public class AttendancePanel extends VerticalLayout implements View {
 
 	private DateTime getAttendanceDate() {
 		if(attendanceDate.getValue() == null ){
-			attendanceDate.setValue(new DateTime().dayOfMonth().withMinimumValue().toDate()); //agrega el primer día del mes actual
+			attendanceDate.setValue(new DateTime(DateTimeZone.UTC).dayOfMonth().withMinimumValue().toDate()); //agrega el primer día del mes actual
 		}
-		return new DateTime(attendanceDate.getValue());
+		return new DateTime(attendanceDate.getValue(),DateTimeZone.UTC);
 	}
 
 	/**
