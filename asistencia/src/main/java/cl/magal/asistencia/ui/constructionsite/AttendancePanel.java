@@ -1526,22 +1526,22 @@ public class AttendancePanel extends VerticalLayout implements View {
 				//mientras la fecha de inicio sea mayor a la fecha recorrida
 				while( Utils.isDateAfter( lc.getActiveContract().getStartDate(), date.toDate()) && current <= date.dayOfMonth().getMaximumValue() )
 				{
-					date = date.withDayOfMonth(current);
 					logger.debug("1 date {}",date);
 					if( !Utils.isAttendanceMarkEmptyOrFilled ( attendance.getMarksAsList().get( current - 1) ) )
 						throw new  CommitException("El día "+Utils.date2String(date.toDate())+" está fuera del rango del contrato ("+Utils.date2String(contract.getStartDate())+"-"+Utils.date2String(contract.getTerminationDate())+") , no puede tener una marca distinta a R o vacio.");;
 					current++;
+					date = date.withDayOfMonth(current);
 				}
 				//rellena con R, todo lo que este fuera de la fecha final de contrato
 				if( lc.getActiveContract().getTerminationDate() != null){
 					current = date.dayOfMonth().getMaximumValue();
 					date = date.withDayOfMonth(current);
 					while( Utils.isDateBefore(lc.getActiveContract().getTerminationDate(),date.toDate()) && current >= date.dayOfMonth().getMinimumValue() ){
-						date = date.withDayOfMonth(current);
 						logger.debug("2 date {}",date);
 						if( !Utils.isAttendanceMarkEmptyOrFilled (attendance.getMarksAsList().get( current - 1) ))
 							throw new  CommitException("El día "+Utils.date2String(date.toDate())+" está fuera del rango del contrato ("+Utils.date2String(contract.getStartDate())+"-"+Utils.date2String(contract.getTerminationDate())+") , no puede tener una marca distinta a R o vacio.");;
 						current-- ;
+						date = date.withDayOfMonth(current);
 					}
 				}
 				
@@ -1555,10 +1555,10 @@ public class AttendancePanel extends VerticalLayout implements View {
 				//mientras la fecha de inicio sea mayor a la fecha recorrida 
 				while(Utils.isDateAfter(lc.getActiveContract().getStartDate(),date2.toDate()) && current <= date2.dayOfMonth().getMaximumValue() )
 				{
-					date2 = date2.withDayOfMonth(current);
 					if( !Utils.isAttendanceMarkEmptyOrFilled (attendance.getLastMarksAsList().get( current - 1) ))
 						throw new  CommitException("El día "+Utils.date2String(date2.toDate())+" está fuera del rango del contrato ("+Utils.date2String(contract.getStartDate())+"-"+Utils.date2String(contract.getTerminationDate())+") , no puede tener una marca distinta a R o vacio.");;
 					current++;
+					date2 = date2.withDayOfMonth(current);
 				}
 				//rellena con R, todo lo que este fuera de la fecha final de contrato
 				if( lc.getActiveContract().getTerminationDate() != null){
@@ -1566,10 +1566,10 @@ public class AttendancePanel extends VerticalLayout implements View {
 					date2 = date2.withDayOfMonth(current);
 					logger.debug("4");
 					while( Utils.isDateBefore(lc.getActiveContract().getTerminationDate(), date2.toDate()) && current >= date2.dayOfMonth().getMinimumValue() ){
-						date2 = date2.withDayOfMonth(current);
 						if( !Utils.isAttendanceMarkEmptyOrFilled (attendance.getLastMarksAsList().get( current - 1) ))
 							throw new  CommitException("El día "+Utils.date2String(date2.toDate())+" está fuera del rango del contrato ("+Utils.date2String(contract.getStartDate())+"-"+Utils.date2String(contract.getTerminationDate())+") , no puede tener una marca distinta a R o vacio.");;
 						current-- ;
+						date2 = date2.withDayOfMonth(current);
 					}
 				}
 			}
