@@ -337,7 +337,8 @@ public class ConstructionSiteService {
 			AttendanceMark mark = chooseBetweenEmptyOrFilled(date,lc.getActiveContract().getStartDate());
 			attendance.setMark(mark, current - 1);
 			current++;
-			date = date.withDayOfMonth(current);
+			if(current <= date.dayOfMonth().getMaximumValue())
+					date = date.withDayOfMonth(current);
 		}
 		
 		//rellena con R, todo lo que este fuera de la fecha final de contrato
@@ -349,7 +350,8 @@ public class ConstructionSiteService {
 				AttendanceMark mark = chooseBetweenEmptyOrFilled(date,lc.getActiveContract().getTerminationDate());
 				attendance.setMark(mark, current - 1);
 				current-- ;
-				date = date.withDayOfMonth(current);
+				if(current >= date.dayOfMonth().getMinimumValue())
+					date = date.withDayOfMonth(current);
 			}
 		}
 		
@@ -365,7 +367,8 @@ public class ConstructionSiteService {
 			AttendanceMark mark = AttendanceMark.EMPTY;
 			attendance.setLastMark(mark, current - 1);
 			current++;
-			date2 = date2.withDayOfMonth(current);
+			if(current <= date2.dayOfMonth().getMaximumValue())
+				date2 = date2.withDayOfMonth(current);
 		}
 		//rellena con R, todo lo que este fuera de la fecha final de contrato
 		if( lc.getActiveContract().getTerminationDate() != null){
@@ -376,7 +379,8 @@ public class ConstructionSiteService {
 				AttendanceMark mark = AttendanceMark.EMPTY;
 				attendance.setLastMark(mark, current - 1);
 				current-- ;
-				date2 = date2.withDayOfMonth(current);
+				if(current >= date2.dayOfMonth().getMinimumValue())
+					date2 = date2.withDayOfMonth(current);
 			}
 		}
 	}
