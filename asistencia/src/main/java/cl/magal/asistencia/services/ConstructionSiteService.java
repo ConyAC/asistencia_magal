@@ -11,7 +11,7 @@ import java.util.Map;
 import javax.annotation.PostConstruct;
 
 import org.joda.time.DateTime;
-import org.joda.time.LocalDateTime;
+import org.joda.time.DateTimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -326,7 +326,7 @@ public class ConstructionSiteService {
 	 * @param attendance
 	 */
 	public void defineContractRange(DateTime dateInput,LaborerConstructionsite lc, Attendance attendance){
-		LocalDateTime date = new LocalDateTime(dateInput).withTime(0, 0, 0, 0);
+		DateTime date = new DateTime(dateInput,DateTimeZone.UTC).withTime(0, 0, 0, 0);
 		//rellena con R, todo lo que este fuera de la fecha inicial 
 		int current = date.dayOfMonth().getMinimumValue();
 		date = date.withDayOfMonth(current);
@@ -345,7 +345,7 @@ public class ConstructionSiteService {
 			current = date.dayOfMonth().getMaximumValue();
 			date = date.withDayOfMonth(current);
 			while( Utils.isDateBefore(lc.getActiveContract().getTerminationDate(),date.toDate()) && current >= date.dayOfMonth().getMinimumValue() ){
-				//elije la marca según si la fecha está en la misma fecha o no
+				//elije la marca según si la fecha está en la misma semana o no
 				date = date.withDayOfMonth(current);
 				AttendanceMark mark = chooseBetweenEmptyOrFilled(date,lc.getActiveContract().getTerminationDate());
 				attendance.setMark(mark, current - 1);
@@ -354,7 +354,7 @@ public class ConstructionSiteService {
 		}
 		
 		//hace lo mismo para el mes pasado
-		LocalDateTime date2 = date.minusMonths(1);
+		DateTime date2 = date.minusMonths(1);
 		//rellena con R, todo lo que este fuera de la fecha inicial 
 		current = date2.dayOfMonth().get();
 		date2 = date2.withDayOfMonth(current);
@@ -362,7 +362,8 @@ public class ConstructionSiteService {
 		while(Utils.isDateAfter(lc.getActiveContract().getStartDate(),date2.toDate()) && current <= date2.dayOfMonth().getMaximumValue() )
 		{
 			date2 = date2.withDayOfMonth(current);
-			AttendanceMark mark = chooseBetweenEmptyOrFilled(date2,lc.getActiveContract().getStartDate());
+//			AttendanceMark mark = chooseBetweenEmptyOrFilled(date2,lc.getActiveContract().getStartDate());
+			AttendanceMark mark = AttendanceMark.EMPTY;
 			attendance.setLastMark(mark, current - 1);
 			current++;
 		}
@@ -372,7 +373,8 @@ public class ConstructionSiteService {
 			date2 = date2.withDayOfMonth(current);
 			while( Utils.isDateBefore(lc.getActiveContract().getTerminationDate(),date2.toDate()) && current >= date2.dayOfMonth().getMinimumValue() ){
 				date2 = date2.withDayOfMonth(current);
-				AttendanceMark mark = chooseBetweenEmptyOrFilled(date2,lc.getActiveContract().getTerminationDate());
+//				AttendanceMark mark = chooseBetweenEmptyOrFilled(date2,lc.getActiveContract().getTerminationDate());
+				AttendanceMark mark = AttendanceMark.EMPTY;
 				attendance.setLastMark(mark, current - 1);
 				current-- ;
 			}
@@ -386,9 +388,9 @@ public class ConstructionSiteService {
 	 * @param refDate
 	 * @return
 	 */
-	private AttendanceMark chooseBetweenEmptyOrFilled(LocalDateTime date,Date refDate) {
+	private AttendanceMark chooseBetweenEmptyOrFilled(DateTime date,Date refDate) {
 		String date1 = date.toString("ww-yyyy");
-		String date2 = new LocalDateTime(refDate).withTime(0, 0, 0, 0).toString("ww-yyyy");
+		String date2 = new DateTime(refDate,DateTimeZone.UTC).withTime(0, 0, 0, 0).toString("ww-yyyy");
 		
 		//si está en la misma semana y es un día de la semana laboral, entonces es R, si no EMPTY
 		if(date1.compareTo(date2) == 0 && Utils.isLaborerDay(date)){
@@ -418,16 +420,16 @@ public class ConstructionSiteService {
 		logger.debug("feriados");
 		List<Holiday> h = holidayRepo.findByMonth(date.toDate());
 		logger.debug("feriados pasados");
-		List<Holiday> h_p = holidayRepo.findByMonth(new DateTime(date.toDate()).minusMonths(1).toDate());
+		List<Holiday> h_p = holidayRepo.findByMonth(date.minusMonths(1).toDate());
 		
 		List<Vacation> vacations = vacationRepo.findByConstructionsiteAndMonth(cs,date.toDate());
-		List<Vacation> vacations_p = vacationRepo.findByConstructionsiteAndMonth(cs,new DateTime(date.toDate()).minusMonths(1).toDate());
+		List<Vacation> vacations_p = vacationRepo.findByConstructionsiteAndMonth(cs,date.minusMonths(1).toDate());
 		
 		List<License> license = licenseRepo.findByConstructionsiteAndMonth(cs, date.toDate());
-		List<License> license_p = licenseRepo.findByConstructionsiteAndMonth(cs, new DateTime(date.toDate()).minusMonths(1).toDate());
+		List<License> license_p = licenseRepo.findByConstructionsiteAndMonth(cs, date.minusMonths(1).toDate());
 		
 		List<Accident> accident = accidentRepo.findByConstructionsiteAndMonth(cs, date.toDate());
-		List<Accident> accident_p = accidentRepo.findByConstructionsiteAndMonth(cs, new DateTime(date.toDate()).minusMonths(1).toDate());
+		List<Accident> accident_p = accidentRepo.findByConstructionsiteAndMonth(cs, date.minusMonths(1).toDate());
 		
 		//verifica que exista una asistencia para cada elemento, si no existe la crea
 		for(LaborerConstructionsite lc : lcs ){
@@ -530,7 +532,7 @@ public class ConstructionSiteService {
             for (int i = 0; i < 31; i++){
                 if( i + 1 <= date.dayOfMonth().getMaximumValue() ){       
                     int day = date.withDayOfMonth(i+1).dayOfWeek().get();
-                    DateTime dt = new DateTime(date.toDate());                     
+                    DateTime dt = date;                    
                     if( dt.getDayOfMonth() == (i+1) && day != 6 && day != 7 )                      
                         a.setMark(AttendanceMark.ATTEND, i);
                     else if(dt.getDayOfMonth() == (i+1) && day == 6)
@@ -544,7 +546,7 @@ public class ConstructionSiteService {
             for (int i = 0; i < 31; i++){               
                 if( i + 1 <= date.dayOfMonth().getMaximumValue()){
                     int day_p = date.withDayOfMonth(i+1).dayOfWeek().get();
-                    DateTime dt = new DateTime(date.toDate());                     
+                    DateTime dt = date;                     
                     if( dt.getDayOfMonth() == (i+1) && day_p != 6 && day_p != 7 )                      
                         a2.setLastMark(AttendanceMark.ATTEND, i);
                     else if(dt.getDayOfMonth() == (i+1) && day_p == 6)
@@ -832,11 +834,11 @@ public class ConstructionSiteService {
 
 		Date supleClose = dateConfiguration.getAdvance();
 		
-		DateTime assistanceClose = new DateTime(dateConfiguration.getAssistance()).withDayOfMonth(1);
+		DateTime assistanceClose = new DateTime(dateConfiguration.getAssistance(),DateTimeZone.UTC).withDayOfMonth(1);
 		//fecha cierre mes anterio
 		DateConfigurations dateConfigurationLastMonth = configurationService.getDateConfigurationByCsAndMonth(cs,date.minusMonths(1));
 		if(dateConfigurationLastMonth != null )
-			assistanceClose = new DateTime(dateConfigurationLastMonth.getAssistance());
+			assistanceClose = new DateTime(dateConfigurationLastMonth.getAssistance(),DateTimeZone.UTC);
 		
 		if(supleClose == null )
 			throw new RuntimeException("Aún no se definen las fechas de cierre de anticipo. Ésta es necesaria para cálcular el sueldo.");
@@ -1075,7 +1077,7 @@ public class ConstructionSiteService {
 		List<Holiday> holidays = holidayRepo.findByMonth(attendanceDate.toDate());
 		int count = 0;
 		for(Holiday h : holidays){
-			if(Utils.isLaborerDay(new DateTime(h.getDate())))
+			if(Utils.isLaborerDay(new DateTime(h.getDate(),DateTimeZone.UTC)))
 				count++;
 		}
 		return count;

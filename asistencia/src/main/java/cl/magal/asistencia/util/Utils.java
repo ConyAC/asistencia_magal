@@ -14,6 +14,7 @@ import javax.validation.ConstraintViolation;
 import org.apache.commons.lang.ArrayUtils;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeConstants;
+import org.joda.time.DateTimeZone;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.joda.time.format.DateTimeFormat;
@@ -555,8 +556,8 @@ public class Utils {
 	public static boolean isDateAfter(Date startDate, Date date) {
 		if(startDate == null || date == null )
 			throw new RuntimeException("Las fechas a comparar no pueden ser nulas.");
-		LocalDateTime startDateTime = new LocalDateTime(startDate).withTime(0, 0, 0, 0);
-		LocalDateTime dateTime = new LocalDateTime(date).withTime(0, 0, 0, 0);
+		DateTime startDateTime = new DateTime(startDate,DateTimeZone.UTC).withTime(0, 0, 0, 0);
+		DateTime dateTime = new DateTime(date,DateTimeZone.UTC).withTime(0, 0, 0, 0);
 		return startDateTime.isAfter(dateTime);
 	}
 	
@@ -569,8 +570,8 @@ public class Utils {
 	public static boolean isDateBefore(Date startDate, Date date) {
 		if(startDate == null || date == null )
 			throw new RuntimeException("Las fechas a comparar no pueden ser nulas.");
-		LocalDateTime startDateTime = new LocalDateTime(startDate).withTime(0, 0, 0, 0);
-		LocalDateTime dateTime = new LocalDateTime(date).withTime(0, 0, 0, 0);
+		DateTime startDateTime = new DateTime(startDate,DateTimeZone.UTC).withTime(0, 0, 0, 0);
+		DateTime dateTime = new DateTime(date,DateTimeZone.UTC).withTime(0, 0, 0, 0);
 		return startDateTime.isBefore(dateTime);
 	}
 	
@@ -583,8 +584,8 @@ public class Utils {
 	public static boolean isDateAfterOrSame(Date startDate, Date date) {
 		if(startDate == null || date == null )
 			throw new RuntimeException("Las fechas a comparar no pueden ser nulas.");
-		LocalDateTime startDateTime = new LocalDateTime(startDate).withTime(0, 0, 0, 0);
-		LocalDateTime dateTime = new LocalDateTime(date).withTime(0, 0, 0, 0);
+		DateTime startDateTime = new DateTime(startDate,DateTimeZone.UTC).withTime(0, 0, 0, 0);
+		DateTime dateTime = new DateTime(date,DateTimeZone.UTC).withTime(0, 0, 0, 0);
 		return startDateTime.isAfter(dateTime) || 
 				(startDateTime.getDayOfMonth() == dateTime.getDayOfMonth() && startDateTime.getMonthOfYear() == dateTime.getMonthOfYear() && startDateTime.getYear() == dateTime.getYear());
 	}
@@ -598,8 +599,8 @@ public class Utils {
 	public static boolean isDateBeforeOrSame(Date startDate, Date date) {
 		if(startDate == null || date == null )
 			throw new RuntimeException("Las fechas a comparar no pueden ser nulas.");
-		LocalDateTime startDateTime = new LocalDateTime(startDate).withTime(0, 0, 0, 0);
-		LocalDateTime dateTime = new LocalDateTime(date).withTime(0, 0, 0, 0);
+		DateTime startDateTime = new DateTime(startDate,DateTimeZone.UTC).withTime(0, 0, 0, 0);
+		DateTime dateTime = new DateTime(date,DateTimeZone.UTC).withTime(0, 0, 0, 0);
 		return startDateTime.isBefore(dateTime) || 
 				(startDateTime.getDayOfMonth() == dateTime.getDayOfMonth() && startDateTime.getMonthOfYear() == dateTime.getMonthOfYear() && startDateTime.getYear() == dateTime.getYear());
 	}
