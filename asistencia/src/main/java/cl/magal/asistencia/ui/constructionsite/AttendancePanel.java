@@ -1519,24 +1519,25 @@ public class AttendancePanel extends VerticalLayout implements View {
 			private void checkR(Attendance attendance) throws CommitException {
 				LaborerConstructionsite lc = attendance.getLaborerConstructionSite();
 				Contract contract = lc.getActiveContract();
-				LocalDateTime date = getAttendanceDate().toLocalDateTime().withTime(0, 0, 0, 0);
+				DateTime date = getAttendanceDate().withTime(0, 0, 0, 0);
 				int current = date.dayOfMonth().getMinimumValue();
+				date = date.withDayOfMonth(current);
 				//mientras la fecha de inicio sea mayor a la fecha recorrida
-
 				while( Utils.isDateAfter( lc.getActiveContract().getStartDate(), date.toDate()) && current <= date.dayOfMonth().getMaximumValue() )
 				{
 					date = date.withDayOfMonth(current);
+					logger.debug("1 date {}",date);
 					if( !Utils.isAttendanceMarkEmptyOrFilled ( attendance.getMarksAsList().get( current - 1) ) )
 						throw new  CommitException("El día "+Utils.date2String(date.toDate())+" está fuera del rango del contrato ("+Utils.date2String(contract.getStartDate())+"-"+Utils.date2String(contract.getTerminationDate())+") , no puede tener una marca distinta a R o vacio.");;
 					current++;
 				}
-				
 				//rellena con R, todo lo que este fuera de la fecha final de contrato
 				if( lc.getActiveContract().getTerminationDate() != null){
 					current = date.dayOfMonth().getMaximumValue();
-					
+					date = date.withDayOfMonth(current);
 					while( Utils.isDateBefore(lc.getActiveContract().getTerminationDate(),date.toDate()) && current >= date.dayOfMonth().getMinimumValue() ){
 						date = date.withDayOfMonth(current);
+						logger.debug("2 date {}",date);
 						if( !Utils.isAttendanceMarkEmptyOrFilled (attendance.getMarksAsList().get( current - 1) ))
 							throw new  CommitException("El día "+Utils.date2String(date.toDate())+" está fuera del rango del contrato ("+Utils.date2String(contract.getStartDate())+"-"+Utils.date2String(contract.getTerminationDate())+") , no puede tener una marca distinta a R o vacio.");;
 						current-- ;
@@ -1544,10 +1545,12 @@ public class AttendancePanel extends VerticalLayout implements View {
 				}
 				
 				//hace lo mismo para el mes pasado
-				LocalDateTime date2 = date.minusMonths(1);
+				DateTime date2 = getPastMonthClosingDate();
 				//rellena con R, todo lo que este fuera de la fecha inicial 
-				current = date2.dayOfMonth().getMinimumValue();
+				current = date2.dayOfMonth().get();
+//				date2 = date2.withDayOfMonth(current);
 				date2 = date2.withDayOfMonth(current);
+				logger.debug("3 date2 {}",date2);
 				//mientras la fecha de inicio sea mayor a la fecha recorrida 
 				while(Utils.isDateAfter(lc.getActiveContract().getStartDate(),date2.toDate()) && current <= date2.dayOfMonth().getMaximumValue() )
 				{
@@ -1559,7 +1562,8 @@ public class AttendancePanel extends VerticalLayout implements View {
 				//rellena con R, todo lo que este fuera de la fecha final de contrato
 				if( lc.getActiveContract().getTerminationDate() != null){
 					current = date2.dayOfMonth().getMaximumValue();
-
+					date2 = date2.withDayOfMonth(current);
+					logger.debug("4");
 					while( Utils.isDateBefore(lc.getActiveContract().getTerminationDate(), date2.toDate()) && current >= date2.dayOfMonth().getMinimumValue() ){
 						date2 = date2.withDayOfMonth(current);
 						if( !Utils.isAttendanceMarkEmptyOrFilled (attendance.getLastMarksAsList().get( current - 1) ))
