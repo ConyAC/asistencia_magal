@@ -633,10 +633,10 @@ public class AttendancePanel extends VerticalLayout implements View {
 					}
 					if(dt2 != null ){ //continua solo si el día es válido
 
-						//si la grid es de asistencia, calcula el rango con el dia de cierre del mes pasado y el ultimo dia del mes seleccionado
+						//si la grid es de asistencia, calcula el rango con el dia de cierre del mes pasado más 1 y el ultimo dia del mes seleccionado
 						DateTime startDate,endDate;
 						if(isAttendanceGrid){
-							startDate = getPastMonthClosingDate();
+							startDate = getPastMonthClosingDate().plusDays(1);
 							endDate = getAttendanceDate().withDayOfMonth(getAttendanceDate().dayOfMonth().getMaximumValue());
 						}else{//si la grid es de sobretiempos, calcula el rango con el dia de inicio del trato y el fin de trato
 							startDate = new DateTime( getDateConfigurations().getBeginDeal());
@@ -1548,7 +1548,7 @@ public class AttendancePanel extends VerticalLayout implements View {
 				}
 				
 				//hace lo mismo para el mes pasado
-				DateTime date2 = getPastMonthClosingDate();
+				DateTime date2 = getPastMonthClosingDate().plusDays(1);
 				//rellena con R, todo lo que este fuera de la fecha inicial 
 				current = date2.dayOfMonth().get();
 //				date2 = date2.withDayOfMonth(current);

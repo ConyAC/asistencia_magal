@@ -553,7 +553,7 @@ public class SalaryCalculator {
 		
 		if(closingDateLastMonth == null )
 			throw new RuntimeException("Aún no se define una fecha de cierre del mes anterior, no se puede calcular el sueldo.");
-		this.closingDateLastMonth = closingDateLastMonth;
+		this.closingDateLastMonth = closingDateLastMonth.plusDays(1);
 		
 		if(wageConfigurations == null )
 			throw new RuntimeException("Aún no se definen los valores de sueldo mínimo, colación y movilización, no se puede calcular el sueldo.");
@@ -787,6 +787,7 @@ public class SalaryCalculator {
 		if(attendance == null )
 			throw new RuntimeException("El objeto de asistencia no pueden ser nulo.");
 		
+//		logger.error("lastClosingDate {},maxDays {}, attendance {}, lastMonthAttendance {},checkException {}",lastClosingDate,maxDays, attendance,lastMonthAttendance,checkException);
 		List<AttendanceMark> resultMarks = new ArrayList<AttendanceMark>();
 		//si el objeto del mes anterior es nulo, retorna la lista vacia
 		if(lastMonthAttendance == null )
