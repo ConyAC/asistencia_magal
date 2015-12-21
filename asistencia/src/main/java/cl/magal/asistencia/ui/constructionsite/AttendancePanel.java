@@ -2230,7 +2230,7 @@ public class AttendancePanel extends VerticalLayout implements View {
 									            row41 = sheet0.createRow(i);									            
 							                	if(t_imp < taxationConfig.size()){
 							                		row41.createCell(1).setCellValue(taxationConfig.get(t_imp).getFrom());
-							                		row41.createCell(2).setCellValue((taxationConfig.get(t_imp).getFactor()/100));
+							                		row41.createCell(2).setCellValue((taxationConfig.get(t_imp).getFactor() ));
 							                		row41.createCell(4).setCellValue(taxationConfig.get(t_imp).getReduction());						                		
 							                	}
 							                	t_imp++;
@@ -2241,7 +2241,7 @@ public class AttendancePanel extends VerticalLayout implements View {
 									        	rowE = sheet0.createRow(i);									            
 							                	if(t_imp_d < taxationConfig.size()){
 							                		rowE.createCell(1).setCellValue(taxationConfig.get(t_imp_d).getTo());		
-							                		rowE.createCell(2).setCellValue(taxationConfig.get(t_imp_d).getFactor() * 100);
+							                		rowE.createCell(2).setCellValue(taxationConfig.get(t_imp_d).getFactor() );
 							                		rowE.createCell(4).setCellValue(taxationConfig.get(t_imp_d).getReduction());		
 							                	}
 							                	t_imp_d++;
@@ -2302,8 +2302,10 @@ public class AttendancePanel extends VerticalLayout implements View {
 												row.getCell(0).setCellValue(attendance.getLaborerConstructionSite().getJobCode());
 												row.getCell(1).setCellValue(attendance.getLaborerConstructionSite().getLaborer().getFullname());
 												
-												int minDay = Utils.calcularDiaInicial(attendance,0,false);
-												int maxDay = Utils.calcularDiaFinal(attendance,getAttendanceDate().dayOfMonth().getMaximumValue(),false) + 1;
+//												int minDay = Utils.calcularDiaInicial(attendance,0,false);
+//												int maxDay = Utils.calcularDiaFinal(attendance,getAttendanceDate().dayOfMonth().getMaximumValue(),false) + 1;
+//												int minDay = 0;
+												int maxDay = getAttendanceDate().dayOfMonth().getMaximumValue() ;//+ 1;
 												//asistencia
 												int j = 3;
 												for(AttendanceMark mark : attendance.getMarksAsList()){
@@ -2315,15 +2317,15 @@ public class AttendancePanel extends VerticalLayout implements View {
 													}
 													
 													//continua hasta que no haya ingresado por contrato
-													if( j - 3 < minDay ){
-														j++;
-														continue;
-													}
+//													if( j - 3 < minDay ){
+//														j++;
+//														continue;
+//													}
 													
 													if(mark == null)
 														mark = AttendanceMark.EMPTY;
 													row.getCell(j).setCellValue(mark.toString());
-													//ingresa hasta el fin de mes solamente o hasta el fin de contrato
+													//ingresa hasta el fin de mes solamente 
 													if(j - 3 == maxDay )
 														break;
 													j++;
