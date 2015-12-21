@@ -1086,7 +1086,8 @@ public class SalaryCalculator {
 		double impuesto = getImpto();
 		logger.debug("impuesto {}",impuesto);
 		logger.debug("suple {}, tool {}, loan {}",suple,tool,loan);
-		return descImposiciones + impuesto + suple - tool - loan;
+//		return descImposiciones + impuesto + suple - tool - loan;
+		return descImposiciones + impuesto + suple + tool + loan;
 	}
 
 	/**
