@@ -450,13 +450,14 @@ public class Utils {
 		if(attendance2.getLaborerConstructionSite()
 				.getActiveContract().getTerminationDate() == null )
 			return maxDay;
-		//obtiene el primer día del mes
-		LocalDateTime finMes = new LocalDateTime(attendance2.getDate())
-			.withDayOfMonth(new LocalDateTime(attendance2.getDate())
+		//obtiene el ultimo dia del mes
+		DateTime attendanceDate = new DateTime(attendance2.getDate(),DateTimeZone.UTC);
+		DateTime finMes = attendanceDate
+			.withDayOfMonth(attendanceDate
 			.withTime(0, 0, 0, 0)
 			.dayOfMonth().getMaximumValue());
 		//obtiene la fecha de ingreso
-		LocalDateTime finContrato = new LocalDateTime(attendance2.getLaborerConstructionSite().getActiveContract().getTerminationDate()).withTime(0, 0, 0, 0);
+		DateTime finContrato = new DateTime(attendance2.getLaborerConstructionSite().getActiveContract().getTerminationDate(),DateTimeZone.UTC).withTime(0, 0, 0, 0);
 		//si tiene que completar la semana, retorna el lunes más cercano
 		if(completarSemana){
 			//le resta dia hasta que sea el lunes
@@ -475,7 +476,7 @@ public class Utils {
 	 * @param dt
 	 * @return
 	 */
-	private static LocalDateTime calcularLunesMasCercano(LocalDateTime dt){
+	private static DateTime calcularLunesMasCercano(DateTime dt){
 		while(dt.getDayOfWeek() != DateTimeConstants.MONDAY ){
 			dt = dt.minusDays(1);
 		}
@@ -489,9 +490,9 @@ public class Utils {
 	 */
 	public static int calcularDiaInicial(Attendance attendance2,int minVal,boolean completarSemana) {
 		//obtiene el primer día del mes
-		LocalDateTime inicioMes = new LocalDateTime(attendance2.getDate()).withDayOfMonth(1).withTime(0, 0, 0, 0);
+		DateTime inicioMes = new DateTime(attendance2.getDate(),DateTimeZone.UTC).withDayOfMonth(1).withTime(0, 0, 0, 0);
 		//obtiene la fecha de ingreso
-		LocalDateTime inicioContrato = new LocalDateTime(attendance2.getLaborerConstructionSite().getActiveContract().getStartDate()).withTime(0, 0, 0, 0);
+		DateTime inicioContrato = new DateTime(attendance2.getLaborerConstructionSite().getActiveContract().getStartDate(),DateTimeZone.UTC).withTime(0, 0, 0, 0);
 		//si tiene que completar la semana, retorna el lunes más cercano
 		if(completarSemana){
 			//le resta dia hasta que sea el lunes
