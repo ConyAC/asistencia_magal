@@ -24,17 +24,17 @@ public interface SalaryRepository extends
 
 	
 	@Query(value = "select avg(s.jornalPromedio) from Salary s where s.laborerConstructionSite = ?1 AND "
-			+ " extract( year from s.date ) + extract( month from s.date ) in "
-			+ " ( (extract( year from ?2 ) + extract ( month from ?2 )) , "
-			+ "   (extract( year from ?2 ) + extract ( month from ?2 ) - 1) , "
-			+ "   (extract( year from ?2 ) + extract ( month from ?2 ) - 2 ) )" )
+			+ " (extract( year from s.date )* 100)  + extract( month from s.date ) in "
+			+ " ( ((extract( year from ?2 )* 100)  + extract ( month from ?2 )) , "
+			+ "   ((extract( year from ?2 )* 100)  + extract ( month from ?2 ) - 1) , "
+			+ "   ((extract( year from ?2 )* 100)  + extract ( month from ?2 ) - 2 ) )" )
 	Double calculateJornalPromedioAvg(LaborerConstructionsite lc,Date terminationDate);
 	
 	@Query(value = "select s.jornalPromedio from Salary s where s.laborerConstructionSite = ?1 AND "
-			+ " extract( year from s.date ) + extract( month from s.date ) in "
-			+ " ( (extract( year from ?2 ) + extract ( month from ?2 )) , "
-			+ "   (extract( year from ?2 ) + extract ( month from ?2 ) - 1) , "
-			+ "   (extract( year from ?2 ) + extract ( month from ?2 ) - 2 ) ) order by s.date desc " )
+			+ " (extract( year from s.date )* 100)  + extract( month from s.date ) in "
+			+ " ( ((extract( year from ?2 )* 100)  + extract ( month from ?2 )) , "
+			+ "   ((extract( year from ?2 )* 100)  + extract ( month from ?2 ) - 1) , "
+			+ "   ((extract( year from ?2 )* 100)  + extract ( month from ?2 ) - 2 ) ) order by s.date desc " )
 	List<Double> get3LastJornalPromedio(LaborerConstructionsite lc,Date terminationDate);
 
 }
