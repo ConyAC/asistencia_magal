@@ -19,13 +19,13 @@
     <level value='DEBUG' />
   </logger>
   <logger name='cl.magal.asistencia.services'>
-    <level value='DEBUG' />
+    <level value='ERROR' />
   </logger>
   <logger name='cl.magal.asistencia.ui'>
-    <level value='DEBUG' />
+    <level value='ERROR' />
   </logger>
   <logger name='cl.magal.asistencia.util'>
-      <level value='DEBUG' />
+      <level value='ERROR' />
   </logger>
   <logger name='cl.magal.asistencia.services.bo'>
         <level value='ERROR' />
