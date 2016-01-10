@@ -123,7 +123,7 @@ public class LaborerService {
 	 * Permite guardar toda la información de un obrero dentro de una obra
 	 * @param laborerConstructionSite
 	 */
-	public void save(LaborerConstructionsite laborerConstructionSite) {
+	public LaborerConstructionsite save(LaborerConstructionsite laborerConstructionSite) {
 		//si es nulo, da error
 		if(laborerConstructionSite == null)
 			throw new RuntimeException("La relación trabajador-obra no puede ser nula");
@@ -138,7 +138,7 @@ public class LaborerService {
 		laborerRepo.save(laborerConstructionSite.getLaborer());
 		
 		//guarda 
-		laborerConstructionsiteRepo.save(laborerConstructionSite);		
+		return laborerConstructionsiteRepo.save(laborerConstructionSite);
 		
 	}
 

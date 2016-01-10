@@ -900,13 +900,20 @@ public class LaborerAndTeamPanel extends VerticalLayout implements View {
 						try {
 							//			    			LaborerConstructionsite laborer = ((BeanItem<LaborerConstructionsite>) event.getSavedItem()).getBean();
 							LaborerConstructionsite laborer = beanItem.getBean();
-							logger.debug("laborer constructionsite {}, rut {}, photo {} postcommit ",laborer,laborer.getLaborer().getRut(),laborer.getLaborer().getPhoto());
-							laborerService.save(laborer);	
+							logger.debug("laborer constructionsite {}, rut {}, photo {} postcommit, \nloan {} ",laborer,laborer.getLaborer().getRut(),laborer.getLaborer().getPhoto(),laborer.getLoan());
+							laborer = laborerService.save(laborer);	
 							//si el elemento no esta activo, lo quita de la lista
 							if( !laborer.isActive() ){
 								laborerConstructionContainer.removeItem(laborer);
 							}
-							table.refreshRowCache();
+							//recarga las colecciones en el item para que recargue los ids
+							beanItem.getItemProperty("vacations").setValue(laborer.getProgressiveVacation()); 
+							beanItem.getItemProperty("progressiveVacation").setValue(laborer.getVacations());
+							beanItem.getItemProperty("accidents").setValue(laborer.getAccidents());
+							beanItem.getItemProperty("absences").setValue(laborer.getAbsences()); 
+							beanItem.getItemProperty("tool").setValue(laborer.getTool());
+							beanItem.getItemProperty("loan").setValue(laborer.getLoan());
+							beanItem.getItemProperty("withdrawalSettlements").setValue(laborer.getWithdrawalSettlements());
 							return;
 						} catch (TransactionSystemException e) {
 
