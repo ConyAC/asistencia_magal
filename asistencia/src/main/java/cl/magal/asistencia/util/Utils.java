@@ -317,6 +317,42 @@ public class Utils {
 	public static int countLaborerDays(DateTime date) {
 	    return countDays(date,DateTimeConstants.MONDAY,DateTimeConstants.TUESDAY,DateTimeConstants.WEDNESDAY,DateTimeConstants.THURSDAY,DateTimeConstants.FRIDAY);
 	}
+	
+	/**
+	 * Cuenta los dias laborales del rango de fecha dado
+	 * @param inicio 
+	 * @param fin inclusive este día
+	 */
+	public static int countLaborerDays(DateTime beginning, DateTime ending) {
+	    return countDaysBetween(beginning,ending,DateTimeConstants.MONDAY,DateTimeConstants.TUESDAY,DateTimeConstants.WEDNESDAY,DateTimeConstants.THURSDAY,DateTimeConstants.FRIDAY);
+	}
+	
+	/**
+	 * Cuenta los dias dados en dateTimneConstants del rango de fecha dado
+	 * @param inicio 
+	 * @param fin
+	 * @param dateTimeConstants
+	 */
+	public static int countDaysBetween(DateTime beginning, DateTime ending,int... dateTimeConstants) {
+		if(beginning == null  || ending == null )
+			throw new RuntimeException("Los valores de la fecha no pueden ser nulo.");
+		if(dateTimeConstants == null )
+			throw new RuntimeException("es necesario la lista de DateTimeConstants");
+	    int days = 0;
+	    DateTime current = beginning;
+	    while (current.isBefore(ending) || current.toString("dd/MM/yyyy").equals(ending.toString("dd/MM/yyyy"))) {
+	    	boolean cond = false;
+	    	for(int dtc : dateTimeConstants ){
+	    		cond |= (current.getDayOfWeek() == dtc); 
+	    	}
+
+	        if (cond)
+	        	days++;
+	        
+	        current = current.plusDays(1);
+	    }
+	    return days;
+	}
 
 	/**
 	 * cuenta los domingos del mes de la fecha dada
@@ -342,7 +378,7 @@ public class Utils {
 	    final LocalDate end = date.withDayOfMonth(date.dayOfMonth().getMaximumValue()).toLocalDate();
 	    int saturdays = 0;
 	    LocalDate current = start;
-	    while (current.isBefore(end) || current.equals(end)) {
+	    while (current.isBefore(end) || current.toString("dd/MM/yyyy").equals(end.toString("dd/MM/yyyy"))) {
 	    	boolean cond = false;
 	    	for(int dtc : datetime ){
 	    		cond |= (current.getDayOfWeek() == dtc); 
@@ -614,5 +650,6 @@ public class Utils {
 	public static boolean isAttendanceMarkEmptyOrFilled(AttendanceMark attendanceMark) {
 		return attendanceMark == AttendanceMark.FILLER || attendanceMark == AttendanceMark.EMPTY;
 	}
+
 }
 

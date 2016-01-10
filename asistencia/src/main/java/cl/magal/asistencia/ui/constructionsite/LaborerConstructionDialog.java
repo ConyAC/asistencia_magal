@@ -1878,6 +1878,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 				return false;
 			}
 			vacations.add(vacation);
+			vacation.setLaborerConstructionSite(laborer);
 		}
 		getItem().getItemProperty("vacations").setValue(vacations); 
 		
@@ -1892,6 +1893,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 				return false;
 			}
 			vacationps.add(vacation);
+			vacation.setLaborerConstructionSite(laborer);
 		}
 		getItem().getItemProperty("progressiveVacation").setValue(vacationps); // no se si esto es necesario
 
@@ -1906,6 +1908,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 				return false;
 			}
 			accidents.add(accident);
+			accident.setLaborerConstructionSite(laborer);
 		}
 		getItem().getItemProperty("accidents").setValue(accidents);
 
@@ -1920,6 +1923,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 				return false;
 			}
 			absences.add(absence);
+			absence.setLaborerConstructionSite(laborer);
 		}
 		getItem().getItemProperty("absences").setValue(absences); 
 
@@ -1948,6 +1952,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 				}
 			}                
 			tools.add(t);
+			t.setLaborerConstructionSite(laborer);
 		}
 		getItem().getItemProperty("tool").setValue(tools);
 
@@ -1977,6 +1982,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 				}
 			}                
 			loans.add(l);
+			l.setLaborerConstructionSite(laborer);
 		}
 		getItem().getItemProperty("loan").setValue(loans);
 		
@@ -1991,6 +1997,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 				return false;
 			}
 			withdrawalsettlements.add(l);
+			l.setLaborerConstructionSite(laborer);
 		}
 		getItem().getItemProperty("withdrawalSettlements").setValue(withdrawalsettlements);
 

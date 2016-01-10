@@ -16,7 +16,8 @@ import javax.persistence.TemporalType;
 import javax.validation.constraints.NotNull;
 
 import org.joda.time.DateTime;
-import org.joda.time.Days;
+
+import cl.magal.asistencia.util.Utils;
 
 @Entity
 @Table(name="vacation")
@@ -82,7 +83,7 @@ public class Vacation implements Serializable {
 	}
 
 	public int getTotal(){
-		return Days.daysBetween(new DateTime(fromDate), new DateTime(toDate)).getDays() + 1;
+		return Utils.countLaborerDays(new DateTime(fromDate), new DateTime(toDate));
 	}
 
 	public boolean isConfirmed() {

@@ -907,8 +907,8 @@ public class LaborerAndTeamPanel extends VerticalLayout implements View {
 								laborerConstructionContainer.removeItem(laborer);
 							}
 							//recarga las colecciones en el item para que recargue los ids
-							beanItem.getItemProperty("vacations").setValue(laborer.getProgressiveVacation()); 
-							beanItem.getItemProperty("progressiveVacation").setValue(laborer.getVacations());
+							beanItem.getItemProperty("vacations").setValue(laborer.getVacations()); 
+							beanItem.getItemProperty("progressiveVacation").setValue(laborer.getProgressiveVacation());
 							beanItem.getItemProperty("accidents").setValue(laborer.getAccidents());
 							beanItem.getItemProperty("absences").setValue(laborer.getAbsences()); 
 							beanItem.getItemProperty("tool").setValue(laborer.getTool());
