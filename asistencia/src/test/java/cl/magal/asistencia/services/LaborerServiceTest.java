@@ -35,7 +35,7 @@ import cl.magal.asistencia.entities.validator.RutDigitValidator;
 import cl.magal.asistencia.helpers.LaborerHelper;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(locations = { "/META-INF/spring/testApplicationContext.xml" })
+@ContextConfiguration(locations = { "/META-INF/spring/testApplicationContext3.xml" })
 @Transactional
 public class LaborerServiceTest {
 	
@@ -668,6 +668,10 @@ public class LaborerServiceTest {
 		return service.findLaborerOnConstructionSite(cs,laborer);
 	}
 	
-	
-	
+	@Test
+	public void testLaborerCS(){
+		ConstructionSite cs = constructionService.findConstructionSite(10L);
+		logger.debug("comenzando query");
+		List<LaborerConstructionsite> laborers = constructionService.getLaborerActiveByConstruction(cs);	
+	}
 }

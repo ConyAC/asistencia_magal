@@ -445,6 +445,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 				if( propertyId.equals("name") || propertyId.equals("price") || propertyId.equals("fee")){
 					field = new TextField();
 					((TextField)field).setNullRepresentation("");
+					((TextField)field).setConversionError("Número inválido");
 					((TextField)field).setImmediate(true);
 				}
 				else  if( propertyId.equals("status") ){
@@ -552,7 +553,9 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 		beanItemLoan = new BeanItemContainer<Loan>(Loan.class);
 		beanItemLoan.addNestedContainerProperty("status.description");
 		List<Loan> loans = (List<Loan>)getItem().getItemProperty("loan").getValue();
+		logger.debug("cargando loans {}",loans);
 		beanItemLoan.addAll(loans);
+		logger.debug("items {}",beanItemLoan.getItemIds());
 
 		if(!readOnly){
 			btnAddP = new Button(null,FontAwesome.PLUS);
@@ -586,6 +589,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 				if( propertyId.equals("price") || propertyId.equals("fee")){
 					field = new TextField();
 					((TextField)field).setNullRepresentation("");
+					((TextField)field).setConversionError("Número inválido");
 				}
 				else  if( propertyId.equals("status") ){
 					field = new TextField();
@@ -1864,7 +1868,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 		LaborerConstructionsite laborer = (LaborerConstructionsite) getItem().getBean();
 		Date firstDayOfCurrentMonth;
 		//vacaciones
-		laborer.getVacations().clear();
+		List<Vacation> vacations = new ArrayList<Vacation>(vacationContainer.getItemIds().size());
 		for(Vacation vacation : vacationContainer.getItemIds()){
 			// valida las vacaciones
 			Set<ConstraintViolation<Vacation>> constraintViolations = validator.validate(vacation);
@@ -1873,12 +1877,13 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 				tab.setSelectedTab(2);
 				return false;
 			}
-			laborer.addVacation(vacation);
+			vacations.add(vacation);
+			vacation.setLaborerConstructionSite(laborer);
 		}
-		getItem().getItemProperty("vacations").setValue(laborer.getVacations()); // no se si esto es necesario
+		getItem().getItemProperty("vacations").setValue(vacations); 
 		
 		//vacaciones progresivas
-		laborer.getProgressiveVacation().clear();
+		List<ProgressiveVacation> vacationps = new ArrayList<ProgressiveVacation>(progressiveVacationContainer.getItemIds().size());
 		for(ProgressiveVacation vacation : progressiveVacationContainer.getItemIds()){
 			// valida las vacaciones
 			Set<ConstraintViolation<ProgressiveVacation>> constraintViolations = validator.validate(vacation);
@@ -1887,12 +1892,13 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 				tab.setSelectedTab(2);
 				return false;
 			}
-			laborer.addProgressiveVacation(vacation);
+			vacationps.add(vacation);
+			vacation.setLaborerConstructionSite(laborer);
 		}
-		getItem().getItemProperty("progressiveVacation").setValue(laborer.getProgressiveVacation()); // no se si esto es necesario
+		getItem().getItemProperty("progressiveVacation").setValue(vacationps); // no se si esto es necesario
 
 		//accidentes
-		laborer.getAccidents().clear();
+		List<Accident> accidents = new ArrayList<Accident>(accidentContainer.getItemIds().size());
 		for(Accident accident : accidentContainer.getItemIds()){
 			// valida los accidentes
 			Set<ConstraintViolation<Accident>> constraintViolations = validator.validate(accident);
@@ -1901,12 +1907,13 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 				tab.setSelectedTab(4);
 				return false;
 			}
-			laborer.addAccident(accident);
+			accidents.add(accident);
+			accident.setLaborerConstructionSite(laborer);
 		}
-		getItem().getItemProperty("accidents").setValue(laborer.getAccidents()); // no se si esto es necesario
+		getItem().getItemProperty("accidents").setValue(accidents);
 
 		//licencias
-		laborer.getAbsences().clear();
+		List<License> absences = new ArrayList<License>(absenceContainer.getItemIds().size());
 		for(License absence : absenceContainer.getItemIds()){
 			// valida las licencias
 			Set<ConstraintViolation<License>> constraintViolations = validator.validate(absence);
@@ -1915,11 +1922,12 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 				tab.setSelectedTab(5);
 				return false;
 			}
-			laborer.addAbsence(absence);
+			absences.add(absence);
+			absence.setLaborerConstructionSite(laborer);
 		}
-		getItem().getItemProperty("absences").setValue(laborer.getAbsences()); // no se si esto es necesario
+		getItem().getItemProperty("absences").setValue(absences); 
 
-		laborer.getTool().clear();		
+		List<Tool> tools = new ArrayList<Tool>(beanItemTool.getItemIds().size());
 		for(Tool t : beanItemTool.getItemIds()){
 			// valida las herramientas
 			Set<ConstraintViolation<Tool>> constraintViolations = validator.validate(t);
@@ -1943,11 +1951,13 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 						t.getDatePostponed().remove(firstDayOfCurrentMonth);
 				}
 			}                
-			laborer.addTool(t);
+			tools.add(t);
+			t.setLaborerConstructionSite(laborer);
 		}
-		getItem().getItemProperty("tool").setValue(laborer.getTool());
+		getItem().getItemProperty("tool").setValue(tools);
 
-		laborer.getLoan().clear();		
+		//limpiando lista de prestamos
+		List<Loan> loans = new ArrayList<Loan>(beanItemLoan.getItemIds().size());
 		for(Loan l : beanItemLoan.getItemIds()){
 			// valida los préstamos
 			Set<ConstraintViolation<Loan>> constraintViolations = validator.validate(l);
@@ -1971,12 +1981,13 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 						l.getDatePostponed().remove(firstDayOfCurrentMonth);
 				}
 			}                
-			laborer.addLoan(l);
+			loans.add(l);
+			l.setLaborerConstructionSite(laborer);
 		}
-		getItem().getItemProperty("loan").setValue(laborer.getLoan());
+		getItem().getItemProperty("loan").setValue(loans);
 		
 		//retiros
-		laborer.getWithdrawalSettlements().clear();	
+		List<WithdrawalSettlement> withdrawalsettlements = new ArrayList<WithdrawalSettlement>(beanItemWithdrawalSettlement.getItemIds().size());
 		for(WithdrawalSettlement l : beanItemWithdrawalSettlement.getItemIds()){
 			// valida los préstamos
 			Set<ConstraintViolation<WithdrawalSettlement>> constraintViolations = validator.validate(l);
@@ -1985,9 +1996,10 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 				tab.setSelectedTab(4);
 				return false;
 			}
-			laborer.addWithdrawalSettlement(l);
+			withdrawalsettlements.add(l);
+			l.setLaborerConstructionSite(laborer);
 		}
-		getItem().getItemProperty("withdrawalSettlements").setValue(laborer.getLoan());
+		getItem().getItemProperty("withdrawalSettlements").setValue(withdrawalsettlements);
 
 		return super.preCommit();
 	}

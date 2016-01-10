@@ -11,7 +11,7 @@ import cl.magal.asistencia.entities.ConstructionSite;
 
 public interface AttendanceRepository extends PagingAndSortingRepository<Attendance, Long> {
 
-	@Query(value = "select a from Attendance a join fetch a.laborerConstructionSite lc where lc.constructionsite = ?1 and extract( month from a.date ) = extract ( month from ?2 ) and extract( year from a.date ) = extract ( year from ?2 )" )
+	@Query(value = "select a from Attendance a join fetch a.laborerConstructionSite lc join fetch lc.laborer where lc.constructionsite = ?1 and extract( month from a.date ) = extract ( month from ?2 ) and extract( year from a.date ) = extract ( year from ?2 )" )
 	List<Attendance> findByConstructionsiteAndMonth(ConstructionSite cs, Date date);
 
 	@Query(value = "select a from Attendance a where a.laborerConstructionSite.constructionsite = ?1 " )

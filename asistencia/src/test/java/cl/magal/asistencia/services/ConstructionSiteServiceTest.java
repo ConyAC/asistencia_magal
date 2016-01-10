@@ -227,6 +227,15 @@ public class ConstructionSiteServiceTest {
 				
 	}
 	
+	@Test
+	public void testGetSalaries(){
+		
+		ConstructionSite cs = csService.findConstructionSite(10L);
+		DateTime dt = DateTime.parse("2015-12-01");
+		logger.debug("buscando salaries");
+		List<Salary> salaries = csService.getSalariesByConstructionAndMonth(cs,dt);
+	}
+	
 	/**
 	 * Eliminar
 	 */

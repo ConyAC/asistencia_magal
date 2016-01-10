@@ -291,6 +291,7 @@ public class ConstructionSiteService {
 		logger.debug("trabajadores activos {} ",lcs);
 
 		List<Attendance> attendanceResultList =  attendanceRepo.findByConstructionsiteAndMonth(cs,date.toDate());
+		logger.debug("fin query");
 		Attendance tmp = new Attendance();
 
 		Map<Integer,Attendance> attendanceResult = new HashMap<Integer,Attendance>();
@@ -859,8 +860,10 @@ public class ConstructionSiteService {
 		if(taxTable == null )
 			throw new RuntimeException("Aún no se definen la tabla de impuestos. Ésta es necesaria para cálcular el sueldo.");
 		
+		logger.debug("buscando attendance del mes");
 		//busca la asistencia del mes 
 		Map<Integer,Attendance> attendance = getAttendanceMapByConstructionAndMonth(cs, date);
+		logger.debug("buscando attendance del mes pasado");
 		//busca la asistencia del mes anterior 
 		Map<Integer,Attendance> lastMonthAttendance = getAttendanceMapByConstructionAndMonth(cs, date.minusMonths(1));
 		//busca las sobre horas

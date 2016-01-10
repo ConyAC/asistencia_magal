@@ -14,7 +14,7 @@ public interface LaborerConstructionsiteRepository extends
 		PagingAndSortingRepository<LaborerConstructionsite, Long> {
 
 	
-	@Query(value="select lc from LaborerConstructionsite lc join fetch lc.activeContract where lc.constructionsite = ?1 and lc.active != 0 ")
+	@Query(value="select lc from LaborerConstructionsite lc join fetch lc.laborer join fetch lc.activeContract where lc.constructionsite = ?1 and lc.active != 0 ")
 	List<LaborerConstructionsite> findByConstructionsiteAndIsActive(ConstructionSite constructionsite);
 	
 	LaborerConstructionsite findByConstructionsiteAndLaborer(ConstructionSite constructionsite, Laborer laborer);
@@ -30,7 +30,7 @@ public interface LaborerConstructionsiteRepository extends
 	@Query(value="select lc from LaborerConstructionsite lc join fetch lc.activeContract where lc.active != 0 ")
 	List<LaborerConstructionsite> findConstructionsiteActive();
 
-	@Query(value="select lc from LaborerConstructionsite lc join fetch lc.activeContract ac where lc.constructionsite = ?1 "
+	@Query(value="select lc from LaborerConstructionsite lc join fetch lc.laborer join fetch lc.activeContract ac where lc.constructionsite = ?1 "
 			+ " and ( (extract( year from ac.startDate) * 100) + extract( month from ac.startDate) ) <= ( (extract( year from ?2) * 100) + extract( month from ?2)) "
 			+ " and ( ac.terminationDate is null or ( ( extract( year from ac.terminationDate ) * 100) + extract( month from ac.terminationDate ) ) >= ((extract( year from  ?2 ) * 100) + extract( month from  ?2 )) ) ")
 	List<LaborerConstructionsite> findByConstructionsiteAndIsActiveThisMonth(ConstructionSite cs, Date date);
