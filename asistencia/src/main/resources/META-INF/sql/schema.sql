@@ -935,3 +935,12 @@ ADD COLUMN `isapre_plus` DOUBLE NOT NULL DEFAULT 0 COMMENT '';
 ALTER TABLE `magal_asistencia`.`laborer` 
 ADD COLUMN `otherAgreements` VARCHAR(1024) NULL AFTER `isapre_plus`,
 ADD COLUMN `villa` VARCHAR(1024) NULL AFTER `otherAgreements`;
+
+-- cuenta de costos
+CREATE TABLE `magal_asistencia`.`constructionsite_cost_account` (
+  `constructionsiteId` BIGINT(20) NULL DEFAULT NULL COMMENT '',
+  `code` VARCHAR(512) NULL DEFAULT NULL COMMENT '',
+  `name` VARCHAR(512) NULL DEFAULT NULL COMMENT '');
+  
+  ALTER TABLE `magal_asistencia`.`contract` 
+ADD COLUMN `costaccountId` INT(10) UNSIGNED NULL DEFAULT NULL COMMENT '' AFTER `specialityId`;

@@ -1,14 +1,30 @@
 package cl.magal.asistencia.ui.constructionsite;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import cl.magal.asistencia.entities.ConstructionCompany;
 import cl.magal.asistencia.entities.ConstructionSite;
+import cl.magal.asistencia.entities.CostAccount;
+import cl.magal.asistencia.entities.FamilyAllowanceConfigurations;
 import cl.magal.asistencia.entities.Speciality;
 import cl.magal.asistencia.entities.User;
 import cl.magal.asistencia.entities.enums.Job;
@@ -17,6 +33,8 @@ import cl.magal.asistencia.entities.enums.Status;
 import cl.magal.asistencia.services.ConstructionSiteService;
 import cl.magal.asistencia.services.UserService;
 import cl.magal.asistencia.ui.AbstractWindowEditor;
+import cl.magal.asistencia.ui.OnValueChangeFieldFactory;
+import cl.magal.asistencia.ui.OnValueChangeFieldFactory.OnValueChangeListener;
 import cl.magal.asistencia.util.Constants;
 import cl.magal.asistencia.util.SecurityHelper;
 import cl.magal.asistencia.util.Utils;
@@ -30,6 +48,7 @@ import com.vaadin.data.util.BeanItem;
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.data.util.filter.Compare;
 import com.vaadin.server.FontAwesome;
+import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.AbstractSelect.ItemCaptionMode;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
@@ -39,7 +58,12 @@ import com.vaadin.ui.Component;
 import com.vaadin.ui.Field;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
+import com.vaadin.ui.TextArea;
+import com.vaadin.ui.UI;
+import com.vaadin.ui.Upload;
+import com.vaadin.ui.Window;
 import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.TabSheet;
@@ -60,12 +84,14 @@ public class ConstructionSiteDialog extends AbstractWindowEditor {
 	BeanItemContainer<User> userContainer;
 	BeanItemContainer<ConstructionCompany> constructioncompanyContainer;
 	BeanItemContainer<Speciality> specialitiesContainer = new BeanItemContainer<Speciality>(Speciality.class);
+	BeanItemContainer<CostAccount> costContainer = new BeanItemContainer<CostAccount>(CostAccount.class);
 	User user;
 
 	UserService userService;
 	ConstructionSiteService service;
 	
 	Table tableSteps;
+	Table tableCosto;
 
 	public ConstructionSiteDialog(BeanItem<ConstructionSite> item, BeanItemContainer<User> user, BeanItemContainer<ConstructionCompany> constructionCompany, ConstructionSiteService service ){
 		super(item);
@@ -157,10 +183,12 @@ public class ConstructionSiteDialog extends AbstractWindowEditor {
 		// lista de etapas de obra
 		VerticalLayout vl1 = drawStepTable();
 		VerticalLayout vl2 = drawSpecialityTable();
+		VerticalLayout vl3 = drawCostoTable();
 		
 		TabSheet tb = new TabSheet();
 		tb.addTab(vl1,"Etapas");
 		tb.addTab(vl2,"Especialidades");
+		tb.addTab(vl3,"Cuentas de Costo");
 		
 		hl.addComponent(tb);
 		return hl;
@@ -350,6 +378,257 @@ public class ConstructionSiteDialog extends AbstractWindowEditor {
 		return vl;
 	}
 
+	/**
+	 * Tabla de cuentas de costo
+	 * @return
+	 */
+	private VerticalLayout drawCostoTable(){
+		VerticalLayout vl = new VerticalLayout();
+		vl.setMargin(true);
+		vl.setSpacing(true);
+
+		costContainer.addAll(service.findCostAccountByConstructionSite((ConstructionSite) getItem().getBean()));
+
+		tableCosto = new Table(null, costContainer);
+		tableCosto.setPageLength(6);
+		tableCosto.setWidth("100%");
+		tableCosto.setTableFieldFactory(new TableFieldFactory() {
+			
+			@Override
+			public Field<?> createField(Container container, Object itemId,
+					Object propertyId, Component uiContext) {
+				Field<?> field = null; 
+				if(propertyId.equals("name") || propertyId.equals("code")){
+					field = new TextField();
+					((TextField)field).setImmediate(true);
+				} else
+					return null;
+					
+				return field;
+			}
+		});				
+
+		//botón eliminar
+		tableCosto.addGeneratedColumn("delete", new Table.ColumnGenerator() {
+
+			@Override
+			public Object generateCell(Table source, final Object itemId, Object columnId) {
+				return new Button(null,new Button.ClickListener() {
+
+					@Override
+					public void buttonClick(ClickEvent event) {
+						//confirma que no se esté usando
+						CostAccount costAccount = costContainer.getItem(itemId).getBean();;
+						if(service.checkCostAccountInUse((ConstructionSite) getItem().getBean(), costAccount)){
+							Notification.show("No se puede borrar la cuenta de costo dado que está asignada a trabajadores de la obra");
+							return;
+						}
+						service.removeCostAccount(costAccount);
+						costContainer.removeItem(itemId);
+					}
+				}){ {setIcon(FontAwesome.TRASH_O);} };
+			}
+		});
+		
+		OnValueChangeListener listener = new OnValueChangeListener(){
+
+			@Override
+			public void onValueChange(Object itemId) {
+				CostAccount cost = ((BeanItem<CostAccount>)costContainer.getItem(itemId)).getBean();
+				service.save(cost);
+			}
+			
+		};
+		OnValueChangeFieldFactory factory = new OnValueChangeFieldFactory(2);
+		factory.addListener(listener);
+		tableCosto.setTableFieldFactory(factory);
+		tableCosto.setContainerDataSource(costContainer);
+
+		tableCosto.setColumnWidth("delete", 100);
+		tableCosto.setVisibleColumns("code","name","delete");
+		tableCosto.setColumnHeaders("Código Cuenta","Nombre Cuenta","");
+		
+		//boton para agregar cuentas de costo
+		Button btn = new Button(null,FontAwesome.PLUS_CIRCLE);
+		btn.setVisible(SecurityHelper.hasPermission(Permission.AGREGAR_CUENTAS_COSTO));
+		btn.addClickListener(new Button.ClickListener() {
+
+			@Override
+			public void buttonClick(ClickEvent event) {
+				
+				CostAccount costAccount = new CostAccount();
+				String defaultName = "Nombre";
+				String defaultCode = "Código";
+				costAccount.setCode(defaultCode + " 1");
+				costAccount.setName(defaultName + " 1");
+				costAccount.setConstructionSite((ConstructionSite) getItem().getBean());
+				
+				//verifica si ya existe uno así en el contenedor
+				int i = 2;
+				while(Utils.containsContainer(costContainer, "code", costAccount.getCode())){
+					costAccount.setCode(defaultCode+" "+(i));
+					costAccount.setName(defaultName+" "+(i));
+					i++;
+				}
+				service.save(costAccount);
+				costContainer.addBean(costAccount);
+			}
+		});
+		vl.addComponent(btn);
+		
+		//boton para subir excel de  cuentas de costo
+		Button btnCargar = new Button(null,FontAwesome.FILE_EXCEL_O);
+		btnCargar.setVisible(SecurityHelper.hasPermission(Permission.AGREGAR_CUENTAS_COSTO));
+		btnCargar.addClickListener(new Button.ClickListener() {
+
+			@Override
+			public void buttonClick(ClickEvent event) {
+				logger.debug("CLIC!!!");
+				service.removeAll();
+				costContainer.removeAllItems();
+				final Window window = new Window();
+
+				window.center();
+				window.setModal(true);
+				window.setResizable(false);
+
+				window.setContent(new VerticalLayout() {
+					{
+						setMargin(true);
+						VerticalLayout form = new VerticalLayout() {
+							{
+								setWidth("700px");
+								setMargin(true);
+								setSpacing(true);
+								addComponent(new Upload("Cuenta de Costos: ",
+										new Upload.Receiver() {
+
+											@Override
+											public OutputStream receiveUpload(
+													String filename,
+													String mimeType) {
+												
+												try {
+													FileInputStream file = new FileInputStream(new File("C:\\Users\\Usuario\\Desktop\\test.xlsx"));												
+													//Get the workbook instance for XLS file 
+													XSSFWorkbook workbook = new XSSFWorkbook (file);
+													 
+													//Get first sheet from the workbook
+													XSSFSheet sheet = workbook.getSheetAt(0);
+													 
+													//Get iterator to all the rows in current sheet
+													Iterator<Row> rowIterator = sheet.iterator();
+												    while(rowIterator.hasNext()) {
+												        Row row = rowIterator.next();
+												         
+												        //For each row, iterate through each columns
+												        Iterator<Cell> cellIterator = row.cellIterator();
+												        while(cellIterator.hasNext()) {
+												             
+												            Cell cell = cellIterator.next();
+												            CostAccount costAccount = new CostAccount();
+												            switch(cell.getCellType()) {
+												                case Cell.CELL_TYPE_BOOLEAN:
+												                    System.out.print("VER 1: "+cell.getBooleanCellValue() + "\t\t");
+												                    break;
+												                case Cell.CELL_TYPE_NUMERIC:
+												                    System.out.print("VER 2: "+cell.getNumericCellValue() + "\t\t");
+												                    break;
+												                case Cell.CELL_TYPE_STRING:
+												    				costAccount.setCode(cell.getStringCellValue());
+												    				costAccount.setName(cell.getStringCellValue());
+												    				costAccount.setConstructionSite((ConstructionSite) getItem().getBean());
+												    				costContainer.addBean(costAccount);
+												                    System.out.print("VER 3: "+cell.getStringCellValue() + "\t\t");
+												                    break;
+												            }
+												        }
+												        System.out.println("");
+												    }
+												    file.close();
+												    FileOutputStream out = 
+												        new FileOutputStream(new File("C:\\Users\\Usuario\\Desktop\\test.xlsx"));
+												    workbook.write(out);
+												    out.close();												     
+												} catch (FileNotFoundException e) {
+												    e.printStackTrace();
+												} catch (IOException e) {
+												    e.printStackTrace();
+												}
+												return null; 
+											}
+										}));
+							}
+						};
+
+						addComponent(form);
+						setExpandRatio(form, 1.0F);
+
+						HorizontalLayout footer = new HorizontalLayout();
+						footer.setHeight("60px");
+						footer.setSpacing(true);
+
+						Button btnGuardar = new Button("Aceptar");
+						btnGuardar.addClickListener(new Button.ClickListener() {
+
+							@Override
+							public void buttonClick(ClickEvent event) {
+								window.close();
+
+							}
+						});
+						btnGuardar.addStyleName("default");
+						footer.addComponent(btnGuardar);
+						footer.setComponentAlignment(btnGuardar,
+								Alignment.MIDDLE_RIGHT);
+
+						Button btnCancelar = new Button("Cancelar");
+						btnCancelar
+								.addClickListener(new Button.ClickListener() {
+
+									@Override
+									public void buttonClick(ClickEvent event) {
+										window.close();
+
+									}
+								});
+						btnCancelar.addStyleName("link");
+						footer.addComponent(btnCancelar);
+						footer.setComponentAlignment(btnCancelar,
+								Alignment.MIDDLE_RIGHT);
+
+						addComponent(new Label("<hr />", ContentMode.HTML));
+						addComponent(footer);
+						setComponentAlignment(footer, Alignment.MIDDLE_RIGHT);
+
+					}
+				});
+
+				UI.getCurrent().addWindow(window);
+			}
+		});
+		
+		vl.addComponent(btnCargar);
+		
+		HorizontalLayout hl = new HorizontalLayout();
+		FormLayout fm = new FormLayout(btnCargar);
+		fm.setMargin(false);
+		hl.setWidth("100%");
+		hl.addComponent(fm);
+		hl.setComponentAlignment(fm, Alignment.MIDDLE_CENTER);	
+		hl.addComponent(btn);
+		hl.setComponentAlignment(btn, Alignment.BOTTOM_RIGHT);		
+		vl.addComponent(hl);
+		
+		vl.addComponent(tableCosto);
+		vl.setExpandRatio(tableCosto, 1.0F);
+
+		tableCosto.setEnabled(SecurityHelper.hasPermission(Permission.AGREGAR_CUENTAS_COSTO));
+		tableCosto.setEditable(true);
+		
+		return vl;
+	}
+	
 	private String tradProperty(Object propertyId) {
 		if(propertyId.equals("costCenter"))
 			return "Centro de Costo";

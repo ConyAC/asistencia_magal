@@ -27,6 +27,7 @@ import cl.magal.asistencia.entities.Attendance;
 import cl.magal.asistencia.entities.Confirmations;
 import cl.magal.asistencia.entities.ConstructionCompany;
 import cl.magal.asistencia.entities.ConstructionSite;
+import cl.magal.asistencia.entities.CostAccount;
 import cl.magal.asistencia.entities.DateConfigurations;
 import cl.magal.asistencia.entities.ExtraParams;
 import cl.magal.asistencia.entities.FamilyAllowanceConfigurations;
@@ -53,6 +54,7 @@ import cl.magal.asistencia.repositories.ConfirmationsRepository;
 import cl.magal.asistencia.repositories.ConstructionCompanyRepository;
 import cl.magal.asistencia.repositories.ConstructionSiteRepository;
 import cl.magal.asistencia.repositories.ContractRepository;
+import cl.magal.asistencia.repositories.CostAccountRepository;
 import cl.magal.asistencia.repositories.ExtraParamsRepository;
 import cl.magal.asistencia.repositories.HistoricalSalaryRepository;
 import cl.magal.asistencia.repositories.HolidayRepository;
@@ -117,6 +119,8 @@ public class ConstructionSiteService {
 	ContractRepository contractRepo;
 	@Autowired
 	SpecialityRepository specialityRepo;
+	@Autowired
+	CostAccountRepository costRepo;
 	
 	//SERVICES
 	@Autowired
@@ -1154,4 +1158,44 @@ public class ConstructionSiteService {
 		historicalSalaryRepo.save(historicals);
 	}
 	
+	/**
+	 * Guarda una cuenta de costo
+	 * @param costAccount
+	 */
+	public void save(CostAccount costAccount) {
+		CostAccount db = costRepo.save(costAccount);
+		//se asegura se setear el id
+		costAccount.setId(db.getId());
+	}
+
+	/**
+	 * Busca las cuentas de costo de una obra
+	 * @param bean
+	 * @return
+	 */
+	public Collection<? extends CostAccount> findCostAccountByConstructionSite(ConstructionSite bean) {
+		return costRepo.findByConstructionSite(bean);
+	}
+
+	/**
+	 * Elimina una cuenta de costo
+	 * @param costAccount
+	 */
+	public void removeCostAccount(CostAccount costAccount) {
+		costRepo.delete(costAccount);
+	}
+	
+	public void removeAll() {
+		costRepo.deleteAll();
+	}
+	
+	/**
+	 * Verifica si la cuenta de costo dada está siendo utlizada por algún trabajador de la obra dada
+	 * @param bean
+	 * @param costAccount
+	 * @return
+	 */
+	public boolean checkCostAccountInUse(ConstructionSite bean, CostAccount costAccount) {
+		return contractRepo.existsWithCostAccount(bean, costAccount) != null;
+	}
 }
