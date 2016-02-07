@@ -805,6 +805,7 @@ public class ConfigView extends VerticalLayout implements View {
 		VerticalLayout vl = new VerticalLayout();
 		vl.setSpacing(true);
 		vl.setMargin(true);
+		vl.setSizeFull();
 		
 		List<Holiday> h = service.findAllHoliday();
 		holidayContainer = new BeanItemContainer<Holiday>(Holiday.class, h);
@@ -821,7 +822,7 @@ public class ConfigView extends VerticalLayout implements View {
 
 		final Table table = new Table(){
 			{
-				setWidth("100%");
+				setSizeFull();
 				setContainerDataSource(holidayContainer);
 				setTableFieldFactory(new DefaultFieldFactory(){
 

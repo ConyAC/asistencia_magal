@@ -25,13 +25,16 @@ import cl.magal.asistencia.entities.AdvancePaymentConfigurations;
 import cl.magal.asistencia.entities.AfpAndInsuranceConfigurations;
 import cl.magal.asistencia.entities.Attendance;
 import cl.magal.asistencia.entities.ConstructionSite;
+import cl.magal.asistencia.entities.Contract;
 import cl.magal.asistencia.entities.DateConfigurations;
 import cl.magal.asistencia.entities.FamilyAllowanceConfigurations;
+import cl.magal.asistencia.entities.LaborerConstructionsite;
 import cl.magal.asistencia.entities.Overtime;
 import cl.magal.asistencia.entities.Salary;
 import cl.magal.asistencia.entities.TaxationConfigurations;
 import cl.magal.asistencia.entities.User;
 import cl.magal.asistencia.entities.WageConfigurations;
+import cl.magal.asistencia.entities.enums.AttendanceMark;
 import cl.magal.asistencia.entities.enums.Status;
 import cl.magal.asistencia.helpers.ConstructionSiteHelper;
 import cl.magal.asistencia.util.SecurityHelper;
@@ -222,6 +225,15 @@ public class ConstructionSiteServiceTest {
 		dbcs = csService.findConstructionSite(cs.getId());		
 		ConstructionSiteHelper.verify(cs,dbcs); 	
 				
+	}
+	
+	@Test
+	public void testGetSalaries(){
+		
+		ConstructionSite cs = csService.findConstructionSite(10L);
+		DateTime dt = DateTime.parse("2015-12-01");
+		logger.debug("buscando salaries");
+		List<Salary> salaries = csService.getSalariesByConstructionAndMonth(cs,dt);
 	}
 	
 	/**
@@ -582,5 +594,56 @@ public class ConstructionSiteServiceTest {
 		cs.setId(constructionId);
 		DateTime monthDate = DateTime.parse("2015-08-01");
 		csService.getAttendanceByConstruction(cs,monthDate);
+	}
+	
+	@Test 
+	public void testSetFilled(){
+		Attendance attedance = new Attendance();
+		DateTime monthDate = DateTime.parse("2015-11-01");
+		Contract contract = new Contract();
+		contract.setStartDate(DateTime.parse("2015-11-04").toDate());
+		LaborerConstructionsite lc = new LaborerConstructionsite();
+		lc.setActiveContract(contract);
+		
+		csService.defineContractRange(monthDate, lc, attedance);
+		
+		logger.debug("atteandance {}",attedance);
+		
+		assertEquals(AttendanceMark.FILLER, attedance.getDma1());
+		assertEquals(AttendanceMark.FILLER, attedance.getDma2());
+		assertEquals(AttendanceMark.FILLER, attedance.getDma3());
+		assertTrue(AttendanceMark.FILLER != attedance.getDma4());
+		assertTrue(AttendanceMark.FILLER !=  attedance.getDma5());
+		
+	}
+	
+	@Test 
+	public void testSetFilled2(){
+		Attendance attedance = new Attendance();
+		DateTime monthDate = DateTime.parse("2015-11-01");
+		Contract contract = new Contract();
+		contract.setStartDate(DateTime.parse("2015-11-04").toDate());
+		contract.setTerminationDate(DateTime.parse("2015-11-20").toDate());
+		LaborerConstructionsite lc = new LaborerConstructionsite();
+		lc.setActiveContract(contract);
+		
+		csService.defineContractRange(monthDate, lc, attedance);
+		
+		logger.debug("atteandance {}",attedance);
+		
+		assertEquals(AttendanceMark.FILLER, attedance.getDma1());
+		assertEquals(AttendanceMark.FILLER, attedance.getDma2());
+		assertEquals(AttendanceMark.FILLER, attedance.getDma3());
+		assertTrue(AttendanceMark.FILLER != attedance.getDma4());
+		assertTrue(AttendanceMark.FILLER !=  attedance.getDma5());
+	
+		assertTrue(AttendanceMark.FILLER !=  attedance.getDma18());
+		assertTrue(AttendanceMark.FILLER !=  attedance.getDma19());
+		assertEquals(AttendanceMark.FILLER ,  attedance.getDma19());
+		assertEquals(AttendanceMark.FILLER ,  attedance.getDma20());
+		assertEquals(AttendanceMark.FILLER, attedance.getDma21());
+		assertEquals(AttendanceMark.FILLER, attedance.getDma22());
+		assertEquals(AttendanceMark.FILLER, attedance.getDma23());
+		
 	}
 }

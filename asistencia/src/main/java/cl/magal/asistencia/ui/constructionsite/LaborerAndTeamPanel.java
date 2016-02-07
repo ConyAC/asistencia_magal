@@ -845,6 +845,15 @@ public class LaborerAndTeamPanel extends VerticalLayout implements View {
 				return cb;
 			}
 		});
+		
+		table.addGeneratedColumn("fechas", new CustomTable.ColumnGenerator() {
+
+			@Override
+			public Object generateCell(CustomTable source, final Object itemId,Object columnId) {
+				final BeanItem<LaborerConstructionsite> laborerConstruction = (BeanItem<LaborerConstructionsite>) laborerConstructionContainer.getItem(itemId);
+				return Utils.date2String( laborerConstruction.getBean().getActiveContract().getStartDate() ) + "-" + Utils.date2String(laborerConstruction.getBean().getActiveContract().getTerminationDate());
+			}
+		});
 
 		table.setContainerDataSource(laborerConstructionContainer);
 		table.setSizeFull();
@@ -863,8 +872,8 @@ public class LaborerAndTeamPanel extends VerticalLayout implements View {
 		//		});
 
 		//TODO estado
-		table.setVisibleColumns("selected","activeContract.jobCode","laborer.fullname","activeContract.step","actions"); //FIXME laborerId
-		table.setColumnHeaders("","Rol","Nombre","Etapa","Acciones");
+		table.setVisibleColumns("selected","activeContract.jobCode","laborer.fullname","activeContract.step","fechas","actions"); //FIXME laborerId
+		table.setColumnHeaders("","Rol","Nombre","Etapa","Fecha<br/>Contrato","Acciones");
 		table.setColumnWidth("selected", 40);
 
 		table.setSelectable(true);
@@ -891,13 +900,20 @@ public class LaborerAndTeamPanel extends VerticalLayout implements View {
 						try {
 							//			    			LaborerConstructionsite laborer = ((BeanItem<LaborerConstructionsite>) event.getSavedItem()).getBean();
 							LaborerConstructionsite laborer = beanItem.getBean();
-							logger.debug("laborer constructionsite {}, rut {}, photo {} postcommit ",laborer,laborer.getLaborer().getRut(),laborer.getLaborer().getPhoto());
-							laborerService.save(laborer);	
+							logger.debug("laborer constructionsite {}, rut {}, photo {} postcommit, \nloan {} ",laborer,laborer.getLaborer().getRut(),laborer.getLaborer().getPhoto(),laborer.getLoan());
+							laborer = laborerService.save(laborer);	
 							//si el elemento no esta activo, lo quita de la lista
 							if( !laborer.isActive() ){
 								laborerConstructionContainer.removeItem(laborer);
 							}
-							table.refreshRowCache();
+							//recarga las colecciones en el item para que recargue los ids
+							beanItem.getItemProperty("vacations").setValue(laborer.getVacations()); 
+							beanItem.getItemProperty("progressiveVacation").setValue(laborer.getProgressiveVacation());
+							beanItem.getItemProperty("accidents").setValue(laborer.getAccidents());
+							beanItem.getItemProperty("absences").setValue(laborer.getAbsences()); 
+							beanItem.getItemProperty("tool").setValue(laborer.getTool());
+							beanItem.getItemProperty("loan").setValue(laborer.getLoan());
+							beanItem.getItemProperty("withdrawalSettlements").setValue(laborer.getWithdrawalSettlements());
 							return;
 						} catch (TransactionSystemException e) {
 
@@ -1095,6 +1111,7 @@ public class LaborerAndTeamPanel extends VerticalLayout implements View {
 		List<LaborerConstructionsite> laborers = constructionSiteService.getLaborerActiveByConstruction(item.getBean());
 		laborerConstructionContainer.removeAllItems();
 		laborerConstructionContainer.addAll(laborers);
+		laborerConstructionContainer.sort(new Object[] { "activeContract.jobCode" }, new boolean[]{true}); 
 
 		List<Team> teams = constructionSiteService.getTeamsByConstruction(item.getBean());
 		teamContainer.removeAllItems();

@@ -1,4 +1,4 @@
--- laborer
+-- LABORER
 MERGE INTO laborer ( laborerId,address,afp,commune,date_birth,dependents,firstname,isapre,lastname,marital_status,mobile_number,nationality,phone,photo,rut,secondlastname,secondname,town,wedge,bank,bank_account) VALUES (207,'Edith Madge 0711',4,'La Pintana',{ts '1959-02-05 00:00:00.0'},1,'Juan',1,'Salas',2,'83697498',1,'61833825','1.JPG','8858100-8','Roa','Francisco','Santo Tomas',40,1,null);
 MERGE INTO laborer ( laborerId,address,afp,commune,date_birth,dependents,firstname,isapre,lastname,marital_status,mobile_number,nationality,phone,photo,rut,secondlastname,secondname,town,wedge,bank,bank_account) VALUES (208,'El Chilco 14132',1,'La Pintana',{ts '1987-06-07 00:00:00.0'},0,'Miguel',1,'Fuenzalida',1,'54803265',1,null,'2.JPG','14184926-3','Fernandez','Angel','Jorge Alesandri',41,1,null);
 MERGE INTO laborer ( laborerId,address,afp,commune,date_birth,dependents,firstname,isapre,lastname,marital_status,mobile_number,nationality,phone,photo,rut,secondlastname,secondname,town,wedge,bank,bank_account) VALUES (209,'Mariano Gomez 1064',4,'Puente Alto',{ts '1942-08-02 00:00:00.0'},0,'Juvenal',1,'Pe¤a',2,null,1,null,'3.JPG','4912637-9','Urizar','Alfonso','Las Brisas',40,1,null);
@@ -195,8 +195,6 @@ MERGE INTO laborer ( laborerId,address,afp,commune,date_birth,dependents,firstna
 MERGE INTO laborer ( laborerId,address,afp,commune,date_birth,dependents,firstname,isapre,lastname,marital_status,mobile_number,nationality,phone,photo,rut,secondlastname,secondname,town,wedge,bank,bank_account) VALUES (410,'Pasaje Lago Yandad 0299',2,'Puente Alto',{ts '1951-02-21 00:00:00.0'},0,'Manuel',1,'Ortega',2,'93391973',1,null,'915.JPG','5819478-6','Catalan','Ricardo','San Alberto',41,1,null);
 MERGE INTO laborer ( laborerId,address,afp,commune,date_birth,dependents,firstname,isapre,lastname,marital_status,mobile_number,nationality,phone,photo,rut,secondlastname,secondname,town,wedge,bank,bank_account) VALUES (411,'Pasaje Los Crisantemos 12557',2,'El Bosque',{ts '1970-03-06 00:00:00.0'},0,'Javier',1,'Agurto',1,'96084958',1,'69084699','916.JPG','10275876-5','Figueroa','Eduardo','Oscar Bonilla',42,1,null);
 MERGE INTO laborer ( laborerId,address,afp,commune,date_birth,dependents,firstname,isapre,lastname,marital_status,mobile_number,nationality,phone,photo,rut,secondlastname,secondname,town,wedge,bank,bank_account) VALUES (412,'Pasaje Setter 1500',2,'Cerro Navia',{ts '1975-05-25 00:00:00.0'},1,'Marcelo',1,'Sanchez',2,'96499889',1,'81428942','917.JPG','14523741-6','Sartori','Fabian','El Montijo',41,1,null);
-
-
 
 -- Construction Company
 

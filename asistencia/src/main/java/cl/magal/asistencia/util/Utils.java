@@ -14,7 +14,9 @@ import javax.validation.ConstraintViolation;
 import org.apache.commons.lang.ArrayUtils;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeConstants;
+import org.joda.time.DateTimeZone;
 import org.joda.time.LocalDate;
+import org.joda.time.LocalDateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -315,6 +317,42 @@ public class Utils {
 	public static int countLaborerDays(DateTime date) {
 	    return countDays(date,DateTimeConstants.MONDAY,DateTimeConstants.TUESDAY,DateTimeConstants.WEDNESDAY,DateTimeConstants.THURSDAY,DateTimeConstants.FRIDAY);
 	}
+	
+	/**
+	 * Cuenta los dias laborales del rango de fecha dado
+	 * @param inicio 
+	 * @param fin inclusive este día
+	 */
+	public static int countLaborerDays(DateTime beginning, DateTime ending) {
+	    return countDaysBetween(beginning,ending,DateTimeConstants.MONDAY,DateTimeConstants.TUESDAY,DateTimeConstants.WEDNESDAY,DateTimeConstants.THURSDAY,DateTimeConstants.FRIDAY);
+	}
+	
+	/**
+	 * Cuenta los dias dados en dateTimneConstants del rango de fecha dado
+	 * @param inicio 
+	 * @param fin
+	 * @param dateTimeConstants
+	 */
+	public static int countDaysBetween(DateTime beginning, DateTime ending,int... dateTimeConstants) {
+		if(beginning == null  || ending == null )
+			throw new RuntimeException("Los valores de la fecha no pueden ser nulo.");
+		if(dateTimeConstants == null )
+			throw new RuntimeException("es necesario la lista de DateTimeConstants");
+	    int days = 0;
+	    DateTime current = beginning;
+	    while (current.isBefore(ending) || current.toString("dd/MM/yyyy").equals(ending.toString("dd/MM/yyyy"))) {
+	    	boolean cond = false;
+	    	for(int dtc : dateTimeConstants ){
+	    		cond |= (current.getDayOfWeek() == dtc); 
+	    	}
+
+	        if (cond)
+	        	days++;
+	        
+	        current = current.plusDays(1);
+	    }
+	    return days;
+	}
 
 	/**
 	 * cuenta los domingos del mes de la fecha dada
@@ -340,7 +378,7 @@ public class Utils {
 	    final LocalDate end = date.withDayOfMonth(date.dayOfMonth().getMaximumValue()).toLocalDate();
 	    int saturdays = 0;
 	    LocalDate current = start;
-	    while (current.isBefore(end) || current.equals(end)) {
+	    while (current.isBefore(end) || current.toString("dd/MM/yyyy").equals(end.toString("dd/MM/yyyy"))) {
 	    	boolean cond = false;
 	    	for(int dtc : datetime ){
 	    		cond |= (current.getDayOfWeek() == dtc); 
@@ -354,7 +392,25 @@ public class Utils {
 	    return saturdays;
 	}
 	
+	/**
+	 * Verifica si un DateTime está en un día laboral (lunes, martes, miercoles, jueves o viernes)
+	 * @param date
+	 * @return
+	 */
 	public static boolean isLaborerDay(DateTime date){
+		return date.getDayOfWeek() == DateTimeConstants.MONDAY ||
+				date.getDayOfWeek() == DateTimeConstants.TUESDAY || 
+						date.getDayOfWeek() == DateTimeConstants.WEDNESDAY ||
+								date.getDayOfWeek() == DateTimeConstants.THURSDAY ||
+										date.getDayOfWeek() == DateTimeConstants.FRIDAY;
+	}
+	
+	/**
+	 * Verifica si un LocalDateTime está en un día laboral (lunes, martes, miercoles, jueves o viernes)
+	 * @param date
+	 * @return
+	 */
+	public static boolean isLaborerDay(LocalDateTime date){
 		return date.getDayOfWeek() == DateTimeConstants.MONDAY ||
 				date.getDayOfWeek() == DateTimeConstants.TUESDAY || 
 						date.getDayOfWeek() == DateTimeConstants.WEDNESDAY ||
@@ -430,12 +486,14 @@ public class Utils {
 		if(attendance2.getLaborerConstructionSite()
 				.getActiveContract().getTerminationDate() == null )
 			return maxDay;
-		//obtiene el primer día del mes
-		DateTime finMes = new DateTime(attendance2.getDate())
-			.withDayOfMonth(new DateTime(attendance2.getDate())
+		//obtiene el ultimo dia del mes
+		DateTime attendanceDate = new DateTime(attendance2.getDate(),DateTimeZone.UTC);
+		DateTime finMes = attendanceDate
+			.withDayOfMonth(attendanceDate
+			.withTime(0, 0, 0, 0)
 			.dayOfMonth().getMaximumValue());
 		//obtiene la fecha de ingreso
-		DateTime finContrato = new DateTime(attendance2.getLaborerConstructionSite().getActiveContract().getTerminationDate());
+		DateTime finContrato = new DateTime(attendance2.getLaborerConstructionSite().getActiveContract().getTerminationDate(),DateTimeZone.UTC).withTime(0, 0, 0, 0);
 		//si tiene que completar la semana, retorna el lunes más cercano
 		if(completarSemana){
 			//le resta dia hasta que sea el lunes
@@ -468,9 +526,9 @@ public class Utils {
 	 */
 	public static int calcularDiaInicial(Attendance attendance2,int minVal,boolean completarSemana) {
 		//obtiene el primer día del mes
-		DateTime inicioMes = new DateTime(attendance2.getDate()).withDayOfMonth(1);
+		DateTime inicioMes = new DateTime(attendance2.getDate(),DateTimeZone.UTC).withDayOfMonth(1).withTime(0, 0, 0, 0);
 		//obtiene la fecha de ingreso
-		DateTime inicioContrato = new DateTime(attendance2.getLaborerConstructionSite().getActiveContract().getStartDate());
+		DateTime inicioContrato = new DateTime(attendance2.getLaborerConstructionSite().getActiveContract().getStartDate(),DateTimeZone.UTC).withTime(0, 0, 0, 0);
 		//si tiene que completar la semana, retorna el lunes más cercano
 		if(completarSemana){
 			//le resta dia hasta que sea el lunes
@@ -497,7 +555,7 @@ public class Utils {
 
 		//si el número maximo es nulo, calcula el máximo según la fecha de la asistencia
 		if(maxDay == null )
-			maxDay = new DateTime(attendance.getDate()).dayOfMonth().getMaximumValue();
+			maxDay = new LocalDateTime(attendance.getDate()).withTime(0, 0, 0, 0).dayOfMonth().getMaximumValue();
 		
 		//verifica si contiene relleno
 		boolean contieneRelleno = ArrayUtils.contains(marks, AttendanceMark.FILLER );
@@ -525,5 +583,73 @@ public class Utils {
 	}
 		return decimalFormat;
 	}
+
+	/**
+	 * Permite Testear si una fecha es despues o es la misma (mismo dia-mes-año) que la otra
+	 * @param startDate
+	 * @param date
+	 * @return
+	 */
+	public static boolean isDateAfter(Date startDate, Date date) {
+		if(startDate == null || date == null )
+			throw new RuntimeException("Las fechas a comparar no pueden ser nulas.");
+		DateTime startDateTime = new DateTime(startDate,DateTimeZone.UTC).withTime(0, 0, 0, 0);
+		DateTime dateTime = new DateTime(date,DateTimeZone.UTC).withTime(0, 0, 0, 0);
+		return startDateTime.isAfter(dateTime);
+	}
+	
+	/**
+	 * Permite Testear si una fecha es antes o es la misma (mismo dia-mes-año) que la otra
+	 * @param startDate
+	 * @param date
+	 * @return
+	 */
+	public static boolean isDateBefore(Date startDate, Date date) {
+		if(startDate == null || date == null )
+			throw new RuntimeException("Las fechas a comparar no pueden ser nulas.");
+		DateTime startDateTime = new DateTime(startDate,DateTimeZone.UTC).withTime(0, 0, 0, 0);
+		DateTime dateTime = new DateTime(date,DateTimeZone.UTC).withTime(0, 0, 0, 0);
+		return startDateTime.isBefore(dateTime);
+	}
+	
+	/**
+	 * Permite Testear si una fecha es despues o es la misma (mismo dia-mes-año) que la otra
+	 * @param startDate
+	 * @param date
+	 * @return
+	 */
+	public static boolean isDateAfterOrSame(Date startDate, Date date) {
+		if(startDate == null || date == null )
+			throw new RuntimeException("Las fechas a comparar no pueden ser nulas.");
+		DateTime startDateTime = new DateTime(startDate,DateTimeZone.UTC).withTime(0, 0, 0, 0);
+		DateTime dateTime = new DateTime(date,DateTimeZone.UTC).withTime(0, 0, 0, 0);
+		return startDateTime.isAfter(dateTime) || 
+				(startDateTime.getDayOfMonth() == dateTime.getDayOfMonth() && startDateTime.getMonthOfYear() == dateTime.getMonthOfYear() && startDateTime.getYear() == dateTime.getYear());
+	}
+	
+	/**
+	 * Permite Testear si una fecha es antes o es la misma (mismo dia-mes-año) que la otra
+	 * @param startDate
+	 * @param date
+	 * @return
+	 */
+	public static boolean isDateBeforeOrSame(Date startDate, Date date) {
+		if(startDate == null || date == null )
+			throw new RuntimeException("Las fechas a comparar no pueden ser nulas.");
+		DateTime startDateTime = new DateTime(startDate,DateTimeZone.UTC).withTime(0, 0, 0, 0);
+		DateTime dateTime = new DateTime(date,DateTimeZone.UTC).withTime(0, 0, 0, 0);
+		return startDateTime.isBefore(dateTime) || 
+				(startDateTime.getDayOfMonth() == dateTime.getDayOfMonth() && startDateTime.getMonthOfYear() == dateTime.getMonthOfYear() && startDateTime.getYear() == dateTime.getYear());
+	}
+
+	/**
+	 * Verifica si la asistencia en R o Vacia
+	 * @param attendanceMark
+	 * @return
+	 */
+	public static boolean isAttendanceMarkEmptyOrFilled(AttendanceMark attendanceMark) {
+		return attendanceMark == AttendanceMark.FILLER || attendanceMark == AttendanceMark.EMPTY;
+	}
+
 }
 

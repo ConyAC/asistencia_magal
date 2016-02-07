@@ -196,6 +196,8 @@ public class LaborerBaseInformation extends VerticalLayout {
 				field = buildAndBind(t, prefix+propertyId);
 				if(field instanceof TextField){
 					((TextField)field).setNullRepresentation("");
+					((TextField)field).setConversionError("Número inválido");
+					((TextField)field).setRequiredError("El elemento es requerido");
 				}
 				
 				if(viewElement){

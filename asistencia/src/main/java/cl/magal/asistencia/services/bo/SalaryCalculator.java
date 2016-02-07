@@ -91,7 +91,7 @@ public class SalaryCalculator {
 	public Double getTTribut(){
 		if(tTribut == null ){
 			tTribut = calculateTTribut(getAfecto(),getSobreAfecto());
-			logger.debug("tTribut {}",tTribut);
+			logger.debug("{} : tTribut {}",attendance.getLaborerConstructionSite().getActiveContract().getJobCode(),tTribut);
 		}
 		return tTribut;
 	}
@@ -553,7 +553,7 @@ public class SalaryCalculator {
 		
 		if(closingDateLastMonth == null )
 			throw new RuntimeException("Aún no se define una fecha de cierre del mes anterior, no se puede calcular el sueldo.");
-		this.closingDateLastMonth = closingDateLastMonth;
+		this.closingDateLastMonth = closingDateLastMonth.plusDays(1);
 		
 		if(wageConfigurations == null )
 			throw new RuntimeException("Aún no se definen los valores de sueldo mínimo, colación y movilización, no se puede calcular el sueldo.");
@@ -588,15 +588,22 @@ public class SalaryCalculator {
 	 * Permite calcular el sueldo de un trabajador
 	 * @return
 	 */
-	public double calculateSalary(Integer jornalPromedio,Double suple,Salary salary2) {
+	public double calculateSalary(Integer jornalPromedio,Double suple,Salary salary2) throws ProjectedAttendanceNotDefined {
 		this.jornalPromedio = jornalPromedio;
 		this.suple = suple;
 		logger.debug("jornalPromedio {}",jornalPromedio);
 		setSalary(salary2);
 		//valida que este toda la información necesaria para el calculo
 		validateInformation();
-		double salary = getAfecto() + getSobreAfecto() + getTNoAfecto() - getTDesc() + this.loans;
-		logger.debug("salario calculado {}",salary);
+		double salary = 0;
+		try{
+			countDiffMarksFromDate(closingDateLastMonth,attendance,lastMonthAttendance,true,AttendanceMark.ATTEND);
+			salary = getAfecto() + getSobreAfecto() + getTNoAfecto() - getTDesc() + this.loans;
+			logger.debug("salario calculado {}",salary);
+		}catch(ProjectedAttendanceNotDefined e){
+			logger.debug("salario calculado {}",salary);
+			salary = 0d;
+		}
 		return salary;
 	}
 	
@@ -674,7 +681,7 @@ public class SalaryCalculator {
 		logger.debug("sumAsistenciaAjustadaMesAnterior {}",sumAsistenciaAjustadaMesAnterior);
 		return sumAsistenciaAjustadaMesAnterior * getJPromedio();
 	}
-
+	
 	/**
 	 * DONE
 	 * @param closingDate
@@ -684,7 +691,19 @@ public class SalaryCalculator {
 	 * @return
 	 */
 	private int countDiffMarksFromDate(DateTime closingDate,Attendance attendance, Attendance lastMonthAttendance, AttendanceMark ... marks) {
-		return countDiffMarksFromDay(closingDate.getDayOfMonth(),closingDate.dayOfMonth().getMaximumValue(),attendance,lastMonthAttendance,marks);
+		return countDiffMarksFromDate(closingDate,attendance,lastMonthAttendance,false,marks);
+	}
+
+	/**
+	 * DONE
+	 * @param closingDate
+	 * @param attendance
+	 * @param lastMonthAttendance
+	 * @param marks
+	 * @return
+	 */
+	private int countDiffMarksFromDate(DateTime closingDate,Attendance attendance, Attendance lastMonthAttendance,boolean checkException, AttendanceMark ... marks) {
+		return countDiffMarksFromDay(closingDate.getDayOfMonth(),closingDate.dayOfMonth().getMaximumValue(),attendance,lastMonthAttendance,checkException,marks);
 	}
 
 	/**
@@ -695,10 +714,10 @@ public class SalaryCalculator {
 	 * @param marks
 	 * @return
 	 */
-	private int countDiffMarksFromDay(Integer lastClosingDate,int maxDays, Attendance attendance,Attendance lastMonthAttendance, AttendanceMark ... marks) {
+	private int countDiffMarksFromDay(Integer lastClosingDate,int maxDays, Attendance attendance,Attendance lastMonthAttendance,boolean checkException, AttendanceMark ... marks) throws ProjectedAttendanceNotDefined {
 		if(attendance == null  )
 			throw new RuntimeException("El objeto de asistencia no pueden ser nulo.");
-		
+
 		//si no hay asistencia anterior, retorna 0 diferencias
 		if( lastMonthAttendance == null )
 			return 0;
@@ -706,17 +725,20 @@ public class SalaryCalculator {
 		List<AttendanceMark> lastRealMarks = attendance.getLastMarksAsList();
 		List<AttendanceMark> projectionsMarks = lastMonthAttendance.getMarksAsList();
 		int count = 0;
-		
+
 		int i = lastClosingDate != null && 0 < lastClosingDate  ? lastClosingDate - 1 : 0;
 		i = Utils.calcularDiaInicial(attendance,i,false);
 		maxDays = Utils.calcularDiaFinal(attendance,maxDays,false);
-		
+
 		if( i >= maxDays )
 			return 0;
-		
-		for(; 
-			i < maxDays ; 
-			i ++){
+
+		for(; i < maxDays ; i ++){
+			// si cualquiera de los dos es vacio, lanza una excepcion
+			if(checkException && lastRealMarks.get(i) == AttendanceMark.EMPTY )
+				throw new ProjectedAttendanceNotDefined("Aún no se define toda la asistencia proyectada.");
+			if(checkException && projectionsMarks.get(i) == AttendanceMark.EMPTY )
+				throw new ProjectedAttendanceNotDefined("Aún no se define toda la asistencia real.");
 			//si son distintos, lo contabiliza
 			if(lastRealMarks.get(i) != projectionsMarks.get(i)){
 				//lo cuenta solo si está dentro del grupo a contabilizar
@@ -729,12 +751,16 @@ public class SalaryCalculator {
 		return count;
 	}
 	
+	public List<AttendanceMark> getAjusteMesAnterior(){
+		return getAjusteMesAnterior(false);
+	}
+	
 	/**
 	 * 
 	 * @return
 	 */
-	public List<AttendanceMark> getAjusteMesAnterior(){
-		return getDiffMarksFromDate(closingDateLastMonth,attendance,lastMonthAttendance);
+	public List<AttendanceMark> getAjusteMesAnterior(boolean checkException){
+		return getDiffMarksFromDate(closingDateLastMonth,attendance,lastMonthAttendance,checkException);
 	}
 	
 	/**
@@ -745,8 +771,8 @@ public class SalaryCalculator {
 	 * @param marks
 	 * @return
 	 */
-	public List<AttendanceMark> getDiffMarksFromDate(DateTime closingDate,Attendance attendance, Attendance lastMonthAttendance) {
-		return getDiffMarksFromDay(closingDate.getDayOfMonth(),closingDate.dayOfMonth().getMaximumValue(),attendance,lastMonthAttendance);
+	public List<AttendanceMark> getDiffMarksFromDate(DateTime closingDate,Attendance attendance, Attendance lastMonthAttendance,boolean checkException) {
+		return getDiffMarksFromDay(closingDate.getDayOfMonth(),closingDate.dayOfMonth().getMaximumValue(),attendance,lastMonthAttendance,checkException);
 	}
 	
 	/**
@@ -757,10 +783,11 @@ public class SalaryCalculator {
 	 * @param marks
 	 * @return
 	 */
-	private List<AttendanceMark> getDiffMarksFromDay(Integer lastClosingDate,int maxDays, Attendance attendance,Attendance lastMonthAttendance) {
+	private List<AttendanceMark> getDiffMarksFromDay(Integer lastClosingDate,int maxDays, Attendance attendance,Attendance lastMonthAttendance,boolean checkException) throws ProjectedAttendanceNotDefined {
 		if(attendance == null )
 			throw new RuntimeException("El objeto de asistencia no pueden ser nulo.");
 		
+//		logger.error("lastClosingDate {},maxDays {}, attendance {}, lastMonthAttendance {},checkException {}",lastClosingDate,maxDays, attendance,lastMonthAttendance,checkException);
 		List<AttendanceMark> resultMarks = new ArrayList<AttendanceMark>();
 		//si el objeto del mes anterior es nulo, retorna la lista vacia
 		if(lastMonthAttendance == null )
@@ -777,6 +804,11 @@ public class SalaryCalculator {
 			return resultMarks;
 		
 		for( ; i < maxDays ; i ++){
+			// si cualquiera de los dos es vacio, lanza una excepcion
+			if(checkException && lastRealMarks.get(i) == AttendanceMark.EMPTY )
+				throw new ProjectedAttendanceNotDefined("Aún no se define toda la asistencia proyectada.");
+			if(checkException && projectionsMarks.get(i) == AttendanceMark.EMPTY )
+				throw new ProjectedAttendanceNotDefined("Aún no se define toda la asistencia real.");
 			//si son distintos, lo contabiliza
 			if(lastRealMarks.get(i) != projectionsMarks.get(i)){
 				//lo cuenta solo si está dentro del grupo a contabilizar
@@ -850,13 +882,13 @@ public class SalaryCalculator {
 	 * DONE Considera la suma de las horas por sobre tiempo
 	 * @return
 	 */
-	private int calculateHorasSobrtpo(Overtime overtime) {
-		int count = 0;
-		for(Integer i : overtime.getOvertimeAsList()){
+	private double calculateHorasSobrtpo(Overtime overtime) {
+		double count = 0;
+		for(Double i : overtime.getOvertimeAsList()){
 			if(i != null)
 				count += i;
 		}
-		for(Integer i : overtime.getLastMonthOvertimeAsList()){
+		for(Double i : overtime.getLastMonthOvertimeAsList()){
 			if(i != null)
 				count += i;
 		}
@@ -1054,7 +1086,8 @@ public class SalaryCalculator {
 		double impuesto = getImpto();
 		logger.debug("impuesto {}",impuesto);
 		logger.debug("suple {}, tool {}, loan {}",suple,tool,loan);
-		return descImposiciones + impuesto + suple - tool - loan;
+//		return descImposiciones + impuesto + suple - tool - loan;
+		return descImposiciones + impuesto + suple + tool + loan;
 	}
 
 	/**
@@ -1167,5 +1200,34 @@ public class SalaryCalculator {
 		return 0.07D;
 	}
 	
-	
+
+	public class ProjectedAttendanceNotDefined extends RuntimeException {
+
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = -1582445685938739242L;
+
+		public ProjectedAttendanceNotDefined() {
+			super();
+			// TODO Auto-generated constructor stub
+		}
+
+		public ProjectedAttendanceNotDefined(String message, Throwable cause) {
+			super(message, cause);
+			// TODO Auto-generated constructor stub
+		}
+
+		public ProjectedAttendanceNotDefined(String message) {
+			super(message);
+			// TODO Auto-generated constructor stub
+		}
+
+		public ProjectedAttendanceNotDefined(Throwable cause) {
+			super(cause);
+			// TODO Auto-generated constructor stub
+		}
+		
+		
+	}
 }

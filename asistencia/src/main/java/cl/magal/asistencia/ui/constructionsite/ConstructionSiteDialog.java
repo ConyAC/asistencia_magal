@@ -162,6 +162,8 @@ public class ConstructionSiteDialog extends AbstractWindowEditor {
 				field.setWidth("100%");
 				if(field instanceof TextField){
 					((TextField)field).setNullRepresentation("");
+					((TextField)field).setConversionError("Número inválido");
+					((TextField)field).setRequiredError("El elemento es requerido");
 				}
 				fl.addComponent(field);
 				fl.setComponentAlignment(field, Alignment.MIDDLE_LEFT);

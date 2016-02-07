@@ -105,28 +105,28 @@ public class LaborerConstructionsite implements Serializable {
     @Column(name = "comment")
     private String comment;
     
-    @OneToMany(mappedBy="laborerConstructionSite",fetch=FetchType.LAZY,cascade={CascadeType.PERSIST,CascadeType.MERGE},orphanRemoval=true )
+    @OneToMany(mappedBy="laborerConstructionSite",fetch=FetchType.LAZY,cascade={ CascadeType.ALL },orphanRemoval=true )
     List<Vacation> vacations = new ArrayList<Vacation>();
     
-    @OneToMany(mappedBy="laborerConstructionSite",fetch=FetchType.LAZY,cascade={CascadeType.PERSIST,CascadeType.MERGE},orphanRemoval=true )
+    @OneToMany(mappedBy="laborerConstructionSite",fetch=FetchType.LAZY,cascade={ CascadeType.ALL },orphanRemoval=true )
     List<ProgressiveVacation> progressiveVacation = new ArrayList<ProgressiveVacation>();
     
-    @OneToMany(mappedBy="laborerConstructionSite",fetch=FetchType.LAZY,cascade={CascadeType.PERSIST,CascadeType.MERGE},orphanRemoval=true )
+    @OneToMany(mappedBy="laborerConstructionSite",fetch=FetchType.LAZY,cascade={ CascadeType.ALL },orphanRemoval=true )
     List<License> absences = new ArrayList<License>();
     
-    @OneToMany(mappedBy="laborerConstructionSite",fetch=FetchType.LAZY,cascade={CascadeType.PERSIST,CascadeType.MERGE},orphanRemoval=true )
+    @OneToMany(mappedBy="laborerConstructionSite",fetch=FetchType.LAZY,cascade={ CascadeType.ALL },orphanRemoval=true )
     List<Accident> accidents = new ArrayList<Accident>();
     
-    @OneToMany(mappedBy="laborerConstructionSite",fetch=FetchType.LAZY,cascade={CascadeType.PERSIST,CascadeType.MERGE},orphanRemoval=true )
+    @OneToMany(mappedBy="laborerConstructionSite",fetch=FetchType.LAZY,cascade={ CascadeType.ALL },orphanRemoval=true )
     List<Tool> tool = new ArrayList<Tool>();
     
-    @OneToMany(mappedBy="laborerConstructionSite",fetch=FetchType.LAZY,cascade = { CascadeType.PERSIST, CascadeType.MERGE },orphanRemoval=true )
+    @OneToMany(mappedBy="laborerConstructionSite",fetch=FetchType.LAZY,cascade = { CascadeType.ALL },orphanRemoval=true )
     List<Loan> loan = new ArrayList<Loan>();
     
-    @OneToMany(mappedBy="laborerConstructionSite",fetch=FetchType.LAZY,cascade = { CascadeType.PERSIST, CascadeType.MERGE },orphanRemoval=true )
+    @OneToMany(mappedBy="laborerConstructionSite",fetch=FetchType.LAZY,cascade = { CascadeType.ALL },orphanRemoval=true )
     List<WithdrawalSettlement> withdrawalSettlements = new ArrayList<WithdrawalSettlement>();
    
-    @ManyToMany(mappedBy="laborerConstructionsites",cascade = { CascadeType.PERSIST, CascadeType.MERGE })
+    @ManyToMany(mappedBy="laborerConstructionsites",cascade = { CascadeType.ALL })
     List<Team> teams = new ArrayList<Team>();
     
     /**

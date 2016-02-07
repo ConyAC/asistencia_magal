@@ -42,12 +42,13 @@
 		<property name="username" value="sa" />
 		<property name="password" value="" />
 	</bean>
+
 	<jdbc:initialize-database data-source="datasource">
 	    <jdbc:script location="classpath:/META-INF/sql/schema.sql"/>
 	    <jdbc:script location="classpath:/META-INF/sql/data.sql"/>
 	</jdbc:initialize-database>
 	-->
-	<bean id="datasource" 
+		<bean id="datasource" 
 		class="org.springframework.jdbc.datasource.DriverManagerDataSource">
  
 		<property name="driverClassName" value="com.mysql.jdbc.Driver" />
@@ -55,7 +56,7 @@
 		<property name="username" value="root" />
 		<property name="password" value="" />
 	</bean>
-	
+		
 	<bean id="jpaDialect" class="org.springframework.orm.jpa.vendor.EclipseLinkJpaDialect" >
 		<!-- org.eclipse.persistence.platform.database.MySQLPlatform  -->
 		<!--  <property name="databasePlatform" value="org.eclipse.persistence.platform.database.H2Platform" /> -->

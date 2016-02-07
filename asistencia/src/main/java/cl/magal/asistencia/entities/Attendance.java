@@ -52,247 +52,247 @@ public class Attendance implements Serializable {
 	
 	@Convert(converter = AttendanceMarkConverter.class)
 	@Column(name="dmp1")
-	AttendanceMark dmp1 = AttendanceMark.VACIO; //AttendanceMark.ATTEND;
+	AttendanceMark dmp1 = AttendanceMark.EMPTY; //AttendanceMark.ATTEND;
 	
 	@Convert(converter = AttendanceMarkConverter.class)
 	@Column(name="dmp2")
-	AttendanceMark dmp2 = AttendanceMark.VACIO; //AttendanceMark.ATTEND;
+	AttendanceMark dmp2 = AttendanceMark.EMPTY; //AttendanceMark.ATTEND;
 	
 	@Convert(converter = AttendanceMarkConverter.class)
 	@Column(name="dmp3")
-	AttendanceMark dmp3 = AttendanceMark.VACIO; //AttendanceMark.ATTEND;
+	AttendanceMark dmp3 = AttendanceMark.EMPTY; //AttendanceMark.ATTEND;
 	
 	@Convert(converter = AttendanceMarkConverter.class)
 	@Column(name="dmp4")
-	AttendanceMark dmp4 = AttendanceMark.VACIO; //AttendanceMark.ATTEND;
+	AttendanceMark dmp4 = AttendanceMark.EMPTY; //AttendanceMark.ATTEND;
 	
 	@Convert(converter = AttendanceMarkConverter.class)
 	@Column(name="dmp5")
-	AttendanceMark dmp5 = AttendanceMark.VACIO; //AttendanceMark.ATTEND;
+	AttendanceMark dmp5 = AttendanceMark.EMPTY; //AttendanceMark.ATTEND;
 	
 	@Convert(converter = AttendanceMarkConverter.class)
 	@Column(name="dmp6")
-	AttendanceMark dmp6 = AttendanceMark.VACIO; //AttendanceMark.ATTEND;
+	AttendanceMark dmp6 = AttendanceMark.EMPTY; //AttendanceMark.ATTEND;
 	
 	@Convert(converter = AttendanceMarkConverter.class)
 	@Column(name="dmp7")
-	AttendanceMark dmp7 = AttendanceMark.VACIO; //AttendanceMark.ATTEND;
+	AttendanceMark dmp7 = AttendanceMark.EMPTY; //AttendanceMark.ATTEND;
 	
 	@Convert(converter = AttendanceMarkConverter.class)
 	@Column(name="dmp8")
-	AttendanceMark dmp8 = AttendanceMark.VACIO; //AttendanceMark.ATTEND;
+	AttendanceMark dmp8 = AttendanceMark.EMPTY; //AttendanceMark.ATTEND;
 	
 	@Convert(converter = AttendanceMarkConverter.class)
 	@Column(name="dmp9")
-	AttendanceMark dmp9 = AttendanceMark.VACIO; //AttendanceMark.ATTEND;
+	AttendanceMark dmp9 = AttendanceMark.EMPTY; //AttendanceMark.ATTEND;
 	
 	@Convert(converter = AttendanceMarkConverter.class)
 	@Column(name="dmp10")
-	AttendanceMark dmp10 = AttendanceMark.VACIO; //AttendanceMark.ATTEND;
+	AttendanceMark dmp10 = AttendanceMark.EMPTY; //AttendanceMark.ATTEND;
 	
 	@Convert(converter = AttendanceMarkConverter.class)
 	@Column(name="dmp11")
-	AttendanceMark dmp11 = AttendanceMark.VACIO; //AttendanceMark.ATTEND;
+	AttendanceMark dmp11 = AttendanceMark.EMPTY; //AttendanceMark.ATTEND;
 	
 	@Convert(converter = AttendanceMarkConverter.class)
 	@Column(name="dmp12")
-	AttendanceMark dmp12 = AttendanceMark.VACIO; //AttendanceMark.ATTEND;
+	AttendanceMark dmp12 = AttendanceMark.EMPTY; //AttendanceMark.ATTEND;
 	
 	@Convert(converter = AttendanceMarkConverter.class)
 	@Column(name="dmp13")
-	AttendanceMark dmp13 = AttendanceMark.VACIO; //AttendanceMark.ATTEND;
+	AttendanceMark dmp13 = AttendanceMark.EMPTY; //AttendanceMark.ATTEND;
 	
 	@Convert(converter = AttendanceMarkConverter.class)
 	@Column(name="dmp14")
-	AttendanceMark dmp14 = AttendanceMark.VACIO; //AttendanceMark.ATTEND;
+	AttendanceMark dmp14 = AttendanceMark.EMPTY; //AttendanceMark.ATTEND;
 	
 	@Convert(converter = AttendanceMarkConverter.class)
 	@Column(name="dmp15")
-	AttendanceMark dmp15 = AttendanceMark.VACIO; //AttendanceMark.ATTEND;
+	AttendanceMark dmp15 = AttendanceMark.EMPTY; //AttendanceMark.ATTEND;
 	
 	@Convert(converter = AttendanceMarkConverter.class)
 	@Column(name="dmp16")
-	AttendanceMark dmp16 = AttendanceMark.VACIO; //AttendanceMark.ATTEND;
+	AttendanceMark dmp16 = AttendanceMark.EMPTY; //AttendanceMark.ATTEND;
 	
 	@Convert(converter = AttendanceMarkConverter.class)
 	@Column(name="dmp17")
-	AttendanceMark dmp17 = AttendanceMark.VACIO; //AttendanceMark.ATTEND;
+	AttendanceMark dmp17 = AttendanceMark.EMPTY; //AttendanceMark.ATTEND;
 	
 	@Convert(converter = AttendanceMarkConverter.class)
 	@Column(name="dmp18")
-	AttendanceMark dmp18 = AttendanceMark.VACIO; //AttendanceMark.ATTEND;
+	AttendanceMark dmp18 = AttendanceMark.EMPTY; //AttendanceMark.ATTEND;
 	
 	@Convert(converter = AttendanceMarkConverter.class)
 	@Column(name="dmp19")
-	AttendanceMark dmp19 = AttendanceMark.VACIO; //AttendanceMark.ATTEND;
+	AttendanceMark dmp19 = AttendanceMark.EMPTY; //AttendanceMark.ATTEND;
 	
 	@Convert(converter = AttendanceMarkConverter.class)
 	@Column(name="dmp20")
-	AttendanceMark dmp20 = AttendanceMark.VACIO; //AttendanceMark.ATTEND;
+	AttendanceMark dmp20 = AttendanceMark.EMPTY; //AttendanceMark.ATTEND;
 	
 	@Convert(converter = AttendanceMarkConverter.class)
 	@Column(name="dmp21")
-	AttendanceMark dmp21 = AttendanceMark.VACIO; //AttendanceMark.ATTEND;
+	AttendanceMark dmp21 = AttendanceMark.EMPTY; //AttendanceMark.ATTEND;
 	
 	@Convert(converter = AttendanceMarkConverter.class)
 	@Column(name="dmp22")
-	AttendanceMark dmp22 = AttendanceMark.VACIO; //AttendanceMark.ATTEND;
+	AttendanceMark dmp22 = AttendanceMark.EMPTY; //AttendanceMark.ATTEND;
 	
 	@Convert(converter = AttendanceMarkConverter.class)
 	@Column(name="dmp23")
-	AttendanceMark dmp23 = AttendanceMark.VACIO; //AttendanceMark.ATTEND;
+	AttendanceMark dmp23 = AttendanceMark.EMPTY; //AttendanceMark.ATTEND;
 	
 	@Convert(converter = AttendanceMarkConverter.class)
 	@Column(name="dmp24")
-	AttendanceMark dmp24 = AttendanceMark.VACIO; //AttendanceMark.ATTEND;
+	AttendanceMark dmp24 = AttendanceMark.EMPTY; //AttendanceMark.ATTEND;
 	
 	@Convert(converter = AttendanceMarkConverter.class)
 	@Column(name="dmp25")
-	AttendanceMark dmp25 = AttendanceMark.VACIO; //AttendanceMark.ATTEND;
+	AttendanceMark dmp25 = AttendanceMark.EMPTY; //AttendanceMark.ATTEND;
 	
 	@Convert(converter = AttendanceMarkConverter.class)
 	@Column(name="dmp26")
-	AttendanceMark dmp26 = AttendanceMark.VACIO; //AttendanceMark.ATTEND;
+	AttendanceMark dmp26 = AttendanceMark.EMPTY; //AttendanceMark.ATTEND;
 	
 	@Convert(converter = AttendanceMarkConverter.class)
 	@Column(name="dmp27")
-	AttendanceMark dmp27 = AttendanceMark.VACIO; //AttendanceMark.ATTEND;
+	AttendanceMark dmp27 = AttendanceMark.EMPTY; //AttendanceMark.ATTEND;
 	
 	@Convert(converter = AttendanceMarkConverter.class)
 	@Column(name="dmp28")
-	AttendanceMark dmp28 = AttendanceMark.VACIO; //AttendanceMark.ATTEND;
+	AttendanceMark dmp28 = AttendanceMark.EMPTY; //AttendanceMark.ATTEND;
 	
 	@Convert(converter = AttendanceMarkConverter.class)
 	@Column(name="dmp29")
-	AttendanceMark dmp29 = AttendanceMark.VACIO; //AttendanceMark.ATTEND;
+	AttendanceMark dmp29 = AttendanceMark.EMPTY; //AttendanceMark.ATTEND;
 	@Convert(converter = AttendanceMarkConverter.class)
 	@Column(name="dmp30")
-	AttendanceMark dmp30 = AttendanceMark.VACIO; //AttendanceMark.ATTEND;
+	AttendanceMark dmp30 = AttendanceMark.EMPTY; //AttendanceMark.ATTEND;
 	@Convert(converter = AttendanceMarkConverter.class)
 	@Column(name="dmp31")
-	AttendanceMark dmp31 = AttendanceMark.VACIO; //AttendanceMark.ATTEND;
+	AttendanceMark dmp31 = AttendanceMark.EMPTY; //AttendanceMark.ATTEND;
 	
 	@Convert(converter = AttendanceMarkConverter.class)
 	@Column(name = "dma1" ,nullable = false )
-	AttendanceMark dma1 = AttendanceMark.VACIO; //AttendanceMark.ATTEND;
+	AttendanceMark dma1 = AttendanceMark.EMPTY; //AttendanceMark.ATTEND;
 	
 	@Convert(converter = AttendanceMarkConverter.class)
 	@Column(name = "dma2" ,nullable = false )
-	AttendanceMark dma2 = AttendanceMark.VACIO; //AttendanceMark.ATTEND;
+	AttendanceMark dma2 = AttendanceMark.EMPTY; //AttendanceMark.ATTEND;
 	
 	@Convert(converter = AttendanceMarkConverter.class)
 	@Column(name = "dma3" ,nullable = false )
-	AttendanceMark dma3 = AttendanceMark.VACIO; //AttendanceMark.ATTEND;
+	AttendanceMark dma3 = AttendanceMark.EMPTY; //AttendanceMark.ATTEND;
 	
 	@Convert(converter = AttendanceMarkConverter.class)
 	@Column(name = "dma4" ,nullable = false )
-	AttendanceMark dma4 = AttendanceMark.VACIO; //AttendanceMark.ATTEND;
+	AttendanceMark dma4 = AttendanceMark.EMPTY; //AttendanceMark.ATTEND;
 	
 	@Convert(converter = AttendanceMarkConverter.class)
 	@Column(name = "dma5" ,nullable = false )
-	AttendanceMark dma5 = AttendanceMark.VACIO; //AttendanceMark.ATTEND;
+	AttendanceMark dma5 = AttendanceMark.EMPTY; //AttendanceMark.ATTEND;
 	
 	@Convert(converter = AttendanceMarkConverter.class)
 	@Column(name = "dma6" ,nullable = false )
-	AttendanceMark dma6 = AttendanceMark.VACIO; //AttendanceMark.ATTEND;
+	AttendanceMark dma6 = AttendanceMark.EMPTY; //AttendanceMark.ATTEND;
 	
 	@Convert(converter = AttendanceMarkConverter.class)
 	@Column(name = "dma7" ,nullable = false )
-	AttendanceMark dma7 = AttendanceMark.VACIO; //AttendanceMark.ATTEND;
+	AttendanceMark dma7 = AttendanceMark.EMPTY; //AttendanceMark.ATTEND;
 	
 	@Convert(converter = AttendanceMarkConverter.class)
 	@Column(name = "dma8" ,nullable = false )
-	AttendanceMark dma8 = AttendanceMark.VACIO; //AttendanceMark.ATTEND;
+	AttendanceMark dma8 = AttendanceMark.EMPTY; //AttendanceMark.ATTEND;
 	
 	@Convert(converter = AttendanceMarkConverter.class)
 	@Column(name = "dma9" ,nullable = false )
-	AttendanceMark dma9 = AttendanceMark.VACIO; //AttendanceMark.ATTEND;
+	AttendanceMark dma9 = AttendanceMark.EMPTY; //AttendanceMark.ATTEND;
 	
 	@Convert(converter = AttendanceMarkConverter.class)
 	@Column(name = "dma10" ,nullable = false )
-	AttendanceMark dma10 = AttendanceMark.VACIO; //AttendanceMark.ATTEND;
+	AttendanceMark dma10 = AttendanceMark.EMPTY; //AttendanceMark.ATTEND;
 	
 	@Convert(converter = AttendanceMarkConverter.class)
 	@Column(name = "dma11" ,nullable = false )
-	AttendanceMark dma11 = AttendanceMark.VACIO; //AttendanceMark.ATTEND;
+	AttendanceMark dma11 = AttendanceMark.EMPTY; //AttendanceMark.ATTEND;
 	
 	@Convert(converter = AttendanceMarkConverter.class)
 	@Column(name = "dma12" ,nullable = false )
-	AttendanceMark dma12 = AttendanceMark.VACIO; //AttendanceMark.ATTEND;
+	AttendanceMark dma12 = AttendanceMark.EMPTY; //AttendanceMark.ATTEND;
 	
 	@Convert(converter = AttendanceMarkConverter.class)
 	@Column(name = "dma13" ,nullable = false )
-	AttendanceMark dma13 = AttendanceMark.VACIO; //AttendanceMark.ATTEND;
+	AttendanceMark dma13 = AttendanceMark.EMPTY; //AttendanceMark.ATTEND;
 	
 	@Convert(converter = AttendanceMarkConverter.class)
 	@Column(name = "dma14" ,nullable = false )
-	AttendanceMark dma14 = AttendanceMark.VACIO; //AttendanceMark.ATTEND;
+	AttendanceMark dma14 = AttendanceMark.EMPTY; //AttendanceMark.ATTEND;
 	
 	@Convert(converter = AttendanceMarkConverter.class)
 	@Column(name = "dma15" ,nullable = false )
-	AttendanceMark dma15 = AttendanceMark.VACIO; //AttendanceMark.ATTEND;
+	AttendanceMark dma15 = AttendanceMark.EMPTY; //AttendanceMark.ATTEND;
 	
 	@Convert(converter = AttendanceMarkConverter.class)
 	@Column(name = "dma16" ,nullable = false )
-	AttendanceMark dma16 = AttendanceMark.VACIO; //AttendanceMark.ATTEND;
+	AttendanceMark dma16 = AttendanceMark.EMPTY; //AttendanceMark.ATTEND;
 	
 	@Convert(converter = AttendanceMarkConverter.class)
 	@Column(name = "dma17" ,nullable = false )
-	AttendanceMark dma17 = AttendanceMark.VACIO; //AttendanceMark.ATTEND;
+	AttendanceMark dma17 = AttendanceMark.EMPTY; //AttendanceMark.ATTEND;
 	
 	@Convert(converter = AttendanceMarkConverter.class)
 	@Column(name = "dma18" ,nullable = false )
-	AttendanceMark dma18 = AttendanceMark.VACIO; //AttendanceMark.ATTEND;
+	AttendanceMark dma18 = AttendanceMark.EMPTY; //AttendanceMark.ATTEND;
 	
 	@Convert(converter = AttendanceMarkConverter.class)
 	@Column(name = "dma19" ,nullable = false )
-	AttendanceMark dma19 = AttendanceMark.VACIO; //AttendanceMark.ATTEND;
+	AttendanceMark dma19 = AttendanceMark.EMPTY; //AttendanceMark.ATTEND;
 	
 	@Convert(converter = AttendanceMarkConverter.class)
 	@Column(name = "dma20" ,nullable = false )
-	AttendanceMark dma20 = AttendanceMark.VACIO; //AttendanceMark.ATTEND;
+	AttendanceMark dma20 = AttendanceMark.EMPTY; //AttendanceMark.ATTEND;
 	
 	@Convert(converter = AttendanceMarkConverter.class)
 	@Column(name = "dma21" ,nullable = false )
-	AttendanceMark dma21 = AttendanceMark.VACIO; //AttendanceMark.ATTEND;
+	AttendanceMark dma21 = AttendanceMark.EMPTY; //AttendanceMark.ATTEND;
 	
 	@Convert(converter = AttendanceMarkConverter.class)
 	@Column(name = "dma22" ,nullable = false )
-	AttendanceMark dma22 = AttendanceMark.VACIO; //AttendanceMark.ATTEND;
+	AttendanceMark dma22 = AttendanceMark.EMPTY; //AttendanceMark.ATTEND;
 	
 	@Convert(converter = AttendanceMarkConverter.class)
 	@Column(name = "dma23" ,nullable = false )
-	AttendanceMark dma23 = AttendanceMark.VACIO; //AttendanceMark.ATTEND;
+	AttendanceMark dma23 = AttendanceMark.EMPTY; //AttendanceMark.ATTEND;
 	
 	@Convert(converter = AttendanceMarkConverter.class)
 	@Column(name = "dma24" ,nullable = false )
-	AttendanceMark dma24 = AttendanceMark.VACIO; //AttendanceMark.ATTEND;
+	AttendanceMark dma24 = AttendanceMark.EMPTY; //AttendanceMark.ATTEND;
 	
 	@Convert(converter = AttendanceMarkConverter.class)
 	@Column(name = "dma25" ,nullable = false )
-	AttendanceMark dma25 = AttendanceMark.VACIO; //AttendanceMark.ATTEND;
+	AttendanceMark dma25 = AttendanceMark.EMPTY; //AttendanceMark.ATTEND;
 	
 	@Convert(converter = AttendanceMarkConverter.class)
 	@Column(name = "dma26" ,nullable = false )
-	AttendanceMark dma26 = AttendanceMark.VACIO; //AttendanceMark.ATTEND;
+	AttendanceMark dma26 = AttendanceMark.EMPTY; //AttendanceMark.ATTEND;
 	
 	@Convert(converter = AttendanceMarkConverter.class)
 	@Column(name = "dma27" ,nullable = false )
-	AttendanceMark dma27 = AttendanceMark.VACIO; //AttendanceMark.ATTEND;
+	AttendanceMark dma27 = AttendanceMark.EMPTY; //AttendanceMark.ATTEND;
 	
 	@Convert(converter = AttendanceMarkConverter.class)
 	@Column(name = "dma28" ,nullable = false )
-	AttendanceMark dma28 = AttendanceMark.VACIO; //AttendanceMark.ATTEND;
+	AttendanceMark dma28 = AttendanceMark.EMPTY; //AttendanceMark.ATTEND;
 	
 	@Convert(converter = AttendanceMarkConverter.class)
 	@Column(name="dma29")
-	AttendanceMark dma29 = AttendanceMark.VACIO; //AttendanceMark.ATTEND;
+	AttendanceMark dma29 = AttendanceMark.EMPTY; //AttendanceMark.ATTEND;
 	@Convert(converter = AttendanceMarkConverter.class)
 	@Column(name="dma30")
-	AttendanceMark dma30 = AttendanceMark.VACIO; //AttendanceMark.ATTEND;
+	AttendanceMark dma30 = AttendanceMark.EMPTY; //AttendanceMark.ATTEND;
 	@Convert(converter = AttendanceMarkConverter.class)
 	@Column(name="dma31")
-	AttendanceMark dma31 = AttendanceMark.VACIO; //AttendanceMark.ATTEND;
+	AttendanceMark dma31 = AttendanceMark.EMPTY; //AttendanceMark.ATTEND;
 	
 	public List<AttendanceMark> getMarksAsList() {
 		ArrayList<AttendanceMark> tmp = new ArrayList<AttendanceMark>();
@@ -891,7 +891,8 @@ public class Attendance implements Serializable {
 	@Override
 	public String toString() {
 		return "Attendance [attendanceId=" + id + ", date=" + date
-				+ ", laborerConstructionSite=" + laborerConstructionSite + "]";
+				+ ", laborerConstructionSite=" + laborerConstructionSite 
+				+ ", attendances "+getMarksAsList()+ "]";
 	}
 
 	public void setMark(AttendanceMark attendanceMark, int i) {
