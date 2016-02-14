@@ -52,11 +52,17 @@ public class CostAccount implements Serializable {
         this.id = costaccountId;
     }
 
-    public CostAccount(Long costaccountId, String code, String name) {
-        this.id = costaccountId;
+//    public CostAccount(Long costaccountId, String code, String name) {
+//        this.constructionSite = costaccountId;
+//        this.code = code;
+//        this.name = name;
+//    }    
+    
+    public CostAccount(Long id, String code, String name) {
+        this.id = id;
         this.code = code;
         this.name = name;
-    }    
+    }  
     
 	public Long getId() {
 		return id;

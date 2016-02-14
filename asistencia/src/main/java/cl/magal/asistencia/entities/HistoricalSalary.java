@@ -76,6 +76,9 @@ public class HistoricalSalary implements Serializable {
 	@Column(name="loan_bond")
 	Integer loanBond = 0;
 	
+	@JoinColumn(name="costaccountId",nullable=false)
+	CostAccount costAccount;
+	
 //	@JoinColumn(name="attendanceId",nullable=false)
 //	Attendance attendance;
 	
@@ -208,6 +211,7 @@ public class HistoricalSalary implements Serializable {
 		mov2 = salary.getMov2();
 		tnoAfecto = salary.getTnoAfecto();
 		loan = salary.getLoan();
+		costAccount = salary.getCostAccount();
 	}
 	
 	public Long getId() {
@@ -304,6 +308,14 @@ public class HistoricalSalary implements Serializable {
         return loanBond;
     }
 	
+	public CostAccount getCostAccount() {
+		return costAccount;
+	}
+
+	public void setCostAccount(CostAccount costAccount) {
+		this.costAccount = costAccount;
+	}
+
 	/**
 	 * columnas ocultables
 	 * @return

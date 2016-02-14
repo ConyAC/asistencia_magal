@@ -116,9 +116,6 @@ public class Contract implements Serializable {
     
     @OneToMany(mappedBy="contract",fetch=FetchType.LAZY,cascade={CascadeType.PERSIST,CascadeType.MERGE},orphanRemoval=true )
     List<Annexed> annexeds = new ArrayList<Annexed>();
-    
-    @JoinColumn(name="costaccountId")
-    CostAccount costAccount;
 
     public Contract() {
     }
@@ -283,14 +280,6 @@ public class Contract implements Serializable {
 
 	public void setSpeciality(Speciality speciality) {
 		this.speciality = speciality;
-	}
-
-	public CostAccount getCostAccount() {
-		return costAccount;
-	}
-
-	public void setCostAccount(CostAccount costAccount) {
-		this.costAccount = costAccount;
 	}
 
 	@Override

@@ -11,9 +11,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.apache.poi.hssf.usermodel.HSSFSheet;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -24,7 +21,6 @@ import org.slf4j.LoggerFactory;
 import cl.magal.asistencia.entities.ConstructionCompany;
 import cl.magal.asistencia.entities.ConstructionSite;
 import cl.magal.asistencia.entities.CostAccount;
-import cl.magal.asistencia.entities.FamilyAllowanceConfigurations;
 import cl.magal.asistencia.entities.Speciality;
 import cl.magal.asistencia.entities.User;
 import cl.magal.asistencia.entities.enums.Job;
@@ -33,6 +29,7 @@ import cl.magal.asistencia.entities.enums.Status;
 import cl.magal.asistencia.services.ConstructionSiteService;
 import cl.magal.asistencia.services.UserService;
 import cl.magal.asistencia.ui.AbstractWindowEditor;
+import cl.magal.asistencia.ui.MagalUI;
 import cl.magal.asistencia.ui.OnValueChangeFieldFactory;
 import cl.magal.asistencia.ui.OnValueChangeFieldFactory.OnValueChangeListener;
 import cl.magal.asistencia.util.Constants;
@@ -48,7 +45,6 @@ import com.vaadin.data.util.BeanItem;
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.data.util.filter.Compare;
 import com.vaadin.server.FontAwesome;
-import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.AbstractSelect.ItemCaptionMode;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
@@ -58,11 +54,12 @@ import com.vaadin.ui.Component;
 import com.vaadin.ui.Field;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
-import com.vaadin.ui.TextArea;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.Upload;
+import com.vaadin.ui.Upload.Receiver;
+import com.vaadin.ui.Upload.SucceededEvent;
+import com.vaadin.ui.Upload.SucceededListener;
 import com.vaadin.ui.Window;
 import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.Panel;
@@ -92,7 +89,8 @@ public class ConstructionSiteDialog extends AbstractWindowEditor {
 	
 	Table tableSteps;
 	Table tableCosto;
-
+	String fullpath;
+	
 	public ConstructionSiteDialog(BeanItem<ConstructionSite> item, BeanItemContainer<User> user, BeanItemContainer<ConstructionCompany> constructionCompany, ConstructionSiteService service ){
 		super(item);
 		if(service == null )
@@ -108,6 +106,7 @@ public class ConstructionSiteDialog extends AbstractWindowEditor {
 
 	public void init(){
 		super.init();
+		fullpath = (String) ((MagalUI)UI.getCurrent()).getSpringBean("uploaded_files_path");
 	}
 
 	@Override
@@ -394,6 +393,7 @@ public class ConstructionSiteDialog extends AbstractWindowEditor {
 		tableCosto = new Table(null, costContainer);
 		tableCosto.setPageLength(6);
 		tableCosto.setWidth("100%");
+		tableCosto.setImmediate(true);
 		tableCosto.setTableFieldFactory(new TableFieldFactory() {
 			
 			@Override
@@ -419,13 +419,12 @@ public class ConstructionSiteDialog extends AbstractWindowEditor {
 
 					@Override
 					public void buttonClick(ClickEvent event) {
-						//confirma que no se esté usando
-						CostAccount costAccount = costContainer.getItem(itemId).getBean();;
-						if(service.checkCostAccountInUse((ConstructionSite) getItem().getBean(), costAccount)){
-							Notification.show("No se puede borrar la cuenta de costo dado que está asignada a trabajadores de la obra");
-							return;
-						}
-						service.removeCostAccount(costAccount);
+						//No se valida la eliminación, puesto que es labor del administrador reasignar un código 
+						//si este ha sido eliminado tanto por la carga del excel como manualmente.
+						CostAccount costAccount = costContainer.getItem(itemId).getBean();
+						//service.removeCostAccount(costAccount);
+						//Tb debe eliminarse si esta relacionado a algún trabajador
+						service.removeCostAccountIdByCSAndCost(costAccount, (ConstructionSite) getItem().getBean());
 						costContainer.removeItem(itemId);
 					}
 				}){ {setIcon(FontAwesome.TRASH_O);} };
@@ -478,134 +477,114 @@ public class ConstructionSiteDialog extends AbstractWindowEditor {
 		});
 		vl.addComponent(btn);
 		
-		//boton para subir excel de  cuentas de costo
+		//boton para cargar excel de cuentas de costo
 		Button btnCargar = new Button(null,FontAwesome.FILE_EXCEL_O);
 		btnCargar.setVisible(SecurityHelper.hasPermission(Permission.AGREGAR_CUENTAS_COSTO));
 		btnCargar.addClickListener(new Button.ClickListener() {
 
 			@Override
 			public void buttonClick(ClickEvent event) {
-				logger.debug("CLIC!!!");
-				service.removeAll();
+				service.removeByConstructionSite((ConstructionSite) getItem().getBean());
 				costContainer.removeAllItems();
-				final Window window = new Window();
-
-				window.center();
+				
+				final Window window = new Window("Cuenta de Costos");
+				VerticalLayout subContent = new VerticalLayout();
+				subContent.setMargin(true);
+				subContent.setWidth("550px");
+				subContent.setHeight("120px");
+				
 				window.setModal(true);
 				window.setResizable(false);
+				window.center();
+				
+				Upload upload = new Upload("Cargar Archivo", null);
+				upload.setButtonCaption("Iniciar Carga");
+				
+				class fileUploader implements Receiver, SucceededListener {
+				    /**
+					 * 
+					 */
+					private static final long serialVersionUID = -2957126296893401853L;
+					public File file;
+				    
+				    public OutputStream receiveUpload(String filename, String mimeType) {
+				        // Create upload stream
+				        FileOutputStream fos = null; // Output stream to write to
+				        try {
+				            // Open the file for writing.
+				        	logger.debug("filename {}",fullpath);
+				            file = new File(fullpath+filename);
+				            fos = new FileOutputStream(file);
+				            
+				        } catch (final java.io.FileNotFoundException e) {
+				        	logger.error("Error al obtener el archivo ",e);
+				        	new Notification("No es posible acceder al archivo", e.getMessage());
+				            return null;
+				        }catch (Exception e) {
+				        	logger.error("Error al obtener el archivo ",e);
+				        	new Notification("No es posible acceder al archivo", e.getMessage());
+				            return null;
+				        }
+				        return fos; // Return the output stream to write to
+				    }
 
-				window.setContent(new VerticalLayout() {
-					{
-						setMargin(true);
-						VerticalLayout form = new VerticalLayout() {
-							{
-								setWidth("700px");
-								setMargin(true);
-								setSpacing(true);
-								addComponent(new Upload("Cuenta de Costos: ",
-										new Upload.Receiver() {
+					@Override
+					public void uploadSucceeded(SucceededEvent event) {
+			        	//Get the workbook instance for XLS file 
+						XSSFWorkbook workbook = null;
+						try {
+							workbook = new XSSFWorkbook (new FileInputStream(file));
+						} catch (FileNotFoundException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						} catch (IOException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+						 
+						//Get first sheet from the workbook
+						XSSFSheet sheet = workbook.getSheetAt(0);			
+						//Get iterator to all the rows in current sheet
+						Iterator<Row> rowIterator = sheet.iterator();
+					    while(rowIterator.hasNext()) {
+					        Row row = rowIterator.next();					       
+					        //For each row, iterate through each columns
+					        Iterator<Cell> cellIterator = row.cellIterator();
+					        CostAccount costAccount = new CostAccount();
+					        while(cellIterator.hasNext()) {
+					            Cell cell = cellIterator.next();
+					            if(cell.getRowIndex() > 0){ //saltamos el titulo del excel					            	
+//						            switch(cell.getCellType()) {
+//						                case Cell.CELL_TYPE_NUMERIC:						                	
+//						                	costAccount.setCode(String.valueOf(cell.getNumericCellValue()));
+//						                    break;
+//						                case Cell.CELL_TYPE_STRING:
+//						                	costAccount.setName(cell.getStringCellValue());
+//						                    break;
+//						            }
 
-											@Override
-											public OutputStream receiveUpload(
-													String filename,
-													String mimeType) {
-												
-												try {
-													FileInputStream file = new FileInputStream(new File("C:\\Users\\Usuario\\Desktop\\test.xlsx"));												
-													//Get the workbook instance for XLS file 
-													XSSFWorkbook workbook = new XSSFWorkbook (file);
-													 
-													//Get first sheet from the workbook
-													XSSFSheet sheet = workbook.getSheetAt(0);
-													 
-													//Get iterator to all the rows in current sheet
-													Iterator<Row> rowIterator = sheet.iterator();
-												    while(rowIterator.hasNext()) {
-												        Row row = rowIterator.next();
-												         
-												        //For each row, iterate through each columns
-												        Iterator<Cell> cellIterator = row.cellIterator();
-												        while(cellIterator.hasNext()) {
-												             
-												            Cell cell = cellIterator.next();
-												            CostAccount costAccount = new CostAccount();
-												            switch(cell.getCellType()) {
-												                case Cell.CELL_TYPE_BOOLEAN:
-												                    System.out.print("VER 1: "+cell.getBooleanCellValue() + "\t\t");
-												                    break;
-												                case Cell.CELL_TYPE_NUMERIC:
-												                    System.out.print("VER 2: "+cell.getNumericCellValue() + "\t\t");
-												                    break;
-												                case Cell.CELL_TYPE_STRING:
-												    				costAccount.setCode(cell.getStringCellValue());
-												    				costAccount.setName(cell.getStringCellValue());
-												    				costAccount.setConstructionSite((ConstructionSite) getItem().getBean());
-												    				costContainer.addBean(costAccount);
-												                    System.out.print("VER 3: "+cell.getStringCellValue() + "\t\t");
-												                    break;
-												            }
-												        }
-												        System.out.println("");
-												    }
-												    file.close();
-												    FileOutputStream out = 
-												        new FileOutputStream(new File("C:\\Users\\Usuario\\Desktop\\test.xlsx"));
-												    workbook.write(out);
-												    out.close();												     
-												} catch (FileNotFoundException e) {
-												    e.printStackTrace();
-												} catch (IOException e) {
-												    e.printStackTrace();
-												}
-												return null; 
-											}
-										}));
-							}
-						};
-
-						addComponent(form);
-						setExpandRatio(form, 1.0F);
-
-						HorizontalLayout footer = new HorizontalLayout();
-						footer.setHeight("60px");
-						footer.setSpacing(true);
-
-						Button btnGuardar = new Button("Aceptar");
-						btnGuardar.addClickListener(new Button.ClickListener() {
-
-							@Override
-							public void buttonClick(ClickEvent event) {
-								window.close();
-
-							}
-						});
-						btnGuardar.addStyleName("default");
-						footer.addComponent(btnGuardar);
-						footer.setComponentAlignment(btnGuardar,
-								Alignment.MIDDLE_RIGHT);
-
-						Button btnCancelar = new Button("Cancelar");
-						btnCancelar
-								.addClickListener(new Button.ClickListener() {
-
-									@Override
-									public void buttonClick(ClickEvent event) {
-										window.close();
-
-									}
-								});
-						btnCancelar.addStyleName("link");
-						footer.addComponent(btnCancelar);
-						footer.setComponentAlignment(btnCancelar,
-								Alignment.MIDDLE_RIGHT);
-
-						addComponent(new Label("<hr />", ContentMode.HTML));
-						addComponent(footer);
-						setComponentAlignment(footer, Alignment.MIDDLE_RIGHT);
-
+					            	if(cell.getColumnIndex() == 0)
+					            		costAccount.setCode(cell.toString());
+					            	else
+					            		costAccount.setName(cell.toString());
+						            costAccount.setConstructionSite((ConstructionSite) getItem().getBean());
+					            }					           
+					        }
+					        if(costAccount.getCode() != null && costAccount.getName() != null){
+						        service.save(costAccount);
+			    				costContainer.addBean(costAccount);
+					        }
+					    }					    
+						window.close();						
 					}
-				});
-
+				};
+				
+				final fileUploader uploader = new fileUploader(); 
+				upload.setReceiver(uploader);
+				upload.addListener(uploader);
+				
+				subContent.addComponent(upload);
+				window.setContent(subContent);
 				UI.getCurrent().addWindow(window);
 			}
 		});

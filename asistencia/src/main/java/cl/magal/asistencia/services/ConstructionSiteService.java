@@ -1136,7 +1136,7 @@ public class ConstructionSiteService {
 	 * @param bean
 	 * @return
 	 */
-	public Collection<? extends CostAccount> findCostAccountByConstructionSite(ConstructionSite bean) {
+	public List<CostAccount> findCostAccountByConstructionSite(ConstructionSite bean) {
 		return costRepo.findByConstructionSite(bean);
 	}
 
@@ -1148,17 +1148,21 @@ public class ConstructionSiteService {
 		costRepo.delete(costAccount);
 	}
 	
-	public void removeAll() {
-		costRepo.deleteAll();
+	/**
+	 * Elimina los registros de cuenta de costos asociados a una obra
+	 * @param cs
+	 */
+	public void removeByConstructionSite(ConstructionSite cs) {
+		List<CostAccount> cost = (List<CostAccount>) costRepo.findByConstructionSite(cs);
+		if(cost == null)
+			throw new RuntimeException("El elemento que se trata de eliminar no existe.");
+		costRepo.delete(cost);
 	}
 	
-	/**
-	 * Verifica si la cuenta de costo dada está siendo utlizada por algún trabajador de la obra dada
-	 * @param bean
-	 * @param costAccount
-	 * @return
-	 */
-	public boolean checkCostAccountInUse(ConstructionSite bean, CostAccount costAccount) {
-		return contractRepo.existsWithCostAccount(bean, costAccount) != null;
+	public void removeCostAccountIdByCSAndCost(CostAccount costAccount, ConstructionSite cs) {
+		List<Salary> salary = salaryRepo.findByConstructionsiteAndCost(cs, costAccount);		
+		logger.debug("dddddddd: "+salary);
+		//costRepo.removeIdByCSAndCost(salary);
 	}
+	
 }
