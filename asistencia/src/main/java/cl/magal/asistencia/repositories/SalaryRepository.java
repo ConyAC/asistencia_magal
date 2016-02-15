@@ -8,7 +8,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 
 import cl.magal.asistencia.entities.ConstructionSite;
-import cl.magal.asistencia.entities.CostAccount;
 import cl.magal.asistencia.entities.LaborerConstructionsite;
 import cl.magal.asistencia.entities.Salary;
 
@@ -38,7 +37,4 @@ public interface SalaryRepository extends
 			+ "   ((extract( year from ?2 )* 100)  + extract ( month from ?2 ) - 2 ) ) order by s.date desc " )
 	List<Double> get3LastJornalPromedio(LaborerConstructionsite lc,Date terminationDate);
 
-
-	@Query(value = "SELECT s FROM Salary s LEFT JOIN LaborerConstructionsite lc on lc.constructionsite = s.laborerConstructionSite.constructionsite WHERE lc.constructionsite = ?1 AND s.costAccount = ?2 " )
-	List<Salary> findByConstructionsiteAndCost(ConstructionSite cs, CostAccount ca);
 }

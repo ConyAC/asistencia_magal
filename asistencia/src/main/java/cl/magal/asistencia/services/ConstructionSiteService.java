@@ -1159,10 +1159,12 @@ public class ConstructionSiteService {
 		costRepo.delete(cost);
 	}
 	
+	/**
+	 * Elimina la relación entre una cuenta de costo y uno o varios salary
+	 * @param costAccount
+	 * @param cs
+	 */
 	public void removeCostAccountIdByCSAndCost(CostAccount costAccount, ConstructionSite cs) {
-		List<Salary> salary = salaryRepo.findByConstructionsiteAndCost(cs, costAccount);		
-		logger.debug("dddddddd: "+salary);
-		//costRepo.removeIdByCSAndCost(salary);
-	}
-	
+		costRepo.removeIdByCSAndCost(cs, costAccount);
+	}	
 }

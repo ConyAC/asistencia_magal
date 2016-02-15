@@ -170,6 +170,7 @@ public class AttendancePanel extends VerticalLayout implements View {
 	BeanItemContainer<AbsenceVO> absenceContainer = new BeanItemContainer<AbsenceVO>(AbsenceVO.class);
 	BeanItemContainer<ConstructionSite> constructionContainer = new BeanItemContainer<ConstructionSite>(ConstructionSite.class);
 	BeanItemContainer<CostAccount> costContainer = new BeanItemContainer<CostAccount>(CostAccount.class);
+
 	/** COMPONENTES **/
 	ProgressBar progress;
 	Label status;
@@ -219,7 +220,7 @@ public class AttendancePanel extends VerticalLayout implements View {
 	};
 	
 	final static String[] historicalSalaryTableVisibleTable = new String[]{"laborerConstructionSite.activeContract.jobCode",
-		"laborerConstructionSite.laborer.fullname","costAccount","lastJornalPromedio","jornalPromedio","specialBond","bondMov2","loanBond","sobreTiempo","descHours","loan","tools","totalLiquido",
+		"laborerConstructionSite.laborer.fullname","costAccount.code","lastJornalPromedio","jornalPromedio","specialBond","bondMov2","loanBond","sobreTiempo","descHours","loan","tools","totalLiquido",
 		"diaTrab","sab","sep","dps","dpd","col","mov"
 		,"jornalBaseMes","vtrato","valorSabado","vsCorrd","descHoras","bonifImpo","glegal","afecto","sobreAfecto","cargas","asigFamiliar","colacion","mov2","tnoAfecto"
 	};
@@ -1024,6 +1025,7 @@ public class AttendancePanel extends VerticalLayout implements View {
 		salaryContainer.addNestedContainerProperty("salaryCalculator.dpd");
 		salaryContainer.addNestedContainerProperty("salaryCalculator.col");
 		salaryContainer.addNestedContainerProperty("salaryCalculator.mov");
+		salaryContainer.addNestedContainerProperty("costAccount.code");
 
 		VerticalLayout vl = new VerticalLayout(){
 			{
@@ -2343,7 +2345,6 @@ public class AttendancePanel extends VerticalLayout implements View {
 											XSSFSheet sheet = wb.getSheetAt(1);
 											int i = 11;
 											costContainer.addAll(getCostByConstructionSite());
-											
 											for(Object itemId : attendanceContainer.getItemIds()){
 
 												BeanItem<Attendance> attendanceItem = attendanceContainer.getItem(itemId);
@@ -2842,6 +2843,7 @@ public class AttendancePanel extends VerticalLayout implements View {
 				historicalSalaryContainer.addNestedContainerProperty("laborerConstructionSite.laborer.fullname");
 				historicalSalaryContainer.addNestedContainerProperty("laborerConstructionSite.supleCode");
 				historicalSalaryContainer.addNestedContainerProperty("laborerConstructionSite.id");
+				historicalSalaryContainer.addNestedContainerProperty("costAccount.code");
 				historicalSalaryContainer.setBeanIdProperty("laborerConstructionSite.id");
 				
 				historicalSalaryContainer.addAll(salaries);

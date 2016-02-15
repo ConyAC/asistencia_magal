@@ -422,9 +422,9 @@ public class ConstructionSiteDialog extends AbstractWindowEditor {
 						//No se valida la eliminación, puesto que es labor del administrador reasignar un código 
 						//si este ha sido eliminado tanto por la carga del excel como manualmente.
 						CostAccount costAccount = costContainer.getItem(itemId).getBean();
-						//service.removeCostAccount(costAccount);
-						//Tb debe eliminarse si esta relacionado a algún trabajador
+						//Se debe eliminar si esta relacionado a algún trabajador
 						service.removeCostAccountIdByCSAndCost(costAccount, (ConstructionSite) getItem().getBean());
+						service.removeCostAccount(costAccount);
 						costContainer.removeItem(itemId);
 					}
 				}){ {setIcon(FontAwesome.TRASH_O);} };

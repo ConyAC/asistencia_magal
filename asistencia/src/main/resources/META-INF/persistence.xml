@@ -78,9 +78,9 @@
             <property name="eclipselink.logging.parameters" value="true"/>
             --> 
             
-            <property name="eclipselink.logging.level" value="OFF"/>
-            <property name="eclipselink.logging.level.sql" value="OFF"/>
-            <property name="eclipselink.logging.parameters" value="false"/>
+            <property name="eclipselink.logging.level" value="FINE"/>
+            <property name="eclipselink.logging.level.sql" value="FINE"/>
+            <property name="eclipselink.logging.parameters" value="true"/>
             
             <!-- optimización de escritura en batch -->
             <property name="eclipselink.jdbc.batch-writing" value="JDBC"/>           

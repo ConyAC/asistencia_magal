@@ -947,5 +947,6 @@ CREATE TABLE `cost_account` (
   PRIMARY KEY (`costaccountId`)
 ) ENGINE=InnoDB AUTO_INCREMENT=230 DEFAULT CHARSET=latin1$$
 
-ALTER TABLE `salary` ADD COLUMN `costaccountId` BIGINT(20) UNSIGNED NULL DEFAULT NULL COMMENT AFTER `loan_bond` ;
+ALTER TABLE `salary` ADD COLUMN `costaccountId` BIGINT(20) UNSIGNED NULL DEFAULT NULL COMMENT '' AFTER `loan_bond` ;
+ALTER TABLE `historical_salary` ADD COLUMN `costaccountId` BIGINT(20) UNSIGNED NULL DEFAULT NULL COMMENT '' AFTER `laborer_constructionsiteId` ;
 
