@@ -48,7 +48,7 @@ public class Salary implements Serializable {
 	transient Integer lastJornalPromedio = 0;
 	
 	@ManyToOne
-	@JoinColumn(name="laborer_constructionsiteId")
+	@JoinColumn(name="laborer_constructionsiteId",nullable=false)
 	LaborerConstructionsite laborerConstructionSite;
 	
 	@NotNull(message="La fecha es necesaria.")
@@ -80,7 +80,7 @@ public class Salary implements Serializable {
 	@Column(name="loan_bond")
 	Integer loanBond = 0;
 	
-	@JoinColumn(name="costaccountId",nullable=false)
+	@JoinColumn(name="costaccountId")
 	CostAccount costAccount;
 	
 	/**
@@ -257,7 +257,7 @@ public class Salary implements Serializable {
 	
 	public Integer getLoanBond() {
         return salaryCalculator.getLoans();
-    }	
+    }
 	
 	public CostAccount getCostAccount() {
 		return costAccount;

@@ -63,7 +63,7 @@ public class OnValueChangeFieldFactory extends DefaultFieldFactory {
 						doOnChanged(itemId);
 					}catch(Exception e){
 						Notification.show("Error al guardar el elemento",Type.ERROR_MESSAGE);
-						logger.error("Error al guardar el elemento de impuesto",e);
+						logger.error("Error al guardad el elemento de impuesto",e);
 					}
 
 				}
