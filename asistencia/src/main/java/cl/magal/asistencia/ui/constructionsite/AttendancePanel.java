@@ -219,6 +219,34 @@ public class AttendancePanel extends VerticalLayout implements View {
 		"descHoras","bonifImpo","glegal","afecto","sobreAfecto","cargas","asigFamiliar","colacion","mov","mov2","tnoAfecto"
 	};
 	
+	final static String[] salaryTableVisibleTable2 = new String[]{
+		"laborerConstructionSite.activeContract.jobCode",//1
+		"laborerConstructionSite.laborer.fullname",//2
+		"costAccount.code",
+		"lastJornalPromedio",//3
+		"jornalPromedio",//4
+		"specialBond",//5
+		"bondMov2",//6
+		"loanBond",//7
+		"sobreTiempo",//8
+		"descHours",//9
+		"loan",//10
+		"tools",//11
+		"totalLiquido",//12
+		"salaryCalculator.diaTrab",//13
+		"salaryCalculator.sab",//14
+		"salaryCalculator.sep",//15
+		"salaryCalculator.dps",//16
+		"salaryCalculator.dpd",//17
+		"salaryCalculator.col",//18
+		"salaryCalculator.mov",//19
+		"jornalBaseMes",//20
+		"vtrato",//21
+		"valorSabado",//22
+		"vsCorrd",//23
+		"descHoras","bonifImpo","glegal","afecto","sobreAfecto","cargas","asigFamiliar","colacion","mov","mov2","tnoAfecto"
+	};
+	
 	final static String[] historicalSalaryTableVisibleTable = new String[]{"laborerConstructionSite.activeContract.jobCode",
 		"laborerConstructionSite.laborer.fullname","costAccount.code","lastJornalPromedio","jornalPromedio","specialBond","bondMov2","loanBond","sobreTiempo","descHours","loan","tools","totalLiquido",
 		"diaTrab","sab","sep","dps","dpd","col","mov"
@@ -555,12 +583,15 @@ public class AttendancePanel extends VerticalLayout implements View {
 	}
 
 	private void enableSalary(boolean state) {
-//		if(!state && getConfirmations().isConstructionSiteCheck() && getConfirmations().isCentralCheck())
-//			salaryTable.setVisibleColumns(historicalSalaryTableVisibleTable);
-//		else
-//			salaryTable.setVisibleColumns(salaryTableVisibleTable);
-		
-		salaryTable.refreshRowCache();
+		if(!getConfirmations().isCentralCheck()){
+			Class<?> type = salaryTable.getContainerDataSource().getType("salaryCalculator.diaTrab");
+			if(type != null)
+			if(!state){
+				logger.debug("{}",salaryTable.getContainerDataSource().getContainerPropertyIds());
+				salaryTable.setVisibleColumns(salaryTableVisibleTable2);
+			}else 
+				salaryTable.setVisibleColumns(salaryTableVisibleTable);
+		}
 		salaryTable.setEditable(state);
 	}
 
@@ -2848,6 +2879,7 @@ public class AttendancePanel extends VerticalLayout implements View {
 				historicalSalaryContainer.addNestedContainerProperty("laborerConstructionSite.activeContract.jobCode");
 				historicalSalaryContainer.addNestedContainerProperty("laborerConstructionSite.laborer.fullname");
 				historicalSalaryContainer.addNestedContainerProperty("laborerConstructionSite.supleCode");
+				historicalSalaryContainer.addNestedContainerProperty("diaTrab");
 				historicalSalaryContainer.addNestedContainerProperty("laborerConstructionSite.id");
 				historicalSalaryContainer.addNestedContainerProperty("costAccount.code");
 				historicalSalaryContainer.setBeanIdProperty("laborerConstructionSite.id");
