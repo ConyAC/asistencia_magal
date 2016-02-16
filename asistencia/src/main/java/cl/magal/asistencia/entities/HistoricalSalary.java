@@ -212,6 +212,11 @@ public class HistoricalSalary implements Serializable {
 		tnoAfecto = salary.getTnoAfecto();
 		loan = salary.getLoan();
 		costAccount = salary.getCostAccount();
+		
+		suple = suple.isNaN()?0:suple;
+		this.salary = this.salary.isNaN() ? 0 :this.salary;
+		descHours = descHours.isNaN() ? 0 : descHours;
+		
 	}
 	
 	public Long getId() {

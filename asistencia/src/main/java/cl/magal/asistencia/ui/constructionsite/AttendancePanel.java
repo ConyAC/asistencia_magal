@@ -555,6 +555,12 @@ public class AttendancePanel extends VerticalLayout implements View {
 	}
 
 	private void enableSalary(boolean state) {
+//		if(!state && getConfirmations().isConstructionSiteCheck() && getConfirmations().isCentralCheck())
+//			salaryTable.setVisibleColumns(historicalSalaryTableVisibleTable);
+//		else
+//			salaryTable.setVisibleColumns(salaryTableVisibleTable);
+		
+		salaryTable.refreshRowCache();
 		salaryTable.setEditable(state);
 	}
 
