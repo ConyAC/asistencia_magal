@@ -40,6 +40,7 @@ import cl.magal.asistencia.entities.Attendance;
 import cl.magal.asistencia.entities.Confirmations;
 import cl.magal.asistencia.entities.ConstructionSite;
 import cl.magal.asistencia.entities.Contract;
+import cl.magal.asistencia.entities.CostAccount;
 import cl.magal.asistencia.entities.DateConfigurations;
 import cl.magal.asistencia.entities.FamilyAllowanceConfigurations;
 import cl.magal.asistencia.entities.HistoricalSalary;
@@ -51,6 +52,7 @@ import cl.magal.asistencia.entities.User;
 import cl.magal.asistencia.entities.WageConfigurations;
 import cl.magal.asistencia.entities.enums.AttendanceMark;
 import cl.magal.asistencia.entities.enums.Permission;
+import cl.magal.asistencia.repositories.CostAccountRepository;
 import cl.magal.asistencia.repositories.LaborerConstructionsiteRepository;
 import cl.magal.asistencia.services.ConfigurationService;
 import cl.magal.asistencia.services.ConstructionSiteService;
@@ -157,6 +159,8 @@ public class AttendancePanel extends VerticalLayout implements View {
 	private transient VelocityEngine velocityEngine;
 	@Autowired
 	LaborerConstructionsiteRepository labcsRepo;
+	@Autowired
+	private transient CostAccountRepository costService;
 
 	AdvancePaymentConfigurations advancepayment;
 	/** CONTAINERS **/
@@ -165,6 +169,7 @@ public class AttendancePanel extends VerticalLayout implements View {
 	BeanContainer<Long,Salary> salaryContainer = new BeanContainer<Long,Salary>(Salary.class);
 	BeanItemContainer<AbsenceVO> absenceContainer = new BeanItemContainer<AbsenceVO>(AbsenceVO.class);
 	BeanItemContainer<ConstructionSite> constructionContainer = new BeanItemContainer<ConstructionSite>(ConstructionSite.class);
+	BeanItemContainer<CostAccount> costContainer = new BeanItemContainer<CostAccount>(CostAccount.class);
 
 	/** COMPONENTES **/
 	ProgressBar progress;
@@ -189,6 +194,35 @@ public class AttendancePanel extends VerticalLayout implements View {
 	final static String[] salaryTableVisibleTable = new String[]{
 		"laborerConstructionSite.activeContract.jobCode",//1
 		"laborerConstructionSite.laborer.fullname",//2
+		"costAccount",
+		"lastJornalPromedio",//3
+		"jornalPromedio",//4
+		"specialBond",//5
+		"bondMov2",//6
+		"loanBond",//7
+		"sobreTiempo",//8
+		"descHours",//9
+		"loan",//10
+		"tools",//11
+		"totalLiquido",//12
+		"salaryCalculator.diaTrab",//13
+		"salaryCalculator.sab",//14
+		"salaryCalculator.sep",//15
+		"salaryCalculator.dps",//16
+		"salaryCalculator.dpd",//17
+		"salaryCalculator.col",//18
+		"salaryCalculator.mov",//19
+		"jornalBaseMes",//20
+		"vtrato",//21
+		"valorSabado",//22
+		"vsCorrd",//23
+		"descHoras","bonifImpo","glegal","afecto","sobreAfecto","cargas","asigFamiliar","colacion","mov","mov2","tnoAfecto"
+	};
+	
+	final static String[] salaryTableVisibleTable2 = new String[]{
+		"laborerConstructionSite.activeContract.jobCode",//1
+		"laborerConstructionSite.laborer.fullname",//2
+		"costAccount.code",
 		"lastJornalPromedio",//3
 		"jornalPromedio",//4
 		"specialBond",//5
@@ -214,7 +248,7 @@ public class AttendancePanel extends VerticalLayout implements View {
 	};
 	
 	final static String[] historicalSalaryTableVisibleTable = new String[]{"laborerConstructionSite.activeContract.jobCode",
-		"laborerConstructionSite.laborer.fullname","lastJornalPromedio","jornalPromedio","specialBond","bondMov2","loanBond","sobreTiempo","descHours","loan","tools","totalLiquido",
+		"laborerConstructionSite.laborer.fullname","costAccount.code","lastJornalPromedio","jornalPromedio","specialBond","bondMov2","loanBond","sobreTiempo","descHours","loan","tools","totalLiquido",
 		"diaTrab","sab","sep","dps","dpd","col","mov"
 		,"jornalBaseMes","vtrato","valorSabado","vsCorrd","descHoras","bonifImpo","glegal","afecto","sobreAfecto","cargas","asigFamiliar","colacion","mov2","tnoAfecto"
 	};
@@ -269,6 +303,12 @@ public class AttendancePanel extends VerticalLayout implements View {
 		List<FamilyAllowanceConfigurations> dateConfig = configurationService.findFamylyAllowanceConfigurations();
 		return dateConfig;
 	}
+	
+	private List<CostAccount> getCostByConstructionSite(){
+		List<CostAccount> cost = (List<CostAccount>) costService.findByConstructionSite(cs);
+		return cost;
+	}
+	
 
 	DateConfigurations dateConfig = null;
 	/**
@@ -543,6 +583,15 @@ public class AttendancePanel extends VerticalLayout implements View {
 	}
 
 	private void enableSalary(boolean state) {
+		if(!getConfirmations().isCentralCheck()){
+			Class<?> type = salaryTable.getContainerDataSource().getType("salaryCalculator.diaTrab");
+			if(type != null)
+			if(!state){
+				logger.debug("{}",salaryTable.getContainerDataSource().getContainerPropertyIds());
+				salaryTable.setVisibleColumns(salaryTableVisibleTable2);
+			}else 
+				salaryTable.setVisibleColumns(salaryTableVisibleTable);
+		}
 		salaryTable.setEditable(state);
 	}
 
@@ -1013,6 +1062,7 @@ public class AttendancePanel extends VerticalLayout implements View {
 		salaryContainer.addNestedContainerProperty("salaryCalculator.dpd");
 		salaryContainer.addNestedContainerProperty("salaryCalculator.col");
 		salaryContainer.addNestedContainerProperty("salaryCalculator.mov");
+		salaryContainer.addNestedContainerProperty("costAccount.code");
 
 		VerticalLayout vl = new VerticalLayout(){
 			{
@@ -1083,6 +1133,42 @@ public class AttendancePanel extends VerticalLayout implements View {
 
 						});
 						addComponent(btnValidate);
+						
+						final Button btnValidarCostos = new Button("Validar Cta. Costos",FontAwesome.CHECK_CIRCLE_O);
+						btnValidarCostos.setDisableOnClick(true);
+						btnValidarCostos.addClickListener(new Button.ClickListener() {
+
+							@Override
+							public void buttonClick(ClickEvent event) {								
+								List<Object> itemIds = new LinkedList<Object>();
+								for(Object itemId : salaryContainer.getItemIds()){
+										Property property = salaryContainer.getContainerProperty(itemId, "costAccount");
+										if( property == null || property.getValue() == null )
+											itemIds.add(itemId);
+								}								
+								
+								if( itemIds.size() == 0 )
+									Notification.show("Todos los trabajadores tienen asignada una cuenta de costos.",Type.HUMANIZED_MESSAGE);
+								else{
+									//crea el mensaje
+									StringBuilder sb = new StringBuilder("Hay "+itemIds.size()+" trabajadores sin cuenta de costos:\n");
+									int i = 0;
+									for(Object itemId : itemIds ){
+										BeanItem<Salary> item = salaryContainer.getItem(itemId);
+										sb.append(item.getBean().getLaborerConstructionSite().getJobCode());
+
+										i++;
+										if( i < itemIds.size() )
+											sb.append(",");
+										if( i % 8 == 0) //para mostrar de a grupo de 8 maximo
+											sb.append("\n");
+									}
+									Notification.show(sb.toString(),Type.ERROR_MESSAGE);
+								}
+								btnValidarCostos.setEnabled(true);
+							}
+						});
+						addComponent(btnValidarCostos);
 
 						btnConstructionSiteConfirm = new Button("Confirmación Obra",FontAwesome.CHECK);
 						btnConstructionSiteConfirm.setDisableOnClick(true);
@@ -1226,6 +1312,14 @@ public class AttendancePanel extends VerticalLayout implements View {
 //								}
 //							});
 							return tf;
+						}
+						if(propertyId.equals("costAccount")){
+							costContainer.addAll(getCostByConstructionSite());							
+							ComboBox cbCost = new ComboBox(null,costContainer);
+							cbCost.setItemCaptionPropertyId("code");
+							cbCost.setImmediate(true);
+							cbCost.setWidth("130px");
+							return cbCost;
 						}
 						return null;
 					}
@@ -2159,6 +2253,7 @@ public class AttendancePanel extends VerticalLayout implements View {
 										AfpAndInsuranceConfigurations afpTable = getAfpAndInsuranceConfigurations();
 										List<TaxationConfigurations> taxationConfig = getTaxationConfigurations();
 										List<FamilyAllowanceConfigurations> familyConfig = getFamilyAllowanceConfigurations();
+										List<CostAccount> costo = getCostByConstructionSite();
 
 										//verifica que se tengan bien las configuraciones del mes
 										logger.debug("TERCERO");
@@ -2286,6 +2381,7 @@ public class AttendancePanel extends VerticalLayout implements View {
 											wb.setSheetName(1,getAttendanceDate().toString("MMMM yyyy").toUpperCase());
 											XSSFSheet sheet = wb.getSheetAt(1);
 											int i = 11;
+											costContainer.addAll(getCostByConstructionSite());
 											for(Object itemId : attendanceContainer.getItemIds()){
 
 												BeanItem<Attendance> attendanceItem = attendanceContainer.getItem(itemId);
@@ -2295,9 +2391,13 @@ public class AttendancePanel extends VerticalLayout implements View {
 												Salary salary = salaryItem.getBean();
 												Attendance attendance = attendanceItem.getBean();
 												Overtime overtime = overtimeItem.getBean();
-
+												
+												BeanItem<CostAccount> costItem = costContainer.getItem(salaryItem.getBean().getCostAccount());
 												Row row = sheet.getRow(i++);
 
+												//información de cuenta de costos										
+												row.getCell(133).setCellValue(costItem.getBean().getCode());
+												
 												//información del trabajador
 												row.getCell(0).setCellValue(attendance.getLaborerConstructionSite().getJobCode());
 												row.getCell(1).setCellValue(attendance.getLaborerConstructionSite().getLaborer().getFullname());
@@ -2396,6 +2496,18 @@ public class AttendancePanel extends VerticalLayout implements View {
 												row.getCell(158).setCellValue(rate);
 
 											}
+											
+											//Modificar valores de centro de costo
+											XSSFRow rowS19;
+									        int cc = 0;
+									        for (int k = 8; k <= costo.size(); k++){
+									        	rowS19 = sheet.getRow(k);
+							                	if(cc < costo.size()){
+							                		rowS19.getCell(18).setCellValue(costo.get(cc).getCode());
+							                	}
+									            cc++;
+									        }
+											
 											try { HSSFFormulaEvaluator.evaluateAllFormulaCells(wb); }catch(Exception e){}
 
 											ByteArrayOutputStream outputStream =  new ByteArrayOutputStream();
@@ -2669,6 +2781,7 @@ public class AttendancePanel extends VerticalLayout implements View {
 		salaryTable.setColumnHeaders(
 				"Rol",//1
 				"Nombre",//2
+				"Cta. Costos",
 				"Último<br />Jornal Prom",//3
 				"Jornal Prom",//4
 				"Bono Imp.",//5
@@ -2766,7 +2879,9 @@ public class AttendancePanel extends VerticalLayout implements View {
 				historicalSalaryContainer.addNestedContainerProperty("laborerConstructionSite.activeContract.jobCode");
 				historicalSalaryContainer.addNestedContainerProperty("laborerConstructionSite.laborer.fullname");
 				historicalSalaryContainer.addNestedContainerProperty("laborerConstructionSite.supleCode");
+				historicalSalaryContainer.addNestedContainerProperty("diaTrab");
 				historicalSalaryContainer.addNestedContainerProperty("laborerConstructionSite.id");
+				historicalSalaryContainer.addNestedContainerProperty("costAccount.code");
 				historicalSalaryContainer.setBeanIdProperty("laborerConstructionSite.id");
 				
 				historicalSalaryContainer.addAll(salaries);
@@ -2774,7 +2889,7 @@ public class AttendancePanel extends VerticalLayout implements View {
 				salaryTable.setContainerDataSource(historicalSalaryContainer);
 				salaryTable.setVisibleColumns(historicalSalaryTableVisibleTable);
 
-				salaryTable.setColumnHeaders("Rol","Nombre","Último<br />Jornal Prom","Jornal Prom","Bono Imp.","Bono No Imp.","Bono Prest.", "Sobretpo","H Desc","V Cuota<br />Prestamo",
+				salaryTable.setColumnHeaders("Rol","Nombre","Cta. Costos","Último<br />Jornal Prom","Jornal Prom","Bono Imp.","Bono No Imp.","Bono Prest.", "Sobretpo","H Desc","V Cuota<br />Prestamo",
 						"V Cuota<br />Herramienta","Total Líquido<br />(A Pagar)",
 						"Día<br />Trab","Sab","Sep","DPS","DPD","Col","Mov"
 						,"Jornal Base", " V Trato", "Valor Sábado" , "V S Corrida", "Desc Horas","Total<br />Bonos<br />Imponibles","G Legal","Afecto","Sobre Afecto","Cargas","A Familiar","Colación","Movi 2","T No Afecto"

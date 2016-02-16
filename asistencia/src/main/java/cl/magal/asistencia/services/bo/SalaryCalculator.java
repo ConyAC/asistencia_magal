@@ -141,7 +141,7 @@ public class SalaryCalculator {
 			afecto = calculateAfecto(closingDateLastMonth,getDiasHabiles(),attendance,lastMonthAttendance,overtime,getJornalBaseMes(),wageConfigurations.getMaxImponibleFactor());
 			logger.debug("afecto {}",afecto);
 		}
-		return afecto;
+		return afecto.isNaN()? 0 : afecto ;
 	}
 		
 	Double sobreAfecto;
@@ -225,7 +225,7 @@ public class SalaryCalculator {
 		if(valorSabado == null ){
 			valorSabado = calculateValorSabado(closingDateLastMonth, attendance, lastMonthAttendance);
 		}
-		return valorSabado;
+		return valorSabado.isNaN()? 0 : valorSabado;
 	}
 	
 	Double vSCorrd;
@@ -233,7 +233,7 @@ public class SalaryCalculator {
 		if(vSCorrd == null ){
 			vSCorrd = calculateVSCorrd(closingDateLastMonth, attendance, lastMonthAttendance, overtime);
 		}
-		return vSCorrd;
+		return vSCorrd.isNaN()? 0 : vSCorrd;
 		
 	}
 	
