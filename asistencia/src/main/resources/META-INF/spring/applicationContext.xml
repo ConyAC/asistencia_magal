@@ -24,6 +24,10 @@
 	  <constructor-arg value="${ext.uploaded_images_path}"/>
 	</bean>
 	
+	<bean id="uploaded_files_path" class="java.lang.String" factory-method="valueOf">
+	  <constructor-arg value="${ext.uploaded_files_path}"/>
+	</bean>
+	
 	<!-- escanea las clases del package services buscando componentes -->
 	<context:component-scan base-package="cl.magal.asistencia.services" />
 	<context:component-scan base-package="cl.magal.asistencia.ui" />
@@ -31,7 +35,7 @@
 	<tx:annotation-driven  transaction-manager="transactionManager"/>
 	    
 
-	<!--  Data Base 
+	   	<!--  Data Base 
 	<jdbc:embedded-database id="datasource" type="H2"></jdbc:embedded-database>
 	
 	<bean id="datasource"

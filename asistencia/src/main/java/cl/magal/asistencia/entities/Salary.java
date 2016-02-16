@@ -80,6 +80,9 @@ public class Salary implements Serializable {
 	@Column(name="loan_bond")
 	Integer loanBond = 0;
 	
+	@JoinColumn(name="costaccountId")
+	CostAccount costAccount;
+	
 	/**
 	 * Objeto que permite el calculo de los sueldos
 	 */
@@ -256,6 +259,12 @@ public class Salary implements Serializable {
         return salaryCalculator.getLoans();
     }
 	
+	public CostAccount getCostAccount() {
+		return costAccount;
+	}
+	public void setCostAccount(CostAccount costAccount) {
+		this.costAccount = costAccount;
+	}
 	/**
 	 * columnas ocultables
 	 * @return
