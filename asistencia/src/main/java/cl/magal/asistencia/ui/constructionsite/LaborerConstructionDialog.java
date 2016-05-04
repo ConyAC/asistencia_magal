@@ -189,7 +189,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 
 	private Component drawInformation() {
 
-		GridLayout gl  = new GridLayout(3,8);
+		GridLayout gl  = new GridLayout(3,9);
 		gl.setWidth("100%");
 		gl.setSpacing(true);
 
@@ -255,8 +255,14 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 		gl.setComponentAlignment(endDate, Alignment.TOP_CENTER);
 		gl.addComponent(cbSupleCode,0,2);
 		gl.setComponentAlignment(cbSupleCode, Alignment.TOP_CENTER);
+		//si el usuario tiene permisos para cambiar el rol
+		if(SecurityHelper.hasPermission(Permission.AGREGAR_CUENTAS_COSTO)){
+			final TextField jobCode = new TextField("Codigo en Obra",getItem().getItemProperty("activeContract.jobCode"));
+			gl.addComponent(jobCode,0,3);
+			gl.setComponentAlignment(jobCode, Alignment.TOP_CENTER);
+		}
 
-		gl.addComponent(new LaborerBaseInformation(getBinder(),"laborer",true),0,3,2,3);
+		gl.addComponent(new LaborerBaseInformation(getBinder(),"laborer",true),0,4,2,4);
 
 		return gl;
 	}
