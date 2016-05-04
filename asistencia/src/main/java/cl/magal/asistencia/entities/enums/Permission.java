@@ -32,7 +32,8 @@ public enum Permission {
 	CONFIRMAR_ASISTENCIA_CENTRAL(28,"Confirmar Asistencia desde Central"),
 	GENERAR_SUELDOS_SOFTLAND(29,"Generar Sueldos en Formato Softland"), 
 	DESBLOQUEDAR_ASISTENCIA(30,"Desbloquear asistencia/sueldo mes"),
-	AGREGAR_CUENTAS_COSTO(31,"Agregar Cuentas de Costo");
+	AGREGAR_CUENTAS_COSTO(31,"Agregar Cuentas de Costo"),
+	CAMBIAR_ROL(32,"Cambiar Rol de Trabajadores");
 	
 	int i;
 	String description;
