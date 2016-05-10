@@ -70,7 +70,8 @@ public class ConstructionSiteView extends BaseView  implements View {
 			if(root.getComponentIndex(laborerAndTeamPanel) >= 0){
 				UI.getCurrent().getNavigator().navigateTo(ConstructionSitesView.NAME);
 			}else{
-				Page.getCurrent().setUriFragment(Page.getCurrent().getUriFragment().replace("/asistencia",""), false);
+				int indexOf = Page.getCurrent().getUriFragment().indexOf("asistencia");
+				Page.getCurrent().setUriFragment(Page.getCurrent().getUriFragment().substring(0, indexOf), false);
 				switchPanels();
 			}
 
@@ -88,7 +89,10 @@ public class ConstructionSiteView extends BaseView  implements View {
 
 			@Override
 			public void buttonClick(ClickEvent event) {
-				Page.getCurrent().setUriFragment(Page.getCurrent().getUriFragment()+"/asistencia", false);
+				String fragment = "asistencia";
+				if(!Page.getCurrent().getUriFragment().endsWith("/"))
+					fragment = "/"+fragment;
+				Page.getCurrent().setUriFragment(Page.getCurrent().getUriFragment()+fragment, false);
 				switchPanels();
 
 			}
@@ -100,7 +104,7 @@ public class ConstructionSiteView extends BaseView  implements View {
 	private void switchPanels(){
 		switchPanels(null);
 	}
-	
+
 	private void switchPanels(ViewChangeEvent event) {
 
 		if(root.getComponentIndex(laborerAndTeamPanel) >= 0){
@@ -134,10 +138,7 @@ public class ConstructionSiteView extends BaseView  implements View {
 				Long id = Long.valueOf(msgs[0]);
 
 				//verifica los parametros de la url
-				if( msgs.length == 1 ){
-					//si todo va bien, carga la información de la obra
-					reloadData(id);
-				}else if( msgs.length == 2 ){
+				if( msgs.length >= 2 ){
 					String function = msgs[1];
 					reloadData(id);
 					if(function.equals("asistencia")){
@@ -145,6 +146,10 @@ public class ConstructionSiteView extends BaseView  implements View {
 					}else{
 						showErrorParam();
 					}
+
+				}else if( msgs.length >= 1 ){
+					//si todo va bien, carga la información de la obra
+					reloadData(id);
 				}
 			}catch(NumberFormatException e){
 				showErrorParam();

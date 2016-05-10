@@ -21,6 +21,16 @@ import org.joda.time.format.DateTimeFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.vaadin.data.Validator.InvalidValueException;
+import com.vaadin.data.fieldgroup.FieldGroup.CommitException;
+import com.vaadin.data.util.BeanItem;
+import com.vaadin.data.util.BeanItemContainer;
+import com.vaadin.data.util.MethodProperty;
+import com.vaadin.ui.Field;
+import com.vaadin.ui.Notification;
+import com.vaadin.ui.Notification.Type;
+import com.vaadin.ui.TextField;
+
 import cl.magal.asistencia.entities.Accident;
 import cl.magal.asistencia.entities.AfpItem;
 import cl.magal.asistencia.entities.Attendance;
@@ -33,16 +43,6 @@ import cl.magal.asistencia.entities.Mobilization2;
 import cl.magal.asistencia.entities.Vacation;
 import cl.magal.asistencia.entities.WithdrawalSettlement;
 import cl.magal.asistencia.entities.enums.AttendanceMark;
-
-import com.vaadin.data.Validator.InvalidValueException;
-import com.vaadin.data.fieldgroup.FieldGroup.CommitException;
-import com.vaadin.data.util.BeanItem;
-import com.vaadin.data.util.BeanItemContainer;
-import com.vaadin.data.util.MethodProperty;
-import com.vaadin.ui.Field;
-import com.vaadin.ui.Notification;
-import com.vaadin.ui.Notification.Type;
-import com.vaadin.ui.TextField;
 
 public class Utils {
 	
@@ -496,8 +496,8 @@ public class Utils {
 		DateTime finContrato = new DateTime(attendance2.getLaborerConstructionSite().getActiveContract().getTerminationDate(),DateTimeZone.UTC).withTime(0, 0, 0, 0);
 		//si tiene que completar la semana, retorna el lunes más cercano
 		if(completarSemana){
-			//le resta dia hasta que sea el lunes
-			finContrato = calcularLunesMasCercano(finContrato);
+			//le suma dia hasta que sea el lunes
+			finContrato = calcularViernesMasCercano(finContrato,true);
 		}
 		
 		//si la fecha de ingreso es luego del inicio del mes, entonces comienza a contar desde ese día
@@ -512,9 +512,27 @@ public class Utils {
 	 * @param dt
 	 * @return
 	 */
-	private static DateTime calcularLunesMasCercano(DateTime dt){
+	private static DateTime calcularViernesMasCercano(DateTime dt,boolean futuro){
+		while(dt.getDayOfWeek() != DateTimeConstants.FRIDAY ){
+			if(futuro)
+				dt = dt.plusDays(1);
+			else
+				dt = dt.minusDays(1);
+		}
+		return dt;
+	}
+	
+	/**
+	 * Dada una fecha, retorna el lunes pasado más cercano
+	 * @param dt
+	 * @return
+	 */
+	private static DateTime calcularLunesMasCercano(DateTime dt,boolean futuro){
 		while(dt.getDayOfWeek() != DateTimeConstants.MONDAY ){
-			dt = dt.minusDays(1);
+			if(futuro)
+				dt = dt.plusDays(1);
+			else
+				dt = dt.minusDays(1);
 		}
 		return dt;
 	}
@@ -532,7 +550,7 @@ public class Utils {
 		//si tiene que completar la semana, retorna el lunes más cercano
 		if(completarSemana){
 			//le resta dia hasta que sea el lunes
-			inicioContrato = calcularLunesMasCercano(inicioContrato);
+			inicioContrato = calcularLunesMasCercano(inicioContrato,false);
 		}
 		//si la fecha de ingreso es luego del inicio del mes, entonces comienza a contar desde ese día
 		if(inicioContrato.isAfter(inicioMes)){
@@ -575,6 +593,33 @@ public class Utils {
 				count++;
 		}
 		return count;
+	}
+	
+	public static String printFechas(Integer maxDay,Attendance attendance, AttendanceMark ... marks) {
+		if(attendance == null )
+			throw new RuntimeException("El objeto de asistencia no puede ser nulo.");
+
+		//si el número maximo es nulo, calcula el máximo según la fecha de la asistencia
+		if(maxDay == null )
+			maxDay = new LocalDateTime(attendance.getDate()).withTime(0, 0, 0, 0).dayOfMonth().getMaximumValue();
+		
+		//verifica si contiene relleno
+		boolean contieneRelleno = ArrayUtils.contains(marks, AttendanceMark.FILLER );
+		
+		//que considere la fecha inicial de contrato para considerar el día inical y el final
+		int i = Utils.calcularDiaInicial(attendance,0,contieneRelleno);
+		maxDay = Utils.calcularDiaFinal(attendance,maxDay,contieneRelleno);
+		
+		if( i >= maxDay )
+			return "0";
+		
+		int ii = i;
+		List<AttendanceMark> attendanceMarks = attendance.getMarksAsList();
+		for( ; i < maxDay ; i++){
+			AttendanceMark mark = attendanceMarks.get(i);
+			if(ArrayUtils.contains(marks, mark));
+		}
+		return "día inicial"+ii+" : día final "+maxDay;
 	}
 
 	public static DecimalFormat getDecimalFormat(){
