@@ -25,6 +25,7 @@ import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Interval;
 import org.joda.time.LocalDateTime;
+import org.joda.time.format.DateTimeFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +33,63 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.springframework.ui.velocity.VelocityEngineUtils;
 import org.vaadin.dialogs.ConfirmDialog;
+
+import com.vaadin.data.Container;
+import com.vaadin.data.Container.Filterable;
+import com.vaadin.data.Container.SimpleFilterable;
+import com.vaadin.data.Property;
+import com.vaadin.data.Property.ValueChangeEvent;
+import com.vaadin.data.Property.ValueChangeNotifier;
+import com.vaadin.data.Validator.InvalidValueException;
+import com.vaadin.data.fieldgroup.BeanFieldGroup;
+import com.vaadin.data.fieldgroup.DefaultFieldGroupFieldFactory;
+import com.vaadin.data.fieldgroup.FieldGroup;
+import com.vaadin.data.fieldgroup.FieldGroup.CommitEvent;
+import com.vaadin.data.fieldgroup.FieldGroup.CommitException;
+import com.vaadin.data.fieldgroup.FieldGroup.CommitHandler;
+import com.vaadin.data.util.BeanContainer;
+import com.vaadin.data.util.BeanItem;
+import com.vaadin.data.util.BeanItemContainer;
+import com.vaadin.data.util.filter.SimpleStringFilter;
+import com.vaadin.event.FieldEvents.TextChangeEvent;
+import com.vaadin.event.FieldEvents.TextChangeListener;
+import com.vaadin.navigator.View;
+import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
+import com.vaadin.server.FontAwesome;
+import com.vaadin.server.Page;
+import com.vaadin.shared.ui.datefield.Resolution;
+import com.vaadin.shared.ui.label.ContentMode;
+import com.vaadin.ui.AbstractSelect.ItemDescriptionGenerator;
+import com.vaadin.ui.Alignment;
+import com.vaadin.ui.Button;
+import com.vaadin.ui.Button.ClickEvent;
+import com.vaadin.ui.ComboBox;
+import com.vaadin.ui.Field;
+import com.vaadin.ui.FormLayout;
+import com.vaadin.ui.Grid;
+import com.vaadin.ui.Grid.CellReference;
+import com.vaadin.ui.Grid.CommitErrorEvent;
+import com.vaadin.ui.Grid.EditorErrorHandler;
+import com.vaadin.ui.Grid.FooterCell;
+import com.vaadin.ui.Grid.FooterRow;
+import com.vaadin.ui.Grid.HeaderCell;
+import com.vaadin.ui.Grid.HeaderRow;
+import com.vaadin.ui.Grid.SelectionMode;
+import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.InlineDateField;
+import com.vaadin.ui.Label;
+import com.vaadin.ui.Notification;
+import com.vaadin.ui.Notification.Type;
+import com.vaadin.ui.Panel;
+import com.vaadin.ui.ProgressBar;
+import com.vaadin.ui.TabSheet;
+import com.vaadin.ui.Table;
+import com.vaadin.ui.TableFieldFactory;
+import com.vaadin.ui.TextField;
+import com.vaadin.ui.UI;
+import com.vaadin.ui.Upload;
+import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.Window;
 
 import cl.magal.asistencia.entities.AdvancePaymentConfigurations;
 import cl.magal.asistencia.entities.AdvancePaymentItem;
@@ -71,61 +129,6 @@ import cl.magal.asistencia.util.OnDemandFileDownloader.OnDemandStreamResource;
 import cl.magal.asistencia.util.SecurityHelper;
 import cl.magal.asistencia.util.Utils;
 import cl.magal.asistencia.util.VelocityHelper;
-
-import com.vaadin.data.Container;
-import com.vaadin.data.Container.Filterable;
-import com.vaadin.data.Container.SimpleFilterable;
-import com.vaadin.data.Property;
-import com.vaadin.data.Property.ValueChangeEvent;
-import com.vaadin.data.Property.ValueChangeNotifier;
-import com.vaadin.data.Validator.InvalidValueException;
-import com.vaadin.data.fieldgroup.BeanFieldGroup;
-import com.vaadin.data.fieldgroup.DefaultFieldGroupFieldFactory;
-import com.vaadin.data.fieldgroup.FieldGroup;
-import com.vaadin.data.fieldgroup.FieldGroup.CommitEvent;
-import com.vaadin.data.fieldgroup.FieldGroup.CommitException;
-import com.vaadin.data.fieldgroup.FieldGroup.CommitHandler;
-import com.vaadin.data.util.BeanContainer;
-import com.vaadin.data.util.BeanItem;
-import com.vaadin.data.util.BeanItemContainer;
-import com.vaadin.data.util.filter.SimpleStringFilter;
-import com.vaadin.event.FieldEvents.TextChangeEvent;
-import com.vaadin.event.FieldEvents.TextChangeListener;
-import com.vaadin.navigator.View;
-import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
-import com.vaadin.server.FontAwesome;
-import com.vaadin.shared.ui.datefield.Resolution;
-import com.vaadin.shared.ui.label.ContentMode;
-import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.Field;
-import com.vaadin.ui.FormLayout;
-import com.vaadin.ui.Grid;
-import com.vaadin.ui.Grid.CellReference;
-import com.vaadin.ui.Grid.CommitErrorEvent;
-import com.vaadin.ui.Grid.EditorErrorHandler;
-import com.vaadin.ui.Grid.FooterCell;
-import com.vaadin.ui.Grid.FooterRow;
-import com.vaadin.ui.Grid.HeaderCell;
-import com.vaadin.ui.Grid.HeaderRow;
-import com.vaadin.ui.Grid.SelectionMode;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.InlineDateField;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.Notification;
-import com.vaadin.ui.Notification.Type;
-import com.vaadin.ui.Panel;
-import com.vaadin.ui.ProgressBar;
-import com.vaadin.ui.TabSheet;
-import com.vaadin.ui.Table;
-import com.vaadin.ui.TableFieldFactory;
-import com.vaadin.ui.TextField;
-import com.vaadin.ui.UI;
-import com.vaadin.ui.Upload;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.Window;
 
 
 @Component
@@ -189,68 +192,68 @@ public class AttendancePanel extends VerticalLayout implements View {
 	ConstructionSite cs;
 
 	final static String[] defaultSalaryTableVisibleTable = new String[]{"laborerConstructionSite.activeContract.jobCode",
-		"laborerConstructionSite.laborer.fullname","lastJornalPromedio","jornalPromedio","specialBond","bondMov2","loanBond","sobreTiempo","descHours","loan","tools","totalLiquido"
+			"laborerConstructionSite.laborer.fullname","lastJornalPromedio","jornalPromedio","specialBond","bondMov2","loanBond","sobreTiempo","descHours","loan","tools","totalLiquido"
 	};
 	final static String[] salaryTableVisibleTable = new String[]{
-		"laborerConstructionSite.activeContract.jobCode",//1
-		"laborerConstructionSite.laborer.fullname",//2
-		"costAccount",
-		"lastJornalPromedio",//3
-		"jornalPromedio",//4
-		"specialBond",//5
-		"bondMov2",//6
-		"loanBond",//7
-		"sobreTiempo",//8
-		"descHours",//9
-		"loan",//10
-		"tools",//11
-		"totalLiquido",//12
-		"salaryCalculator.diaTrab",//13
-		"salaryCalculator.sab",//14
-		"salaryCalculator.sep",//15
-		"salaryCalculator.dps",//16
-		"salaryCalculator.dpd",//17
-		"salaryCalculator.col",//18
-		"salaryCalculator.mov",//19
-		"jornalBaseMes",//20
-		"vtrato",//21
-		"valorSabado",//22
-		"vsCorrd",//23
-		"descHoras","bonifImpo","glegal","afecto","sobreAfecto","cargas","asigFamiliar","colacion","mov","mov2","tnoAfecto"
+			"laborerConstructionSite.activeContract.jobCode",//1
+			"laborerConstructionSite.laborer.fullname",//2
+			"costAccount",
+			"lastJornalPromedio",//3
+			"jornalPromedio",//4
+			"specialBond",//5
+			"bondMov2",//6
+			"loanBond",//7
+			"sobreTiempo",//8
+			"descHours",//9
+			"loan",//10
+			"tools",//11
+			"totalLiquido",//12
+			"salaryCalculator.diaTrab",//13
+			"salaryCalculator.sab",//14
+			"salaryCalculator.sep",//15
+			"salaryCalculator.dps",//16
+			"salaryCalculator.dpd",//17
+			"salaryCalculator.col",//18
+			"salaryCalculator.mov",//19
+			"jornalBaseMes",//20
+			"vtrato",//21
+			"valorSabado",//22
+			"vsCorrd",//23
+			"descHoras","bonifImpo","glegal","afecto","sobreAfecto","cargas","asigFamiliar","colacion","mov","mov2","tnoAfecto"
 	};
-	
+
 	final static String[] salaryTableVisibleTable2 = new String[]{
-		"laborerConstructionSite.activeContract.jobCode",//1
-		"laborerConstructionSite.laborer.fullname",//2
-		"costAccount.code",
-		"lastJornalPromedio",//3
-		"jornalPromedio",//4
-		"specialBond",//5
-		"bondMov2",//6
-		"loanBond",//7
-		"sobreTiempo",//8
-		"descHours",//9
-		"loan",//10
-		"tools",//11
-		"totalLiquido",//12
-		"salaryCalculator.diaTrab",//13
-		"salaryCalculator.sab",//14
-		"salaryCalculator.sep",//15
-		"salaryCalculator.dps",//16
-		"salaryCalculator.dpd",//17
-		"salaryCalculator.col",//18
-		"salaryCalculator.mov",//19
-		"jornalBaseMes",//20
-		"vtrato",//21
-		"valorSabado",//22
-		"vsCorrd",//23
-		"descHoras","bonifImpo","glegal","afecto","sobreAfecto","cargas","asigFamiliar","colacion","mov","mov2","tnoAfecto"
+			"laborerConstructionSite.activeContract.jobCode",//1
+			"laborerConstructionSite.laborer.fullname",//2
+			"costAccount.code",
+			"lastJornalPromedio",//3
+			"jornalPromedio",//4
+			"specialBond",//5
+			"bondMov2",//6
+			"loanBond",//7
+			"sobreTiempo",//8
+			"descHours",//9
+			"loan",//10
+			"tools",//11
+			"totalLiquido",//12
+			"salaryCalculator.diaTrab",//13
+			"salaryCalculator.sab",//14
+			"salaryCalculator.sep",//15
+			"salaryCalculator.dps",//16
+			"salaryCalculator.dpd",//17
+			"salaryCalculator.col",//18
+			"salaryCalculator.mov",//19
+			"jornalBaseMes",//20
+			"vtrato",//21
+			"valorSabado",//22
+			"vsCorrd",//23
+			"descHoras","bonifImpo","glegal","afecto","sobreAfecto","cargas","asigFamiliar","colacion","mov","mov2","tnoAfecto"
 	};
-	
+
 	final static String[] historicalSalaryTableVisibleTable = new String[]{"laborerConstructionSite.activeContract.jobCode",
-		"laborerConstructionSite.laborer.fullname","costAccount.code","lastJornalPromedio","jornalPromedio","specialBond","bondMov2","loanBond","sobreTiempo","descHours","loan","tools","totalLiquido",
-		"diaTrab","sab","sep","dps","dpd","col","mov"
-		,"jornalBaseMes","vtrato","valorSabado","vsCorrd","descHoras","bonifImpo","glegal","afecto","sobreAfecto","cargas","asigFamiliar","colacion","mov2","tnoAfecto"
+			"laborerConstructionSite.laborer.fullname","costAccount.code","lastJornalPromedio","jornalPromedio","specialBond","bondMov2","loanBond","sobreTiempo","descHours","loan","tools","totalLiquido",
+			"diaTrab","sab","sep","dps","dpd","col","mov"
+			,"jornalBaseMes","vtrato","valorSabado","vsCorrd","descHoras","bonifImpo","glegal","afecto","sobreAfecto","cargas","asigFamiliar","colacion","mov2","tnoAfecto"
 	};
 
 	public Confirmations getConfirmations() {
@@ -293,22 +296,22 @@ public class AttendancePanel extends VerticalLayout implements View {
 		AfpAndInsuranceConfigurations dateConfig = configurationService.findAfpAndInsuranceConfiguration();
 		return dateConfig;
 	}
-	
+
 	private List<TaxationConfigurations> getTaxationConfigurations(){
 		List<TaxationConfigurations> dateConfig = configurationService.findTaxationConfigurations();
 		return dateConfig;
 	}
-	
+
 	private List<FamilyAllowanceConfigurations> getFamilyAllowanceConfigurations(){
 		List<FamilyAllowanceConfigurations> dateConfig = configurationService.findFamylyAllowanceConfigurations();
 		return dateConfig;
 	}
-	
+
 	private List<CostAccount> getCostByConstructionSite(){
 		List<CostAccount> cost = (List<CostAccount>) costService.findByConstructionSite(cs);
 		return cost;
 	}
-	
+
 
 	DateConfigurations dateConfig = null;
 	/**
@@ -401,15 +404,16 @@ public class AttendancePanel extends VerticalLayout implements View {
 
 	@Override
 	public void enter(ViewChangeEvent event) {
-
+		logger.debug("el event {}",event);
 		if( event == null && cs == null ){
+			logger.debug("el event y el cs son nulos");
 			showErrorParam();
 			return;
-		}
-
+		}else if (event == null ){
+			populateAttendanceGrid();
 		//obtiene los parametros de url
-		else if( event != null && event.getParameters() != null && cs == null ){
-			logger.debug("recuperando parametros de la url");
+		}else if( event != null && event.getParameters() != null || cs == null ){
+			logger.debug("recuperando parametros de la url {}",event.getParameters());
 			// split at "/", add each part as a label
 			String[] msgs = event.getParameters().split("/");
 			//si no trae parametros, entonces avisa y deshabilita la interfaz
@@ -417,28 +421,28 @@ public class AttendancePanel extends VerticalLayout implements View {
 				showErrorParam();
 				return;
 			}
-			//si trae parametro verifica que sea un numero valido
-			try{
 
-				Long id = Long.valueOf(msgs[0]);
+			//si no viene fecha en la url entonces carga la por defecto
+			if( msgs.length == 2){
+				attendanceDate.setValue(new Date());
+			} else
 
-				//verifica los parametros de la url
-				if( msgs.length >= 1 ){
-					//si todo va bien, carga la información de la obra si es necesaria
-					cs = constructionSiteService.findConstructionSite(id);
-				}else if( msgs.length >= 2 ){
+			//si tiene más de 2 entonces trae el numero del mes por lo que lo preseleccionar
+			if( msgs.length > 2 ){
+				try{
+					//intenta posicionar la asistencia en mes y año dado con el formaro MMyyyy 
+					DateTime dt = DateTimeFormat.forPattern("MMyyyy").parseDateTime(msgs[2]);
+					attendanceDate.setValue(dt.toDate());
+				}catch(Exception e){
+					//si no es un número válido, lo ignora
 
-				}else {
-					showErrorParam();
 				}
-			}catch(NumberFormatException e){
-				showErrorParam();
-				return;
 			}
+
 
 		}
 
-		populateAttendanceGrid();
+
 	}
 
 	private void showErrorParam() {
@@ -487,7 +491,7 @@ public class AttendancePanel extends VerticalLayout implements View {
 						SecurityHelper.hasPermission(Permission.EDITAR_ASISTENCIA) && //tiene permisos para editar asistencia
 						!getConfirmations().isConstructionSiteCheck() //si aún no se confirma ese mes
 						) || // O
-						SecurityHelper.hasPermission(Permission.DESBLOQUEDAR_ASISTENCIA); //si tiene permisos para cancelar confirmación central (solo lo deberia tener el admin)
+				SecurityHelper.hasPermission(Permission.DESBLOQUEDAR_ASISTENCIA); //si tiene permisos para cancelar confirmación central (solo lo deberia tener el admin)
 		enableAttendance(attendanceEnabled);
 		enableSalary(attendanceEnabled);
 		//la asistencia de obra se puede editar si
@@ -497,7 +501,7 @@ public class AttendancePanel extends VerticalLayout implements View {
 						SecurityHelper.hasPermission(Permission.EDITAR_ASISTENCIA) && //tiene permisos para editar asistencia
 						!getConfirmations().isSupleObraCheck() //si aún no se confirma ese mes
 						) || // O
-						SecurityHelper.hasPermission(Permission.DESBLOQUEDAR_ASISTENCIA); 
+				SecurityHelper.hasPermission(Permission.DESBLOQUEDAR_ASISTENCIA); 
 		enableSuple(supleEnabled);
 
 	}
@@ -556,7 +560,7 @@ public class AttendancePanel extends VerticalLayout implements View {
 						getConfirmations().isConstructionSiteCheck() && !getConfirmations().isCentralCheck() // si está confirmado por obra pero no por central 
 						&& SecurityHelper.hasPermission(Permission.CONFIRMAR_ASISTENCIA_CENTRAL) //y el usuario tiene permitido confirmar asistencia central (para que el central pueda cancelar la confirmación de obra )
 						)||
-						!getConfirmations().isConstructionSiteCheck() // si no se ha checkeado la construcción
+				!getConfirmations().isConstructionSiteCheck() // si no se ha checkeado la construcción
 				);
 
 		//boton de confirmación de central
@@ -586,11 +590,11 @@ public class AttendancePanel extends VerticalLayout implements View {
 		if(!getConfirmations().isCentralCheck()){
 			Class<?> type = salaryTable.getContainerDataSource().getType("salaryCalculator.diaTrab");
 			if(type != null)
-			if(!state){
-				logger.debug("{}",salaryTable.getContainerDataSource().getContainerPropertyIds());
-				salaryTable.setVisibleColumns(salaryTableVisibleTable2);
-			}else 
-				salaryTable.setVisibleColumns(salaryTableVisibleTable);
+				if(!state){
+					logger.debug("{}",salaryTable.getContainerDataSource().getContainerPropertyIds());
+					salaryTable.setVisibleColumns(salaryTableVisibleTable2);
+				}else 
+					salaryTable.setVisibleColumns(salaryTableVisibleTable);
 		}
 		salaryTable.setEditable(state);
 	}
@@ -781,13 +785,13 @@ public class AttendancePanel extends VerticalLayout implements View {
 				HorizontalLayout hl = new HorizontalLayout(){
 					{
 						setSpacing(true);
-						
+
 						final Button btnGuardar = new Button("Calcular y Guardar",FontAwesome.FLOPPY_O);
 						btnGuardar.setDisableOnClick(true);
 						btnGuardar.addClickListener(new Button.ClickListener() {
 							@Override
 							public void buttonClick(ClickEvent event) {
-								
+
 								try{
 									List<Salary> salaries = new ArrayList<Salary>(salaryContainer.size());
 									for(Long itemId : salaryContainer.getItemIds()){
@@ -921,7 +925,7 @@ public class AttendancePanel extends VerticalLayout implements View {
 						cb.setPropertyDataSource(beanItem.getItemProperty("laborerConstructionSite.supleCode"));
 						cb.setReadOnly(true);
 						hl.addComponent(cb);	
-						
+
 						final Button btnSuple = new Button(FontAwesome.ARROW_CIRCLE_O_RIGHT);
 						btnSuple.setData(false);
 						btnSuple.addClickListener(new Button.ClickListener() {
@@ -932,7 +936,7 @@ public class AttendancePanel extends VerticalLayout implements View {
 								//define el suple como calculado
 
 								synchronized(btnSuple){
-									
+
 									beanItem.getItemProperty("calculatedSuple").setValue(true);
 									//obliga a que se recalcule el suple
 									beanItem.getItemProperty("forceSuple").getValue();
@@ -945,13 +949,13 @@ public class AttendancePanel extends VerticalLayout implements View {
 									beanItem.getItemProperty("suple").setValue(suple);
 								}
 								//guarda el trabajador, para guardar el codigo de suple
-//								laborerService.save(beanItem.getBean().getLaborerConstructionSite());
+								//								laborerService.save(beanItem.getBean().getLaborerConstructionSite());
 								//guarda el salario
-//								constructionSiteService.save(beanItem.getBean());
-								
+								//								constructionSiteService.save(beanItem.getBean());
+
 								btnSuple.setVisible(false);
-								
-								
+
+
 							}							
 						});
 						btnSuple.setVisible(!(Boolean) beanItem.getItemProperty("calculatedSuple").getValue());
@@ -985,9 +989,9 @@ public class AttendancePanel extends VerticalLayout implements View {
 									btnSuple.setData(false);
 								}
 								//independiente de lo que pase, guarda el nuevo suple
-//								constructionSiteService.save(beanItem.getBean());
+								//								constructionSiteService.save(beanItem.getBean());
 
-//								createTableFooter(supleTable);
+								//								createTableFooter(supleTable);
 							}
 						});
 
@@ -1022,17 +1026,17 @@ public class AttendancePanel extends VerticalLayout implements View {
 						tf.setNullRepresentation("");
 						tf.setImmediate(true);
 						if(propertyId.equals("suple")){
-//							tf.addValueChangeListener(new Property.ValueChangeListener() {
-//
-//								@Override
-//								public void valueChange(ValueChangeEvent event) {
-//									//									logger.debug(" suple value changed ");
-//									//									BeanItem<Salary> beanItem = salaryContainer.getItem(itemId);
-//									//									beanItem.getItemProperty("calculatedSuple").setValue(false);
-//									//									//guarda el salario
-//									//									service.save(beanItem.getBean());
-//								}
-//							});
+							//							tf.addValueChangeListener(new Property.ValueChangeListener() {
+							//
+							//								@Override
+							//								public void valueChange(ValueChangeEvent event) {
+							//									//									logger.debug(" suple value changed ");
+							//									//									BeanItem<Salary> beanItem = salaryContainer.getItem(itemId);
+							//									//									beanItem.getItemProperty("calculatedSuple").setValue(false);
+							//									//									//guarda el salario
+							//									//									service.save(beanItem.getBean());
+							//								}
+							//							});
 						}
 						return tf;
 					}
@@ -1061,6 +1065,7 @@ public class AttendancePanel extends VerticalLayout implements View {
 		salaryContainer.addNestedContainerProperty("salaryCalculator.dps");
 		salaryContainer.addNestedContainerProperty("salaryCalculator.dpd");
 		salaryContainer.addNestedContainerProperty("salaryCalculator.col");
+		salaryContainer.addNestedContainerProperty("salaryCalculator.print");
 		salaryContainer.addNestedContainerProperty("salaryCalculator.mov");
 		salaryContainer.addNestedContainerProperty("costAccount.code");
 
@@ -1072,7 +1077,7 @@ public class AttendancePanel extends VerticalLayout implements View {
 					{
 
 						setSpacing(true);
-						
+
 						final Button btnGuardar = new Button("Calcular y Guardar",FontAwesome.FLOPPY_O);
 						btnGuardar.setDisableOnClick(true);
 						btnGuardar.addClickListener(new Button.ClickListener() {
@@ -1083,11 +1088,11 @@ public class AttendancePanel extends VerticalLayout implements View {
 								List<Salary> salaries = new ArrayList<Salary>(salaryContainer.size());
 								for(Long itemId : salaryContainer.getItemIds()){
 									Salary salary = salaryContainer.getItem(itemId).getBean();
-											
+
 									try {
-										
+
 										salary.getSalaryCalculator().getAjusteMesAnterior(true);
-									
+
 									}catch(ProjectedAttendanceNotDefined e){
 										Notification.show("Existe asistencia proyectada o real no definida, por lo que no se puede calcular el sueldo.",Type.ERROR_MESSAGE);
 										btnGuardar.setEnabled(true);
@@ -1133,7 +1138,7 @@ public class AttendancePanel extends VerticalLayout implements View {
 
 						});
 						addComponent(btnValidate);
-						
+
 						final Button btnValidarCostos = new Button("Validar Cta. Costos",FontAwesome.CHECK_CIRCLE_O);
 						btnValidarCostos.setDisableOnClick(true);
 						btnValidarCostos.addClickListener(new Button.ClickListener() {
@@ -1142,11 +1147,11 @@ public class AttendancePanel extends VerticalLayout implements View {
 							public void buttonClick(ClickEvent event) {								
 								List<Object> itemIds = new LinkedList<Object>();
 								for(Object itemId : salaryContainer.getItemIds()){
-										Property property = salaryContainer.getContainerProperty(itemId, "costAccount");
-										if( property == null || property.getValue() == null )
-											itemIds.add(itemId);
+									Property property = salaryContainer.getContainerProperty(itemId, "costAccount");
+									if( property == null || property.getValue() == null )
+										itemIds.add(itemId);
 								}								
-								
+
 								if( itemIds.size() == 0 )
 									Notification.show("Todos los trabajadores tienen asignada una cuenta de costos.",Type.HUMANIZED_MESSAGE);
 								else{
@@ -1229,7 +1234,7 @@ public class AttendancePanel extends VerticalLayout implements View {
 											constructionSiteService.saveHistoricalSalaries(historicals);
 											//marca la confirmación sólo si no hubo problemas
 											constructionSiteService.save(confirmations);
-											
+
 											configureInterface();
 										}
 									}
@@ -1250,6 +1255,25 @@ public class AttendancePanel extends VerticalLayout implements View {
 				addComponent(hl);
 				setComponentAlignment(hl, Alignment.TOP_RIGHT);
 				salaryTable = new ColumnCollapsedObservableTable();
+				
+				salaryTable.setItemDescriptionGenerator(new ItemDescriptionGenerator() {
+					
+					@Override
+					public String generateDescription(com.vaadin.ui.Component source, Object itemId, Object propertyId) {
+						
+						if(propertyId != null ){
+							if(propertyId.equals("laborerConstructionSite.laborer.fullname")){
+								BeanItem<Salary> item = salaryContainer.getItem(itemId);
+								return item.getBean().getLaborerConstructionSite().getActiveContract().getStartDateString()+"-"+
+								item.getBean().getLaborerConstructionSite().getActiveContract().getTerminationDate();
+							}else if(propertyId.equals("salaryCalculator.dpd")){
+								return (String) salaryContainer.getItem(itemId).getItemProperty("salaryCalculator.print").getValue();
+							}
+						}
+						return null;
+					}
+				});
+				
 				//				salaryTable.setWidth("100%");
 				salaryTable.setSizeFull();
 				salaryTable.setContainerDataSource(salaryContainer);
@@ -1291,26 +1315,26 @@ public class AttendancePanel extends VerticalLayout implements View {
 						if(propertyId.equals("jornalPromedio")||
 								propertyId.equals("descHours")||
 								propertyId.equals("specialBond")||
-//								propertyId.equals("loanBond")||
+								//								propertyId.equals("loanBond")||
 								propertyId.equals("bondMov2")){
 
 							TextField tf = new TextField();
 							tf.setWidth("100%");
 							tf.setNullRepresentation("");
 							tf.setImmediate(true);
-//							tf.addValueChangeListener(new ValueChangeListener() {
-//
-//								@Override
-//								public void valueChange(ValueChangeEvent event) {
-//									//
-//									if(!loadingData){
-////										BeanItem<Salary> beanItem = salaryContainer.getItem(itemId);
-//										//guarda el salario
-////										logger.debug("Guardando salary");
-////										constructionSiteService.save(beanItem.getBean());
-//									}
-//								}
-//							});
+							//							tf.addValueChangeListener(new ValueChangeListener() {
+							//
+							//								@Override
+							//								public void valueChange(ValueChangeEvent event) {
+							//									//
+							//									if(!loadingData){
+							////										BeanItem<Salary> beanItem = salaryContainer.getItem(itemId);
+							//										//guarda el salario
+							////										logger.debug("Guardando salary");
+							////										constructionSiteService.save(beanItem.getBean());
+							//									}
+							//								}
+							//							});
 							return tf;
 						}
 						if(propertyId.equals("costAccount")){
@@ -1336,7 +1360,7 @@ public class AttendancePanel extends VerticalLayout implements View {
 		vl.setSizeFull();
 		return vl;
 	}
-	
+
 	boolean loadingData = false;
 
 	/**
@@ -1623,29 +1647,29 @@ public class AttendancePanel extends VerticalLayout implements View {
 					logger.debug("1 date {}",date);
 					if( !Utils.isAttendanceMarkEmptyOrFilled ( attendance.getMarksAsList().get( current - 1) ) )
 						throw new  CommitException("El día "+Utils.date2String(date.toDate())+" está fuera del rango del contrato ("+Utils.date2String(contract.getStartDate())+"-"+Utils.date2String(contract.getTerminationDate())+") , no puede tener una marca distinta a R o vacio.");;
-					current++;
-					if(current <= date.dayOfMonth().getMaximumValue())
-						date = date.withDayOfMonth(current);
+						current++;
+						if(current <= date.dayOfMonth().getMaximumValue())
+							date = date.withDayOfMonth(current);
 				}
 				//rellena con R, todo lo que este fuera de la fecha final de contrato
 				if( lc.getActiveContract().getTerminationDate() != null){
 					current = date.dayOfMonth().getMaximumValue();
 					date = date.withDayOfMonth(current);
-					while( Utils.isDateBefore(lc.getActiveContract().getTerminationDate(),date.toDate()) && current >= date.dayOfMonth().getMinimumValue() ){
+					while( Utils.isDateBeforeOrSame(lc.getActiveContract().getTerminationDate(),date.toDate()) && current >= date.dayOfMonth().getMinimumValue() ){
 						logger.debug("2 date {}",date);
 						if( !Utils.isAttendanceMarkEmptyOrFilled (attendance.getMarksAsList().get( current - 1) ))
 							throw new  CommitException("El día "+Utils.date2String(date.toDate())+" está fuera del rango del contrato ("+Utils.date2String(contract.getStartDate())+"-"+Utils.date2String(contract.getTerminationDate())+") , no puede tener una marca distinta a R o vacio.");;
-						current-- ;
-						if(current >= date.dayOfMonth().getMinimumValue())
-							date = date.withDayOfMonth(current);
+							current-- ;
+							if(current >= date.dayOfMonth().getMinimumValue())
+								date = date.withDayOfMonth(current);
 					}
 				}
-				
+
 				//hace lo mismo para el mes pasado
 				DateTime date2 = getPastMonthClosingDate().plusDays(1);
 				//rellena con R, todo lo que este fuera de la fecha inicial 
 				current = date2.dayOfMonth().get();
-//				date2 = date2.withDayOfMonth(current);
+				//				date2 = date2.withDayOfMonth(current);
 				date2 = date2.withDayOfMonth(current);
 				logger.debug("3 date2 {}",date2);
 				//mientras la fecha de inicio sea mayor a la fecha recorrida 
@@ -1653,9 +1677,9 @@ public class AttendancePanel extends VerticalLayout implements View {
 				{
 					if( !Utils.isAttendanceMarkEmptyOrFilled (attendance.getLastMarksAsList().get( current - 1) ))
 						throw new  CommitException("El día "+Utils.date2String(date2.toDate())+" está fuera del rango del contrato ("+Utils.date2String(contract.getStartDate())+"-"+Utils.date2String(contract.getTerminationDate())+") , no puede tener una marca distinta a R o vacio.");;
-					current++;
-					if(current <= date2.dayOfMonth().getMaximumValue())
-						date2 = date2.withDayOfMonth(current);
+						current++;
+						if(current <= date2.dayOfMonth().getMaximumValue())
+							date2 = date2.withDayOfMonth(current);
 				}
 				//rellena con R, todo lo que este fuera de la fecha final de contrato
 				if( lc.getActiveContract().getTerminationDate() != null){
@@ -1665,20 +1689,20 @@ public class AttendancePanel extends VerticalLayout implements View {
 					while( Utils.isDateBefore(lc.getActiveContract().getTerminationDate(), date2.toDate()) && current >= date2.dayOfMonth().getMinimumValue() ){
 						if( !Utils.isAttendanceMarkEmptyOrFilled (attendance.getLastMarksAsList().get( current - 1) ))
 							throw new  CommitException("El día "+Utils.date2String(date2.toDate())+" está fuera del rango del contrato ("+Utils.date2String(contract.getStartDate())+"-"+Utils.date2String(contract.getTerminationDate())+") , no puede tener una marca distinta a R o vacio.");;
-						current-- ;
-						if(current >= date2.dayOfMonth().getMinimumValue())
-							date2 = date2.withDayOfMonth(current);
+							current-- ;
+							if(current >= date2.dayOfMonth().getMinimumValue())
+								date2 = date2.withDayOfMonth(current);
 					}
 				}
 			}
 		});
-		
+
 		attendanceGrid.setEditorErrorHandler(new EditorErrorHandler() {
-			
+
 			@Override
 			public void commitError(CommitErrorEvent event) {
 				List<InvalidValueException> invalidValues = new ArrayList<InvalidValueException>(event.getCause().getInvalidFields().values());
-				
+
 				String message = "";
 				if(!invalidValues.isEmpty())
 					message = invalidValues.get(0).getMessage();
@@ -1690,12 +1714,12 @@ public class AttendancePanel extends VerticalLayout implements View {
 						message = e.getMessage();
 					}
 				}
-				
+
 				Notification.show(message,Type.ERROR_MESSAGE);
 				event.setUserErrorMessage(message);
 			}
 		});
-		
+
 		attendanceGrid.setEditorFieldGroup(bfg);
 		attendanceGrid.setEditorFieldFactory(new DefaultFieldGroupFieldFactory(){
 			@Override
@@ -1834,11 +1858,25 @@ public class AttendancePanel extends VerticalLayout implements View {
 	Property.ValueChangeListener listener = new Property.ValueChangeListener() {
 
 		@Override
-		public void valueChange(ValueChangeEvent event) {
+		public synchronized void valueChange(ValueChangeEvent event) {
 			attendanceDate.removeValueChangeListener(listener);
 			dateConfig = null;
 			dateConfigPastMonth = null;
-			populateAttendanceGrid();
+
+			//cambia el valor de la url si es necesario
+			String uri = Page.getCurrent().getUriFragment();
+			String lastPart = new DateTime((Date)event.getProperty().getValue()).toString("MMyyyy");
+			if(uri.contains("asistencia") && !(uri.endsWith(lastPart) || uri.endsWith(lastPart+"/"))){
+				StringBuilder sb = new StringBuilder();
+				int indexOf = uri.indexOf("asistencia");
+				sb.append(uri.substring(0, indexOf + 10)).append("/").append(lastPart);
+				Page.getCurrent().setUriFragment(sb.toString(),false);
+				populateAttendanceGrid();
+			}
+			//si no cambio y el contenendor de asistencia sigue vacio, lo intenta cargar
+			else if(attendanceContainer.size() == 0){
+				populateAttendanceGrid();
+			}
 			attendanceDate.addValueChangeListener(listener);
 		}
 	};
@@ -2248,7 +2286,7 @@ public class AttendancePanel extends VerticalLayout implements View {
 											Notification.show("Aún no se calculan los sueldos.");
 											return null;
 										}
-											
+
 
 										AfpAndInsuranceConfigurations afpTable = getAfpAndInsuranceConfigurations();
 										List<TaxationConfigurations> taxationConfig = getTaxationConfigurations();
@@ -2317,66 +2355,66 @@ public class AttendancePanel extends VerticalLayout implements View {
 											//celda B27 movilización2
 											Row row27 = sheet0.getRow(26);
 											row27.getCell(1).setCellValue(Utils.getMov2ConstructionSite(wageConfiguration.getMobilizations2(), cs));																		
-								
+
 											//Importar datos de Impuestos
-									        XSSFRow row41, rowE;
-									        int t_imp = 0;
-									        for (int i=40; i<= (40 + (taxationConfig.size() * 2) ); i += 2 ){
-									            row41 = sheet0.createRow(i);									            
-							                	if(t_imp < taxationConfig.size()){
-							                		row41.createCell(1).setCellValue(taxationConfig.get(t_imp).getFrom());
-							                		row41.createCell(2).setCellValue((taxationConfig.get(t_imp).getFactor() ));
-							                		row41.createCell(4).setCellValue(taxationConfig.get(t_imp).getReduction());						                		
-							                	}
-							                	t_imp++;
-									        }
-									        
-									        int t_imp_d = 0;
-									        for (int i=41; i<= (41 + (taxationConfig.size() * 2) ); i += 2 ){
-									        	rowE = sheet0.createRow(i);									            
-							                	if(t_imp_d < taxationConfig.size()){
-							                		rowE.createCell(1).setCellValue(taxationConfig.get(t_imp_d).getTo());		
-							                		rowE.createCell(2).setCellValue(taxationConfig.get(t_imp_d).getFactor() );
-							                		rowE.createCell(4).setCellValue(taxationConfig.get(t_imp_d).getReduction());		
-							                	}
-							                	t_imp_d++;
-									        }
-									        
-									        //Importar datos Asignación Familiar
-									        XSSFRow row70, rowAF;
-									        int t_af = 0;
-									        for (int i=70; i<= (70 + (familyConfig.size() * 2) ); i += 2 ){
-									            row70 = sheet0.createRow(i);
-							                	if(t_af < familyConfig.size()){
-							                		row70.createCell(1).setCellValue(familyConfig.get(t_af).getFrom());
-							                		row70.createCell(2).setCellValue(familyConfig.get(t_af).getAmount());
-							                	}
-									            t_af++;
-									        }
-									        
-									        int t_af_d = 0;
-									        for (int i=71; i<= (71 + (familyConfig.size() * 2) ); i += 2 ){
-									        	rowAF = sheet0.createRow(i);
-							                	if(t_af_d < familyConfig.size()){
-							                		rowAF.createCell(1).setCellValue(familyConfig.get(t_af_d).getTo());
-							                		rowAF.createCell(2).setCellValue(familyConfig.get(t_af_d).getAmount());
-							                	}
-							                	t_af_d++;
-									        }
-									        
+											XSSFRow row41, rowE;
+											int t_imp = 0;
+											for (int i=40; i<= (40 + (taxationConfig.size() * 2) ); i += 2 ){
+												row41 = sheet0.createRow(i);									            
+												if(t_imp < taxationConfig.size()){
+													row41.createCell(1).setCellValue(taxationConfig.get(t_imp).getFrom());
+													row41.createCell(2).setCellValue((taxationConfig.get(t_imp).getFactor() ));
+													row41.createCell(4).setCellValue(taxationConfig.get(t_imp).getReduction());						                		
+												}
+												t_imp++;
+											}
+
+											int t_imp_d = 0;
+											for (int i=41; i<= (41 + (taxationConfig.size() * 2) ); i += 2 ){
+												rowE = sheet0.createRow(i);									            
+												if(t_imp_d < taxationConfig.size()){
+													rowE.createCell(1).setCellValue(taxationConfig.get(t_imp_d).getTo());		
+													rowE.createCell(2).setCellValue(taxationConfig.get(t_imp_d).getFactor() );
+													rowE.createCell(4).setCellValue(taxationConfig.get(t_imp_d).getReduction());		
+												}
+												t_imp_d++;
+											}
+
+											//Importar datos Asignación Familiar
+											XSSFRow row70, rowAF;
+											int t_af = 0;
+											for (int i=70; i<= (70 + (familyConfig.size() * 2) ); i += 2 ){
+												row70 = sheet0.createRow(i);
+												if(t_af < familyConfig.size()){
+													row70.createCell(1).setCellValue(familyConfig.get(t_af).getFrom());
+													row70.createCell(2).setCellValue(familyConfig.get(t_af).getAmount());
+												}
+												t_af++;
+											}
+
+											int t_af_d = 0;
+											for (int i=71; i<= (71 + (familyConfig.size() * 2) ); i += 2 ){
+												rowAF = sheet0.createRow(i);
+												if(t_af_d < familyConfig.size()){
+													rowAF.createCell(1).setCellValue(familyConfig.get(t_af_d).getTo());
+													rowAF.createCell(2).setCellValue(familyConfig.get(t_af_d).getAmount());
+												}
+												t_af_d++;
+											}
+
 											//Importar datos de AFP
-									        XSSFRow row101;
-									        int t = 0;
-									        for (int i=101; i<= (101 + afpTable.getAfpTable().size()); i++){
-									            row101 = sheet0.createRow(i);
-							                	if(t < afpTable.getAfpTable().size()){
-							                		row101.createCell(1).setCellValue(afpTable.getAfpTable().get(t).getName());							                		
-							                		row101.createCell(2).setCellValue((afpTable.getAfpTable().get(t).getRate()/100));							                		
-							                		row101.createCell(3).setCellValue((afpTable.getAfpTable().get(t).getAfpAndInsuranceConfigurations().getSis()/100));
-								                	}
-									            t++;
-									        }
-									        
+											XSSFRow row101;
+											int t = 0;
+											for (int i=101; i<= (101 + afpTable.getAfpTable().size()); i++){
+												row101 = sheet0.createRow(i);
+												if(t < afpTable.getAfpTable().size()){
+													row101.createCell(1).setCellValue(afpTable.getAfpTable().get(t).getName());							                		
+													row101.createCell(2).setCellValue((afpTable.getAfpTable().get(t).getRate()/100));							                		
+													row101.createCell(3).setCellValue((afpTable.getAfpTable().get(t).getAfpAndInsuranceConfigurations().getSis()/100));
+												}
+												t++;
+											}
+
 											//pone la asistencia en la segunda pestaña
 											wb.setSheetName(1,getAttendanceDate().toString("MMMM yyyy").toUpperCase());
 											XSSFSheet sheet = wb.getSheetAt(1);
@@ -2391,37 +2429,37 @@ public class AttendancePanel extends VerticalLayout implements View {
 												Salary salary = salaryItem.getBean();
 												Attendance attendance = attendanceItem.getBean();
 												Overtime overtime = overtimeItem.getBean();
-												
+
 												BeanItem<CostAccount> costItem = costContainer.getItem(salaryItem.getBean().getCostAccount());
 												Row row = sheet.getRow(i++);
 
 												//información de cuenta de costos										
 												row.getCell(133).setCellValue(costItem.getBean().getCode());
-												
+
 												//información del trabajador
 												row.getCell(0).setCellValue(attendance.getLaborerConstructionSite().getJobCode());
 												row.getCell(1).setCellValue(attendance.getLaborerConstructionSite().getLaborer().getFullname());
-												
-//												int minDay = Utils.calcularDiaInicial(attendance,0,false);
-//												int maxDay = Utils.calcularDiaFinal(attendance,getAttendanceDate().dayOfMonth().getMaximumValue(),false) + 1;
-//												int minDay = 0;
+
+												//												int minDay = Utils.calcularDiaInicial(attendance,0,false);
+												//												int maxDay = Utils.calcularDiaFinal(attendance,getAttendanceDate().dayOfMonth().getMaximumValue(),false) + 1;
+												//												int minDay = 0;
 												int maxDay = getAttendanceDate().dayOfMonth().getMaximumValue() ;//+ 1;
 												//asistencia
 												int j = 3;
 												for(AttendanceMark mark : attendance.getMarksAsList()){
-													
+
 													if(j == 17){
 														//setea el suple ingresado manualmente
 														row.getCell(j).setCellValue(salary.getSuple());
 														j++;
 													}
-													
+
 													//continua hasta que no haya ingresado por contrato
-//													if( j - 3 < minDay ){
-//														j++;
-//														continue;
-//													}
-													
+													//													if( j - 3 < minDay ){
+													//														j++;
+													//														continue;
+													//													}
+
 													if(mark == null)
 														mark = AttendanceMark.EMPTY;
 													row.getCell(j).setCellValue(mark.toString());
@@ -2455,12 +2493,12 @@ public class AttendancePanel extends VerticalLayout implements View {
 													int beginDeal = beginingDeal.getDayOfMonth();
 													int maxLasMonthDeal = beginingDeal.dayOfMonth().getMaximumValue();
 													for(int l =  beginDeal - 1 ; l < maxLasMonthDeal ;l++ ){
-														 if(overtimeLastMonth.get(l) != null )
-															 row.getCell(k).setCellValue(overtimeLastMonth.get(l));
-														 k++;													
+														if(overtimeLastMonth.get(l) != null )
+															row.getCell(k).setCellValue(overtimeLastMonth.get(l));
+														k++;													
 													}
 												}
-												
+
 												//sobre tiempo 75 103
 												k = 75;
 												List<Double> overtimeMonth = overtime.getOvertimeAsList();
@@ -2496,18 +2534,18 @@ public class AttendancePanel extends VerticalLayout implements View {
 												row.getCell(158).setCellValue(rate);
 
 											}
-											
+
 											//Modificar valores de centro de costo
 											XSSFRow rowS19;
-									        int cc = 0;
-									        for (int k = 8; k <= costo.size(); k++){
-									        	rowS19 = sheet.getRow(k);
-							                	if(cc < costo.size()){
-							                		rowS19.getCell(18).setCellValue(costo.get(cc).getCode());
-							                	}
-									            cc++;
-									        }
-											
+											int cc = 0;
+											for (int k = 8; k <= costo.size(); k++){
+												rowS19 = sheet.getRow(k);
+												if(cc < costo.size()){
+													rowS19.getCell(18).setCellValue(costo.get(cc).getCode());
+												}
+												cc++;
+											}
+
 											try { HSSFFormulaEvaluator.evaluateAllFormulaCells(wb); }catch(Exception e){}
 
 											ByteArrayOutputStream outputStream =  new ByteArrayOutputStream();
@@ -2667,7 +2705,7 @@ public class AttendancePanel extends VerticalLayout implements View {
 		toogleButtonState(btnConstructionSiteConfirm,getConfirmations().isConstructionSiteCheck());
 		if(getConfirmations().isCentralCheck()) //solo deja confirmar una vez
 			toogleButtonState(btnCentralConfirm,getConfirmations().isCentralCheck());
-		
+
 		toogleButtonState(btnSupleObraConfirm, confirmations.isSupleObraCheck());
 		toogleButtonState(btnSupleCentralConfirm, confirmations.isSupleCentralCheck());
 
@@ -2676,13 +2714,13 @@ public class AttendancePanel extends VerticalLayout implements View {
 	}
 
 	private void populateAttendanceGrid(){
-
+		logger.debug("llamando populateAttendanceGrid");
 		//		UI.getCurrent().addWindow(progressDialog);
 
 		//		final WorkThread thread = new WorkThread();
 		//		thread.start();
 		DateTime dt = getAttendanceDate();
-		
+
 		logger.debug("configureInterface();");
 
 		reloadMonthAttendanceData(dt);
@@ -2730,24 +2768,24 @@ public class AttendancePanel extends VerticalLayout implements View {
 		for(String column : salaryTableVisibleTable ){
 			salaryTable.setColumnCollapsed(column, !user.getSalaryColumns().contains(column));
 		}
-		
+
 		loadingData = false;
-		
+
 		// Enable polling and set frequency to 1 seconds
 		//		UI.getCurrent().setPollInterval(1000);
 	}
-	
+
 	private void configureSalaryTable(){
-		
+
 		//crea la columna, solo si no existe
 		if(salaryTable.getColumnGenerator("totalLiquido") == null )
 			salaryTable.addGeneratedColumn("totalLiquido", new Table.ColumnGenerator(){
-	
+
 				@Override
 				public Object generateCell(final Table source, final Object itemId,final Object columnId) {
-					
+
 					if(((BeanContainer)source.getContainerDataSource()).getBeanType() == Salary.class){
-					
+
 						final BeanItem<Salary> item = (BeanItem<Salary>) salaryContainer.getItem(itemId);
 						salaryContainer.getItem(itemId).getItemProperty("forceSalary").getValue();
 						final Label label  = new Label("<b>"+Utils.formatInteger((Integer) salaryContainer.getContainerProperty(itemId, columnId).getValue())+"</b>"+
@@ -2755,7 +2793,7 @@ public class AttendancePanel extends VerticalLayout implements View {
 						label.setContentMode(ContentMode.HTML);
 						for(final String pid : new String[]{"jornalPromedio","suple","descHours","bondMov2","specialBond","loanBond"})
 							((ValueChangeNotifier)item.getItemProperty(pid)).addValueChangeListener(new Property.ValueChangeListener() {
-	
+
 								@Override
 								public void valueChange(ValueChangeEvent event) {
 									if("jornalPromedio".equals(pid)){
@@ -2765,7 +2803,7 @@ public class AttendancePanel extends VerticalLayout implements View {
 									//forza actualizar el item
 									label.setValue( "<b>"+Utils.formatInteger((Integer) salaryContainer.getContainerProperty(itemId, columnId).getValue())+"</b>"+
 											"  ("+Utils.formatInteger((Integer) salaryContainer.getContainerProperty(itemId, "roundSalary").getValue())+")");
-									
+
 								}
 							});
 						return label;
@@ -2773,7 +2811,7 @@ public class AttendancePanel extends VerticalLayout implements View {
 						return ((BeanItem<HistoricalSalary>) source.getContainerDataSource().getItem(itemId)).getItemProperty(columnId).getValue();
 					}
 				}
-	
+
 			});
 
 		salaryTable.setVisibleColumns(salaryTableVisibleTable);
@@ -2831,7 +2869,7 @@ public class AttendancePanel extends VerticalLayout implements View {
 		salaryTable.setColumnCollapsed("salaryCalculator.dpd",true);
 		salaryTable.setColumnCollapsed("salaryCalculator.col",true);
 		salaryTable.setColumnCollapsed("salaryCalculator.mov",true);
-		
+
 		salaryTable.setEditable(true);
 	}
 
@@ -2883,7 +2921,7 @@ public class AttendancePanel extends VerticalLayout implements View {
 				historicalSalaryContainer.addNestedContainerProperty("laborerConstructionSite.id");
 				historicalSalaryContainer.addNestedContainerProperty("costAccount.code");
 				historicalSalaryContainer.setBeanIdProperty("laborerConstructionSite.id");
-				
+
 				historicalSalaryContainer.addAll(salaries);
 				historicalSalaryContainer.sort(new String[]{"laborerConstructionsite.activeContract.jobCode"},new boolean[]{ true });
 				salaryTable.setContainerDataSource(historicalSalaryContainer);
@@ -2904,7 +2942,7 @@ public class AttendancePanel extends VerticalLayout implements View {
 				mensaje = e.getMessage();
 			Notification.show(mensaje,Type.ERROR_MESSAGE);
 		}
-	
+
 	}
 	/**
 	 * Según la fecha y la obra, verifica cual es el estado de confirmación de cada una

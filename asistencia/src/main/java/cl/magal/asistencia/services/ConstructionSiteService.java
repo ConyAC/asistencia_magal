@@ -350,7 +350,7 @@ public class ConstructionSiteService {
 		if( lc.getActiveContract().getTerminationDate() != null){
 			current = date.dayOfMonth().getMaximumValue();
 			date = date.withDayOfMonth(current);
-			while( Utils.isDateBefore(lc.getActiveContract().getTerminationDate(),date.toDate()) && current >= date.dayOfMonth().getMinimumValue() ){
+			while( Utils.isDateBeforeOrSame(lc.getActiveContract().getTerminationDate(),date.toDate()) && current >= date.dayOfMonth().getMinimumValue() ){
 				//elije la marca según si la fecha está en la misma semana o no
 				AttendanceMark mark = chooseBetweenEmptyOrFilled(date,lc.getActiveContract().getTerminationDate());
 				attendance.setMark(mark, current - 1);
@@ -448,10 +448,10 @@ public class ConstructionSiteService {
 			Attendance attendance ;
 			if(index >= 0){
 				attendance = attendanceList.remove(index);
-				logger.debug("encontró el attendance, {} laborer {}, cs {}",attendance.getLaborerConstructionSite().getId(),lc.getLaborer(),lc.getConstructionsite());
+//				logger.debug("encontró el attendance, {} laborer {}, cs {}",attendance.getLaborerConstructionSite().getId(),lc.getLaborer(),lc.getConstructionsite());
 			}else{
 				attendance = new Attendance();
-				logger.debug("no encontró el attendance, laborer {}, cs {}",lc.getLaborer(),lc.getConstructionsite());
+//				logger.debug("no encontró el attendance, laborer {}, cs {}",lc.getLaborer(),lc.getConstructionsite());
 				attendance.setLaborerConstructionSite(lc);
 				attendance.setDate(date.toDate());
 			}

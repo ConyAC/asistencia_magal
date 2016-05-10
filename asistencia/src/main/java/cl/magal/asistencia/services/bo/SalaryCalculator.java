@@ -919,6 +919,11 @@ public class SalaryCalculator {
 		return Utils.countMarks(null,attendance,AttendanceMark.ATTEND,AttendanceMark.SATURDAY,AttendanceMark.RAIN,AttendanceMark.PERMISSION,
 				AttendanceMark.FILLER,AttendanceMark.FAIL,AttendanceMark.VACATION);
 	}
+	
+	public String getPrint(){
+		return Utils.printFechas(null,attendance,AttendanceMark.ATTEND,AttendanceMark.SATURDAY,AttendanceMark.RAIN,AttendanceMark.PERMISSION,
+				AttendanceMark.FILLER,AttendanceMark.FAIL,AttendanceMark.VACATION);
+	}
 
 	/**
 	 * DONE
