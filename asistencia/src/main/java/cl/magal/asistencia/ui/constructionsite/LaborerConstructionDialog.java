@@ -256,7 +256,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 		gl.addComponent(cbSupleCode,0,2);
 		gl.setComponentAlignment(cbSupleCode, Alignment.TOP_CENTER);
 		//si el usuario tiene permisos para cambiar el rol
-		if(SecurityHelper.hasPermission(Permission.AGREGAR_CUENTAS_COSTO)){
+		if(SecurityHelper.hasPermission(Permission.CAMBIAR_ROL)){
 			final TextField jobCode = new TextField("Codigo en Obra",getItem().getItemProperty("activeContract.jobCode"));
 			gl.addComponent(jobCode,0,3);
 			gl.setComponentAlignment(jobCode, Alignment.TOP_CENTER);
@@ -882,7 +882,14 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 		gl.addComponent(new UndefinedWidthLabel("Oficio : "),columna++,fila);gl.addComponent(lbJob,columna--,fila++);
 		gl.addComponent(new UndefinedWidthLabel("Rol : "),columna++,fila);gl.addComponent(lbJobCode,columna--,fila++);
 		gl.addComponent(new UndefinedWidthLabel("Fecha Inicio : "),columna++,fila);gl.addComponent(lbStarting,columna--,fila++);
-		gl.addComponent(new UndefinedWidthLabel("Fecha Termino : "),columna++,fila);gl.addComponent(lbEnding,columna--,fila++);
+		gl.addComponent(new UndefinedWidthLabel("Fecha Termino : "),columna++,fila);
+		//si el usuario tiene permisos para cambiar el rol
+		if(SecurityHelper.hasPermission(Permission.CAMBIAR_ROL)){
+			final DateField jobCode = new DateField(null,getItem().getItemProperty("activeContract.terminationDate"));
+			gl.addComponent(jobCode,columna--,fila++);
+		}else{
+			gl.addComponent(lbEnding,columna--,fila++);
+		}
 
 		final Button btnFinishContract = new Button(null,FontAwesome.TIMES);
 		btnFinishContract.setDescription("Término de Contrato");

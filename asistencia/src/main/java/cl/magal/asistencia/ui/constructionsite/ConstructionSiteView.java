@@ -8,13 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import ru.xpoft.vaadin.VaadinView;
-import cl.magal.asistencia.entities.ConstructionSite;
-import cl.magal.asistencia.services.ConstructionSiteService;
-import cl.magal.asistencia.services.UserService;
-import cl.magal.asistencia.ui.BaseView;
-import cl.magal.asistencia.ui.MagalUI;
-
 import com.vaadin.data.util.BeanItem;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
@@ -25,6 +18,13 @@ import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.UI;
+
+import cl.magal.asistencia.entities.ConstructionSite;
+import cl.magal.asistencia.services.ConstructionSiteService;
+import cl.magal.asistencia.services.UserService;
+import cl.magal.asistencia.ui.BaseView;
+import cl.magal.asistencia.ui.MagalUI;
+import ru.xpoft.vaadin.VaadinView;
 
 @VaadinView(value=ConstructionSiteView.NAME,cached=false)
 @Scope("prototype")
