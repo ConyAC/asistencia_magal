@@ -172,7 +172,9 @@ public class AttendancePanel extends VerticalLayout implements View {
 	BeanContainer<Long,Salary> salaryContainer = new BeanContainer<Long,Salary>(Salary.class);
 	BeanItemContainer<AbsenceVO> absenceContainer = new BeanItemContainer<AbsenceVO>(AbsenceVO.class);
 	BeanItemContainer<ConstructionSite> constructionContainer = new BeanItemContainer<ConstructionSite>(ConstructionSite.class);
-	BeanItemContainer<CostAccount> costContainer = new BeanItemContainer<CostAccount>(CostAccount.class);
+	
+	// lista de costos
+	List<CostAccount> costAccount = null;
 
 	/** COMPONENTES **/
 	ProgressBar progress;
@@ -264,6 +266,7 @@ public class AttendancePanel extends VerticalLayout implements View {
 
 	public void setCs(ConstructionSite cs) {
 		this.cs = cs;
+		costAccount = getCostByConstructionSite();
 	}
 
 	private DateTime getAttendanceDate() {
@@ -1337,8 +1340,9 @@ public class AttendancePanel extends VerticalLayout implements View {
 							//							});
 							return tf;
 						}
-						if(propertyId.equals("costAccount")){
-							costContainer.addAll(getCostByConstructionSite());							
+						if(propertyId.equals("costAccount")){		
+							BeanItemContainer<CostAccount> costContainer = new BeanItemContainer<CostAccount>(CostAccount.class);
+							costContainer.addAll(costAccount);
 							ComboBox cbCost = new ComboBox(null,costContainer);
 							cbCost.setItemCaptionPropertyId("code");
 							cbCost.setImmediate(true);
@@ -2419,7 +2423,6 @@ public class AttendancePanel extends VerticalLayout implements View {
 											wb.setSheetName(1,getAttendanceDate().toString("MMMM yyyy").toUpperCase());
 											XSSFSheet sheet = wb.getSheetAt(1);
 											int i = 11;
-											costContainer.addAll(getCostByConstructionSite());
 											for(Object itemId : attendanceContainer.getItemIds()){
 
 												BeanItem<Attendance> attendanceItem = attendanceContainer.getItem(itemId);
@@ -2430,11 +2433,11 @@ public class AttendancePanel extends VerticalLayout implements View {
 												Attendance attendance = attendanceItem.getBean();
 												Overtime overtime = overtimeItem.getBean();
 
-												BeanItem<CostAccount> costItem = costContainer.getItem(salaryItem.getBean().getCostAccount());
+											    CostAccount costItem = salaryItem.getBean().getCostAccount();
 												Row row = sheet.getRow(i++);
 
 												//información de cuenta de costos										
-												row.getCell(133).setCellValue(costItem.getBean().getCode());
+												row.getCell(133).setCellValue(costItem.getCode());
 
 												//información del trabajador
 												row.getCell(0).setCellValue(attendance.getLaborerConstructionSite().getJobCode());

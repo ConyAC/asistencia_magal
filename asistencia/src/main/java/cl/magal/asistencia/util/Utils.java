@@ -502,7 +502,7 @@ public class Utils {
 		
 		//si la fecha de ingreso es luego del inicio del mes, entonces comienza a contar desde ese día
 		if(finContrato.isBefore(finMes))
-			return finContrato.getDayOfMonth() - 1;
+			return finContrato.getDayOfMonth();
 		else
 			return maxDay;
 	}
