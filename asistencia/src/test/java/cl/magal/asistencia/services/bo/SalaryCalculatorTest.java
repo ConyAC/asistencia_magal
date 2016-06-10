@@ -38,16 +38,16 @@ import com.github.springtestdbunit.annotation.DatabaseSetup;
 import com.github.springtestdbunit.annotation.DbUnitConfiguration;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(locations = { "/META-INF/spring/testApplicationContext2.xml" })
-@DbUnitConfiguration(databaseConnection="memDatasource",dataSetLoader=XlsDataSetLoader.class)
-@TestExecutionListeners({ DependencyInjectionTestExecutionListener.class, DbUnitTestExecutionListener.class })
-@DatabaseSetup(value={
-		"/datasets/laborer.xls",
-		"/datasets/construction_sites.xls",
-		"/datasets/laborer_constructionsite.xls",
-		"/datasets/configurations.xls",
-		"/datasets/family_allowance_configurations.xls"
-		})
+@ContextConfiguration(locations = { "/META-INF/spring/testApplicationContext3.xml" })
+//@DbUnitConfiguration(databaseConnection="memDatasource",dataSetLoader=XlsDataSetLoader.class)
+//@TestExecutionListeners({ DependencyInjectionTestExecutionListener.class, DbUnitTestExecutionListener.class })
+//@DatabaseSetup(value={
+//		"/datasets/laborer.xls",
+//		"/datasets/construction_sites.xls",
+//		"/datasets/laborer_constructionsite.xls",
+//		"/datasets/configurations.xls",
+//		"/datasets/family_allowance_configurations.xls"
+//		})
 public class SalaryCalculatorTest {
 	
 	transient Logger logger = LoggerFactory.getLogger(SalaryCalculatorTest.class);
@@ -298,6 +298,23 @@ public class SalaryCalculatorTest {
 		logger.debug("attendances {}",attendances);
 		
 		assertTrue(!attendances.isEmpty());
+	}
+	
+	/**
+	 * PRueba la impresión de las variables que tiene salary calculator
+	 */
+	@Test
+	public void testPrintCalculo(){
+		//obtiene un periodo
+		long constructionSiteId = 1L;
+		DateTime monthDate = DateTime.parse("2016-03-08");
+		Integer jobCode = 400;
+		// obtiene los datos desde el dataset
+		
+		Salary salary = csService.calculateSalaryByCsAndMonthAndJobCode(constructionSiteId,monthDate,jobCode);
+		
+		logger.debug("salary {}",salary.dump());
+		
 	}
 	
 

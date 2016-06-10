@@ -163,7 +163,7 @@ public class SalaryCalculator {
 	}
 
 	Double tDesc;
-	Double getTDesc(){
+	public Double getTDesc(){
 		if ( tDesc == null ) {
 			tDesc= calculateTDesc(getAfecto(),getSobreAfecto(),suple,toolFee,loanFee);
 			logger.debug("tDesc {}",tDesc);
