@@ -411,20 +411,21 @@ public class Salary implements Serializable {
 
 		int salto = 1; 
 		StringBuilder sb = new StringBuilder();
-		sb.append("Total Liquido = Anticipos + A Pagar");
-		sb.append(salary + suple ).append(" = ").append(suple).append(" + ").append(salary).append(salto(salto));
+		sb.append("Total Liquido = Anticipos + A Pagar ").append(salto(salto));
+		sb.append( getSalary() + getSuple() ).append(" = ").append(getSuple()).append(" + ").append(getSalary())
+		.append(salto(salto));
 		
-		sb.append(3).append(salto(salto));
+		sb.append(salto(3)).append(salto(salto));
 		
-		sb.append("A Pagar = Afecto + Sobre Afecto + T No Afecto - T Desc").append(salto(salto));
+		sb.append("A Pagar = Afecto + Sobre Afecto + T No Afecto - T Desc ").append(salto(salto));
 		sb.append(salary).append(" = ").append(salaryCalculator.getAfecto()).append(" + ").append(salaryCalculator.getSobreAfecto()).append(" + ").append(salaryCalculator.getTNoAfecto()).append(" - ").append(salaryCalculator.getTDesc()).append(salto(salto));
 		
-		sb.append(3).append(salto(salto));
+		sb.append(salto(3)).append(salto(salto));
 		
 		sb.append("T Desc = Desc Imposicion + Imponible + Anticipo + Herramienta + Prestamo").append(salto(salto));
 		sb.append(salaryCalculator.getTDesc()).append(" = ").append(salaryCalculator.getDescImposicion()).append(" + ").append(suple).append(" + ").append(salaryCalculator.getToolFee()).append(" + ").append(salaryCalculator.getLoanFee()).append(salto(salto));
 		
-		sb.append(3).append(salto(salto));
+		sb.append(salto(3)).append(salto(salto));
 
 
 		sb.append("Desc Imposicion = 7% Saludo (Isapre) + Adiciona Isapre (Monto cto UF) + $ AFP (AFP / %) ").append(salto(salto));

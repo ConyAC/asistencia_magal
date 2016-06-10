@@ -242,5 +242,15 @@ public class LaborerService {
 	 */
 	public Laborer findByRut(String rut) {
 		return laborerRepo.findByRut(rut);
-	}	
+	}
+
+//	/**
+//	 * 
+//	 * @param cs
+//	 * @param jobcode
+//	 * @return
+//	 */
+//	public LaborerConstructionsite findLaborerOnConstructionSiteByJobCode(ConstructionSite cs, int jobcode) {
+//		return laborerConstructionsiteRepo.findByConstructionsiteAndJobCode(cs, jobcode);
+//	}	
 }

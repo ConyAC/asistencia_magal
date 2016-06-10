@@ -35,4 +35,7 @@ public interface LaborerConstructionsiteRepository extends
 			+ " and ( ac.terminationDate is null or ( ( extract( year from ac.terminationDate ) * 100) + extract( month from ac.terminationDate ) ) >= ((extract( year from  ?2 ) * 100) + extract( month from  ?2 )) ) ")
 	List<LaborerConstructionsite> findByConstructionsiteAndIsActiveThisMonth(ConstructionSite cs, Date date);
 
+	@Query(value="select lc from LaborerConstructionsite lc where lc.constructionsite = ?1 and lc.activeContract.jobCode = ?2")
+	LaborerConstructionsite findByConstructionsiteAndJobCode(ConstructionSite cs, int jobcode);
+
 }

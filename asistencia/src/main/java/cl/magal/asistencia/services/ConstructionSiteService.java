@@ -1168,15 +1168,5 @@ public class ConstructionSiteService {
 		costRepo.removeIdByCSAndCost(cs, costAccount);
 	}
 
-	/**
-	 * Salary
-	 * @param constructionSiteId
-	 * @param monthDate
-	 * @param jobCode
-	 * @return
-	 */
-	public Salary calculateSalaryByCsAndMonthAndJobCode(long constructionSiteId, DateTime monthDate, Integer jobCode) {
-		// TODO Auto-generated method stub
-		return null;
-	}	
+
 }
