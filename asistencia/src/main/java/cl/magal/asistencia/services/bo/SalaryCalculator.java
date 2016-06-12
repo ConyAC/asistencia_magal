@@ -264,7 +264,7 @@ public class SalaryCalculator {
 	Double gLegal;
 	public Double getGLegal(){
 		if(gLegal == null ){
-			gLegal = calculateGLegal(getDiasHabiles());
+			gLegal = calculateGLegal();
 		}
 		return gLegal;
 	}
@@ -634,12 +634,22 @@ public class SalaryCalculator {
 				getDescHoras() + getBonifImpo() + getGLegal();
 		return sum > maxImponible ? maxImponible : sum ;
 	}
+	
+	
+	private Double gratificacionLegalMes;
+	public Double getGratificacionLegalMes(){
+		if(gratificacionLegalMes == null)
+			gratificacionLegalMes = calculateGratificacionLegalMes(getDiasHabiles());
+		return gratificacionLegalMes;
+	}
+	
+	
 	/**
 	 * DONE
 	 * @return
 	 */
-	private double calculateGLegal(int diasHabilesMes) {
-		return calculateGratificacionLegalMes(diasHabilesMes) * getDiaTrab();
+	private double calculateGLegal() {
+		return getGratificacionLegalMes() * getDiaTrab();
 	}
 
 	/**
