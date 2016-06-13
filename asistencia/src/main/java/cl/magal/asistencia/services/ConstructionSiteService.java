@@ -888,6 +888,7 @@ public class ConstructionSiteService {
 		List<Salary> salaries = new ArrayList<Salary>(lcs.size());
 		
 		int holydays = countHolidaysMonthOnLaborerDays(date);
+		logger.debug("holydays {}",holydays);
 		
 		AfpAndInsuranceConfigurations afpConfig = configurationService.findAfpAndInsuranceConfiguration();
 		
@@ -1088,7 +1089,9 @@ public class ConstructionSiteService {
 		List<Holiday> holidays = holidayRepo.findByMonth(attendanceDate.toDate());
 		int count = 0;
 		for(Holiday h : holidays){
-			if(Utils.isLaborerDay(new DateTime(h.getDate(),DateTimeZone.UTC)))
+			DateTime dt = new DateTime(h.getDate());
+			logger.debug("dt {}",dt);
+			if(Utils.isLaborerDay(dt))
 				count++;
 		}
 		return count;

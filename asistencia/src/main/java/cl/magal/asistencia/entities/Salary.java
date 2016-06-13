@@ -422,8 +422,38 @@ public class Salary implements Serializable {
 		
 		sb.append(salto(3)).append(salto(salto));
 		
+		sb.append("Afecto = V Trato + Valor Sabado + V S Corrd + Sbto + Desc H + Bonif Imp + G Legal ").append(salto(salto));
+		sb.append(salaryCalculator.getAfecto()).append(" = ").append(salaryCalculator.getVTrato()).append(" + ")
+		.append(salaryCalculator.getValorSabado()).append(" + ").append(salaryCalculator.getVSCorrd())
+		.append(" + ").append(salaryCalculator.getSobreTiempo()).append(" + ").append(salaryCalculator.getDescHoras())
+		.append(" + ").append(salaryCalculator.getBonifImpo()).append(" + ").append(salaryCalculator.getGLegal()).append(salto(salto));
+		
+		sb.append(salto(3)).append(salto(salto));
+		
+		sb.append("V Trato = J Promedio * Dia Trab ").append(salto(salto));
+		sb.append(salaryCalculator.getVTrato()).append(" = ").append(getJornalPromedio()).append(" * ")
+		.append(salaryCalculator.getDiaTrab()).append(salto(salto));
+		
+		sb.append(salto(3)).append(salto(salto));
+		
+		sb.append("Valor Sabado = (V Trato + Descto Horas) / (Sab * DPS) ").append(salto(salto));
+		sb.append(salaryCalculator.getValorSabado()).append(" = ( ").append(salaryCalculator.getVTrato()).append(" + ")
+		.append(salaryCalculator.getDescHoras()).append(") / ( ").append(salaryCalculator.getSab()).append(" * ")
+		.append(salaryCalculator.getDps()).append(" ) ").append(salto(salto));
+		
+		sb.append(salto(3)).append(salto(salto));
+		
+		sb.append("G Legal =  Gratif Legal * Dias Trab").append(salto(salto));
+		sb.append(salaryCalculator.getGLegal()).append(" = ").append(salaryCalculator.getGratificacionLegalMes()).append(" * ")
+		.append(salaryCalculator.getDiaTrab()).append(salto(salto));
+		
+		sb.append(salto(3)).append(salto(salto));
+		
 		sb.append("T Desc = Desc Imposicion + Imponible + Anticipo + Herramienta + Prestamo").append(salto(salto));
-		sb.append(salaryCalculator.getTDesc()).append(" = ").append(salaryCalculator.getDescImposicion()).append(" + ").append(suple).append(" + ").append(salaryCalculator.getToolFee()).append(" + ").append(salaryCalculator.getLoanFee()).append(salto(salto));
+		sb.append(salaryCalculator.getTDesc()).append(" = ")
+		.append(salaryCalculator.getDescImposicion()).append(" + ")
+		.append(salaryCalculator.getImpto()).append(" + ").append(suple).append(" + ")
+		.append(salaryCalculator.getToolFee()).append(" + ").append(salaryCalculator.getLoanFee()).append(salto(salto));
 		
 		sb.append(salto(3)).append(salto(salto));
 

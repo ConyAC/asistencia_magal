@@ -309,7 +309,7 @@ public class SalaryCalculatorTest {
 		Map<Integer,Double> resultado = new HashMap<Integer,Double>();
 
 		resultado.put(3,504793d);
-		resultado.put(4,0d);
+//		resultado.put(4,0d);
 		resultado.put(5,503473d);
 		resultado.put(6,469589d);
 		resultado.put(7,449774d);
@@ -318,7 +318,8 @@ public class SalaryCalculatorTest {
 		resultado.put(10,541511d);
 		resultado.put(13,381954d);
 		resultado.put(15,452759d);
-		resultado.put(16,94354d);
+		//resultado.put(16,94354d);
+		resultado.put(16,88141d);
 		resultado.put(17,532587d);
 		resultado.put(18,476279d);
 		resultado.put(19,461435d);
@@ -344,13 +345,15 @@ public class SalaryCalculatorTest {
 		resultado.put(422,735440d);
 		resultado.put(423,750505d);
 		resultado.put(424,754782d);
-		resultado.put(425,35365d);
-		resultado.put(426,35261d);
+//		resultado.put(425,35365d);
+//		resultado.put(426,35261d);
+		resultado.put(425,33650d);
+		resultado.put(426,33551d);
 		resultado.put(427,705309d);
 		resultado.put(428,750505d);
 		resultado.put(429,662135d);
 		resultado.put(430,543020d);
-		resultado.put(431,0d);
+//		resultado.put(431,0d);
 		resultado.put(432,543669d);
 		resultado.put(703,743374d);
 		resultado.put(801,702200d);
@@ -360,7 +363,7 @@ public class SalaryCalculatorTest {
 		resultado.put(903,1367692d);
 		resultado.put(904,504255d);
 		resultado.put(905,887966d);
-		resultado.put(906,520226d);
+		resultado.put(906,574168d);
 		resultado.put(908,748653d);
 		resultado.put(909,822951d);
 		resultado.put(910,10350d);
@@ -369,13 +372,12 @@ public class SalaryCalculatorTest {
 		resultado.put(914,504309d);
 
 		long csId = 10;
-		int jobcode = 20;
 		DateTime date = DateTimeFormat.forPattern("dd/MM/yyyy").parseDateTime("01/03/2016") ;
 
 		ConstructionSite cs = csService.findConstructionSite(csId);
 		List<Salary> salaries = csService.getSalariesByConstructionAndMonth(cs, date);
 		for(Salary salary : salaries ){
-//			if(salary.getLaborerConstructionSite().getJobCode() == jobcode ){
+//			if(salary.getLaborerConstructionSite().getJobCode() == 3 ){
 				logger.debug("\ndump del trabajador con code {} y csId {} \ndump {}\n\n",salary.getLaborerConstructionSite().getActiveContract().getJobCode(),csId,salary.dump());
 				Double expectedSalary  = resultado.get(salary.getLaborerConstructionSite().getActiveContract().getJobCode());
 				if(expectedSalary == null ) continue;
