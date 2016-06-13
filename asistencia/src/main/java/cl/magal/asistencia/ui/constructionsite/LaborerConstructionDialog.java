@@ -622,6 +622,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 				Date firstDayOfCurrentMonth = new DateTime().dayOfMonth().withMinimumValue().toDate();
 				if(  Utils.containsMonth(loanBean.getBean().getDatePostponed(), firstDayOfCurrentMonth) ){                
 					lcb.setValue(true);
+					//loanBean.getBean().setStatus(LoanToolStatus.APLAZADA);
 				}else{
 					lcb.setValue(false);
 				}

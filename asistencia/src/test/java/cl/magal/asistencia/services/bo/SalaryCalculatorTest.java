@@ -384,6 +384,78 @@ public class SalaryCalculatorTest {
 		}
 
 	}
+	@Test
+	public void testFebrero(){
+		
+		//obtiene un periodo
+		//crea el map de valores esperados
+		Map<Integer,Double> resultado = new HashMap<Integer,Double>();
+		resultado.put(5,419120d);
+		resultado.put(6,438582d);
+		resultado.put(7,445142d);
+		resultado.put(8,476431d);
+		resultado.put(9,442198d);
+		resultado.put(10,551236d);
+		resultado.put(13,363039d);
+		resultado.put(15,460480d);
+		resultado.put(16,320892d);
+		resultado.put(17,562013d);
+		resultado.put(18,453475d);
+		resultado.put(19,387666d);
+		resultado.put(21,510079d);
+		resultado.put(23,477252d);
+		resultado.put(24,355180d);
+		resultado.put(25,462675d);
+		resultado.put(26,460480d);
+		resultado.put(400,721677d);
+		resultado.put(401,705450d);
+		resultado.put(402,619106d);
+		resultado.put(403,664791d);
+		resultado.put(404,498228d);
+		resultado.put(407,232216d);
+		resultado.put(408,655965d);
+		resultado.put(409,726181d);
+		resultado.put(410,619106d);
+		resultado.put(411,610980d);
+		resultado.put(413,476771d);
+		resultado.put(414,681079d);
+		resultado.put(418,613462d);
+		resultado.put(420,555132d);
+		resultado.put(421,345450d);
+		resultado.put(422,338436d);
+		resultado.put(423,116306d);
+		resultado.put(424,116987d);
+		resultado.put(703,676168d);
+		resultado.put(800,441410d);
+		resultado.put(801,581184d);
+		resultado.put(901,544112d);
+		resultado.put(902,896329d);
+		resultado.put(903,1236479d);
+		resultado.put(904,450824d);
+		resultado.put(905,901184d);
+		resultado.put(906,615876d);
+		resultado.put(908,700749d);
+		resultado.put(909,945279d);
+		resultado.put(910,734368d);
+		resultado.put(911,123344d);
+		resultado.put(912,472222d);
+		resultado.put(913,540747d);
+
+		long csId = 10;
+		int jobcode = 20;
+		DateTime date = DateTimeFormat.forPattern("dd/MM/yyyy").parseDateTime("01/02/2016") ;
+
+		ConstructionSite cs = csService.findConstructionSite(csId);
+		List<Salary> salaries = csService.getSalariesByConstructionAndMonth(cs, date);
+		for(Salary salary : salaries ){
+//			if(salary.getLaborerConstructionSite().getJobCode() == jobcode ){
+				logger.debug("\ndump del trabajador con code {} y csId {} \ndump {}\n\n",salary.getLaborerConstructionSite().getActiveContract().getJobCode(),csId,salary.dump());
+				Double expectedSalary  = resultado.get(salary.getLaborerConstructionSite().getActiveContract().getJobCode());
+				if(expectedSalary == null ) continue;
+				assertEquals(expectedSalary,salary.getSalary() + salary.getSuple(),1d);
+//			}
+		}
+	}
 
 
 }
