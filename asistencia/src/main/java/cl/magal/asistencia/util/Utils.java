@@ -21,16 +21,6 @@ import org.joda.time.format.DateTimeFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.vaadin.data.Validator.InvalidValueException;
-import com.vaadin.data.fieldgroup.FieldGroup.CommitException;
-import com.vaadin.data.util.BeanItem;
-import com.vaadin.data.util.BeanItemContainer;
-import com.vaadin.data.util.MethodProperty;
-import com.vaadin.ui.Field;
-import com.vaadin.ui.Notification;
-import com.vaadin.ui.Notification.Type;
-import com.vaadin.ui.TextField;
-
 import cl.magal.asistencia.entities.Accident;
 import cl.magal.asistencia.entities.AfpItem;
 import cl.magal.asistencia.entities.Attendance;
@@ -43,6 +33,16 @@ import cl.magal.asistencia.entities.Mobilization2;
 import cl.magal.asistencia.entities.Vacation;
 import cl.magal.asistencia.entities.WithdrawalSettlement;
 import cl.magal.asistencia.entities.enums.AttendanceMark;
+
+import com.vaadin.data.Validator.InvalidValueException;
+import com.vaadin.data.fieldgroup.FieldGroup.CommitException;
+import com.vaadin.data.util.BeanItem;
+import com.vaadin.data.util.BeanItemContainer;
+import com.vaadin.data.util.MethodProperty;
+import com.vaadin.ui.Field;
+import com.vaadin.ui.Notification;
+import com.vaadin.ui.Notification.Type;
+import com.vaadin.ui.TextField;
 
 public class Utils {
 	
@@ -544,16 +544,16 @@ public class Utils {
 	 */
 	public static int calcularDiaInicial(Attendance attendance2,int minVal,boolean completarSemana) {
 		//obtiene el primer día del mes
-		DateTime inicioMes = new DateTime(attendance2.getDate(),DateTimeZone.UTC).withDayOfMonth(1).withTime(0, 0, 0, 0);
+		DateTime inicioMes = new DateTime(attendance2.getDate()).withDayOfMonth(1);
 		//obtiene la fecha de ingreso
-		DateTime inicioContrato = new DateTime(attendance2.getLaborerConstructionSite().getActiveContract().getStartDate(),DateTimeZone.UTC).withTime(0, 0, 0, 0);
+		DateTime inicioContrato = new DateTime(attendance2.getLaborerConstructionSite().getActiveContract().getStartDate());
 		//si tiene que completar la semana, retorna el lunes más cercano
 		if(completarSemana){
 			//le resta dia hasta que sea el lunes
 			inicioContrato = calcularLunesMasCercano(inicioContrato,false);
 		}
 		//si la fecha de ingreso es luego del inicio del mes, entonces comienza a contar desde ese día
-		if(inicioContrato.isAfter(inicioMes)){
+		if(inicioContrato.isAfter(inicioMes) && inicioContrato.getDayOfMonth() > minVal){
 			return inicioContrato.getDayOfMonth() - 1;
 		}else {
 			return minVal;

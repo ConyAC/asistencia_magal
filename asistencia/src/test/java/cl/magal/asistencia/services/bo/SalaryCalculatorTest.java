@@ -300,10 +300,10 @@ public class SalaryCalculatorTest {
 	}
 
 	/**
-	 * PRueba la impresión de las variables que tiene salary calculator
+	 * Prueba la impresión de las variables que tiene salary calculator
 	 */
 	@Test
-	public void testPrintCalculo(){
+	public void testMarzoPrintCalculo(){
 		//obtiene un periodo
 		//crea el map de valores esperados
 		Map<Integer,Double> resultado = new HashMap<Integer,Double>();
@@ -382,6 +382,86 @@ public class SalaryCalculatorTest {
 				Double expectedSalary  = resultado.get(salary.getLaborerConstructionSite().getActiveContract().getJobCode());
 				if(expectedSalary == null ) continue;
 				assertEquals(expectedSalary,salary.getSalary() + salary.getSuple(),1d);
+//			}
+		}
+
+	}
+	
+	/**
+	 * Prueba la impresión de las variables que tiene salary calculator
+	 */
+	@Test
+	public void testEneroPrintCalculo(){
+		//obtiene un periodo
+		//crea el map de valores esperados
+		Map<Integer,Double> resultado = new HashMap<Integer,Double>();
+
+		resultado.put(3,507269d);
+		resultado.put(4,24638d);
+		resultado.put(5,470382d);
+		resultado.put(6,359218d);
+		resultado.put(7,258597d);
+		resultado.put(8,397081d);
+		resultado.put(9,587180d);
+		resultado.put(10,359542d);
+		resultado.put(12,305517d);
+		resultado.put(13,325857d);
+		resultado.put(14,21470d);
+		resultado.put(15,345526d);
+		resultado.put(16,426148d);
+		resultado.put(17,375876d);
+		resultado.put(18,359218d);
+		resultado.put(19,358443d);
+		resultado.put(20,354168d);
+		resultado.put(21,364844d);
+		resultado.put(22,24211d);
+		resultado.put(23,218833d);
+		resultado.put(24,124065d);
+		resultado.put(400,596782d);
+		resultado.put(401,499808d);
+		resultado.put(402,511928d);
+		resultado.put(403,560574d);
+		resultado.put(404,383948d);
+		resultado.put(407,538164d);
+		resultado.put(408,558421d);
+		resultado.put(409,524695d);
+		resultado.put(410,511928d);
+		resultado.put(411,511928d);
+		resultado.put(412,423627d);
+		resultado.put(413,548553d);
+		resultado.put(414,588127d);
+		resultado.put(417,823d);
+		resultado.put(418,560574d);
+		resultado.put(419,52888d);
+		resultado.put(420,264309d);
+		resultado.put(702,3272d);
+		resultado.put(800,450553d);
+		resultado.put(801,455407d);
+		resultado.put(901,394387d);
+		resultado.put(902,606787d);
+		resultado.put(903,1068374d);
+		resultado.put(904,333275d);
+		resultado.put(905,701411d);
+		resultado.put(906,510955d);
+		resultado.put(908,606151d);
+		resultado.put(909,752514d);
+		resultado.put(910,624319d);
+		resultado.put(911,568927d);
+		resultado.put(912,335184d);
+		resultado.put(913,418743d);
+
+
+		long csId = 10;
+		DateTime date = DateTimeFormat.forPattern("dd/MM/yyyy").parseDateTime("01/01/2016") ;
+
+		ConstructionSite cs = csService.findConstructionSite(csId);
+		List<Salary> salaries = csService.getSalariesByConstructionAndMonth(cs, date);
+		for(Salary salary : salaries ){
+//			if(salary.getLaborerConstructionSite().getJobCode() == 3 ){
+				logger.debug("\ndump del trabajador con code {} y csId {} \ndump {}\n\n",salary.getLaborerConstructionSite().getActiveContract().getJobCode(),csId,salary.dump());
+				Double expectedSalary  = resultado.get(salary.getLaborerConstructionSite().getActiveContract().getJobCode());
+				if(expectedSalary == null ) continue;
+				assertEquals(expectedSalary,salary.getSalary(),1d);
 //			}
 		}
 

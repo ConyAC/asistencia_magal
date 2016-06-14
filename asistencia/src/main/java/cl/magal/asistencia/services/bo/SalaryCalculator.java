@@ -1,5 +1,7 @@
 package cl.magal.asistencia.services.bo;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -179,7 +181,7 @@ public class SalaryCalculator {
 	}
 	
 	Integer diasHabiles ;
-	Integer getDiasHabiles(){
+	public Integer getDiasHabiles(){
 		if( diasHabiles == null )
 			diasHabiles  = calculateDiasHabilesMes(date, holidays);
 		return diasHabiles ;
@@ -602,6 +604,7 @@ public class SalaryCalculator {
 			logger.debug("salario calculado {}",salary);
 		}catch(ProjectedAttendanceNotDefined e){
 			logger.debug("salario calculado {}",salary);
+			logger.error("salario calculado {}",e);
 			salary = 0d;
 		}
 		return salary;
@@ -657,7 +660,13 @@ public class SalaryCalculator {
 	 * @return
 	 */
 	private double calculateGratificacionLegalMes(int diasHabilesMes) {
-		return (4.75*sueldoMinimo/12)/diasHabilesMes;
+		BigDecimal bdSueldoMinimo = new BigDecimal(sueldoMinimo);
+		BigDecimal bdFactor = new BigDecimal(4.75);
+		BigDecimal result1 = bdFactor.multiply(bdSueldoMinimo);
+		logger.debug("result1 {}",result1);
+		BigDecimal result2 = result1.divide(new BigDecimal(12.0),12,RoundingMode.HALF_UP).divide(new BigDecimal(diasHabilesMes),12,RoundingMode.HALF_UP);
+		logger.debug("result2 {}",result2);
+		return result2.doubleValue();
 	}
 
 	/**
@@ -667,7 +676,7 @@ public class SalaryCalculator {
 	private int calculateDiasHabilesMes(Date date,int holidays) {
 		DateTime dt = new DateTime(date);
 		int days = Utils.countLaborerDays(dt);
-		logger.debug("date {} , days {}",date,days);
+		logger.debug("date {} , days {}, holidays {}",date,days,holidays);
 		return days - holidays;
 	}
 
@@ -814,15 +823,18 @@ public class SalaryCalculator {
 			return resultMarks;
 		
 		for( ; i < maxDays ; i ++){
+			AttendanceMark mark = lastRealMarks.get(i);
 			// si cualquiera de los dos es vacio, lanza una excepcion
-			if(checkException && lastRealMarks.get(i) == AttendanceMark.EMPTY )
-				throw new ProjectedAttendanceNotDefined("Aún no se define toda la asistencia proyectada.");
-			if(checkException && projectionsMarks.get(i) == AttendanceMark.EMPTY )
-				throw new ProjectedAttendanceNotDefined("Aún no se define toda la asistencia real.");
+			if(checkException && mark == AttendanceMark.EMPTY )
+				throw new ProjectedAttendanceNotDefined("Aún no se define toda la asistencia de "+attendance.getLaborerConstructionSite().getJobCode()+" "+(mark == null? "nulo": mark)+", real "+i+".");
+			
+			mark = projectionsMarks.get(i);
+			if(checkException && mark == AttendanceMark.EMPTY )
+				throw new ProjectedAttendanceNotDefined("Aún no se define toda la asistencia "+attendance.getLaborerConstructionSite().getJobCode()+" "+(mark == null? "nulo": mark)+", real "+i+".");
 			//si son distintos, lo contabiliza
 			if(lastRealMarks.get(i) != projectionsMarks.get(i)){
 				//lo cuenta solo si está dentro del grupo a contabilizar
-				AttendanceMark mark = lastRealMarks.get(i);
+				mark = lastRealMarks.get(i);
 				resultMarks.add(mark);
 			}else{
 				resultMarks.add(null);
@@ -1244,5 +1256,10 @@ public class SalaryCalculator {
 		}
 		
 		
+	}
+
+
+	public double getSueldoMinimo() {
+		return sueldoMinimo;
 	}
 }
