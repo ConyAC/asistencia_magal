@@ -449,6 +449,12 @@ public class Salary implements Serializable {
 		
 		sb.append(salto(3)).append(salto(salto));
 		
+		sb.append("Gratif Legal = ( 4.75 * sueldoMinimo / 12 ) / diasHabilesMes ").append(salto(salto));
+		sb.append(salaryCalculator.getGratificacionLegalMes()).append(" = ")
+		.append(" ( 4,75 * ").append(salaryCalculator.getSueldoMinimo()).append(" / 12 ) / ").append(salaryCalculator.getDiasHabiles()).append(salto(salto));
+		
+		sb.append(salto(3)).append(salto(salto));
+		
 		sb.append("T Desc = Desc Imposicion + Imponible + Anticipo + Herramienta + Prestamo").append(salto(salto));
 		sb.append(salaryCalculator.getTDesc()).append(" = ")
 		.append(salaryCalculator.getDescImposicion()).append(" + ")

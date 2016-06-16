@@ -657,11 +657,13 @@ public class ConstructionSiteService {
 	}
 
 	private Map<Integer, Integer> getLoanFeesMapByConstructionAndMonth(
-			ConstructionSite cs, DateTime date) {
+			ConstructionSite cs, DateTime mothAttendance) {
 		//obtiene la lista de trabajadores
-		List<LaborerConstructionsite> lcs =  labcsRepo.findByConstructionsiteAndIsActiveThisMonth(cs,date.toDate());
+		List<LaborerConstructionsite> lcs =  labcsRepo.findByConstructionsiteAndIsActiveThisMonth(cs,mothAttendance.toDate());
+		//define el rango en el cual buscará
+		
 		//obtiene la lista de las prestamos que deberian ser cargadas en el mes
-		List<Loan> loanFees = loanRepo.findFeeByConstructionsiteAndMonth(cs,date.withDayOfMonth(1).toDate()); //se asegura de pasar el primero del mes para verificar las fechas pospuestas
+		List<Loan> loanFees = loanRepo.findFeeByConstructionsiteAndMonth(cs,mothAttendance.withDayOfMonth(1).toDate()); //se asegura de pasar el primero del mes para verificar las fechas pospuestas
 		Map<Integer, Integer> toolResult = new HashMap<Integer, Integer>();
 		//verifica que exista una asistencia para cada elemento, si no existe la crea
 		for(LaborerConstructionsite lc : lcs ){

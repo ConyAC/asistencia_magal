@@ -22,7 +22,6 @@ import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.velocity.app.VelocityEngine;
 import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
 import org.joda.time.Interval;
 import org.joda.time.LocalDateTime;
 import org.joda.time.format.DateTimeFormat;
@@ -33,6 +32,45 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.springframework.ui.velocity.VelocityEngineUtils;
 import org.vaadin.dialogs.ConfirmDialog;
+
+import cl.magal.asistencia.entities.AdvancePaymentConfigurations;
+import cl.magal.asistencia.entities.AdvancePaymentItem;
+import cl.magal.asistencia.entities.AfpAndInsuranceConfigurations;
+import cl.magal.asistencia.entities.Attendance;
+import cl.magal.asistencia.entities.Confirmations;
+import cl.magal.asistencia.entities.ConstructionSite;
+import cl.magal.asistencia.entities.Contract;
+import cl.magal.asistencia.entities.CostAccount;
+import cl.magal.asistencia.entities.DateConfigurations;
+import cl.magal.asistencia.entities.FamilyAllowanceConfigurations;
+import cl.magal.asistencia.entities.HistoricalSalary;
+import cl.magal.asistencia.entities.LaborerConstructionsite;
+import cl.magal.asistencia.entities.Overtime;
+import cl.magal.asistencia.entities.Salary;
+import cl.magal.asistencia.entities.TaxationConfigurations;
+import cl.magal.asistencia.entities.User;
+import cl.magal.asistencia.entities.WageConfigurations;
+import cl.magal.asistencia.entities.enums.AttendanceMark;
+import cl.magal.asistencia.entities.enums.Permission;
+import cl.magal.asistencia.repositories.CostAccountRepository;
+import cl.magal.asistencia.repositories.LaborerConstructionsiteRepository;
+import cl.magal.asistencia.services.ConfigurationService;
+import cl.magal.asistencia.services.ConstructionSiteService;
+import cl.magal.asistencia.services.LaborerService;
+import cl.magal.asistencia.services.MailService;
+import cl.magal.asistencia.services.UserService;
+import cl.magal.asistencia.services.bo.SalaryCalculator.ProjectedAttendanceNotDefined;
+import cl.magal.asistencia.ui.ListenerFieldFactory;
+import cl.magal.asistencia.ui.MagalUI;
+import cl.magal.asistencia.ui.components.ColumnCollapsedObservableTable;
+import cl.magal.asistencia.ui.components.ColumnCollapsedObservableTable.ColumnCollapsedEvent;
+import cl.magal.asistencia.ui.vo.AbsenceVO;
+import cl.magal.asistencia.util.Constants;
+import cl.magal.asistencia.util.OnDemandFileDownloader;
+import cl.magal.asistencia.util.OnDemandFileDownloader.OnDemandStreamResource;
+import cl.magal.asistencia.util.SecurityHelper;
+import cl.magal.asistencia.util.Utils;
+import cl.magal.asistencia.util.VelocityHelper;
 
 import com.vaadin.data.Container;
 import com.vaadin.data.Container.Filterable;
@@ -90,45 +128,6 @@ import com.vaadin.ui.UI;
 import com.vaadin.ui.Upload;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
-
-import cl.magal.asistencia.entities.AdvancePaymentConfigurations;
-import cl.magal.asistencia.entities.AdvancePaymentItem;
-import cl.magal.asistencia.entities.AfpAndInsuranceConfigurations;
-import cl.magal.asistencia.entities.Attendance;
-import cl.magal.asistencia.entities.Confirmations;
-import cl.magal.asistencia.entities.ConstructionSite;
-import cl.magal.asistencia.entities.Contract;
-import cl.magal.asistencia.entities.CostAccount;
-import cl.magal.asistencia.entities.DateConfigurations;
-import cl.magal.asistencia.entities.FamilyAllowanceConfigurations;
-import cl.magal.asistencia.entities.HistoricalSalary;
-import cl.magal.asistencia.entities.LaborerConstructionsite;
-import cl.magal.asistencia.entities.Overtime;
-import cl.magal.asistencia.entities.Salary;
-import cl.magal.asistencia.entities.TaxationConfigurations;
-import cl.magal.asistencia.entities.User;
-import cl.magal.asistencia.entities.WageConfigurations;
-import cl.magal.asistencia.entities.enums.AttendanceMark;
-import cl.magal.asistencia.entities.enums.Permission;
-import cl.magal.asistencia.repositories.CostAccountRepository;
-import cl.magal.asistencia.repositories.LaborerConstructionsiteRepository;
-import cl.magal.asistencia.services.ConfigurationService;
-import cl.magal.asistencia.services.ConstructionSiteService;
-import cl.magal.asistencia.services.LaborerService;
-import cl.magal.asistencia.services.MailService;
-import cl.magal.asistencia.services.UserService;
-import cl.magal.asistencia.services.bo.SalaryCalculator.ProjectedAttendanceNotDefined;
-import cl.magal.asistencia.ui.ListenerFieldFactory;
-import cl.magal.asistencia.ui.MagalUI;
-import cl.magal.asistencia.ui.components.ColumnCollapsedObservableTable;
-import cl.magal.asistencia.ui.components.ColumnCollapsedObservableTable.ColumnCollapsedEvent;
-import cl.magal.asistencia.ui.vo.AbsenceVO;
-import cl.magal.asistencia.util.Constants;
-import cl.magal.asistencia.util.OnDemandFileDownloader;
-import cl.magal.asistencia.util.OnDemandFileDownloader.OnDemandStreamResource;
-import cl.magal.asistencia.util.SecurityHelper;
-import cl.magal.asistencia.util.Utils;
-import cl.magal.asistencia.util.VelocityHelper;
 
 
 @Component
@@ -271,9 +270,9 @@ public class AttendancePanel extends VerticalLayout implements View {
 
 	private DateTime getAttendanceDate() {
 		if(attendanceDate.getValue() == null ){
-			attendanceDate.setValue(new DateTime(DateTimeZone.UTC).dayOfMonth().withMinimumValue().toDate()); //agrega el primer día del mes actual
+			attendanceDate.setValue(new DateTime().withDayOfMonth(15).toDate()); //agrega el día 15 
 		}
-		return new DateTime(attendanceDate.getValue(),DateTimeZone.UTC);
+		return new DateTime(attendanceDate.getValue());
 	}
 
 	/**
@@ -1097,6 +1096,7 @@ public class AttendancePanel extends VerticalLayout implements View {
 										salary.getSalaryCalculator().getAjusteMesAnterior(true);
 
 									}catch(ProjectedAttendanceNotDefined e){
+										logger.error("Existe asistencia proyectada o real no definida, por lo que no se puede calcular el sueldo",e);
 										Notification.show("Existe asistencia proyectada o real no definida, por lo que no se puede calcular el sueldo.",Type.ERROR_MESSAGE);
 										btnGuardar.setEnabled(true);
 										return;
@@ -1267,8 +1267,11 @@ public class AttendancePanel extends VerticalLayout implements View {
 						if(propertyId != null ){
 							if(propertyId.equals("laborerConstructionSite.laborer.fullname")){
 								BeanItem<Salary> item = salaryContainer.getItem(itemId);
-								return item.getBean().getLaborerConstructionSite().getActiveContract().getStartDateString()+"-"+
-								item.getBean().getLaborerConstructionSite().getActiveContract().getTerminationDate();
+								if(item != null && item.getBean() != null && item.getBean().getLaborerConstructionSite() != null && item.getBean().getLaborerConstructionSite().getActiveContract() != null )
+									return item.getBean().getLaborerConstructionSite().getActiveContract().getStartDateString()+"-"+
+									item.getBean().getLaborerConstructionSite().getActiveContract().getTerminationDate();
+								else
+									return "";
 							}else if(propertyId.equals("salaryCalculator.dpd")){
 								return (String) salaryContainer.getItem(itemId).getItemProperty("salaryCalculator.print").getValue();
 							}
@@ -1635,25 +1638,27 @@ public class AttendancePanel extends VerticalLayout implements View {
 			}
 
 			/**
-			 * Permite verificar si no se han seleccionado marcas distinas de R fuera de la fecha de contrato
+			 * Permite verificar si no se han seleccionado marcas distinas de R o vacia fuera de la fecha de contrato
 			 * @param attendance
 			 * @throws CommitException
 			 */
 			private void checkR(Attendance attendance) throws CommitException {
 				LaborerConstructionsite lc = attendance.getLaborerConstructionSite();
 				Contract contract = lc.getActiveContract();
-				DateTime date = getAttendanceDate().withTime(0, 0, 0, 0);
+				DateTime date = getAttendanceDate();
 				int current = date.dayOfMonth().getMinimumValue();
 				date = date.withDayOfMonth(current);
 				//mientras la fecha de inicio sea mayor a la fecha recorrida
 				while( Utils.isDateAfter( lc.getActiveContract().getStartDate(), date.toDate()) && current <= date.dayOfMonth().getMaximumValue() )
 				{
 					logger.debug("1 date {}",date);
-					if( !Utils.isAttendanceMarkEmptyOrFilled ( attendance.getMarksAsList().get( current - 1) ) )
-						throw new  CommitException("El día "+Utils.date2String(date.toDate())+" está fuera del rango del contrato ("+Utils.date2String(contract.getStartDate())+"-"+Utils.date2String(contract.getTerminationDate())+") , no puede tener una marca distinta a R o vacio.");;
-						current++;
-						if(current <= date.dayOfMonth().getMaximumValue())
-							date = date.withDayOfMonth(current);
+					AttendanceMark mark = attendance.getMarksAsList().get( current - 1);
+					if( !Utils.isAttendanceMarkEmptyOrFilled ( mark ) ){
+						throw new  CommitException("El día "+Utils.date2String(date.toDate())+" está fuera del rango del contrato ("+Utils.date2String(contract.getStartDate())+"-"+Utils.date2String(contract.getTerminationDate())+") "+mark+", no puede tener una marca distinta a R o vacio (1).");
+					}
+					current++;
+					if(current <= date.dayOfMonth().getMaximumValue())
+						date = date.withDayOfMonth(current);
 				}
 				//rellena con R, todo lo que este fuera de la fecha final de contrato
 				if( lc.getActiveContract().getTerminationDate() != null){
@@ -1661,11 +1666,12 @@ public class AttendancePanel extends VerticalLayout implements View {
 					date = date.withDayOfMonth(current);
 					while( Utils.isDateBeforeOrSame(lc.getActiveContract().getTerminationDate(),date.toDate()) && current >= date.dayOfMonth().getMinimumValue() ){
 						logger.debug("2 date {}",date);
-						if( !Utils.isAttendanceMarkEmptyOrFilled (attendance.getMarksAsList().get( current - 1) ))
-							throw new  CommitException("El día "+Utils.date2String(date.toDate())+" está fuera del rango del contrato ("+Utils.date2String(contract.getStartDate())+"-"+Utils.date2String(contract.getTerminationDate())+") , no puede tener una marca distinta a R o vacio.");;
-							current-- ;
-							if(current >= date.dayOfMonth().getMinimumValue())
-								date = date.withDayOfMonth(current);
+						AttendanceMark mark = attendance.getMarksAsList().get( current - 1);
+						if( !Utils.isAttendanceMarkEmptyOrFilled ( mark ))
+							throw new  CommitException("El día "+Utils.date2String(date.toDate())+" está fuera del rango del contrato ("+Utils.date2String(contract.getStartDate())+"-"+Utils.date2String(contract.getTerminationDate())+") "+mark+", no puede tener una marca distinta a R o vacio (2).");
+						current-- ;
+						if(current >= date.dayOfMonth().getMinimumValue())
+							date = date.withDayOfMonth(current);
 					}
 				}
 
@@ -1673,17 +1679,17 @@ public class AttendancePanel extends VerticalLayout implements View {
 				DateTime date2 = getPastMonthClosingDate().plusDays(1);
 				//rellena con R, todo lo que este fuera de la fecha inicial 
 				current = date2.dayOfMonth().get();
-				//				date2 = date2.withDayOfMonth(current);
 				date2 = date2.withDayOfMonth(current);
 				logger.debug("3 date2 {}",date2);
 				//mientras la fecha de inicio sea mayor a la fecha recorrida 
 				while(Utils.isDateAfter(lc.getActiveContract().getStartDate(),date2.toDate()) && current <= date2.dayOfMonth().getMaximumValue() )
 				{
-					if( !Utils.isAttendanceMarkEmptyOrFilled (attendance.getLastMarksAsList().get( current - 1) ))
-						throw new  CommitException("El día "+Utils.date2String(date2.toDate())+" está fuera del rango del contrato ("+Utils.date2String(contract.getStartDate())+"-"+Utils.date2String(contract.getTerminationDate())+") , no puede tener una marca distinta a R o vacio.");;
-						current++;
-						if(current <= date2.dayOfMonth().getMaximumValue())
-							date2 = date2.withDayOfMonth(current);
+					AttendanceMark mark = attendance.getLastMarksAsList().get( current - 1);
+					if( !Utils.isAttendanceMarkEmptyOrFilled (mark ))
+						throw new  CommitException("El día "+Utils.date2String(date2.toDate())+" está fuera del rango del contrato ("+Utils.date2String(contract.getStartDate())+"-"+Utils.date2String(contract.getTerminationDate())+") "+mark+", no puede tener una marca distinta a R o vacio (3).");
+					current++;
+					if(current <= date2.dayOfMonth().getMaximumValue())
+						date2 = date2.withDayOfMonth(current);
 				}
 				//rellena con R, todo lo que este fuera de la fecha final de contrato
 				if( lc.getActiveContract().getTerminationDate() != null){
@@ -1691,11 +1697,12 @@ public class AttendancePanel extends VerticalLayout implements View {
 					date2 = date2.withDayOfMonth(current);
 					logger.debug("4");
 					while( Utils.isDateBefore(lc.getActiveContract().getTerminationDate(), date2.toDate()) && current >= date2.dayOfMonth().getMinimumValue() ){
-						if( !Utils.isAttendanceMarkEmptyOrFilled (attendance.getLastMarksAsList().get( current - 1) ))
-							throw new  CommitException("El día "+Utils.date2String(date2.toDate())+" está fuera del rango del contrato ("+Utils.date2String(contract.getStartDate())+"-"+Utils.date2String(contract.getTerminationDate())+") , no puede tener una marca distinta a R o vacio.");;
-							current-- ;
-							if(current >= date2.dayOfMonth().getMinimumValue())
-								date2 = date2.withDayOfMonth(current);
+						AttendanceMark mark = attendance.getLastMarksAsList().get( current - 1);
+						if( !Utils.isAttendanceMarkEmptyOrFilled (mark ))
+							throw new  CommitException("El día "+Utils.date2String(date2.toDate())+" está fuera del rango del contrato ("+Utils.date2String(contract.getStartDate())+"-"+Utils.date2String(contract.getTerminationDate())+") "+mark+", no puede tener una marca distinta a R o vacio (4).");
+						current-- ;
+						if(current >= date2.dayOfMonth().getMinimumValue())
+							date2 = date2.withDayOfMonth(current);
 					}
 				}
 			}
@@ -1731,6 +1738,7 @@ public class AttendancePanel extends VerticalLayout implements View {
 
 				if (type.isAssignableFrom(AttendanceMark.class) && fieldType.isAssignableFrom(ComboBox.class)) {
 					ComboBox cb = new ComboBox();
+					cb.setNullSelectionAllowed(false);
 					cb.setImmediate(true);
 					for(AttendanceMark a : AttendanceMark.values()){
 						cb.addItem(a);

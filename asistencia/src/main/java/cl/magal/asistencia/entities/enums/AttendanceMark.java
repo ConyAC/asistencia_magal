@@ -2,6 +2,7 @@ package cl.magal.asistencia.entities.enums;
 
 public enum AttendanceMark {
 	
+	EMPTY(11," "," "),
 	ATTEND(1,"X","Asistió"),
 	ACCIDENT(2,"A","Accidente"),
 	PERMISSION(3,"P","Permission"),
@@ -11,8 +12,7 @@ public enum AttendanceMark {
 	SICK(7,"E","Enfermo"),
 	FAIL(8,"F","Falla"),
 	FILLER(9,"R","Relleno"), 
-	VACATION(10,"V","Vacación"),
-	EMPTY(11," "," ");
+	VACATION(10,"V","Vacación"),;
 	
 	Integer code;
 	String description;
