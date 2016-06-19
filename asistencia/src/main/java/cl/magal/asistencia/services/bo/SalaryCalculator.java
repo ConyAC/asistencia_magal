@@ -660,6 +660,7 @@ public class SalaryCalculator {
 	 * @return
 	 */
 	private double calculateGratificacionLegalMes(int diasHabilesMes) {
+		logger.debug("jobcode {}",attendance.getLaborerConstructionSite().getActiveContract().getJobCode());
 		BigDecimal bdSueldoMinimo = new BigDecimal(sueldoMinimo);
 		BigDecimal bdFactor = new BigDecimal(4.75);
 		BigDecimal result1 = bdFactor.multiply(bdSueldoMinimo);

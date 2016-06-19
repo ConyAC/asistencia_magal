@@ -298,93 +298,78 @@ public class SalaryCalculatorTest {
 
 		assertTrue(!attendances.isEmpty());
 	}
-
-	/**
-	 * PRueba la impresión de las variables que tiene salary calculator
-	 */
+	
 	@Test
-	public void testMarzoPrintCalculo(){
+	public void testDiciembrePrintCalculo(){
+		
 		//obtiene un periodo
 		//crea el map de valores esperados
 		Map<Integer,Double> resultado = new HashMap<Integer,Double>();
 
-		resultado.put(3,504793d);
-//		resultado.put(4,0d);
-		resultado.put(5,503473d);
-		resultado.put(6,469589d);
-		resultado.put(7,449774d);
-		resultado.put(8,329340d);
-		resultado.put(9,592442d);
-		resultado.put(10,541511d);
-		resultado.put(13,381954d);
-		resultado.put(15,452759d);
-		//resultado.put(16,94354d);
-		resultado.put(16,88141d);
-		resultado.put(17,532587d);
-		resultado.put(18,476279d);
-		resultado.put(19,461435d);
-		resultado.put(21,514612d);
-		resultado.put(23,549691d);
-		resultado.put(25,488445d);
-		resultado.put(26,465473d);
-		resultado.put(27,436919d);
-		resultado.put(28,283594d);
-		resultado.put(401,631000d);
-		resultado.put(402,615912d);
-		resultado.put(404,526450d);
-		resultado.put(407,692639d);
-		resultado.put(408,663369d);
-		resultado.put(409,562946d);
-		resultado.put(410,750505d);
-		resultado.put(411,596059d);
-		resultado.put(413,762708d);
-		resultado.put(414,748211d);
-		resultado.put(418,361805d);
-		resultado.put(420,655097d);
-		resultado.put(421,739206d);
-		resultado.put(422,735440d);
-		resultado.put(423,750505d);
-		resultado.put(424,754782d);
-//		resultado.put(425,35365d);
-//		resultado.put(426,35261d);
-		resultado.put(425,33650d);
-		resultado.put(426,33551d);
-		resultado.put(427,705309d);
-		resultado.put(428,750505d);
-		resultado.put(429,662135d);
-		resultado.put(430,543020d);
-//		resultado.put(431,0d);
-		resultado.put(432,543669d);
-		resultado.put(703,743374d);
-		resultado.put(801,702200d);
-		resultado.put(802,703940d);
-		resultado.put(901,600824d);
-		resultado.put(902,683034d);
-		resultado.put(903,1367692d);
-		resultado.put(904,504255d);
-		resultado.put(905,887966d);
-		resultado.put(906,574168d);
-		resultado.put(908,748653d);
-		resultado.put(909,822951d);
-		resultado.put(910,10350d);
-		resultado.put(912,516788d);
-		resultado.put(913,720531d);
-		resultado.put(914,504309d);
+//		resultado.put(3,522287d);
+//		resultado.put(4,441918d);
+//		resultado.put(5,484809d);
+//		resultado.put(6,440540d);
+//		resultado.put(7,358550d);
+//		resultado.put(8,433998d);
+//		resultado.put(9,520696d);
+//		resultado.put(10,413879d);
+	//	resultado.put(12,414111d);
+//		resultado.put(13,394095d);
+//		resultado.put(14,389177d);
+	//	resultado.put(15,436102d);
+//		resultado.put(16,509693d);
+//		resultado.put(17,479215d);
+//		resultado.put(18,444891d);
+//		resultado.put(19,402985d);
+//		resultado.put(20,391096d);
+//		resultado.put(400,709902d);
+//		resultado.put(401,593716d);
+//		resultado.put(402,650384d);
+//		resultado.put(403,689339d);
+//		resultado.put(404,522287d);
+//		resultado.put(407,674823d);
+//		resultado.put(408,651679d);
+//		resultado.put(409,694462d);
+//		resultado.put(410,626061d);
+//		resultado.put(411,626061d);
+//		resultado.put(412,662749d);
+//		resultado.put(413,667564d);
+//		resultado.put(414,696597d);
+//		resultado.put(415,138964d);		
+//		resultado.put(416,520995d);
+//		resultado.put(417,534955d);
+//		resultado.put(418,598624d);
+//		resultado.put(419,595160d);
+	//	resultado.put(702,380297d);
+//		resultado.put(800,583780d);
+//		resultado.put(901,525856d);
+//		resultado.put(902,995089d);
+//		resultado.put(903,1829414d);
+//		resultado.put(904,504306d);
+//		resultado.put(905,1105676d);
+		resultado.put(906,838712d);
+//		resultado.put(907,0d);
+//		resultado.put(908,922781d);
+//		resultado.put(909,1066688d);
+//		resultado.put(910,766016d);
+//		resultado.put(911,707389d);
+//		resultado.put(912,533611d);
 
 		long csId = 10;
-		DateTime date = DateTimeFormat.forPattern("dd/MM/yyyy").parseDateTime("01/03/2016") ;
+		int jobcode = 20;
+		DateTime date = DateTimeFormat.forPattern("dd/MM/yyyy").parseDateTime("01/12/2015") ;
 
 		ConstructionSite cs = csService.findConstructionSite(csId);
 		List<Salary> salaries = csService.getSalariesByConstructionAndMonth(cs, date);
 		for(Salary salary : salaries ){
-//			if(salary.getLaborerConstructionSite().getJobCode() == 3 ){
+//			if(salary.getLaborerConstructionSite().getJobCode() == jobcode ){
 				logger.debug("\ndump del trabajador con code {} y csId {} \ndump {}\n\n",salary.getLaborerConstructionSite().getActiveContract().getJobCode(),csId,salary.dump());
 				Double expectedSalary  = resultado.get(salary.getLaborerConstructionSite().getActiveContract().getJobCode());
 				if(expectedSalary == null ) continue;
 				assertEquals(expectedSalary,salary.getSalary() + salary.getSuple(),1d);
 //			}
 		}
-
 	}
 	
 		/**
@@ -468,60 +453,21 @@ public class SalaryCalculatorTest {
 	}
 	
 	@Test
-	public void testFebrero(){
+	public void testFebreroPrintCalculo(){
 		
 		//obtiene un periodo
 		//crea el map de valores esperados
 		Map<Integer,Double> resultado = new HashMap<Integer,Double>();
-		resultado.put(5,419120d);
-		resultado.put(6,438582d);
-		resultado.put(7,445142d);
-		resultado.put(8,476431d);
-		resultado.put(9,442198d);
-		resultado.put(10,551236d);
-		resultado.put(13,363039d);
-		resultado.put(15,460480d);
-		resultado.put(16,320892d);
-		resultado.put(17,562013d);
-		resultado.put(18,453475d);
-		resultado.put(19,387666d);
-		resultado.put(21,510079d);
-		resultado.put(23,477252d);
-		resultado.put(24,355180d);
-		resultado.put(25,462675d);
-		resultado.put(26,460480d);
-		resultado.put(400,721677d);
-		resultado.put(401,705450d);
-		resultado.put(402,619106d);
-		resultado.put(403,664791d);
-		resultado.put(404,498228d);
-		resultado.put(407,232216d);
-		resultado.put(408,655965d);
-		resultado.put(409,726181d);
-		resultado.put(410,619106d);
-		resultado.put(411,610980d);
-		resultado.put(413,476771d);
-		resultado.put(414,681079d);
-		resultado.put(418,613462d);
-		resultado.put(420,555132d);
-		resultado.put(421,345450d);
-		resultado.put(422,338436d);
-		resultado.put(423,116306d);
-		resultado.put(424,116987d);
-		resultado.put(703,676168d);
-		resultado.put(800,441410d);
-		resultado.put(801,581184d);
-		resultado.put(901,544112d);
-		//resultado.put(902,896329d);
-		resultado.put(903,1236479d);
-		resultado.put(904,450824d);
-		resultado.put(905,901184d);
-		resultado.put(906,615876d);
-		resultado.put(908,700749d);
-		resultado.put(909,945279d);
-		//resultado.put(910,734368d);
-		resultado.put(911,123344d);
-		resultado.put(912,472222d);
+
+//		resultado.put(903,1236479d);
+//		resultado.put(904,450824d);
+//		resultado.put(905,901184d);
+//		resultado.put(906,615876d);
+//		resultado.put(908,700749d);
+//		resultado.put(909,945279d);
+//		resultado.put(910,734368d);
+//		resultado.put(911,123344d);
+//		resultado.put(912,472222d);
 		resultado.put(913,540747d);
 
 		long csId = 10;
@@ -539,6 +485,92 @@ public class SalaryCalculatorTest {
 //			}
 		}
 	}
+	
+	/**
+	 * PRueba la impresión de las variables que tiene salary calculator
+	 */
+	@Test
+	public void testMarzoPrintCalculo(){
+		//obtiene un periodo
+		//crea el map de valores esperados
+		Map<Integer,Double> resultado = new HashMap<Integer,Double>();
 
+		resultado.put(3,504793d);
+//		resultado.put(4,0d);
+//		resultado.put(5,503473d);
+//		resultado.put(6,469589d);
+//		resultado.put(7,449774d);
+//		resultado.put(8,329340d);
+//		resultado.put(9,592442d);
+//		resultado.put(10,541511d);
+//		resultado.put(13,381954d);
+//		resultado.put(15,452759d);
+//		//resultado.put(16,94354d);
+//		resultado.put(16,88141d);
+//		resultado.put(17,532587d);
+//		resultado.put(18,476279d);
+//		resultado.put(19,461435d);
+//		resultado.put(21,514612d);
+//		resultado.put(23,549691d);
+//		resultado.put(25,488445d);
+//		resultado.put(26,465473d);
+//		resultado.put(27,436919d);
+//		resultado.put(28,283594d);
+//		resultado.put(401,631000d);
+//		resultado.put(402,615912d);
+//		resultado.put(404,526450d);
+//		resultado.put(407,692639d);
+//		resultado.put(408,663369d);
+//		resultado.put(409,562946d);
+//		resultado.put(410,750505d);
+//		resultado.put(411,596059d);
+//		resultado.put(413,762708d);
+//		resultado.put(414,748211d);
+//		resultado.put(418,361805d);
+//		resultado.put(420,655097d);
+//		resultado.put(421,739206d);
+//		resultado.put(422,735440d);
+//		resultado.put(423,750505d);
+//		resultado.put(424,754782d);
+////		resultado.put(425,35365d);
+////		resultado.put(426,35261d);
+//		resultado.put(425,33650d);
+//		resultado.put(426,33551d);
+//		resultado.put(427,705309d);
+//		resultado.put(428,750505d);
+//		resultado.put(429,662135d);
+//		resultado.put(430,543020d);
+////		resultado.put(431,0d);
+//		resultado.put(432,543669d);
+//		resultado.put(703,743374d);
+//		resultado.put(801,702200d);
+//		resultado.put(802,703940d);
+//		resultado.put(901,600824d);
+//		resultado.put(902,683034d);
+//		resultado.put(903,1367692d);
+//		resultado.put(904,504255d);
+//		resultado.put(905,887966d);
+//		resultado.put(906,574168d);
+//		resultado.put(908,748653d);
+//		resultado.put(909,822951d);
+//		resultado.put(910,10350d);
+//		resultado.put(912,516788d);
+//		resultado.put(913,720531d);
+//		resultado.put(914,504309d);
 
+		long csId = 10;
+		DateTime date = DateTimeFormat.forPattern("dd/MM/yyyy").parseDateTime("01/03/2016") ;
+
+		ConstructionSite cs = csService.findConstructionSite(csId);
+		List<Salary> salaries = csService.getSalariesByConstructionAndMonth(cs, date);
+		for(Salary salary : salaries ){
+//			if(salary.getLaborerConstructionSite().getJobCode() == 3 ){
+				logger.debug("\ndump del trabajador con code {} y csId {} \ndump {}\n\n",salary.getLaborerConstructionSite().getActiveContract().getJobCode(),csId,salary.dump());
+				Double expectedSalary  = resultado.get(salary.getLaborerConstructionSite().getActiveContract().getJobCode());
+				if(expectedSalary == null ) continue;
+				assertEquals(expectedSalary,salary.getSalary() + salary.getSuple(),1d);
+//			}
+		}
+
+	}
 }
