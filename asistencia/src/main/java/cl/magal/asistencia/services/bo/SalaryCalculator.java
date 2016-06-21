@@ -826,11 +826,11 @@ public class SalaryCalculator {
 			AttendanceMark mark = lastRealMarks.get(i);
 			// si cualquiera de los dos es vacio, lanza una excepcion
 			if(checkException && mark == AttendanceMark.EMPTY )
-				throw new ProjectedAttendanceNotDefined("Aún no se define toda la asistencia de "+attendance.getLaborerConstructionSite().getJobCode()+" "+(mark == null? "nulo": mark)+", real "+i+".");
+				throw new ProjectedAttendanceNotDefined("Aún no se define toda la asistencia real del trabajador "+attendance.getLaborerConstructionSite().getJobCode()+" "+(mark == null? "nulo": mark)+" el día "+(i+1)+".");
 			
 			mark = projectionsMarks.get(i);
 			if(checkException && mark == AttendanceMark.EMPTY )
-				throw new ProjectedAttendanceNotDefined("Aún no se define toda la asistencia "+attendance.getLaborerConstructionSite().getJobCode()+" "+(mark == null? "nulo": mark)+", real "+i+".");
+				throw new ProjectedAttendanceNotDefined("Aún no se define toda la asistencia proyectada del trabajador "+attendance.getLaborerConstructionSite().getJobCode()+" "+(mark == null? "nulo": mark)+" el día "+(i+1)+".");
 			//si son distintos, lo contabiliza
 			if(lastRealMarks.get(i) != projectionsMarks.get(i)){
 				//lo cuenta solo si está dentro del grupo a contabilizar

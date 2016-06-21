@@ -33,45 +33,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.ui.velocity.VelocityEngineUtils;
 import org.vaadin.dialogs.ConfirmDialog;
 
-import cl.magal.asistencia.entities.AdvancePaymentConfigurations;
-import cl.magal.asistencia.entities.AdvancePaymentItem;
-import cl.magal.asistencia.entities.AfpAndInsuranceConfigurations;
-import cl.magal.asistencia.entities.Attendance;
-import cl.magal.asistencia.entities.Confirmations;
-import cl.magal.asistencia.entities.ConstructionSite;
-import cl.magal.asistencia.entities.Contract;
-import cl.magal.asistencia.entities.CostAccount;
-import cl.magal.asistencia.entities.DateConfigurations;
-import cl.magal.asistencia.entities.FamilyAllowanceConfigurations;
-import cl.magal.asistencia.entities.HistoricalSalary;
-import cl.magal.asistencia.entities.LaborerConstructionsite;
-import cl.magal.asistencia.entities.Overtime;
-import cl.magal.asistencia.entities.Salary;
-import cl.magal.asistencia.entities.TaxationConfigurations;
-import cl.magal.asistencia.entities.User;
-import cl.magal.asistencia.entities.WageConfigurations;
-import cl.magal.asistencia.entities.enums.AttendanceMark;
-import cl.magal.asistencia.entities.enums.Permission;
-import cl.magal.asistencia.repositories.CostAccountRepository;
-import cl.magal.asistencia.repositories.LaborerConstructionsiteRepository;
-import cl.magal.asistencia.services.ConfigurationService;
-import cl.magal.asistencia.services.ConstructionSiteService;
-import cl.magal.asistencia.services.LaborerService;
-import cl.magal.asistencia.services.MailService;
-import cl.magal.asistencia.services.UserService;
-import cl.magal.asistencia.services.bo.SalaryCalculator.ProjectedAttendanceNotDefined;
-import cl.magal.asistencia.ui.ListenerFieldFactory;
-import cl.magal.asistencia.ui.MagalUI;
-import cl.magal.asistencia.ui.components.ColumnCollapsedObservableTable;
-import cl.magal.asistencia.ui.components.ColumnCollapsedObservableTable.ColumnCollapsedEvent;
-import cl.magal.asistencia.ui.vo.AbsenceVO;
-import cl.magal.asistencia.util.Constants;
-import cl.magal.asistencia.util.OnDemandFileDownloader;
-import cl.magal.asistencia.util.OnDemandFileDownloader.OnDemandStreamResource;
-import cl.magal.asistencia.util.SecurityHelper;
-import cl.magal.asistencia.util.Utils;
-import cl.magal.asistencia.util.VelocityHelper;
-
 import com.vaadin.data.Container;
 import com.vaadin.data.Container.Filterable;
 import com.vaadin.data.Container.SimpleFilterable;
@@ -128,6 +89,45 @@ import com.vaadin.ui.UI;
 import com.vaadin.ui.Upload;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
+
+import cl.magal.asistencia.entities.AdvancePaymentConfigurations;
+import cl.magal.asistencia.entities.AdvancePaymentItem;
+import cl.magal.asistencia.entities.AfpAndInsuranceConfigurations;
+import cl.magal.asistencia.entities.Attendance;
+import cl.magal.asistencia.entities.Confirmations;
+import cl.magal.asistencia.entities.ConstructionSite;
+import cl.magal.asistencia.entities.Contract;
+import cl.magal.asistencia.entities.CostAccount;
+import cl.magal.asistencia.entities.DateConfigurations;
+import cl.magal.asistencia.entities.FamilyAllowanceConfigurations;
+import cl.magal.asistencia.entities.HistoricalSalary;
+import cl.magal.asistencia.entities.LaborerConstructionsite;
+import cl.magal.asistencia.entities.Overtime;
+import cl.magal.asistencia.entities.Salary;
+import cl.magal.asistencia.entities.TaxationConfigurations;
+import cl.magal.asistencia.entities.User;
+import cl.magal.asistencia.entities.WageConfigurations;
+import cl.magal.asistencia.entities.enums.AttendanceMark;
+import cl.magal.asistencia.entities.enums.Permission;
+import cl.magal.asistencia.repositories.CostAccountRepository;
+import cl.magal.asistencia.repositories.LaborerConstructionsiteRepository;
+import cl.magal.asistencia.services.ConfigurationService;
+import cl.magal.asistencia.services.ConstructionSiteService;
+import cl.magal.asistencia.services.LaborerService;
+import cl.magal.asistencia.services.MailService;
+import cl.magal.asistencia.services.UserService;
+import cl.magal.asistencia.services.bo.SalaryCalculator.ProjectedAttendanceNotDefined;
+import cl.magal.asistencia.ui.ListenerFieldFactory;
+import cl.magal.asistencia.ui.MagalUI;
+import cl.magal.asistencia.ui.components.ColumnCollapsedObservableTable;
+import cl.magal.asistencia.ui.components.ColumnCollapsedObservableTable.ColumnCollapsedEvent;
+import cl.magal.asistencia.ui.vo.AbsenceVO;
+import cl.magal.asistencia.util.Constants;
+import cl.magal.asistencia.util.OnDemandFileDownloader;
+import cl.magal.asistencia.util.OnDemandFileDownloader.OnDemandStreamResource;
+import cl.magal.asistencia.util.SecurityHelper;
+import cl.magal.asistencia.util.Utils;
+import cl.magal.asistencia.util.VelocityHelper;
 
 
 @Component
@@ -1097,7 +1097,7 @@ public class AttendancePanel extends VerticalLayout implements View {
 
 									}catch(ProjectedAttendanceNotDefined e){
 										logger.error("Existe asistencia proyectada o real no definida, por lo que no se puede calcular el sueldo",e);
-										Notification.show("Existe asistencia proyectada o real no definida, por lo que no se puede calcular el sueldo.",Type.ERROR_MESSAGE);
+										Notification.show("Existe asistencia proyectada o real no definida, por lo que no se puede calcular el sueldo.",e.getMessage(),Type.ERROR_MESSAGE);
 										btnGuardar.setEnabled(true);
 										return;
 									}
