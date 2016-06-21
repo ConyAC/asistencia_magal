@@ -600,7 +600,7 @@ public class SalaryCalculator {
 		double salary = 0;
 		try{
 			countDiffMarksFromDate(closingDateLastMonth,attendance,lastMonthAttendance,true,AttendanceMark.ATTEND);
-			salary = getAfecto() + getSobreAfecto() + getTNoAfecto() - getTDesc() + this.loans;
+			salary = getAfecto() + getSobreAfecto() + getTNoAfecto() - getTDesc() /* + this.loans*/;
 			logger.debug("salario calculado {}",salary);
 		}catch(ProjectedAttendanceNotDefined e){
 			logger.debug("salario calculado {}",salary);
@@ -687,7 +687,7 @@ public class SalaryCalculator {
 	 */
 	private double calculateBonifImpo(DateTime closingDate,Attendance attendance,Attendance lastMonthAttendance,double jornalBaseMes) {
 		logger.debug("BonifImpo {},{},{},{}",bonoImponibleEspecial , calculateLLuvia(attendance,jornalBaseMes) , calculateLLuviaMesAnterior(closingDate,attendance,lastMonthAttendance,jornalBaseMes) , calculateAjusteAsistenciaMesAnterior(closingDate,attendance,lastMonthAttendance));
-		return /*calculateBonoBencina() +*/ bonoImponibleEspecial + calculateLLuvia(attendance,jornalBaseMes) + calculateLLuviaMesAnterior(closingDate,attendance,lastMonthAttendance,jornalBaseMes) + calculateAjusteAsistenciaMesAnterior(closingDate,attendance,lastMonthAttendance);
+		return /*calculateBonoBencina() +*/ this.loans + bonoImponibleEspecial + calculateLLuvia(attendance,jornalBaseMes) + calculateLLuviaMesAnterior(closingDate,attendance,lastMonthAttendance,jornalBaseMes) + calculateAjusteAsistenciaMesAnterior(closingDate,attendance,lastMonthAttendance);
 	}
 
 	/**
