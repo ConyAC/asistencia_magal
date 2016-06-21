@@ -600,7 +600,7 @@ public class SalaryCalculator {
 		double salary = 0;
 		try{
 			countDiffMarksFromDate(closingDateLastMonth,attendance,lastMonthAttendance,true,AttendanceMark.ATTEND);
-			salary = getAfecto() + getSobreAfecto() + getTNoAfecto() - getTDesc() + this.loans;
+			salary = getAfecto() + getSobreAfecto() + getTNoAfecto() - getTDesc() /*+ this.loans*/;
 			logger.debug("salario calculado {}",salary);
 		}catch(ProjectedAttendanceNotDefined e){
 			logger.debug("salario calculado {}",salary);
@@ -686,7 +686,7 @@ public class SalaryCalculator {
 	 */
 	private double calculateBonifImpo(DateTime closingDate,Attendance attendance,Attendance lastMonthAttendance,double jornalBaseMes) {
 		logger.debug("BonifImpo {},{},{},{}",bonoImponibleEspecial , calculateLLuvia(attendance,jornalBaseMes) , calculateLLuviaMesAnterior(closingDate,attendance,lastMonthAttendance,jornalBaseMes) , calculateAjusteAsistenciaMesAnterior(closingDate,attendance,lastMonthAttendance));
-		return /*calculateBonoBencina() +*/ bonoImponibleEspecial + calculateLLuvia(attendance,jornalBaseMes) + calculateLLuviaMesAnterior(closingDate,attendance,lastMonthAttendance,jornalBaseMes) + calculateAjusteAsistenciaMesAnterior(closingDate,attendance,lastMonthAttendance);
+		return /*calculateBonoBencina() +*/ this.loans + bonoImponibleEspecial + calculateLLuvia(attendance,jornalBaseMes) + calculateLLuviaMesAnterior(closingDate,attendance,lastMonthAttendance,jornalBaseMes) + calculateAjusteAsistenciaMesAnterior(closingDate,attendance,lastMonthAttendance);
 	}
 
 	/**
@@ -826,11 +826,11 @@ public class SalaryCalculator {
 			AttendanceMark mark = lastRealMarks.get(i);
 			// si cualquiera de los dos es vacio, lanza una excepcion
 			if(checkException && mark == AttendanceMark.EMPTY )
-				throw new ProjectedAttendanceNotDefined("Aún no se define toda la asistencia de "+attendance.getLaborerConstructionSite().getJobCode()+" "+(mark == null? "nulo": mark)+", real "+i+".");
+				throw new ProjectedAttendanceNotDefined("Aún no se define toda la asistencia real del trabajador "+attendance.getLaborerConstructionSite().getJobCode()+" "+(mark == null? "nulo": mark)+" el día "+(i+1)+".");
 			
 			mark = projectionsMarks.get(i);
 			if(checkException && mark == AttendanceMark.EMPTY )
-				throw new ProjectedAttendanceNotDefined("Aún no se define toda la asistencia "+attendance.getLaborerConstructionSite().getJobCode()+" "+(mark == null? "nulo": mark)+", real "+i+".");
+				throw new ProjectedAttendanceNotDefined("Aún no se define toda la asistencia proyectada del trabajador "+attendance.getLaborerConstructionSite().getJobCode()+" "+(mark == null? "nulo": mark)+" el día "+(i+1)+".");
 			//si son distintos, lo contabiliza
 			if(lastRealMarks.get(i) != projectionsMarks.get(i)){
 				//lo cuenta solo si está dentro del grupo a contabilizar
