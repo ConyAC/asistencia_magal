@@ -2,7 +2,7 @@ package cl.magal.asistencia.entities.enums;
 
 public enum AttendanceMark {
 	
-	EMPTY(11," "," "),
+	EMPTY(11,"",""),
 	ATTEND(1,"X","Asistió"),
 	ACCIDENT(2,"A","Accidente"),
 	PERMISSION(3,"P","Permission"),
@@ -37,6 +37,16 @@ public enum AttendanceMark {
 	@Override
 	public String toString(){
 		return description;
+	}
+	
+	public static AttendanceMark getFromString(String stringVal){
+		if(stringVal == null)
+			return EMPTY;
+		for(AttendanceMark e : AttendanceMark.values()){
+			if(e.toString().compareTo(stringVal) == 0 )
+				return e;
+		}
+		return EMPTY;
 	}
 
 }
