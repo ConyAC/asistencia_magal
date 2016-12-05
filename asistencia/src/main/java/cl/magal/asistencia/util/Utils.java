@@ -498,6 +498,8 @@ public class Utils {
 		if(completarSemana){
 			//le suma dia hasta que sea el lunes
 			finContrato = calcularViernesMasCercano(finContrato,true);
+			//si trabajo parte de la semana le corresponde considerar el sabado de la misma
+			finContrato.plusDays(1);
 		}
 		
 		//si la fecha de ingreso es luego del inicio del mes, entonces comienza a contar desde ese día

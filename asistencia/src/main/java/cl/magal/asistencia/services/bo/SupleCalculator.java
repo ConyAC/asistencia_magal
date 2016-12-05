@@ -108,7 +108,10 @@ public class SupleCalculator {
 		Integer countFails = Utils.countMarks(supleCloseDay,attendance,AttendanceMark.FAIL);
 		Integer secondDiscount = (int) (countFails*supleTable.getPermissionDiscount());
 //		logger.debug("second discount {}",secondDiscount);
-		return maxAmount - firstDiscount - secondDiscount;
+		
+		//Los suples tienen que siempre mayor o igual que 0
+		double suple = (maxAmount - firstDiscount - secondDiscount);
+		return (suple>0)?suple:0.0;
 	}
 
 	/**

@@ -11,6 +11,7 @@ import java.util.Map;
 import javax.annotation.PostConstruct;
 
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeConstants;
 import org.joda.time.DateTimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -404,9 +405,16 @@ public class ConstructionSiteService {
 		//si está en la misma semana y es un día de la semana laboral, entonces es R, si no EMPTY
 		if(date1.compareTo(date2) == 0 && Utils.isLaborerDay(date)){
 			return AttendanceMark.FILLER;
-		}else{
-			return AttendanceMark.EMPTY;  
-		}
+		}else
+		//SABADO
+		if(date1.compareTo(date2) == 0 && date.getDayOfWeek()== DateTimeConstants.SATURDAY){
+			return AttendanceMark.SATURDAY;
+		}else
+		//DOMINGO
+		if(date1.compareTo(date2) == 0 && date.getDayOfWeek()== DateTimeConstants.SUNDAY){ 
+			return AttendanceMark.SUNDAY;
+		}else		
+			return AttendanceMark.EMPTY;
 		
 	}
 

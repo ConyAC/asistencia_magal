@@ -935,6 +935,7 @@ public class SalaryCalculator {
 
 	/**
 	 * DONE
+	 * =CONTAR.SI($D23:$AI23;"X")+CONTAR.SI($D23:$AK23;"S")+CONTAR.SI($D23:$AI23;"LL")+CONTAR.SI($D23:$AK23;"P")+CONTAR.SI($D23:$AI23;"R")+CONTAR.SI($D23:$AI23;"F")+CONTAR.SI($D23:$AI23;"V")
 	 * @return
 	 */
 	private double calculateDPD(Attendance attendance) {
