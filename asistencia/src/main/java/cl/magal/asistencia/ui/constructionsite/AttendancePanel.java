@@ -11,6 +11,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import javax.annotation.PostConstruct;
@@ -49,6 +50,7 @@ import com.vaadin.data.fieldgroup.FieldGroup.CommitHandler;
 import com.vaadin.data.util.BeanContainer;
 import com.vaadin.data.util.BeanItem;
 import com.vaadin.data.util.BeanItemContainer;
+import com.vaadin.data.util.converter.Converter;
 import com.vaadin.data.util.filter.SimpleStringFilter;
 import com.vaadin.event.FieldEvents.TextChangeEvent;
 import com.vaadin.event.FieldEvents.TextChangeListener;
@@ -672,6 +674,7 @@ public class AttendancePanel extends VerticalLayout implements View {
 				//				int maxDay = getPastMonthClosingDate().getDayOfMonth();
 				//calculo de la semana
 				if(((String) pid).startsWith("dmp") || ((String) pid).startsWith("dma")  ){
+					
 					//calcula el numero del mes
 					int monthDay = Integer.parseInt(((String) pid).replace("dmp","").replace("dma",""));
 					//crea una fecha con el año y mes seleccionado y con el dia recuperado del property actual
@@ -717,6 +720,40 @@ public class AttendancePanel extends VerticalLayout implements View {
 
 					if(cell != null){
 						cell.setComponent(label);
+					}
+					
+					if(isAttendanceGrid){
+						//le entrega el converter a la columna para mostrar null como empty
+						if(grid.getColumn(pid) != null )
+							grid.getColumn(pid).setConverter(new Converter(){
+					
+								@Override
+								public Object convertToModel(Object value, Class targetType, Locale locale)
+										throws ConversionException {
+									if(value == null)
+										return AttendanceMark.EMPTY.toString();
+									return AttendanceMark.getFromString((String)value);
+								}
+					
+								@Override
+								public Object convertToPresentation(Object value, Class targetType, Locale locale)
+										throws ConversionException {
+									if(value == null)
+										return AttendanceMark.EMPTY.toString();
+									return ((AttendanceMark)value).toString();
+								}
+					
+								@Override
+								public Class getModelType() {
+									return AttendanceMark.class;
+								}
+					
+								@Override
+								public Class getPresentationType() {
+									return String.class;
+								}
+								
+							});
 					}
 				}
 
@@ -1543,13 +1580,27 @@ public class AttendancePanel extends VerticalLayout implements View {
 
 			@Override
 			public void postCommit(CommitEvent commitEvent) throws CommitException {
-				//guarda el elmento
+				//guarda el elemento
 				Overtime overtime = ((BeanItem<Overtime>) commitEvent.getFieldBinder().getItemDataSource()).getBean();
 				constructionSiteService.save(overtime);
 				overtimeContainer.sort(new Object[]{"laborerConstructionSite.activeContract.jobCode"}, new boolean[]{true});
 
 				//por cada variable
 				createGridFooters(overtimeGrid);
+				
+				//actualiza el container del  sueldo
+				BeanItem<Salary> salaryItem = salaryContainer.getItem(overtime.getLaborerConstructionSite().getId());
+				if(salaryItem == null ){
+					return;
+				}
+				Property<Overtime> prop = salaryItem.getItemProperty("overtime");
+				prop.setValue(overtime);
+
+				//obliga a recalcular el salario
+				salaryItem.getItemProperty("forceSalary").getValue();
+
+				//guarda el valor
+				constructionSiteService.save(salaryItem.getBean());
 			}
 		});
 
@@ -1601,6 +1652,7 @@ public class AttendancePanel extends VerticalLayout implements View {
 		attendanceContainer.addNestedContainerProperty("laborerConstructionSite.id");
 		attendanceContainer.setBeanIdProperty("laborerConstructionSite.id");
 		attendanceGrid = new Grid(attendanceContainer);
+		
 		attendanceGrid.setSelectionMode(SelectionMode.SINGLE);
 		attendanceGrid.setSizeFull();
 		BeanFieldGroup<Attendance> bfg = new BeanFieldGroup<Attendance>(Attendance.class);
@@ -1738,7 +1790,7 @@ public class AttendancePanel extends VerticalLayout implements View {
 
 				if (type.isAssignableFrom(AttendanceMark.class) && fieldType.isAssignableFrom(ComboBox.class)) {
 					ComboBox cb = new ComboBox();
-					cb.setNullSelectionAllowed(false);
+					cb.setNullSelectionAllowed(true);
 					cb.setImmediate(true);
 					for(AttendanceMark a : AttendanceMark.values()){
 						cb.addItem(a);
@@ -1861,8 +1913,9 @@ public class AttendancePanel extends VerticalLayout implements View {
 
 		List<String> sList = new ArrayList<String>(attendanceOrder.length);
 		for(String ss : attendanceOrder){
-			if(attendanceGrid.getColumn(ss) != null)
+			if(attendanceGrid.getColumn(ss) != null){
 				sList.add(ss);
+			}
 		}
 		attendanceGrid.setColumnOrder(sList.toArray(new String[sList.size()]));		
 	}
@@ -3011,7 +3064,10 @@ public class AttendancePanel extends VerticalLayout implements View {
 
 	}
 
-	//Permite bloquear el ingreso de horas extras en caso de que un obrero registre vacaciones, accidente y/o licencia.
+	/**
+	 * Permite bloquear el ingreso de horas extras en caso de que un obrero registre vacaciones, accidente y/o licencia.
+	 * @param grid
+	 */
 	private void disabledHours(Grid grid){
 		for(Object itemId : grid.getContainerDataSource().getItemIds()){
 			BeanItem attendanceItem = (BeanItem) grid.getContainerDataSource().getItem(itemId);

@@ -463,6 +463,10 @@ public class SalaryCalculator {
 	public void setAttendance(Attendance attendance2) {
 		this.attendance = attendance2;
 	}
+	
+	public void setOvertime(Overtime overtime) {
+		this.overtime = overtime;
+	}
 
 	public int getLoans(){
         return this.loans;

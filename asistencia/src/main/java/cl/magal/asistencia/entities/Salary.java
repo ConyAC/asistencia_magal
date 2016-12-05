@@ -130,6 +130,17 @@ public class Salary implements Serializable {
 		getForceSuple();
 		getForceSalary();
 	}
+	
+	transient Overtime overtime;
+	public Overtime getOvertime(){
+		return overtime;
+	}
+	public void setOvertime(Overtime overtime){
+		if(this.supleCalculator == null || this.salaryCalculator == null )
+			throw new RuntimeException("Es necesario que el objeto de calculo sea distinto a null");
+		salaryCalculator.setOvertime(overtime);
+		getForceSalary();
+	}
 
 	public void setAdvancePaymentConfiguration(AdvancePaymentConfigurations api){
 		if(this.supleCalculator == null || this.salaryCalculator == null )
