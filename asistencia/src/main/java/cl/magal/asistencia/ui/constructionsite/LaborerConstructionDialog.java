@@ -667,14 +667,18 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 						DateTime dateTime = new DateTime((Date)event.getProperty().getValue());
 						Integer month = dateTime.getMonthOfYear();
 						
-						DateTime today = new DateTime();
-						Integer month_today = today.getMonthOfYear();
 						
-						if(!month_today.equals(month)){
-							Notification.show("Solo puede seleccionar un día del mes actual.", Type.ERROR_MESSAGE);
+						if(SecurityHelper.hasPermission(Permission.DEFINIR_VARIABLE_GLOBAL)){
+							DateTime today = new DateTime();
 							
-							return;
-						}					
+							Integer month_today = today.getMonthOfYear();
+							
+							if(!month_today.equals(month)){
+								Notification.show("Solo puede seleccionar un día del mes actual.", Type.ERROR_MESSAGE);
+								
+								return;
+							}		
+						}
 					}
 				});
 
