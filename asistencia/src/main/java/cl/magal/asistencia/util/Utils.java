@@ -707,7 +707,7 @@ public class Utils {
 	 * @return
 	 */
 	public static boolean isAttendanceMarkEmptyOrFilledOrFail(AttendanceMark attendanceMark) {
-		return attendanceMark == AttendanceMark.FILLER || attendanceMark == AttendanceMark.EMPTY || attendanceMark == AttendanceMark.FAIL;
+		return attendanceMark == AttendanceMark.FILLER || attendanceMark == AttendanceMark.EMPTY || attendanceMark == AttendanceMark.FAIL || attendanceMark == AttendanceMark.SATURDAY || attendanceMark == AttendanceMark.SUNDAY;
 	}
 
 }
