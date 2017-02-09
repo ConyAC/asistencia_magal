@@ -700,6 +700,15 @@ public class Utils {
 	public static boolean isAttendanceMarkEmptyOrFilled(AttendanceMark attendanceMark) {
 		return attendanceMark == AttendanceMark.FILLER || attendanceMark == AttendanceMark.EMPTY;
 	}
+	
+	/**
+	 * Verifica si la asistencia en R o Vacia o falla
+	 * @param attendanceMark
+	 * @return
+	 */
+	public static boolean isAttendanceMarkEmptyOrFilledOrFail(AttendanceMark attendanceMark) {
+		return attendanceMark == AttendanceMark.FILLER || attendanceMark == AttendanceMark.EMPTY || attendanceMark == AttendanceMark.FAIL;
+	}
 
 }
 
