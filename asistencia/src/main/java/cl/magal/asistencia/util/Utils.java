@@ -2,6 +2,7 @@ package cl.magal.asistencia.util;
 
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -21,6 +22,16 @@ import org.joda.time.format.DateTimeFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.vaadin.data.Validator.InvalidValueException;
+import com.vaadin.data.fieldgroup.FieldGroup.CommitException;
+import com.vaadin.data.util.BeanItem;
+import com.vaadin.data.util.BeanItemContainer;
+import com.vaadin.data.util.MethodProperty;
+import com.vaadin.ui.Field;
+import com.vaadin.ui.Notification;
+import com.vaadin.ui.Notification.Type;
+import com.vaadin.ui.TextField;
+
 import cl.magal.asistencia.entities.Accident;
 import cl.magal.asistencia.entities.AfpItem;
 import cl.magal.asistencia.entities.Attendance;
@@ -33,16 +44,6 @@ import cl.magal.asistencia.entities.Mobilization2;
 import cl.magal.asistencia.entities.Vacation;
 import cl.magal.asistencia.entities.WithdrawalSettlement;
 import cl.magal.asistencia.entities.enums.AttendanceMark;
-
-import com.vaadin.data.Validator.InvalidValueException;
-import com.vaadin.data.fieldgroup.FieldGroup.CommitException;
-import com.vaadin.data.util.BeanItem;
-import com.vaadin.data.util.BeanItemContainer;
-import com.vaadin.data.util.MethodProperty;
-import com.vaadin.ui.Field;
-import com.vaadin.ui.Notification;
-import com.vaadin.ui.Notification.Type;
-import com.vaadin.ui.TextField;
 
 public class Utils {
 	
@@ -668,10 +669,13 @@ public class Utils {
 	public static boolean isDateAfterOrSame(Date startDate, Date date) {
 		if(startDate == null || date == null )
 			throw new RuntimeException("Las fechas a comparar no pueden ser nulas.");
-		DateTime startDateTime = new DateTime(startDate,DateTimeZone.UTC).withTime(0, 0, 0, 0);
+		/*DateTime startDateTime = new DateTime(startDate,DateTimeZone.UTC).withTime(0, 0, 0, 0);
 		DateTime dateTime = new DateTime(date,DateTimeZone.UTC).withTime(0, 0, 0, 0);
 		return startDateTime.isAfter(dateTime) || 
 				(startDateTime.getDayOfMonth() == dateTime.getDayOfMonth() && startDateTime.getMonthOfYear() == dateTime.getMonthOfYear() && startDateTime.getYear() == dateTime.getYear());
+				*/
+		SimpleDateFormat sdf = new SimpleDateFormat("ddMMyyyy");
+		return startDate.after(date) || sdf.format( startDate ).compareTo(sdf.format(date)) == 0;
 	}
 	
 	/**
@@ -683,10 +687,9 @@ public class Utils {
 	public static boolean isDateBeforeOrSame(Date startDate, Date date) {
 		if(startDate == null || date == null )
 			throw new RuntimeException("Las fechas a comparar no pueden ser nulas.");
-		DateTime startDateTime = new DateTime(startDate,DateTimeZone.UTC).withTime(0, 0, 0, 0);
-		DateTime dateTime = new DateTime(date,DateTimeZone.UTC).withTime(0, 0, 0, 0);
-		return startDateTime.isBefore(dateTime) || 
-				(startDateTime.getDayOfMonth() == dateTime.getDayOfMonth() && startDateTime.getMonthOfYear() == dateTime.getMonthOfYear() && startDateTime.getYear() == dateTime.getYear());
+		
+		SimpleDateFormat sdf = new SimpleDateFormat("ddMMyyyy");
+		return startDate.before(date) || sdf.format( startDate ).compareTo(sdf.format(date)) == 0;
 	}
 
 	/**
