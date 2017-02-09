@@ -337,7 +337,7 @@ public class ConstructionSiteService {
 		int current = date.dayOfMonth().getMinimumValue();
 		date = date.withDayOfMonth(current);
 		//mientras la fecha de inicio sea mayor a la fecha recorrida
-		while(Utils.isDateAfter(lc.getActiveContract().getStartDate(), date.toDate()) && current <= date.dayOfMonth().getMaximumValue() )
+		while(Utils.isDateAfter(lc.getActiveContract().getStartDate(), date.toLocalDate().toDate()) && current <= date.dayOfMonth().getMaximumValue() )
 		{
 			//elije la marca según si la fecha está en la misma fecha o no
 			AttendanceMark mark = chooseBetweenEmptyOrFilled(date,lc.getActiveContract().getStartDate());
@@ -351,7 +351,7 @@ public class ConstructionSiteService {
 		if( lc.getActiveContract().getTerminationDate() != null){
 			current = date.dayOfMonth().getMaximumValue();
 			date = date.withDayOfMonth(current);
-			while( Utils.isDateBeforeOrSame(lc.getActiveContract().getTerminationDate(),date.toDate()) && current >= date.dayOfMonth().getMinimumValue() ){
+			while( Utils.isDateBefore(lc.getActiveContract().getTerminationDate(),date.toLocalDate().toDate()) && current >= date.dayOfMonth().getMinimumValue() ){
 				//elije la marca según si la fecha está en la misma semana o no
 				AttendanceMark mark = chooseBetweenEmptyOrFilled(date,lc.getActiveContract().getTerminationDate());
 				attendance.setMark(mark, current - 1);
@@ -367,7 +367,7 @@ public class ConstructionSiteService {
 		current = date2.dayOfMonth().get();
 		date2 = date2.withDayOfMonth(current);
 		//mientras la fecha de inicio sea mayor a la fecha recorrida 
-		while(Utils.isDateAfter(lc.getActiveContract().getStartDate(),date2.toDate()) && current <= date2.dayOfMonth().getMaximumValue() )
+		while(Utils.isDateAfter(lc.getActiveContract().getStartDate(),date2.toLocalDate().toDate()) && current <= date2.dayOfMonth().getMaximumValue() )
 		{
 //			AttendanceMark mark = chooseBetweenEmptyOrFilled(date2,lc.getActiveContract().getStartDate());
 			AttendanceMark mark = AttendanceMark.EMPTY;
@@ -380,7 +380,7 @@ public class ConstructionSiteService {
 		if( lc.getActiveContract().getTerminationDate() != null){
 			current = date2.dayOfMonth().getMaximumValue();
 			date2 = date2.withDayOfMonth(current);
-			while( Utils.isDateBefore(lc.getActiveContract().getTerminationDate(),date2.toDate()) && current >= date2.dayOfMonth().getMinimumValue() ){
+			while( Utils.isDateBefore(lc.getActiveContract().getTerminationDate(),date2.toLocalDate().toDate()) && current >= date2.dayOfMonth().getMinimumValue() ){
 //				AttendanceMark mark = chooseBetweenEmptyOrFilled(date2,lc.getActiveContract().getTerminationDate());
 				AttendanceMark mark = AttendanceMark.EMPTY;
 				attendance.setLastMark(mark, current - 1);
