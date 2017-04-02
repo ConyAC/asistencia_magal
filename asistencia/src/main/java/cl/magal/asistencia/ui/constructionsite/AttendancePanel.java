@@ -121,6 +121,7 @@ import cl.magal.asistencia.ui.ListenerFieldFactory;
 import cl.magal.asistencia.ui.MagalUI;
 import cl.magal.asistencia.ui.components.ColumnCollapsedObservableTable;
 import cl.magal.asistencia.ui.components.ColumnCollapsedObservableTable.ColumnCollapsedEvent;
+import cl.magal.asistencia.ui.components.LazyTabSheet;
 import cl.magal.asistencia.ui.vo.AbsenceVO;
 import cl.magal.asistencia.util.Constants;
 import cl.magal.asistencia.util.OnDemandFileDownloader;
@@ -183,7 +184,7 @@ public class AttendancePanel extends VerticalLayout implements View {
 	InlineDateField attendanceDate;
 	Button btnExportSoftland,btnExportSupleSoftland,btnConstructionSiteConfirm,btnCentralConfirm,btnSupleObraConfirm,btnSupleCentralConfirm;
 	Table confirmTable;
-	TabSheet tab;
+	LazyTabSheet tab;
 	//	VerticalLayout root;
 	Table supleTable;
 	ColumnCollapsedObservableTable salaryTable;
@@ -464,7 +465,7 @@ public class AttendancePanel extends VerticalLayout implements View {
 
 	private TabSheet drawAttendanceDetail() {
 		logger.debug("PRIMERO");
-		tab = new TabSheet();
+		tab = new LazyTabSheet();
 
 		Grid attendanceGrid = drawAttendanceGrid();
 		tab.addTab(attendanceGrid,"Asistencia");
