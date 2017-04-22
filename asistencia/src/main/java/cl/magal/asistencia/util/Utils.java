@@ -21,6 +21,16 @@ import org.joda.time.format.DateTimeFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.vaadin.data.Validator.InvalidValueException;
+import com.vaadin.data.fieldgroup.FieldGroup.CommitException;
+import com.vaadin.data.util.BeanItem;
+import com.vaadin.data.util.BeanItemContainer;
+import com.vaadin.data.util.MethodProperty;
+import com.vaadin.ui.Field;
+import com.vaadin.ui.Notification;
+import com.vaadin.ui.Notification.Type;
+import com.vaadin.ui.TextField;
+
 import cl.magal.asistencia.entities.Accident;
 import cl.magal.asistencia.entities.AfpItem;
 import cl.magal.asistencia.entities.Attendance;
@@ -33,16 +43,6 @@ import cl.magal.asistencia.entities.Mobilization2;
 import cl.magal.asistencia.entities.Vacation;
 import cl.magal.asistencia.entities.WithdrawalSettlement;
 import cl.magal.asistencia.entities.enums.AttendanceMark;
-
-import com.vaadin.data.Validator.InvalidValueException;
-import com.vaadin.data.fieldgroup.FieldGroup.CommitException;
-import com.vaadin.data.util.BeanItem;
-import com.vaadin.data.util.BeanItemContainer;
-import com.vaadin.data.util.MethodProperty;
-import com.vaadin.ui.Field;
-import com.vaadin.ui.Notification;
-import com.vaadin.ui.Notification.Type;
-import com.vaadin.ui.TextField;
 
 public class Utils {
 	
@@ -497,10 +497,10 @@ public class Utils {
 		//si tiene que completar la semana, retorna el lunes más cercano
 		if(completarSemana){
 			//le suma dia hasta que sea el lunes
-			finContrato = calcularViernesMasCercano(finContrato,true);
+			finContrato = calcularDomingoMasCercano(finContrato,true);
 		}
 		
-		//si la fecha de ingreso es luego del inicio del mes, entonces comienza a contar desde ese día
+		//si la fecha de fin de contrato es luego del inicio del mes, entonces comienza a contar desde ese día
 		if(finContrato.isBefore(finMes))
 			return finContrato.getDayOfMonth();
 		else
@@ -512,8 +512,8 @@ public class Utils {
 	 * @param dt
 	 * @return
 	 */
-	private static DateTime calcularViernesMasCercano(DateTime dt,boolean futuro){
-		while(dt.getDayOfWeek() != DateTimeConstants.FRIDAY ){
+	private static DateTime calcularDomingoMasCercano(DateTime dt,boolean futuro){
+		while(dt.getDayOfWeek() != DateTimeConstants.SUNDAY ){
 			if(futuro)
 				dt = dt.plusDays(1);
 			else
