@@ -696,5 +696,49 @@ public class Utils {
 		return attendanceMark == AttendanceMark.FILLER || attendanceMark == AttendanceMark.EMPTY;
 	}
 
+	/**
+	 * Verifica que si la fecha entregada es sabado, entonces la marca tambien lo sea
+	 * @param date
+	 * @param mark
+	 * @return
+	 */
+	public static boolean isBothAreSaturday(DateTime date, AttendanceMark mark) {
+		//si la fecha no es sabado, retorna true
+		if(!isSaturday(date))return true;
+		//si la fecha es sabado, retorn true sólo la marca tambien es sabado
+		return mark == AttendanceMark.SATURDAY;
+	}
+	
+	/**
+	 * Verifica que si la fecha entregada es doming, entonces la marca tambien lo sea
+	 * @param date
+	 * @param mark
+	 * @return
+	 */
+	public static boolean isBothAreSunday(DateTime date, AttendanceMark mark) {
+		//si la fecha no es domingo, retorna true
+		if(!isSunday(date))return true;
+		//si la fecha es domingo, retorn true sólo la marca tambien es domingo
+		return mark == AttendanceMark.SUNDAY;
+	}
+
+	/**
+	 * retorna si la fecha dada es sabado o no
+	 * @param date
+	 * @return
+	 */
+	public static boolean isSaturday(DateTime date) {
+		return date.getDayOfWeek() == org.joda.time.DateTimeConstants.SATURDAY;
+	}
+	
+	/**
+	 * retorna si la fecha dada es domingo o no
+	 * @param date
+	 * @return
+	 */
+	public static boolean isSunday(DateTime date) {
+		return date.getDayOfWeek() == org.joda.time.DateTimeConstants.SUNDAY;
+	}
+
 }
 
