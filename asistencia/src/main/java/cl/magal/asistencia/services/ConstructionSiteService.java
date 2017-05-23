@@ -12,6 +12,7 @@ import javax.annotation.PostConstruct;
 
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
+import org.joda.time.LocalDateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -350,7 +351,7 @@ public class ConstructionSiteService {
 		if( lc.getActiveContract().getTerminationDate() != null){
 			current = date.dayOfMonth().getMaximumValue();
 			date = date.withDayOfMonth(current);
-			while( Utils.isDateBeforeOrSame(lc.getActiveContract().getTerminationDate(),date.toLocalDate().toDate()) && current >= date.dayOfMonth().getMinimumValue() ){
+			while( Utils.isDateBefore(lc.getActiveContract().getTerminationDate(),date.toLocalDate().toDate()) && current >= date.dayOfMonth().getMinimumValue() ){
 				//elije la marca según si la fecha está en la misma semana o no
 				AttendanceMark mark = chooseBetweenEmptyOrFilled(date,lc.getActiveContract().getTerminationDate());
 				attendance.setMark(mark, current - 1);
@@ -399,7 +400,7 @@ public class ConstructionSiteService {
 	 */
 	private AttendanceMark chooseBetweenEmptyOrFilled(DateTime date,Date refDate) {
 		String date1 = date.toString("ww-yyyy");
-		String date2 = new DateTime(refDate,DateTimeZone.UTC).withTime(0, 0, 0, 0).toString("ww-yyyy");
+		String date2 = new LocalDateTime(refDate).toString("ww-yyyy");
 		
 		//si está en la misma semana y es un día de la semana laboral, entonces es R, si no EMPTY
 		if(date1.compareTo(date2) == 0){

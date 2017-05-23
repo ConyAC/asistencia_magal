@@ -1669,9 +1669,9 @@ public class AttendancePanel extends VerticalLayout implements View {
 					while( Utils.isDateBeforeOrSame(lc.getActiveContract().getTerminationDate(),date.toLocalDate().toDate()) && current >= date.dayOfMonth().getMinimumValue() ){
 						logger.debug("2 date {}",date);
 						AttendanceMark mark = attendance.getMarksAsList().get( current - 1);
-						if( !Utils.isBothAreSaturday(date,mark))
+						if( !Utils.isBothAreSaturday(date,mark) && !Utils.isAttendanceMarkEmpty(mark ) )
 							throw new  CommitException("El día "+Utils.date2String(date.toLocalDate().toDate())+" está fuera del rango del contrato ("+Utils.date2String(contract.getStartDate())+"-"+Utils.date2String(contract.getTerminationDate())+") "+mark+", no puede tener una marca distinta a S.");
-						else if(!Utils.isBothAreSunday(date,mark) )
+						else if(!Utils.isBothAreSunday(date,mark) && !Utils.isAttendanceMarkEmpty(mark ) )
 							throw new  CommitException("El día "+Utils.date2String(date.toLocalDate().toDate())+" está fuera del rango del contrato ("+Utils.date2String(contract.getStartDate())+"-"+Utils.date2String(contract.getTerminationDate())+") "+mark+", no puede tener una marca distinta a D.");
 						else if (!Utils.isAttendanceMarkEmptyOrFilled ( mark ))
 							throw new  CommitException("El día "+Utils.date2String(date.toLocalDate().toDate())+" está fuera del rango del contrato ("+Utils.date2String(contract.getStartDate())+"-"+Utils.date2String(contract.getTerminationDate())+") "+mark+", no puede tener una marca distinta a R o vacio (2).");
@@ -1704,9 +1704,9 @@ public class AttendancePanel extends VerticalLayout implements View {
 					logger.debug("4");
 					while( Utils.isDateBefore(lc.getActiveContract().getTerminationDate(), date2.toLocalDate().toDate()) && current >= date2.dayOfMonth().getMinimumValue() ){
 						AttendanceMark mark = attendance.getLastMarksAsList().get( current - 1);
-						if( !Utils.isBothAreSaturday(date,mark))
+						if( !Utils.isBothAreSaturday(date,mark) && !Utils.isAttendanceMarkEmpty(mark ) )
 							throw new  CommitException("El día "+Utils.date2String(date.toLocalDate().toDate())+" está fuera del rango del contrato ("+Utils.date2String(contract.getStartDate())+"-"+Utils.date2String(contract.getTerminationDate())+") "+mark+", no puede tener una marca distinta a S.");
-						else if(!Utils.isBothAreSunday(date,mark) )
+						else if(!Utils.isBothAreSunday(date,mark) && !Utils.isAttendanceMarkEmpty(mark ) )
 							throw new  CommitException("El día "+Utils.date2String(date.toLocalDate().toDate())+" está fuera del rango del contrato ("+Utils.date2String(contract.getStartDate())+"-"+Utils.date2String(contract.getTerminationDate())+") "+mark+", no puede tener una marca distinta a D.");
 						if( !Utils.isAttendanceMarkEmptyOrFilled (mark ))
 							throw new  CommitException("El día "+Utils.date2String(date2.toLocalDate().toDate())+" está fuera del rango del contrato ("+Utils.date2String(contract.getStartDate())+"-"+Utils.date2String(contract.getTerminationDate())+") "+mark+", no puede tener una marca distinta a R o vacio (4).");

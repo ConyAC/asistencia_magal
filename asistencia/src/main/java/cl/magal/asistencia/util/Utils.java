@@ -740,5 +740,14 @@ public class Utils {
 		return date.getDayOfWeek() == org.joda.time.DateTimeConstants.SUNDAY;
 	}
 
+	/**
+	 * retorna si la marca es vacia
+	 * @param mark
+	 * @return
+	 */
+	public static boolean isAttendanceMarkEmpty(AttendanceMark mark) {
+		return mark == AttendanceMark.EMPTY;
+	}
+
 }
 
