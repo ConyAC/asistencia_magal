@@ -1679,8 +1679,8 @@ public class AttendancePanel extends VerticalLayout implements View {
 							}else if( Utils.isSunday(date) ){
 								if( !Utils.isBothAreSunday(date,mark)  )
 									throw new  CommitException("El día "+Utils.date2String(date.toLocalDate().toDate())+" está fuera del rango del contrato ("+Utils.date2String(contract.getStartDate())+"-"+Utils.date2String(contract.getTerminationDate())+") "+mark+", no puede tener una marca distinta a D.");
-							}else if (!Utils.isAttendanceMarkEmptyOrFilled ( mark ))
-								throw new  CommitException(" El día "+Utils.date2String(date.toLocalDate().toDate())+" está fuera del rango del contrato ("+Utils.date2String(contract.getStartDate())+"-"+Utils.date2String(contract.getTerminationDate())+") "+mark+", no puede tener una marca distinta a R.");
+							}else if (!Utils.isAttendanceMarkFailOrFilled ( mark ))
+								throw new  CommitException(" El día "+Utils.date2String(date.toLocalDate().toDate())+" está fuera del rango del contrato ("+Utils.date2String(contract.getStartDate())+"-"+Utils.date2String(contract.getTerminationDate())+") "+mark+", no puede tener una marca distinta a R o F.");
 						}else {//los demás dias sólo puede tener vacios
 							if (!Utils.isAttendanceMarkEmpty( mark ))
 								throw new  CommitException(" El día "+Utils.date2String(date.toLocalDate().toDate())+" está fuera del rango del contrato ("+Utils.date2String(contract.getStartDate())+"-"+Utils.date2String(contract.getTerminationDate())+") "+mark+", no puede tener una marca distinta vacio (2).");
@@ -1724,8 +1724,8 @@ public class AttendancePanel extends VerticalLayout implements View {
 							}else if( Utils.isSunday(date2) ){
 								if (!Utils.isBothAreSunday(date2,mark) )
 									throw new  CommitException("El día "+Utils.date2String(date2.toLocalDate().toDate())+" está fuera del rango del contrato ("+Utils.date2String(contract.getStartDate())+"-"+Utils.date2String(contract.getTerminationDate())+") "+mark+", no puede tener una marca distinta a D.");
-							}else if( !Utils.isAttendanceMarkEmptyOrFilled (mark ))
-								throw new  CommitException("El día "+Utils.date2String(date2.toLocalDate().toDate())+" está fuera del rango del contrato ("+Utils.date2String(contract.getStartDate())+"-"+Utils.date2String(contract.getTerminationDate())+") "+mark+", no puede tener una marca distinta a R o vacio (4).");
+							}else if( !Utils.isAttendanceMarkFailOrFilled (mark ))
+								throw new  CommitException("El día "+Utils.date2String(date2.toLocalDate().toDate())+" está fuera del rango del contrato ("+Utils.date2String(contract.getStartDate())+"-"+Utils.date2String(contract.getTerminationDate())+") "+mark+", no puede tener una marca distinta a R o F (4).");
 						}else {//los demás dias sólo puede tener vacios
 							if (!Utils.isAttendanceMarkEmpty( mark ))
 								throw new  CommitException(" El día "+Utils.date2String(date2.toLocalDate().toDate())+" está fuera del rango del contrato ("+Utils.date2String(contract.getStartDate())+"-"+Utils.date2String(contract.getTerminationDate())+") "+mark+", no puede tener una marca distinta vacio (2).");

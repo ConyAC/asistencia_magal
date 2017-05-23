@@ -772,5 +772,14 @@ public class Utils {
 		return date1.compareTo(date2) == 0;
 	}
 
+	/**
+	 * 
+	 * @param mark
+	 * @return
+	 */
+	public static boolean isAttendanceMarkFailOrFilled(AttendanceMark mark) {
+		return mark == AttendanceMark.FAIL || mark == AttendanceMark.FILLER;
+	}
+
 }
 
