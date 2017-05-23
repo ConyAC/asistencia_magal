@@ -399,11 +399,8 @@ public class ConstructionSiteService {
 	 * @return
 	 */
 	private AttendanceMark chooseBetweenEmptyOrFilled(DateTime date,Date refDate) {
-		String date1 = date.toString("ww-yyyy");
-		String date2 = new LocalDateTime(refDate).toString("ww-yyyy");
-		
 		//si está en la misma semana y es un día de la semana laboral, entonces es R, si no EMPTY
-		if(date1.compareTo(date2) == 0){
+		if(Utils.isSameWeek(date,refDate)){
 			//si es un dia laboral entonces retorna R
 			if(Utils.isLaborerDay(date))return AttendanceMark.FILLER;
 			//si esa sabado

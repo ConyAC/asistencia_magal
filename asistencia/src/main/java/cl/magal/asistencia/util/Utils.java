@@ -749,5 +749,28 @@ public class Utils {
 		return mark == AttendanceMark.EMPTY;
 	}
 
+	/**
+	 * Verifica si la fecha date está en la misma semana que la fecha refDate
+	 * @param date
+	 * @param refDate
+	 * @return
+	 */
+	public static boolean isSameWeek(DateTime date, Date refDate) {
+		return isSameWeek(date, new LocalDateTime(refDate) );
+	}
+	
+	/**
+	 * Verifica si la fecha date está en la misma semana que la fecha refDate
+	 * @param date
+	 * @param refDate
+	 * @return
+	 */
+	public static boolean isSameWeek(DateTime date, LocalDateTime refDate) {
+		
+		String date1 = date.toString("ww-yyyy");
+		String date2 = refDate.toString("ww-yyyy");
+		return date1.compareTo(date2) == 0;
+	}
+
 }
 
