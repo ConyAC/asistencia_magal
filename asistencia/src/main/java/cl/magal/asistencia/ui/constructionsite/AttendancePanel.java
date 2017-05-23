@@ -1675,7 +1675,7 @@ public class AttendancePanel extends VerticalLayout implements View {
 						else if( isSameWeek && !Utils.isBothAreSunday(date,mark)  )
 							throw new  CommitException("El día "+Utils.date2String(date.toLocalDate().toDate())+" está fuera del rango del contrato ("+Utils.date2String(contract.getStartDate())+"-"+Utils.date2String(contract.getTerminationDate())+") "+mark+", no puede tener una marca distinta a D.");
 						else if (!Utils.isAttendanceMarkEmptyOrFilled ( mark ))
-							throw new  CommitException("El día "+Utils.date2String(date.toLocalDate().toDate())+" está fuera del rango del contrato ("+Utils.date2String(contract.getStartDate())+"-"+Utils.date2String(contract.getTerminationDate())+") "+mark+", no puede tener una marca distinta a R o vacio (2).");
+							throw new  CommitException(new LocalDateTime(lc.getActiveContract().getTerminationDate())+" || "+lc.getActiveContract().getTerminationDate()+" El día "+Utils.date2String(date.toLocalDate().toDate())+" está fuera del rango del contrato ("+Utils.date2String(contract.getStartDate())+"-"+Utils.date2String(contract.getTerminationDate())+") "+mark+", no puede tener una marca distinta a R o vacio (2).");
 						current-- ;
 						if(current >= date.dayOfMonth().getMinimumValue())
 							date = date.withDayOfMonth(current);
