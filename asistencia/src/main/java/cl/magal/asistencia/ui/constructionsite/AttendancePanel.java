@@ -1665,7 +1665,7 @@ public class AttendancePanel extends VerticalLayout implements View {
 				if( lc.getActiveContract().getTerminationDate() != null){
 					current = date.dayOfMonth().getMaximumValue();
 					date = date.withDayOfMonth(current);
-					while( Utils.isDateBeforeOrSame(lc.getActiveContract().getTerminationDate(),date.toLocalDate().toDate()) && current >= date.dayOfMonth().getMinimumValue() ){
+					while( Utils.isDateBefore(lc.getActiveContract().getTerminationDate(),date.toLocalDate().toDate()) && current >= date.dayOfMonth().getMinimumValue() ){
 						logger.debug("2 date {}",date);
 						AttendanceMark mark = attendance.getMarksAsList().get( current - 1);
 						boolean isSameWeek = Utils.isSameWeek(date,lc.getActiveContract().getTerminationDate());
