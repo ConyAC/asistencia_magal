@@ -1673,11 +1673,13 @@ public class AttendancePanel extends VerticalLayout implements View {
 						
 						if( isSameWeek ) {
 							//si el dia es sabado
-							if( Utils.isSaturday(date) && !Utils.isBothAreSaturday(date,mark)  )
-								throw new  CommitException("El día "+Utils.date2String(date.toLocalDate().toDate())+" está fuera del rango del contrato ("+Utils.date2String(contract.getStartDate())+"-"+Utils.date2String(contract.getTerminationDate())+") "+mark+", no puede tener una marca distinta a S.");
-							else if( Utils.isSunday(date) && !Utils.isBothAreSunday(date,mark)  )
-								throw new  CommitException("El día "+Utils.date2String(date.toLocalDate().toDate())+" está fuera del rango del contrato ("+Utils.date2String(contract.getStartDate())+"-"+Utils.date2String(contract.getTerminationDate())+") "+mark+", no puede tener una marca distinta a D.");
-							else if (!Utils.isAttendanceMarkEmptyOrFilled ( mark ))
+							if( Utils.isSaturday(date)){ 
+								if(!Utils.isBothAreSaturday(date,mark))
+									throw new  CommitException("El día "+Utils.date2String(date.toLocalDate().toDate())+" está fuera del rango del contrato ("+Utils.date2String(contract.getStartDate())+"-"+Utils.date2String(contract.getTerminationDate())+") "+mark+", no puede tener una marca distinta a S.");
+							}else if( Utils.isSunday(date) ){
+								if( !Utils.isBothAreSunday(date,mark)  )
+									throw new  CommitException("El día "+Utils.date2String(date.toLocalDate().toDate())+" está fuera del rango del contrato ("+Utils.date2String(contract.getStartDate())+"-"+Utils.date2String(contract.getTerminationDate())+") "+mark+", no puede tener una marca distinta a D.");
+							}else if (!Utils.isAttendanceMarkEmptyOrFilled ( mark ))
 								throw new  CommitException(" El día "+Utils.date2String(date.toLocalDate().toDate())+" está fuera del rango del contrato ("+Utils.date2String(contract.getStartDate())+"-"+Utils.date2String(contract.getTerminationDate())+") "+mark+", no puede tener una marca distinta a R.");
 						}else {//los demás dias sólo puede tener vacios
 							if (!Utils.isAttendanceMarkEmpty( mark ))
@@ -1716,11 +1718,13 @@ public class AttendancePanel extends VerticalLayout implements View {
 						//si es la misma semana, valida que tenga solo R, S y D donde corresponda
 						
 						if( isSameWeek ) {
-							if( Utils.isSaturday(date2) && !Utils.isBothAreSaturday(date2,mark) )
-								throw new  CommitException("El día "+Utils.date2String(date2.toLocalDate().toDate())+" está fuera del rango del contrato ("+Utils.date2String(contract.getStartDate())+"-"+Utils.date2String(contract.getTerminationDate())+") "+mark+", no puede tener una marca distinta a S.");
-							else if( Utils.isSunday(date2) && !Utils.isBothAreSunday(date2,mark) )
-								throw new  CommitException("El día "+Utils.date2String(date2.toLocalDate().toDate())+" está fuera del rango del contrato ("+Utils.date2String(contract.getStartDate())+"-"+Utils.date2String(contract.getTerminationDate())+") "+mark+", no puede tener una marca distinta a D.");
-							else if( !Utils.isAttendanceMarkEmptyOrFilled (mark ))
+							if( Utils.isSaturday(date2)){
+								if( !Utils.isBothAreSaturday(date2,mark) )
+									throw new  CommitException("El día "+Utils.date2String(date2.toLocalDate().toDate())+" está fuera del rango del contrato ("+Utils.date2String(contract.getStartDate())+"-"+Utils.date2String(contract.getTerminationDate())+") "+mark+", no puede tener una marca distinta a S.");
+							}else if( Utils.isSunday(date2) ){
+								if (!Utils.isBothAreSunday(date2,mark) )
+									throw new  CommitException("El día "+Utils.date2String(date2.toLocalDate().toDate())+" está fuera del rango del contrato ("+Utils.date2String(contract.getStartDate())+"-"+Utils.date2String(contract.getTerminationDate())+") "+mark+", no puede tener una marca distinta a D.");
+							}else if( !Utils.isAttendanceMarkEmptyOrFilled (mark ))
 								throw new  CommitException("El día "+Utils.date2String(date2.toLocalDate().toDate())+" está fuera del rango del contrato ("+Utils.date2String(contract.getStartDate())+"-"+Utils.date2String(contract.getTerminationDate())+") "+mark+", no puede tener una marca distinta a R o vacio (4).");
 						}else {//los demás dias sólo puede tener vacios
 							if (!Utils.isAttendanceMarkEmpty( mark ))
