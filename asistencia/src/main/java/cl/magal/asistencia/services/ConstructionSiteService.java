@@ -1,18 +1,21 @@
 package cl.magal.asistencia.services;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
-import org.joda.time.LocalDateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -325,6 +328,25 @@ public class ConstructionSiteService {
 	}
 	
 	/**
+	 * 
+	 * @param list
+	 * @return
+	 */
+	private Set<String> listToSet(List list){
+		Set<String> set = new HashSet<String>();
+		
+		if(list.isEmpty()) return set;
+		
+		if(list.get(0).getClass() == Holiday.class ){
+			SimpleDateFormat sdf = new SimpleDateFormat("ddMMyyyy");
+			for(Holiday h : (List<Holiday>)list)
+				set.add(sdf.format(h.getDate()));
+		}
+		
+		return set;
+	}
+	
+	/**
 	 * Rellena con EMPTY la asistencia dada del obrero según su fecha de entrada y salida
 	 * Si el trabajador entró o salió a mitad de semana, rellena con R's para completarla
 	 * @param date
@@ -332,28 +354,51 @@ public class ConstructionSiteService {
 	 * @param attendance
 	 */
 	public void defineContractRange(DateTime dateInput,LaborerConstructionsite lc, Attendance attendance){
+		
+		
+		Calendar c = Calendar.getInstance();
+		List<Holiday> holidays = holidayRepo.findByMonth(dateInput.toLocalDate().toDate());
+		Set<String> setHolidays = listToSet(holidays);
 		DateTime date = new DateTime(dateInput);
 		//rellena con R, todo lo que este fuera de la fecha inicial 
 		int current = date.dayOfMonth().getMinimumValue();
 		date = date.withDayOfMonth(current);
-		//mientras la fecha de inicio sea mayor a la fecha recorrida
+		//mientras la fecha de inicio de contrato sea mayor a la fecha recorrida
 		while(Utils.isDateAfter(lc.getActiveContract().getStartDate(), date.toLocalDate().toDate()) && current <= date.dayOfMonth().getMaximumValue() )
 		{
 			//elije la marca según si la fecha está en la misma fecha o no
-			AttendanceMark mark = chooseBetweenEmptyOrFilled(date,lc.getActiveContract().getStartDate());
+			AttendanceMark mark = null;
+			
+			//si es feriado, lo mantiene asi 
+			if(setHolidays.contains( date.toString("ddMMyyyy" ))) mark = AttendanceMark.SUNDAY;
+			//si era falla, lo mantiene asi
+			else if(attendance.getMarksAsList().get(current - 1) == AttendanceMark.FAIL) mark = AttendanceMark.FAIL;
+			//si no, elige que poner
+			else mark = chooseBetweenEmptyOrFilled(date,lc.getActiveContract().getStartDate());
+			
 			attendance.setMark(mark, current - 1);
 			current++;
 			if(current <= date.dayOfMonth().getMaximumValue())
 					date = date.withDayOfMonth(current);
 		}
 		
+		c.setTime(lc.getActiveContract().getTerminationDate());
+		c.add(Calendar.DAY_OF_MONTH, 2);
 		//rellena con R, todo lo que este fuera de la fecha final de contrato
 		if( lc.getActiveContract().getTerminationDate() != null){
 			current = date.dayOfMonth().getMaximumValue();
 			date = date.withDayOfMonth(current);
 			while( Utils.isDateBefore(lc.getActiveContract().getTerminationDate(),date.toLocalDate().toDate()) && current >= date.dayOfMonth().getMinimumValue() ){
 				//elije la marca según si la fecha está en la misma semana o no
-				AttendanceMark mark = chooseBetweenEmptyOrFilled(date,lc.getActiveContract().getTerminationDate());
+				AttendanceMark mark = null;
+				
+				//si es feriado, lo mantiene asi 
+				if(setHolidays.contains( date.toString("ddMMyyyy" ))) mark = AttendanceMark.SUNDAY;
+				//si era falla y han pasado a lo más dias del contrato, lo mantiene asi
+				else if(attendance.getMarksAsList().get(current - 1) == AttendanceMark.FAIL && date.toLocalDate().toDate().after(c.getTime()) ) mark = AttendanceMark.FAIL;
+				//si no, elige que poner
+				else mark = chooseBetweenEmptyOrFilled(date,lc.getActiveContract().getTerminationDate() );
+				
 				attendance.setMark(mark, current - 1);
 				current-- ;
 				if(current >= date.dayOfMonth().getMinimumValue())
