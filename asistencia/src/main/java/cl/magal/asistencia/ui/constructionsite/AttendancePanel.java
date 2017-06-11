@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
@@ -1649,6 +1650,10 @@ public class AttendancePanel extends VerticalLayout implements View {
 				DateTime date = getAttendanceDate();
 				int current = date.dayOfMonth().getMinimumValue();
 				date = date.withDayOfMonth(current);
+				
+				
+				Set<String> setHolidays = constructionSiteService.getHolidaysAsSetString(date.toLocalDate().toDate());
+				
 				//mientras la fecha de inicio sea mayor a la fecha recorrida
 				while( Utils.isDateAfter( lc.getActiveContract().getStartDate(), date.toLocalDate().toDate()) && current <= date.dayOfMonth().getMaximumValue() )
 				{
@@ -1672,8 +1677,12 @@ public class AttendancePanel extends VerticalLayout implements View {
 						//si es la misma semana, valida que tenga solo R, S y D donde corresponda
 						
 						if( isSameWeek ) {
+							
+							//si es feriado, solo puede ser feriado
+							if(setHolidays.contains( date.toString("ddMMyyyy" )) && mark != AttendanceMark.SUNDAY ){
+								throw new  CommitException("El día "+Utils.date2String(date.toLocalDate().toDate())+" está fuera del rango del contrato ("+Utils.date2String(contract.getStartDate())+"-"+Utils.date2String(contract.getTerminationDate())+") pero es feriado "+mark+", no puede tener una marca distinta a D.");
 							//si el dia es sabado
-							if( Utils.isSaturday(date)){ 
+							}else if( Utils.isSaturday(date)){ 
 								if(!Utils.isBothAreSaturday(date,mark))
 									throw new  CommitException("El día "+Utils.date2String(date.toLocalDate().toDate())+" está fuera del rango del contrato ("+Utils.date2String(contract.getStartDate())+"-"+Utils.date2String(contract.getTerminationDate())+") "+mark+", no puede tener una marca distinta a S.");
 							}else if( Utils.isSunday(date) ){
@@ -1696,6 +1705,9 @@ public class AttendancePanel extends VerticalLayout implements View {
 				//rellena con R, todo lo que este fuera de la fecha inicial 
 				current = date2.dayOfMonth().get();
 				date2 = date2.withDayOfMonth(current);
+				
+				Set<String> setHolidays2 = constructionSiteService.getHolidaysAsSetString(date2.toLocalDate().toDate());
+				
 				logger.debug("3 date2 {}",date2);
 				//mientras la fecha de inicio sea mayor a la fecha recorrida 
 				while(Utils.isDateAfter(lc.getActiveContract().getStartDate(),date2.toLocalDate().toDate()) && current <= date2.dayOfMonth().getMaximumValue() )
@@ -1718,7 +1730,11 @@ public class AttendancePanel extends VerticalLayout implements View {
 						//si es la misma semana, valida que tenga solo R, S y D donde corresponda
 						
 						if( isSameWeek ) {
-							if( Utils.isSaturday(date2)){
+							//si es feriado, solo puede ser feriado
+							if(setHolidays.contains( date2.toString("ddMMyyyy" )) && mark != AttendanceMark.SUNDAY ){
+								throw new  CommitException("El día "+Utils.date2String(date2.toLocalDate().toDate())+" está fuera del rango del contrato ("+Utils.date2String(contract.getStartDate())+"-"+Utils.date2String(contract.getTerminationDate())+") pero es feriado "+mark+", no puede tener una marca distinta a D.");
+							//si el dia es sabado
+							}else if( Utils.isSaturday(date2)){
 								if( !Utils.isBothAreSaturday(date2,mark) )
 									throw new  CommitException("El día "+Utils.date2String(date2.toLocalDate().toDate())+" está fuera del rango del contrato ("+Utils.date2String(contract.getStartDate())+"-"+Utils.date2String(contract.getTerminationDate())+") "+mark+", no puede tener una marca distinta a S.");
 							}else if( Utils.isSunday(date2) ){

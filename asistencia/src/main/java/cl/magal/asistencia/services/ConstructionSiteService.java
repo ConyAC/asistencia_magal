@@ -347,6 +347,17 @@ public class ConstructionSiteService {
 	}
 	
 	/**
+	 * Permite obtener los feriados como un set de string con formato ddMMyyyy
+	 * @param date
+	 * @return
+	 */
+	public Set<String> getHolidaysAsSetString(Date date){
+		List<Holiday> holidays = holidayRepo.findByMonth(date);
+		Set<String> setHolidays = listToSet(holidays);
+		return setHolidays;
+	}
+	
+	/**
 	 * Rellena con EMPTY la asistencia dada del obrero según su fecha de entrada y salida
 	 * Si el trabajador entró o salió a mitad de semana, rellena con R's para completarla
 	 * @param date
@@ -357,8 +368,7 @@ public class ConstructionSiteService {
 		
 		
 		Calendar c = Calendar.getInstance();
-		List<Holiday> holidays = holidayRepo.findByMonth(dateInput.toLocalDate().toDate());
-		Set<String> setHolidays = listToSet(holidays);
+		Set<String> setHolidays = getHolidaysAsSetString(dateInput.toLocalDate().toDate());
 		DateTime date = new DateTime(dateInput);
 		//rellena con R, todo lo que este fuera de la fecha inicial 
 		int current = date.dayOfMonth().getMinimumValue();
