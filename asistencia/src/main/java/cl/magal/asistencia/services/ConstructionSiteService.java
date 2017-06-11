@@ -382,10 +382,12 @@ public class ConstructionSiteService {
 					date = date.withDayOfMonth(current);
 		}
 		
-		c.setTime(lc.getActiveContract().getTerminationDate());
-		c.add(Calendar.DAY_OF_MONTH, 2);
 		//rellena con R, todo lo que este fuera de la fecha final de contrato
 		if( lc.getActiveContract().getTerminationDate() != null){
+			
+			c.setTime(lc.getActiveContract().getTerminationDate());
+			c.add(Calendar.DAY_OF_MONTH, 2);
+			
 			current = date.dayOfMonth().getMaximumValue();
 			date = date.withDayOfMonth(current);
 			while( Utils.isDateBefore(lc.getActiveContract().getTerminationDate(),date.toLocalDate().toDate()) && current >= date.dayOfMonth().getMinimumValue() ){
