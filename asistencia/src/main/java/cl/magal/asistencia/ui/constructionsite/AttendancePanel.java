@@ -1679,8 +1679,9 @@ public class AttendancePanel extends VerticalLayout implements View {
 						if( isSameWeek ) {
 							
 							//si es feriado, solo puede ser feriado
-							if(setHolidays.contains( date.toString("ddMMyyyy" )) && mark != AttendanceMark.SUNDAY ){
-								throw new  CommitException("El día "+Utils.date2String(date.toLocalDate().toDate())+" está fuera del rango del contrato ("+Utils.date2String(contract.getStartDate())+"-"+Utils.date2String(contract.getTerminationDate())+") pero es feriado "+mark+", no puede tener una marca distinta a D.");
+							if(setHolidays.contains( date.toString("ddMMyyyy" )) ){
+								if( mark != AttendanceMark.SUNDAY)
+									throw new  CommitException("El día "+Utils.date2String(date.toLocalDate().toDate())+" está fuera del rango del contrato ("+Utils.date2String(contract.getStartDate())+"-"+Utils.date2String(contract.getTerminationDate())+") pero es feriado "+mark+", no puede tener una marca distinta a D.");
 							//si el dia es sabado
 							}else if( Utils.isSaturday(date)){ 
 								if(!Utils.isBothAreSaturday(date,mark))
@@ -1731,8 +1732,9 @@ public class AttendancePanel extends VerticalLayout implements View {
 						
 						if( isSameWeek ) {
 							//si es feriado, solo puede ser feriado
-							if(setHolidays.contains( date2.toString("ddMMyyyy" )) && mark != AttendanceMark.SUNDAY ){
-								throw new  CommitException("El día "+Utils.date2String(date2.toLocalDate().toDate())+" está fuera del rango del contrato ("+Utils.date2String(contract.getStartDate())+"-"+Utils.date2String(contract.getTerminationDate())+") pero es feriado "+mark+", no puede tener una marca distinta a D.");
+							if(setHolidays.contains( date2.toString("ddMMyyyy" ))){
+								if(  mark != AttendanceMark.SUNDAY  )
+									throw new  CommitException("El día "+Utils.date2String(date2.toLocalDate().toDate())+" está fuera del rango del contrato ("+Utils.date2String(contract.getStartDate())+"-"+Utils.date2String(contract.getTerminationDate())+") pero es feriado "+mark+", no puede tener una marca distinta a D.");
 							//si el dia es sabado
 							}else if( Utils.isSaturday(date2)){
 								if( !Utils.isBothAreSaturday(date2,mark) )
