@@ -386,7 +386,7 @@ public class ConstructionSiteService {
 		if( lc.getActiveContract().getTerminationDate() != null){
 			
 			c.setTime(lc.getActiveContract().getTerminationDate());
-			c.add(Calendar.DAY_OF_MONTH, 2);
+			c.add(Calendar.DAY_OF_MONTH, 3);
 			
 			current = date.dayOfMonth().getMaximumValue();
 			date = date.withDayOfMonth(current);
@@ -397,7 +397,7 @@ public class ConstructionSiteService {
 				//si es feriado, lo mantiene asi 
 				if(setHolidays.contains( date.toString("ddMMyyyy" ))) mark = AttendanceMark.SUNDAY;
 				//si era falla y han pasado a lo más dias del contrato, lo mantiene asi
-				else if(attendance.getMarksAsList().get(current - 1) == AttendanceMark.FAIL && date.toLocalDate().toDate().after(c.getTime()) ) mark = AttendanceMark.FAIL;
+				else if(attendance.getMarksAsList().get(current - 1) == AttendanceMark.FAIL && date.toLocalDate().toDate().before(c.getTime()) ) mark = AttendanceMark.FAIL;
 				//si no, elige que poner
 				else mark = chooseBetweenEmptyOrFilled(date,lc.getActiveContract().getTerminationDate() );
 				
