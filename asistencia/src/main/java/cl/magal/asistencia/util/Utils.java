@@ -580,7 +580,7 @@ public class Utils {
 		
 		//que considere la fecha inicial de contrato para considerar el día inical y el final
 		int i = Utils.calcularDiaInicial(attendance,0,contieneRelleno);
-		maxDay = Utils.calcularDiaFinal(attendance,maxDay,contieneRelleno);
+		maxDay = Utils.calcularDiaFinal(attendance,maxDay,true);
 		
 		if( i >= maxDay )
 			return 0;
