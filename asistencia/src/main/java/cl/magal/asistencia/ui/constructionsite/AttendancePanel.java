@@ -58,6 +58,7 @@ import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.Page;
 import com.vaadin.shared.ui.datefield.Resolution;
+import com.vaadin.shared.ui.grid.GridStaticCellType;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.AbstractSelect.ItemDescriptionGenerator;
 import com.vaadin.ui.Alignment;
@@ -624,6 +625,8 @@ public class AttendancePanel extends VerticalLayout implements View {
 	}
 
 	private void createHeaders(final Grid grid) {
+		
+		//if(true)return;
 
 		boolean isAttendanceGrid = grid.equals(attendanceGrid);
 
@@ -641,6 +644,9 @@ public class AttendancePanel extends VerticalLayout implements View {
 
 			if(pid.equals("laborerConstructionSite.activeContract.jobCode")||
 					pid.equals("laborerConstructionSite.laborer.fullname")){
+				
+				//solo define el filtro si no existe
+				if( cell.getCellType() == GridStaticCellType.WIDGET && cell.getComponent() != null) continue;
 
 				// Have an input field to use for filter
 				TextField filterField = new TextField();
@@ -665,8 +671,10 @@ public class AttendancePanel extends VerticalLayout implements View {
 				});
 				if(cell != null)
 					cell.setComponent(filterField);
+				//rutina para mostrar el nombre de la semana correspondiente y si se debe o no mostrar la columna
 			}else {
-				Label label = new Label();
+				//Label label = new Label();
+				StringBuilder text = new StringBuilder();
 				if(grid.getColumn(pid) != null )
 					grid.getColumn(pid).setSortable(false);//.setWidth(50);
 
@@ -686,7 +694,8 @@ public class AttendancePanel extends VerticalLayout implements View {
 					}catch(Exception e){ //si no es un día válido del mes válida lo ocula
 						dt2 = null;
 						if(grid.getColumn(pid) != null)
-							grid.removeColumn(pid);
+							//grid.removeColumn(pid);
+							grid.getColumn(pid).setHidden(true);
 					}
 					if(dt2 != null ){ //continua solo si el día es válido
 
@@ -703,13 +712,18 @@ public class AttendancePanel extends VerticalLayout implements View {
 						Interval interval = new Interval(startDate, endDate.plusDays(1)); //le suma un dia, dado que el contains del interval es exclusivo para el final
 						//si la fecha que representa el property está dentro del rango, se preocupa de mostrarla y definir sus header y subheader
 						if(interval.contains(dt2)){
-							if(grid.getColumn(pid) == null)
-								grid.addColumn(pid);
-							label.setValue( dt2.dayOfWeek().getAsShortText() );
+							//if(grid.getColumn(pid) == null)
+							//	grid.addColumn(pid);
+							if(grid.getColumn(pid).isHidden())
+								grid.getColumn(pid).setHidden(false);
+							//label.setValue( dt2.dayOfWeek().getAsShortText() );
+							text.append(dt2.dayOfWeek().getAsShortText() );
 							grid.getColumn(pid).setHeaderCaption(((String) pid).replace("dmp","").replace("dma","")).setSortable(false);
 						}else{ //si no la contiene, la oculta
 							if(grid.getColumn(pid) != null)
-								grid.removeColumn(pid);
+								//grid.removeColumn(pid);
+								grid.getColumn(pid).setHidden(true);
+							
 						}
 					}
 
@@ -718,53 +732,55 @@ public class AttendancePanel extends VerticalLayout implements View {
 					}
 
 					if(cell != null){
-						cell.setComponent(label);
+						//cell.setComponent(label);
+						cell.setText(text.toString());
 					}
 				}
 
 			}
+		}
+		
 
-			grid.setCellStyleGenerator(new Grid.CellStyleGenerator() {
+		grid.setCellStyleGenerator(new Grid.CellStyleGenerator() {
 
-				@Override
-				public String getStyle(CellReference cellReference) {
-					String post = "";
-					if( (cellReference.getValue() instanceof AttendanceMark && !AttendanceMark.ATTEND.equals(cellReference.getValue())) ||
-							(cellReference.getValue() instanceof Integer && 0 != (Integer)cellReference.getValue()))
-						if(AttendanceMark.FILLER.equals(cellReference.getValue()))
-							post = " r-color";
-						else
-							post = " red-color";
-					if(cellReference.getValue() instanceof AttendanceMark && !AttendanceMark.ATTEND.equals(cellReference.getValue()))
-						post += " bold";
-					String pid = (String) cellReference.getPropertyId();
+			@Override
+			public String getStyle(CellReference cellReference) {
+				String post = "";
+				if( (cellReference.getValue() instanceof AttendanceMark && !AttendanceMark.ATTEND.equals(cellReference.getValue())) ||
+						(cellReference.getValue() instanceof Integer && 0 != (Integer)cellReference.getValue()))
+					if(AttendanceMark.FILLER.equals(cellReference.getValue()))
+						post = " r-color";
+					else
+						post = " red-color";
+				if(cellReference.getValue() instanceof AttendanceMark && !AttendanceMark.ATTEND.equals(cellReference.getValue()))
+					post += " bold";
+				String pid = (String) cellReference.getPropertyId();
 
-					if(pid.equals("laborerConstructionSite.laborer.fullname"))
-						return "textalignLeft";
+				if(pid.equals("laborerConstructionSite.laborer.fullname"))
+					return "textalignLeft";
 
-					if( pid.startsWith("dmp") || pid.startsWith("dma") ){
-						//calcula el numero del mes
-						int monthDay = Integer.parseInt(((String) pid).replace("dmp","").replace("dma",""));
-						DateTime dt2 = dt;
-						if ( pid.startsWith("dmp") )
-							dt2 = dt2.minusMonths(1);
-						if(monthDay <= dt2.dayOfMonth().getMaximumValue()){
-							//si es el dia actual
-							if(dt2.withDayOfMonth(monthDay).toString("dd/MM/yyyy").equals(DateTime.now().toString("dd/MM/yyyy")))
-								return "grid-today"+post;
-							//	si es mes pasado
-							else if(pid.startsWith("dmp")){
-								return "grid-pastmonth"+post;
-							}else{
-								//si es este mes
-								return "grid-actualmonth"+post;
-							}
+				if( pid.startsWith("dmp") || pid.startsWith("dma") ){
+					//calcula el numero del mes
+					int monthDay = Integer.parseInt(((String) pid).replace("dmp","").replace("dma",""));
+					DateTime dt2 = dt;
+					if ( pid.startsWith("dmp") )
+						dt2 = dt2.minusMonths(1);
+					if(monthDay <= dt2.dayOfMonth().getMaximumValue()){
+						//si es el dia actual
+						if(dt2.withDayOfMonth(monthDay).toString("dd/MM/yyyy").equals(DateTime.now().toString("dd/MM/yyyy")))
+							return "grid-today"+post;
+						//	si es mes pasado
+						else if(pid.startsWith("dmp")){
+							return "grid-pastmonth"+post;
+						}else{
+							//si es este mes
+							return "grid-actualmonth"+post;
 						}
 					}
-					return null;
 				}
-			});
-		}
+				return null;
+			}
+		});
 	}
 
 	/**
