@@ -282,7 +282,6 @@ public class AttendancePanel extends VerticalLayout implements View {
 		// }
 		// return new DateTime(attendanceDate.getValue());
 		String month = monthSelector.getMonth();
-		status.setValue("Cargando asistencia del " + month);
 		return DateTimeFormat.forPattern("ddMMyyyy").parseDateTime("15" + month);
 	}
 
@@ -413,12 +412,9 @@ public class AttendancePanel extends VerticalLayout implements View {
 		setSizeFull();
 		setSpacing(true);
 
-		topAsistencia.setSizeFull();
 		addComponent(topAsistencia);
-		setExpandRatio(topAsistencia, 0.1F);
-		detalleAsistencia.setSizeFull();
 		addComponent(detalleAsistencia);
-		setExpandRatio(detalleAsistencia, 0.9F);
+		setExpandRatio(detalleAsistencia, 1.0F);
 
 	}
 
@@ -2225,6 +2221,9 @@ public class AttendancePanel extends VerticalLayout implements View {
 	 * Realiza el evento de cambia la asistencia
 	 */
 	private void reloadAttendance() {
+		
+		String month = monthSelector.getMonth();
+		status.setValue("Cargando asistencia del " + month);
 		UI.getCurrent().addWindow(progressDialog);
 		UI.getCurrent().setPollInterval(500);
 		new WorkThread().start();
@@ -3018,6 +3017,8 @@ public class AttendancePanel extends VerticalLayout implements View {
 
 				monthSelector = new MonthSelector();
 				addComponent(monthSelector);
+//				setComponentAlignment(monthSelector, Alignment.MIDDLE_LEFT);
+//				setExpandRatio(monthSelector, 1.0f);
 
 				Button btn = new Button("Ir");
 				btn.addClickListener(new ClickListener() {

@@ -5,6 +5,7 @@ import java.util.Locale;
 
 import com.vaadin.data.util.BeanItem;
 import com.vaadin.data.util.converter.StringToIntegerConverter;
+import com.vaadin.server.FontAwesome;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
@@ -28,7 +29,8 @@ public class MonthSelector extends CustomComponent {
 		
 		HorizontalLayout hl = new HorizontalLayout();
 		hl.setSpacing(true);
-		hl.setSizeFull();
+		setHeight("100%");
+		setWidth("390px");
 		setCompositionRoot(hl);
 		
 		final TextField tfYear = new TextField();
@@ -42,26 +44,26 @@ public class MonthSelector extends CustomComponent {
 		
 		final ComboBox cbMonth = new ComboBox();
 		
-		final Button leftYear = new Button("<<");
-		leftYear.setStyleName("link");
+		final Button leftYear = new Button(FontAwesome.ANGLE_DOUBLE_LEFT);
+		leftYear.addStyleName("link");
 		leftYear.addClickListener(new ClickListener(){
 
 			@Override
 			public void buttonClick(ClickEvent event) {
 				int year = item.getBean().getYear();
-				tfYear.setValue((year + 1)+"");
+				tfYear.setValue((year - 1)+"");
 				
 			}
 			
 		});
-		final Button leftMonth = new Button("<");
-		leftMonth.setStyleName("link");
+		final Button leftMonth = new Button(FontAwesome.ANGLE_LEFT);
+		leftMonth.addStyleName("link");
 		leftMonth.addClickListener(new ClickListener(){
 
 			@Override
 			public void buttonClick(ClickEvent event) {
 				int month = item.getBean().getMonth();
-				cbMonth.select((month + 1));
+				cbMonth.select((month - 1));
 			}
 			
 		});
@@ -87,25 +89,25 @@ public class MonthSelector extends CustomComponent {
 		tfYear.setImmediate(true);
 		tfYear.setPropertyDataSource(item.getItemProperty("year"));
 		
-		final Button rightMonth = new Button(">");
-		rightMonth.setStyleName("link");
+		final Button rightMonth = new Button(FontAwesome.ANGLE_RIGHT);
+		rightMonth.addStyleName("link");
 		rightMonth.addClickListener(new ClickListener(){
 
 			@Override
 			public void buttonClick(ClickEvent event) {
 				int month = item.getBean().getMonth();
-				cbMonth.select((month - 1));
+				cbMonth.select((month + 1));
 			}
 			
 		});
-		final Button rightYear = new Button(">>");
-		rightYear.setStyleName("link");
+		final Button rightYear = new Button(FontAwesome.ANGLE_DOUBLE_RIGHT);
+		rightYear.addStyleName("link");
 		rightYear.addClickListener(new ClickListener(){
 
 			@Override
 			public void buttonClick(ClickEvent event) {
 				int year = item.getBean().getYear();
-				tfYear.setValue((year - 1)+"");
+				tfYear.setValue((year + 1)+"");
 			}
 			
 		});
@@ -116,9 +118,12 @@ public class MonthSelector extends CustomComponent {
 				addComponent(leftMonth);
 			}
 		});
-		hl.addComponent(cbMonth);
-		hl.addComponent(tfYear);
-		hl.setExpandRatio(tfYear, 1.0f);
+		HorizontalLayout hl2 = new HorizontalLayout();
+		hl2.addComponent(cbMonth);
+		hl2.addComponent(tfYear);
+		hl.addComponent(hl2);
+		hl.setExpandRatio(hl2, 1.0f);
+		
 		hl.addComponent(new HorizontalLayout(){
 			{
 				addComponent(rightMonth);
