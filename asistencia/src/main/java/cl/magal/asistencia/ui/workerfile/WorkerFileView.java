@@ -232,7 +232,7 @@ public class WorkerFileView extends HorizontalLayout implements View {
 	private com.vaadin.ui.Component drawOverview() {
 
 		historyContainer.addNestedContainerProperty("constructionsite.name");
-		historyContainer.addNestedContainerProperty("activeContract.step");
+		historyContainer.addNestedContainerProperty("step");
 
 		fullname = new Label();
 		rut = new Label();
@@ -369,7 +369,7 @@ public class WorkerFileView extends HorizontalLayout implements View {
 		});
 		table.setWidth("100%");
 		table.setHeight("250");
-		table.setVisibleColumns("constructionsite.name","averageWage","reward","numberOfAccidents","activeContractProp","activeContract.step","activeProp"//,"startingDate","endingDate"
+		table.setVisibleColumns("constructionsite.name","averageWage","reward","numberOfAccidents","activeContractProp","step","activeProp"//,"startingDate","endingDate"
 				);
 		table.setColumnHeaders("Obra","Jornal Promedio","Premio","N° Accidentes","Oficio","Etapa","Estado"//,"Fecha Inicio","Fecha Termino"
 				);

@@ -257,7 +257,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 		gl.setComponentAlignment(cbSupleCode, Alignment.TOP_CENTER);
 		//si el usuario tiene permisos para cambiar el rol
 		if(SecurityHelper.hasPermission(Permission.CAMBIAR_ROL)){
-			final TextField jobCode = new TextField("Codigo en Obra",getItem().getItemProperty("activeContract.jobCode"));
+			final TextField jobCode = new TextField("Codigo en Obra",getItem().getItemProperty("jobCode"));
 			gl.addComponent(jobCode,0,3);
 			gl.setComponentAlignment(jobCode, Alignment.TOP_CENTER);
 		}
@@ -298,9 +298,9 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 				setComponentAlignment(gl, Alignment.MIDDLE_CENTER);
 				//gl.setComponentAlignment(hl, Alignment.MIDDLE_CENTER);
 
-				gl.addComponent(new Label("Rol :   "));gl.addComponent(new Label(getItem().getItemProperty("activeContract.jobCode")));
-				gl.addComponent(new Label("Oficio :   "));gl.addComponent(new Label(getItem().getItemProperty("activeContract.job")));
-				Speciality speciality = (Speciality)getItem().getItemProperty("activeContract.speciality").getValue();
+				gl.addComponent(new Label("Rol :   "));gl.addComponent(new Label(getItem().getItemProperty("jobCode")));
+				gl.addComponent(new Label("Oficio :   "));gl.addComponent(new Label(getItem().getItemProperty("job")));
+				Speciality speciality = (Speciality)getItem().getItemProperty("speciality").getValue();
 				gl.addComponent(new Label("Especialidad :   "));gl.addComponent(new Label( speciality != null ? speciality.getName(): ""));
 				gl.addComponent(new Label("Nombre :   "));gl.addComponent(new Label(getItem().getItemProperty("laborer.fullname")));
 				gl.addComponent(new Label("Rut :   "));gl.addComponent(new Label(getItem().getItemProperty("laborer.rut")));
@@ -320,9 +320,9 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 					gl.addComponent(new Label(getItem().getItemProperty("laborer.mobileNumber").getValue() +" - "+getItem().getItemProperty("laborer.phone").getValue()));
 				}
 
-				if(getItem().getItemProperty("activeContract.startDate").getValue() != null){
+				if(getItem().getItemProperty("startDate").getValue() != null){
 					gl.addComponent(new Label("Fecha Ingreso : "));
-					gl.addComponent(new Label(getItem().getItemProperty("activeContract.startDateString")));
+					gl.addComponent(new Label(getItem().getItemProperty("startDateString")));
 				}
 				gl.addComponent(new Label("Premio : "));gl.addComponent(new Label(getItem().getItemProperty("reward").getValue()+""));
 
@@ -788,7 +788,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 
 	protected Component drawCyF() {
 
-		final Contract activeContract = ((LaborerConstructionsite)getItem().getBean()).getActiveContract();
+//		final LaborerConstructionsite activeContract = (LaborerConstructionsite)getItem().getBean();
 
 		VerticalLayout vl = new VerticalLayout();
 		vl.setSpacing(true);
@@ -885,7 +885,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 		gl.addComponent(new UndefinedWidthLabel("Fecha Termino : "),columna++,fila);
 		//si el usuario tiene permisos para cambiar el rol
 		if(SecurityHelper.hasPermission(Permission.CAMBIAR_ROL)){
-			final DateField jobCode = new DateField(null,getItem().getItemProperty("activeContract.terminationDate"));
+			final DateField jobCode = new DateField(null,getItem().getItemProperty("terminationDate"));
 			gl.addComponent(jobCode,columna--,fila++);
 		}else{
 			gl.addComponent(lbEnding,columna--,fila++);
@@ -921,6 +921,8 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 
 									@Override
 									public void buttonClick(ClickEvent event) {
+										
+										LaborerConstructionsite lc = (LaborerConstructionsite)getItem().getBean();
 
 										if( og.getValue() == null ){
 											Notification.show("Debe seleccionar una causa de término.",Type.WARNING_MESSAGE);
@@ -964,9 +966,9 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 										w.setWidth("60%");
 										w.setHeight("60%");
 
-										activeContract.setTerminationDate(new Date());
-										activeContract.setFinished(true);
-										setContractGl(activeContract);
+										lc.setTerminationDate(new Date());
+										lc.setFinished(true);
+										setContractGl(lc);
 									}
 								}){ {setIcon(FontAwesome.CHECK_CIRCLE_O);} } );
 
@@ -997,7 +999,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 			public void buttonClick(ClickEvent event) {
 
 				//solo puede calcular el finiquito, si el contrato no está activo
-				if(!activeContract.isFinished()){
+				if(!((LaborerConstructionsite)getItem().getBean()).isFinished()){
 					Notification.show("El contrato debe estár terminado para calcular el finiquito",Type.HUMANIZED_MESSAGE);
 					return;
 				}
@@ -1039,7 +1041,6 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 										//agrega el finiquito
 										LaborerConstructionsite lc = (LaborerConstructionsite)getItem().getBean();
 										//deja desactivo tanto el contrato como el laborer constructionsite
-										activeContract.setActive(false);
 										lc.setActive(false);
 										
 										//setea un finiquito calculado
@@ -1048,8 +1049,8 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 										VelocityHelper.addTools(input);
 										
 
-										activeContract.setSettlement(calculateSettlement(lc,input));
-										setContractGl(activeContract);
+										lc.setSettlement(calculateSettlement(lc,input));
+										setContractGl(lc);
 
 										//muestra el finiquito
 										final StringBuilder sb = new StringBuilder();
@@ -1097,7 +1098,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 		});
 
 		gl.addComponent(new UndefinedWidthLabel("Finiquito : "),columna++,fila);gl.addComponent(lbSettlement,columna++,fila);gl.addComponent(btnSettlement,columna++,fila++);
-		setContractGl(activeContract);
+		setContractGl((LaborerConstructionsite)getItem().getBean());
 
 		GridLayout gl2 = new GridLayout(2,10);
 		gl2.setSpacing(true);
@@ -1108,7 +1109,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 
 		gl2.addComponent(new Label("<hr />",ContentMode.HTML),columna++,fila,columna--,fila++);
 
-		beanContainerAnnexeds.addAll((Collection<? extends Annexed>) activeContract.getAnnexeds());
+		beanContainerAnnexeds.addAll((Collection<? extends Annexed>) ((LaborerConstructionsite) getItem().getBean()).getAnnexeds());
 
 		gl2.addComponent(new Label("<h1>Anexos</h1>",ContentMode.HTML),columna++,fila);
 		if(!readOnly)
@@ -1120,7 +1121,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 					//						@Override
 					//						public void buttonClick(ClickEvent event) {
 					//
-					//							AddAnnexedContractDialog userWindow = new AddAnnexedContractDialog(new BeanItem<Contract>(((LaborerConstructionsite)getItem().getBean()).getActiveContract()));
+					//							AddAnnexedContractDialog userWindow = new AddAnnexedContractDialog(new BeanItem<Contract>(((LaborerConstructionsite)getItem().getBean())));
 					//							userWindow.addListener(new AbstractWindowEditor.EditorSavedListener() {
 					//
 					//								@Override
@@ -1224,9 +1225,9 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 	protected double calculateSettlement(LaborerConstructionsite lc,Map<String, Object> input) {
 
 		//TODO
-		List<Double> last3JornalPromedio = service.getJornalPromedioLastThreeMonth(lc,lc.getActiveContract().getTerminationDate());
+		List<Double> last3JornalPromedio = service.getJornalPromedioLastThreeMonth(lc,lc.getTerminationDate());
 		input.put("ultimosJornales", last3JornalPromedio );
-		DateTime dt = new DateTime(lc.getActiveContract().getTerminationDate());
+		DateTime dt = new DateTime(lc.getTerminationDate());
 		input.put("firstmonth", dt.toDate() );
 		input.put("secondmonth", dt.minusMonths(1).toDate() );
 		input.put("threemonth", dt.minusMonths(2).toDate() );
@@ -1236,7 +1237,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 		
 		logger.debug("JornalPromedio {}",JornalPromedio);
 		
-		Period period = new Period(new DateTime(lc.getActiveContract().getStartDate()), new DateTime(lc.getActiveContract().getTerminationDate()));
+		Period period = new Period(new DateTime(lc.getStartDate()), new DateTime(lc.getTerminationDate()));
 		//TODO
 		double AnoDuracionContrato = period.getYears() + (period.getMonths() - (period.getYears() * 12)) / 12;
 		input.put("duracionContrato", AnoDuracionContrato);
@@ -1272,15 +1273,14 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 	BeanItemContainer<License> absenceContainer;BeanItemContainer<Accident> accidentContainer;
 	BeanItemContainer<ProgressiveVacation> progressiveVacationContainer;
 
-	private void setContractGl(final Contract activeContract) {
+	private void setContractGl(final LaborerConstructionsite lc) {
 
-		lbStep.setValue(activeContract.getStep());
-		lbJob.setValue(activeContract.getJob().toString());
-		lbJobCode.setValue(activeContract.getJobCode()+"");
-		lbStarting.setValue(Utils.date2String( activeContract.getStartDate()));
-		lbEnding.setValue(Utils.date2String( activeContract.getTerminationDate()));
-		lbStatus.setValue(!activeContract.isFinished() ? "ACTIVO" : "TERMINADO");
-		lbSettlement.setValue(activeContract.getSettlement() != null ? activeContract.getSettlement()+"":"");
+		lbStep.setValue(lc.getStep());
+		lbJobCode.setValue(lc.getJobCode()+"");
+		lbStarting.setValue(Utils.date2String( lc.getStartDate()));
+		lbEnding.setValue(Utils.date2String( lc.getTerminationDate()));
+		lbStatus.setValue(!lc.isFinished() ? "ACTIVO" : "TERMINADO");
+		lbSettlement.setValue(lc.getSettlement() != null ? lc.getSettlement()+"":"");
 
 	}
 
@@ -1585,9 +1585,9 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 		}
 	}
 
-	private int calcularDisponibles(Contract contract,List<Vacation> vacations) {
+	private int calcularDisponibles(LaborerConstructionsite lc,List<Vacation> vacations) {
 		//calcula las vacaciones totales
-		Date startDate = contract.getStartDate();
+		Date startDate = lc.getStartDate();
 		int totalDays = Days.daysBetween(new DateTime(startDate), new DateTime(new Date())).getDays()/30;
 		return (int) (( totalDays*1.25 ) - calcularUsadas(vacations));
 	}
@@ -1607,8 +1607,8 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 				final Label totalDisponibles = new Label();
 
 				totalUsadas.setValue( calcularUsadas(vacationContainer.getItemIds()) +"");
-				final Contract activeContract = ((LaborerConstructionsite) getItem().getBean()).getActiveContract();
-				totalDisponibles.setValue(calcularDisponibles(activeContract,vacationContainer.getItemIds()) +"");
+				final LaborerConstructionsite lc = ((LaborerConstructionsite) getItem().getBean());
+				totalDisponibles.setValue(calcularDisponibles(lc,vacationContainer.getItemIds()) +"");
 
 				addComponent(new GridLayout(3,2){
 					{
@@ -1627,7 +1627,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 									Vacation vacation = new Vacation();
 									vacationContainer.addBean(vacation);
 									totalUsadas.setValue( calcularUsadas(vacationContainer.getItemIds()) +"");
-									totalDisponibles.setValue(calcularDisponibles(activeContract,vacationContainer.getItemIds()) +"");
+									totalDisponibles.setValue(calcularDisponibles(lc,vacationContainer.getItemIds()) +"");
 
 								}
 							}){{setIcon(FontAwesome.PLUS);}};
@@ -1653,7 +1653,7 @@ public class LaborerConstructionDialog extends AbstractWindowEditor {
 							@Override
 							public void valueChange(Property.ValueChangeEvent event) {
 								totalUsadas.setValue( calcularUsadas(vacationContainer.getItemIds()) +"");
-								totalDisponibles.setValue(calcularDisponibles(activeContract,vacationContainer.getItemIds()) +"");
+								totalDisponibles.setValue(calcularDisponibles(lc,vacationContainer.getItemIds()) +"");
 								label.setValue(((Vacation) item.getBean()).getTotal()+"");
 							}
 						};

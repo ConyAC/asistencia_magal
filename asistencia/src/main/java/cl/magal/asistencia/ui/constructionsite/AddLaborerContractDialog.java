@@ -384,16 +384,12 @@ public class AddLaborerContractDialog extends AbstractWindowEditor implements Ne
 			Job job = speciality.getJob();
 			
 			//crea el contrato
-			Contract contract = new Contract();
-			contract.setStartDate(dfAdmissionDate.getValue());
-			contract.setName(laborer.getFullname());
-			contract.setSpeciality(speciality);
-			contract.setJob(job);
-			contract.setJobCode(Integer.valueOf(lbCodJob.getValue()));
-			contract.setStep((String) cbStep.getValue());
-			contract.setActive(true);
+			((BeanItem<LaborerConstructionsite>) getItem()).getBean().setStartDate(dfAdmissionDate.getValue());
+			((BeanItem<LaborerConstructionsite>) getItem()).getBean().setSpeciality(speciality);
+			((BeanItem<LaborerConstructionsite>) getItem()).getBean().setJobCode(Integer.valueOf(lbCodJob.getValue()));
+			((BeanItem<LaborerConstructionsite>) getItem()).getBean().setStep((String) cbStep.getValue());
+			((BeanItem<LaborerConstructionsite>) getItem()).getBean().setActive(true);
 			
-			((BeanItem<LaborerConstructionsite>) getItem()).getBean().setActiveContract(contract);
 		}
 		return msj == null;
 	}

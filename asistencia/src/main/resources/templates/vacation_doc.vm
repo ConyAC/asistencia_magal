@@ -68,7 +68,7 @@
 					trabajador:
 					<br />
 					<br />
-					DON <b>${laborerConstruction.laborer.fullname}</b> RUT: <b>$numberTools.integer(${laborerConstruction.laborer.rut.split("-").get(0)})-${laborerConstruction.laborer.rut.split("-").get(1)}</b> ROL: <b>${laborerConstruction.activeContract.jobCode}</b>
+					DON <b>${laborerConstruction.laborer.fullname}</b> RUT: <b>$numberTools.integer(${laborerConstruction.laborer.rut.split("-").get(0)})-${laborerConstruction.laborer.rut.split("-").get(1)}</b> ROL: <b>${laborerConstruction.jobCode}</b>
 				</td>
 			</tr>
 			<tr>

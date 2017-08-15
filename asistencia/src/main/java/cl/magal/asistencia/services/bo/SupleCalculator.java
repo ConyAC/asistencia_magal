@@ -96,7 +96,7 @@ public class SupleCalculator {
 		//obtiene el día en que se cierra el suple
 		Integer supleCloseDay = fechaCierreSuple.dayOfMonth().get();
 		//si la fecha de inicio de contrato es luego de la fecha cierre de suple, entonces le corresponde suple 0
-		DateTime inicioContrato = new DateTime(attendance.getLaborerConstructionSite().getActiveContract().getStartDate());
+		DateTime inicioContrato = new DateTime(attendance.getLaborerConstructionSite().getStartDate());
 		if(inicioContrato.isAfter(fechaCierreSuple)){
 			return 0;
 		}

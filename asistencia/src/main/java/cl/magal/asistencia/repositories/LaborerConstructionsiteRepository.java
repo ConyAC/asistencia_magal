@@ -14,28 +14,28 @@ public interface LaborerConstructionsiteRepository extends
 		PagingAndSortingRepository<LaborerConstructionsite, Long> {
 
 	
-	@Query(value="select lc from LaborerConstructionsite lc join fetch lc.laborer join fetch lc.activeContract where lc.constructionsite = ?1 and lc.active != 0 ")
+	@Query(value="select lc from LaborerConstructionsite lc join fetch lc.laborer where lc.constructionsite = ?1 and lc.active != 0 ")
 	List<LaborerConstructionsite> findByConstructionsiteAndIsActive(ConstructionSite constructionsite);
 	
 	LaborerConstructionsite findByConstructionsiteAndLaborer(ConstructionSite constructionsite, Laborer laborer);
 	
-	@Query(value="select lc from LaborerConstructionsite lc where lc.laborer = ?1 order by lc.activeContract.active desc,lc.activeContract.terminationDate desc")
+	@Query(value="select lc from LaborerConstructionsite lc where lc.laborer = ?1 order by lc.active desc,lc.terminationDate desc")
 	List<LaborerConstructionsite> findByLaborer(Laborer laborer);
 	
-	LaborerConstructionsite findFirstByLaborerOrderByActiveContractStartDateDesc(Laborer laborer);
+	LaborerConstructionsite findFirstByLaborerOrderByStartDateDesc(Laborer laborer);
 
 	@Query(value="select lcs.constructionsite from LaborerConstructionsite lcs where lcs.laborer = ?1 and lcs.active = 1 ")
 	ConstructionSite findConstructionsiteByLaborer(Laborer laborer);
 	
-	@Query(value="select lc from LaborerConstructionsite lc join fetch lc.activeContract where lc.active != 0 ")
+	@Query(value="select lc from LaborerConstructionsite lc where lc.active != 0 ")
 	List<LaborerConstructionsite> findConstructionsiteActive();
 
-	@Query(value="select lc from LaborerConstructionsite lc join fetch lc.laborer join fetch lc.activeContract ac where lc.constructionsite = ?1 "
-			+ " and ( (extract( year from ac.startDate) * 100) + extract( month from ac.startDate) ) <= ( (extract( year from ?2) * 100) + extract( month from ?2)) "
-			+ " and ( ac.terminationDate is null or ( ( extract( year from ac.terminationDate ) * 100) + extract( month from ac.terminationDate ) ) >= ((extract( year from  ?2 ) * 100) + extract( month from  ?2 )) ) ")
+	@Query(value="select lc from LaborerConstructionsite lc join fetch lc.laborer where lc.constructionsite = ?1 "
+			+ " and ( (extract( year from lc.startDate) * 100) + extract( month from lc.startDate) ) <= ( (extract( year from ?2) * 100) + extract( month from ?2)) "
+			+ " and ( lc.terminationDate is null or ( ( extract( year from lc.terminationDate ) * 100) + extract( month from lc.terminationDate ) ) >= ((extract( year from  ?2 ) * 100) + extract( month from  ?2 )) ) ")
 	List<LaborerConstructionsite> findByConstructionsiteAndIsActiveThisMonth(ConstructionSite cs, Date date);
 
-	@Query(value="select lc from LaborerConstructionsite lc where lc.constructionsite = ?1 and lc.activeContract.jobCode = ?2")
+	@Query(value="select lc from LaborerConstructionsite lc where lc.constructionsite = ?1 and lc.jobCode = ?2")
 	LaborerConstructionsite findByConstructionsiteAndJobCode(ConstructionSite cs, int jobcode);
 
 }

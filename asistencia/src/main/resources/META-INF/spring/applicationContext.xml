@@ -58,7 +58,7 @@
 		<property name="driverClassName" value="com.mysql.jdbc.Driver" />
 		<property name="url" value="jdbc:mysql://localhost:3306/magal_asistencia" />
 		<property name="username" value="root" />
-		<property name="password" value="ds59j!JDHE.kd" />
+		<property name="password" value="" />
 	</bean>
 		
 	<bean id="jpaDialect" class="org.springframework.orm.jpa.vendor.EclipseLinkJpaDialect" >

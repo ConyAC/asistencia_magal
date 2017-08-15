@@ -93,7 +93,7 @@ public class SalaryCalculator {
 	public Double getTTribut(){
 		if(tTribut == null ){
 			tTribut = calculateTTribut(getAfecto(),getSobreAfecto());
-			logger.debug("{} : tTribut {}",attendance.getLaborerConstructionSite().getActiveContract().getJobCode(),tTribut);
+			logger.debug("{} : tTribut {}",attendance.getLaborerConstructionSite().getJobCode(),tTribut);
 		}
 		return tTribut;
 	}

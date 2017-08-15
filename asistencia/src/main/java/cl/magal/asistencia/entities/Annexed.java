@@ -42,6 +42,10 @@ public class Annexed implements Serializable {
 	@ManyToOne
 	@JoinColumn(name="contractId")
 	Contract contract;
+	
+	@ManyToOne
+	@JoinColumn(name="laborer_constructionsiteId",nullable = false,unique=true )
+	LaborerConstructionsite laborerConstructionSite;
 
 	public Long getId() {
 		return id;
@@ -89,6 +93,14 @@ public class Annexed implements Serializable {
 
 	public void setStep(String step) {
 		this.step = step;
+	}
+
+	public LaborerConstructionsite getLaborerConstructionSite() {
+		return laborerConstructionSite;
+	}
+
+	public void setLaborerConstructionSite(LaborerConstructionsite laborerConstructionSite) {
+		this.laborerConstructionSite = laborerConstructionSite;
 	}
 	
 	

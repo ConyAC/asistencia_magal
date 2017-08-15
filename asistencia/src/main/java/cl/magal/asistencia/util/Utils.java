@@ -484,7 +484,7 @@ public class Utils {
 	 */
 	public static int calcularDiaFinal(Attendance attendance2, int maxDay,boolean completarSemana){
 		if(attendance2.getLaborerConstructionSite()
-				.getActiveContract().getTerminationDate() == null )
+				.getTerminationDate() == null )
 			return maxDay;
 		//obtiene el ultimo dia del mes
 		DateTime attendanceDate = new DateTime(attendance2.getDate(),DateTimeZone.UTC);
@@ -493,7 +493,7 @@ public class Utils {
 			.withTime(0, 0, 0, 0)
 			.dayOfMonth().getMaximumValue());
 		//obtiene la fecha de ingreso
-		DateTime finContrato = new DateTime(attendance2.getLaborerConstructionSite().getActiveContract().getTerminationDate(),DateTimeZone.UTC).withTime(0, 0, 0, 0);
+		DateTime finContrato = new DateTime(attendance2.getLaborerConstructionSite().getTerminationDate(),DateTimeZone.UTC).withTime(0, 0, 0, 0);
 		//si tiene que completar la semana, retorna el lunes más cercano
 		if(completarSemana){
 			//le suma dia hasta que sea el lunes
@@ -546,7 +546,7 @@ public class Utils {
 		//obtiene el primer día del mes
 		DateTime inicioMes = new DateTime(attendance2.getDate()).withDayOfMonth(1);
 		//obtiene la fecha de ingreso
-		DateTime inicioContrato = new DateTime(attendance2.getLaborerConstructionSite().getActiveContract().getStartDate());
+		DateTime inicioContrato = new DateTime(attendance2.getLaborerConstructionSite().getStartDate());
 		//si tiene que completar la semana, retorna el lunes más cercano
 		if(completarSemana){
 			//le resta dia hasta que sea el lunes

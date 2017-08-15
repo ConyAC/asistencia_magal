@@ -94,11 +94,10 @@ public class LaborerService {
 			HistoryVO vo = new HistoryVO();
 			vo.setConstructionSite(laborerConstructionsite.getConstructionsite());
 			//considerar el job historico
-			vo.setJob(laborerConstructionsite.getActiveContract().getJob()); 
 			vo.setNumberOfAccidents(laborerConstructionsite.getAccidents().size());
-			vo.setStartingDate(laborerConstructionsite.getActiveContract().getStartDate());
-			vo.setEndingDate(laborerConstructionsite.getActiveContract().getTerminationDate());
-			vo.setActive(laborerConstructionsite.getActiveContract().isActive());
+			vo.setStartingDate(laborerConstructionsite.getStartDate());
+			vo.setEndingDate(laborerConstructionsite.getTerminationDate());
+			vo.setActive(laborerConstructionsite.isActive());
 			//TODO
 			vo.setReward(laborerConstructionsite.getReward());
 			vo.setAverageWage(Double.valueOf(Utils.random(9000, 15000)));
@@ -128,7 +127,7 @@ public class LaborerService {
 		if(laborerConstructionSite == null)
 			throw new RuntimeException("La relación trabajador-obra no puede ser nula");
 		//es necesario que tenga algún contrato
-		if(laborerConstructionSite.getActiveContract() == null )
+		if(laborerConstructionSite == null )
 			throw new RuntimeException("La relación trabajador-obra debe tener al menos un contrato asociado");
 		// valida que el trabajador no sea nulo
 		if(laborerConstructionSite.getLaborer() == null)
@@ -174,7 +173,7 @@ public class LaborerService {
 	 * @return
 	 */
 	public ConstructionSite getLastConstructionSite(Laborer laborer) {
-		LaborerConstructionsite cs = laborerConstructionsiteRepo.findFirstByLaborerOrderByActiveContractStartDateDesc(laborer);
+		LaborerConstructionsite cs = laborerConstructionsiteRepo.findFirstByLaborerOrderByStartDateDesc(laborer);
 		if(cs != null)
 			return cs.getConstructionsite();
 		return null;
@@ -214,7 +213,7 @@ public class LaborerService {
 	public List<Double> getJornalPromedioLastThreeMonth(LaborerConstructionsite lc, Date date) {
 		if( lc == null )
 			throw new RuntimeException("El obrero es necesario");
-		if( lc.getActiveContract().getTerminationDate() == null )
+		if( lc.getTerminationDate() == null )
 			throw new RuntimeException("La fecha de termino de contrato es necesario");
 		List<Double> jornales = salaryRepo.get3LastJornalPromedio(lc,date);
 		return jornales;
@@ -229,7 +228,7 @@ public class LaborerService {
 	public double getJornalAVGPromedioLastThreeMonth(LaborerConstructionsite lc, Date date) {
 		if( lc == null )
 			throw new RuntimeException("El obrero es necesario");
-		if( lc.getActiveContract().getTerminationDate() == null )
+		if( lc.getTerminationDate() == null )
 			throw new RuntimeException("La fecha de termino de contrato es necesario");
 		Double avg = salaryRepo.calculateJornalPromedioAvg(lc,date);
 		return avg != null ? avg : 0;
