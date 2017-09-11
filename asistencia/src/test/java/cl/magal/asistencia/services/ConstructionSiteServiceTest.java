@@ -25,7 +25,6 @@ import cl.magal.asistencia.entities.AdvancePaymentConfigurations;
 import cl.magal.asistencia.entities.AfpAndInsuranceConfigurations;
 import cl.magal.asistencia.entities.Attendance;
 import cl.magal.asistencia.entities.ConstructionSite;
-import cl.magal.asistencia.entities.Contract;
 import cl.magal.asistencia.entities.DateConfigurations;
 import cl.magal.asistencia.entities.FamilyAllowanceConfigurations;
 import cl.magal.asistencia.entities.LaborerConstructionsite;
@@ -598,12 +597,11 @@ public class ConstructionSiteServiceTest {
 	
 	@Test 
 	public void testSetFilled(){
+		
+		LaborerConstructionsite lc = new LaborerConstructionsite();
 		Attendance attedance = new Attendance();
 		DateTime monthDate = DateTime.parse("2015-11-01");
-		Contract contract = new Contract();
-		contract.setStartDate(DateTime.parse("2015-11-04").toDate());
-		LaborerConstructionsite lc = new LaborerConstructionsite();
-		lc.setActiveContract(contract);
+		lc.setStartDate(DateTime.parse("2015-11-04").toDate());
 		
 		csService.defineContractRange(monthDate, lc, attedance);
 		
@@ -619,13 +617,12 @@ public class ConstructionSiteServiceTest {
 	
 	@Test 
 	public void testSetFilled2(){
+		
+		LaborerConstructionsite lc = new LaborerConstructionsite();
 		Attendance attedance = new Attendance();
 		DateTime monthDate = DateTime.parse("2015-11-01");
-		Contract contract = new Contract();
-		contract.setStartDate(DateTime.parse("2015-11-04").toDate());
-		contract.setTerminationDate(DateTime.parse("2015-11-20").toDate());
-		LaborerConstructionsite lc = new LaborerConstructionsite();
-		lc.setActiveContract(contract);
+		lc.setStartDate(DateTime.parse("2015-11-04").toDate());
+		lc.setTerminationDate(DateTime.parse("2015-11-20").toDate());
 		
 		csService.defineContractRange(monthDate, lc, attedance);
 		

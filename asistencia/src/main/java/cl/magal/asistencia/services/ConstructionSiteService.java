@@ -1,12 +1,16 @@
 package cl.magal.asistencia.services;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
@@ -24,6 +28,7 @@ import org.springframework.stereotype.Service;
 import cl.magal.asistencia.entities.Accident;
 import cl.magal.asistencia.entities.AdvancePaymentConfigurations;
 import cl.magal.asistencia.entities.AfpAndInsuranceConfigurations;
+import cl.magal.asistencia.entities.AfpItem;
 import cl.magal.asistencia.entities.Attendance;
 import cl.magal.asistencia.entities.Confirmations;
 import cl.magal.asistencia.entities.ConstructionCompany;
@@ -49,6 +54,7 @@ import cl.magal.asistencia.entities.WageConfigurations;
 import cl.magal.asistencia.entities.enums.AbsenceType;
 import cl.magal.asistencia.entities.enums.AttendanceMark;
 import cl.magal.asistencia.repositories.AccidentRepository;
+import cl.magal.asistencia.repositories.AfpItemRepository;
 import cl.magal.asistencia.repositories.AttendanceRepository;
 import cl.magal.asistencia.repositories.ConfirmationsRepository;
 import cl.magal.asistencia.repositories.ConstructionCompanyRepository;
@@ -121,6 +127,8 @@ public class ConstructionSiteService {
 	SpecialityRepository specialityRepo;
 	@Autowired
 	CostAccountRepository costRepo;
+	@Autowired
+	AfpItemRepository afpItemRepo;
 	
 	//SERVICES
 	@Autowired
@@ -292,10 +300,10 @@ public class ConstructionSiteService {
 	 */
 	public Map<Integer,Attendance> getAttendanceMapByConstructionAndMonth(ConstructionSite cs,DateTime date) {
 		//obtiene la lista de trabajadores de la obra
-		List<LaborerConstructionsite> lcs =  labcsRepo.findByConstructionsiteAndIsActiveThisMonth(cs,date.toDate());
+		List<LaborerConstructionsite> lcs =  labcsRepo.findByConstructionsiteAndIsActiveThisMonth(cs,date.toLocalDate().toDate());
 		logger.debug("trabajadores activos {} ",lcs);
 
-		List<Attendance> attendanceResultList =  attendanceRepo.findByConstructionsiteAndMonth(cs,date.toDate());
+		List<Attendance> attendanceResultList =  attendanceRepo.findByConstructionsiteAndMonth(cs,date.toLocalDate().toDate());
 		logger.debug("fin query");
 		Attendance tmp = new Attendance();
 
@@ -309,12 +317,12 @@ public class ConstructionSiteService {
 			if( index >= 0 ){
 				Attendance attendance = attendanceResultList.remove(index);
 				attendance.setLaborerConstructionSite(lc);
-				attendance.setDate(date.toDate());	
+				attendance.setDate(date.toLocalDate().toDate());	
 				attendanceResult.put(lc.getJobCode(),attendance);
 			}else{
 				Attendance attendance = new Attendance();
 				attendance.setLaborerConstructionSite(lc);
-				attendance.setDate(date.toDate());
+				attendance.setDate(date.toLocalDate().toDate());
 				attendanceResult.put(lc.getJobCode(),attendance);
 			}
 			
@@ -325,22 +333,74 @@ public class ConstructionSiteService {
 	}
 	
 	/**
+	 * 
+	 * @param list
+	 * @return
+	 */
+	private Set<String> listToSet(List list){
+		Set<String> set = new HashSet<String>();
+		
+		if(list.isEmpty()) return set;
+		
+		if(list.get(0).getClass() == Holiday.class ){
+			SimpleDateFormat sdf = new SimpleDateFormat("ddMMyyyy");
+			for(Holiday h : (List<Holiday>)list)
+				set.add(sdf.format(h.getDate()));
+		}
+		
+		return set;
+	}
+	
+	/**
+	 * Permite obtener los feriados como un set de string con formato ddMMyyyy
+	 * @param date
+	 * @return
+	 */
+	public Set<String> getHolidaysAsSetString(Date date){
+		List<Holiday> holidays = holidayRepo.findByMonth(date);
+		Set<String> setHolidays = listToSet(holidays);
+		return setHolidays;
+	}
+	
+	/**
+	 * 
+	 * @param dateInput
+	 * @param lc
+	 * @param attendance
+	 */
+	public void defineContractRange(DateTime dateInput,LaborerConstructionsite lc, Attendance attendance){
+		Set<String> holidays = getHolidaysAsSetString(dateInput.toLocalDate().toDate());
+		defineContractRange(holidays,dateInput,lc,attendance);
+	}
+	
+	/**
 	 * Rellena con EMPTY la asistencia dada del obrero según su fecha de entrada y salida
 	 * Si el trabajador entró o salió a mitad de semana, rellena con R's para completarla
 	 * @param date
 	 * @param lc
 	 * @param attendance
 	 */
-	public void defineContractRange(DateTime dateInput,LaborerConstructionsite lc, Attendance attendance){
-		DateTime date = new DateTime(dateInput,DateTimeZone.UTC).withTime(0, 0, 0, 0);
+	public void defineContractRange(Set<String> setHolidays, DateTime dateInput,LaborerConstructionsite lc, Attendance attendance){
+		
+		
+		Calendar c = Calendar.getInstance();
+		DateTime date = new DateTime(dateInput);
 		//rellena con R, todo lo que este fuera de la fecha inicial 
 		int current = date.dayOfMonth().getMinimumValue();
 		date = date.withDayOfMonth(current);
-		//mientras la fecha de inicio sea mayor a la fecha recorrida
-		while(Utils.isDateAfter(lc.getActiveContract().getStartDate(), date.toLocalDate().toDate()) && current <= date.dayOfMonth().getMaximumValue() )
+		//mientras la fecha de inicio de contrato sea mayor a la fecha recorrida
+		while(Utils.isDateAfter(lc.getStartDate(), date.toLocalDate().toDate()) && current <= date.dayOfMonth().getMaximumValue() )
 		{
 			//elije la marca según si la fecha está en la misma fecha o no
-			AttendanceMark mark = chooseBetweenEmptyOrFilled(date,lc.getActiveContract().getStartDate());
+			AttendanceMark mark = null;
+			
+			//si es feriado, lo mantiene asi 
+			if(setHolidays.contains( date.toString("ddMMyyyy" ))) mark = AttendanceMark.SUNDAY;
+			//si era falla, lo mantiene asi
+			else if(attendance.getMarksAsList().get(current - 1) == AttendanceMark.FAIL) mark = AttendanceMark.FAIL;
+			//si no, elige que poner
+			else mark = chooseBetweenEmptyOrFilled(date,lc.getStartDate());
+			
 			attendance.setMark(mark, current - 1);
 			current++;
 			if(current <= date.dayOfMonth().getMaximumValue())
@@ -348,12 +408,24 @@ public class ConstructionSiteService {
 		}
 		
 		//rellena con R, todo lo que este fuera de la fecha final de contrato
-		if( lc.getActiveContract().getTerminationDate() != null){
+		if( lc.getTerminationDate() != null){
+			
+			c.setTime(lc.getTerminationDate());
+			c.add(Calendar.DAY_OF_MONTH, 3);
+			
 			current = date.dayOfMonth().getMaximumValue();
 			date = date.withDayOfMonth(current);
-			while( Utils.isDateBefore(lc.getActiveContract().getTerminationDate(),date.toLocalDate().toDate()) && current >= date.dayOfMonth().getMinimumValue() ){
+			while( Utils.isDateBefore(lc.getTerminationDate(),date.toLocalDate().toDate()) && current >= date.dayOfMonth().getMinimumValue() ){
 				//elije la marca según si la fecha está en la misma semana o no
-				AttendanceMark mark = chooseBetweenEmptyOrFilled(date,lc.getActiveContract().getTerminationDate());
+				AttendanceMark mark = null;
+				
+				//si es feriado, lo mantiene asi 
+				if(setHolidays.contains( date.toString("ddMMyyyy" ))) mark = AttendanceMark.SUNDAY;
+				//si era falla y han pasado a lo más dias del contrato, lo mantiene asi
+				else if(attendance.getMarksAsList().get(current - 1) == AttendanceMark.FAIL && date.toLocalDate().toDate().before(c.getTime()) ) mark = AttendanceMark.FAIL;
+				//si no, elige que poner
+				else mark = chooseBetweenEmptyOrFilled(date,lc.getTerminationDate() );
+				
 				attendance.setMark(mark, current - 1);
 				current-- ;
 				if(current >= date.dayOfMonth().getMinimumValue())
@@ -367,7 +439,7 @@ public class ConstructionSiteService {
 		current = date2.dayOfMonth().get();
 		date2 = date2.withDayOfMonth(current);
 		//mientras la fecha de inicio sea mayor a la fecha recorrida 
-		while(Utils.isDateAfter(lc.getActiveContract().getStartDate(),date2.toLocalDate().toDate()) && current <= date2.dayOfMonth().getMaximumValue() )
+		while(Utils.isDateAfter(lc.getStartDate(),date2.toLocalDate().toDate()) && current <= date2.dayOfMonth().getMaximumValue() )
 		{
 //			AttendanceMark mark = chooseBetweenEmptyOrFilled(date2,lc.getActiveContract().getStartDate());
 			AttendanceMark mark = AttendanceMark.EMPTY;
@@ -377,10 +449,10 @@ public class ConstructionSiteService {
 				date2 = date2.withDayOfMonth(current);
 		}
 		//rellena con R, todo lo que este fuera de la fecha final de contrato
-		if( lc.getActiveContract().getTerminationDate() != null){
+		if( lc.getTerminationDate() != null){
 			current = date2.dayOfMonth().getMaximumValue();
 			date2 = date2.withDayOfMonth(current);
-			while( Utils.isDateBefore(lc.getActiveContract().getTerminationDate(),date2.toLocalDate().toDate()) && current >= date2.dayOfMonth().getMinimumValue() ){
+			while( Utils.isDateBefore(lc.getTerminationDate(),date2.toLocalDate().toDate()) && current >= date2.dayOfMonth().getMinimumValue() ){
 //				AttendanceMark mark = chooseBetweenEmptyOrFilled(date2,lc.getActiveContract().getTerminationDate());
 				AttendanceMark mark = AttendanceMark.EMPTY;
 				attendance.setLastMark(mark, current - 1);
@@ -399,20 +471,14 @@ public class ConstructionSiteService {
 	 * @return
 	 */
 	private AttendanceMark chooseBetweenEmptyOrFilled(DateTime date,Date refDate) {
-		String date1 = date.toString("ww-yyyy");
-		String date2 = new DateTime(refDate,DateTimeZone.UTC).withTime(0, 0, 0, 0).toString("ww-yyyy");
-		
 		//si está en la misma semana y es un día de la semana laboral, entonces es R, si no EMPTY
-		if(date1.compareTo(date2) == 0 && Utils.isLaborerDay(date)){
-			return AttendanceMark.FILLER;
-		}else
-		//SABADO
-		if(date1.compareTo(date2) == 0 && date.getDayOfWeek()== DateTimeConstants.SATURDAY){
-			return AttendanceMark.SATURDAY;
-		}else
-		//DOMINGO
-		if(date1.compareTo(date2) == 0 && date.getDayOfWeek()== DateTimeConstants.SUNDAY){ 
-			return AttendanceMark.SUNDAY;
+		if(Utils.isSameWeek(date,refDate)){
+			//si es un dia laboral entonces retorna R
+			if(Utils.isLaborerDay(date))return AttendanceMark.FILLER;
+			//si esa sabado
+			else if(Utils.isSaturday(date))return AttendanceMark.SATURDAY;
+			//si esa domingo
+			else return AttendanceMark.SUNDAY;
 		}else		
 			return AttendanceMark.EMPTY;
 		
@@ -427,26 +493,29 @@ public class ConstructionSiteService {
 	public List<Attendance> getAttendanceByConstruction(ConstructionSite cs,DateTime date) {
 		//obtiene la lista de trabajadores de la obra
 		logger.debug("Obteniendo Trabajadores");
-		List<LaborerConstructionsite> lcs =  labcsRepo.findByConstructionsiteAndIsActiveThisMonth(cs,date.toDate());
+		List<LaborerConstructionsite> lcs =  labcsRepo.findByConstructionsiteAndIsActiveThisMonth(cs,date.toLocalDate().toDate());
 		logger.debug("Asistencia");
-		List<Attendance> attendanceList =  attendanceRepo.findByConstructionsiteAndMonth(cs,date.toDate());
+		//obtiene los trabajadores activos ese mes
+//		List<Laborer> laborers = labRepo.findByConstructionSite(cs.getId());
+		List<Attendance> attendanceList =  attendanceRepo.findByConstructionsiteAndMonth(cs,date.toLocalDate().toDate());
 		
 		List<Attendance> attendanceResult = new ArrayList<Attendance>(lcs.size());
 		
 		Attendance tmp = new Attendance();
 		logger.debug("feriados");
-		List<Holiday> h = holidayRepo.findByMonth(date.toDate());
+		//List<Holiday> holidays = holidayRepo.findByMonth(date.toLocalDate().toDate());
+		Set<String> holidays = getHolidaysAsSetString(date.toLocalDate().toDate());
 		logger.debug("feriados pasados");
-		List<Holiday> h_p = holidayRepo.findByMonth(date.minusMonths(1).toDate());
+		List<Holiday> holydays_p = holidayRepo.findByMonth(date.minusMonths(1).toLocalDate().toDate());
 		
-		List<Vacation> vacations = vacationRepo.findByConstructionsiteAndMonth(cs,date.toDate());
-		List<Vacation> vacations_p = vacationRepo.findByConstructionsiteAndMonth(cs,date.minusMonths(1).toDate());
+		List<Vacation> vacations = vacationRepo.findByConstructionsiteAndMonth(cs,date.toLocalDate().toDate());
+		List<Vacation> vacations_p = vacationRepo.findByConstructionsiteAndMonth(cs,date.minusMonths(1).toLocalDate().toDate());
 		
-		List<License> license = licenseRepo.findByConstructionsiteAndMonth(cs, date.toDate());
-		List<License> license_p = licenseRepo.findByConstructionsiteAndMonth(cs, date.minusMonths(1).toDate());
+		List<License> license = licenseRepo.findByConstructionsiteAndMonth(cs, date.toLocalDate().toDate());
+		List<License> license_p = licenseRepo.findByConstructionsiteAndMonth(cs, date.minusMonths(1).toLocalDate().toDate());
 		
-		List<Accident> accident = accidentRepo.findByConstructionsiteAndMonth(cs, date.toDate());
-		List<Accident> accident_p = accidentRepo.findByConstructionsiteAndMonth(cs, date.minusMonths(1).toDate());
+		List<Accident> accident = accidentRepo.findByConstructionsiteAndMonth(cs, date.toLocalDate().toDate());
+		List<Accident> accident_p = accidentRepo.findByConstructionsiteAndMonth(cs, date.minusMonths(1).toLocalDate().toDate());
 		
 		//verifica que exista una asistencia para cada elemento, si no existe la crea
 		for(LaborerConstructionsite lc : lcs ){
@@ -461,13 +530,14 @@ public class ConstructionSiteService {
 				attendance = new Attendance();
 //				logger.debug("no encontró el attendance, laborer {}, cs {}",lc.getLaborer(),lc.getConstructionsite());
 				attendance.setLaborerConstructionSite(lc);
-				attendance.setDate(date.toDate());
+				attendance.setDate(date.toLocalDate().toDate());
 			}
 
 			for (int i = 0; i < 31; i++){
 				if( i + 1 <= date.dayOfMonth().getMaximumValue() ){ //solo setea hasta el maximo
 					
-					int day = date.withDayOfMonth(i+1).dayOfWeek().get();
+					DateTime currentDate = date.withDayOfMonth(i+1);
+					int day = currentDate.dayOfWeek().get();
 					//ACCIDENTE
 					if(Utils.containsAccident(accident, (i+1), lc, date)){//Si tiene accidentes registradas las marca
 						attendance.setMark(AttendanceMark.ACCIDENT, i);
@@ -477,7 +547,7 @@ public class ConstructionSiteService {
 						attendance.setMark(AttendanceMark.SICK, i);
 					}else 
 					// FERIADO	
-					if (Utils.containsHoliday(h,(i+1))){
+					if (holidays.contains(currentDate.toString("ddMMyyyy" ))){ 
 						attendance.setMark(AttendanceMark.SUNDAY, i);
 					}else 
 					//DOMINGO	
@@ -508,7 +578,7 @@ public class ConstructionSiteService {
 						attendance.setLastMark(AttendanceMark.SICK, i);
 					}else 
 					// FERIADO
-					if (Utils.containsHoliday(h_p,(i+1))){
+					if (Utils.containsHoliday(holydays_p,(i+1))){
 						attendance.setLastMark(AttendanceMark.SUNDAY, i);
 					}else
 					// DOMINGO
@@ -526,7 +596,7 @@ public class ConstructionSiteService {
 				}
 			}
 			
-			defineContractRange(date,lc,attendance);
+			defineContractRange(holidays,date,lc,attendance);
 			
 			attendanceResult.add(attendance);
 		}
@@ -540,8 +610,8 @@ public class ConstructionSiteService {
 	
 	public void resetHoliday(DateTime date) {
         List<LaborerConstructionsite> lcs =  labcsRepo.findConstructionsiteActive();
-        List<Attendance> attendanceList =  attendanceRepo.findBydMonth(date.toDate());       
-        List<Attendance> attendanceList_2 =  attendanceRepo.findBydMonth(date.plusMonths(1).toDate());
+        List<Attendance> attendanceList =  attendanceRepo.findBydMonth(date.toLocalDate().toDate());       
+        List<Attendance> attendanceList_2 =  attendanceRepo.findBydMonth(date.plusMonths(1).toLocalDate().toDate());
        
         List<Attendance> attendanceResult = new ArrayList<Attendance>(lcs.size());
        
@@ -592,8 +662,8 @@ public class ConstructionSiteService {
 	 */
 	public Map<Integer,Overtime> getOvertimeMapByConstructionAndMonth(ConstructionSite cs,DateTime date) {
 		//obtiene la lista de trabajadores de la obra
-		List<LaborerConstructionsite> lcs =  labcsRepo.findByConstructionsiteAndIsActiveThisMonth(cs,date.toDate());
-		List<Overtime> overtimeList =  overtimeRepo.findByConstructionsiteAndMonth(cs,date.toDate());
+		List<LaborerConstructionsite> lcs =  labcsRepo.findByConstructionsiteAndIsActiveThisMonth(cs,date.toLocalDate().toDate());
+		List<Overtime> overtimeList =  overtimeRepo.findByConstructionsiteAndMonth(cs,date.toLocalDate().toDate());
 		Overtime tmp = new Overtime();
 		
 		Map<Integer,Overtime> overtimeResult = new HashMap<Integer,Overtime>();
@@ -605,12 +675,12 @@ public class ConstructionSiteService {
 			if( index >= 0 ){
 				Overtime overtime = overtimeList.remove(index);
 				overtime.setLaborerConstructionSite(lc);
-				overtime.setDate(date.toDate());
+				overtime.setDate(date.toLocalDate().toDate());
 				overtimeResult.put(lc.getJobCode(),overtime);
 			}else{
 				Overtime overtime = new Overtime();
 				overtime.setLaborerConstructionSite(lc);
-				overtime.setDate(date.toDate());
+				overtime.setDate(date.toLocalDate().toDate());
 				overtimeResult.put(lc.getJobCode(),overtime);
 			}
 		}
@@ -619,11 +689,11 @@ public class ConstructionSiteService {
 
 	public Map<Integer, Integer> getLoanMapByConstructionAndMonth(ConstructionSite cs, DateTime date) {
 		//obtiene la lista de trabajadores de la obra
-		List<LaborerConstructionsite> lcs =  labcsRepo.findByConstructionsiteAndIsActiveThisMonth(cs,date.toDate());
+		List<LaborerConstructionsite> lcs =  labcsRepo.findByConstructionsiteAndIsActiveThisMonth(cs,date.toLocalDate().toDate());
 		logger.debug("trabajadores activos {} ",lcs);
 		logger.debug("date {} ",date);
 
-		List<Loan> loanResultList =  loanRepo.findByConstructionsiteAndMonth(cs, date.toDate());
+		List<Loan> loanResultList =  loanRepo.findByConstructionsiteAndMonth(cs, date.toLocalDate().toDate());
 
 		if(!loanResultList.isEmpty())
 			logger.debug("loanResultList.getmarks {} ",loanResultList.get(0));
@@ -644,9 +714,9 @@ public class ConstructionSiteService {
 
 	private Map<Integer, Integer> getToolFeesMapByConstructionAndMonth(ConstructionSite cs, DateTime date) {
 		//obtiene la lista de trabajadores
-		List<LaborerConstructionsite> lcs =  labcsRepo.findByConstructionsiteAndIsActiveThisMonth(cs,date.toDate());
+		List<LaborerConstructionsite> lcs =  labcsRepo.findByConstructionsiteAndIsActiveThisMonth(cs,date.toLocalDate().toDate());
 		//obtiene la lista de las herramientas que deberian ser cargadas en el mes
-		Date toDate = date.withDayOfMonth(1).withHourOfDay(0).withMinuteOfHour(0).withSecondOfMinute(0).withMillisOfSecond(0).toDate();
+		Date toDate = date.withDayOfMonth(1).withHourOfDay(0).withMinuteOfHour(0).withSecondOfMinute(0).withMillisOfSecond(0).toLocalDate().toDate();
 		logger.debug("toDate {}",toDate);
 		List<Tool> toolFees = toolRepo.findFeeByConstructionsiteAndMonth(cs,toDate); //se asegura de pasar el primero del mes para verificar las fechas pospuestas
 		Map<Integer, Integer> toolResult = new HashMap<Integer, Integer>();
@@ -667,11 +737,11 @@ public class ConstructionSiteService {
 	private Map<Integer, Integer> getLoanFeesMapByConstructionAndMonth(
 			ConstructionSite cs, DateTime mothAttendance) {
 		//obtiene la lista de trabajadores
-		List<LaborerConstructionsite> lcs =  labcsRepo.findByConstructionsiteAndIsActiveThisMonth(cs,mothAttendance.toDate());
+		List<LaborerConstructionsite> lcs =  labcsRepo.findByConstructionsiteAndIsActiveThisMonth(cs,mothAttendance.toLocalDate().toDate());
 		//define el rango en el cual buscará
 		
 		//obtiene la lista de las prestamos que deberian ser cargadas en el mes
-		List<Loan> loanFees = loanRepo.findFeeByConstructionsiteAndMonth(cs,mothAttendance.withDayOfMonth(1).toDate()); //se asegura de pasar el primero del mes para verificar las fechas pospuestas
+		List<Loan> loanFees = loanRepo.findFeeByConstructionsiteAndMonth(cs,mothAttendance.withDayOfMonth(1).toLocalDate().toDate()); //se asegura de pasar el primero del mes para verificar las fechas pospuestas
 		Map<Integer, Integer> toolResult = new HashMap<Integer, Integer>();
 		//verifica que exista una asistencia para cada elemento, si no existe la crea
 		for(LaborerConstructionsite lc : lcs ){
@@ -695,10 +765,12 @@ public class ConstructionSiteService {
 	 */
 	public List<Overtime> getOvertimeByConstruction(ConstructionSite cs,DateTime date) {
 		//obtiene la lista de trabajadores de la obra
-		List<LaborerConstructionsite> lcs =  labcsRepo.findByConstructionsiteAndIsActiveThisMonth(cs,date.toDate());
-		logger.debug("trabajadores activos obtenidos {} ",lcs);
+		List<Speciality> specialyties = (List<Speciality>) specialityRepo.findAll();
+		List<AfpItem> afp = (List<AfpItem>) afpItemRepo.findAll();
+		List<LaborerConstructionsite> lcs =  labcsRepo.findByConstructionsiteAndIsActiveThisMonth(cs,date.toLocalDate().toDate());
+//		logger.debug("trabajadores activos obtenidos {} ",lcs);
 		
-		List<Overtime> overtimeResult =  overtimeRepo.findByConstructionsiteAndMonth(cs,date.toDate());
+		List<Overtime> overtimeResult =  overtimeRepo.findByConstructionsiteAndMonth(cs,date.toLocalDate().toDate());
 		Overtime tmp = new Overtime();
 		//verifica que exista una asistencia para cada elemento, si no existe la crea
 		for(LaborerConstructionsite lc : lcs ){
@@ -706,7 +778,7 @@ public class ConstructionSiteService {
 			if(!overtimeResult.contains(tmp)){
 				Overtime overtime = new Overtime();
 				overtime.setLaborerConstructionSite(lc);
-				overtime.setDate(date.toDate());
+				overtime.setDate(date.toLocalDate().toDate());
 				overtimeResult.add(overtime);
 			}
 		}
@@ -728,11 +800,11 @@ public class ConstructionSiteService {
 	 * @return
 	 */
 	public Confirmations getConfirmationsByConstructionsiteAndMonth(ConstructionSite cs, DateTime dt) {
-		Confirmations result = confirmationsRepo.findByConstructionsiteAndMonth(cs,dt.toDate());
+		Confirmations result = confirmationsRepo.findByConstructionsiteAndMonth(cs,dt.toLocalDate().toDate());
 		if(result == null ){
 			result = new Confirmations();
 			result.setConstructionsite(cs);
-			result.setDate(dt.toDate());
+			result.setDate(dt.toLocalDate().toDate());
 		}
 		return result;
 	}
@@ -749,11 +821,11 @@ public class ConstructionSiteService {
 
 		//busca todas las vacaciones de la obra en el mes dado
 		logger.debug("obteniendo vacaciones");
-		List<Vacation> vacations = vacationRepo.findByConstructionsiteAndMonth(cs,dt.toDate());
+		List<Vacation> vacations = vacationRepo.findByConstructionsiteAndMonth(cs,dt.toLocalDate().toDate());
 		logger.debug("obteniendo accidentes");
-		List<Accident> accidents = accidentRepo.findByConstructionsiteAndMonth(cs,dt.toDate());
+		List<Accident> accidents = accidentRepo.findByConstructionsiteAndMonth(cs,dt.toLocalDate().toDate());
 		logger.debug("obteniendo licencias");
-		List<License> licenses	= licenseRepo.findByConstructionsiteAndMonth(cs,dt.toDate());
+		List<License> licenses	= licenseRepo.findByConstructionsiteAndMonth(cs,dt.toLocalDate().toDate());
 
 		List<AbsenceVO> result = new ArrayList<AbsenceVO>(vacations.size()+accidents.size()+licenses.size());
 
@@ -831,7 +903,7 @@ public class ConstructionSiteService {
 
 	
 	public List<HistoricalSalary> getHistoricalSalariesByConstructionAndMonth(ConstructionSite cs,DateTime date){
-		return historicalSalaryRepo.findByConstructionsiteAndMonth(cs,date.toDate());
+		return historicalSalaryRepo.findByConstructionsiteAndMonth(cs,date.toLocalDate().toDate());
 	}
 
 	/**
@@ -889,11 +961,11 @@ public class ConstructionSiteService {
 		//busca las cuotas de las herramientas
 		Map<Integer,Integer> toolFees = getToolFeesMapByConstructionAndMonth(cs,date);
 
-		List<LaborerConstructionsite> lcs =  labcsRepo.findByConstructionsiteAndIsActiveThisMonth(cs,date.toDate());
+		List<LaborerConstructionsite> lcs =  labcsRepo.findByConstructionsiteAndIsActiveThisMonth(cs,date.toLocalDate().toDate());
 		
-		List<Salary> salariesList =  salaryRepo.findByConstructionsiteAndMonth(cs,date.toDate());
+		List<Salary> salariesList =  salaryRepo.findByConstructionsiteAndMonth(cs,date.toLocalDate().toDate());
 		//busca el salario del mes anterior, para mostrar el ultimo jornal promedio
-		List<Salary> lastSalariesList =  salaryRepo.findByConstructionsiteAndMonth(cs,date.minusMonths(1).toDate());
+		List<Salary> lastSalariesList =  salaryRepo.findByConstructionsiteAndMonth(cs,date.minusMonths(1).toLocalDate().toDate());
 		
 		List<Salary> salaries = new ArrayList<Salary>(lcs.size());
 		
@@ -932,7 +1004,7 @@ public class ConstructionSiteService {
 			}
 			
 			salary.setLaborerConstructionSite(lc);
-			salary.setDate(date.toDate());
+			salary.setDate(date.toLocalDate().toDate());
 			salary.setLastJornalPromedio(lastJornalPromedio);
 			
 			suc.setInformation(attendance.get(lc.getJobCode()), lc.getSupleCode());
@@ -1087,7 +1159,7 @@ public class ConstructionSiteService {
 	 * @return
 	 */
 	public int countHolidaysMonth(DateTime attendanceDate) {
-		return holidayRepo.countByMonth(attendanceDate.toDate());
+		return holidayRepo.countByMonth(attendanceDate.toLocalDate().toDate());
 	}
 	
 	/**
@@ -1096,7 +1168,7 @@ public class ConstructionSiteService {
 	 * @return
 	 */
 	public int countHolidaysMonthOnLaborerDays(DateTime attendanceDate) {
-		List<Holiday> holidays = holidayRepo.findByMonth(attendanceDate.toDate());
+		List<Holiday> holidays = holidayRepo.findByMonth(attendanceDate.toLocalDate().toDate());
 		int count = 0;
 		for(Holiday h : holidays){
 			DateTime dt = new DateTime(h.getDate());

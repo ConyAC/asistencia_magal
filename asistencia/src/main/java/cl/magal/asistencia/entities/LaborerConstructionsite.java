@@ -31,9 +31,8 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.validation.constraints.Digits;
-import javax.validation.constraints.NotNull;
 
-import cl.magal.asistencia.entities.enums.Job;
+import cl.magal.asistencia.util.Utils;
 
 /**
  * Clase que permite encapsular toda la información de un trabajador asociada a una obra
@@ -132,19 +131,61 @@ public class LaborerConstructionsite implements Serializable {
     /**
      * Define la etapa para la cual está contratado el trabajador actual
      */
-    transient private String step;
     transient private double failureDiscount;
     transient private double othersDiscount;
     
     /**
      * define el contrato activo o el primero
      */
+    /*
     @NotNull
     @OneToOne(mappedBy="laborerConstructionSite",cascade = {CascadeType.PERSIST,CascadeType.MERGE},optional=false)
     Contract activeContract;
+    */
+    /*INFORMACION DEL CONTRATO*/
+    @Basic(optional = false)
+    @Column(name = "timeduration")
+    private int timeduration;
+    
+    @Basic(optional = false)
+    @Column(name = "startdate")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date startDate;
+    
+    @Basic(optional = false)
+    @Column(name = "terminationdate")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date terminationDate;
+    
+    @Basic(optional = false)
+    @Column(name = "value_treatment")
+    private int valueTreatment;
+    
+    @Column(name = "step")
+    private String step;
+    
+    @Column(name = "settlement")
+    private Double settlement;
+    
+    @Column(name = "contract_description")
+    String contractDescription;
+    
+    @JoinColumn(name="specialityId")
+    Speciality speciality;
+    
+    @Column(name="job_code",nullable = false)
+    private Integer jobCode;
+    
+    @Column(name = "finished")
+    private boolean finished;
     
     @Column(name = "suple_code",nullable=false)
   	Integer supleCode = 1;
+    
+    @OneToMany(mappedBy="laborerConstructionSite",fetch=FetchType.LAZY,cascade={CascadeType.PERSIST,CascadeType.MERGE},orphanRemoval=true )
+    List<Annexed> annexeds = new ArrayList<Annexed>();
+    
+    /** GETTER AND SETTER */
     
     public double getFailureDiscount() {
 		return failureDiscount;
@@ -383,26 +424,26 @@ public class LaborerConstructionsite implements Serializable {
 		this.reward = reward;
 	}
 
-	public Contract getActiveContract(){
-		return activeContract;
-	}
-	
-	public void setActiveContract(Contract contract){
-		this.activeContract = contract;
-		if(contract.getLaborerConstructionSite() == null )
-			contract.setLaborerConstructionSite(this);
-	}
+//	public Contract getActiveContract(){
+//		return activeContract;
+//	}
+//	
+//	public void setActiveContract(Contract contract){
+//		this.activeContract = contract;
+//		if(contract.getLaborerConstructionSite() == null )
+//			contract.setLaborerConstructionSite(this);
+//	}
 	
 	/**
 	 * VARIABLES SOLO LECTURA PARA RESCATAR LA INFORMACION DEL CONTRACTO ACTIVO
 	 * @return
 	 */
-	public Job getJob() {
-		return getActiveContract() != null ? getActiveContract().getJob() : null;
-	}
+//	public Job getJob() {
+//		return job;
+//	}
 
 	public Integer getJobCode() {
-		return getActiveContract() != null ? getActiveContract().getJobCode() : null;
+		return jobCode;
 	}
 
 	public String getStep() {
@@ -489,8 +530,96 @@ public class LaborerConstructionsite implements Serializable {
 	public void setComment(String comment) {
 		this.comment = comment;
 	}
-
-
+	
+	
+	public int getTimeduration() {
+		return timeduration;
+	}
+	public void setTimeduration(int timeduration) {
+		this.timeduration = timeduration;
+	}
+	public Date getStartDate() {
+		return startDate;
+	}
+	public void setStartDate(Date startDate) {
+		this.startDate = startDate;
+	}
+	public Date getTerminationDate() {
+		return terminationDate;
+	}
+	public void setTerminationDate(Date terminationDate) {
+		this.terminationDate = terminationDate;
+	}
+	public int getValueTreatment() {
+		return valueTreatment;
+	}
+	public void setValueTreatment(int valueTreatment) {
+		this.valueTreatment = valueTreatment;
+	}
+	public Double getSettlement() {
+		return settlement;
+	}
+	public void setSettlement(Double settlement) {
+		this.settlement = settlement;
+	}
+	public String getContractDescription() {
+		return contractDescription;
+	}
+	public void setContractDescription(String contractDescription) {
+		this.contractDescription = contractDescription;
+	}
+	public Speciality getSpeciality() {
+		return speciality;
+	}
+	public void setSpeciality(Speciality speciality) {
+		this.speciality = speciality;
+	}
+	public boolean isFinished() {
+		return finished;
+	}
+	public void setFinished(boolean finished) {
+		this.finished = finished;
+	}
+	public List<Annexed> getAnnexeds() {
+		return annexeds;
+	}
+	public void setAnnexeds(List<Annexed> annexeds) {
+		this.annexeds = annexeds;
+	}
+	public void setStep(String step) {
+		this.step = step;
+	}
+	public void setJobCode(Integer jobCode) {
+		this.jobCode = jobCode;
+	}
+	
+	public String getStartDateString() {
+        return Utils.date2String(startDate);
+    }
+	
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((id == null) ? 0 : id.hashCode());
+		return result;
+	}
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		LaborerConstructionsite other = (LaborerConstructionsite) obj;
+		if (id == null) {
+			if (other.id != null)
+				return false;
+		} else if (!id.equals(other.id))
+			return false;
+		return true;
+	}
 	@Override
     public String toString() {
         return "jpa.magal.entities.LaborerConstructionsite[ id = "+id+", laborerId=" + (laborer != null ? laborer.getId() : "laborer nulo") + " ]";

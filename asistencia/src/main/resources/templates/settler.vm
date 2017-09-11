@@ -36,14 +36,14 @@
 		<br />
 		<!-- información del trabajador -->
 		<table style="width:100%;" >
-			<tr><td>N&uacute;mero</td><td><b>${laborerConstruction.activeContract.jobCode}</b></td><td></td><td></td></tr>
+			<tr><td>N&uacute;mero</td><td><b>${laborerConstruction.jobCode}</b></td><td></td><td></td></tr>
 			<tr><td>Nombre</td><td><b>${laborerConstruction.laborer.lastname}</b></td><td><b>${laborerConstruction.laborer.secondlastname}</b></td><td><b>${laborerConstruction.laborer.firstname} ${laborerConstruction.laborer.secondname}</b></td></tr>
 			<tr><td>Comit&eacute; Paritario</td><td><b>Secretario</b></td><td></td><td></td></tr>
 		</table>
 		<br/>
 		<table style="width:100%;" >
-			<tr><td>Fecha Ingreso</td><td>$tools.format('d-M-yy',${laborerConstruction.activeContract.startDate})</td><td></td></tr>
-			<tr><td>Fecha Finiquito</td><td>$tools.format('d-M-yy',${laborerConstruction.activeContract.terminationDate})</td><td></td></tr>
+			<tr><td>Fecha Ingreso</td><td>$tools.format('d-M-yy',${laborerConstruction.startDate})</td><td></td></tr>
+			<tr><td>Fecha Finiquito</td><td>$tools.format('d-M-yy',${laborerConstruction.terminationDate})</td><td></td></tr>
 			<tr><td>A&ntilde;os Duraci&oacute;n Contrato</td><td>${duracionContrato}</td><td></td></tr>
 			<tr><td><br /></td><td></td><td></td></tr>
 			<tr><td>Jornal $tools.format('MMM yyyy',${firstmonth})</td><td>#if($ultimosJornales.size()>0) ${ultimosJornales.get(0)} #end</td><td>&nbsp</td></tr>

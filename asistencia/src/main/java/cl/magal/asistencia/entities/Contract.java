@@ -110,9 +110,9 @@ public class Contract implements Serializable {
     @Column(name = "finished")
     private boolean finished;
     
-    @OneToOne
-    @JoinColumn(name="laborer_constructionsiteId",nullable = false,unique=true )
-	LaborerConstructionsite laborerConstructionSite;
+//    @OneToOne
+//    @JoinColumn(name="laborer_constructionsiteId",nullable = false,unique=true )
+//	LaborerConstructionsite laborerConstructionSite;
     
     @OneToMany(mappedBy="contract",fetch=FetchType.LAZY,cascade={CascadeType.PERSIST,CascadeType.MERGE},orphanRemoval=true )
     List<Annexed> annexeds = new ArrayList<Annexed>();
@@ -196,16 +196,16 @@ public class Contract implements Serializable {
 		this.step = step;
 	}
 
-	public LaborerConstructionsite getLaborerConstructionSite() {
-		return laborerConstructionSite;
-	}
+//	public LaborerConstructionsite getLaborerConstructionSite() {
+//		return laborerConstructionSite;
+//	}
 
-	public void setLaborerConstructionSite(LaborerConstructionsite laborerConstructionSite) {
-		this.laborerConstructionSite = laborerConstructionSite;
-		if(laborerConstructionSite.getActiveContract() == null ){
-			laborerConstructionSite.setActiveContract(this);
-		}
-	}
+//	public void setLaborerConstructionSite(LaborerConstructionsite laborerConstructionSite) {
+//		this.laborerConstructionSite = laborerConstructionSite;
+////		if(laborerConstructionSite.getActiveContract() == null ){
+////			laborerConstructionSite.setActiveContract(this);
+////		}
+//	}
 
 	public List<Annexed> getAnnexeds() {
 		return annexeds;
@@ -294,8 +294,9 @@ public class Contract implements Serializable {
 				+ valueTreatment + ", step=" + step + ", settlement="
 				+ settlement + ", contractDescription=" + contractDescription
 				+ ", job=" + job + ", jobCode=" + jobCode + ", active="
-				+ active + ", laborerConstructionSite="
-				+ laborerConstructionSite + ", annexeds=" + annexeds + "]";
+				+ active + 
+				//", laborerConstructionSite="+ laborerConstructionSite +
+				", annexeds=" + annexeds + "]";
 	}
 
 	

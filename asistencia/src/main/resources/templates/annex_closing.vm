@@ -31,7 +31,7 @@
 					<h2 style="text-align:left;">OBRA: <b>${laborerConstruction.constructionsite.name}</b></h2>
 				</td>
 				<td>
-					<h2 style="text-align:right;">ROL TRABAJADOR <b>${laborerConstruction.activeContract.jobCode}</b></h2>	
+					<h2 style="text-align:right;">ROL TRABAJADOR <b>${laborerConstruction.jobCode}</b></h2>	
 				</td>
 			</tr>
 		</table>

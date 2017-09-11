@@ -144,7 +144,6 @@ public class LaborerAndTeamPanel extends VerticalLayout implements View {
 
 		teamContainer.addNestedContainerProperty("leader.firstname");
 		laborerConstructionContainer.addNestedContainerBean("laborer");
-		laborerConstructionContainer.addNestedContainerBean("activeContract");
 		setSizeFull();
 		//crea el tab con trabajadores y cuadrillas
 		TabSheet tab = new TabSheet();
@@ -766,7 +765,7 @@ public class LaborerAndTeamPanel extends VerticalLayout implements View {
 			
 			@Override
 			public AbstractField<?> getCustomFilterComponent(Object propertyId) {
-				 if ("activeContract.step".equals(propertyId)) {
+				 if ("step".equals(propertyId)) {
 					 cbFilterStep = new ComboBox(null);
 					 cbFilterStep.setNullSelectionAllowed(true);
 					 return cbFilterStep;
@@ -851,7 +850,7 @@ public class LaborerAndTeamPanel extends VerticalLayout implements View {
 			@Override
 			public Object generateCell(CustomTable source, final Object itemId,Object columnId) {
 				final BeanItem<LaborerConstructionsite> laborerConstruction = (BeanItem<LaborerConstructionsite>) laborerConstructionContainer.getItem(itemId);
-				return Utils.date2String( laborerConstruction.getBean().getActiveContract().getStartDate() ) + "-" + Utils.date2String(laborerConstruction.getBean().getActiveContract().getTerminationDate());
+				return Utils.date2String( laborerConstruction.getBean().getStartDate() ) + "-" + Utils.date2String(laborerConstruction.getBean().getTerminationDate());
 			}
 		});
 
@@ -872,7 +871,7 @@ public class LaborerAndTeamPanel extends VerticalLayout implements View {
 		//		});
 
 		//TODO estado
-		table.setVisibleColumns("selected","activeContract.jobCode","laborer.fullname","activeContract.step","fechas","actions"); //FIXME laborerId
+		table.setVisibleColumns("selected","jobCode","laborer.fullname","step","fechas","actions"); //FIXME laborerId
 		table.setColumnHeaders("","Rol","Nombre","Etapa","Fecha<br/>Contrato","Acciones");
 		table.setColumnWidth("selected", 40);
 
@@ -1111,7 +1110,7 @@ public class LaborerAndTeamPanel extends VerticalLayout implements View {
 		List<LaborerConstructionsite> laborers = constructionSiteService.getLaborerActiveByConstruction(item.getBean());
 		laborerConstructionContainer.removeAllItems();
 		laborerConstructionContainer.addAll(laborers);
-		laborerConstructionContainer.sort(new Object[] { "activeContract.jobCode" }, new boolean[]{true}); 
+		laborerConstructionContainer.sort(new Object[] { "jobCode" }, new boolean[]{true}); 
 
 		List<Team> teams = constructionSiteService.getTeamsByConstruction(item.getBean());
 		teamContainer.removeAllItems();

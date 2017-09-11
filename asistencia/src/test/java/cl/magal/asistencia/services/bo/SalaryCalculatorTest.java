@@ -378,8 +378,8 @@ public class SalaryCalculatorTest {
 		List<Salary> salaries = csService.getSalariesByConstructionAndMonth(cs, date);
 		for(Salary salary : salaries ){
 //			if(salary.getLaborerConstructionSite().getJobCode() == 3 ){
-				logger.debug("\ndump del trabajador con code {} y csId {} \ndump {}\n\n",salary.getLaborerConstructionSite().getActiveContract().getJobCode(),csId,salary.dump());
-				Double expectedSalary  = resultado.get(salary.getLaborerConstructionSite().getActiveContract().getJobCode());
+				logger.debug("\ndump del trabajador con code {} y csId {} \ndump {}\n\n",salary.getLaborerConstructionSite().getJobCode(),csId,salary.dump());
+				Double expectedSalary  = resultado.get(salary.getLaborerConstructionSite().getJobCode());
 				if(expectedSalary == null ) continue;
 				assertEquals(expectedSalary,salary.getSalary() + salary.getSuple(),1d);
 //			}
@@ -458,8 +458,8 @@ public class SalaryCalculatorTest {
 		List<Salary> salaries = csService.getSalariesByConstructionAndMonth(cs, date);
 		for(Salary salary : salaries ){
 //			if(salary.getLaborerConstructionSite().getJobCode() == 3 ){
-				logger.debug("\ndump del trabajador con code {} y csId {} \ndump {}\n\n",salary.getLaborerConstructionSite().getActiveContract().getJobCode(),csId,salary.dump());
-				Double expectedSalary  = resultado.get(salary.getLaborerConstructionSite().getActiveContract().getJobCode());
+				logger.debug("\ndump del trabajador con code {} y csId {} \ndump {}\n\n",salary.getLaborerConstructionSite().getJobCode(),csId,salary.dump());
+				Double expectedSalary  = resultado.get(salary.getLaborerConstructionSite().getJobCode());
 				if(expectedSalary == null ) continue;
 				assertEquals(expectedSalary,salary.getSalary(),1d);
 //			}

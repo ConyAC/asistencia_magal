@@ -485,7 +485,7 @@ public class Utils {
 	 */
 	public static int calcularDiaFinal(Attendance attendance2, int maxDay,boolean completarSemana){
 		if(attendance2.getLaborerConstructionSite()
-				.getActiveContract().getTerminationDate() == null )
+				.getTerminationDate() == null )
 			return maxDay;
 		//obtiene el ultimo dia del mes
 		DateTime attendanceDate = new DateTime(attendance2.getDate(),DateTimeZone.UTC);
@@ -494,16 +494,16 @@ public class Utils {
 			.withTime(0, 0, 0, 0)
 			.dayOfMonth().getMaximumValue());
 		//obtiene la fecha de ingreso
-		DateTime finContrato = new DateTime(attendance2.getLaborerConstructionSite().getActiveContract().getTerminationDate(),DateTimeZone.UTC).withTime(0, 0, 0, 0);
+		DateTime finContrato = new DateTime(attendance2.getLaborerConstructionSite().getTerminationDate());
 		//si tiene que completar la semana, retorna el lunes más cercano
 		if(completarSemana){
 			//le suma dia hasta que sea el lunes
-			finContrato = calcularViernesMasCercano(finContrato,true);
+			finContrato = calcularDomingoMasCercano(finContrato,true);
 			//si trabajo parte de la semana le corresponde considerar el sabado de la misma
 			finContrato.plusDays(1);
 		}
 		
-		//si la fecha de ingreso es luego del inicio del mes, entonces comienza a contar desde ese día
+		//si la fecha de fin de contrato es luego del inicio del mes, entonces comienza a contar desde ese día
 		if(finContrato.isBefore(finMes))
 			return finContrato.getDayOfMonth();
 		else
@@ -515,8 +515,8 @@ public class Utils {
 	 * @param dt
 	 * @return
 	 */
-	private static DateTime calcularViernesMasCercano(DateTime dt,boolean futuro){
-		while(dt.getDayOfWeek() != DateTimeConstants.FRIDAY ){
+	private static DateTime calcularDomingoMasCercano(DateTime dt,boolean futuro){
+		while(dt.getDayOfWeek() != DateTimeConstants.SUNDAY ){
 			if(futuro)
 				dt = dt.plusDays(1);
 			else
@@ -549,7 +549,7 @@ public class Utils {
 		//obtiene el primer día del mes
 		DateTime inicioMes = new DateTime(attendance2.getDate()).withDayOfMonth(1);
 		//obtiene la fecha de ingreso
-		DateTime inicioContrato = new DateTime(attendance2.getLaborerConstructionSite().getActiveContract().getStartDate());
+		DateTime inicioContrato = new DateTime(attendance2.getLaborerConstructionSite().getStartDate());
 		//si tiene que completar la semana, retorna el lunes más cercano
 		if(completarSemana){
 			//le resta dia hasta que sea el lunes
@@ -583,7 +583,7 @@ public class Utils {
 		
 		//que considere la fecha inicial de contrato para considerar el día inical y el final
 		int i = Utils.calcularDiaInicial(attendance,0,contieneRelleno);
-		maxDay = Utils.calcularDiaFinal(attendance,maxDay,contieneRelleno);
+		maxDay = Utils.calcularDiaFinal(attendance,maxDay,true);
 		
 		if( i >= maxDay )
 			return 0;
@@ -708,6 +708,91 @@ public class Utils {
 	 */
 	public static boolean isAttendanceMarkEmptyOrFilledOrFail(AttendanceMark attendanceMark) {
 		return attendanceMark == AttendanceMark.FILLER || attendanceMark == AttendanceMark.EMPTY || attendanceMark == AttendanceMark.FAIL || attendanceMark == AttendanceMark.SATURDAY || attendanceMark == AttendanceMark.SUNDAY;
+	}
+
+	/**
+	 * Verifica que si la fecha entregada es sabado, entonces la marca tambien lo sea
+	 * @param date
+	 * @param mark
+	 * @return
+	 */
+	public static boolean isBothAreSaturday(DateTime date, AttendanceMark mark) {
+		//si la fecha no es sabado, retorna true
+		if(!isSaturday(date))return true;
+		//si la fecha es sabado, retorn true sólo la marca tambien es sabado
+		return mark == AttendanceMark.SATURDAY;
+	}
+	
+	/**
+	 * Verifica que si la fecha entregada es doming, entonces la marca tambien lo sea
+	 * @param date
+	 * @param mark
+	 * @return
+	 */
+	public static boolean isBothAreSunday(DateTime date, AttendanceMark mark) {
+		//si la fecha no es domingo, retorna true
+		if(!isSunday(date))return true;
+		//si la fecha es domingo, retorn true sólo la marca tambien es domingo
+		return mark == AttendanceMark.SUNDAY;
+	}
+
+	/**
+	 * retorna si la fecha dada es sabado o no
+	 * @param date
+	 * @return
+	 */
+	public static boolean isSaturday(DateTime date) {
+		return date.getDayOfWeek() == org.joda.time.DateTimeConstants.SATURDAY;
+	}
+	
+	/**
+	 * retorna si la fecha dada es domingo o no
+	 * @param date
+	 * @return
+	 */
+	public static boolean isSunday(DateTime date) {
+		return date.getDayOfWeek() == org.joda.time.DateTimeConstants.SUNDAY;
+	}
+
+	/**
+	 * retorna si la marca es vacia
+	 * @param mark
+	 * @return
+	 */
+	public static boolean isAttendanceMarkEmpty(AttendanceMark mark) {
+		return mark == AttendanceMark.EMPTY;
+	}
+
+	/**
+	 * Verifica si la fecha date está en la misma semana que la fecha refDate
+	 * @param date
+	 * @param refDate
+	 * @return
+	 */
+	public static boolean isSameWeek(DateTime date, Date refDate) {
+		return isSameWeek(date, new LocalDateTime(refDate) );
+	}
+	
+	/**
+	 * Verifica si la fecha date está en la misma semana que la fecha refDate
+	 * @param date
+	 * @param refDate
+	 * @return
+	 */
+	public static boolean isSameWeek(DateTime date, LocalDateTime refDate) {
+		
+		String date1 = date.toString("ww-yyyy");
+		String date2 = refDate.toString("ww-yyyy");
+		return date1.compareTo(date2) == 0;
+	}
+
+	/**
+	 * 
+	 * @param mark
+	 * @return
+	 */
+	public static boolean isAttendanceMarkFailOrFilled(AttendanceMark mark) {
+		return mark == AttendanceMark.FAIL || mark == AttendanceMark.FILLER;
 	}
 
 }

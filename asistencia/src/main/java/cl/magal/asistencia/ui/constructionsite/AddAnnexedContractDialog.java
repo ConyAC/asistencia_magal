@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 
 import cl.magal.asistencia.entities.Annexed;
 import cl.magal.asistencia.entities.Contract;
+import cl.magal.asistencia.entities.LaborerConstructionsite;
 import cl.magal.asistencia.ui.AbstractWindowEditor;
 
 import com.vaadin.data.util.BeanItem;
@@ -54,7 +55,7 @@ public class AddAnnexedContractDialog extends AbstractWindowEditor {
 		
 		
 		//text de etapa
-		lbStep = new ComboBox("Etapa",((BeanItem<Contract>) getItem()).getBean().getLaborerConstructionSite().getConstructionsite().getSteps());
+		lbStep = new ComboBox("Etapa",((BeanItem<LaborerConstructionsite>) getItem()).getBean().getConstructionsite().getSteps());
 		lbStep.setImmediate(true);
 		lbStep.setTabIndex(4);
 		lbStep.setRequired(true);
