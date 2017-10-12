@@ -589,6 +589,12 @@ public class LaborerConstructionsite implements Serializable {
 	public void setStep(String step) {
 		this.step = step;
 	}
+	public void addAnnexed(Annexed annexed){
+	 if (!getAnnexeds().contains(annexed)) {
+		 getAnnexeds().add(annexed);
+    	annexed.setLaborerConstructionSite(this);
+    }
+}
 	public void setJobCode(Integer jobCode) {
 		this.jobCode = jobCode;
 	}

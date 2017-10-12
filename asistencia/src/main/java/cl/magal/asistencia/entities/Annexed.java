@@ -38,11 +38,7 @@ public class Annexed implements Serializable {
 	String step;
     @Column(name = "annexed_description")
 	String annexedDescription;
-	
-	@ManyToOne
-	@JoinColumn(name="contractId")
-	Contract contract;
-	
+		
 	@ManyToOne
 	@JoinColumn(name="laborer_constructionsiteId",nullable = false,unique=true )
 	LaborerConstructionsite laborerConstructionSite;
@@ -61,14 +57,6 @@ public class Annexed implements Serializable {
 
 	public void setAnnexedDescription(String annexedDescription) {
 		this.annexedDescription = annexedDescription;
-	}
-
-	public Contract getContract() {
-		return contract;
-	}
-
-	public void setContract(Contract contract) {
-		this.contract = contract;
 	}
 
 	public Date getStartDate() {

@@ -5,11 +5,6 @@ import java.util.Date;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import cl.magal.asistencia.entities.Annexed;
-import cl.magal.asistencia.entities.Contract;
-import cl.magal.asistencia.entities.LaborerConstructionsite;
-import cl.magal.asistencia.ui.AbstractWindowEditor;
-
 import com.vaadin.data.util.BeanItem;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.ui.ComboBox;
@@ -17,7 +12,10 @@ import com.vaadin.ui.Component;
 import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Notification.Type;
-import com.vaadin.ui.TextField;
+
+import cl.magal.asistencia.entities.Annexed;
+import cl.magal.asistencia.entities.LaborerConstructionsite;
+import cl.magal.asistencia.ui.AbstractWindowEditor;
 
 public class AddAnnexedContractDialog extends AbstractWindowEditor {
 
@@ -82,7 +80,7 @@ public class AddAnnexedContractDialog extends AbstractWindowEditor {
 			annexed.setStartDate(new Date());
 			annexed.setStep((String) lbStep.getValue());
 
-			((BeanItem<Contract>) getItem()).getBean().addAnnexed(annexed);
+			((BeanItem<LaborerConstructionsite>) getItem()).getBean().addAnnexed(annexed);
 		}
 		
 		return msj == null;

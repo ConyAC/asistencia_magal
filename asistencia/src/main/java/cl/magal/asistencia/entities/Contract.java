@@ -207,20 +207,20 @@ public class Contract implements Serializable {
 ////		}
 //	}
 
-	public List<Annexed> getAnnexeds() {
-		return annexeds;
-	}
-
-	public void setAnnexeds(List<Annexed> annexeds) {
-		this.annexeds = annexeds;
-	}
-	
-	public void addAnnexed(Annexed annexed){
-		 if (!getAnnexeds().contains(annexed)) {
-			 getAnnexeds().add(annexed);
-	     	annexed.setContract(this);
-	     }
-	}
+//	public List<Annexed> getAnnexeds() {
+//		return annexeds;
+//	}
+//
+//	public void setAnnexeds(List<Annexed> annexeds) {
+//		this.annexeds = annexeds;
+//	}
+//	
+//	public void addAnnexed(Annexed annexed){
+//		 if (!getAnnexeds().contains(annexed)) {
+//			 getAnnexeds().add(annexed);
+//	     	annexed.setContract(this);
+//	     }
+//	}
 
 	public Double getSettlement() {
 		return settlement;
