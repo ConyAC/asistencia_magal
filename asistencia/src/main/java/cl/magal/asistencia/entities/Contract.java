@@ -6,24 +6,18 @@
 package cl.magal.asistencia.entities;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 import javax.persistence.Basic;
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
 import javax.persistence.PrePersist;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
@@ -114,8 +108,8 @@ public class Contract implements Serializable {
 //    @JoinColumn(name="laborer_constructionsiteId",nullable = false,unique=true )
 //	LaborerConstructionsite laborerConstructionSite;
     
-    @OneToMany(mappedBy="contract",fetch=FetchType.LAZY,cascade={CascadeType.PERSIST,CascadeType.MERGE},orphanRemoval=true )
-    List<Annexed> annexeds = new ArrayList<Annexed>();
+//    @OneToMany(mappedBy="contract",fetch=FetchType.LAZY,cascade={CascadeType.PERSIST,CascadeType.MERGE},orphanRemoval=true )
+//    List<Annexed> annexeds = new ArrayList<Annexed>();
 
     public Contract() {
     }
@@ -294,9 +288,10 @@ public class Contract implements Serializable {
 				+ valueTreatment + ", step=" + step + ", settlement="
 				+ settlement + ", contractDescription=" + contractDescription
 				+ ", job=" + job + ", jobCode=" + jobCode + ", active="
-				+ active + 
+				+ active  
 				//", laborerConstructionSite="+ laborerConstructionSite +
-				", annexeds=" + annexeds + "]";
+				//", annexeds=" + annexeds + "]"
+				;
 	}
 
 	
