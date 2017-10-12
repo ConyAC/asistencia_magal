@@ -774,9 +774,9 @@ public class ConfigView extends VerticalLayout implements View {
 								//calcula el inicio y final del mes
 								Date current = config.getDate();
 								DateTime endDatetime = new DateTime(current).dayOfMonth().withMaximumValue(); 
-								Date endDate = endDatetime.toDate();
+								Date endDate = endDatetime.toLocalDateTime().toDate();
 								DateTime startDatetime = new DateTime(current).withDayOfMonth(1); 
-								Date startDate = startDatetime.toDate();
+								Date startDate = startDatetime.toLocalDateTime().toDate();
 								
 								advance.setRangeStart(startDate);advance.setRangeEnd(endDate);
 								assistance.setRangeEnd(endDate);assistance.setRangeStart(startDate);
