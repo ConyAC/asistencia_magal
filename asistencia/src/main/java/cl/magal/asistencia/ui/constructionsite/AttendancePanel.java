@@ -497,6 +497,8 @@ public class AttendancePanel extends VerticalLayout implements View {
 
 		vl = drawSalaryLayout();
 		tab.addTab(vl, "Sueldo");
+		
+		tab.setSizeFull();
 
 		return tab;
 	}
