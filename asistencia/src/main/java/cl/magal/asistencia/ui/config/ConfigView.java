@@ -18,27 +18,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
 import org.vaadin.dialogs.ConfirmDialog;
 
-import ru.xpoft.vaadin.VaadinView;
-import cl.magal.asistencia.entities.AfpAndInsuranceConfigurations;
-import cl.magal.asistencia.entities.AfpItem;
-import cl.magal.asistencia.entities.Bank;
-import cl.magal.asistencia.entities.ConstructionSite;
-import cl.magal.asistencia.entities.DateConfigurations;
-import cl.magal.asistencia.entities.FamilyAllowanceConfigurations;
-import cl.magal.asistencia.entities.Holiday;
-import cl.magal.asistencia.entities.Mobilization2;
-import cl.magal.asistencia.entities.TaxationConfigurations;
-import cl.magal.asistencia.entities.WageConfigurations;
-import cl.magal.asistencia.entities.enums.Permission;
-import cl.magal.asistencia.services.ConfigurationService;
-import cl.magal.asistencia.services.ConstructionSiteService;
-import cl.magal.asistencia.ui.ListenerFieldFactory;
-import cl.magal.asistencia.ui.MagalUI;
-import cl.magal.asistencia.ui.OnValueChangeFieldFactory;
-import cl.magal.asistencia.ui.OnValueChangeFieldFactory.OnValueChangeListener;
-import cl.magal.asistencia.util.SecurityHelper;
-import cl.magal.asistencia.util.Utils;
-
 import com.vaadin.data.Container;
 import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeEvent;
@@ -69,6 +48,27 @@ import com.vaadin.ui.Table;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
+
+import cl.magal.asistencia.entities.AfpAndInsuranceConfigurations;
+import cl.magal.asistencia.entities.AfpItem;
+import cl.magal.asistencia.entities.Bank;
+import cl.magal.asistencia.entities.ConstructionSite;
+import cl.magal.asistencia.entities.DateConfigurations;
+import cl.magal.asistencia.entities.FamilyAllowanceConfigurations;
+import cl.magal.asistencia.entities.Holiday;
+import cl.magal.asistencia.entities.Mobilization2;
+import cl.magal.asistencia.entities.TaxationConfigurations;
+import cl.magal.asistencia.entities.WageConfigurations;
+import cl.magal.asistencia.entities.enums.Permission;
+import cl.magal.asistencia.services.ConfigurationService;
+import cl.magal.asistencia.services.ConstructionSiteService;
+import cl.magal.asistencia.ui.ListenerFieldFactory;
+import cl.magal.asistencia.ui.MagalUI;
+import cl.magal.asistencia.ui.OnValueChangeFieldFactory;
+import cl.magal.asistencia.ui.OnValueChangeFieldFactory.OnValueChangeListener;
+import cl.magal.asistencia.util.SecurityHelper;
+import cl.magal.asistencia.util.Utils;
+import ru.xpoft.vaadin.VaadinView;
 
 @VaadinView(value=ConfigView.NAME)
 @Scope("prototype")
@@ -773,10 +773,10 @@ public class ConfigView extends VerticalLayout implements View {
 								
 								//calcula el inicio y final del mes
 								Date current = config.getDate();
-								DateTime endDatetime = new DateTime(current).dayOfMonth().withMaximumValue(); 
-								Date endDate = endDatetime.toLocalDateTime().toDate();
-								DateTime startDatetime = new DateTime(current).withDayOfMonth(1); 
-								Date startDate = startDatetime.toLocalDateTime().toDate();
+								DateTime endDatetime = new DateTime(current).plusDays(5).dayOfMonth().withMaximumValue(); 
+								Date endDate = endDatetime.toLocalDate().toDate();
+								DateTime startDatetime = new DateTime(current).plusDays(1).withDayOfMonth(1); 
+								Date startDate = startDatetime.toLocalDate().toDate();
 								
 								advance.setRangeStart(startDate);advance.setRangeEnd(endDate);
 								assistance.setRangeEnd(endDate);assistance.setRangeStart(startDate);
