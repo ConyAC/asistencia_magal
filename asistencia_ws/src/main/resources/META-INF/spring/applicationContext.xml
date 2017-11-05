@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+	xmlns:jpa="http://www.springframework.org/schema/data/jpa"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="
+						http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc-4.0.xsd
+						http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+						http://www.springframework.org/schema/data/jpa http://www.springframework.org/schema/data/jpa/spring-jpa-1.3.xsd
+						http://www.springframework.org/schema/tx
+                        http://www.springframework.org/schema/tx/spring-tx.xsd
+						http://www.springframework.org/schema/context 
+					   	http://www.springframework.org/schema/context/spring-context-3.1.xsd">
+
+	<context:annotation-config />
+	<context:load-time-weaver/>
+	
+	<!-- archivo de propiedades -->
+	<context:property-placeholder location="classpath:app.properties" />
+	
+	<bean id="uploaded_images_path" class="java.lang.String" factory-method="valueOf">
+	  <constructor-arg value="${ext.uploaded_images_path}"/>
+	</bean>
+	
+	<bean id="uploaded_files_path" class="java.lang.String" factory-method="valueOf">
+	  <constructor-arg value="${ext.uploaded_files_path}"/>
+	</bean>
+	
+	<!-- escanea las clases del package services buscando componentes -->
+	<context:component-scan base-package="cl.koritsu.asistenca_ws" />
+	
+	<tx:annotation-driven  transaction-manager="transactionManager"/>
+	    
+
+	   	<!--  Data Base 
+	<jdbc:embedded-database id="datasource" type="H2"></jdbc:embedded-database>
+	
+	<bean id="datasource"
+		class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+ 
+		<property name="driverClassName" value="org.h2.Driver" />
+		<property name="url" value="jdbc:h2:~/magal.mem" />
+		<property name="username" value="sa" />
+		<property name="password" value="" />
+	</bean>
+
+	<jdbc:initialize-database data-source="datasource">
+	    <jdbc:script location="classpath:/META-INF/sql/schema.sql"/>
+	    <jdbc:script location="classpath:/META-INF/sql/data.sql"/>
+	</jdbc:initialize-database>
+	-->
+		<bean id="datasource" 
+		class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+ 
+		<property name="driverClassName" value="com.mysql.jdbc.Driver" />
+		<property name="url" value="jdbc:mysql://localhost:3306/magal_asistencia" />
+		<property name="username" value="root" />
+		<property name="password" value="ds59j!JDHE.kd" />
+	</bean>
+		
+	<bean id="jpaDialect" class="org.springframework.orm.jpa.vendor.EclipseLinkJpaDialect" >
+		<!-- org.eclipse.persistence.platform.database.MySQLPlatform  -->
+		<!--  <property name="databasePlatform" value="org.eclipse.persistence.platform.database.H2Platform" /> -->
+   		<!-- <property name="showSql" value="true" />  -->
+	</bean> 
+	<!--  Entity Manager Factory -->
+	<bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean" >
+		<property name="dataSource" ref="datasource"></property>
+		<property name="persistenceUnitName" value="persistenceUnit"></property>
+		<property name="jpaDialect" ref="jpaDialect" />
+    	<property name="jpaVendorAdapter">
+        	<bean class="org.springframework.orm.jpa.vendor.EclipseLinkJpaVendorAdapter" />
+         </property>
+         <!-- 
+		<property name="jpaPropertyMap">
+			<map>
+				<entry key="eclipselink.weaving" value="false" />
+			</map>
+		</property>
+		 -->
+	</bean>
+	
+	<!--  Transacción manager -->
+	<bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
+		<property name="entityManagerFactory" ref="entityManagerFactory"></property>
+	</bean>
+	
+	<!-- JPA Repositories -->
+	<jpa:repositories base-package="cl.koritsu.asistenca_ws.repositories"></jpa:repositories>
+	<!-- traductor de excepciones de repo -->
+    <bean class="org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor" />
+
+	<bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource">
+		<property name="basenames">
+			<list>
+				<value>MensajesLogin</value>
+			</list>
+		</property>
+	</bean>
+	
+	<!-- Velocity -->
+	<!-- 
+     <bean id="velocityEngine" class="org.springframework.ui.velocity.VelocityEngineFactoryBean"> 
+	  <property name="velocityProperties">
+	   <props>
+	    <prop key="resource.loader">class</prop>
+	    <prop key="class.resource.loader.class">org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader</prop>
+	   </props>
+	  </property>
+	 </bean>
+	 -->
+	 <!-- Mail -->
+	 <!--
+	<bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
+        <property name="host" value="smtp.gmail.com"/>
+        <property name="port" value="25"/>
+        <property name="username" value="magalnoreplay@gmail.com"/>
+        <property name="password" value="mmagal69"/>
+        <property name="javaMailProperties">
+            <props>
+                <prop key="mail.transport.protocol">smtp</prop>
+                <prop key="mail.smtp.auth">true</prop>
+                <prop key="mail.smtp.starttls.enable">true</prop>
+                <prop key="mail.debug">true</prop>
+            </props>
+        </property>
+    </bean>
+    -->
+    <!-- Task executor para llamadas asincronicas -->
+    <!-- 
+    <bean id="taskExecutor" class="org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor">
+	    <property name="corePoolSize" value="5" />
+	    <property name="maxPoolSize" value="10" />
+	    <property name="queueCapacity" value="25" />
+	</bean>
+	 -->
+	<!-- 
+	<import resource="security.xml" />
+ -->
+</beans>
