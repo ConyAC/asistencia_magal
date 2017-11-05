@@ -40,9 +40,9 @@ public class AttendanceClock  implements Serializable {
 	public Long getAttendanceClockId() {
 		return attendanceClockId;
 	}
-	public void setAttendanceClockId(Long attendanceClockId) {
-		this.attendanceClockId = attendanceClockId;
-	}
+//	public void setAttendanceClockId(Long attendanceClockId) {
+//		this.attendanceClockId = attendanceClockId;
+//	}
 	public Date getEntryTime() {
 		return entryTime;
 	}

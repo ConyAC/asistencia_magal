@@ -17,10 +17,16 @@ public class AsistenciaWSController {
 	@Autowired
     AttendanceClockService attendanceClockService; 
 	
-    @RequestMapping(value = "/cargaReloj", method = RequestMethod.POST)
+    @RequestMapping(value = "/cargaReloj", method = RequestMethod.POST ,consumes = {"application/json"})
     public ResponseEntity<AttendanceClockWrapperResponse> cargaReloj(@RequestBody AttendanceClockWrapper attendance,    UriComponentsBuilder ucBuilder) {
     	AttendanceClockWrapperResponse response = new AttendanceClockWrapperResponse();
     	response.setConstructionsiteId(attendance.getConstructionsiteId());
+    	
+    	//si no trae ninguna elemento retorna inmediatamente
+    	if( attendance.getAttendances() == null || attendance.getAttendances().isEmpty() ) {
+    		response.setResponseCode(ResponseCode.OK);
+    		return new ResponseEntity<AttendanceClockWrapperResponse>(response,HttpStatus.OK);
+    	}
     	
     	//valida que no vengan más de 100 objetos
     	if(attendance.getAttendances().size() > 100) {
@@ -42,6 +48,7 @@ public class AsistenciaWSController {
         	response.setResponseCode(ResponseCode.OK);
         	return new ResponseEntity<AttendanceClockWrapperResponse>(response,HttpStatus.CREATED);
         }catch(Exception e) {
+        	e.printStackTrace();
         	response.setResponseCode(ResponseCode.ERROR);
         	return new ResponseEntity<AttendanceClockWrapperResponse>(response,HttpStatus.INTERNAL_SERVER_ERROR);
         }

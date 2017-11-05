@@ -950,3 +950,12 @@ CREATE TABLE `cost_account` (
 ALTER TABLE `salary` ADD COLUMN `costaccountId` BIGINT(20) UNSIGNED NULL DEFAULT NULL COMMENT '' AFTER `loan_bond` ;
 ALTER TABLE `historical_salary` ADD COLUMN `costaccountId` BIGINT(20) UNSIGNED NULL DEFAULT NULL COMMENT '' AFTER `laborer_constructionsiteId` ;
 
+CREATE TABLE `magal_asistencia`.`attendance_clock` (
+  `attendanceClockId` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `entryTime` DATETIME NULL,
+  `departureTime` DATETIME NULL,
+  `rut` VARCHAR(20) NOT NULL,
+  PRIMARY KEY (`attendanceClockId`));
+
+  ALTER TABLE `magal_asistencia`.`attendance_clock` 
+ADD COLUMN `constructionsiteId` INT UNSIGNED NOT NULL AFTER `rut`;
