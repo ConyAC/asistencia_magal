@@ -13,6 +13,8 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 @Entity
 @Table(name="attendance_clock")
 public class AttendanceClock  implements Serializable {
@@ -26,10 +28,14 @@ public class AttendanceClock  implements Serializable {
     @Basic(optional = false)
     @Column(name = "attendanceClockId")
 	Long attendanceClockId;
-	@Temporal(TemporalType.DATE)
+	@JsonFormat
+    (shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd hh:mm:ss")
+	@Temporal(TemporalType.TIMESTAMP )
 	@Column(name = "entryTime")
 	Date entryTime;
-	@Temporal(TemporalType.DATE)
+	@JsonFormat
+    (shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd hh:mm:ss")
+	@Temporal(TemporalType.TIMESTAMP )
 	@Column(name = "departureTime")
 	Date departureTime;
 	@Column(name = "rut")

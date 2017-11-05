@@ -32,6 +32,8 @@ public class AttendanceClockServiceImpl implements AttendanceClockService {
 		for(AttendanceClock attendance : attendances ) {
 			attendance.setConstructionsiteId(constructionsiteId);
 			attendanceClockRepository.save(attendance);
+			System.out.println("agregado "+attendance.getEntryTime());
+			System.out.println("agregado "+attendance.getDepartureTime());
 		}
 	}
 
