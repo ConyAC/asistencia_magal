@@ -2,7 +2,9 @@ package cl.magal.asistencia.services.bo;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -611,6 +613,9 @@ public class SalaryCalculator {
 			logger.error("salario calculado {}",e);
 			salary = 0d;
 		}
+		//si el calculo es menor a 0 entonces retorna 0
+		if( salary < 0 )
+			salary = 0;
 		return salary;
 	}
 	
@@ -823,6 +828,14 @@ public class SalaryCalculator {
 		i = Utils.calcularDiaInicial(attendance,i,false);
 		maxDays = Utils.calcularDiaFinal(attendance,maxDays,false);
 		
+		//mes
+		SimpleDateFormat sdf = new SimpleDateFormat("/MM/yyyy");
+		String mesActual = sdf.format(attendance.getDate());
+		Calendar c = Calendar.getInstance();
+		c.setTime(attendance.getDate());
+		c.add(Calendar.MONTH, -1);
+		String mesAnterior = sdf.format(c.getTime());
+		
 		if( i >= maxDays )
 			return resultMarks;
 		
@@ -830,11 +843,11 @@ public class SalaryCalculator {
 			AttendanceMark mark = lastRealMarks.get(i);
 			// si cualquiera de los dos es vacio, lanza una excepcion
 			if(checkException && mark == AttendanceMark.EMPTY )
-				throw new ProjectedAttendanceNotDefined("Aún no se define toda la asistencia real del trabajador "+attendance.getLaborerConstructionSite().getJobCode()+" "+(mark == null? "nulo": mark)+" el día "+(i+1)+".");
+				throw new ProjectedAttendanceNotDefined("Aún no se define toda la asistencia real del trabajador "+attendance.getLaborerConstructionSite().getJobCode()+" "+(mark == null? "nulo": mark)+" el día "+(i+1)+mesActual+".");
 			
 			mark = projectionsMarks.get(i);
 			if(checkException && mark == AttendanceMark.EMPTY )
-				throw new ProjectedAttendanceNotDefined("Aún no se define toda la asistencia proyectada del trabajador "+attendance.getLaborerConstructionSite().getJobCode()+" "+(mark == null? "nulo": mark)+" el día "+(i+1)+".");
+				throw new ProjectedAttendanceNotDefined("Aún no se define toda la asistencia proyectada del trabajador "+attendance.getLaborerConstructionSite().getJobCode()+" "+(mark == null? "nulo": mark)+" el día "+(i+1)+mesAnterior+".");
 			//si son distintos, lo contabiliza
 			if(lastRealMarks.get(i) != projectionsMarks.get(i)){
 				//lo cuenta solo si está dentro del grupo a contabilizar

@@ -3321,12 +3321,14 @@ public class AttendancePanel extends VerticalLayout implements View {
 
 						final BeanItem<Salary> item = (BeanItem<Salary>) salaryContainer.getItem(itemId);
 						salaryContainer.getItem(itemId).getItemProperty("forceSalary").getValue();
+						//si el salario o el total a pagar es menor que 0, entonces lo deja en 0
+						Integer salary = (Integer) salaryContainer.getContainerProperty(itemId, columnId).getValue();
+						if(salary <= 0 ) salary = 0;
+						Integer salaryRound = (Integer) salaryContainer.getContainerProperty(itemId, "roundSalary").getValue();
+						if(salaryRound <= 0 ) salaryRound = 0;
+						
 						final Label label = new Label("<b>"
-								+ Utils.formatInteger(
-										(Integer) salaryContainer.getContainerProperty(itemId, columnId).getValue())
-								+ "</b>" + "  (" + Utils.formatInteger((Integer) salaryContainer
-										.getContainerProperty(itemId, "roundSalary").getValue())
-								+ ")");
+								+ Utils.formatInteger( salary )	+ "</b>" + "  (" + Utils.formatInteger(salaryRound)	+ ")");
 						label.setContentMode(ContentMode.HTML);
 						for (final String pid : new String[] { "jornalPromedio", "suple", "descHours", "bondMov2",
 								"specialBond", "loanBond" })
@@ -3338,7 +3340,8 @@ public class AttendancePanel extends VerticalLayout implements View {
 											if ("jornalPromedio".equals(pid)) {
 											} else if ("suple".equals(pid)) {
 											}
-											salaryContainer.getItem(itemId).getItemProperty("forceSalary").getValue();
+											salaryContainer.getItem
+											(itemId).getItemProperty("forceSalary").getValue();
 											// forza actualizar el item
 											label.setValue("<b>"
 													+ Utils.formatInteger((Integer) salaryContainer
