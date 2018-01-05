@@ -2124,7 +2124,8 @@ public class AttendancePanel extends VerticalLayout implements View {
 					cb.setNullSelectionAllowed(false);
 					cb.setImmediate(true);
 					for (AttendanceMark a : AttendanceMark.values()) {
-						cb.addItem(a);
+						if(a != AttendanceMark.FILLER )
+							cb.addItem(a);
 					}
 					return (T) cb;
 				}
